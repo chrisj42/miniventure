@@ -2,11 +2,13 @@ package miniventure.game;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 
@@ -31,7 +33,11 @@ public class Game extends ApplicationAdapter {
 		tiles = new TextureAtlas("data/tiles.txt");
 		tree = tiles.createSprite("tree");
 		
-		treeBounds = new Rectangle(SCREEN_WIDTH/2, 0, tree.getWidth(), tree.getHeight());
+		treeBounds = new Rectangle();
+		treeBounds.x = MathUtils.random(0, SCREEN_WIDTH);
+		treeBounds.y = MathUtils.random(0, SCREEN_HEIGHT);
+		treeBounds.width = tree.getWidth();
+		treeBounds.height = tree.getHeight();
 	}
 	
 	@Override
@@ -76,5 +82,16 @@ public class Game extends ApplicationAdapter {
 				Note: it is very, very bad to instantiate a new object all the time, such as the Vector3 instance. The reason for this is the garbage collector has to kick in frequently to collect these short-lived objects. On the desktop it's not such a big deal, but other platforms can experience issues. To solve this issue in this particular case, we can simply make mousePos a field of the Game class instead of instantiating it all the time.
 			 */
 		}
+		
+		// getDeltaTime() returns the time passed between the last and the current frame in seconds.
+		int speed = 200; // this is technically in units/second.
+		if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) treeBounds.x -= speed * Gdx.graphics.getDeltaTime();
+		if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) treeBounds.x += speed * Gdx.graphics.getDeltaTime();
+		if(Gdx.input.isKeyPressed(Input.Keys.UP)) treeBounds.y += speed * Gdx.graphics.getDeltaTime();
+		if(Gdx.input.isKeyPressed(Input.Keys.DOWN)) treeBounds.y -= speed * Gdx.graphics.getDeltaTime();
+		treeBounds.x = Math.max(treeBounds.x, 0);
+		treeBounds.y = Math.max(treeBounds.y, 0);
+		treeBounds.x = Math.min(treeBounds.x, SCREEN_WIDTH);
+		treeBounds.y = Math.min(treeBounds.y, SCREEN_HEIGHT);
 	}
 }
