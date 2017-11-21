@@ -5,6 +5,7 @@ import miniventure.game.world.Entity;
 import miniventure.game.world.mob.MobAnimationController.AnimationState;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -38,7 +39,8 @@ public class Mob extends Entity {
 	public void render(SpriteBatch batch, float delta) {
 		animator.update(delta);
 		
-		batch.draw(animator.getFrame(), x, y);
+		TextureRegion r = animator.getFrame();
+		batch.draw(r, x-r.getRegionWidth()/2, y-r.getRegionHeight()/2);
 	}
 	
 	@Override
