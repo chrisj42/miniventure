@@ -1,9 +1,9 @@
-package miniventure.game.world.mob;
+package miniventure.game.world.entity.mob;
 
 import java.util.HashMap;
 import java.util.PriorityQueue;
 
-import miniventure.game.world.Direction;
+import miniventure.game.world.entity.Direction;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Animation;

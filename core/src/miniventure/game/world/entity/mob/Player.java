@@ -1,4 +1,4 @@
-package miniventure.game.world.mob;
+package miniventure.game.world.entity.mob;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;

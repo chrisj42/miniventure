@@ -1,7 +1,8 @@
-package miniventure.game;
+package miniventure.game.screen;
 
+import miniventure.game.GameCore;
 import miniventure.game.world.SceneryObject;
-import miniventure.game.world.mob.Player;
+import miniventure.game.world.entity.mob.Player;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -24,8 +25,8 @@ public class GameScreen implements Screen {
 	//private TextureRegion player;
 	
 	public GameScreen(GameCore game) {
-		batch = game.batch;
-		game.gameScreen = this;
+		batch = game.getBatch();
+		game.setGameScreen(this);
 		
 		mainPlayer = new Player();
 		mainPlayer.moveTo(GameCore.SCREEN_WIDTH/2, GameCore.SCREEN_HEIGHT/2);

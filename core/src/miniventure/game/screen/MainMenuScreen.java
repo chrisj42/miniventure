@@ -1,4 +1,6 @@
-package miniventure.game;
+package miniventure.game.screen;
+
+import miniventure.game.GameCore;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -19,7 +21,7 @@ public class MainMenuScreen implements Screen {
 	public MainMenuScreen(final GameCore game) {
 		this.game = game;
 		
-		batch = game.batch;
+		batch = game.getBatch();
 		
 		camera = new OrthographicCamera();
 		camera.setToOrtho(false, GameCore.SCREEN_WIDTH, GameCore.SCREEN_HEIGHT);
@@ -37,8 +39,8 @@ public class MainMenuScreen implements Screen {
 		
 		batch.setProjectionMatrix(camera.combined); // tells the batch to use the camera's coordinate system.
 		batch.begin();
-		game.font.draw(batch, "Welcome to Miniventure! ", 100, 150);
-		game.font.draw(batch, "Click anywhere, or press space, to begin.", 100, 100);
+		game.getFont().draw(batch, "Welcome to Miniventure! ", 100, 150);
+		game.getFont().draw(batch, "Click anywhere, or press space, to begin.", 100, 100);
 		
 		batch.end();
 		

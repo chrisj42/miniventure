@@ -1,8 +1,8 @@
-package miniventure.game.world.mob;
+package miniventure.game.world.entity.mob;
 
-import miniventure.game.world.Direction;
-import miniventure.game.world.Entity;
-import miniventure.game.world.mob.MobAnimationController.AnimationState;
+import miniventure.game.world.entity.Direction;
+import miniventure.game.world.entity.Entity;
+import miniventure.game.world.entity.mob.MobAnimationController.AnimationState;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
