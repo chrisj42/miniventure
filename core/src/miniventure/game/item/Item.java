@@ -15,4 +15,6 @@ public abstract class Item {
 	
 	public abstract boolean isRelfexive();
 	
+	public int getDamage() { return 1; }
+	
 }

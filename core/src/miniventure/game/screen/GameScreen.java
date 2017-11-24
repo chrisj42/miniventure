@@ -1,7 +1,7 @@
 package miniventure.game.screen;
 
 import miniventure.game.GameCore;
-import miniventure.game.world.SceneryObject;
+import miniventure.game.world.Level;
 import miniventure.game.world.entity.mob.Player;
 
 import com.badlogic.gdx.Gdx;
@@ -9,10 +9,6 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
-import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.utils.Array;
 
 public class GameScreen implements Screen {
 	
@@ -20,7 +16,8 @@ public class GameScreen implements Screen {
 	private Player mainPlayer;
 	private SpriteBatch batch;
 	
-	private Array<SceneryObject> background = new Array<>();
+	//private Array<SceneryObject> background = new Array<>();
+	private Level level;
 	
 	//private TextureRegion player;
 	
@@ -31,10 +28,12 @@ public class GameScreen implements Screen {
 		mainPlayer = new Player();
 		mainPlayer.moveTo(GameCore.SCREEN_WIDTH/2, GameCore.SCREEN_HEIGHT/2);
 		
-		TextureAtlas tiles = new TextureAtlas("sprites/tiles.txt");
-		for(AtlasRegion region: tiles.getRegions())
-			background.add(new SceneryObject(region, MathUtils.random(0, GameCore.SCREEN_WIDTH-20), MathUtils.random(0, GameCore.SCREEN_HEIGHT-20)));
+		//TextureAtlas tiles = new TextureAtlas("sprites/tiles.txt");
+		//for(AtlasRegion region: tiles.getRegions())
+		//	background.add(new SceneryObject(region, MathUtils.random(0, GameCore.SCREEN_WIDTH-20), MathUtils.random(0, GameCore.SCREEN_HEIGHT-20)));
 		
+		level = new Level(GameCore.SCREEN_WIDTH /*/ Tile.SIZE*/, GameCore.SCREEN_HEIGHT /*/ Tile.SIZE*/);
+		level.addEntity(mainPlayer);
 		//TextureAtlas playerAtlas = new TextureAtlas("sprites/player.txt");
 		//player = playerAtlas.findRegion("idle-left");
 		//playerAtlas.dispose();
@@ -60,13 +59,13 @@ public class GameScreen implements Screen {
 		
 		batch.setProjectionMatrix(camera.combined); // tells the batch to use the camera's coordinate system.
 		batch.begin();
-		for(SceneryObject obj: background)
-			obj.render(batch, delta);
-		
+		//for(SceneryObject obj: background)
+		//	obj.render(batch, delta);
+		level.render(mainPlayer, batch, delta);
 		//if(player != null)
 		//	batch.draw(player, 200, 200);
-		if(mainPlayer != null)
-			mainPlayer.render(batch, delta);
+		//if(mainPlayer != null)
+		//	mainPlayer.render(batch, delta);
 		batch.end();
 	}
 	

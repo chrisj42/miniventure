@@ -1,82 +1,57 @@
 package miniventure.game.world.tile;
 
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 
-import miniventure.game.item.Item;
-import miniventure.game.world.ItemDrop;
-import miniventure.game.world.Level;
-import miniventure.game.world.entity.Entity;
-import miniventure.game.world.entity.mob.Mob;
+import miniventure.game.GameCore;
 
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public enum TileType {
 	
-	HOLE();
+	TREE(
+		SolidProperty.WALKABLE,
+		DestructibleProperty.INDESTRUCTIBLE,
+		InteractableProperty.NONE,
+		TouchListener.DO_NOTHING
+	);
 	
+	final SolidProperty solidProperty;
+	final DestructibleProperty destructibleProperty;
+	final InteractableProperty interactableProperty;
+	final TouchListener touchListener;
+	// TODO add animation field, and with it, a render or getSprite method.
+	final TextureRegion tileSprite;
 	
-	public final int dataLength; // the number of ints that this tiletype needs to store data.
+	private final HashMap<TileProperty, Integer> propertyDataIndexes = new HashMap<>();
+	final int dataLength;
 	
-	private final TileType coveredTile; // the tile that is set when this one is destroyed.
-	
-	private LinkedHashMap<Class<? extends TileProperty>, TileProperty> propertyMap = new LinkedHashMap<>();
-	
-	TileType(TileProperty... properties) { this(null, properties); } // null = Hole tile.
-	TileType(TileType coveredTile, TileProperty... properties) {
-		this.coveredTile = coveredTile;
+	TileType(@NotNull SolidProperty solidProperty, @NotNull DestructibleProperty destructibleProperty, @NotNull InteractableProperty interactableProperty, @NotNull TouchListener touchListener) {
 		
-		int dataLength = 0;
-		for(TileProperty prop: properties) {
-			dataLength += prop.getDataCount();
-			propertyMap.put(prop.getClass(), prop);
-		}
+		tileSprite = GameCore.tileAtlas.findRegion(name().toLowerCase());
 		
-		this.dataLength = dataLength;
-	}
-	
-	private <T extends TileProperty> T getProp(Class<T> clazz) {
-		//noinspection unchecked
-		return (T)propertyMap.get(clazz);
-	}
-	
-	public void render(SpriteBatch batch, float delta, Tile tile) {
+		this.solidProperty = solidProperty;
+		this.destructibleProperty = destructibleProperty;
+		this.interactableProperty = interactableProperty;
+		this.touchListener = touchListener;
 		
-	}
-	
-	@NotNull
-	public TileType getCoveredTile() {
-		if(coveredTile == null) return HOLE;
-		else return coveredTile;
-	}
-	
-	
-	/// ---- EVENT METHODS ----
-	
-	public boolean touchedBy(Entity entity) {
-		TouchEventProperty touch = getProp(TouchEventProperty.class);
-		if(touch != null) return touch.touchedBy(entity);
-		else return true;
-	}
-	
-	public void tileAttacked(Mob mob, Item attackItem, int damage, Tile tile) {
-		AttackableProperty attackProp = getProp(AttackableProperty.class);
-		if(attackProp != null) {
-			
-		}
-	}
-	
-	private void tileDestroyed(@Nullable Mob cause, Tile tile) {
-		Level level = tile.getLevel();
+		int curIdx = 0;
+		propertyDataIndexes.put(solidProperty, curIdx);
+		curIdx += solidProperty.getDataLength();
 		
-		DropItemProperty dProp = getProp(DropItemProperty.class);
-		if(dProp != null)
-			for(ItemDrop drop: dProp.drops)
-				drop.dropItems(level, tile.getCenterX(), tile.getCenterY());
+		propertyDataIndexes.put(destructibleProperty, curIdx);
+		curIdx += destructibleProperty.getDataLength();
 		
-		tile.setType(getCoveredTile());
+		propertyDataIndexes.put(interactableProperty, curIdx);
+		curIdx += interactableProperty.getDataLength();
+		
+		propertyDataIndexes.put(touchListener, curIdx);
+		curIdx += touchListener.getDataLength();
+		
+		dataLength = curIdx;
 	}
+	
+	public int getDataIndex(TileProperty property) { return propertyDataIndexes.get(property); }
 	
 }

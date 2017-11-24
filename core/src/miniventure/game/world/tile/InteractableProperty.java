@@ -1,0 +1,15 @@
+package miniventure.game.world.tile;
+
+import miniventure.game.item.Item;
+import miniventure.game.world.entity.mob.Player;
+
+@FunctionalInterface
+public interface InteractableProperty extends TileProperty {
+	
+	InteractableProperty NONE = (p, i, t) -> {};
+	
+	void interact(Player player, Item heldItem, Tile tile);
+	
+	@Override
+	default int getDataLength() { return 0; }
+}

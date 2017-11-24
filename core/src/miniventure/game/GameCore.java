@@ -6,10 +6,12 @@ import miniventure.game.screen.MainMenuScreen;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 
 public class GameCore extends Game {
 	
 	public static final int SCREEN_WIDTH = 800, SCREEN_HEIGHT = 450;
+	public static TextureAtlas tileAtlas;
 	
 	private SpriteBatch batch;
 	private BitmapFont font; // this is stored here because it is a really good idea to reuse objects where ever possible; and don't repeat instantiations, aka make a font instance in two classes when the fonts are the same.
@@ -18,7 +20,7 @@ public class GameCore extends Game {
 	
 	@Override
 	public void create () {
-		
+		tileAtlas = new TextureAtlas("sprites/tiles.txt");
 		batch = new SpriteBatch();
 		font = new BitmapFont(); // uses libGDX's default Arial font
 		

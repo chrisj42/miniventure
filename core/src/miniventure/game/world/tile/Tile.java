@@ -1,6 +1,12 @@
 package miniventure.game.world.tile;
 
+import miniventure.game.item.Item;
 import miniventure.game.world.Level;
+import miniventure.game.world.entity.Entity;
+import miniventure.game.world.entity.mob.Player;
+
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -76,7 +82,41 @@ public class Tile {
 	public TileType getType() { return type; }
 	
 	Level getLevel() { return level; }
-	int getCenterX() { return x*SIZE + SIZE/2; }
 	
+	int getCenterX() { return x*SIZE + SIZE/2; }
 	int getCenterY() { return y*SIZE + SIZE/2; }
+	
+	private void resetTile(TileType newType) {
+		type = newType;
+		data = new int[type.dataLength];
+	}
+	
+	public TextureRegion getSprite(float delta) {
+		return type.tileSprite;
+	}
+	public void render(SpriteBatch batch, float delta) {
+		batch.draw(getSprite(delta), x, y);
+	}
+	
+	public boolean isPermeableBy(Entity entity) {
+		return type.solidProperty.isPermeableBy(entity);
+	}
+	
+	public void attackedBy(Player player, Item heldItem) {
+		int damage = type.destructibleProperty.getDamage(heldItem, heldItem.getDamage());
+		if(damage > 0) {
+			int healthIdx = type.getDataIndex(type.destructibleProperty);
+			data[healthIdx] -= damage;
+			if(data[healthIdx] <= 0)
+				resetTile(type.destructibleProperty.getCoveredTile());
+		}
+	}
+	
+	public void interactWith(Player player, Item heldItem) {
+		type.interactableProperty.interact(player, heldItem, this);
+	}
+	
+	public void touchedBy(Entity entity) {
+		type.touchListener.touchedBy(entity);
+	}
 }
