@@ -5,7 +5,7 @@ import miniventure.game.world.entity.Entity;
 @FunctionalInterface
 public interface TouchListener extends TileProperty {
 	
-	TouchListener DO_NOTHING = entity -> {};
+	//TouchListener DO_NOTHING = entity -> {};
 	
 	void touchedBy(Entity entity);
 	//void stillTouchedBy(Entity entity);

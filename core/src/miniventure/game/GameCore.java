@@ -13,6 +13,7 @@ public class GameCore extends Game {
 	
 	public static final int SCREEN_WIDTH = 800, SCREEN_HEIGHT = 450;
 	public static TextureAtlas tileAtlas;
+	public static final int START_TIME = (int) (System.currentTimeMillis()/1000);
 	
 	private SpriteBatch batch;
 	private BitmapFont font; // this is stored here because it is a really good idea to reuse objects where ever possible; and don't repeat instantiations, aka make a font instance in two classes when the fonts are the same.
@@ -49,5 +50,9 @@ public class GameCore extends Game {
 	
 	public void setGameScreen(GameScreen gameScreen) {
 		this.gameScreen = gameScreen;
+	}
+	
+	public static float getElapsedProgramTime() {
+		return System.currentTimeMillis()/1000f - START_TIME;
 	}
 }

@@ -6,7 +6,7 @@ import miniventure.game.world.entity.mob.Player;
 @FunctionalInterface
 public interface InteractableProperty extends TileProperty {
 	
-	InteractableProperty NONE = (p, i, t) -> {};
+	//InteractableProperty NONE = (p, i, t) -> {};
 	
 	void interact(Player player, Item heldItem, Tile tile);
 	

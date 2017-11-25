@@ -1,57 +1,56 @@
 package miniventure.game.world.tile;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import miniventure.game.GameCore;
-
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import miniventure.game.world.tile.AnimationProperty.Animated;
+import miniventure.game.world.tile.AnimationProperty.SingleFrame;
 
 import org.jetbrains.annotations.NotNull;
 
 public enum TileType {
 	
-	TREE(
-		SolidProperty.WALKABLE,
-		DestructibleProperty.INDESTRUCTIBLE,
-		InteractableProperty.NONE,
-		TouchListener.DO_NOTHING
-	);
+	GRASS();
 	
 	final SolidProperty solidProperty;
 	final DestructibleProperty destructibleProperty;
 	final InteractableProperty interactableProperty;
 	final TouchListener touchListener;
-	// TODO add animation field, and with it, a render or getTexture method.
-	final TextureRegion tileSprite;
+	final AnimationProperty animationProperty;
 	
-	private final HashMap<TileProperty, Integer> propertyDataIndexes = new HashMap<>();
+	final HashMap<TileProperty, Integer> propertyDataIndexes = new HashMap<>();
 	final int dataLength;
 	
-	TileType(@NotNull SolidProperty solidProperty, @NotNull DestructibleProperty destructibleProperty, @NotNull InteractableProperty interactableProperty, @NotNull TouchListener touchListener) {
+	TileType(@NotNull TileProperty... properties) {
 		
-		tileSprite = GameCore.tileAtlas.findRegion(name().toLowerCase());
+		// get the default properties
+		LinkedHashMap<Class<? extends TileProperty>, TileProperty> propertyMap = new LinkedHashMap<>(TileProperty.defaultProperties);
 		
-		this.solidProperty = solidProperty;
-		this.destructibleProperty = destructibleProperty;
-		this.interactableProperty = interactableProperty;
-		this.touchListener = touchListener;
+		// replace the defaults with specified properties
+		for(TileProperty property: properties)
+			propertyMap.put(property.getClass(), property);
+		
+		// fetch the animationProperty, and initialize it how it should be
+		TileProperty animationProperty = propertyMap.get(AnimationProperty.class);
+		if(animationProperty instanceof SingleFrame)
+			((SingleFrame)animationProperty).initialize(GameCore.tileAtlas.findRegion(name().toLowerCase()));
+		else
+			((Animated)animationProperty).initialize(GameCore.tileAtlas.findRegions(name().toLowerCase()));
+		
+		this.solidProperty = (SolidProperty)propertyMap.get(SolidProperty.class);
+		this.destructibleProperty = (DestructibleProperty)propertyMap.get(DestructibleProperty.class);
+		this.interactableProperty = (InteractableProperty)propertyMap.get(InteractableProperty.class);
+		this.touchListener = (TouchListener)propertyMap.get(TouchListener.class);
+		this.animationProperty = (AnimationProperty) animationProperty;
 		
 		int curIdx = 0;
-		propertyDataIndexes.put(solidProperty, curIdx);
-		curIdx += solidProperty.getDataLength();
 		
-		propertyDataIndexes.put(destructibleProperty, curIdx);
-		curIdx += destructibleProperty.getDataLength();
-		
-		propertyDataIndexes.put(interactableProperty, curIdx);
-		curIdx += interactableProperty.getDataLength();
-		
-		propertyDataIndexes.put(touchListener, curIdx);
-		curIdx += touchListener.getDataLength();
+		for(TileProperty prop: properties) {
+			propertyDataIndexes.put(prop, curIdx);
+			curIdx += prop.getDataLength();
+		}
 		
 		dataLength = curIdx;
 	}
-	
-	public int getDataIndex(TileProperty property) { return propertyDataIndexes.get(property); }
-	
 }

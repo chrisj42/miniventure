@@ -1,12 +1,12 @@
 package miniventure.game.world.tile;
 
+import miniventure.game.GameCore;
 import miniventure.game.item.Item;
 import miniventure.game.world.Level;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Player;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -83,19 +83,35 @@ public class Tile {
 	
 	Level getLevel() { return level; }
 	
-	int getCenterX() { return x*SIZE + SIZE/2; }
-	int getCenterY() { return y*SIZE + SIZE/2; }
+	public int getCenterX() { return x*SIZE + SIZE/2; }
+	public int getCenterY() { return y*SIZE + SIZE/2; }
 	
-	private void resetTile(TileType newType) {
+	void resetTile(TileType newType) {
 		type = newType;
 		data = new int[type.dataLength];
 	}
 	
-	public TextureRegion getSprite(float delta) {
-		return type.tileSprite;
-	}
 	public void render(SpriteBatch batch, float delta) {
-		batch.draw(getSprite(delta), x*SIZE, y*SIZE, SIZE, SIZE);
+		batch.draw(type.animationProperty.getSprite(GameCore.getElapsedProgramTime()), x*SIZE, y*SIZE, SIZE, SIZE);
+	}
+	
+	
+	private void checkDataAccess(TileProperty property, int propDataIndex) {
+		if(!type.propertyDataIndexes.containsKey(property))
+			throw new IllegalArgumentException("specified property " + property + " is not from this tile's type, "+type+".");
+		
+		if(propDataIndex >= property.getDataLength())
+			throw new IndexOutOfBoundsException("tile property " + property + " tried to access index past stated length; length="+property.getDataLength()+", index="+propDataIndex);
+	}
+	
+	int getData(TileProperty property, int propDataIndex) {
+		checkDataAccess(property, propDataIndex);
+		return this.data[type.propertyDataIndexes.get(property)+propDataIndex];
+	}
+	
+	void setData(TileProperty property, int propDataIndex, int data) {
+		checkDataAccess(property, propDataIndex);
+		this.data[type.propertyDataIndexes.get(property)+propDataIndex] = data;
 	}
 	
 	public boolean isPermeableBy(Entity entity) {
@@ -103,20 +119,10 @@ public class Tile {
 	}
 	
 	public void attackedBy(Player player, Item heldItem) {
-		int damage = type.destructibleProperty.getDamage(heldItem, heldItem.getDamage());
-		if(damage > 0) {
-			int healthIdx = type.getDataIndex(type.destructibleProperty);
-			data[healthIdx] -= damage;
-			if(data[healthIdx] <= 0)
-				resetTile(type.destructibleProperty.getCoveredTile());
-		}
+		
 	}
 	
-	public void interactWith(Player player, Item heldItem) {
-		type.interactableProperty.interact(player, heldItem, this);
-	}
+	public void interactWith(Player player, Item heldItem) { type.interactableProperty.interact(player, heldItem, this); }
 	
-	public void touchedBy(Entity entity) {
-		type.touchListener.touchedBy(entity);
-	}
+	public void touchedBy(Entity entity) { type.touchListener.touchedBy(entity); }
 }

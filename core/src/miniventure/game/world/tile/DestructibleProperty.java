@@ -10,7 +10,9 @@ import org.jetbrains.annotations.Nullable;
 
 public class DestructibleProperty implements TileProperty {
 	
-	public static final DestructibleProperty INDESTRUCTIBLE = new DestructibleProperty();
+	static final DestructibleProperty INDESTRUCTIBLE = new DestructibleProperty();
+	
+	private static final int HEALTH_IDX = 0;
 	
 	private final TileType coveredTile;
 	private final int totalHealth;
@@ -51,7 +53,18 @@ public class DestructibleProperty implements TileProperty {
 	}
 	
 	
-	public int getDamage(@Nullable Item attackItem, int damage) {
+	void tileAttacked(Tile tile, Item attackItem) {
+		int damage = getDamage(attackItem, attackItem.getDamage());
+		if(damage > 0) {
+			int health = tile.getData(this, HEALTH_IDX);
+			health -= damage;
+			if(health <= 0)
+				tile.resetTile(coveredTile);
+		}
+	}
+	
+	
+	private int getDamage(@Nullable Item attackItem, int damage) {
 		if(damageConditions.length > 0) {
 			// must satisfy at least one condition
 			boolean doDamage = false;
@@ -87,7 +100,6 @@ public class DestructibleProperty implements TileProperty {
 	
 	
 	// TODO make methods for when tile is destroyed, and getting health of the tile. I'm not doing it now because I'm not sure yet how I'm going to implement it.
-	
 	
 	
 	static class PreferredTool {

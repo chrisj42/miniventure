@@ -23,7 +23,7 @@ public class Level {
 		tiles = new Tile[width*height];
 		
 		for(int i = 0; i < tiles.length; i++) {
-			tiles[i] = new Tile(TileType.TREE, this, i%width, i/width);
+			tiles[i] = new Tile(TileType.GRASS, this, i%width, i/width);
 		}
 	}
 	
