@@ -31,17 +31,24 @@ public class Level {
 		entities.add(e);
 	}
 	
+	public void update(float delta) {
+		// TO-DO pollAnimation random tiles
+		
+		// pollAnimation entities
+		for(Entity e: entities)
+			e.update(delta);
+	}
+	
 	public void render(Player mainPlayer, SpriteBatch batch, float delta) {
 		// the game renders around the main player. For now, the level shall be the same size as the screen, so no camera fanciness or coordinate manipulation is needed.
 		
-		for(Tile tile: tiles) {
+		//batch.disableBlending(); // this prevents alpha from being rendered, which gives a performance boost. When drawing tiles, we don't need alpha (yet), so we'll disable it. 
+		for(Tile tile: tiles)
 			tile.render(batch, delta);
-			//batch.draw(tile.getSprite(delta), tile.x, tile);
-		}
+		//batch.enableBlending(); // re-enable alpha for the drawing of entities.
 		
-		for(Entity entity: entities) {
+		for(Entity entity: entities)
 			entity.render(batch, delta);
-		}
 	}
 	
 	public void dropItem(Item item, int x, int y, Entity target) {

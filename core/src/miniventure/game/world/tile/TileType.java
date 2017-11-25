@@ -21,7 +21,7 @@ public enum TileType {
 	final DestructibleProperty destructibleProperty;
 	final InteractableProperty interactableProperty;
 	final TouchListener touchListener;
-	// TODO add animation field, and with it, a render or getSprite method.
+	// TODO add animation field, and with it, a render or getTexture method.
 	final TextureRegion tileSprite;
 	
 	private final HashMap<TileProperty, Integer> propertyDataIndexes = new HashMap<>();

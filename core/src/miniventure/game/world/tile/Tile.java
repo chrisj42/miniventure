@@ -58,7 +58,7 @@ public class Tile {
 		Perhaps I can manage to only object-ify the nearby tiles. The way it will 
 	 */
 	
-	public static final int SIZE = 16;
+	public static final int SIZE = 32;
 	
 	private TileType type;
 	
@@ -95,7 +95,7 @@ public class Tile {
 		return type.tileSprite;
 	}
 	public void render(SpriteBatch batch, float delta) {
-		batch.draw(getSprite(delta), x, y);
+		batch.draw(getSprite(delta), x*SIZE, y*SIZE, SIZE, SIZE);
 	}
 	
 	public boolean isPermeableBy(Entity entity) {

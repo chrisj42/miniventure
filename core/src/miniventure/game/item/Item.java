@@ -1,5 +1,7 @@
 package miniventure.game.item;
 
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+
 public abstract class Item {
 	
 	/*
@@ -9,11 +11,15 @@ public abstract class Item {
 		
 	 */
 	
-	public Item() {
-		
+	private TextureRegion texture;
+	
+	public Item(TextureRegion texture) {
+		this.texture = texture;
 	}
 	
-	public abstract boolean isRelfexive();
+	public TextureRegion getTexture() { return texture; }
+	
+	public abstract boolean isReflexive();
 	
 	public int getDamage() { return 1; }
 	

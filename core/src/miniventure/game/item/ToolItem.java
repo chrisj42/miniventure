@@ -5,6 +5,7 @@ public class ToolItem extends Item {
 	private final ToolType toolType;
 	
 	public ToolItem(ToolType type) {
+		super(type.texture);
 		this.toolType = type;
 	}
 	
@@ -12,7 +13,5 @@ public class ToolItem extends Item {
 	
 	
 	@Override
-	public boolean isRelfexive() {
-		return false;
-	}
+	public boolean isReflexive() { return false; }
 }

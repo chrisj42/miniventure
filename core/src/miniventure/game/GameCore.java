@@ -2,6 +2,7 @@ package miniventure.game;
 
 import miniventure.game.screen.GameScreen;
 import miniventure.game.screen.MainMenuScreen;
+import miniventure.game.world.entity.mob.MobAnimationController;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -33,6 +34,9 @@ public class GameCore extends Game {
 		font.dispose();
 		if(gameScreen != null)
 			gameScreen.dispose();
+		
+		tileAtlas.dispose();
+		MobAnimationController.disposeTextures();
 	}
 	
 	public SpriteBatch getBatch() {
