@@ -125,4 +125,10 @@ public class Tile {
 	public void interactWith(Player player, Item heldItem) { type.interactableProperty.interact(player, heldItem, this); }
 	
 	public void touchedBy(Entity entity) { type.touchListener.touchedBy(entity); }
+	
+	
+	@Override
+	public String toString() {
+		return type + " Tile";
+	}
 }

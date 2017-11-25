@@ -3,7 +3,6 @@ package miniventure.game.screen;
 import miniventure.game.GameCore;
 import miniventure.game.world.Level;
 import miniventure.game.world.entity.mob.Player;
-import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -17,20 +16,26 @@ public class GameScreen implements Screen {
 	private SpriteBatch batch;
 	
 	private Player mainPlayer;
-	private Level level;
+	private int curLevel;
 	
 	public GameScreen(GameCore game) {
 		batch = game.getBatch();
 		game.setGameScreen(this);
 		
-		mainPlayer = new Player();
-		mainPlayer.moveTo(GameCore.SCREEN_WIDTH/2, GameCore.SCREEN_HEIGHT/2);
-		
-		level = new Level(GameCore.SCREEN_WIDTH / Tile.SIZE, GameCore.SCREEN_HEIGHT / Tile.SIZE);
-		level.addEntity(mainPlayer);
+		createWorld();
 		
 		camera = new OrthographicCamera();
 		camera.setToOrtho(false, GameCore.SCREEN_WIDTH, GameCore.SCREEN_HEIGHT);
+	}
+	
+	private void createWorld() {
+		Level.resetLevels();
+		curLevel = 0;
+		
+		mainPlayer = new Player();
+		mainPlayer.moveTo(GameCore.SCREEN_WIDTH/2, GameCore.SCREEN_HEIGHT/2);
+		
+		Level.getLevel(curLevel).addEntity(mainPlayer);
 	}
 	
 	@Override
@@ -43,13 +48,13 @@ public class GameScreen implements Screen {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		
 		mainPlayer.checkInput(delta);
-		level.update(delta);
+		Level.getLevel(curLevel).update(delta);
 		
 		camera.update(); // updates the camera "matrices"
 		
 		batch.setProjectionMatrix(camera.combined); // tells the batch to use the camera's coordinate system.
 		batch.begin();
-		level.render(mainPlayer, batch, delta);
+		Level.getLevel(curLevel).render(mainPlayer, batch, delta);
 		// TO-DO render GUI here
 		batch.end();
 	}

@@ -1,7 +1,9 @@
 package miniventure.game.world;
 
+import java.util.HashMap;
 import java.util.HashSet;
 
+import miniventure.game.GameCore;
 import miniventure.game.item.Item;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Player;
@@ -9,8 +11,32 @@ import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileType;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.Array;
+
+import org.jetbrains.annotations.Nullable;
 
 public class Level {
+	
+	private static Level[] levels = new Level[0];
+	private static final HashMap<Entity, Level> entityLevels = new HashMap<>();
+	
+	public static void resetLevels() {
+		entityLevels.clear();
+		for(Level level: levels)
+			level.entities.clear();
+		
+		levels = new Level[1];
+		levels[0] = new Level(GameCore.SCREEN_WIDTH / Tile.SIZE, GameCore.SCREEN_HEIGHT / Tile.SIZE);
+	}
+	
+	public static Level getLevel(int idx) { return levels[idx]; }
+	
+	@Nullable
+	public static Level getEntityLevel(Entity entity) { return entityLevels.get(entity); }
+	
+	
+	
 	
 	private final int width, height;
 	private final Tile[] tiles;
@@ -22,13 +48,23 @@ public class Level {
 		this.height = height;
 		tiles = new Tile[width*height];
 		
-		for(int i = 0; i < tiles.length; i++) {
+		for(int i = 0; i < tiles.length; i++)
 			tiles[i] = new Tile(TileType.GRASS, this, i%width, i/width);
-		}
+		
+		tiles[5].setType(TileType.TREE); // for some variety
 	}
 	
 	public void addEntity(Entity e) {
 		entities.add(e);
+		Level oldLevel = entityLevels.put(e, this); // replaces the level for the entity
+		if(oldLevel != null && oldLevel != this)
+			oldLevel.removeEntity(e); // remove it from the other level's entity set.
+	}
+	
+	public void removeEntity(Entity e) {
+		entities.remove(e);
+		if(entityLevels.get(e) == this)
+			entityLevels.remove(e);
 	}
 	
 	public void update(float delta) {
@@ -65,4 +101,27 @@ public class Level {
 		
 	}
 	
+	
+	public Array<Tile> getOverlappingTiles(Rectangle entityRect) {
+		int tileMinX = (int) entityRect.x / Tile.SIZE;
+		int tileMaxX = (int) (entityRect.x + entityRect.width) / Tile.SIZE;
+		int tileMinY = (int) entityRect.y / Tile.SIZE;
+		int tileMaxY = (int) (entityRect.y + entityRect.height) / Tile.SIZE;
+		
+		Array<Tile> overlappingTiles = new Array<>();
+		for(int x = tileMinX; x <= tileMaxX; x++)
+			for(int y = tileMinY; y <= tileMaxY; y++)
+				overlappingTiles.add(tiles[x + y*width]);
+		
+		return overlappingTiles;
+	}
+	
+	public Array<Entity> getOverlappingEntities(Rectangle rect) {
+		Array<Entity> overlapping = new Array<>();
+		for(Entity entity: entities)
+			if(entity.getBounds().overlaps(rect))
+				overlapping.add(entity);
+		
+		return overlapping;
+	}
 }
