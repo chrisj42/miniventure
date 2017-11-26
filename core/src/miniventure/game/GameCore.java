@@ -11,6 +11,8 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 
 public class GameCore extends Game {
 	
+	public static final Version VERSION = new Version("1.0.0");
+	
 	public static final int SCREEN_WIDTH = 800, SCREEN_HEIGHT = 450;
 	public static TextureAtlas tileAtlas;
 	public static final int START_TIME = (int) (System.currentTimeMillis()/1000);

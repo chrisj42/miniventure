@@ -39,8 +39,9 @@ public class MainMenuScreen implements Screen {
 		
 		batch.setProjectionMatrix(camera.combined); // tells the batch to use the camera's coordinate system.
 		batch.begin();
-		game.getFont().draw(batch, "Welcome to Miniventure! ", 100, 150);
-		game.getFont().draw(batch, "Click anywhere, or press space, to begin.", 100, 100);
+		game.getFont().draw(batch, "Welcome to Miniventure! You're playing Version " + GameCore.VERSION, 100, 150);
+		game.getFont().draw(batch, "Use the arrow keys to move, and the C key to attack. (trees have 10 health)", 100, 100);
+		game.getFont().draw(batch, "Click anywhere, or press space, to begin.", 100, 50);
 		
 		batch.end();
 		
