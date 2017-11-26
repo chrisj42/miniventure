@@ -1,5 +1,6 @@
 package miniventure.game.world.entity.mob;
 
+import miniventure.game.item.Item;
 import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.MobAnimationController.AnimationState;
@@ -43,4 +44,7 @@ public abstract class Mob extends Entity {
 			this.dir = dir;
 		}
 	}
+	
+	@Override
+	public boolean hurtBy(Mob mob, Item attackItem) { return true; } // mobs are hurt
 }

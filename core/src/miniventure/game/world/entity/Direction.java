@@ -1,5 +1,7 @@
 package miniventure.game.world.entity;
 
+import com.badlogic.gdx.math.Vector2;
+
 import org.jetbrains.annotations.Nullable;
 
 public enum Direction {
@@ -27,5 +29,16 @@ public enum Direction {
 			else
 				return Direction.UP;
 		}
+	}
+	
+	public Vector2 getVector() {
+		Vector2 vector = new Vector2(0, 0);
+		
+		if(this == UP) vector.y = 1;
+		if(this == DOWN) vector.y = -1;
+		if(this == LEFT) vector.x = -1;
+		if(this == RIGHT) vector.x = 1;
+		
+		return vector;
 	}
 }

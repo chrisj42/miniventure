@@ -1,7 +1,9 @@
 package miniventure.game.world.entity;
 
 import miniventure.game.GameCore;
+import miniventure.game.item.Item;
 import miniventure.game.world.Level;
+import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -18,15 +20,25 @@ public abstract class Entity {
 	
 	public abstract void update(float delta);
 	
-	public void render(SpriteBatch batch, float delta) { sprite.draw(batch); }
+	public void render(SpriteBatch batch, float delta) {
+		sprite.draw(batch);
+		
+	}
 	
 	protected void setSprite(TextureRegion texture) {
+		//sprite.setRegion(texture);
 		float x = sprite.getX(), y = sprite.getY();
 		sprite = new Sprite(texture);
 		sprite.setPosition(x, y);
 	}
 	
-	public Rectangle getBounds() { return sprite.getBoundingRectangle(); }
+	public Rectangle getBounds() {
+		Rectangle bounds = new Rectangle(sprite.getBoundingRectangle());
+		//bounds.setX(bounds.getX()+bounds.getWidth()/5);
+		//bounds.setSize(bounds.getWidth()*3/5, bounds.getHeight()/2); // due to the weird perspective of the game, the top part of most sprites is technically "in the air", so you don't really touch it.
+		bounds.setHeight(bounds.getHeight()*4/5);
+		return bounds;
+	}
 	
 	public void move(int xd, int yd) {
 		moveAxis(true, xd);
@@ -35,7 +47,7 @@ public abstract class Entity {
 	
 	private void moveAxis(boolean xaxis, int amt) {
 		Rectangle oldRect = sprite.getBoundingRectangle();
-		Rectangle newRect = new Rectangle(sprite.getX()+(xaxis?amt:0), sprite.getY()+(xaxis?0:amt), sprite.getWidth(), sprite.getHeight());
+		Rectangle newRect = new Rectangle(sprite.getX()+(xaxis?amt:0), sprite.getY()+(xaxis?0:amt), oldRect.width, oldRect.height);
 		
 		// check and see if the entity can go to the new coordinates.
 		/*
@@ -81,8 +93,8 @@ public abstract class Entity {
 		// this method doesn't care where you end up.
 		x = Math.max(x, 0);
 		y = Math.max(y, 0);
-		x = Math.min(x, GameCore.SCREEN_WIDTH);
-		y = Math.min(y, GameCore.SCREEN_HEIGHT);
+		x = Math.min(x, GameCore.SCREEN_WIDTH-(int)sprite.getWidth());
+		y = Math.min(y, GameCore.SCREEN_HEIGHT-(int)sprite.getHeight());
 		sprite.setPosition(x, y);
 	}
 	
@@ -92,4 +104,6 @@ public abstract class Entity {
 	// returns whether the other entity stops this one from moving.
 	// Generally, entities are tangible and stop each other from moving, so this returns true by default.
 	public boolean blockedBy(Entity other) { return true; }
+	
+	public boolean hurtBy(Mob mob, Item attackItem) { return false; } // generally speaking, attacking an entity doesn't do anything; only for mobs, and maybe furniture...
 }
