@@ -12,5 +12,5 @@ public interface TouchListener extends TileProperty {
 	//void steppedOff(Entity entity); // idk, this will be much later.
 	
 	@Override
-	default int getDataLength() { return 0; }
+	default Integer[] getInitData() { return new Integer[0]; }
 }

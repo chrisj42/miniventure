@@ -16,6 +16,6 @@ public interface TileProperty {
 		return map;
 	}
 	
-	int getDataLength();
+	Integer[] getInitData();
 	
 }

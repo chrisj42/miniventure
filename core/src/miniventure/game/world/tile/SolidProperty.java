@@ -11,5 +11,5 @@ public interface SolidProperty extends TileProperty {
 	boolean isPermeableBy(Entity entity);
 	
 	@Override
-	default int getDataLength() { return 0; }
+	default Integer[] getInitData() { return new Integer[0]; }
 }

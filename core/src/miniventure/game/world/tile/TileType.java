@@ -5,15 +5,19 @@ import java.util.LinkedHashMap;
 
 import miniventure.game.GameCore;
 import miniventure.game.item.ToolType;
-import miniventure.game.world.tile.AnimationProperty.Animated;
-import miniventure.game.world.tile.AnimationProperty.SingleFrame;
 import miniventure.game.world.tile.DestructibleProperty.PreferredTool;
+
+import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
 
 public enum TileType {
 	
-	GRASS(),
+	//HOLE(),
+	DIRT(),
+	GRASS(
+		new DestructibleProperty(DIRT, null)
+	),
 	
 	TREE(
 		SolidProperty.SOLID,
@@ -27,25 +31,28 @@ public enum TileType {
 	final AnimationProperty animationProperty;
 	
 	final HashMap<TileProperty, Integer> propertyDataIndexes = new HashMap<>();
-	final int dataLength;
+	final HashMap<TileProperty, Integer> propertyDataLengths = new HashMap<>();
+	private final Integer[] initialData;
 	
 	TileType(@NotNull TileProperty... properties) {
 		// get the default properties
 		LinkedHashMap<String, TileProperty> propertyMap = TileProperty.getDefaultPropertyMap();
 		
+		//System.out.println("making tile type: " + this);
 		// replace the defaults with specified properties
 		for(TileProperty property: properties) {
 			String className = property.getClass().getName();
 			if(className.contains("$")) className = className.substring(0, className.indexOf("$")); // strip off extra stuff generated if it was a lambda expression
-			propertyMap.put(className, property);
+			TileProperty oldProp = propertyMap.put(className, property);
+			//System.out.println("replaced property of class " + className + ": " + oldProp + ", with new property: " + property);
 		}
 		
 		// fetch the animationProperty, and initialize it how it should be
 		TileProperty animationProperty = propertyMap.get(AnimationProperty.class.getName());
-		if(animationProperty instanceof SingleFrame)
-			((SingleFrame)animationProperty).initialize(GameCore.tileAtlas.findRegion(name().toLowerCase()));
+		if(animationProperty instanceof AnimationProperty.SingleFrame)
+			((AnimationProperty.SingleFrame)animationProperty).initialize(GameCore.tileAtlas.findRegion(name().toLowerCase()));
 		else
-			((Animated)animationProperty).initialize(GameCore.tileAtlas.findRegions(name().toLowerCase()));
+			((AnimationProperty.Animated)animationProperty).initialize(GameCore.tileAtlas.findRegions(name().toLowerCase()));
 		
 		this.solidProperty = (SolidProperty)propertyMap.get(SolidProperty.class.getName());
 		this.destructibleProperty = (DestructibleProperty)propertyMap.get(DestructibleProperty.class.getName());
@@ -53,13 +60,27 @@ public enum TileType {
 		this.touchListener = (TouchListener)propertyMap.get(TouchListener.class.getName());
 		this.animationProperty = (AnimationProperty) animationProperty;
 		
-		int curIdx = 0;
+		Array<Integer> initData = new Array<Integer>();
 		
-		for(TileProperty prop: properties) {
-			propertyDataIndexes.put(prop, curIdx);
-			curIdx += prop.getDataLength();
+		for(TileProperty prop: propertyMap.values()) {
+			propertyDataIndexes.put(prop, initData.size);
+			Integer[] propData = prop.getInitData();
+			propertyDataLengths.put(prop, propData.length);
+			initData.addAll(propData);
 		}
 		
-		dataLength = curIdx;
+		initialData = new Integer[initData.size];
+		for(int i = 0; i < initialData.length; i++)
+			initialData[i] = initData.get(i);
 	}
+	
+	int[] getInitialData() {
+		int[] data = new int[initialData.length];
+		for(int i = 0; i < data.length; i++)
+			data[i] = initialData[i];
+		
+		return data;
+	}
+	
+	
 }

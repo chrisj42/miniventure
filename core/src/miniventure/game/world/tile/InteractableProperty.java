@@ -11,5 +11,5 @@ public interface InteractableProperty extends TileProperty {
 	void interact(Player player, Item heldItem, Tile tile);
 	
 	@Override
-	default int getDataLength() { return 0; }
+	default Integer[] getInitData() { return new Integer[0]; }
 }

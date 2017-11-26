@@ -54,17 +54,24 @@ public class DestructibleProperty implements TileProperty {
 	
 	
 	void tileAttacked(Tile tile, Item attackItem) {
-		int damage = getDamage(attackItem, attackItem.getDamage());
+		int damage = getDamage(attackItem);
+		//System.out.println("attacked tile " + tile + " with " + attackItem + "; damage = " + damage);
 		if(damage > 0) {
-			int health = tile.getData(this, HEALTH_IDX);
+			int health = totalHealth > 1 ? tile.getData(this, HEALTH_IDX) : 1;
 			health -= damage;
-			if(health <= 0)
+			if(health <= 0) // TODO here is where we need to drop the items.
 				tile.resetTile(coveredTile);
+			else
+				tile.setData(this, HEALTH_IDX, health);
 		}
 	}
 	
 	
-	private int getDamage(@Nullable Item attackItem, int damage) {
+	private int getDamage(@Nullable Item attackItem) {
+		int damage = 1;
+		if(attackItem != null)
+			damage = attackItem.getDamage();
+		
 		if(damageConditions.length > 0) {
 			// must satisfy at least one condition
 			boolean doDamage = false;
@@ -91,9 +98,9 @@ public class DestructibleProperty implements TileProperty {
 	}
 	
 	@Override
-	public int getDataLength() {
-		if(totalHealth > 1) return 1;
-		return 0; // for a health of one or below, the tile will always be at max health, or destroyed.
+	public Integer[] getInitData() {
+		if(totalHealth > 1) return new Integer[] {totalHealth};
+		return new Integer[0]; // for a health of one or below, the tile will always be at max health, or destroyed.
 	}
 	
 	public TileType getCoveredTile() { return coveredTile; }
@@ -132,4 +139,9 @@ public class DestructibleProperty implements TileProperty {
 			return attackItem instanceof ToolItem && ((ToolItem)attackItem).getType() == toolType;
 		}
 	}
+	
+	
+	
+	@Override
+	public String toString() { return "DestructibleProperty[conditions="+damageConditions.length+"]"; }
 }

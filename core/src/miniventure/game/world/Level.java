@@ -12,6 +12,7 @@ import miniventure.game.world.tile.TileType;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.Nullable;
@@ -49,9 +50,9 @@ public class Level {
 		tiles = new Tile[width*height];
 		
 		for(int i = 0; i < tiles.length; i++)
-			tiles[i] = new Tile(TileType.GRASS, this, i%width, i/width);
+			tiles[i] = new Tile((i%width<5||width-(i%width)<5?TileType.TREE:TileType.GRASS), this, i%width, i/width);
 		
-		tiles[5].setType(TileType.TREE); // for some variety
+		//tiles[5].resetTile(TileType.TREE); // for some variety
 	}
 	
 	public void addEntity(Entity e) {
@@ -68,9 +69,9 @@ public class Level {
 	}
 	
 	public void update(float delta) {
-		// TO-DO pollAnimation random tiles
+		// TO-DO update random tiles
 		
-		// pollAnimation entities
+		// update entities
 		for(Entity e: entities)
 			e.update(delta);
 	}
@@ -109,8 +110,8 @@ public class Level {
 		int tileMaxY = (int) (entityRect.y + entityRect.height) / Tile.SIZE;
 		
 		Array<Tile> overlappingTiles = new Array<>();
-		for(int x = tileMinX; x <= tileMaxX; x++)
-			for(int y = tileMinY; y <= tileMaxY; y++)
+		for(int x = tileMinX; x <= tileMaxX && x < width; x++)
+			for(int y = tileMinY; y <= tileMaxY && y < height; y++)
 				overlappingTiles.add(tiles[x + y*width]);
 		
 		return overlappingTiles;
@@ -123,5 +124,18 @@ public class Level {
 				overlapping.add(entity);
 		
 		return overlapping;
+	}
+	
+	@Nullable
+	public Tile getClosestTile(Rectangle area) {
+		Vector2 center = new Vector2();
+		area.getCenter(center);
+		int x = (int)center.x;
+		int y = (int)center.y;
+		x /= Tile.SIZE;
+		y /= Tile.SIZE;
+		
+		if(x < 0 || x >= width || y < 0 || y >= height) return null;
+		else return tiles[x + y * width];
 	}
 }

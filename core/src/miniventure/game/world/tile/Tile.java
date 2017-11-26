@@ -8,8 +8,6 @@ import miniventure.game.world.entity.mob.Player;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
-import org.jetbrains.annotations.NotNull;
-
 public class Tile {
 	
 	/*
@@ -66,9 +64,7 @@ public class Tile {
 	private int x, y;
 	private int[] data;
 	
-	public Tile(TileType type, Level level, int x, int y) {
-		this(type, level, x, y, new int[type.dataLength]);
-	}
+	public Tile(TileType type, Level level, int x, int y) { this(type, level, x, y, type.getInitialData()); }
 	public Tile(TileType type, Level level, int x, int y, int[] data) {
 		this.type = type;
 		this.level = level;
@@ -77,8 +73,6 @@ public class Tile {
 		this.data = data;
 	}
 	
-	public void setType(@NotNull TileType type) { this.type = type; }
-	
 	public TileType getType() { return type; }
 	
 	Level getLevel() { return level; }
@@ -86,12 +80,15 @@ public class Tile {
 	public int getCenterX() { return x*SIZE + SIZE/2; }
 	public int getCenterY() { return y*SIZE + SIZE/2; }
 	
-	void resetTile(TileType newType) {
+	public void resetTile(TileType newType) {
 		type = newType;
-		data = new int[type.dataLength];
+		data = type.getInitialData();
 	}
 	
 	public void render(SpriteBatch batch, float delta) {
+		TileType under = type.destructibleProperty.getCoveredTile();
+		if(under != null)
+			batch.draw(under.animationProperty.getSprite(GameCore.getElapsedProgramTime()), x*SIZE, y*SIZE, SIZE, SIZE);
 		batch.draw(type.animationProperty.getSprite(GameCore.getElapsedProgramTime()), x*SIZE, y*SIZE, SIZE, SIZE);
 	}
 	
@@ -100,8 +97,8 @@ public class Tile {
 		if(!type.propertyDataIndexes.containsKey(property))
 			throw new IllegalArgumentException("specified property " + property + " is not from this tile's type, "+type+".");
 		
-		if(propDataIndex >= property.getDataLength())
-			throw new IndexOutOfBoundsException("tile property " + property + " tried to access index past stated length; length="+property.getDataLength()+", index="+propDataIndex);
+		if(propDataIndex >= type.propertyDataLengths.get(property))
+			throw new IndexOutOfBoundsException("tile property " + property + " tried to access index past stated length; length="+type.propertyDataLengths.get(property)+", index="+propDataIndex);
 	}
 	
 	int getData(TileProperty property, int propDataIndex) {
@@ -119,7 +116,7 @@ public class Tile {
 	}
 	
 	public void attackedBy(Player player, Item heldItem) {
-		
+		type.destructibleProperty.tileAttacked(this, heldItem);
 	}
 	
 	public void interactWith(Player player, Item heldItem) { type.interactableProperty.interact(player, heldItem, this); }
@@ -128,7 +125,5 @@ public class Tile {
 	
 	
 	@Override
-	public String toString() {
-		return type + " Tile";
-	}
+	public String toString() { return type + " Tile"; }
 }
