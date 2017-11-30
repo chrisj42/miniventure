@@ -11,7 +11,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 
 public class GameCore extends Game {
 	
-	public static final Version VERSION = new Version("1.0.0");
+	public static final Version VERSION = new Version("1.0.1");
 	
 	public static final int SCREEN_WIDTH = 800, SCREEN_HEIGHT = 450;
 	public static TextureAtlas tileAtlas;

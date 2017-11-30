@@ -95,9 +95,9 @@ public class Level {
 	
 	public void dropItem(Item item, int x, int y) {
 		/* this drops the itemEntity at the given coordinate, with any direction.
-		 	However, if the given coordinates reside within a solid tileold, the adjacent tiles are checked.
+		 	However, if the given coordinates reside within a solid tile, the adjacent tiles are checked.
 		 		If all surrounding tiles are solid, then it just uses the given coordinates.
-		 		But if it finds a non-solid tileold, it drops it towards the non-solid tileold.
+		 		But if it finds a non-solid tile, it drops it towards the non-solid tile.
 		  */
 		
 	}

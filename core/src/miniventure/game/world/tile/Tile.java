@@ -13,7 +13,7 @@ public class Tile {
 	/*
 		So, tiles can have any of the following properties/features:
 			- walkable or solid
-			- replacement tileold (tileold that appears underneath when this one is broken; can vary?; defaults to a Hole).
+			- replacement tile (tile that appears underneath when this one is broken; can vary?; defaults to a Hole).
 			- special rendering
 				- animation
 				- lighting
@@ -27,6 +27,10 @@ public class Tile {
 			- experience drops? (preset destroy event)
 			- achievement trigger? (custom)
 		 
+		Tile data:
+			- sprite
+			- animation state
+		
 		
 		Events:
 			- destroy
@@ -45,10 +49,10 @@ public class Tile {
 	
 	/* NOTE: for tiles that drop something, they will drop them progressively; the last hit will drop the last one. Though, you can bias it so that the last drops all the items, or the last drops half the items, etc.
 		lastDropBias:
-			1 = all items are dropped when the tileold is destroyed; none before.
+			1 = all items are dropped when the tile is destroyed; none before.
 			0 = items are dropped at equal intervals so that the last hit drops the last item.
-			0.5 = half the items are dropped when the tileold is destroyed; the other half is equally distributed.
-			i.e. lastDropBias = part of items that are dropped when the tileold is destroyed. The rest are equally distributed.
+			0.5 = half the items are dropped when the tile is destroyed; the other half is equally distributed.
+			i.e. lastDropBias = part of items that are dropped when the tile is destroyed. The rest are equally distributed.
 	 */
 	
 	

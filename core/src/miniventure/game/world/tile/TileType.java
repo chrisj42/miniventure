@@ -24,6 +24,15 @@ public enum TileType {
 		new DestructibleProperty(10, GRASS, new PreferredTool(ToolType.AXE, 2))
 	);
 	
+	/*
+		Others:
+		water, lava, sand, stone, cactus, wheat, farmland, door, floor, wall, stairs?, sapling, torch, ore, cloud?,
+		laser source, laser, mirror, laser receiver.
+		ice
+		
+		
+	 */
+	
 	final SolidProperty solidProperty;
 	final DestructibleProperty destructibleProperty;
 	final InteractableProperty interactableProperty;
