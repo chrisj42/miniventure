@@ -16,7 +16,7 @@ import net.openhft.hashing.LongHashFunction;
 
 public class LevelGen {
 	
-	private static final int CHUNK_SIZE = 16; // perlin noise is individually generated for each chunk.
+	private static final int CHUNK_SIZE = 64; // perlin noise is individually generated for each chunk.
 	
 	private final long worldSeed;
 	private final LongHashFunction hashFunction;
@@ -33,21 +33,40 @@ public class LevelGen {
 		return null;
 	}
 	
-	private float[][] generateChunkNoise(int worldX, int worldY) {
+	private float[][] generateChunkNoise(int chunkX, int chunkY) {
 		
 		float[][] chunkNoise = new float[CHUNK_SIZE][CHUNK_SIZE];
-		int radius = 8;
+		//int radius = 4;
 		
-		worldX -= radius/2;
-		worldY -= radius/2;
+		int worldX = chunkX * CHUNK_SIZE;
+		int worldY = chunkY * CHUNK_SIZE;
 		
-		for(int y = 0; y < chunkNoise.length; y++) {
-			for(int x = 0; x < chunkNoise[y].length; x++) {
-				float[][] perlinSmoothed = PerlinNoiseGenerator.generatePerlinNoise(hashFunction, worldX+x, worldY+y, radius, radius, 8);
+		/*worldX -= radius;
+		worldY -= radius;
+		
+		float[][][][] smoothNoise = new float[CHUNK_SIZE][CHUNK_SIZE][radius*2][radius*2];
+		
+		for(int x = 0; x < CHUNK_SIZE; x++) {
+			for(int y = 0; y < CHUNK_SIZE; y++) {
+				smoothNoise[x][y] = PerlinNoiseGenerator.generateSmoothNoise(hashFunction, worldX+x, worldY+y, radius*2, radius*2, 1);
+				*//*float average = 0;
+				for(float[] row: perlinSmoothed)
+					for(float val: row)
+						average += val;
+				*//*
+				//average /= radius*radius*4;
 				//perlinSmoothed = PerlinNoiseGenerator.generateSmoothNoise()
-				chunkNoise[y][x] = perlinSmoothed[radius/2][radius/2];
+				//chunkNoise[x][y] = perlinSmoothed[radius][radius];
+			}
+		}*/
+		
+		for(int x = 0; x < CHUNK_SIZE; x++) {
+			for(int y = 0; y < CHUNK_SIZE; y++) {
+				chunkNoise[x][y] = getWorldValue(worldX+x, worldY+y);
 			}
 		}
+		
+		//chunkNoise = PerlinNoiseGenerator.generateSmoothNoise(hashFunction, chunkX*CHUNK_SIZE, chunkY*CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE, 1);
 		
 		return chunkNoise;
 		
@@ -78,6 +97,44 @@ public class LevelGen {
 		//return sampleSpace;
 	}
 	
+	private float getWorldValue(int worldX, int worldY) {
+		int radius = 2;
+		
+		float[][][][] smoothed = new float[radius*2+1][radius*2+1][][];
+		
+		for(int x = -radius; x <= radius; x++) {
+			for(int y = -radius; y <= radius; y++) {
+				// get a 2D array of the surrounding tiles, smoothed.
+				// for each tile in the radius, get a 2D array surrounding it, smoothed.
+				smoothed[x+radius][y+radius] = PerlinNoiseGenerator.generateSmoothNoise(hashFunction, x+worldX, y+worldY, radius*2+1, radius*2+1, 2);
+			}
+		}
+		
+		float average = 0;
+		//float totalWeight = 0;
+		float maxDist = (float) Math.sqrt(2*radius*radius);
+		float origValue = smoothed[radius][radius][0][0];
+		
+		for(int x = -radius; x <= radius; x++) {
+			for(int y = -radius; y <= radius; y++) {
+				// return the value that is the weighted average of all the values for the given tile (closer to this tile has a higher weight)
+				float dist = (float) Math.sqrt(x*x + y*y);//Math.min(Math.abs(x), Math.abs(y));
+				float weight = PerlinNoiseGenerator.map(dist*dist, 0, maxDist*maxDist, 0, 1);
+				//float weight = dist == 0 ? 1.5f : (1.0f / dist);
+				float val = smoothed[x+radius][y+radius][x+radius][y+radius];
+				val = PerlinNoiseGenerator.interpolate(origValue, val, weight);
+				
+				//totalWeight += weight;
+				average += val;
+			}
+		}
+		
+		//average /= totalWeight;
+		average /= Math.pow(radius*2+1, 2);
+		
+		return average;
+	}
+	
 	private static HashMap<String, Color> terrainColors = new HashMap<String, Color>() {{
 		put("water", Color.blue);
 		put("rock", Color.gray);
@@ -89,27 +146,27 @@ public class LevelGen {
 	
 	public static void main(String[] args) {
 		while(true) {
-			int scale = 16;
-			int width = CHUNK_SIZE*2, height = CHUNK_SIZE*2;
+			int scale = 8;
+			int width = CHUNK_SIZE, height = CHUNK_SIZE;
 			
 			LevelGen gen = new LevelGen(new Random().nextLong(), width, height);
 			
 			//float[][] totalMap = PerlinNoiseGenerator.generatePerlinNoise(gen.sampleSpace, 5);
 			//totalMap = PerlinNoiseGenerator.generateSmoothNoise(totalMap, 2);
 			
-			float[][] totalMap = new float[CHUNK_SIZE*2][CHUNK_SIZE*2];
+			float[][] totalMap = gen.generateChunkNoise(0, 0);/*new float[width][height];
 			
-			float[][] topRight = gen.generateChunkNoise(0, 0);
-			float[][] topLeft = gen.generateChunkNoise(-CHUNK_SIZE*2, 0);
-			float[][] bottomLeft = gen.generateChunkNoise(-CHUNK_SIZE*2, -CHUNK_SIZE*2);
-			float[][] bottomRight = gen.generateChunkNoise(0, -CHUNK_SIZE*2);
+			float[][] topRight = gen.generateChunkNoise(1, 1);
+			float[][] topLeft = gen.generateChunkNoise(0, 1);
+			float[][] bottomLeft = gen.generateChunkNoise(0, 0);
+			float[][] bottomRight = gen.generateChunkNoise(1, 0);
 			
-			for(int y = 0; y < CHUNK_SIZE; y++) {
-				System.arraycopy(topRight[y], 0, totalMap[y], CHUNK_SIZE, CHUNK_SIZE);
-				System.arraycopy(topLeft[y], 0, totalMap[y], 0, CHUNK_SIZE);
-				System.arraycopy(bottomLeft[y], 0, totalMap[y+CHUNK_SIZE], 0, CHUNK_SIZE);
-				System.arraycopy(bottomRight[y], 0, totalMap[y+CHUNK_SIZE], CHUNK_SIZE, CHUNK_SIZE);
-			}
+			for(int y = 0; y < height/2; y++) {
+				System.arraycopy(topRight[y], 0, totalMap[y], width/2, height/2);
+				System.arraycopy(topLeft[y], 0, totalMap[y], 0, height/2);
+				System.arraycopy(bottomLeft[y], 0, totalMap[y+height/2], 0, height/2);
+				System.arraycopy(bottomRight[y], 0, totalMap[y+height/2], height/2, height/2);
+			}*/
 			
 			/*
 				- fetch coordinates to generate terrain for
@@ -147,15 +204,26 @@ public class LevelGen {
 			BufferedImage image = new BufferedImage(width * scale, height * scale, BufferedImage.TYPE_INT_RGB);
 			Graphics g = image.getGraphics();
 			
+			float minVal = totalMap[0][0];
+			float maxVal = totalMap[0][0];
 			for (int x = 0; x < totalMap.length; x++) {
 				for (int y = 0; y < totalMap[x].length; y++) {
 					float val = totalMap[x][y]; // should be a value between 0 and 1
-					//int col = (int) (val * 255);
-					//g.setColor(new Color(col, col, col));
-					g.setColor(terrainColors.get(getTerrain(val)));
+					minVal = Math.min(minVal, val);
+					maxVal = Math.max(maxVal, val);
+					int col = (int) (val * 255);
+					g.setColor(new Color(col, col, col));
+					//g.setColor(terrainColors.get(getTerrain(val)));
 					g.fillRect(x * scale, y * scale, scale, scale);
 				}
 			}
+			
+			System.out.println("minimum value: " + minVal);
+			System.out.println("maximum value: " + maxVal);
+			
+			for (int x = 0; x < totalMap.length; x++)
+				for (int y = 0; y < totalMap[x].length; y++)
+					totalMap[x][y] = PerlinNoiseGenerator.map(totalMap[x][y], minVal, maxVal, 0, 1);
 			
 			JPanel viewPanel = new JPanel() {
 				@Override

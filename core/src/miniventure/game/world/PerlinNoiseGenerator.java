@@ -27,23 +27,23 @@ class PerlinNoiseGenerator {
 		return x0 * (1 - alpha) + alpha * x1;
 	}
 	
-	static float[][] generateSmoothNoise(LongHashFunction hashFunction, int x, int y, int width, int height, int octave) {
+	static float[][] generateSmoothNoise(LongHashFunction hashFunction, int sx, int sy, int width, int height, int octave) {
 		float[][] smoothNoise = new float[width][height];
 		
-		int samplePeriod = 1 << octave; // calculates 2 ^ k
+		int samplePeriod = 1 << octave; // calculates 2 ^ octave
 		float sampleFrequency = 1.0f / samplePeriod;
-		for (int i = 0; i < width; i++) {
-			int sample_i0 = (i / samplePeriod) * samplePeriod;
-			int sample_i1 = (sample_i0 + samplePeriod) % width; // wrap around
-			float horizontal_blend = (i - sample_i0) * sampleFrequency;
+		for (int x = 0; x < width; x++) {
+			int sample_x0 = (x / samplePeriod) * samplePeriod; // this gets the greatest multiple of samplePeriod <= x.
+			int sample_x1 = (sample_x0 + samplePeriod) % width; // wrap around
+			float horizontal_blend = (x - sample_x0) * sampleFrequency;
 			
-			for (int j = 0; j < height; j++) {
-				int sample_j0 = (j / samplePeriod) * samplePeriod;
-				int sample_j1 = (sample_j0 + samplePeriod) % height; // wrap around
-				float vertical_blend = (j - sample_j0) * sampleFrequency;
-				float top = interpolate(getHash(hashFunction, x+sample_i0, y+sample_j0), getHash(hashFunction, x+sample_i1, y+sample_j0), horizontal_blend);
-				float bottom = interpolate(getHash(hashFunction, x+sample_i0, y+sample_j1), getHash(hashFunction, x+sample_i1, y+sample_j1), horizontal_blend);
-				smoothNoise[i][j] = interpolate(top, bottom, vertical_blend);
+			for (int y = 0; y < height; y++) {
+				int sample_y0 = (y / samplePeriod) * samplePeriod;
+				int sample_y1 = (sample_y0 + samplePeriod) % height; // wrap around
+				float vertical_blend = (y - sample_y0) * sampleFrequency;
+				float top = interpolate(getHash(hashFunction, sx+sample_x0, sy+sample_y0), getHash(hashFunction, sx+sample_x1, sy+sample_y0), horizontal_blend);
+				float bottom = interpolate(getHash(hashFunction, sx+sample_x0, sy+sample_y1), getHash(hashFunction, sx+sample_x1, sy+sample_y1), horizontal_blend);
+				smoothNoise[x][y] = interpolate(top, bottom, vertical_blend);
 			}
 		}
 		
@@ -61,7 +61,7 @@ class PerlinNoiseGenerator {
 		//return map(floatVal, 0, Float.MAX_VALUE, 0, 1);*/
 	}
 	
-	private static float map(float num, float prevMin, float prevMax, float newMin, float newMax) {
+	public static float map(float num, float prevMin, float prevMax, float newMin, float newMax) {
 		return (num-prevMin)/(prevMax-prevMin) * (newMax-newMin) + newMin;
 	}
 	
