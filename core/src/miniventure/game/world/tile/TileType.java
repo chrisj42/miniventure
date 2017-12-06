@@ -23,6 +23,10 @@ public enum TileType {
 		new DestructibleProperty(DIRT, null)
 	),
 	
+	SAND(
+		new DestructibleProperty(HOLE, null)
+	),
+	
 	TREE(
 		SolidProperty.SOLID,
 		new DestructibleProperty(10, GRASS, new PreferredTool(ToolType.AXE, 2))
