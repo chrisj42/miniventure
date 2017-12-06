@@ -4,7 +4,7 @@ import java.util.Random;
 
 import net.openhft.hashing.LongHashFunction;
 
-class PerlinNoiseGenerator {
+class InfiniteNoiseGenerator {
 	
 	private static final Random random = new Random();
 	

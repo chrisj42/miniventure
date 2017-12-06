@@ -7,7 +7,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 
@@ -15,14 +14,14 @@ import miniventure.game.world.tile.TileType;
 
 import net.openhft.hashing.LongHashFunction;
 
-public class LevelGen {
+public class InfiniteLevelGen {
 	
 	private static final int CHUNK_SIZE = 512; // perlin noise is individually generated for each chunk.
 	
 	private final long worldSeed;
 	private final LongHashFunction hashFunction;
 	
-	public LevelGen(long worldSeed, int width, int height) {
+	public InfiniteLevelGen(long worldSeed, int width, int height) {
 		this.worldSeed = worldSeed;
 		//Random random = new Random(worldSeed);
 		//sampleSpace = PerlinNoiseGenerator.generateWhiteNoise(worldSeed, width, height);
@@ -108,7 +107,7 @@ public class LevelGen {
 			for(int cy = -radius; cy <= radius; cy++) {
 				// get a 2D array of the surrounding chunks, smoothed.
 				// for each tile in the radius, get a 2D array surrounding it, smoothed.
-				perlin[cx+radius][cy+radius] = PerlinNoiseGenerator.generatePerlinNoise(hashFunction, (cx+chunkX)*CHUNK_SIZE, (cy+chunkY)*CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE, 6);
+				perlin[cx+radius][cy+radius] = InfiniteNoiseGenerator.generatePerlinNoise(hashFunction, (cx+chunkX)*CHUNK_SIZE, (cy+chunkY)*CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE, 6);
 				
 				/*for(int tx = 0; tx < chunkNoise.length; tx++) {
 					System.arraycopy(chunkNoise[tx], 0, smoothed[(cx+radius)*CHUNK_SIZE], (cy+radius)*CHUNK_SIZE, CHUNK_SIZE);
@@ -116,7 +115,7 @@ public class LevelGen {
 			}
 		}
 		
-		perlin = PerlinNoiseGenerator.generateSmoothNoise(perlin, dimSize, dimSize, 4);
+		perlin = InfiniteNoiseGenerator.generateSmoothNoise(perlin, dimSize, dimSize, 4);
 		
 		/*float[][] chunkNoise = new float[CHUNK_SIZE][CHUNK_SIZE];
 		for(int x = 0; x < chunkNoise.length; x++)
@@ -166,11 +165,11 @@ public class LevelGen {
 			int scale = 4;
 			int width = 128, height = 128;
 			
-			LevelGen gen = new LevelGen(new Random().nextLong(), width, height);
+			InfiniteLevelGen gen = new InfiniteLevelGen(new Random().nextLong(), width, height);
 			
 			//float[][] totalMap = PerlinNoiseGenerator.generatePerlinNoise(gen.sampleSpace, 5);
-			float[][] totalMap = PerlinNoiseGenerator.generatePerlinNoise(gen.hashFunction, 0, 0, width, height, 7);
-			totalMap = PerlinNoiseGenerator.generateSmoothNoise(totalMap, 2);
+			float[][] totalMap = InfiniteNoiseGenerator.generatePerlinNoise(gen.hashFunction, 0, 0, width, height, 7);
+			totalMap = InfiniteNoiseGenerator.generateSmoothNoise(totalMap, 2);
 			
 			for(int i = 0; i < 50; i++) {
 				float[][] averageMap = new float[totalMap.length][totalMap[0].length];
