@@ -6,10 +6,13 @@ import javax.swing.JPanel;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.Stack;
 
 import miniventure.game.world.tile.TileType;
 
@@ -19,7 +22,9 @@ public class LevelGenerator {
 		OCEAN(TileType.WATER),
 		
 		FOREST(
-			TileType.TREE/*,
+			new int[] {1},
+			new int[] {1},
+			TileType.TREE,
 			TileType.GRASS,
 			TileType.GRASS,
 			TileType.GRASS,
@@ -28,7 +33,7 @@ public class LevelGenerator {
 			TileType.GRASS,
 			TileType.TREE,
 			TileType.GRASS,
-			TileType.GRASS*/
+			TileType.GRASS
 		),
 		
 		DESERT(TileType.SAND),
@@ -42,145 +47,126 @@ public class LevelGenerator {
 		);
 		
 		public final TileType[] tiles;
+		private final int[] samplePeriods;
+		private final int[] postSmoothing;
 		
-		Biome(TileType... tiles) {
+		Biome(TileType... tiles) { this(null, null, tiles); }
+		Biome(int[] samplePeriods, int[] postSmoothing, TileType... tiles) {
 			this.tiles = tiles;
+			this.samplePeriods = samplePeriods;
+			this.postSmoothing = postSmoothing;
 		}
 		
+		public float[] generateTerrain(long seed, int width, int height) {
+			if(samplePeriods == null && postSmoothing == null)
+				return LevelGenerator.generateTerrain(seed, width, height);
+			if(samplePeriods == null)
+				return LevelGenerator.generateTerrain(seed, width, height, postSmoothing);
+			
+			return LevelGenerator.generateTerrain(seed, width, height, samplePeriods, postSmoothing);
+		}
 		
 		public static final Biome[] values = Biome.values();
 	}
 	
-	/*private static final Biome[] biomes = {
-		*//*Biome.FOREST,
-		Biome.DESERT,
-		Biome.PLAINS,
-		Biome.DESERT,
-		Biome.MOUNTAIN,
-		Biome.FOREST,
-		Biome.PLAINS,
-		Biome.FOREST,
-		Biome.PLAINS,
-		Biome.PLAINS,
-		Biome.MOUNTAIN,
-		Biome.MOUNTAIN*//*
-		//Biome.OCEAN,
-		//Biome.OCEAN,
-	};
-	
-	private static boolean[] ocean = {
-		true,
-		false,
-		false
-	};
-	
-	private static final TileType[] surfaceTiles = {
-		TileType.WATER,
-		TileType.WATER,
-		TileType.WATER,
-		TileType.WATER,
-		TileType.SAND,
-		TileType.GRASS,
-		TileType.GRASS,
-		TileType.GRASS,
-		TileType.GRASS,
-		TileType.HOLE, // represents rock
-		TileType.HOLE
-	};
-	
-	private static final boolean[] treeLayout = {
-		false,
-		false,
-		false,
-		false,
-		false,
-		false,
-		false,
-		false,
-		true,
-		false,
-		true,
-		false,
-		false,
-		false,
-		true
-	};*/
-	
-	static TileType[] generateLevel(int width, int height) {
+	static TileType[][] generateLevel(int width, int height) {
 		return generateLevel(new Random().nextLong(), width, height);
 	}
-	static TileType[] generateLevel(long seed, int width, int height) {
+	static TileType[][] generateLevel(long seed, int width, int height) {
 		Random seedPicker = new Random(seed);
 		long biomeSeed = seedPicker.nextLong();
-		long detailSeed = seedPicker.nextLong();
-		//long oceanSeed = seedPicker.nextLong();
+		
+		EnumMap<Biome, float[]> biomeTerrain = new EnumMap<>(Biome.class);
+		for(Biome b: Biome.values)
+			biomeTerrain.put(b, b.generateTerrain(seedPicker.nextLong(), width, height));
 		
 		float[] biomeData = generateTerrain(biomeSeed, width, height);
 		
-		float[] rawTerrainValues = generateTerrain(detailSeed, width, height);
-		//float[] oceanTerrainValues = generateTerrain(oceanSeed, width, height, 50, 40, 30, 20, 10, 5, 1);
-		TileType[] tiles = new TileType[width*height];
-		int[] biomeSets = new int[width*height];
-		Arrays.fill(biomeSets, -1);
-		int curBiome = 0;
+		TileType[][] tiles = new TileType[width][height];
 		
-		for(int i = 0; i < biomeSets.length; i++) {
-			int x = i / height, y = i % height;
-			int biomeIdx = getIndex(Biome.values.length, biomeData[i]);
-			if(biomeSets[i] == -1) {
-				biomeSets[i] = curBiome;
-				curBiome++;
-			} else if(y > height-10)
-				System.out.println("biome already set for " + x+","+y+": "+biomeIdx+" (area "+biomeSets[i]+")");
-			if(y < height-1 && getIndex(Biome.values.length, biomeData[i+1]) == biomeIdx)
-				biomeSets[i + 1] = biomeSets[i];
-			else if(y < height-1 && y > height-10)
-				System.out.println("below tile " + x+","+y+" is a different biome; cur="+biomeIdx+" (area:"+biomeSets[i]+"), other="+getIndex(Biome.values.length, biomeData[i+1])+" (area:"+biomeSets[i+1]+")");
-			if(x < width-1 && getIndex(Biome.values.length, biomeData[i+height]) == biomeIdx)
-				biomeSets[i + height] = biomeSets[i];
-			else if(x < width-1 && y > height-10)
-				System.out.println("right of tile " + x+","+y+" is a different biome; cur="+biomeIdx+" (area:"+biomeSets[i]+"), other="+getIndex(Biome.values.length, biomeData[i+height])+" (area:"+biomeSets[i+height]+")");
-			/*if(y > 0 && getIndex(Biome.values.length, biomeData[i-1]) == biomeIdx)
-				biomeSets[i - 1] = biomeSets[i];
-			else if(y > 0 && y > height-10)
-				System.out.println("above tile " + x+","+y+" is a different biome; cur="+biomeIdx+" (area:"+biomeSets[i]+"), other="+getIndex(Biome.values.length, biomeData[i-1])+" (area:"+biomeSets[i-1]+")");
-			if(x > 0 && getIndex(Biome.values.length, biomeData[i-height]) == biomeIdx)
-				biomeSets[i - height] = biomeSets[i];
-			else if(x > 0 && y > height-10)
-				System.out.println("left of tile " + x+","+y+" is a different biome; cur="+biomeIdx+" (area:"+biomeSets[i]+"), other="+getIndex(Biome.values.length, biomeData[i-height])+" (area:"+biomeSets[i-height]+")");*/
+		int[][] biomeAreas = new int[width][height];
+		int[][] biomes = new int[width][height];
+		
+		for(int i = 0; i < biomeData.length; i++)
+			biomes[i/height][i%height] = getIndex(Biome.values.length, biomeData[i]);
+		
+		for(int i = 0; i < biomeAreas.length; i++)
+			Arrays.fill(biomeAreas[i], -1);
+		
+		int curArea = -1;
+		Stack<Point> inArea = new Stack<>();
+		Stack<Point> diffArea = new Stack<>();
+		diffArea.push(new Point(0, 0));
+		
+		while(diffArea.size() > 0) {
+			Point newArea = diffArea.pop(); // get a point in the next area.
+			while(diffArea.size() > 0 && biomeAreas[newArea.x][newArea.y] != -1) // insure that the point is still considered new (could have been put multiple times in this stack).
+				newArea = diffArea.pop();
+			
+			if(biomeAreas[newArea.x][newArea.y] != -1)
+				continue; // can't find any unset tiles anywhere, we are done.
+			
+			curArea++; // set the area number of the new area.
+			
+			inArea.push(newArea); // add the tile to the new area.
+			
+			while(inArea.size() > 0) {
+				Point next = inArea.pop(); // get the next tile in the current area.
+				biomeAreas[next.x][next.y] = curArea; // set this tile to the current area
+				checkAreaTiles(biomeAreas, biomes, next.x, next.y, inArea, diffArea); // check surrounding tiles, and add them to appropriate stacks. 
+			}
 		}
 		
-		System.out.println("biomes made: " + curBiome);
-		
+		System.out.println("biomes made: " + (curArea+1));
 		// biome areas are set, now assign a biome to each number
-		Biome[] biomes = new Biome[curBiome];
-		for(int i = 0; i < biomes.length; i++) {
-			biomes[i] = Biome.values[seedPicker.nextInt(Biome.values.length)];
-			System.out.println("area " + i + " = " + biomes[i]);
-		}
+		Biome[] areaBiomes = new Biome[curArea+1];
+		for(int i = 0; i < areaBiomes.length; i++)
+			areaBiomes[i] = Biome.values[seedPicker.nextInt(Biome.values.length)];
 		
 		// biomes are set, now assign tile types based on biome
-		for(int i = 0; i < tiles.length; i++) {
-			//System.out.println("getting biome " + biomeSets[i]);
-			TileType[] btiles = biomes[biomeSets[i]].tiles;
-			tiles[i] = btiles[getIndex(btiles.length, rawTerrainValues[i])];
+		for(int x = 0; x < tiles.length; x++) {
+			for(int y = 0; y < tiles[x].length; y++) {
+				Biome biome = areaBiomes[biomeAreas[x][y]];
+				//Biome biome = Biome.FOREST;
+				tiles[x][y] = biome.tiles[getIndex(biome.tiles.length, biomeTerrain.get(biome)[x*height + y])];
+				//tiles[x][y] = Biome.values[biomes[x][y]].tiles[0];
+			}
 		}
 		
 		// make sure all water bordered by not-water is sand, a beach.
-		/*for(int i = 0; i < tiles.length; i++) {
-			if(tiles[i] == TileType.WATER) {
-				if(i >= height && tiles[i-height] != TileType.WATER)
-					tiles[i-height] = TileType.SAND;
-				if(i%height > 0 && tiles[i-1] != TileType.WATER)
-					tiles[i-1] = TileType.SAND;
-				if(i%height < height-1 && tiles[i+1] != TileType.WATER)
-					tiles[i+1] = TileType.SAND;
-				if(i < height*(width-1) && tiles[i+height] != TileType.WATER)
-					tiles[i+height] = TileType.SAND;
+		for(int x = 0; x < tiles.length; x++) {
+			for(int y = 0; y < tiles[x].length; y++) {
+				if (tiles[x][y] == TileType.WATER) {
+					if (x > 0 && tiles[x-1][y] != TileType.WATER)
+						tiles[x-1][y] = TileType.SAND;
+					if (y > 0 && tiles[x][y-1] != TileType.WATER)
+						tiles[x][y-1] = TileType.SAND;
+					if (x < width-1 && tiles[x+1][y] != TileType.WATER)
+						tiles[x+1][y] = TileType.SAND;
+					if (y < height-1 && tiles[x][y+1] != TileType.WATER)
+						tiles[x][y+1] = TileType.SAND;
+				}
 			}
-		}*/
+		}
 		
 		return tiles;
+	}
+	
+	private static void checkAreaTiles(int[][] biomeAreas, int[][] biomes, int x, int y, Stack<Point> inArea, Stack<Point> diffArea) {
+		// it is a given that the current tile is already marked
+		
+		for(int xi = Math.max(0, x-1); xi <= Math.min(x+1, biomeAreas.length-1); xi++) {
+			for(int yi = Math.max(0, y-1); yi <= Math.min(y+1, biomeAreas[xi].length-1); yi++) {
+				//if(xi == x && yi == y) continue;
+				if(biomeAreas[xi][yi] == -1) {
+					Point p = new Point(xi, yi);
+					if(biomes[xi][yi] == biomes[x][y])
+						inArea.push(p); // add it to the list of tiles in this area.
+					else
+						diffArea.push(p); // add it to the list of tiles outside this area.
+				}
+			}
+		}
 	}
 	
 	private static float[] generateTerrain(long seed, int width, int height) {
@@ -189,9 +175,9 @@ public class LevelGenerator {
 	private static float[] generateTerrain(long seed, int width, int height, int... postSmoothing) {
 		return generateTerrain(seed, width, height, new int[] {1, 2, 4, 8, 16, 32, 64}, postSmoothing);
 	}
-	private static float[] generateTerrain(long seed, int width, int height, int[] initialSmoothing, int[] postSmoothing) {
+	private static float[] generateTerrain(long seed, int width, int height, int[] samplePeriods, int[] postSmoothing) {
 		float[] noise = Noise.getWhiteNoise(seed, width*height);
-		float[][] noises = Noise.smoothNoise2D(noise, width, height, initialSmoothing);
+		float[][] noises = Noise.smoothNoise2D(noise, width, height, samplePeriods);
 		float[] smoothNoise = Noise.addNoiseWeighted(noises);
 		//smoothNoise = Noise.smoothNoise2DProgressive(smoothNoise, width, height, 50, 40, 30, 20, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1);
 		smoothNoise = Noise.smoothNoise2DProgressive(smoothNoise, width, height, postSmoothing);
@@ -209,7 +195,6 @@ public class LevelGenerator {
 			//System.out.println("after: " + smoothNoise[i]);
 		}*/
 		
-		//return new float[][] {smoothNoise, smoothNoise2};
 		return Noise.map(smoothNoise, 0, 1);
 	}
 	
@@ -228,15 +213,20 @@ public class LevelGenerator {
 	}
 	
 	private static void displayLevelVisually(int width, int height, int scale) {
+		displayLevelVisually(width, height, scale, new Random().nextLong());
+	}
+	private static void displayLevelVisually(int width, int height, int scale, long seed) {
 		BufferedImage image = new BufferedImage(width * scale, height * scale, BufferedImage.TYPE_INT_RGB);
 		Graphics g = image.getGraphics();
 		
-		TileType[] tiles = generateLevel(width, height);
+		TileType[][] tiles = generateLevel(seed, width, height);
 		
-		for(int i = 0; i < tiles.length; i++) {
-			//float val = noise[i]; // should be a value between 0 and 1
-			g.setColor(tileMap.get(tiles[i]));
-			g.fillRect((i/height) * scale, (i%height) * scale, scale, scale);
+		for(int x = 0; x < tiles.length; x++) {
+			for(int y = 0; y < tiles[x].length; y++) {
+				//float val = noise[i]; // should be a value between 0 and 1
+				g.setColor(tileMap.get(tiles[x][y]));
+				g.fillRect(x * scale, y * scale, scale, scale);
+			}
 		}
 		
 		JPanel viewPanel = new JPanel() {
