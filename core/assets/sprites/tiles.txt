@@ -17,23 +17,30 @@ grass
   orig: 32, 32
   offset: 0, 0
   index: -1
-sand
+hole
   rotate: false
   xy: 0, 32
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree
+sand
   rotate: false
   xy: 32, 32
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-water
+tree
   rotate: false
   xy: 0, 64
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+water
+  rotate: false
+  xy: 32, 64
   size: 32, 32
   orig: 32, 32
   offset: 0, 0

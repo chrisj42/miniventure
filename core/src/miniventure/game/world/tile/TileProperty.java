@@ -11,7 +11,7 @@ public interface TileProperty {
 		map.put(SolidProperty.class.getName(), SolidProperty.WALKABLE);
 		map.put(DestructibleProperty.class.getName(), DestructibleProperty.INDESTRUCTIBLE);
 		map.put(InteractableProperty.class.getName(), (InteractableProperty)((p, i, t) -> {}));
-		map.put(TouchListener.class.getName(), (TouchListener)(entity -> {}));
+		map.put(TouchListener.class.getName(), (TouchListener)((entity, tile) -> {}));
 		map.put(AnimationProperty.class.getName(), new SingleFrame());
 		return map;
 	}

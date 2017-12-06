@@ -3,18 +3,24 @@ package miniventure.game.world.tile;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 
-// FIXME this class will be used for water and stuff, mainly; except, I'm thinking I'll make a subclass, RandomAnimationProperty, to do that; it will pick from a group of frames randomly, at set intervals. I'm not sure what I'm going to do with this. So I'm just going to leave it alone for now.
 public abstract class AnimationProperty implements TileProperty {
 	
 	// TODO add a way to specify if a tile should draw the tile underneath it, so fully opaque tiles don't try to draw the bottom one when none of it will be seen.
 	
-	public abstract TextureRegion getSprite(float timeElapsed);
+	// maybe have an animationProperty for each overlap state, thing..?
+	
+	public TextureRegion getSprite(float timeElapsed, Array<Tile> adjacentTiles) {
+		return getSprite(timeElapsed);
+	}
+	protected abstract TextureRegion getSprite(float timeElapsed);
 	
 	@Override
 	public Integer[] getInitData() { return new Integer[0]; }
 	
+	abstract void initialize(Array<AtlasRegion> frames);
 	
 	static class Animated extends AnimationProperty {
 		
@@ -26,6 +32,7 @@ public abstract class AnimationProperty implements TileProperty {
 			this.frameTime = frameTime;
 		}
 		
+		@Override
 		void initialize(Array<AtlasRegion> frames) {
 			animation = new Animation<>(frameTime, frames);
 			initialized = true;
@@ -40,6 +47,31 @@ public abstract class AnimationProperty implements TileProperty {
 		}
 	}
 	
+	static class RandomFrame extends AnimationProperty {
+		private boolean initialized = false;
+		private final float frameTime;
+		private Array<? extends TextureRegion> frames;
+		
+		public RandomFrame(float frameTime) {
+			this.frameTime = frameTime;
+		}
+		
+		@Override
+		void initialize(Array<AtlasRegion> frames) {
+			this.frames = frames;
+			initialized = true;
+		}
+		
+		@Override
+		public TextureRegion getSprite(float timeElapsed) {
+			if(!initialized)
+				throw new IllegalStateException("Attempted to access sprite from uninitialized AnimationProperty.");
+			
+			MathUtils.random.setSeed((long)(timeElapsed/frameTime));
+			return frames.get(MathUtils.random(frames.size-1));
+		}
+	}
+	
 	
 	
 	static class SingleFrame extends AnimationProperty {
@@ -47,9 +79,10 @@ public abstract class AnimationProperty implements TileProperty {
 		private boolean initialized = false;
 		private TextureRegion texture;
 		
-		void initialize(TextureRegion frame) {
-			texture = frame;
-			initialized = true;
+		@Override
+		void initialize(Array<AtlasRegion> frames) {
+			texture = frames.size > 0 ? frames.get(0) : null;
+			initialized = frames.size > 0;
 		}
 		
 		@Override

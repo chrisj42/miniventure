@@ -13,8 +13,12 @@ import org.jetbrains.annotations.NotNull;
 
 public enum TileType {
 	
-	//HOLE(),
-	DIRT(),
+	HOLE(),
+	
+	DIRT(
+		new DestructibleProperty(HOLE, null)
+	),
+	
 	GRASS(
 		new DestructibleProperty(DIRT, null)
 	),
@@ -22,7 +26,16 @@ public enum TileType {
 	TREE(
 		SolidProperty.SOLID,
 		new DestructibleProperty(10, GRASS, new PreferredTool(ToolType.AXE, 2))
+	),
+	
+	WATER(
+		new AnimationProperty.RandomFrame(0.1f)
 	);
+	
+	/*LAVA(
+		(TouchListener) Entity::hurtBy,
+		new AnimationProperty.RandomFrame(0.1f)
+	);*/
 	
 	/*
 		Others:
@@ -57,17 +70,19 @@ public enum TileType {
 		}
 		
 		// fetch the animationProperty, and initialize it how it should be
-		TileProperty animationProperty = propertyMap.get(AnimationProperty.class.getName());
-		if(animationProperty instanceof AnimationProperty.SingleFrame)
-			((AnimationProperty.SingleFrame)animationProperty).initialize(GameCore.tileAtlas.findRegion(name().toLowerCase()));
-		else
-			((AnimationProperty.Animated)animationProperty).initialize(GameCore.tileAtlas.findRegions(name().toLowerCase()));
+		//AnimationProperty animationProperty = 
+		//if(animationProperty instanceof AnimationProperty.SingleFrame)
+		//	((AnimationProperty.SingleFrame)animationProperty).initialize(GameCore.tileAtlas.findRegion(name().toLowerCase()));
+		//else if()
 		
 		this.solidProperty = (SolidProperty)propertyMap.get(SolidProperty.class.getName());
 		this.destructibleProperty = (DestructibleProperty)propertyMap.get(DestructibleProperty.class.getName());
 		this.interactableProperty = (InteractableProperty)propertyMap.get(InteractableProperty.class.getName());
 		this.touchListener = (TouchListener)propertyMap.get(TouchListener.class.getName());
-		this.animationProperty = (AnimationProperty) animationProperty;
+		this.animationProperty = (AnimationProperty)propertyMap.get(AnimationProperty.class.getName());
+		
+		if(GameCore.tileAtlas != null)
+			animationProperty.initialize(GameCore.tileAtlas.findRegions(name().toLowerCase()));
 		
 		Array<Integer> initData = new Array<Integer>();
 		

@@ -8,7 +8,6 @@ import miniventure.game.item.Item;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.TileType;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
@@ -49,8 +48,10 @@ public class Level {
 		this.height = height;
 		tiles = new Tile[width*height];
 		
-		for(int i = 0; i < tiles.length; i++)
-			tiles[i] = new Tile((i%width<5||width-(i%width)<5?TileType.TREE:TileType.GRASS), this, i%width, i/width);
+		//for(int i = 0; i < tiles.length; i++)
+		//	tiles[i] = new Tile((i%width<5||width-(i%width)<5?TileType.TREE:TileType.GRASS), this, i%width, i/width);
+		
+		
 		
 		//tiles[5].resetTile(TileType.TREE); // for some variety
 	}
@@ -124,6 +125,20 @@ public class Level {
 				overlapping.add(entity);
 		
 		return overlapping;
+	}
+	
+	public Array<Tile> getAreaTiles(int xt, int yt, int radius, boolean includeCenter) {
+		Array<Tile> tiles = new Array<>();
+		for(int x = Math.max(0, xt-radius); x <= Math.min(width, xt+radius); x++) {
+			for(int y = Math.max(0, yt-radius); y <= Math.min(height, yt+radius); y++) {
+				tiles.add(this.tiles[y * width + x]);
+			}
+		}
+		
+		if(!includeCenter)
+			tiles.removeValue(this.tiles[yt * width + xt], true);
+		
+		return tiles;
 	}
 	
 	@Nullable

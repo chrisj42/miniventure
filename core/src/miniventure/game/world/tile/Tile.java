@@ -7,6 +7,7 @@ import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Player;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.utils.Array;
 
 public class Tile {
 	
@@ -65,7 +66,7 @@ public class Tile {
 	private TileType type;
 	
 	private Level level;
-	private int x, y;
+	private final int x, y;
 	private int[] data;
 	
 	public Tile(TileType type, Level level, int x, int y) { this(type, level, x, y, type.getInitialData()); }
@@ -91,9 +92,18 @@ public class Tile {
 	
 	public void render(SpriteBatch batch, float delta) {
 		TileType under = type.destructibleProperty.getCoveredTile();
+		Array<Tile> adjacent = level.getAreaTiles(x, y, 1, false);
+		/*int underMatches = 0, matches = 0;
+		for(Tile t: adjacent) {
+			if(t.type == type)
+				matches++;
+			if(t.type == under)
+				underMatches++;
+		}*/
+		
 		if(under != null)
-			batch.draw(under.animationProperty.getSprite(GameCore.getElapsedProgramTime()), x*SIZE, y*SIZE, SIZE, SIZE);
-		batch.draw(type.animationProperty.getSprite(GameCore.getElapsedProgramTime()), x*SIZE, y*SIZE, SIZE, SIZE);
+			batch.draw(under.animationProperty.getSprite(GameCore.getElapsedProgramTime(), adjacent), x*SIZE, y*SIZE, SIZE, SIZE);
+		batch.draw(type.animationProperty.getSprite(GameCore.getElapsedProgramTime(), adjacent), x*SIZE, y*SIZE, SIZE, SIZE);
 	}
 	
 	
@@ -125,7 +135,7 @@ public class Tile {
 	
 	public void interactWith(Player player, Item heldItem) { type.interactableProperty.interact(player, heldItem, this); }
 	
-	public void touchedBy(Entity entity) { type.touchListener.touchedBy(entity); }
+	public void touchedBy(Entity entity) { type.touchListener.touchedBy(entity, this); }
 	
 	
 	@Override
