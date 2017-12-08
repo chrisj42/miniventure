@@ -5,6 +5,7 @@ import miniventure.game.world.Level;
 import miniventure.game.world.entity.mob.Player;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -52,6 +53,15 @@ public class GameScreen implements Screen {
 		
 		mainPlayer.checkInput(delta);
 		Level.getLevel(curLevel).update(delta);
+		
+		if(Gdx.input.isKeyJustPressed(Keys.MINUS)) {
+			camera.viewportHeight *= 2;
+			camera.viewportWidth *= 2;
+		}
+		if(Gdx.input.isKeyJustPressed(Keys.EQUALS) || Gdx.input.isKeyJustPressed(Keys.PLUS)) {
+			camera.viewportHeight /= 2;
+			camera.viewportWidth /= 2;
+		}
 		
 		Vector2 playerPos = new Vector2();
 		mainPlayer.getBounds().getCenter(playerPos);
