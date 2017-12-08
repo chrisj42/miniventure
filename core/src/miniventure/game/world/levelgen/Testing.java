@@ -27,11 +27,7 @@ class Testing {
 		displayLevelVisually(width, height, scale, new Random().nextLong());
 	}
 	private static void displayLevelVisually(int width, int height, int scale, long seed) {
-		TileType[][] tiles;
-		Random seedGen = new Random(seed);
-		do {
-			tiles = LevelGenerator.generateLevel(seedGen.nextLong(), width, height);
-		} while(!LevelGenerator.validateLevel(tiles));
+		TileType[][] tiles = LevelGenerator.generateLevel(seed, width, height);
 		
 		Color[][] colors = new Color[width][height];
 		for(int x = 0; x < tiles.length; x++)
