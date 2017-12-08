@@ -9,6 +9,9 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 
 public class GameScreen implements Screen {
 	
@@ -50,11 +53,19 @@ public class GameScreen implements Screen {
 		mainPlayer.checkInput(delta);
 		Level.getLevel(curLevel).update(delta);
 		
+		Vector2 playerPos = new Vector2();
+		mainPlayer.getBounds().getCenter(playerPos);
+		//playerPos.sub(GameCore.SCREEN_WIDTH/2, GameCore.SCREEN_HEIGHT/2);
+		camera.position.set(playerPos, camera.position.z);
 		camera.update(); // updates the camera "matrices"
+		
+		Vector3 worldMin = camera.unproject(new Vector3(0, 0, 0));
+		Vector3 worldMax = camera.unproject(new Vector3(camera.viewportWidth, camera.viewportHeight, 0));
+		Rectangle renderSpace = new Rectangle(worldMin.x, worldMin.y, worldMax.x-worldMin.x, worldMax.y-worldMin.y);
 		
 		batch.setProjectionMatrix(camera.combined); // tells the batch to use the camera's coordinate system.
 		batch.begin();
-		Level.getLevel(curLevel).render(mainPlayer, batch, delta);
+		Level.getLevel(curLevel).render(renderSpace, batch, delta);
 		// TO-DO render GUI here
 		batch.end();
 	}

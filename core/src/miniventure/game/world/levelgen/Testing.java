@@ -18,7 +18,7 @@ class Testing {
 		tileMap.put(TileType.WATER, Color.BLUE);
 		tileMap.put(TileType.TREE, Color.GREEN.darker().darker());
 		tileMap.put(TileType.GRASS, Color.GREEN);
-		tileMap.put(TileType.HOLE, Color.GRAY);
+		tileMap.put(TileType.ROCK, Color.GRAY);
 		tileMap.put(TileType.SAND, Color.YELLOW);
 		tileMap.put(TileType.DIRT, Color.ORANGE.darker().darker());
 	}
@@ -73,7 +73,7 @@ class Testing {
 	
 	public static void main(String[] args) {
 		while(true) //testTerrainGen(256, 256, 2);
-		displayLevelVisually(256, 256, 2);
+		displayLevelVisually(20, 16, 32);
 	}
 	
 	private static void testTerrainGen(int width, int height, int scale) { testTerrainGen(width, height, scale, new Random().nextLong()); }

@@ -1,6 +1,5 @@
 package miniventure.game.world.entity;
 
-import miniventure.game.GameCore;
 import miniventure.game.item.Item;
 import miniventure.game.world.Level;
 import miniventure.game.world.entity.mob.Mob;
@@ -22,7 +21,6 @@ public abstract class Entity {
 	
 	public void render(SpriteBatch batch, float delta) {
 		sprite.draw(batch);
-		
 	}
 	
 	protected void setSprite(TextureRegion texture) {
@@ -93,8 +91,8 @@ public abstract class Entity {
 		// this method doesn't care where you end up.
 		x = Math.max(x, 0);
 		y = Math.max(y, 0);
-		x = Math.min(x, GameCore.SCREEN_WIDTH-(int)sprite.getWidth());
-		y = Math.min(y, GameCore.SCREEN_HEIGHT-(int)sprite.getHeight());
+		//x = Math.min(x, );
+		//y = Math.min(y, GameCore.SCREEN_HEIGHT-(int)sprite.getHeight());
 		sprite.setPosition(x, y);
 	}
 	

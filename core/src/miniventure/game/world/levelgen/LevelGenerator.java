@@ -24,7 +24,7 @@ public class LevelGenerator {
 		TileType.WATER, TileType.WATER, TileType.WATER, TileType.WATER, TileType.WATER,
 		TileType.SAND,
 		TileType.GRASS, TileType.GRASS, TileType.GRASS, TileType.GRASS, TileType.GRASS, TileType.GRASS,
-		TileType.HOLE, TileType.HOLE, TileType.HOLE, TileType.HOLE
+		TileType.ROCK, TileType.ROCK, TileType.ROCK, TileType.ROCK
 	);
 	
 	private static final int[] biomeSample = {20, 10};
@@ -67,7 +67,7 @@ public class LevelGenerator {
 		MOUNTAIN(new TileNoiseLayer(
 			new int[] {},
 			new int[] {},
-			TileType.HOLE
+			TileType.ROCK
 		));
 		
 		private final TileNoiseLayer noiseMap;
@@ -87,6 +87,9 @@ public class LevelGenerator {
 		public static final Biome[] values = Biome.values();
 	}
 	
+	public static TileType[][] generateLevel(int width, int height) {
+		return generateLevel(new Random().nextLong(), width, height);
+	}
 	public static TileType[][] generateLevel(long seed, int width, int height) {
 		Random seedGen = new Random(seed);
 		
@@ -136,7 +139,7 @@ public class LevelGenerator {
 			//System.out.println(type + " percent: " + tileCounts[type.ordinal()]);
 		}
 		
-		if(tileCounts[TileType.HOLE.ordinal()] < 10) return false; // this is stone
+		if(tileCounts[TileType.ROCK.ordinal()] < 10) return false; // this is stone
 		if(tileCounts[TileType.TREE.ordinal()] < 2) return false;
 		if(tileCounts[TileType.WATER.ordinal()] < 15) return false;
 		if(tileCounts[TileType.GRASS.ordinal()] < 20) return false;
@@ -144,7 +147,7 @@ public class LevelGenerator {
 		if(tileCounts[TileType.GRASS.ordinal()] + tileCounts[TileType.SAND.ordinal()] < 40) return false;
 		
 		if(tileCounts[TileType.GRASS.ordinal()] < tileCounts[TileType.SAND.ordinal()]) return false;
-		if(tileCounts[TileType.GRASS.ordinal()] + tileCounts[TileType.SAND.ordinal()] < tileCounts[TileType.HOLE.ordinal()]) return false;
+		if(tileCounts[TileType.GRASS.ordinal()] + tileCounts[TileType.SAND.ordinal()] < tileCounts[TileType.ROCK.ordinal()]) return false;
 		
 		//System.out.println("Map validated!");
 		
