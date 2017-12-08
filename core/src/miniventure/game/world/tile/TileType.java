@@ -111,4 +111,6 @@ public enum TileType {
 	}
 	
 	
+	
+	public static final TileType[] values = TileType.values();
 }

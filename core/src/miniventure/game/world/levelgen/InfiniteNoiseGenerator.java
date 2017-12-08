@@ -1,4 +1,4 @@
-package miniventure.game.world;
+package miniventure.game.world.levelgen;
 
 import java.util.Random;
 
