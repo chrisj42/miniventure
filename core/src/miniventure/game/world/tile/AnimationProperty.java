@@ -12,10 +12,7 @@ public abstract class AnimationProperty implements TileProperty {
 	
 	// maybe have an animationProperty for each overlap state, thing..?
 	
-	public TextureRegion getSprite(float timeElapsed, Array<Tile> adjacentTiles) {
-		return getSprite(timeElapsed);
-	}
-	protected abstract TextureRegion getSprite(float timeElapsed);
+	public abstract TextureRegion getSprite(float timeElapsed, Tile tile);
 	
 	@Override
 	public Integer[] getInitData() { return new Integer[0]; }
@@ -39,7 +36,7 @@ public abstract class AnimationProperty implements TileProperty {
 		}
 		
 		@Override
-		public TextureRegion getSprite(float timeElapsed) {
+		public TextureRegion getSprite(float timeElapsed, Tile tile) {
 			if(!initialized)
 				throw new IllegalStateException("Attempted to access sprite from uninitialized AnimationProperty.");
 			
@@ -63,11 +60,11 @@ public abstract class AnimationProperty implements TileProperty {
 		}
 		
 		@Override
-		public TextureRegion getSprite(float timeElapsed) {
+		public TextureRegion getSprite(float timeElapsed, Tile tile) {
 			if(!initialized)
 				throw new IllegalStateException("Attempted to access sprite from uninitialized AnimationProperty.");
 			
-			MathUtils.random.setSeed((long)(timeElapsed/frameTime));
+			MathUtils.random.setSeed((long)(1/frameTime*timeElapsed) + tile.getCenterX() * tile.getCenterX() + tile.getCenterY());
 			return frames.get(MathUtils.random(frames.size-1));
 		}
 	}
@@ -86,7 +83,7 @@ public abstract class AnimationProperty implements TileProperty {
 		}
 		
 		@Override
-		public TextureRegion getSprite(float timeElapsed) {
+		public TextureRegion getSprite(float timeElapsed, Tile tile) {
 			if(!initialized)
 				throw new IllegalStateException("Attempted to access sprite from uninitialized AnimationProperty.");
 			
