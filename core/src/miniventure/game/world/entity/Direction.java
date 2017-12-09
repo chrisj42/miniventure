@@ -15,7 +15,7 @@ public enum Direction {
 	}
 	
 	@Nullable
-	public static Direction getDirection(int xd, int yd) {
+	public static Direction getDirection(float xd, float yd) {
 		if (xd == 0 && yd == 0) return null;
 		
 		if(Math.abs(xd) > Math.abs(yd)) { // the y distance will be more prominent than the x distance (if equal dists, then the direction is up or down).

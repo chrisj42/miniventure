@@ -38,12 +38,12 @@ public abstract class Entity {
 		return bounds;
 	}
 	
-	public void move(int xd, int yd) {
+	public void move(float xd, float yd) {
 		moveAxis(true, xd);
 		moveAxis(false, yd);
 	}
 	
-	private void moveAxis(boolean xaxis, int amt) {
+	private void moveAxis(boolean xaxis, float amt) {
 		Rectangle oldRect = sprite.getBoundingRectangle();
 		Rectangle newRect = new Rectangle(sprite.getX()+(xaxis?amt:0), sprite.getY()+(xaxis?0:amt), oldRect.width, oldRect.height);
 		
@@ -84,16 +84,21 @@ public abstract class Entity {
 		if(!canMove) return;
 		
 		// FINALLY, the entity can move.
-		moveTo((int)newRect.x, (int)newRect.y);
+		moveTo(level, newRect.x, newRect.y);
 	}
 	
-	public void moveTo(int x, int y) {
+	public void moveTo(Level level, float x, float y) {
 		// this method doesn't care where you end up.
 		x = Math.max(x, 0);
 		y = Math.max(y, 0);
-		//x = Math.min(x, );
-		//y = Math.min(y, GameCore.SCREEN_HEIGHT-(int)sprite.getHeight());
+		x = Math.min(x, level.getWidth()*Tile.SIZE - sprite.getRegionWidth());
+		y = Math.min(y, level.getHeight()*Tile.SIZE - sprite.getRegionHeight());
 		sprite.setPosition(x, y);
+	}
+	public void moveTo(Tile tile) {
+		int x = tile.getCenterX() - sprite.getRegionWidth()/2;
+		int y = tile.getCenterY() - sprite.getRegionHeight()/2;
+		moveTo(tile.getLevel(), x, y);
 	}
 	
 	// returns whether anything meaningful happened; if false, then other.touchedBy(this) will be called.
