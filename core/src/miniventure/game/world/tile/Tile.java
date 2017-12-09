@@ -80,7 +80,7 @@ public class Tile {
 	
 	public TileType getType() { return type; }
 	
-	Level getLevel() { return level; }
+	public Level getLevel() { return level; }
 	
 	public int getCenterX() { return x*SIZE + SIZE/2; }
 	public int getCenterY() { return y*SIZE + SIZE/2; }
@@ -90,22 +90,30 @@ public class Tile {
 		data = type.getInitialData();
 	}
 	
-	public void render(SpriteBatch batch, float delta) {
-		TileType under = type.destructibleProperty.getCoveredTile();
-		Array<Tile> adjacent = level.getAreaTiles(x, y, 1, false);
-		/*int underMatches = 0, matches = 0;
-		for(Tile t: adjacent) {
-			if(t.type == type)
-				matches++;
-			if(t.type == under)
-				underMatches++;
-		}*/
-		
-		if(under != null)
-			batch.draw(under.animationProperty.getSprite(GameCore.getElapsedProgramTime(), adjacent), x*SIZE, y*SIZE, SIZE, SIZE);
-		batch.draw(type.animationProperty.getSprite(GameCore.getElapsedProgramTime(), adjacent), x*SIZE, y*SIZE, SIZE, SIZE);
+	public Array<Tile> getAdjacentTiles(boolean includeCorners) {
+		if(includeCorners)
+			return level.getAreaTiles(x, y, 1, false);
+		else {
+			Array<Tile> tiles = new Array<>();
+			if(x > 0) tiles.add(level.getTile(x-1, y));
+			if(y < level.getHeight()-1) tiles.add(level.getTile(x, y+1));
+			if(x < level.getWidth()-1) tiles.add(level.getTile(x+1, y));
+			if(y > 0) tiles.add(level.getTile(x, y-1));
+			return tiles;
+		}
 	}
 	
+	public void render(SpriteBatch batch, float delta) {
+		TileType under = type.destructibleProperty.getCoveredTile();
+		
+		if(under != null)
+			batch.draw(under.animationProperty.getSprite(GameCore.getElapsedProgramTime(), this), x*SIZE, y*SIZE	, SIZE, SIZE);
+		batch.draw(type.animationProperty.getSprite(GameCore.getElapsedProgramTime(), this), x*SIZE, y*SIZE, SIZE, SIZE);
+	}
+	
+	public void update() {
+		
+	}
 	
 	private void checkDataAccess(TileProperty property, int propDataIndex) {
 		if(!type.propertyDataIndexes.containsKey(property))

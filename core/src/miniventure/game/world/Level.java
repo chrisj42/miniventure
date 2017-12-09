@@ -10,6 +10,7 @@ import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileType;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
@@ -20,6 +21,8 @@ public class Level {
 	
 	private static Level[] levels = new Level[0];
 	private static final HashMap<Entity, Level> entityLevels = new HashMap<>();
+	
+	private static final float percentTilesUpdatedPerSecond = 0.1f; // this represents the percent of the total number of tiles in the map that are updated per second.
 	
 	public static void resetLevels() {
 		entityLevels.clear();
@@ -37,7 +40,6 @@ public class Level {
 	
 	
 	
-	
 	private final int width, height;
 	private final Tile[][] tiles;
 	
@@ -51,10 +53,14 @@ public class Level {
 		TileType[][] tileTypes = LevelGenerator.generateLevel(width, height);
 		for(int x = 0; x < tiles.length; x++)
 			for(int y = 0; y < tiles[x].length; y++)
-			tiles[x][y] = new Tile(tileTypes[x][y]/*(i%width<5?TileType.ROCK:width-(i%width)<5? TileType.TREE:TileType.GRASS)*/, this, x, y);
+				tiles[x][y] = new Tile(tileTypes[x][y]/*(x<5?TileType.TREE:width-x<5? TileType.CACTUS:TileType.GRASS)*/, this, x, y);
 		
-		//tiles[5].resetTile(TileType.TREE); // for some variety
+		//tiles[5][0].resetTile(TileType.WATER);
 	}
+	
+	public int getWidth() { return width; }
+	public int getHeight() { return height; }
+	
 	
 	public void addEntity(Entity e) {
 		entities.add(e);
@@ -70,7 +76,13 @@ public class Level {
 	}
 	
 	public void update(float delta) {
-		// TO-DO update random tiles
+		int tilesToUpdate = (int) (percentTilesUpdatedPerSecond * width*height * delta);
+		
+		for(int i = 0; i < tilesToUpdate; i++) {
+			int x = MathUtils.random(width-1);
+			int y = MathUtils.random(height-1);
+			tiles[x][y].update();
+		}
 		
 		// update entities
 		for(Entity e: entities)
@@ -81,12 +93,12 @@ public class Level {
 		// the game renders around the main player. For now, the level shall be the same size as the screen, so no camera fanciness or coordinate manipulation is needed.
 		
 		//batch.disableBlending(); // this prevents alpha from being rendered, which gives a performance boost. When drawing tiles, we don't need alpha (yet), so we'll disable it.
-		for(Tile[] tiles: this.tiles)
-			for(Tile tile: tiles)
+		//for(Tile[] tiles: this.tiles)
+			for(Tile tile: getOverlappingTiles(renderSpace))
 				tile.render(batch, delta);
 		//batch.enableBlending(); // re-enable alpha for the drawing of entities.
 		
-		for(Entity entity: entities)
+		for(Entity entity: getOverlappingEntities(renderSpace))
 			entity.render(batch, delta);
 	}
 	
@@ -104,6 +116,12 @@ public class Level {
 		
 	}
 	
+	@Nullable
+	public Tile getTile(int xt, int yt) {
+		if(xt >= 0 && xt < width && yt >= 0 && yt < height)
+			return tiles[xt][yt];
+		return null;
+	}
 	
 	public Array<Tile> getOverlappingTiles(Rectangle entityRect) {
 		int tileMinX = (int) entityRect.x / Tile.SIZE;
@@ -112,8 +130,8 @@ public class Level {
 		int tileMaxY = (int) (entityRect.y + entityRect.height) / Tile.SIZE;
 		
 		Array<Tile> overlappingTiles = new Array<>();
-		for(int x = tileMinX; x <= tileMaxX && x < width; x++)
-			for(int y = tileMinY; y <= tileMaxY && y < height; y++)
+		for(int x = Math.max(0, tileMinX); x <= Math.min(width-1, tileMaxX); x++)
+			for(int y = Math.max(0, tileMinY); y <= Math.min(height-1, tileMaxY); y++)
 				overlappingTiles.add(tiles[x][y]);
 		
 		return overlappingTiles;
@@ -151,7 +169,6 @@ public class Level {
 		x /= Tile.SIZE;
 		y /= Tile.SIZE;
 		
-		if(x < 0 || x >= width || y < 0 || y >= height) return null;
-		else return tiles[x][y];
+		return getTile(x, y);
 	}
 }

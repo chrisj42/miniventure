@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 
 import miniventure.game.GameCore;
 import miniventure.game.item.ToolType;
+import miniventure.game.world.entity.Entity;
 import miniventure.game.world.tile.DestructibleProperty.PreferredTool;
 
 import com.badlogic.gdx.utils.Array;
@@ -37,8 +38,15 @@ public enum TileType {
 		new DestructibleProperty(10, GRASS, new PreferredTool(ToolType.AXE, 2))
 	),
 	
+	CACTUS(
+		SolidProperty.SOLID,
+		new DestructibleProperty(7, SAND, null),
+		(TouchListener) Entity::hurtBy
+	),
+	
 	WATER(
-		new AnimationProperty.RandomFrame(0.1f)
+		new AnimationProperty.RandomFrame(0.2f),
+		new SpreadUpdateProperty(HOLE)
 	);
 	
 	/*LAVA(
@@ -60,6 +68,7 @@ public enum TileType {
 	final InteractableProperty interactableProperty;
 	final TouchListener touchListener;
 	final AnimationProperty animationProperty;
+	final UpdateProperty updateProperty;
 	
 	final HashMap<TileProperty, Integer> propertyDataIndexes = new HashMap<>();
 	final HashMap<TileProperty, Integer> propertyDataLengths = new HashMap<>();
@@ -89,6 +98,7 @@ public enum TileType {
 		this.interactableProperty = (InteractableProperty)propertyMap.get(InteractableProperty.class.getName());
 		this.touchListener = (TouchListener)propertyMap.get(TouchListener.class.getName());
 		this.animationProperty = (AnimationProperty)propertyMap.get(AnimationProperty.class.getName());
+		this.updateProperty = (UpdateProperty)propertyMap.get(UpdateProperty.class.getName());
 		
 		if(GameCore.tileAtlas != null)
 			animationProperty.initialize(GameCore.tileAtlas.findRegions(name().toLowerCase()));
