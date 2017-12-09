@@ -1,54 +1,82 @@
 tiles.png
-size: 64, 128
+size: 128, 256
 format: RGBA8888
 filter: Linear,Linear
 repeat: none
+cactus
+  rotate: false
+  xy: 2, 2
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
 dirt
   rotate: false
-  xy: 0, 0
+  xy: 38, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 grass
   rotate: false
-  xy: 32, 0
+  xy: 74, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 hole
   rotate: false
-  xy: 0, 32
+  xy: 2, 38
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 rock
   rotate: false
-  xy: 32, 32
+  xy: 38, 38
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 sand
   rotate: false
-  xy: 0, 64
+  xy: 74, 38
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tree
   rotate: false
-  xy: 32, 64
+  xy: 2, 74
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 water
   rotate: false
-  xy: 0, 96
+  xy: 38, 74
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: -1
+  index: 1
+water
+  rotate: false
+  xy: 74, 74
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 2
+water
+  rotate: false
+  xy: 2, 110
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 3
+water
+  rotate: false
+  xy: 38, 110
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 4

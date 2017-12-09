@@ -60,8 +60,8 @@ public class LevelGenerator {
 			new int[] {1},
 			TileType.SAND, TileType.SAND, TileType.SAND, TileType.SAND, TileType.SAND, TileType.SAND,
 			TileType.SAND, TileType.SAND, TileType.SAND, TileType.SAND, TileType.SAND, TileType.SAND,
-			TileType.SAND, TileType.SAND, TileType.SAND, TileType.TREE, TileType.SAND, TileType.SAND,  
-			TileType.SAND, TileType.SAND, TileType.SAND // tree = cactus
+			TileType.SAND, TileType.SAND, TileType.SAND, TileType.CACTUS, TileType.SAND, TileType.SAND,  
+			TileType.SAND, TileType.SAND, TileType.SAND
 		)),
 		
 		MOUNTAIN(new TileNoiseLayer(
