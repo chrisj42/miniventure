@@ -81,17 +81,14 @@ public enum TileType {
 		//System.out.println("making tile type: " + this);
 		// replace the defaults with specified properties
 		for(TileProperty property: properties) {
-			String className = property.getClass().getName();
+			Class clazz = GameCore.getDirectSubclass(TileProperty.class, property.getClass());
+			if(clazz == null) throw new NullPointerException();
+			String className = clazz.getName();
+			//System.out.println(className);
 			if(className.contains("$")) className = className.substring(0, className.indexOf("$")); // strip off extra stuff generated if it was a lambda expression
 			TileProperty oldProp = propertyMap.put(className, property);
 			//System.out.println("replaced property of class " + className + ": " + oldProp + ", with new property: " + property);
 		}
-		
-		// fetch the animationProperty, and initialize it how it should be
-		//AnimationProperty animationProperty = 
-		//if(animationProperty instanceof AnimationProperty.SingleFrame)
-		//	((AnimationProperty.SingleFrame)animationProperty).initialize(GameCore.tileAtlas.findRegion(name().toLowerCase()));
-		//else if()
 		
 		this.solidProperty = (SolidProperty)propertyMap.get(SolidProperty.class.getName());
 		this.destructibleProperty = (DestructibleProperty)propertyMap.get(DestructibleProperty.class.getName());

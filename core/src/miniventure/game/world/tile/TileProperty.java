@@ -13,6 +13,7 @@ public interface TileProperty {
 		map.put(InteractableProperty.class.getName(), (InteractableProperty)((p, i, t) -> {}));
 		map.put(TouchListener.class.getName(), (TouchListener)((entity, tile) -> {}));
 		map.put(AnimationProperty.class.getName(), new SingleFrame());
+		map.put(UpdateProperty.class.getName(), (UpdateProperty) ((delta, tile) -> {}));
 		return map;
 	}
 	

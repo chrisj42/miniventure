@@ -81,7 +81,7 @@ public class Level {
 		for(int i = 0; i < tilesToUpdate; i++) {
 			int x = MathUtils.random(width-1);
 			int y = MathUtils.random(height-1);
-			tiles[x][y].update();
+			tiles[x][y].update(delta);
 		}
 		
 		// update entities

@@ -8,6 +8,9 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.utils.Array;
+
+import org.jetbrains.annotations.Nullable;
 
 public class GameCore extends Game {
 	
@@ -56,5 +59,31 @@ public class GameCore extends Game {
 	
 	public static float getElapsedProgramTime() {
 		return (System.nanoTime() - START_TIME)/1E9f;
+	}
+	
+	@Nullable
+	public static Class getDirectSubclass(Class superClass, Class target) {
+		Array<Class> parents = new Array<>(target.getInterfaces());
+		Class targetSuper = target.getSuperclass();
+		
+		if(parents.contains(superClass, false) || targetSuper.equals(superClass))
+			return target;
+		
+		if(targetSuper == Object.class && parents.size == 0)
+			return null;
+		
+		if(targetSuper != Object.class) {
+			Class sub = getDirectSubclass(superClass, targetSuper);
+			if(sub != null) return sub;
+		}
+		
+		// go through array
+		for(Class parent: parents) {
+			Class sub = getDirectSubclass(superClass, parent);
+			if(sub != null)
+				return sub;
+		}
+		
+		return null;
 	}
 }

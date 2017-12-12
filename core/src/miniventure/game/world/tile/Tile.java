@@ -111,8 +111,8 @@ public class Tile {
 		batch.draw(type.animationProperty.getSprite(GameCore.getElapsedProgramTime(), this), x*SIZE, y*SIZE, SIZE, SIZE);
 	}
 	
-	public void update() {
-		
+	public void update(float delta) {
+		type.updateProperty.update(delta, this);
 	}
 	
 	private void checkDataAccess(TileProperty property, int propDataIndex) {
