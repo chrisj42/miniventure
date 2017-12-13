@@ -2,7 +2,6 @@ package miniventure.game;
 
 import miniventure.game.screen.GameScreen;
 import miniventure.game.screen.MainMenuScreen;
-import miniventure.game.world.entity.mob.MobAnimationController;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -17,7 +16,7 @@ public class GameCore extends Game {
 	public static final Version VERSION = new Version("1.0.3");
 	
 	public static final int SCREEN_WIDTH = 800, SCREEN_HEIGHT = 450;
-	public static TextureAtlas tileAtlas, tileConnectionAtlas;
+	public static TextureAtlas entityAtlas, tileAtlas, tileConnectionAtlas;
 	private static final long START_TIME = System.nanoTime();
 	
 	private SpriteBatch batch;
@@ -27,6 +26,7 @@ public class GameCore extends Game {
 	
 	@Override
 	public void create () {
+		entityAtlas = new TextureAtlas("sprites/entities.txt");
 		tileAtlas = new TextureAtlas("sprites/tiles.txt");
 		tileConnectionAtlas = new TextureAtlas("sprites/tilemap.txt");
 		batch = new SpriteBatch();
@@ -42,9 +42,9 @@ public class GameCore extends Game {
 		if(gameScreen != null)
 			gameScreen.dispose();
 		
+		entityAtlas.dispose();
 		tileAtlas.dispose();
 		tileConnectionAtlas.dispose();
-		MobAnimationController.disposeTextures();
 	}
 	
 	public SpriteBatch getBatch() {

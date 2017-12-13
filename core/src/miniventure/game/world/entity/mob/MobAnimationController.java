@@ -3,10 +3,10 @@ package miniventure.game.world.entity.mob;
 import java.util.HashMap;
 import java.util.PriorityQueue;
 
+import miniventure.game.GameCore;
 import miniventure.game.world.entity.Direction;
 
 import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class MobAnimationController {
@@ -14,26 +14,18 @@ public class MobAnimationController {
 	private static final HashMap<Class<? extends Mob>, MobAnimation> mobAnimations = new HashMap<>();
 	
 	private static class MobAnimation {
-		private final TextureAtlas atlas;
 		private final HashMap<String, Animation<TextureRegion>> animations;
 		
 		public MobAnimation(String mobSpriteName) {
 			animations = new HashMap<>();
 			
-			atlas = new TextureAtlas("sprites/"+mobSpriteName+".txt");
 			for(AnimationState state: AnimationState.values) {
 				for(String dir: Direction.names) {
 					String name = state.name().toLowerCase()+"-"+dir;
-					animations.put(name, new Animation<>(state.frameDuration, atlas.findRegions(name)));
-					//atlas.dispose(); // can NOT do this! disposing of the atlas disposes of all the textures too.
+					animations.put(name, new Animation<>(state.frameDuration, GameCore.entityAtlas.findRegions(mobSpriteName+"/"+name)));
 				}
 			}
 		}
-	}
-	
-	public static void disposeTextures() {
-		for(MobAnimation animation: mobAnimations.values())
-			animation.atlas.dispose();
 	}
 	
 	public enum AnimationState {
