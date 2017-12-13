@@ -14,10 +14,10 @@ import org.jetbrains.annotations.Nullable;
 
 public class GameCore extends Game {
 	
-	public static final Version VERSION = new Version("1.0.2");
+	public static final Version VERSION = new Version("1.0.3");
 	
 	public static final int SCREEN_WIDTH = 800, SCREEN_HEIGHT = 450;
-	public static TextureAtlas tileAtlas;
+	public static TextureAtlas tileAtlas, tileConnectionAtlas;
 	private static final long START_TIME = System.nanoTime();
 	
 	private SpriteBatch batch;
@@ -28,6 +28,7 @@ public class GameCore extends Game {
 	@Override
 	public void create () {
 		tileAtlas = new TextureAtlas("sprites/tiles.txt");
+		tileConnectionAtlas = new TextureAtlas("sprites/tilemap.txt");
 		batch = new SpriteBatch();
 		font = new BitmapFont(); // uses libGDX's default Arial font
 		
@@ -42,6 +43,7 @@ public class GameCore extends Game {
 			gameScreen.dispose();
 		
 		tileAtlas.dispose();
+		tileConnectionAtlas.dispose();
 		MobAnimationController.disposeTextures();
 	}
 	

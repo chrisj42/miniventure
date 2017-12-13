@@ -1,11 +1,13 @@
 package miniventure.game.world.tile;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 import miniventure.game.GameCore;
 import miniventure.game.item.ToolType;
 import miniventure.game.world.entity.Entity;
+import miniventure.game.world.tile.AnimationProperty.AnimationType;
 import miniventure.game.world.tile.DestructibleProperty.PreferredTool;
 
 import com.badlogic.gdx.utils.Array;
@@ -45,7 +47,7 @@ public enum TileType {
 	),
 	
 	WATER(
-		new AnimationProperty.RandomFrame(0.2f),
+		new AnimationProperty(AnimationType.RANDOM, 0.2f),
 		new SpreadUpdateProperty(HOLE)
 	);
 	
@@ -68,6 +70,7 @@ public enum TileType {
 	final InteractableProperty interactableProperty;
 	final TouchListener touchListener;
 	final AnimationProperty animationProperty;
+	final ConnectionProperty connectionProperty;
 	final UpdateProperty updateProperty;
 	
 	final HashMap<TileProperty, Integer> propertyDataIndexes = new HashMap<>();
@@ -95,10 +98,13 @@ public enum TileType {
 		this.interactableProperty = (InteractableProperty)propertyMap.get(InteractableProperty.class.getName());
 		this.touchListener = (TouchListener)propertyMap.get(TouchListener.class.getName());
 		this.animationProperty = (AnimationProperty)propertyMap.get(AnimationProperty.class.getName());
+		this.connectionProperty = (ConnectionProperty)propertyMap.get(ConnectionProperty.class.getName());
 		this.updateProperty = (UpdateProperty)propertyMap.get(UpdateProperty.class.getName());
 		
-		if(GameCore.tileAtlas != null)
-			animationProperty.initialize(GameCore.tileAtlas.findRegions(name().toLowerCase()));
+		//if(GameCore.tileAtlas != null)
+		//	animationProperty.initialize(GameCore.tileAtlas.findRegions(name().toLowerCase()));
+		
+		
 		
 		Array<Integer> initData = new Array<Integer>();
 		
@@ -123,6 +129,18 @@ public enum TileType {
 	}
 	
 	
-	
 	public static final TileType[] values = TileType.values();
+	public static final TileType[] zOrder = { // first tile is drawn over by all.
+		HOLE, DIRT, SAND, GRASS, ROCK, TREE, CACTUS, WATER
+	};
+	
+	public static final Comparator<TileType> tileSorter = (t1, t2) -> {
+		if(t1 == t2) return 0;
+		for(TileType type: zOrder) {
+			if(type == t1) return -1;
+			if(type == t2) return 1;
+		}
+		
+		return 0; // shouldn't every reach here...
+	};
 }

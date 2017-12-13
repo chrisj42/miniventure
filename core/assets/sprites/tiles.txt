@@ -3,77 +3,77 @@ size: 128, 256
 format: RGBA8888
 filter: Linear,Linear
 repeat: none
-cactus
+cactus/00
   rotate: false
   xy: 2, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-dirt
+dirt/00
   rotate: false
   xy: 38, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-grass
+grass/00
   rotate: false
   xy: 74, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole
+hole/00
   rotate: false
   xy: 2, 38
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-rock
+rock/00
   rotate: false
   xy: 38, 38
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-sand
+sand/00
   rotate: false
   xy: 74, 38
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree
+tree/00
   rotate: false
   xy: 2, 74
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-water
+water/00
   rotate: false
   xy: 38, 74
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 1
-water
+water/00
   rotate: false
   xy: 74, 74
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 2
-water
+water/00
   rotate: false
   xy: 2, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 3
-water
+water/00
   rotate: false
   xy: 38, 110
   size: 32, 32
