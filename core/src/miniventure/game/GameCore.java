@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class GameCore extends Game {
 	
-	public static final Version VERSION = new Version("1.0.3");
+	public static final Version VERSION = new Version("1.0.4");
 	
 	public static final int SCREEN_WIDTH = 800, SCREEN_HEIGHT = 450;
 	public static TextureAtlas entityAtlas, tileAtlas, tileOverlapAtlas, tileConnectionAtlas;

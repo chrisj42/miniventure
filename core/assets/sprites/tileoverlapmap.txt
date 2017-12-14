@@ -94,3 +94,31 @@ repeat: none
   orig: 3, 3
   offset: 0, 0
   index: -1
+13
+  rotate: false
+  xy: 5, 17
+  size: 3, 3
+  orig: 3, 3
+  offset: 0, 0
+  index: -1
+14
+  rotate: false
+  xy: 9, 17
+  size: 3, 3
+  orig: 3, 3
+  offset: 0, 0
+  index: -1
+15
+  rotate: false
+  xy: 1, 21
+  size: 3, 3
+  orig: 3, 3
+  offset: 0, 0
+  index: -1
+16
+  rotate: false
+  xy: 5, 21
+  size: 3, 3
+  orig: 3, 3
+  offset: 0, 0
+  index: -1
