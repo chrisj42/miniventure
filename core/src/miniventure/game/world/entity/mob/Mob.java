@@ -33,7 +33,7 @@ public abstract class Mob extends Entity {
 	}
 	
 	@Override
-	public void move(int xd, int yd) {
+	public void move(float xd, float yd) {
 		super.move(xd, yd);
 		
 		if(xd != 0 || yd != 0) animator.requestState(AnimationState.WALK);

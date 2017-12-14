@@ -1,63 +1,99 @@
 package miniventure.game.world.tile;
 
-import com.badlogic.gdx.graphics.g2d.Animation;
+import java.util.HashMap;
+
+import miniventure.game.GameCore;
+
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 
-// FIXME this class will be used for water and stuff, mainly; except, I'm thinking I'll make a subclass, RandomAnimationProperty, to do that; it will pick from a group of frames randomly, at set intervals. I'm not sure what I'm going to do with this. So I'm just going to leave it alone for now.
-public abstract class AnimationProperty implements TileProperty {
+public class AnimationProperty implements TileProperty {
 	
-	// TODO add a way to specify if a tile should draw the tile underneath it, so fully opaque tiles don't try to draw the bottom one when none of it will be seen.
+	private static HashMap<String, HashMap<String, Array<AtlasRegion>>> tileConnectionAnimations = new HashMap<>();
+	private static HashMap<String, HashMap<String, Array<AtlasRegion>>> tileOverlapAnimations = new HashMap<>();
+	static {
+		Array<AtlasRegion> regions = GameCore.tileAtlas.getRegions();
+		for(AtlasRegion region: regions) {
+			String tilename = region.name.substring(0, region.name.indexOf("/"));
+			String spriteIdx = region.name.substring(region.name.indexOf("/")+1);
+			boolean isOverlap = spriteIdx.startsWith("o");
+			if(isOverlap) {
+				spriteIdx = spriteIdx.substring(1);
+				tileOverlapAnimations.computeIfAbsent(tilename, k -> new HashMap<>());
+				tileOverlapAnimations.get(tilename).computeIfAbsent(spriteIdx, k -> new Array<>());
+				tileOverlapAnimations.get(tilename).get(spriteIdx).add(region);
+			} else {
+				tileConnectionAnimations.computeIfAbsent(tilename, k -> new HashMap<>());
+				tileConnectionAnimations.get(tilename).computeIfAbsent(spriteIdx, k -> new Array<>());
+				tileConnectionAnimations.get(tilename).get(spriteIdx).add(region);
+			}
+		}
+	}
 	
-	public abstract TextureRegion getSprite(float timeElapsed);
+	@FunctionalInterface
+	private interface SpriteFetcher {
+		AtlasRegion getSprite(Tile tile, Array<AtlasRegion> frames, int frameIdx);
+	}
+	
+	enum AnimationType {
+		SEQUENCE((tile, frames, frameIdx) -> frames.get(frameIdx % frames.size)),
+		
+		RANDOM((tile, frames, frameIdx) -> {
+			MathUtils.random.setSeed((long)(frameIdx) + tile.getCenterX() * tile.getCenterX() + tile.getCenterY());
+			return frames.get(MathUtils.random(frames.size-1));
+		}),
+		
+		SINGLE_FRAME((tile, frames, frameIdx) -> frames.get(0));
+		
+		private SpriteFetcher fetcher;
+		
+		AnimationType(SpriteFetcher fetcher) { this.fetcher = fetcher; }
+		
+		public AtlasRegion getSprite(Tile tile, Array<AtlasRegion> frames, int frameIdx) { return fetcher.getSprite(tile, frames, frameIdx); }
+	}
+	
+	private final AnimationType main, overlay;
+	private final float mainFrameTime, overlayFrameTime;
+	final TileType renderBehind;
+	
+	AnimationProperty(AnimationType main) { this(null, main); }
+	AnimationProperty(TileType renderBehind, AnimationType main) { this(renderBehind, main, 0); }
+	AnimationProperty(AnimationType main, float mainFrameTime) { this(null, main, mainFrameTime); }
+	AnimationProperty(TileType renderBehind, AnimationType main, float mainFrameTime) { this(renderBehind, main, mainFrameTime, main, mainFrameTime); }
+	AnimationProperty(AnimationType main, float mainFrameTime, AnimationType overlay, float overlayFrameTime) { this(null, main, mainFrameTime, overlay, overlayFrameTime); }
+	AnimationProperty(TileType renderBehind, AnimationType main, float mainFrameTime, AnimationType overlay, float overlayFrameTime) {
+		this.renderBehind = renderBehind;
+		this.main = main;
+		this.overlay = overlay;
+		this.mainFrameTime = mainFrameTime;
+		this.overlayFrameTime = overlayFrameTime;
+	}
+	
+	AtlasRegion getSprite(int spriteIndex, boolean isOverlapSprite, Tile tile) {
+		return getSprite(spriteIndex, isOverlapSprite, tile, tile.getType());
+	}
+	AtlasRegion getSprite(int spriteIndex, boolean isOverlapSprite, Tile tile, TileType type) {
+		return getSprite(spriteIndex, isOverlapSprite, tile, type, GameCore.getElapsedProgramTime());
+	}
+	/*AtlasRegion getSprite(int spriteIndex, boolean isOverlapSprite, Tile tile, float timeElapsed) {
+		return getSprite(spriteIndex, isOverlapSprite, tile, tile.getType(), timeElapsed);
+	}*/
+	AtlasRegion getSprite(int spriteIndex, boolean isOverlapSprite, Tile tile, TileType type, float timeElapsed) {
+		Array<AtlasRegion> frames;
+		String typeName = type.name().toLowerCase();
+		String indexString = (spriteIndex < 10 ? "0" : "") + spriteIndex;
+		if(isOverlapSprite) {
+			frames = tileOverlapAnimations.get(typeName).get(indexString);
+			return overlay.getSprite(tile, frames, (int)(timeElapsed/overlayFrameTime));
+		} else {
+			frames = tileConnectionAnimations.get(typeName).get(indexString);
+			//if(!indexString.equals("00"))
+			//	System.out.println("fetching sprites for " + typeName + " at " + indexString + " as a connection sprite, from the main animation type " + main + "; frames="+frames);
+			return main.getSprite(tile, frames, (int)(timeElapsed/mainFrameTime));
+		}
+	}
 	
 	@Override
 	public Integer[] getInitData() { return new Integer[0]; }
-	
-	
-	static class Animated extends AnimationProperty {
-		
-		private boolean initialized = false;
-		private final float frameTime;
-		private Animation<TextureRegion> animation;
-		
-		public Animated(float frameTime) {
-			this.frameTime = frameTime;
-		}
-		
-		void initialize(Array<AtlasRegion> frames) {
-			animation = new Animation<>(frameTime, frames);
-			initialized = true;
-		}
-		
-		@Override
-		public TextureRegion getSprite(float timeElapsed) {
-			if(!initialized)
-				throw new IllegalStateException("Attempted to access sprite from uninitialized AnimationProperty.");
-			
-			return animation.getKeyFrame(timeElapsed, true);
-		}
-	}
-	
-	
-	
-	static class SingleFrame extends AnimationProperty {
-		
-		private boolean initialized = false;
-		private TextureRegion texture;
-		
-		void initialize(TextureRegion frame) {
-			texture = frame;
-			initialized = true;
-		}
-		
-		@Override
-		public TextureRegion getSprite(float timeElapsed) {
-			if(!initialized)
-				throw new IllegalStateException("Attempted to access sprite from uninitialized AnimationProperty.");
-			
-			return texture;
-		}
-	}
 }

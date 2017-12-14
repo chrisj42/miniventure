@@ -1,19 +1,21 @@
 package miniventure.game.world.tile;
 
-import miniventure.game.GameCore;
 import miniventure.game.item.Item;
 import miniventure.game.world.Level;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Player;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.utils.Array;
 
 public class Tile {
 	
 	/*
 		So, tiles can have any of the following properties/features:
 			- walkable or solid
-			- replacement tileold (tileold that appears underneath when this one is broken; can vary?; defaults to a Hole).
+			- replacement tile (tile that appears underneath when this one is broken; can vary?; defaults to a Hole).
 			- special rendering
 				- animation
 				- lighting
@@ -27,6 +29,10 @@ public class Tile {
 			- experience drops? (preset destroy event)
 			- achievement trigger? (custom)
 		 
+		Tile data:
+			- sprite
+			- animation state
+		
 		
 		Events:
 			- destroy
@@ -45,10 +51,10 @@ public class Tile {
 	
 	/* NOTE: for tiles that drop something, they will drop them progressively; the last hit will drop the last one. Though, you can bias it so that the last drops all the items, or the last drops half the items, etc.
 		lastDropBias:
-			1 = all items are dropped when the tileold is destroyed; none before.
+			1 = all items are dropped when the tile is destroyed; none before.
 			0 = items are dropped at equal intervals so that the last hit drops the last item.
-			0.5 = half the items are dropped when the tileold is destroyed; the other half is equally distributed.
-			i.e. lastDropBias = part of items that are dropped when the tileold is destroyed. The rest are equally distributed.
+			0.5 = half the items are dropped when the tile is destroyed; the other half is equally distributed.
+			i.e. lastDropBias = part of items that are dropped when the tile is destroyed. The rest are equally distributed.
 	 */
 	
 	
@@ -61,7 +67,7 @@ public class Tile {
 	private TileType type;
 	
 	private Level level;
-	private int x, y;
+	protected final int x, y;
 	private int[] data;
 	
 	public Tile(TileType type, Level level, int x, int y) { this(type, level, x, y, type.getInitialData()); }
@@ -75,7 +81,7 @@ public class Tile {
 	
 	public TileType getType() { return type; }
 	
-	Level getLevel() { return level; }
+	public Level getLevel() { return level; }
 	
 	public int getCenterX() { return x*SIZE + SIZE/2; }
 	public int getCenterY() { return y*SIZE + SIZE/2; }
@@ -85,13 +91,47 @@ public class Tile {
 		data = type.getInitialData();
 	}
 	
-	public void render(SpriteBatch batch, float delta) {
-		TileType under = type.destructibleProperty.getCoveredTile();
-		if(under != null)
-			batch.draw(under.animationProperty.getSprite(GameCore.getElapsedProgramTime()), x*SIZE, y*SIZE, SIZE, SIZE);
-		batch.draw(type.animationProperty.getSprite(GameCore.getElapsedProgramTime()), x*SIZE, y*SIZE, SIZE, SIZE);
+	public Array<Tile> getAdjacentTiles(boolean includeCorners) {
+		if(includeCorners)
+			return level.getAreaTiles(x, y, 1, false);
+		else {
+			Array<Tile> tiles = new Array<>();
+			if(x > 0) tiles.add(level.getTile(x-1, y));
+			if(y < level.getHeight()-1) tiles.add(level.getTile(x, y+1));
+			if(x < level.getWidth()-1) tiles.add(level.getTile(x+1, y));
+			if(y > 0) tiles.add(level.getTile(x, y-1));
+			return tiles;
+		}
 	}
 	
+	private void draw(SpriteBatch batch, TextureRegion texture) {
+		batch.draw(texture, x*SIZE, y*SIZE, SIZE, SIZE);
+	}
+	
+	public void render(SpriteBatch batch, float delta) {
+		TileType under = type.animationProperty.renderBehind;
+		
+		if(under != null) { // draw the tile that ought to be rendered underneath this one
+			draw(batch, under.connectionProperty.getSprite(this, true));
+			Array<AtlasRegion> sprites = under.overlapProperty.getSprites(this, true);
+			for(AtlasRegion sprite: sprites)
+				draw(batch, sprite);
+		}
+		// Due to animation, I'm going to try and draw everything without caching. Hopefully, it won't be slow.
+		
+		// TODO here, ask the overlapProperty to get the array of sprites to render. the overlap property will accept a tile. It will cache a reference to the surrounding tiles, and then it will then loop through the overlap checks, passing the cached list of tile types, and add the corresponding sprite for every match. it then returns this array.
+		// TODO the array returned is actually a reference to the tile sprites, however, all could be part of an animation. So, the animation property is checked for each one. The animation property for that tile type, then, takes an int (String?) for the overlap sprite index/id. It should have registered a list of animations for each overlap index. it applies the program time and given index and returns the correct frame of the correct sprite's animation.
+		
+		draw(batch, type.connectionProperty.getSprite(this)); // draws base sprite for this tile
+		
+		Array<AtlasRegion> sprites = type.overlapProperty.getSprites(this);
+		for(AtlasRegion sprite: sprites)
+			draw(batch, sprite);
+	}
+	
+	public void update(float delta) {
+		type.updateProperty.update(delta, this);
+	}
 	
 	private void checkDataAccess(TileProperty property, int propDataIndex) {
 		if(!type.propertyDataIndexes.containsKey(property))
@@ -121,8 +161,7 @@ public class Tile {
 	
 	public void interactWith(Player player, Item heldItem) { type.interactableProperty.interact(player, heldItem, this); }
 	
-	public void touchedBy(Entity entity) { type.touchListener.touchedBy(entity); }
-	
+	public void touchedBy(Entity entity) { type.touchListener.touchedBy(entity, this); }
 	
 	@Override
 	public String toString() { return type + " Tile"; }

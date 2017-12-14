@@ -1,10 +1,13 @@
 package miniventure.game.world.tile;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 import miniventure.game.GameCore;
 import miniventure.game.item.ToolType;
+import miniventure.game.world.entity.Entity;
+import miniventure.game.world.tile.AnimationProperty.AnimationType;
 import miniventure.game.world.tile.DestructibleProperty.PreferredTool;
 
 import com.badlogic.gdx.utils.Array;
@@ -13,52 +16,105 @@ import org.jetbrains.annotations.NotNull;
 
 public enum TileType {
 	
-	//HOLE(),
-	DIRT(),
-	GRASS(
+	HOLE(
+		new ConnectionProperty(true)
+	),
+	
+	DIRT(true,
+		new DestructibleProperty(HOLE, null)
+	),
+	
+	GRASS(true,
 		new DestructibleProperty(DIRT, null)
+	),
+	
+	SAND(true,
+		new DestructibleProperty(HOLE, null)
+		//new OverlapProperty(true)
+	),
+	
+	ROCK(
+		SolidProperty.SOLID,
+		new DestructibleProperty(20, DIRT, new PreferredTool(ToolType.PICKAXE, 5))
 	),
 	
 	TREE(
 		SolidProperty.SOLID,
-		new DestructibleProperty(10, GRASS, new PreferredTool(ToolType.AXE, 2))
+		new DestructibleProperty(10, GRASS, new PreferredTool(ToolType.AXE, 2)),
+		new AnimationProperty(GRASS, AnimationType.SINGLE_FRAME),
+		new ConnectionProperty(true)
+	),
+	
+	CACTUS(
+		SolidProperty.SOLID,
+		new DestructibleProperty(7, SAND, null),
+		new AnimationProperty(SAND, AnimationType.SINGLE_FRAME),
+		(TouchListener) Entity::hurtBy
+	),
+	
+	WATER(
+		new AnimationProperty(AnimationType.RANDOM, 0.2f),
+		new SpreadUpdateProperty(HOLE)
 	);
 	
+	/*LAVA(
+		(TouchListener) Entity::hurtBy,
+		new AnimationProperty.RandomFrame(0.1f)
+	);*/
+	
+	/*
+		Others:
+		water, lava, sand, stone, cactus, wheat, farmland, door, floor, wall, stairs?, sapling, torch, ore, cloud?,
+		laser source, laser, mirror, laser receiver.
+		ice
+		
+		
+	 */
+	
+	public final boolean maySpawn;
 	final SolidProperty solidProperty;
 	final DestructibleProperty destructibleProperty;
 	final InteractableProperty interactableProperty;
 	final TouchListener touchListener;
 	final AnimationProperty animationProperty;
+	final ConnectionProperty connectionProperty;
+	final OverlapProperty overlapProperty;
+	final UpdateProperty updateProperty;
 	
 	final HashMap<TileProperty, Integer> propertyDataIndexes = new HashMap<>();
 	final HashMap<TileProperty, Integer> propertyDataLengths = new HashMap<>();
 	private final Integer[] initialData;
 	
 	TileType(@NotNull TileProperty... properties) {
+		this(false, properties);
+	}
+	TileType(boolean maySpawn, @NotNull TileProperty... properties) {
+		this.maySpawn = maySpawn;
+		
 		// get the default properties
 		LinkedHashMap<String, TileProperty> propertyMap = TileProperty.getDefaultPropertyMap();
 		
 		//System.out.println("making tile type: " + this);
 		// replace the defaults with specified properties
 		for(TileProperty property: properties) {
-			String className = property.getClass().getName();
+			Class clazz = GameCore.getDirectSubclass(TileProperty.class, property.getClass());
+			if(clazz == null) throw new NullPointerException();
+			String className = clazz.getName();
+			//System.out.println(className);
 			if(className.contains("$")) className = className.substring(0, className.indexOf("$")); // strip off extra stuff generated if it was a lambda expression
 			TileProperty oldProp = propertyMap.put(className, property);
 			//System.out.println("replaced property of class " + className + ": " + oldProp + ", with new property: " + property);
 		}
 		
-		// fetch the animationProperty, and initialize it how it should be
-		TileProperty animationProperty = propertyMap.get(AnimationProperty.class.getName());
-		if(animationProperty instanceof AnimationProperty.SingleFrame)
-			((AnimationProperty.SingleFrame)animationProperty).initialize(GameCore.tileAtlas.findRegion(name().toLowerCase()));
-		else
-			((AnimationProperty.Animated)animationProperty).initialize(GameCore.tileAtlas.findRegions(name().toLowerCase()));
-		
 		this.solidProperty = (SolidProperty)propertyMap.get(SolidProperty.class.getName());
 		this.destructibleProperty = (DestructibleProperty)propertyMap.get(DestructibleProperty.class.getName());
 		this.interactableProperty = (InteractableProperty)propertyMap.get(InteractableProperty.class.getName());
 		this.touchListener = (TouchListener)propertyMap.get(TouchListener.class.getName());
-		this.animationProperty = (AnimationProperty) animationProperty;
+		this.animationProperty = (AnimationProperty)propertyMap.get(AnimationProperty.class.getName());
+		this.connectionProperty = (ConnectionProperty)propertyMap.get(ConnectionProperty.class.getName());
+		this.overlapProperty = (OverlapProperty)propertyMap.get(OverlapProperty.class.getName());
+		this.updateProperty = (UpdateProperty)propertyMap.get(UpdateProperty.class.getName());
+		
 		
 		Array<Integer> initData = new Array<Integer>();
 		
@@ -83,4 +139,18 @@ public enum TileType {
 	}
 	
 	
+	public static final TileType[] values = TileType.values();
+	public static final TileType[] zOrder = { // first tile is drawn over by all.
+		HOLE, DIRT, SAND, GRASS, WATER, ROCK, TREE, CACTUS
+	};
+	
+	public static final Comparator<TileType> tileSorter = (t1, t2) -> {
+		if(t1 == t2) return 0;
+		for(TileType type: zOrder) {
+			if(type == t1) return -1;
+			if(type == t2) return 1;
+		}
+		
+		return 0; // shouldn't ever reach here...
+	};
 }

@@ -22,8 +22,8 @@ public class Player extends Mob {
 	public void checkInput(float delta) {
 		// checks for keyboard input to move the player.
 		// getDeltaTime() returns the time passed between the last and the current frame in seconds.
-		int speed = 200; // this is technically in units/second.
-		int xd = 0, yd = 0;
+		int speed = 32*5; // this is technically in units/second.
+		float xd = 0, yd = 0;
 		if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) xd -= speed * delta;
 		if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) xd += speed * delta;
 		if(Gdx.input.isKeyPressed(Input.Keys.UP)) yd += speed * delta;

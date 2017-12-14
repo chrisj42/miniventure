@@ -1,0 +1,12 @@
+the level will be split into chunks; idk what size the chunks will be though, probably 16x16 I guess?
+
+Anyway on world spawn, the player is located at or around 0,0. What will happen is, the world will generate a single chunk. It will then attempt to place the player in that chunk. If there is nowhere suitable, it generates a new chunk, and continues in this fashion until it can place the player.
+
+Once the player can be placed, the world generates two chunks in all directions, so, a 5x5 area.
+
+As the player moves around, the game will dynamically load/create/dispose chunks. If the player goes left a chunk from center, the next column of chunks to the left is loaded (there's still a buffer chunk between the new player chunk and the newly loaded chunk).
+
+Basically, the game loads the next chunk when the player moves to the next-to-last loaded chunk in that direction. So in a 5x5 square, if the player moves from column 0 to column -1, then the game loads column -3 and saves column 2.
+going back to column 0 at this point 
+
+Or better, the game starts with 5 chunks, but then, when the player to col -1, it loads col -3, but doesn't yet dispose col 2. It disposes col 2 with the player enters col -2. So, it starts out with 5x5, but will become 6x6 once the player has moved at least one chunk vertically and horizontally.
