@@ -34,7 +34,7 @@ public class ConnectionProperty implements TileProperty {
 			}
 		
 			for (i = 0; i < TileTouchCheck.connectionChecks.length; i++) {
-				if (TileTouchCheck.connectionChecks[i].checkMatch(aroundTiles, null, false)) {
+				if (TileTouchCheck.connectionChecks[i].checkMatch(aroundTiles, aroundTiles[aroundTiles.length/2], null, false)) {
 					spriteIdx = i;
 					break;
 				}

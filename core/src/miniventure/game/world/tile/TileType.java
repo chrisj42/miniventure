@@ -29,8 +29,8 @@ public enum TileType {
 	),
 	
 	SAND(true,
-		new DestructibleProperty(HOLE, null)
-		//new OverlapProperty(true)
+		new DestructibleProperty(HOLE, null),
+		new OverlapProperty(true)
 	),
 	
 	ROCK(
@@ -94,16 +94,13 @@ public enum TileType {
 		// get the default properties
 		LinkedHashMap<String, TileProperty> propertyMap = TileProperty.getDefaultPropertyMap();
 		
-		//System.out.println("making tile type: " + this);
 		// replace the defaults with specified properties
 		for(TileProperty property: properties) {
 			Class clazz = GameCore.getDirectSubclass(TileProperty.class, property.getClass());
 			if(clazz == null) throw new NullPointerException();
 			String className = clazz.getName();
-			//System.out.println(className);
 			if(className.contains("$")) className = className.substring(0, className.indexOf("$")); // strip off extra stuff generated if it was a lambda expression
-			TileProperty oldProp = propertyMap.put(className, property);
-			//System.out.println("replaced property of class " + className + ": " + oldProp + ", with new property: " + property);
+			propertyMap.put(className, property);
 		}
 		
 		this.solidProperty = (SolidProperty)propertyMap.get(SolidProperty.class.getName());
@@ -141,7 +138,7 @@ public enum TileType {
 	
 	public static final TileType[] values = TileType.values();
 	public static final TileType[] zOrder = { // first tile is drawn over by all.
-		HOLE, DIRT, SAND, GRASS, WATER, ROCK, TREE, CACTUS
+		HOLE, DIRT, SAND, GRASS, WATER, ROCK, CACTUS, TREE
 	};
 	
 	public static final Comparator<TileType> tileSorter = (t1, t2) -> {
