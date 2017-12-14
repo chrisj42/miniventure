@@ -7,6 +7,7 @@ import miniventure.game.world.entity.mob.Player;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 
 public class Tile {
@@ -103,20 +104,29 @@ public class Tile {
 		}
 	}
 	
+	private void draw(SpriteBatch batch, TextureRegion texture) {
+		batch.draw(texture, x*SIZE, y*SIZE, SIZE, SIZE);
+	}
+	
 	public void render(SpriteBatch batch, float delta) {
-		TileType under = type.destructibleProperty.getCoveredTile();
+		TileType under = type.animationProperty.renderBehind;
 		
-		if(under != null)
-			batch.draw(under.animationProperty.getSprite("00", this, under), x*SIZE, y*SIZE, SIZE, SIZE);
-		
+		if(under != null) { // draw the tile that ought to be rendered underneath this one
+			draw(batch, under.connectionProperty.getSprite(this, true));
+			Array<AtlasRegion> sprites = under.overlapProperty.getSprites(this, true);
+			for(AtlasRegion sprite: sprites)
+				draw(batch, sprite);
+		}
 		// Due to animation, I'm going to try and draw everything without caching. Hopefully, it won't be slow.
 		
-		// TODO here, ask the connectionProperty to get the array of sprites to render. the connection property will accept a tile. It will cache a reference to the surrounding tiles, and then it will then loop through the connection checks, passing the cached list of tile types, and add the corresponding sprite for every match. it then returns this array.
-		// TODO the array returned is actually a reference to the tile sprites, however, all could be part of an animation. So, the animation property is checked for each one. The animation property for that tile type, then, takes an int (String?) for the overlap sprite index/id. It should have registered a list of animations for each connection index. it applies the program time and given index and returns the correct frame of the correct sprite's animation.
+		// TODO here, ask the overlapProperty to get the array of sprites to render. the overlap property will accept a tile. It will cache a reference to the surrounding tiles, and then it will then loop through the overlap checks, passing the cached list of tile types, and add the corresponding sprite for every match. it then returns this array.
+		// TODO the array returned is actually a reference to the tile sprites, however, all could be part of an animation. So, the animation property is checked for each one. The animation property for that tile type, then, takes an int (String?) for the overlap sprite index/id. It should have registered a list of animations for each overlap index. it applies the program time and given index and returns the correct frame of the correct sprite's animation.
 		
-		Array<AtlasRegion> sprites = type.connectionProperty.getSprites(this);
+		draw(batch, type.connectionProperty.getSprite(this)); // draws base sprite for this tile
+		
+		Array<AtlasRegion> sprites = type.overlapProperty.getSprites(this);
 		for(AtlasRegion sprite: sprites)
-			batch.draw(sprite, x*SIZE, y*SIZE, SIZE, SIZE);
+			draw(batch, sprite);
 	}
 	
 	public void update(float delta) {

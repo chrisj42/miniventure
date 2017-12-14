@@ -16,7 +16,7 @@ public class GameCore extends Game {
 	public static final Version VERSION = new Version("1.0.3");
 	
 	public static final int SCREEN_WIDTH = 800, SCREEN_HEIGHT = 450;
-	public static TextureAtlas entityAtlas, tileAtlas, tileConnectionAtlas;
+	public static TextureAtlas entityAtlas, tileAtlas, tileOverlapAtlas, tileConnectionAtlas;
 	private static final long START_TIME = System.nanoTime();
 	
 	private SpriteBatch batch;
@@ -28,7 +28,8 @@ public class GameCore extends Game {
 	public void create () {
 		entityAtlas = new TextureAtlas("sprites/entities.txt");
 		tileAtlas = new TextureAtlas("sprites/tiles.txt");
-		tileConnectionAtlas = new TextureAtlas("sprites/tilemap.txt");
+		tileConnectionAtlas = new TextureAtlas("sprites/tileconnectmap.txt");
+		tileOverlapAtlas = new TextureAtlas("sprites/tileoverlapmap.txt");
 		batch = new SpriteBatch();
 		font = new BitmapFont(); // uses libGDX's default Arial font
 		
@@ -44,6 +45,7 @@ public class GameCore extends Game {
 		
 		entityAtlas.dispose();
 		tileAtlas.dispose();
+		tileOverlapAtlas.dispose();
 		tileConnectionAtlas.dispose();
 	}
 	

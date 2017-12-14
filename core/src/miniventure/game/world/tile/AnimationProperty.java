@@ -10,15 +10,24 @@ import com.badlogic.gdx.utils.Array;
 
 public class AnimationProperty implements TileProperty {
 	
-	private static HashMap<String, HashMap<String, Array<AtlasRegion>>> tileConnectAnimations = new HashMap<>();
+	private static HashMap<String, HashMap<String, Array<AtlasRegion>>> tileConnectionAnimations = new HashMap<>();
+	private static HashMap<String, HashMap<String, Array<AtlasRegion>>> tileOverlapAnimations = new HashMap<>();
 	static {
 		Array<AtlasRegion> regions = GameCore.tileAtlas.getRegions();
 		for(AtlasRegion region: regions) {
 			String tilename = region.name.substring(0, region.name.indexOf("/"));
-			String connectIdx = region.name.substring(region.name.indexOf("/")+1);
-			tileConnectAnimations.computeIfAbsent(tilename, k -> new HashMap<>());
-			tileConnectAnimations.get(tilename).computeIfAbsent(connectIdx, k -> new Array<>());
-			tileConnectAnimations.get(tilename).get(connectIdx).add(region);
+			String spriteIdx = region.name.substring(region.name.indexOf("/")+1);
+			boolean isOverlap = spriteIdx.startsWith("o");
+			if(isOverlap) {
+				spriteIdx = spriteIdx.substring(1);
+				tileOverlapAnimations.computeIfAbsent(tilename, k -> new HashMap<>());
+				tileOverlapAnimations.get(tilename).computeIfAbsent(spriteIdx, k -> new Array<>());
+				tileOverlapAnimations.get(tilename).get(spriteIdx).add(region);
+			} else {
+				tileConnectionAnimations.computeIfAbsent(tilename, k -> new HashMap<>());
+				tileConnectionAnimations.get(tilename).computeIfAbsent(spriteIdx, k -> new Array<>());
+				tileConnectionAnimations.get(tilename).get(spriteIdx).add(region);
+			}
 		}
 	}
 	
@@ -44,119 +53,47 @@ public class AnimationProperty implements TileProperty {
 		public AtlasRegion getSprite(Tile tile, Array<AtlasRegion> frames, int frameIdx) { return fetcher.getSprite(tile, frames, frameIdx); }
 	}
 	
-	// TODO add a way to specify if a tile should draw the tile underneath it, so fully opaque tiles don't try to draw the bottom one when none of it will be seen.
-	
 	private final AnimationType main, overlay;
 	private final float mainFrameTime, overlayFrameTime;
+	final TileType renderBehind;
 	
-	AnimationProperty(AnimationType main) { this(main, 0); }
-	AnimationProperty(AnimationType main, float mainFrameTime) { this(main, mainFrameTime, main, mainFrameTime); }
-	AnimationProperty(AnimationType main, float mainFrameTime, AnimationType overlay, float overlayFrameTime) {
+	AnimationProperty(AnimationType main) { this(null, main); }
+	AnimationProperty(TileType renderBehind, AnimationType main) { this(renderBehind, main, 0); }
+	AnimationProperty(AnimationType main, float mainFrameTime) { this(null, main, mainFrameTime); }
+	AnimationProperty(TileType renderBehind, AnimationType main, float mainFrameTime) { this(renderBehind, main, mainFrameTime, main, mainFrameTime); }
+	AnimationProperty(AnimationType main, float mainFrameTime, AnimationType overlay, float overlayFrameTime) { this(null, main, mainFrameTime, overlay, overlayFrameTime); }
+	AnimationProperty(TileType renderBehind, AnimationType main, float mainFrameTime, AnimationType overlay, float overlayFrameTime) {
+		this.renderBehind = renderBehind;
 		this.main = main;
 		this.overlay = overlay;
 		this.mainFrameTime = mainFrameTime;
 		this.overlayFrameTime = overlayFrameTime;
 	}
 	
-	AtlasRegion getSprite(String connectIndex, Tile tile) {
-		return getSprite(connectIndex, tile, tile.getType());
+	AtlasRegion getSprite(int spriteIndex, boolean isOverlapSprite, Tile tile) {
+		return getSprite(spriteIndex, isOverlapSprite, tile, tile.getType());
 	}
-	AtlasRegion getSprite(String connectIndex, Tile tile, TileType type) {
-		return getSprite(connectIndex, tile, type, GameCore.getElapsedProgramTime());
+	AtlasRegion getSprite(int spriteIndex, boolean isOverlapSprite, Tile tile, TileType type) {
+		return getSprite(spriteIndex, isOverlapSprite, tile, type, GameCore.getElapsedProgramTime());
 	}
-	AtlasRegion getSprite(String connectIndex, Tile tile, float timeElapsed) {
-		return getSprite(connectIndex, tile, tile.getType(), timeElapsed);
-	}
-	AtlasRegion getSprite(String connectIndex, Tile tile, TileType type, float timeElapsed) {
-		Array<AtlasRegion> frames = tileConnectAnimations.get(type.name().toLowerCase()).get(connectIndex);
-		
-		if(connectIndex.equals("00"))
+	/*AtlasRegion getSprite(int spriteIndex, boolean isOverlapSprite, Tile tile, float timeElapsed) {
+		return getSprite(spriteIndex, isOverlapSprite, tile, tile.getType(), timeElapsed);
+	}*/
+	AtlasRegion getSprite(int spriteIndex, boolean isOverlapSprite, Tile tile, TileType type, float timeElapsed) {
+		Array<AtlasRegion> frames;
+		String typeName = type.name().toLowerCase();
+		String indexString = (spriteIndex < 10 ? "0" : "") + spriteIndex;
+		if(isOverlapSprite) {
+			frames = tileOverlapAnimations.get(typeName).get(indexString);
+			return overlay.getSprite(tile, frames, (int)(timeElapsed/overlayFrameTime));
+		} else {
+			frames = tileConnectionAnimations.get(typeName).get(indexString);
+			//if(!indexString.equals("00"))
+			//	System.out.println("fetching sprites for " + typeName + " at " + indexString + " as a connection sprite, from the main animation type " + main + "; frames="+frames);
 			return main.getSprite(tile, frames, (int)(timeElapsed/mainFrameTime));
-		
-		return overlay.getSprite(tile, frames, (int)(timeElapsed/overlayFrameTime));
+		}
 	}
 	
 	@Override
 	public Integer[] getInitData() { return new Integer[0]; }
-	
-	/*static class Animated extends AnimationType {
-		
-		private boolean initialized = false;
-		private final float frameTime;
-		private Animation<TextureRegion> animation;
-		
-		public Animated(float frameTime) {
-			super(false);
-			this.frameTime = frameTime;
-			//GameCore.tileConnectionAtlas.getRegions().get(0).name;
-		}
-		
-		@Override
-		void initialize(Array<AtlasRegion> frames) {
-			animation = new Animation<>(frameTime, frames);
-			initialized = true;
-		}
-		
-		@Override
-		protected TextureRegion getSprite(Tile tile, float timeElapsed) {
-			if(!initialized)
-				throw new IllegalStateException("Attempted to access sprite from uninitialized AnimationProperty.");
-			
-			return animation.getKeyFrame(timeElapsed, true);
-		}
-	}
-	
-	static class RandomFrame extends AnimationType {
-		private boolean initialized = false;
-		private final float frameTime;
-		private Array<? extends TextureRegion> frames;
-		
-		public RandomFrame(float frameTime) {
-			this(frameTime, frameTime);
-		}
-		public RandomFrame(float frameTime, float overlayFrameTime) {
-			super(false);
-			this.frameTime = frameTime;
-		}
-		
-		@Override
-		void initialize(Array<AtlasRegion> frames) {
-			this.frames = frames;
-			initialized = true;
-		}
-		
-		@Override
-		protected TextureRegion getSprite(Tile tile, float timeElapsed) {
-			if(!initialized)
-				throw new IllegalStateException("Attempted to access sprite from uninitialized AnimationProperty.");
-			
-			MathUtils.random.setSeed((long)(1/frameTime*timeElapsed) + tile.getCenterX() * tile.getCenterX() + tile.getCenterY());
-			return frames.get(MathUtils.random(frames.size-1));
-		}
-	}
-	
-	
-	
-	static class SingleFrame extends AnimationType {
-		
-		private boolean initialized = false;
-		private TextureRegion texture;
-		
-		public SingleFrame() { super(false); }
-		public SingleFrame(boolean connects) { super(connects); }
-		
-		@Override
-		void initialize(Array<AtlasRegion> frames) {
-			texture = frames.size > 0 ? frames.get(0) : null;
-			initialized = frames.size > 0;
-		}
-		
-		@Override
-		protected TextureRegion getSprite(Tile tile, float timeElapsed) {
-			if(!initialized)
-				throw new IllegalStateException("Attempted to access sprite from uninitialized AnimationProperty.");
-			
-			return texture;
-		}
-	}*/
 }

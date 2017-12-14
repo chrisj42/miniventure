@@ -32,7 +32,7 @@ public class DestructibleProperty implements TileProperty {
 	}
 	
 	// this is for tiles with health
-	public DestructibleProperty(int totalHealth, TileType coveredTile, @Nullable PreferredTool preferredTool, ItemDrop... drops) {
+	DestructibleProperty(int totalHealth, TileType coveredTile, @Nullable PreferredTool preferredTool, ItemDrop... drops) {
 		this.coveredTile = coveredTile;
 		this.totalHealth = totalHealth;
 		this.damageConditions = new DamageConditionCheck[0];
@@ -44,7 +44,7 @@ public class DestructibleProperty implements TileProperty {
 	}
 	
 	// this is for tiles that are destroyed in one hit 
-	public DestructibleProperty(TileType coveredTile, ItemDrop drop, DamageConditionCheck... damageConditions) {
+	DestructibleProperty(TileType coveredTile, ItemDrop drop, DamageConditionCheck... damageConditions) {
 		this.coveredTile = coveredTile;
 		totalHealth = 1;
 		preferredTool = null;
@@ -103,10 +103,8 @@ public class DestructibleProperty implements TileProperty {
 		return new Integer[0]; // for a health of one or below, the tile will always be at max health, or destroyed.
 	}
 	
-	public TileType getCoveredTile() { return coveredTile; }
+	//public TileType getCoveredTile() { return coveredTile; }
 	
-	
-	// TODO make methods for when tile is destroyed, and getting health of the tile. I'm not doing it now because I'm not sure yet how I'm going to implement it.
 	
 	
 	static class PreferredTool {

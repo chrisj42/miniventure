@@ -16,18 +16,21 @@ import org.jetbrains.annotations.NotNull;
 
 public enum TileType {
 	
-	HOLE(),
+	HOLE(
+		new ConnectionProperty(true)
+	),
 	
-	DIRT(
+	DIRT(true,
 		new DestructibleProperty(HOLE, null)
 	),
 	
-	GRASS(
+	GRASS(true,
 		new DestructibleProperty(DIRT, null)
 	),
 	
-	SAND(
+	SAND(true,
 		new DestructibleProperty(HOLE, null)
+		//new OverlapProperty(true)
 	),
 	
 	ROCK(
@@ -37,12 +40,15 @@ public enum TileType {
 	
 	TREE(
 		SolidProperty.SOLID,
-		new DestructibleProperty(10, GRASS, new PreferredTool(ToolType.AXE, 2))
+		new DestructibleProperty(10, GRASS, new PreferredTool(ToolType.AXE, 2)),
+		new AnimationProperty(GRASS, AnimationType.SINGLE_FRAME),
+		new ConnectionProperty(true)
 	),
 	
 	CACTUS(
 		SolidProperty.SOLID,
 		new DestructibleProperty(7, SAND, null),
+		new AnimationProperty(SAND, AnimationType.SINGLE_FRAME),
 		(TouchListener) Entity::hurtBy
 	),
 	
@@ -65,12 +71,14 @@ public enum TileType {
 		
 	 */
 	
+	public final boolean maySpawn;
 	final SolidProperty solidProperty;
 	final DestructibleProperty destructibleProperty;
 	final InteractableProperty interactableProperty;
 	final TouchListener touchListener;
 	final AnimationProperty animationProperty;
 	final ConnectionProperty connectionProperty;
+	final OverlapProperty overlapProperty;
 	final UpdateProperty updateProperty;
 	
 	final HashMap<TileProperty, Integer> propertyDataIndexes = new HashMap<>();
@@ -78,6 +86,11 @@ public enum TileType {
 	private final Integer[] initialData;
 	
 	TileType(@NotNull TileProperty... properties) {
+		this(false, properties);
+	}
+	TileType(boolean maySpawn, @NotNull TileProperty... properties) {
+		this.maySpawn = maySpawn;
+		
 		// get the default properties
 		LinkedHashMap<String, TileProperty> propertyMap = TileProperty.getDefaultPropertyMap();
 		
@@ -99,11 +112,8 @@ public enum TileType {
 		this.touchListener = (TouchListener)propertyMap.get(TouchListener.class.getName());
 		this.animationProperty = (AnimationProperty)propertyMap.get(AnimationProperty.class.getName());
 		this.connectionProperty = (ConnectionProperty)propertyMap.get(ConnectionProperty.class.getName());
+		this.overlapProperty = (OverlapProperty)propertyMap.get(OverlapProperty.class.getName());
 		this.updateProperty = (UpdateProperty)propertyMap.get(UpdateProperty.class.getName());
-		
-		//if(GameCore.tileAtlas != null)
-		//	animationProperty.initialize(GameCore.tileAtlas.findRegions(name().toLowerCase()));
-		
 		
 		
 		Array<Integer> initData = new Array<Integer>();
@@ -131,7 +141,7 @@ public enum TileType {
 	
 	public static final TileType[] values = TileType.values();
 	public static final TileType[] zOrder = { // first tile is drawn over by all.
-		HOLE, DIRT, SAND, GRASS, ROCK, TREE, CACTUS, WATER
+		HOLE, DIRT, SAND, GRASS, WATER, ROCK, TREE, CACTUS
 	};
 	
 	public static final Comparator<TileType> tileSorter = (t1, t2) -> {
@@ -141,6 +151,6 @@ public enum TileType {
 			if(type == t2) return 1;
 		}
 		
-		return 0; // shouldn't every reach here...
+		return 0; // shouldn't ever reach here...
 	};
 }

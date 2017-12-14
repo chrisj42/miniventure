@@ -48,7 +48,7 @@ public class GameScreen implements Screen {
 			MathUtils.random(level.getWidth()-1),
 			MathUtils.random(level.getHeight()-1)
 		);
-		while(spawnTile == null || !spawnTile.isPermeableBy(mainPlayer));
+		while(spawnTile == null || !spawnTile.getType().maySpawn);
 		
 		mainPlayer.moveTo(spawnTile);
 	}
