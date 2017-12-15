@@ -54,7 +54,7 @@ public enum TileType {
 	),
 	
 	WATER(
-		new AnimationProperty(AnimationType.RANDOM, 0.2f),
+		new AnimationProperty(AnimationType.RANDOM, 0.2f, AnimationType.SEQUENCE, 1/16f),
 		new SpreadUpdateProperty(HOLE),
 		new OverlapProperty(true)
 	);
