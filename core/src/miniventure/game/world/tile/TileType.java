@@ -25,7 +25,8 @@ public enum TileType {
 	),
 	
 	GRASS(true,
-		new DestructibleProperty(DIRT, null)
+		new DestructibleProperty(DIRT, null),
+		new OverlapProperty(true)
 	),
 	
 	SAND(true,
@@ -54,7 +55,8 @@ public enum TileType {
 	
 	WATER(
 		new AnimationProperty(AnimationType.RANDOM, 0.2f),
-		new SpreadUpdateProperty(HOLE)
+		new SpreadUpdateProperty(HOLE),
+		new OverlapProperty(true)
 	);
 	
 	/*LAVA(
@@ -112,6 +114,7 @@ public enum TileType {
 		this.overlapProperty = (OverlapProperty)propertyMap.get(OverlapProperty.class.getName());
 		this.updateProperty = (UpdateProperty)propertyMap.get(UpdateProperty.class.getName());
 		
+		this.connectionProperty.addConnectingType(this);
 		
 		Array<Integer> initData = new Array<Integer>();
 		
@@ -125,6 +128,11 @@ public enum TileType {
 		initialData = new Integer[initData.size];
 		for(int i = 0; i < initialData.length; i++)
 			initialData[i] = initData.get(i);
+	}
+	
+	/// POST-INITIALIZATION
+	static {
+		HOLE.connectionProperty.addConnectingType(WATER);
 	}
 	
 	int[] getInitialData() {

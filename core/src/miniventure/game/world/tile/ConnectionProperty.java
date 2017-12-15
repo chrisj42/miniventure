@@ -1,13 +1,21 @@
 package miniventure.game.world.tile;
 
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
+import com.badlogic.gdx.utils.Array;
 
 public class ConnectionProperty implements TileProperty {
 	
 	private final boolean connects;
+	private final Array<TileType> connectingTiles;
 	
-	ConnectionProperty(boolean connects) {
+	ConnectionProperty(boolean connects, TileType... connectingTiles) {
 		this.connects = connects;
+		this.connectingTiles = new Array<>(connectingTiles);
+	}
+	
+	void addConnectingType(TileType type) {
+		if(!connectingTiles.contains(type, true))
+			connectingTiles.add(type);
 	}
 	
 	AtlasRegion getSprite(Tile tile) {
@@ -34,7 +42,7 @@ public class ConnectionProperty implements TileProperty {
 			}
 		
 			for (i = 0; i < TileTouchCheck.connectionChecks.length; i++) {
-				if (TileTouchCheck.connectionChecks[i].checkMatch(aroundTiles, aroundTiles[aroundTiles.length/2], null, false)) {
+				if (TileTouchCheck.connectionChecks[i].checkMatch(aroundTiles, aroundTiles[aroundTiles.length/2].connectionProperty.connectingTiles, null, false)) {
 					spriteIdx = i;
 					break;
 				}

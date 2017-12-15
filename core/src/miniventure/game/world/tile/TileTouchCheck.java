@@ -57,6 +57,9 @@ class TileTouchCheck {
 	}
 	
 	boolean checkMatch(TileType[] tiles, TileType black, TileType white, boolean nullMatches) {
+		return checkMatch(tiles, new Array<>(new TileType[] {black}), new Array<>(new TileType[] {white}), nullMatches);
+	}
+	boolean checkMatch(TileType[] tiles, Array<TileType> black, Array<TileType> white, boolean nullMatches) {
 		if(tiles.length != map.length)
 			throw new IllegalArgumentException("tile type array must be of equal size to overlap map array; "+tiles.length+"!="+map.length);
 		
@@ -70,9 +73,9 @@ class TileTouchCheck {
 				else return false;
 			}
 			
-			if(matchRule == WHITE && (white == null && type == black || white != null && type != white))
+			if(matchRule == WHITE && (white == null && black.contains(type, true) || white != null && !white.contains(type, true)))
 				return false;
-			if(matchRule == BLACK && (black == null && type == white || black != null && type != black))
+			if(matchRule == BLACK && (black == null && white.contains(type, true) || black != null && !black.contains(type, true)))
 				return false;
 			
 			/*if(black == null && type != white && (matchRule == BLACK || matchRule == WHITE)) {

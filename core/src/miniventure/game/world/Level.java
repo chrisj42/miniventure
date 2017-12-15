@@ -22,7 +22,7 @@ public class Level {
 	private static Level[] levels = new Level[0];
 	private static final HashMap<Entity, Level> entityLevels = new HashMap<>();
 	
-	private static final float percentTilesUpdatedPerSecond = 0.75f; // this represents the percent of the total number of tiles in the map that are updated per second.
+	private static final float percentTilesUpdatedPerSecond = 2f; // this represents the percent of the total number of tiles in the map that are updated per second.
 	
 	public static void resetLevels() {
 		entityLevels.clear();
