@@ -108,25 +108,26 @@ public class Tile {
 		batch.draw(texture, x*SIZE, y*SIZE, SIZE, SIZE);
 	}
 	
+	private void drawOverlap(SpriteBatch batch, TileType type, boolean under) {
+		Array<AtlasRegion> sprites = type.overlapProperty.getSprites(this, under);
+		for(AtlasRegion sprite: sprites)
+			draw(batch, sprite);
+	}
+	
 	public void render(SpriteBatch batch, float delta) {
 		TileType under = type.animationProperty.renderBehind;
 		
 		if(under != null) { // draw the tile that ought to be rendered underneath this one
 			draw(batch, under.connectionProperty.getSprite(this, true));
-			Array<AtlasRegion> sprites = under.overlapProperty.getSprites(this, true);
-			for(AtlasRegion sprite: sprites)
-				draw(batch, sprite);
+			drawOverlap(batch, under, true);
 		}
+		
 		// Due to animation, I'm going to try and draw everything without caching. Hopefully, it won't be slow.
-		
-		// TODO here, ask the overlapProperty to get the array of sprites to render. the overlap property will accept a tile. It will cache a reference to the surrounding tiles, and then it will then loop through the overlap checks, passing the cached list of tile types, and add the corresponding sprite for every match. it then returns this array.
-		// TODO the array returned is actually a reference to the tile sprites, however, all could be part of an animation. So, the animation property is checked for each one. The animation property for that tile type, then, takes an int (String?) for the overlap sprite index/id. It should have registered a list of animations for each overlap index. it applies the program time and given index and returns the correct frame of the correct sprite's animation.
-		
 		draw(batch, type.connectionProperty.getSprite(this)); // draws base sprite for this tile
 		
-		Array<AtlasRegion> sprites = type.overlapProperty.getSprites(this);
-		for(AtlasRegion sprite: sprites)
-			draw(batch, sprite);
+		drawOverlap(batch, type, true); // draw the overlap from other under tiles; considers also those without an under tile.
+		
+		drawOverlap(batch, type, false); // draw overlap from other tiles; only considers those that have an under tile.
 	}
 	
 	public void update(float delta) {

@@ -7,30 +7,10 @@ import com.badlogic.gdx.utils.Array;
 
 public class OverlapProperty implements TileProperty {
 	
-	/*
-		The sprites will be named "tile/##[_#]", the _# only included if the tile is animated for that sprite.
-		
-		The first ## is the index that matches the names of each of the sprites in the tile overlap map. They are applied whenever the corresponding tile overlap map sprite matches the tile's surrounding neighbors.
-		they are drawn in order.
-		
-		Note: tiles at the edges of the map treat the border as matching itself.
-		
-		This will work, because though it will draw sides as if it intersects all three on the given side, the ones on the corners will draw over that (if they're supposed to).
-	 */
-	
-	//private int[] overlapCheckIndexes;
 	private final boolean overlaps;
 	
 	OverlapProperty(boolean overlaps) {
 		this.overlaps = overlaps;
-		/*if(overlaps) {
-			overlapCheckIndexes = new int[TileOverlapCheck.overlapChecks.length];
-			for(int i = 0; i < overlapCheckIndexes.length; i++)
-				overlapCheckIndexes[i] = i;
-		}
-		else
-			overlapCheckIndexes = new int[] {0};*/
-		
 	}
 	
 	Array<AtlasRegion> getSprites(Tile tile) {
@@ -55,10 +35,17 @@ public class OverlapProperty implements TileProperty {
 			for (int y = -1; y <= 1; y++) {
 				Tile oTile = tile.getLevel().getTile(tile.x + x, tile.y + y);
 				if(oTile != null) {
-					aroundTiles[i] = oTile.getType();
-					if(useUnder && aroundTiles[i].animationProperty.renderBehind != null)
-						aroundTiles[i] = aroundTiles[i].animationProperty.renderBehind;
-					if(aroundTiles[i].overlapProperty.overlaps)
+					TileType oType = oTile.getType();
+					if(useUnder) {
+						if(oType.animationProperty.renderBehind != null)
+							aroundTiles[i] = oType.animationProperty.renderBehind;
+						else
+							aroundTiles[i] = oType;
+					}
+					else if(oType.animationProperty.renderBehind != null)
+						aroundTiles[i] = oType;
+					
+					if(aroundTiles[i] != null && aroundTiles[i].overlapProperty.overlaps)
 						types.add(aroundTiles[i]);
 				}
 				i++;
@@ -72,13 +59,29 @@ public class OverlapProperty implements TileProperty {
 		else 
 			compareType = tile.getType();
 		types.removeIf(tileType -> TileType.tileSorter.compare(tileType, compareType) <= 0);
-		//if(types.size() > 0)
-			//System.out.println("tiles around " + tile.getType() + " that overlap: " + types);
-		for(TileType type: types)
-			for (i = 0; i < TileTouchCheck.overlapChecks.length; i++)
-				if (TileTouchCheck.overlapChecks[i].checkMatch(aroundTiles, type, true))
-					sprites.add(type.animationProperty.getSprite(i, true, tile, type));
 		
+		Array<Integer> indexes = new Array<>();
+		for(TileType type: types) {
+			indexes.clear();
+			
+			int[] bits = new int[4];
+			if(aroundTiles[1] == type) bits[0] = 1;
+			if(aroundTiles[5] == type) bits[1] = 1;
+			if(aroundTiles[7] == type) bits[2] = 1;
+			if(aroundTiles[3] == type) bits[3] = 1;
+			int total = 4, value = 1;
+			for(int num: bits) {
+				total += num * value;
+				value *= 2;
+			}
+			indexes.add(total);
+			if(aroundTiles[2] == type && bits[0] == 0 && bits[1] == 0) indexes.add(0);
+			if(aroundTiles[8] == type && bits[1] == 0 && bits[2] == 0) indexes.add(1);
+			if(aroundTiles[6] == type && bits[2] == 0 && bits[3] == 0) indexes.add(2);
+			if(aroundTiles[0] == type && bits[3] == 0 && bits[0] == 0) indexes.add(3);
+			for(Integer idx: indexes)
+				sprites.add(type.animationProperty.getSprite(idx, true, tile, type));
+		}
 		return sprites;
 	}
 	

@@ -25,12 +25,13 @@ public enum TileType {
 	),
 	
 	GRASS(true,
-		new DestructibleProperty(DIRT, null)
+		new DestructibleProperty(DIRT, null),
+		new OverlapProperty(true)
 	),
 	
 	SAND(true,
-		new DestructibleProperty(HOLE, null)
-		//new OverlapProperty(true)
+		new DestructibleProperty(HOLE, null),
+		new OverlapProperty(true)
 	),
 	
 	ROCK(
@@ -53,8 +54,9 @@ public enum TileType {
 	),
 	
 	WATER(
-		new AnimationProperty(AnimationType.RANDOM, 0.2f),
-		new SpreadUpdateProperty(HOLE)
+		new AnimationProperty(AnimationType.RANDOM, 0.2f, AnimationType.SEQUENCE, 1/16f),
+		new SpreadUpdateProperty(HOLE),
+		new OverlapProperty(true)
 	);
 	
 	/*LAVA(
@@ -94,16 +96,13 @@ public enum TileType {
 		// get the default properties
 		LinkedHashMap<String, TileProperty> propertyMap = TileProperty.getDefaultPropertyMap();
 		
-		//System.out.println("making tile type: " + this);
 		// replace the defaults with specified properties
 		for(TileProperty property: properties) {
 			Class clazz = GameCore.getDirectSubclass(TileProperty.class, property.getClass());
 			if(clazz == null) throw new NullPointerException();
 			String className = clazz.getName();
-			//System.out.println(className);
 			if(className.contains("$")) className = className.substring(0, className.indexOf("$")); // strip off extra stuff generated if it was a lambda expression
-			TileProperty oldProp = propertyMap.put(className, property);
-			//System.out.println("replaced property of class " + className + ": " + oldProp + ", with new property: " + property);
+			propertyMap.put(className, property);
 		}
 		
 		this.solidProperty = (SolidProperty)propertyMap.get(SolidProperty.class.getName());
@@ -115,6 +114,7 @@ public enum TileType {
 		this.overlapProperty = (OverlapProperty)propertyMap.get(OverlapProperty.class.getName());
 		this.updateProperty = (UpdateProperty)propertyMap.get(UpdateProperty.class.getName());
 		
+		this.connectionProperty.addConnectingType(this);
 		
 		Array<Integer> initData = new Array<Integer>();
 		
@@ -130,6 +130,11 @@ public enum TileType {
 			initialData[i] = initData.get(i);
 	}
 	
+	/// POST-INITIALIZATION
+	static {
+		HOLE.connectionProperty.addConnectingType(WATER);
+	}
+	
 	int[] getInitialData() {
 		int[] data = new int[initialData.length];
 		for(int i = 0; i < data.length; i++)
@@ -141,7 +146,7 @@ public enum TileType {
 	
 	public static final TileType[] values = TileType.values();
 	public static final TileType[] zOrder = { // first tile is drawn over by all.
-		HOLE, DIRT, SAND, GRASS, WATER, ROCK, TREE, CACTUS
+		HOLE, DIRT, SAND, GRASS, WATER, ROCK, CACTUS, TREE
 	};
 	
 	public static final Comparator<TileType> tileSorter = (t1, t2) -> {
