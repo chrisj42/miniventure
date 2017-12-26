@@ -1,5 +1,7 @@
 package miniventure.game.screen;
 
+import java.util.HashMap;
+
 import miniventure.game.GameCore;
 import miniventure.game.world.Level;
 import miniventure.game.world.entity.mob.Player;
@@ -11,13 +13,14 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 public class GameScreen implements Screen {
 	
-	private OrthographicCamera camera;
+	private OrthographicCamera camera, uiCamera;
 	private int zoom = 0;
 	private SpriteBatch batch;
 	
@@ -32,6 +35,8 @@ public class GameScreen implements Screen {
 		
 		camera = new OrthographicCamera();
 		camera.setToOrtho(false, GameCore.SCREEN_WIDTH, GameCore.SCREEN_HEIGHT);
+		uiCamera = new OrthographicCamera();
+		uiCamera.setToOrtho(false, GameCore.SCREEN_WIDTH, GameCore.SCREEN_HEIGHT);
 	}
 	
 	private void createWorld() {
@@ -89,7 +94,7 @@ public class GameScreen implements Screen {
 		batch.setProjectionMatrix(camera.combined); // tells the batch to use the camera's coordinate system.
 		batch.begin();
 		level.render(renderSpace, batch, delta);
-		// TO-DO render GUI here
+		renderGui();
 		batch.end();
 	}
 	
@@ -104,6 +109,7 @@ public class GameScreen implements Screen {
 	@Override public void resize(int width, int height) {
 		float zoomFactor = (float) Math.pow(2, zoom);
 		camera.setToOrtho(false, width/zoomFactor, height/zoomFactor);
+		uiCamera.setToOrtho(false, width/zoomFactor, height/zoomFactor);
 	}
 	
 	@Override public void pause() {}
@@ -111,4 +117,28 @@ public class GameScreen implements Screen {
 	
 	@Override public void show() {}
 	@Override public void hide() {}
+	
+	private static HashMap<Boolean, TextureRegion[]> heartSprites = new HashMap<>();
+	static {
+		TextureRegion[] fullHearts = {
+			GameCore.icons.get("heart-left"),
+			GameCore.icons.get("heart-right")
+		};
+		heartSprites.put(true, fullHearts);
+		
+		TextureRegion[] deadHearts = {
+			GameCore.icons.get("heart-dead-left"),
+			GameCore.icons.get("heart-dead-right")
+		};
+		heartSprites.put(false, deadHearts);
+	}
+	
+	private void renderGui() {
+		//System.out.println("rendering GUI");
+		batch.setProjectionMatrix(uiCamera.combined);
+		for(int i = 0; i < Player.Stat.Health.max; i++) {
+			TextureRegion heart = heartSprites.get(i < mainPlayer.getStat(Player.Stat.Health))[i % 2];
+			batch.draw(heart, i*heart.getRegionWidth(), heart.getRegionHeight() * 0.25f);
+		}
+	}
 }

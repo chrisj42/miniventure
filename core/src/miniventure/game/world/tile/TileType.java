@@ -6,7 +6,6 @@ import java.util.LinkedHashMap;
 
 import miniventure.game.GameCore;
 import miniventure.game.item.ToolType;
-import miniventure.game.world.entity.Entity;
 import miniventure.game.world.tile.AnimationProperty.AnimationType;
 import miniventure.game.world.tile.DestructibleProperty.PreferredTool;
 
@@ -50,7 +49,7 @@ public enum TileType {
 		SolidProperty.SOLID,
 		new DestructibleProperty(7, SAND, null),
 		new AnimationProperty(SAND, AnimationType.SINGLE_FRAME),
-		(TouchListener) Entity::hurtBy
+		(TouchListener) (e, t) -> e.hurtBy(t, 1)
 	),
 	
 	WATER(

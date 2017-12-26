@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class Player extends Mob {
 	
-	enum Stat {
+	public enum Stat {
 		Health(20),
 		
 		Stamina(10),
@@ -100,7 +100,7 @@ public class Player extends Mob {
 		otherEntities.removeValue(this, true); // use ==, not .equals()
 		boolean attacked = false;
 		for(Entity e: otherEntities)
-			attacked = attacked || e.hurtBy(this, heldItem);
+			attacked = attacked || e.hurtBy(this, heldItem, 1);
 		
 		if(attacked) return; // don't hurt the tile
 		
@@ -112,6 +112,18 @@ public class Player extends Mob {
 	
 	private void interact() {
 		
+	}
+	
+	@Override
+	public boolean hurtBy(Mob mob, Item attackItem, int dmg) { return hurt(dmg); }
+	@Override
+	public boolean hurtBy(Tile tile, int dmg) { return hurt(dmg); }
+	
+	private boolean hurt(int dmg) {
+		int health = stats.get(Stat.Health);
+		if(health == 0) return false;
+		stats.put(Stat.Health, Math.max(0, health - dmg));
+		return true;
 	}
 	
 	private static boolean pressingKey(int keycode) {

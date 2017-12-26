@@ -46,5 +46,5 @@ public abstract class Mob extends Entity {
 	}
 	
 	@Override
-	public boolean hurtBy(Mob mob, Item attackItem) { return true; } // mobs are hurt
+	public boolean hurtBy(Mob mob, Item attackItem, int dmg) { return true; } // mobs are hurt
 }

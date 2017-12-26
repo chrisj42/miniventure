@@ -1,0 +1,33 @@
+icons.png
+size: 32, 64
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+heart-dead-left
+  rotate: false
+  xy: 3, 3
+  size: 6, 12
+  orig: 6, 12
+  offset: 0, 0
+  index: -1
+heart-dead-right
+  rotate: false
+  xy: 13, 3
+  size: 6, 12
+  orig: 6, 12
+  offset: 0, 0
+  index: -1
+heart-left
+  rotate: false
+  xy: 23, 3
+  size: 6, 12
+  orig: 6, 12
+  offset: 0, 0
+  index: -1
+heart-right
+  rotate: false
+  xy: 3, 19
+  size: 6, 12
+  orig: 6, 12
+  offset: 0, 0
+  index: -1
