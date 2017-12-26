@@ -1,5 +1,7 @@
 package miniventure.game.world.entity.mob;
 
+import java.util.EnumMap;
+
 import miniventure.game.item.Item;
 import miniventure.game.world.Level;
 import miniventure.game.world.entity.Entity;
@@ -11,12 +13,44 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
+import org.jetbrains.annotations.NotNull;
+
 public class Player extends Mob {
 	
+	enum Stat {
+		Health(20),
+		
+		Stamina(10),
+		
+		Hunger(10),
+		
+		Armor(10, 0);
+		
+		public final int max, initial;
+		
+		Stat(int max) {
+			this(max, max);
+		}
+		Stat(int max, int initial) {
+			this.max = max;
+			this.initial = initial;
+		}
+		
+		public static final Stat[] values = Stat.values();
+	}
+	
+	private final EnumMap<Stat, Integer> stats = new EnumMap<>(Stat.class);
 	private Item heldItem;
 	
 	public Player() {
 		super("player");
+		heldItem = null;
+		for(Stat stat: Stat.values)
+			stats.put(stat, stat.initial);
+	}
+	
+	public int getStat(@NotNull Stat stat) {
+		return stats.get(stat);
 	}
 	
 	public void checkInput(float delta) {
