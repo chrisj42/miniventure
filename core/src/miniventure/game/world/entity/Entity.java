@@ -1,5 +1,7 @@
 package miniventure.game.world.entity;
 
+import java.util.HashMap;
+
 import miniventure.game.item.Item;
 import miniventure.game.world.Level;
 import miniventure.game.world.entity.mob.Mob;
@@ -9,7 +11,11 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class Entity {
 	
@@ -59,13 +65,18 @@ public abstract class Entity {
 		if(level == null) return; // can't move if you're not in a level...
 		
 		Array<Tile> newTiles = level.getOverlappingTiles(newRect);
-		newTiles.removeAll(level.getOverlappingTiles(oldRect), true); // "true" means use == for comparison rather than .equals()
+		Array<Tile> oldTiles = level.getOverlappingTiles(oldRect);
+		newTiles.removeAll(oldTiles, true); // "true" means use == for comparison rather than .equals()
 		
 		// we now have a list of the tiles that will be touched, but aren't now.
+		boolean canMoveCurrent = true;
+		for(Tile tile: oldTiles) {
+			canMoveCurrent = canMoveCurrent && tile.isPermeableBy(this);
+		}
 		boolean canMove = true;
 		for(Tile tile: newTiles) {
 			tile.touchedBy(this); // NOTE: I can see this causing an issue if you move too fast; it will "touch" tiles that could be far away, if the player will move there next frame.
-			canMove = canMove && tile.isPermeableBy(this);
+			canMove = canMove && (!canMoveCurrent || tile.isPermeableBy(this));
 		}
 		
 		if(!canMove) return; // don't bother interacting with entities if tiles prevent movement.
@@ -99,6 +110,23 @@ public abstract class Entity {
 		int x = tile.getCenterX() - sprite.getRegionWidth()/2;
 		int y = tile.getCenterY() - sprite.getRegionHeight()/2;
 		moveTo(tile.getLevel(), x, y);
+	}
+	
+	// returns the closest tile to the center of this entity, given an array of tiles.
+	@Nullable
+	public Tile getClosestTile(@NotNull Array<Tile> tiles) {
+		if(tiles.size == 0) return null;
+		
+		Vector2 center = new Vector2();
+		getBounds().getCenter(center);
+		HashMap<Vector2, Tile> tileMap = new HashMap<>();
+		for(Tile t: tiles)
+			tileMap.put(new Vector2(t.getCenterX(), t.getCenterY()), t);
+		
+		Array<Vector2> tileCenters = new Array<>(tileMap.keySet().toArray(new Vector2[tileMap.size()]));
+		tileCenters.sort((v1, v2) -> (int) (center.dst2(v1) - center.dst2(v2))); // sort, so the first one in the list is the closest one
+		
+		return tileMap.get(tileCenters.get(0));
 	}
 	
 	// returns whether anything meaningful happened; if false, then other.touchedBy(this) will be called.

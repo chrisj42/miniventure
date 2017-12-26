@@ -8,6 +8,7 @@ import miniventure.game.world.entity.mob.Player;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
 public class Tile {
@@ -86,7 +87,29 @@ public class Tile {
 	public int getCenterX() { return x*SIZE + SIZE/2; }
 	public int getCenterY() { return y*SIZE + SIZE/2; }
 	
+	private Rectangle getRect() { return new Rectangle(x*SIZE, y*SIZE, SIZE, SIZE); }
+	
 	public void resetTile(TileType newType) {
+		// check for entities that will not be allowed on the new tile, and move them to the closest adjacent tile they are allowed on.
+		Array<Tile> surroundingTiles = getAdjacentTiles(true);
+		for(Entity entity: level.getOverlappingEntities(getRect())) {
+			// for each entity, check if it can walk on the new tile type. If not, fetch the surrounding tiles, remove those the entity can't walk on, and then fetch the closest tile of the remaining ones.
+			if(newType.solidProperty.isPermeableBy(entity)) continue; // no worries for this entity.
+			
+			Array<Tile> aroundTiles = new Array<>(surroundingTiles);
+			for(int i = 0; i < aroundTiles.size; i++) {
+				if(!aroundTiles.get(i).type.solidProperty.isPermeableBy(entity)) {
+					aroundTiles.removeIndex(i);
+					i--;
+				}
+			}
+			
+			Tile closest = entity.getClosestTile(aroundTiles);
+			// if none remain (returned tile is null), take no action for that entity. If a tile is returned, then move the entity to the center of that tile.
+			if(closest != null)
+				entity.moveTo(closest);
+		}
+		
 		type = newType;
 		data = type.getInitialData();
 	}

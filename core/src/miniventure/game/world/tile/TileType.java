@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 public enum TileType {
 	
 	HOLE(
+		SolidProperty.SOLID,
 		new ConnectionProperty(true)
 	),
 	
