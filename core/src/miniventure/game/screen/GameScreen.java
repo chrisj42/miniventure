@@ -17,6 +17,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 
 public class GameScreen implements Screen {
 	
@@ -27,7 +28,10 @@ public class GameScreen implements Screen {
 	private Player mainPlayer;
 	private int curLevel;
 	
+	private final GameCore game;
+	
 	public GameScreen(GameCore game) {
+		this.game = game;
 		batch = game.getBatch();
 		game.setGameScreen(this);
 		
@@ -140,5 +144,21 @@ public class GameScreen implements Screen {
 			TextureRegion heart = heartSprites.get(i < mainPlayer.getStat(Player.Stat.Health))[i % 2];
 			batch.draw(heart, i*heart.getRegionWidth(), heart.getRegionHeight() * 0.25f);
 		}
+		
+		
+		// a list of text to display in the upper left, for debug purposes
+		Array<String> debugInfo = new Array<>();
+		
+		// player coordinates, for debug
+		float x = mainPlayer.getBounds().x;
+		float y = mainPlayer.getBounds().y;
+		debugInfo.add("X = "+((int)(x/Tile.SIZE))+" - "+x);
+		debugInfo.add("Y = "+((int)(y/Tile.SIZE))+" - "+y);
+		
+		Tile playerTile = Level.getLevel(curLevel).getClosestTile(mainPlayer.getBounds());
+		debugInfo.add("Tile = " + (playerTile == null ? "Null" : playerTile.getType()));
+		
+		for(int i = 0; i < debugInfo.size; i++)
+			game.getFont().draw(batch, debugInfo.get(i), 0, uiCamera.viewportHeight-5-15*i);
 	}
 }
