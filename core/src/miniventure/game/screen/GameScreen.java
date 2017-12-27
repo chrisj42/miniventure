@@ -157,6 +157,8 @@ public class GameScreen implements Screen {
 		
 		Tile playerTile = Level.getLevel(curLevel).getClosestTile(mainPlayer.getBounds());
 		debugInfo.add("Tile = " + (playerTile == null ? "Null" : playerTile.getType()));
+		Tile interactTile = Level.getLevel(curLevel).getClosestTile(mainPlayer.getInteractionRect());
+		debugInfo.add("Looking at: " + (interactTile == null ? "Null" : interactTile.toLocString()));
 		
 		for(int i = 0; i < debugInfo.size; i++)
 			game.getFont().draw(batch, debugInfo.get(i), 0, uiCamera.viewportHeight-5-15*i);

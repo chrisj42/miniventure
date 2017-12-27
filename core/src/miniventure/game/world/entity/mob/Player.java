@@ -78,7 +78,7 @@ public class Player extends Mob {
 		// update things like hunger, stamina, etc.
 	}
 	
-	private Rectangle getInteractionRect() {
+	public Rectangle getInteractionRect() {
 		Rectangle bounds = getBounds();
 		Vector2 dirVector = getDirection().getVector();
 		//System.out.println("dir vector="+dirVector);

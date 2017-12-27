@@ -180,7 +180,7 @@ public class Tile {
 	}
 	
 	public void attackedBy(Player player, Item heldItem) {
-		type.destructibleProperty.tileAttacked(this, heldItem);
+		type.destructibleProperty.tileAttacked(this, heldItem, player);
 	}
 	
 	public void interactWith(Player player, Item heldItem) { type.interactableProperty.interact(player, heldItem, this); }
@@ -188,5 +188,19 @@ public class Tile {
 	public void touchedBy(Entity entity) { type.touchListener.touchedBy(entity, this); }
 	
 	@Override
-	public String toString() { return type + " Tile"; }
+	public String toString() { return toTitleCase(type+"") + " Tile"; }
+	
+	public String toLocString() {
+		return x+","+y+" (" + toTitleCase(type+"")+" Tile)";
+	}
+	
+	private static String toTitleCase(String string) {
+		String[] words = string.split(" ");
+		for(int i = 0; i < words.length; i++) {
+			if(words[i].length() == 0) continue;
+			words[i] = words[i].substring(0, 1).toUpperCase() + words[i].substring(1).toLowerCase();
+		}
+		
+		return String.join(" ", words);
+	}
 }
