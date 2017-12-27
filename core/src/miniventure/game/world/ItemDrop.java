@@ -1,6 +1,7 @@
 package miniventure.game.world;
 
 import miniventure.game.item.Item;
+import miniventure.game.world.entity.Entity;
 
 public class ItemDrop {
 	
@@ -90,7 +91,7 @@ public class ItemDrop {
 	}
 	
 	public ItemDrop(Item item) {
-		
+		this.item = item;
 	}
 	
 	public ItemDrop(Item item, int count) {
@@ -106,11 +107,11 @@ public class ItemDrop {
 	
 	public int getItemsDropped() {
 		// TODO implement this
-		return 0;
+		return 1;
 	}
 	
-	public void dropItems(Level level, int x, int y) {
+	public void dropItems(Level level, int x, int y, Entity target) {
 		for(int i = 0; i < getItemsDropped(); i++)
-			level.dropItem(item, x, y);
+			level.dropItem(item, x, y, target);
 	}
 }

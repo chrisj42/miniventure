@@ -5,6 +5,7 @@ import java.util.HashSet;
 
 import miniventure.game.item.Item;
 import miniventure.game.world.entity.Entity;
+import miniventure.game.world.entity.ItemEntity;
 import miniventure.game.world.levelgen.LevelGenerator;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileType;
@@ -15,6 +16,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class Level {
@@ -43,7 +45,9 @@ public class Level {
 	private final int width, height;
 	private final Tile[][] tiles;
 	
-	private HashSet<Entity> entities = new HashSet<>();
+	private final HashSet<Entity> entities = new HashSet<>();
+	private final HashSet<Entity> entitiesToAdd = new HashSet<>();
+	private final HashSet<Entity> entitiesToRemove = new HashSet<>();
 	
 	public Level(int width, int height) {
 		this.width = width;
@@ -63,16 +67,22 @@ public class Level {
 	
 	
 	public void addEntity(Entity e) {
-		entities.add(e);
-		Level oldLevel = entityLevels.put(e, this); // replaces the level for the entity
-		if(oldLevel != null && oldLevel != this)
-			oldLevel.removeEntity(e); // remove it from the other level's entity set.
+		//System.out.println("adding entity " + e + " to level " + this + " at " + e.getBounds().x+","+e.getBounds().y);
+		synchronized (entitiesToAdd) {
+			entitiesToAdd.add(e);
+			Level oldLevel = entityLevels.put(e, this); // replaces the level for the entity
+			if (oldLevel != null && oldLevel != this)
+				oldLevel.removeEntity(e); // remove it from the other level's entity set.
+		}
 	}
 	
 	public void removeEntity(Entity e) {
-		entities.remove(e);
-		if(entityLevels.get(e) == this)
-			entityLevels.remove(e);
+		//System.out.println("removing entity "+e+" from level "+this);
+		synchronized (entitiesToRemove) {
+			entitiesToRemove.add(e);
+			if (entityLevels.get(e) == this)
+				entityLevels.remove(e);
+		}
 	}
 	
 	public void update(float delta) {
@@ -84,9 +94,27 @@ public class Level {
 			tiles[x][y].update(delta);
 		}
 		
+		//System.out.println("entities tracked: " + entities);
+		
 		// update entities
 		for(Entity e: entities)
 			e.update(delta);
+		
+		synchronized (entitiesToAdd) {
+			for (Entity e : entitiesToAdd) {
+				for (Level level : levels)
+					level.entities.remove(e);
+				entities.add(e);
+			}
+			
+			entitiesToAdd.clear();
+		}
+		
+		synchronized (entitiesToRemove) {
+			for (Entity e : entitiesToRemove)
+				entities.remove(e);
+			entitiesToRemove.clear();
+		}
 	}
 	
 	public void render(Rectangle renderSpace, SpriteBatch batch, float delta) {
@@ -98,16 +126,26 @@ public class Level {
 				tile.render(batch, delta);
 		//batch.enableBlending(); // re-enable alpha for the drawing of entities.
 		
-		for(Entity entity: getOverlappingEntities(renderSpace))
+		Array<Entity> overlapping = getOverlappingEntities(renderSpace);
+		//System.out.println("entities being rendered: " + overlapping);
+		for(Entity entity: overlapping)
 			entity.render(batch, delta);
 	}
 	
-	public void dropItem(Item item, int x, int y, Entity target) {
+	public void dropItem(@NotNull Item item, int x, int y, @NotNull Entity target) {
 		// this tries to drop an item toward an entity.
 		// 
+		//System.out.println("dropping item " + item + " towards " + target);
+		
+		Vector2 itemPos = new Vector2(x, y);
+		Vector2 targetPos = new Vector2();
+		target.getBounds().getCenter(targetPos);
+		ItemEntity ie = new ItemEntity(item, targetPos.sub(itemPos));
+		ie.moveTo(this, x, y);
+		addEntity(ie);
 	}
 	
-	public void dropItem(Item item, int x, int y) {
+	public void dropItem(@NotNull Item item, int xt, int yt) {
 		/* this drops the itemEntity at the given coordinate, with any direction.
 		 	However, if the given coordinates reside within a solid tile, the adjacent tiles are checked.
 		 		If all surrounding tiles are solid, then it just uses the given coordinates.

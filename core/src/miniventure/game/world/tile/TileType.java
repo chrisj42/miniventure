@@ -5,7 +5,9 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 import miniventure.game.GameCore;
+import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolType;
+import miniventure.game.world.ItemDrop;
 import miniventure.game.world.tile.AnimationProperty.AnimationType;
 import miniventure.game.world.tile.DestructibleProperty.PreferredTool;
 
@@ -21,7 +23,7 @@ public enum TileType {
 	),
 	
 	DIRT(true,
-		new DestructibleProperty(HOLE, null)
+		new DestructibleProperty(HOLE, new ItemDrop(new ToolItem(ToolType.SWORD)))
 	),
 	
 	GRASS(true,

@@ -4,6 +4,7 @@ import miniventure.game.item.Item;
 import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolType;
 import miniventure.game.world.ItemDrop;
+import miniventure.game.world.entity.mob.Mob;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -53,15 +54,18 @@ public class DestructibleProperty implements TileProperty {
 	}
 	
 	
-	void tileAttacked(Tile tile, Item attackItem) {
+	void tileAttacked(Tile tile, Item attackItem, Mob attacker) {
 		int damage = getDamage(attackItem);
 		//System.out.println("attacked tile " + tile + " with " + attackItem + "; damage = " + damage);
 		if(damage > 0) {
 			int health = totalHealth > 1 ? tile.getData(this, HEALTH_IDX) : 1;
 			health -= damage;
-			if(health <= 0) // TODO here is where we need to drop the items.
+			if(health <= 0) {// TODO here is where we need to drop the items.
+				for(ItemDrop drop: drops)
+					if(drop != null)
+						drop.dropItems(tile.getLevel(), tile.getCenterX(), tile.getCenterY(), attacker);
 				tile.resetTile(coveredTile);
-			else
+			} else
 				tile.setData(this, HEALTH_IDX, health);
 		}
 	}
