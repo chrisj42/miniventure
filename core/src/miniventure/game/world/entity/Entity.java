@@ -24,6 +24,7 @@ public abstract class Entity {
 	
 	private Sprite sprite;
 	private final int eid;
+	private float z = 0;
 	
 	public Entity(Sprite sprite) {
 		this.sprite = sprite;
@@ -39,7 +40,10 @@ public abstract class Entity {
 	public abstract void update(float delta);
 	
 	public void render(SpriteBatch batch, float delta) {
+		float prevY = sprite.getY();
+		sprite.setY(prevY+z);
 		sprite.draw(batch);
+		sprite.setY(prevY);
 	}
 	
 	protected void setSprite(TextureRegion texture) {
@@ -47,7 +51,11 @@ public abstract class Entity {
 		float x = sprite.getX(), y = sprite.getY();
 		sprite = new Sprite(texture);
 		sprite.setPosition(x, y);
+		z = 0;
 	}
+	
+	float getZ() { return z; }
+	void setZ(float z) { this.z = z; }
 	
 	public Rectangle getBounds() {
 		//bounds.setX(bounds.getX()+bounds.getWidth()/5);
@@ -59,8 +67,12 @@ public abstract class Entity {
 	public void addedToLevel(Level level) {}
 	
 	public void move(float xd, float yd) {
+		move(xd, yd, 0);
+	}
+	public void move(float xd, float yd, float zd) {
 		moveAxis(true, xd);
 		moveAxis(false, yd);
+		z += zd;
 	}
 	
 	private void moveAxis(boolean xaxis, float amt) {
