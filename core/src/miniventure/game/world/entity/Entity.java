@@ -10,6 +10,7 @@ import miniventure.game.world.tile.Tile;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
@@ -19,9 +20,21 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class Entity {
 	
-	private Sprite sprite;
+	private static final HashMap<Integer, Entity> takenIDs = new HashMap<>();
 	
-	public Entity(Sprite sprite) { this.sprite = sprite; }
+	private Sprite sprite;
+	private final int eid;
+	
+	public Entity(Sprite sprite) {
+		this.sprite = sprite;
+		
+		int eid;
+		do {
+			eid = MathUtils.random.nextInt();
+		} while(takenIDs.containsKey(eid));
+		this.eid = eid;
+		takenIDs.put(eid, this);
+	}
 	
 	public abstract void update(float delta);
 	
@@ -37,12 +50,13 @@ public abstract class Entity {
 	}
 	
 	public Rectangle getBounds() {
-		Rectangle bounds = new Rectangle(sprite.getBoundingRectangle());
 		//bounds.setX(bounds.getX()+bounds.getWidth()/5);
 		//bounds.setSize(bounds.getWidth()*3/5, bounds.getHeight()/2); // due to the weird perspective of the game, the top part of most sprites is technically "in the air", so you don't really touch it.
-		bounds.setHeight(bounds.getHeight()*4/5);
-		return bounds;
+		//bounds.setHeight(bounds.getHeight()*4/5);
+		return new Rectangle(sprite.getBoundingRectangle());
 	}
+	
+	public void addedToLevel(Level level) {}
 	
 	public void move(float xd, float yd) {
 		moveAxis(true, xd);
@@ -50,6 +64,7 @@ public abstract class Entity {
 	}
 	
 	private void moveAxis(boolean xaxis, float amt) {
+		if(amt == 0) return;
 		Rectangle oldRect = sprite.getBoundingRectangle();
 		Rectangle newRect = new Rectangle(sprite.getX()+(xaxis?amt:0), sprite.getY()+(xaxis?0:amt), oldRect.width, oldRect.height);
 		
@@ -134,8 +149,18 @@ public abstract class Entity {
 	
 	// returns whether the other entity stops this one from moving.
 	// Generally, entities are tangible and stop each other from moving, so this returns true by default.
-	public boolean blockedBy(Entity other) { return true; }
+	public boolean blockedBy(Entity other) { return !(other instanceof ItemEntity); }
 	
 	public boolean hurtBy(Mob mob, Item attackItem, int dmg) { return false; } // generally speaking, attacking an entity doesn't do anything; only for mobs, and maybe furniture...
 	public boolean hurtBy(Tile tile, int dmg) { return false; } // generally speaking, attacking an entity doesn't do anything; only for mobs, and maybe furniture...
+	
+	@Override
+	public boolean equals(Object other) {
+		return other instanceof Entity && ((Entity)other).eid == eid;
+	}
+	
+	@Override
+	public int hashCode() {
+		return eid;
+	}
 }

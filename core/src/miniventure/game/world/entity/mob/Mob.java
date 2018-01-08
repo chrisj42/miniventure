@@ -7,6 +7,7 @@ import miniventure.game.world.entity.mob.MobAnimationController.AnimationState;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Rectangle;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -33,6 +34,13 @@ public abstract class Mob extends Entity {
 	}
 	
 	@Override
+	public Rectangle getBounds() {
+		Rectangle bounds = super.getBounds();
+		bounds.setHeight(bounds.getHeight()*4/5);
+		return bounds;
+	}
+	
+	@Override
 	public void move(float xd, float yd) {
 		super.move(xd, yd);
 		
@@ -44,6 +52,10 @@ public abstract class Mob extends Entity {
 			this.dir = dir;
 		}
 	}
+	
+	/*
+		So, we need a mob hurt system...
+	 */
 	
 	@Override
 	public boolean hurtBy(Mob mob, Item attackItem, int dmg) { return true; } // mobs are hurt

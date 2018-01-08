@@ -46,8 +46,8 @@ public class Level {
 	private final Tile[][] tiles;
 	
 	private final HashSet<Entity> entities = new HashSet<>();
-	private final HashSet<Entity> entitiesToAdd = new HashSet<>();
-	private final HashSet<Entity> entitiesToRemove = new HashSet<>();
+	//private final HashSet<Entity> entitiesToAdd = new HashSet<>();
+	//private final HashSet<Entity> entitiesToRemove = new HashSet<>();
 	
 	public Level(int width, int height) {
 		this.width = width;
@@ -68,21 +68,23 @@ public class Level {
 	
 	public void addEntity(Entity e) {
 		//System.out.println("adding entity " + e + " to level " + this + " at " + e.getBounds().x+","+e.getBounds().y);
-		synchronized (entitiesToAdd) {
-			entitiesToAdd.add(e);
+		//synchronized (entitiesToAdd) {
+		entities.add(e);
+		//	entitiesToAdd.add(e);
 			Level oldLevel = entityLevels.put(e, this); // replaces the level for the entity
 			if (oldLevel != null && oldLevel != this)
 				oldLevel.removeEntity(e); // remove it from the other level's entity set.
-		}
+		//}
 	}
 	
 	public void removeEntity(Entity e) {
 		//System.out.println("removing entity "+e+" from level "+this);
-		synchronized (entitiesToRemove) {
-			entitiesToRemove.add(e);
+		//synchronized (entitiesToRemove) {
+			//entitiesToRemove.add(e);
+			entities.remove(e);
 			if (entityLevels.get(e) == this)
 				entityLevels.remove(e);
-		}
+		//}
 	}
 	
 	public void update(float delta) {
@@ -97,14 +99,16 @@ public class Level {
 		//System.out.println("entities tracked: " + entities);
 		
 		// update entities
+		Entity[] entities = this.entities.toArray(new Entity[this.entities.size()]);
 		for(Entity e: entities)
 			e.update(delta);
 		
-		synchronized (entitiesToAdd) {
+		/*synchronized (entitiesToAdd) {
 			for (Entity e : entitiesToAdd) {
 				for (Level level : levels)
 					level.entities.remove(e);
 				entities.add(e);
+				e.addedToLevel(this);
 			}
 			
 			entitiesToAdd.clear();
@@ -114,7 +118,7 @@ public class Level {
 			for (Entity e : entitiesToRemove)
 				entities.remove(e);
 			entitiesToRemove.clear();
-		}
+		}*/
 	}
 	
 	public void render(Rectangle renderSpace, SpriteBatch batch, float delta) {
