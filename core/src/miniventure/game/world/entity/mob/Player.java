@@ -6,6 +6,7 @@ import miniventure.game.item.Item;
 import miniventure.game.world.Level;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.tile.Tile;
+import miniventure.game.world.tile.TileType;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -111,7 +112,33 @@ public class Player extends Mob {
 	}
 	
 	private void interact() {
+		Level level = Level.getEntityLevel(this);
+		if(level == null) return;
 		
+		Tile tile = level.getClosestTile(getInteractionRect());
+		if(tile == null) return;
+		
+		TileType newType = null;
+		
+		if(pressingKey(Input.Keys.G))
+			newType = TileType.GRASS;
+		if(pressingKey(Input.Keys.D))
+			newType = TileType.DIRT;
+		if(pressingKey(Input.Keys.H))
+			newType = TileType.HOLE;
+		if(pressingKey(Input.Keys.S))
+			newType = TileType.SAND;
+		if(pressingKey(Input.Keys.C))
+			newType = TileType.CACTUS;
+		if(pressingKey(Input.Keys.T))
+			newType = TileType.TREE;
+		if(pressingKey(Input.Keys.W))
+			newType = TileType.WATER;
+		if(pressingKey(Input.Keys.R))
+			newType = TileType.ROCK;
+		
+		if(newType != null)
+			tile.resetTile(newType);
 	}
 	
 	@Override
