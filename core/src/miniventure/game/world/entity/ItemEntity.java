@@ -2,6 +2,7 @@ package miniventure.game.world.entity;
 
 import miniventure.game.item.Item;
 import miniventure.game.world.Level;
+import miniventure.game.world.entity.mob.Player;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
@@ -18,9 +19,12 @@ public class ItemEntity extends Entity {
 	private Vector3 velocity;
 	private float time; // the current time relative to the creation of this item entity. used as the current position along the "x-axis".
 	
+	private final Item item;
+	
 	public ItemEntity(Item item, Vector2 goalDir) {
 		super(new Sprite(item.getTexture()));
 		//position = new Vector3();
+		this.item = item;
 		velocity = new Vector3(goalDir.cpy().scl(INITIAL_MOVE_FORCE), INITIAL_BOUNCE_FORCE);
 		//System.out.println("new vel: " + velocity);
 	}
@@ -78,6 +82,19 @@ public class ItemEntity extends Entity {
 		}
 		
 		time += delta;
+	}
+	
+	@Override
+	public boolean touchedBy(Entity other) {
+		if(other instanceof Player) {
+			((Player)other).addToInventory(item);
+			Level level = Level.getEntityLevel(this);
+			if(level != null)
+				level.removeEntity(this);
+			return true;
+		}
+		
+		return false;
 	}
 	
 	@Override

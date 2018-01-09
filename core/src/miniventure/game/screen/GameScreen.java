@@ -3,6 +3,7 @@ package miniventure.game.screen;
 import java.util.HashMap;
 
 import miniventure.game.GameCore;
+import miniventure.game.item.Item;
 import miniventure.game.world.Level;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.tile.Tile;
@@ -29,6 +30,8 @@ public class GameScreen implements Screen {
 	private int curLevel;
 	
 	private final GameCore game;
+	
+	private Screen screen = null;
 	
 	public GameScreen(GameCore game) {
 		this.game = game;
@@ -140,14 +143,28 @@ public class GameScreen implements Screen {
 	private void renderGui() {
 		//System.out.println("rendering GUI");
 		batch.setProjectionMatrix(uiCamera.combined);
+		
+		
+		
+		// render health
 		for(int i = 0; i < Player.Stat.Health.max; i++) {
 			TextureRegion heart = heartSprites.get(i < mainPlayer.getStat(Player.Stat.Health))[i % 2];
 			batch.draw(heart, i*heart.getRegionWidth(), heart.getRegionHeight() * 0.25f);
 		}
+		// TODO other stats will be rendered in the exact same fashion, with the same sprites. So make a method for it. Maybe I should instantiate it in the Player class, or even Stat enum? 
 		
+		
+		// draw UI for current item
+		Item heldItem = mainPlayer.getHeldItemClone();
+		if(heldItem != null) {
+			float x = camera.viewportWidth / 3;
+			batch.draw(heldItem.getTexture(), x, 5);
+			GameCore.writeOutlinedText(game.getFont(), batch, heldItem.getName(), x+heldItem.getTexture().getRegionWidth()+10, 5);
+		}
 		
 		// a list of text to display in the upper left, for debug purposes
-		Array<String> debugInfo = new Array<>();
+		Array<String> debugInfo = new Array<>(); 
+		debugInfo.add("Version " + GameCore.VERSION);
 		
 		// player coordinates, for debug
 		float x = mainPlayer.getBounds().x;
@@ -161,6 +178,6 @@ public class GameScreen implements Screen {
 		debugInfo.add("Looking at: " + (interactTile == null ? "Null" : interactTile.toLocString()));
 		
 		for(int i = 0; i < debugInfo.size; i++)
-			game.getFont().draw(batch, debugInfo.get(i), 0, uiCamera.viewportHeight-5-15*i);
+			GameCore.writeOutlinedText(game.getFont(), batch, debugInfo.get(i), 0, uiCamera.viewportHeight-5-15*i);
 	}
 }

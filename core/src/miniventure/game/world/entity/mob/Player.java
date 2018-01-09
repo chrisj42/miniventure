@@ -6,7 +6,6 @@ import miniventure.game.item.Item;
 import miniventure.game.world.Level;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.TileType;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -15,6 +14,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class Player extends Mob {
 	
@@ -43,6 +43,8 @@ public class Player extends Mob {
 	private final EnumMap<Stat, Integer> stats = new EnumMap<>(Stat.class);
 	private Item heldItem;
 	
+	private Array<Item> inventory = new Array<>();
+	
 	public Player() {
 		super("player");
 		heldItem = null;
@@ -53,11 +55,16 @@ public class Player extends Mob {
 	public int getStat(@NotNull Stat stat) {
 		return stats.get(stat);
 	}
+	@Nullable
+	public Item getHeldItemClone() {
+		if(heldItem == null) return null;
+		return heldItem.clone();
+	}
 	
 	public void checkInput(float delta) {
 		// checks for keyboard input to move the player.
 		// getDeltaTime() returns the time passed between the last and the current frame in seconds.
-		int speed = 32*5; // this is technically in units/second.
+		int speed = Tile.SIZE * 5; // this is technically in units/second.
 		float xd = 0, yd = 0;
 		if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) xd -= speed * delta;
 		if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) xd += speed * delta;
@@ -66,11 +73,12 @@ public class Player extends Mob {
 		
 		move(xd, yd);
 		
-		// TODO add attack key input, and behavior.
 		// Also, see what happens when I go to texturePacker and remove the outer whitespace around the player sprites. If possible, make sure they are all the same size, but see what happens if they aren't anyway.
+		//if(pressingKey(Input.Keys.E))
+			//GameCore.getGameScreen().setScreen(new InventoryMenu(this, inventory));
 		if(pressingKey(Input.Keys.C))
 			attack();
-		if(pressingKey(Input.Keys.V))
+		else if(pressingKey(Input.Keys.V))
 			interact();
 	}
 	
@@ -112,13 +120,36 @@ public class Player extends Mob {
 	}
 	
 	private void interact() {
+		if(heldItem != null && heldItem.isReflexive()) {
+			useItem(heldItem);
+			return;
+		}
+		
 		Level level = Level.getEntityLevel(this);
 		if(level == null) return;
 		
-		Tile tile = level.getClosestTile(getInteractionRect());
-		if(tile == null) return;
+		Rectangle interactRect = getInteractionRect();
 		
-		TileType newType = null;
+		Array<Entity> entities = level.getOverlappingEntities(interactRect);
+		boolean used = false;
+		for(Entity e: entities) {
+			if(e.interactWith(this, heldItem)) {
+				used = true;
+				break;
+			}
+		}
+		
+		if(!used) {
+			Tile tile = level.getClosestTile(interactRect);
+			if (tile != null) {
+				if (!heldItem.interact(this, tile))
+					tile.interactWith(this, heldItem);
+			}
+		}
+		
+		if(heldItem.isUsed()) heldItem = inventory.size == 0 ? null : inventory.removeIndex(0);
+		
+		/*TileType newType = null;
 		
 		if(pressingKey(Input.Keys.G))
 			newType = TileType.GRASS;
@@ -139,7 +170,14 @@ public class Player extends Mob {
 		
 		if(newType != null)
 			tile.resetTile(newType);
+		*/
 	}
+	
+	private void useItem(Item item) {
+		// this is for reflexive items
+	}
+	
+	public void addToInventory(Item item) { inventory.add(item.clone()); }
 	
 	@Override
 	public boolean hurtBy(Mob mob, Item attackItem, int dmg) { return hurt(dmg); }

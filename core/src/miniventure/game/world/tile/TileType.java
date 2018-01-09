@@ -5,9 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 import miniventure.game.GameCore;
-import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolType;
-import miniventure.game.world.ItemDrop;
 import miniventure.game.world.tile.AnimationProperty.AnimationType;
 import miniventure.game.world.tile.DestructibleProperty.PreferredTool;
 
@@ -23,16 +21,16 @@ public enum TileType {
 	),
 	
 	DIRT(true,
-		new DestructibleProperty(HOLE, new ItemDrop(new ToolItem(ToolType.SWORD)))
+		new DestructibleProperty(HOLE, true)
 	),
 	
 	GRASS(true,
-		new DestructibleProperty(DIRT, null),
+		new DestructibleProperty(DIRT, true),
 		new OverlapProperty(true)
 	),
 	
 	SAND(true,
-		new DestructibleProperty(HOLE, null),
+		new DestructibleProperty(HOLE, true),
 		new OverlapProperty(true)
 	),
 	
@@ -77,7 +75,7 @@ public enum TileType {
 	
 	public final boolean maySpawn;
 	final SolidProperty solidProperty;
-	final DestructibleProperty destructibleProperty;
+	public final DestructibleProperty destructibleProperty;
 	final InteractableProperty interactableProperty;
 	final TouchListener touchListener;
 	final AnimationProperty animationProperty;
@@ -117,6 +115,7 @@ public enum TileType {
 		this.updateProperty = (UpdateProperty)propertyMap.get(UpdateProperty.class.getName());
 		
 		this.connectionProperty.addConnectingType(this);
+		this.destructibleProperty.init(this);
 		
 		Array<Integer> initData = new Array<Integer>();
 		

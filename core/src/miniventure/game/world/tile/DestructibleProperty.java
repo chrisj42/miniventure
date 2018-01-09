@@ -1,6 +1,7 @@
 package miniventure.game.world.tile;
 
 import miniventure.game.item.Item;
+import miniventure.game.item.TileItem;
 import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolType;
 import miniventure.game.world.ItemDrop;
@@ -22,7 +23,7 @@ public class DestructibleProperty implements TileProperty {
 	private final PreferredTool preferredTool;
 	
 	private final DamageConditionCheck[] damageConditions;
-	private final ItemDrop[] drops;
+	private ItemDrop[] drops;
 	
 	private DestructibleProperty() {
 		coveredTile = null;
@@ -44,7 +45,15 @@ public class DestructibleProperty implements TileProperty {
 		//	toolTypeDamageMultipliers.put(tool.toolType, tool.damageMultiplier);
 	}
 	
+	private boolean dropsTileItem;
+	
 	// this is for tiles that are destroyed in one hit 
+	DestructibleProperty(TileType coveredTile, boolean dropsTileItem, DamageConditionCheck... damageConditions) {
+		this(coveredTile, null, damageConditions);
+		this.dropsTileItem = dropsTileItem;
+		//if(dropsTileItem)
+		//	drop = new TileItem()
+	}
 	DestructibleProperty(TileType coveredTile, ItemDrop drop, DamageConditionCheck... damageConditions) {
 		this.coveredTile = coveredTile;
 		totalHealth = 1;
@@ -53,6 +62,12 @@ public class DestructibleProperty implements TileProperty {
 		this.drops = new ItemDrop[] {drop};
 	}
 	
+	void init(TileType type) {
+		if(dropsTileItem)
+			drops = new ItemDrop[] {new ItemDrop(new TileItem(type))};
+	}
+	
+	public TileType getCoveredTile() { return coveredTile; }
 	
 	void tileAttacked(Tile tile, Item attackItem, Mob attacker) {
 		int damage = getDamage(attackItem);
@@ -106,8 +121,6 @@ public class DestructibleProperty implements TileProperty {
 		if(totalHealth > 1) return new Integer[] {totalHealth};
 		return new Integer[0]; // for a health of one or below, the tile will always be at max health, or destroyed.
 	}
-	
-	//public TileType getCoveredTile() { return coveredTile; }
 	
 	
 	

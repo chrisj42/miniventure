@@ -5,6 +5,7 @@ import java.util.HashMap;
 import miniventure.game.item.Item;
 import miniventure.game.world.Level;
 import miniventure.game.world.entity.mob.Mob;
+import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -65,6 +66,8 @@ public abstract class Entity {
 	}
 	
 	public void addedToLevel(Level level) {}
+	
+	public boolean interactWith(Player player, Item item) { return false; }
 	
 	public void move(float xd, float yd) {
 		move(xd, yd, 0);
