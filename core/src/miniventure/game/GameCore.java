@@ -6,6 +6,7 @@ import miniventure.game.screen.GameScreen;
 import miniventure.game.screen.MainMenuScreen;
 
 import com.badlogic.gdx.Game;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -30,7 +31,7 @@ public class GameCore extends Game {
 	private SpriteBatch batch;
 	private BitmapFont font; // this is stored here because it is a really good idea to reuse objects where ever possible; and don't repeat instantiations, aka make a font instance in two classes when the fonts are the same.
 	
-	private GameScreen gameScreen; // Screens ought to be disposed, but aren't automatically disposed; so we need to do it ourselves.
+	private static GameScreen gameScreen; // Screens ought to be disposed, but aren't automatically disposed; so we need to do it ourselves.
 	
 	@Override
 	public void create () {
@@ -46,6 +47,8 @@ public class GameCore extends Game {
 		
 		this.setScreen(new MainMenuScreen(this));
 	}
+	
+	public static GameScreen getGameScreen() { return gameScreen; }
 	
 	@Override
 	public void dispose () {
@@ -100,5 +103,18 @@ public class GameCore extends Game {
 		}
 		
 		return null;
+	}
+	
+	public static void writeOutlinedText(BitmapFont font, SpriteBatch batch, String text, float x, float y) {
+		writeOutlinedText(font, batch, text, x, y, Color.WHITE, Color.BLACK);
+	}
+	public static void writeOutlinedText(BitmapFont font, SpriteBatch batch, String text, float x, float y, Color center, Color outline) {
+		font.setColor(outline);
+		font.draw(batch, text, x-1, y-1);
+		font.draw(batch, text, x-1, y+1);
+		font.draw(batch, text, x+1, y-1);
+		font.draw(batch, text, x+1, y+1);
+		font.setColor(center);
+		font.draw(batch, text, x, y);
 	}
 }
