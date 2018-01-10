@@ -2,3 +2,7 @@ hey, why not give the player an animation holding items? Or better, use the item
 
 ****
 
+Add a highlight to whatever the player *will* interact with if the attack or interact keys are pressed. Maybe overlay the sprite with a translucent white color.
+
+****
+
