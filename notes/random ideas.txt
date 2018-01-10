@@ -1,0 +1,4 @@
+hey, why not give the player an animation holding items? Or better, use the item's sprite, and just draw it in the player's hand, in each of the player's positions. It's a possible idea, but I'm skeptical.
+
+****
+

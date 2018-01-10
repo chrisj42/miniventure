@@ -1,0 +1,12 @@
+I'm noticing a LOT of basic functionality similarities between entities and tiles, and I'm really starting to believe it's worth it to make a WorldObject class, or interface. The question now is, what to put in it?
+
+Here are the similarities I've found so far:
+- can have items used on them to change them
+- collision with entities
+- hurtability - health, or no health but removal condition
+- drops items
+- has a bounding box, a place where it exists, and a level
+- has a sprite that may be rendered and animated (though the animation may remain local to entities vs tiles)
+- can be updated in terms of game logic
+- has tiles surrounding it and in its position
+- 
