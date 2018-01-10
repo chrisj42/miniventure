@@ -61,17 +61,24 @@ public class Player extends Mob {
 		return heldItem.clone();
 	}
 	
-	public void checkInput(float delta) {
+	public void checkInput(float delta, @NotNull Vector2 mouseInput) {
 		// checks for keyboard input to move the player.
 		// getDeltaTime() returns the time passed between the last and the current frame in seconds.
 		int speed = Tile.SIZE * 5; // this is technically in units/second.
-		float xd = 0, yd = 0;
-		if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) xd -= speed * delta;
-		if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) xd += speed * delta;
-		if(Gdx.input.isKeyPressed(Input.Keys.UP)) yd += speed * delta;
-		if(Gdx.input.isKeyPressed(Input.Keys.DOWN)) yd -= speed * delta;
+		Vector2 movement = new Vector2();
+		if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) movement.x--;
+		if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) movement.x++;
+		if(Gdx.input.isKeyPressed(Input.Keys.UP)) movement.y++;
+		if(Gdx.input.isKeyPressed(Input.Keys.DOWN)) movement.y--;
 		
-		move(xd, yd);
+		movement.nor();
+		
+		movement.add(mouseInput);
+		movement.nor();
+		
+		movement.scl(speed * delta);
+		
+		move(movement.x, movement.y);
 		
 		// Also, see what happens when I go to texturePacker and remove the outer whitespace around the player sprites. If possible, make sure they are all the same size, but see what happens if they aren't anyway.
 		//if(pressingKey(Input.Keys.E))

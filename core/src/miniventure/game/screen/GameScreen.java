@@ -22,11 +22,14 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+
+import org.jetbrains.annotations.NotNull;
 
 public class GameScreen implements Screen {
 	
-	private OrthographicCamera camera, uiCamera;
+	private final OrthographicCamera camera, uiCamera;
 	private int zoom = 0;
 	private SpriteBatch batch;
 	
@@ -36,8 +39,6 @@ public class GameScreen implements Screen {
 	private int curLevel;
 	
 	private final GameCore game;
-	
-	private Screen screen = null;
 	
 	public GameScreen(GameCore game) {
 		this.game = game;
@@ -80,7 +81,7 @@ public class GameScreen implements Screen {
 		Gdx.gl.glClearColor(0.1f, 0.5f, 0.1f, 1); // these are floats from 0 to 1.
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		
-		mainPlayer.checkInput(delta);
+		mainPlayer.checkInput(delta, getMouseInput());
 		Level.getLevel(curLevel).update(delta);
 		
 		if(Gdx.input.isKeyJustPressed(Keys.MINUS))
@@ -100,6 +101,7 @@ public class GameScreen implements Screen {
 		playerPos.y = MathUtils.clamp(playerPos.y, Math.min(viewHeight/2, lvlHeight/2), Math.max(lvlHeight/2, lvlHeight-viewHeight/2));
 		camera.position.set(playerPos, camera.position.z);
 		camera.update(); // updates the camera "matrices"
+		uiCamera.update();
 		
 		Rectangle renderSpace = new Rectangle(camera.position.x - viewWidth/2, camera.position.y - viewHeight/2, viewWidth, viewHeight);
 		//Rectangle renderSpace = new Rectangle(0, 0, lvlWidth, lvlHeight);
@@ -111,25 +113,31 @@ public class GameScreen implements Screen {
 		batch.end();
 	}
 	
-	private void zoom(int dir) {
-		zoom += dir;
+	@NotNull
+	private Vector2 getMouseInput() {
+		if(Gdx.input.isTouched()) {
+			
+			Vector2 mousePos = new Vector2(Gdx.input.getX(), Gdx.input.getY());
+			mousePos.y = uiCamera.viewportHeight - mousePos.y; // origin is top left corner, so reverse Y dir
+			
+			Vector2 playerPos = mainPlayer.getBounds().getCenter(new Vector2());
+			
+			// Note: the camera pos is in the center of the screen.
+			
+			Vector3 playerScreenPos = camera.project(new Vector3(playerPos, 0));
+			
+			Vector2 mouseMove = new Vector2();
+			mouseMove.x = mousePos.x - playerScreenPos.x;
+			mouseMove.y = mousePos.y - playerScreenPos.y;
+			//mouseMove.y -= GameCore.getGameScreen().getScreenHeight()/2;
+			mouseMove.nor();
+			
+			return mouseMove;
+		}
 		
-		double zoomFactor = Math.pow(2, dir);
-		camera.viewportHeight /= zoomFactor;
-		camera.viewportWidth /= zoomFactor;
+		return new Vector2();
 	}
 	
-	@Override public void resize(int width, int height) {
-		float zoomFactor = (float) Math.pow(2, zoom);
-		camera.setToOrtho(false, width/zoomFactor, height/zoomFactor);
-		uiCamera.setToOrtho(false, width/zoomFactor, height/zoomFactor);
-	}
-	
-	@Override public void pause() {}
-	@Override public void resume() {}
-	
-	@Override public void show() {}
-	@Override public void hide() {}
 	
 	private static HashMap<Boolean, TextureRegion[]> heartSprites = new HashMap<>();
 	static {
@@ -158,11 +166,10 @@ public class GameScreen implements Screen {
 		}
 		// TODO other stats will be rendered in the exact same fashion, with the same sprites. So make a method for it. Maybe I should instantiate it in the Player class, or even Stat enum? 
 		
-		
 		// draw UI for current item
 		Item heldItem = mainPlayer.getHeldItemClone();
 		if(heldItem != null) {
-			float x = camera.viewportWidth / 3;
+			float x = uiCamera.viewportWidth / 3;
 			
 			Rectangle drawRect = new Rectangle(x, 5, heldItem.getTexture().getRegionWidth(), heldItem.getTexture().getRegionHeight());
 			batch.end();
@@ -195,4 +202,24 @@ public class GameScreen implements Screen {
 		for(int i = 0; i < debugInfo.size; i++)
 			MyUtils.writeOutlinedText(game.getFont(), batch, debugInfo.get(i), 0, uiCamera.viewportHeight-5-15*i);
 	}
+	
+	private void zoom(int dir) {
+		zoom += dir;
+		
+		double zoomFactor = Math.pow(2, dir);
+		camera.viewportHeight /= zoomFactor;
+		camera.viewportWidth /= zoomFactor;
+	}
+	
+	@Override public void resize(int width, int height) {
+		float zoomFactor = (float) Math.pow(2, zoom);
+		camera.setToOrtho(false, width/zoomFactor, height/zoomFactor);
+		uiCamera.setToOrtho(false, width, height);
+	}
+	
+	@Override public void pause() {}
+	@Override public void resume() {}
+	
+	@Override public void show() {}
+	@Override public void hide() {}
 }
