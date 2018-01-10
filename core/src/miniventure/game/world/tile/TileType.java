@@ -4,7 +4,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
-import miniventure.game.GameCore;
+import miniventure.game.MyUtils;
 import miniventure.game.item.ToolType;
 import miniventure.game.world.tile.AnimationProperty.AnimationType;
 import miniventure.game.world.tile.DestructibleProperty.PreferredTool;
@@ -98,7 +98,7 @@ public enum TileType {
 		
 		// replace the defaults with specified properties
 		for(TileProperty property: properties) {
-			Class clazz = GameCore.getDirectSubclass(TileProperty.class, property.getClass());
+			Class clazz = MyUtils.getDirectSubclass(TileProperty.class, property.getClass());
 			if(clazz == null) throw new NullPointerException();
 			String className = clazz.getName();
 			if(className.contains("$")) className = className.substring(0, className.indexOf("$")); // strip off extra stuff generated if it was a lambda expression

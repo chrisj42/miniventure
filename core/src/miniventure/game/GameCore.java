@@ -6,15 +6,11 @@ import miniventure.game.screen.GameScreen;
 import miniventure.game.screen.MainMenuScreen;
 
 import com.badlogic.gdx.Game;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.utils.Array;
-
-import org.jetbrains.annotations.Nullable;
 
 public class GameCore extends Game {
 	
@@ -72,59 +68,11 @@ public class GameCore extends Game {
 	}
 	
 	public void setGameScreen(GameScreen gameScreen) {
-		this.gameScreen = gameScreen;
+		GameCore.gameScreen = gameScreen;
 	}
 	
 	public static float getElapsedProgramTime() {
 		return (System.nanoTime() - START_TIME)/1E9f;
 	}
 	
-	@Nullable
-	public static Class getDirectSubclass(Class superClass, Class target) {
-		Array<Class> parents = new Array<>(target.getInterfaces());
-		Class targetSuper = target.getSuperclass();
-		
-		if(parents.contains(superClass, false) || targetSuper.equals(superClass))
-			return target;
-		
-		if(targetSuper == Object.class && parents.size == 0)
-			return null;
-		
-		if(targetSuper != Object.class) {
-			Class sub = getDirectSubclass(superClass, targetSuper);
-			if(sub != null) return sub;
-		}
-		
-		// go through array
-		for(Class parent: parents) {
-			Class sub = getDirectSubclass(superClass, parent);
-			if(sub != null)
-				return sub;
-		}
-		
-		return null;
-	}
-	
-	public static void writeOutlinedText(BitmapFont font, SpriteBatch batch, String text, float x, float y) {
-		writeOutlinedText(font, batch, text, x, y, Color.WHITE, Color.BLACK);
-	}
-	public static void writeOutlinedText(BitmapFont font, SpriteBatch batch, String text, float x, float y, Color center, Color outline) {
-		font.setColor(outline);
-		font.draw(batch, text, x-1, y-1);
-		font.draw(batch, text, x-1, y+1);
-		font.draw(batch, text, x+1, y-1);
-		font.draw(batch, text, x+1, y+1);
-		font.setColor(center);
-		font.draw(batch, text, x, y);
-	}
-	
-	public static String toTitleCase(String string) {
-		String[] words = string.split(" ");
-		for(int i = 0; i < words.length; i++) {
-			if(words[i].length() == 0) continue;
-			words[i] = words[i].substring(0, 1).toUpperCase() + words[i].substring(1).toLowerCase();
-		}
-		
-		return String.join(" ", words);
-	}
 }

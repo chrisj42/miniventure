@@ -10,3 +10,8 @@ Here are the similarities I've found so far:
 - can be updated in terms of game logic
 - has tiles surrounding it and in its position
 - 
+
+
+- some entities and tiles have health, but some instead require a specific item.
+	for example, a dirt tile won't be removed unless you use a shovel on it, but everything does one damage to stone or a tree until it breaks.
+	Most entities (most notably mobs) have health, but furniture doesn't; hitting it does nothing (generally), unless you use the carry gloves to pick them up.
