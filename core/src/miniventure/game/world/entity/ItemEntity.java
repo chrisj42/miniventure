@@ -33,6 +33,7 @@ public class ItemEntity extends Entity {
 	private boolean moving = true;
 	@Override
 	public void update(float delta) {
+		//super.update(delta);
 		/*
 			Movement will work like this:
 				- the itemEntity will move along a base axis, as time progresses, and the actual position will vary according to time.
@@ -75,7 +76,7 @@ public class ItemEntity extends Entity {
 	
 	@Override
 	public boolean touchedBy(Entity other) {
-		if(other instanceof Player) {
+		if(other instanceof Player && time > 1) {
 			((Player)other).addToInventory(item);
 			Level level = Level.getEntityLevel(this);
 			if(level != null)
@@ -84,6 +85,11 @@ public class ItemEntity extends Entity {
 		}
 		
 		return false;
+	}
+	
+	@Override
+	public void touching(Entity entity) {
+		touchedBy(entity);
 	}
 	
 	@Override

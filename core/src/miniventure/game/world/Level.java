@@ -204,10 +204,15 @@ public class Level {
 	}
 	
 	public Array<Entity> getOverlappingEntities(Rectangle rect) {
+		return getOverlappingEntities(rect, (Entity)null);
+	}
+	public Array<Entity> getOverlappingEntities(Rectangle rect, Entity... exclude) {
 		Array<Entity> overlapping = new Array<>();
 		for(Entity entity: entities)
 			if(entity.getBounds().overlaps(rect))
 				overlapping.add(entity);
+		
+		overlapping.removeAll(new Array<>(exclude), true); // use ==, not .equals()
 		
 		return overlapping;
 	}

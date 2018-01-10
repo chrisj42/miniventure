@@ -214,6 +214,9 @@ public class Tile implements WorldObject {
 	public boolean touchedBy(Entity entity) { type.touchListener.touchedBy(entity, this); return true; }
 	
 	@Override
+	public void touching(Entity entity) {}
+	
+	@Override
 	public String toString() { return MyUtils.toTitleCase(type+"") + " Tile"; }
 	
 	public String toLocString() {

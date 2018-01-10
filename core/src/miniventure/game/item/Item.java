@@ -3,7 +3,6 @@ package miniventure.game.item;
 import miniventure.game.GameCore;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;
-import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
@@ -21,25 +20,44 @@ public abstract class Item {
 	private static final TextureRegion missing = GameCore.icons.get("missing");
 	
 	@NotNull private TextureRegion texture;
+	private final boolean reflexive;
 	private boolean used = false;
 	
-	public Item(TextureRegion texture) {
+	public Item(TextureRegion texture) { this(false, texture); }
+	public Item(boolean reflexive, TextureRegion texture) {
 		this.texture = texture == null ? missing : texture;
+		this.reflexive = reflexive;
 	}
 	
 	protected void setUsed() { used = true; }
 	public boolean isUsed() { return used; }
+	
+	
+	public Item consume() {
+		if(!used) return this;
+		
+		return null; // generally, used up items disappear. But, tool items will only lose durability, and stacks will decrease by one. 
+	}
 	
 	@NotNull
 	public TextureRegion getTexture() { return texture; }
 	
 	public abstract String getName();
 	
-	public abstract boolean isReflexive();
+	public boolean interact(Player player) {
+		if(reflexive) {
+			player.interactWith(player, this);
+			return true; // do not interact with other things
+		}
+		return false; // continue
+	}
 	
-	public boolean interact(Player player, Tile tile) { return false; }
+	// these two below are in case the item has anything to do with the events.
 	
-	public int getDamage(WorldObject target) { return 1; }
+	public boolean attack(WorldObject obj, Player player) { return false; }
+	public boolean interact(WorldObject obj, Player player) { return false; }
+	
+	public int getDamage(WorldObject target) { return 1; } // by default
 	
 	public abstract Item clone();
 }

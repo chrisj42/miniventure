@@ -14,7 +14,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class GameCore extends Game {
 	
-	public static final Version VERSION = new Version("1.0.6");
+	public static final Version VERSION = new Version("1.0.7");
 	
 	public static final int SCREEN_WIDTH = 800, SCREEN_HEIGHT = 450;
 	private static final long START_TIME = System.nanoTime();

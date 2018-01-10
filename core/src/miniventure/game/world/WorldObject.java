@@ -40,7 +40,7 @@ public interface WorldObject {
 	
 	boolean touchedBy(Entity entity);
 	
-	
+	void touching(Entity entity);
 	
 	// returns the closest tile to the center of this object, given an array of tiles.
 	@Nullable

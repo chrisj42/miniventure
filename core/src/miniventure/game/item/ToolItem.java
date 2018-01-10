@@ -11,14 +11,10 @@ public class ToolItem extends Item {
 	
 	public ToolType getType() { return toolType; }
 	
-	
 	@Override
 	public String getName() {
 		return toolType.name();
 	}
-	
-	@Override
-	public boolean isReflexive() { return false; }
 	
 	@Override
 	public Item clone() {

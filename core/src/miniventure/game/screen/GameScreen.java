@@ -12,10 +12,13 @@ import miniventure.game.world.tile.Tile;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -26,6 +29,8 @@ public class GameScreen implements Screen {
 	private OrthographicCamera camera, uiCamera;
 	private int zoom = 0;
 	private SpriteBatch batch;
+	
+	private ShapeRenderer shapeRenderer = new ShapeRenderer();
 	
 	private Player mainPlayer;
 	private int curLevel;
@@ -144,8 +149,7 @@ public class GameScreen implements Screen {
 	private void renderGui() {
 		//System.out.println("rendering GUI");
 		batch.setProjectionMatrix(uiCamera.combined);
-		
-		
+		shapeRenderer.setProjectionMatrix(uiCamera.combined);
 		
 		// render health
 		for(int i = 0; i < Player.Stat.Health.max; i++) {
@@ -159,8 +163,18 @@ public class GameScreen implements Screen {
 		Item heldItem = mainPlayer.getHeldItemClone();
 		if(heldItem != null) {
 			float x = camera.viewportWidth / 3;
+			
+			Rectangle drawRect = new Rectangle(x, 5, heldItem.getTexture().getRegionWidth(), heldItem.getTexture().getRegionHeight());
+			batch.end();
+			shapeRenderer.begin(ShapeType.Filled);
+			shapeRenderer.setColor(Color.BLACK);
+			shapeRenderer.rect(drawRect.x-2, drawRect.y-2, drawRect.width+4, drawRect.height+4);
+			shapeRenderer.end();
+			
+			batch.begin();
 			batch.draw(heldItem.getTexture(), x, 5);
-			MyUtils.writeOutlinedText(game.getFont(), batch, heldItem.getName(), x+heldItem.getTexture().getRegionWidth()+10, 5);
+			
+			MyUtils.writeOutlinedText(game.getFont(), batch, heldItem.getName(), x+drawRect.width+10, drawRect.height*2/3);
 		}
 		
 		// a list of text to display in the upper left, for debug purposes

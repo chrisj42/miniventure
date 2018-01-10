@@ -5,7 +5,6 @@ import java.util.EnumMap;
 import miniventure.game.item.Item;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
-import miniventure.game.world.entity.Entity;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.Gdx;
@@ -42,7 +41,7 @@ public class Player extends Mob {
 	}
 	
 	private final EnumMap<Stat, Integer> stats = new EnumMap<>(Stat.class);
-	private Item heldItem;
+	@Nullable private Item heldItem;
 	
 	private Array<Item> inventory = new Array<>();
 	
@@ -81,11 +80,18 @@ public class Player extends Mob {
 			attack();
 		else if(pressingKey(Input.Keys.V))
 			interact();
+		
+		heldItem = heldItem == null ? null : heldItem.consume();
 	}
 	
 	@Override
 	public void update(float delta) {
+		super.update(delta);
 		// update things like hunger, stamina, etc.
+		if(heldItem == null && inventory.size > 0) {
+			//System.out.println("updating player's active item");
+			heldItem = inventory.removeIndex(0);
+		}
 	}
 	
 	public Rectangle getInteractionRect() {
@@ -97,62 +103,47 @@ public class Player extends Mob {
 		return bounds;
 	}
 	
-	private void attack() {
-		// get level, and don't attack if level is not found
+	@NotNull
+	private Array<WorldObject> getInteractionQueue() {
+		Array<WorldObject> objects = new Array<>();
+		
+		// get level, and don't interact if level is not found
 		Level level = Level.getEntityLevel(this);
-		if(level == null) return;
+		if(level == null) return objects;
 		
-		// get attack rect
-		Rectangle attackBounds = getInteractionRect();
+		Rectangle interactionBounds = getInteractionRect();
 		
-		// find entities in attack rect, and attack them
-		Array<Entity> otherEntities = level.getOverlappingEntities(attackBounds);
-		otherEntities.removeValue(this, true); // use ==, not .equals()
-		boolean attacked = false;
-		for(Entity e: otherEntities)
-			attacked = attacked || e.attackedBy(this, heldItem);
+		objects.addAll(level.getOverlappingEntities(interactionBounds, this));
 		
-		if(attacked) return; // don't hurt the tile
-		
-		// if no entities were successfully attacked, get tile and attack it instead
-		Tile tile = level.getClosestTile(attackBounds);
+		Tile tile = level.getClosestTile(interactionBounds);
 		if(tile != null)
-			tile.attackedBy(this, heldItem);
+			objects.add(tile);
+		
+		return objects;
+	}
+	
+	private void attack() {
+		if(heldItem != null && heldItem.isUsed()) return;
+		
+		for(WorldObject obj: getInteractionQueue()) {
+			if(heldItem == null || !heldItem.isUsed() && !heldItem.attack(obj, this)) {
+				if(obj.attackedBy(this, heldItem))
+					return;
+			} else return;
+		}
 	}
 	
 	private void interact() {
-		if(heldItem != null && heldItem.isReflexive()) {
-			useItem(heldItem);
-			return;
+		if(heldItem != null && heldItem.isUsed()) return;
+		
+		if(heldItem != null && heldItem.interact(this)) return;
+		
+		for(WorldObject obj: getInteractionQueue()) {
+			if(heldItem == null || !heldItem.isUsed() && !heldItem.interact(obj, this)) {
+				if(obj.interactWith(this, heldItem))
+					return;
+			} else return;
 		}
-		
-		Level level = Level.getEntityLevel(this);
-		if(level == null) return;
-		
-		Rectangle interactRect = getInteractionRect();
-		
-		Array<Entity> entities = level.getOverlappingEntities(interactRect);
-		boolean used = false;
-		for(Entity e: entities) {
-			if(e.interactWith(this, heldItem)) {
-				used = true;
-				break;
-			}
-		}
-		
-		if(!used) {
-			Tile tile = level.getClosestTile(interactRect);
-			if (tile != null) {
-				if (!heldItem.interact(this, tile))
-					tile.interactWith(this, heldItem);
-			}
-		}
-		
-		if(heldItem.isUsed()) heldItem = inventory.size == 0 ? null : inventory.removeIndex(0);
-	}
-	
-	private void useItem(Item item) {
-		// this is for reflexive items
 	}
 	
 	public void addToInventory(Item item) { inventory.add(item.clone()); }

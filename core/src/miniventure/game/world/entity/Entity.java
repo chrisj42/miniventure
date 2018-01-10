@@ -40,7 +40,17 @@ public abstract class Entity implements WorldObject {
 	public Level getLevel() { return Level.getEntityLevel(this); }
 	
 	@Override
-	public abstract void update(float delta);
+	public void update(float delta) {
+		Level level = getLevel();
+		if(level == null) return;
+		Array<WorldObject> objects = new Array<>();
+		objects.addAll(level.getOverlappingEntities(getBounds(), this));
+		Tile tile = level.getClosestTile(getBounds());
+		if(tile != null) objects.add(tile);
+		
+		for(WorldObject obj: objects)
+			obj.touching(this);
+	}
 	
 	@Override
 	public void render(SpriteBatch batch, float delta) {
@@ -151,12 +161,15 @@ public abstract class Entity implements WorldObject {
 	@Override
 	public boolean touchedBy(Entity other) { return false; }
 	
+	@Override
+	public void touching(Entity entity) {}
+	
 	// returns whether the other entity stops this one from moving.
 	// Generally, entities are tangible and stop each other from moving, so this returns true by default.
 	//public boolean blockedBy(Entity other) { return !(other instanceof ItemEntity); }
 	
 	@Override
-	public boolean isPermeableBy(Entity entity) { return entity instanceof ItemEntity; }
+	public boolean isPermeableBy(Entity entity) { return this instanceof ItemEntity || entity instanceof ItemEntity; }
 	
 	@Override
 	public boolean attackedBy(Mob mob, Item attackItem) { return hurtBy(mob, attackItem.getDamage(this)); }
