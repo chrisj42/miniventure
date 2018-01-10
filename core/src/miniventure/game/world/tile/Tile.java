@@ -1,8 +1,11 @@
 package miniventure.game.world.tile;
 
+import miniventure.game.GameCore;
 import miniventure.game.item.Item;
 import miniventure.game.world.Level;
+import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
+import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.entity.mob.Player;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -11,7 +14,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
-public class Tile {
+public class Tile implements WorldObject {
 	
 	/*
 		So, tiles can have any of the following properties/features:
@@ -82,17 +85,18 @@ public class Tile {
 	
 	public TileType getType() { return type; }
 	
-	public Level getLevel() { return level; }
+	@Override public Level getLevel() { return level; }
 	
 	public int getCenterX() { return x*SIZE + SIZE/2; }
 	public int getCenterY() { return y*SIZE + SIZE/2; }
 	
-	private Rectangle getRect() { return new Rectangle(x*SIZE, y*SIZE, SIZE, SIZE); }
+	@Override
+	public Rectangle getBounds() { return new Rectangle(x*SIZE, y*SIZE, SIZE, SIZE); }
 	
 	public void resetTile(TileType newType) {
 		// check for entities that will not be allowed on the new tile, and move them to the closest adjacent tile they are allowed on.
 		Array<Tile> surroundingTiles = getAdjacentTiles(true);
-		for(Entity entity: level.getOverlappingEntities(getRect())) {
+		for(Entity entity: level.getOverlappingEntities(getBounds())) {
 			// for each entity, check if it can walk on the new tile type. If not, fetch the surrounding tiles, remove those the entity can't walk on, and then fetch the closest tile of the remaining ones.
 			if(newType.solidProperty.isPermeableBy(entity)) continue; // no worries for this entity.
 			
@@ -137,6 +141,7 @@ public class Tile {
 			draw(batch, sprite);
 	}
 	
+	@Override
 	public void render(SpriteBatch batch, float delta) {
 		TileType under = type.animationProperty.renderBehind;
 		
@@ -153,6 +158,7 @@ public class Tile {
 		drawOverlap(batch, type, false); // draw overlap from other tiles; only considers those that have an under tile.
 	}
 	
+	@Override
 	public void update(float delta) {
 		type.updateProperty.update(delta, this);
 	}
@@ -175,32 +181,31 @@ public class Tile {
 		this.data[type.propertyDataIndexes.get(property)+propDataIndex] = data;
 	}
 	
+	@Override
 	public boolean isPermeableBy(Entity entity) {
 		return type.solidProperty.isPermeableBy(entity);
 	}
 	
-	public void attackedBy(Player player, Item heldItem) {
-		type.destructibleProperty.tileAttacked(this, heldItem, player);
+	@Override
+	public boolean attackedBy(Mob mob, Item attackItem) {
+		return type.destructibleProperty.tileAttacked(this, mob, attackItem);
 	}
-	
-	public void interactWith(Player player, Item heldItem) { type.interactableProperty.interact(player, heldItem, this); }
-	
-	public void touchedBy(Entity entity) { type.touchListener.touchedBy(entity, this); }
 	
 	@Override
-	public String toString() { return toTitleCase(type+"") + " Tile"; }
-	
-	public String toLocString() {
-		return x+","+y+" (" + toTitleCase(type+"")+" Tile)";
+	public boolean hurtBy(WorldObject obj, int damage) {
+		return type.destructibleProperty.tileAttacked(this, obj, damage);
 	}
 	
-	private static String toTitleCase(String string) {
-		String[] words = string.split(" ");
-		for(int i = 0; i < words.length; i++) {
-			if(words[i].length() == 0) continue;
-			words[i] = words[i].substring(0, 1).toUpperCase() + words[i].substring(1).toLowerCase();
-		}
-		
-		return String.join(" ", words);
+	@Override
+	public boolean interactWith(Player player, Item heldItem) { return type.interactableProperty.interact(player, heldItem, this); }
+	
+	@Override
+	public boolean touchedBy(Entity entity) { type.touchListener.touchedBy(entity, this); return true; }
+	
+	@Override
+	public String toString() { return GameCore.toTitleCase(type+"") + " Tile"; }
+	
+	public String toLocString() {
+		return x+","+y+" (" + GameCore.toTitleCase(type+"")+" Tile)";
 	}
 }

@@ -1,7 +1,8 @@
 package miniventure.game.world;
 
 import miniventure.game.item.Item;
-import miniventure.game.world.entity.Entity;
+
+import org.jetbrains.annotations.NotNull;
 
 public class ItemDrop {
 	
@@ -110,7 +111,7 @@ public class ItemDrop {
 		return 1;
 	}
 	
-	public void dropItems(Level level, int x, int y, Entity target) {
+	public void dropItems(Level level, int x, int y, @NotNull WorldObject target) {
 		for(int i = 0; i < getItemsDropped(); i++)
 			level.dropItem(item, x, y, target);
 	}

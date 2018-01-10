@@ -5,6 +5,7 @@ import miniventure.game.item.TileItem;
 import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolType;
 import miniventure.game.world.ItemDrop;
+import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Mob;
 
 import org.jetbrains.annotations.NotNull;
@@ -69,9 +70,13 @@ public class DestructibleProperty implements TileProperty {
 	
 	public TileType getCoveredTile() { return coveredTile; }
 	
-	void tileAttacked(Tile tile, Item attackItem, Mob attacker) {
+	boolean tileAttacked(Tile tile, Mob attacker, Item attackItem) {
 		int damage = getDamage(attackItem);
+		return tileAttacked(tile, attacker, damage);
+	}
 		//System.out.println("attacked tile " + tile + " with " + attackItem + "; damage = " + damage);
+	
+	boolean tileAttacked(Tile tile, WorldObject attacker, int damage) {
 		if(damage > 0) {
 			int health = totalHealth > 1 ? tile.getData(this, HEALTH_IDX) : 1;
 			health -= damage;
@@ -82,9 +87,12 @@ public class DestructibleProperty implements TileProperty {
 				tile.resetTile(coveredTile);
 			} else
 				tile.setData(this, HEALTH_IDX, health);
+			
+			return true;
 		}
+		
+		return false;
 	}
-	
 	
 	private int getDamage(@Nullable Item attackItem) {
 		int damage = 1;

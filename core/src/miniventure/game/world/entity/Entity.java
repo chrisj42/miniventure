@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import miniventure.game.item.Item;
 import miniventure.game.world.Level;
+import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.tile.Tile;
@@ -13,13 +14,9 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-public abstract class Entity {
+public abstract class Entity implements WorldObject {
 	
 	private static final HashMap<Integer, Entity> takenIDs = new HashMap<>();
 	
@@ -38,8 +35,13 @@ public abstract class Entity {
 		takenIDs.put(eid, this);
 	}
 	
+	@Override
+	public Level getLevel() { return Level.getEntityLevel(this); }
+	
+	@Override
 	public abstract void update(float delta);
 	
+	@Override
 	public void render(SpriteBatch batch, float delta) {
 		float prevY = sprite.getY();
 		sprite.setY(prevY+z);
@@ -58,6 +60,7 @@ public abstract class Entity {
 	float getZ() { return z; }
 	void setZ(float z) { this.z = z; }
 	
+	@Override
 	public Rectangle getBounds() {
 		//bounds.setX(bounds.getX()+bounds.getWidth()/5);
 		//bounds.setSize(bounds.getWidth()*3/5, bounds.getHeight()/2); // due to the weird perspective of the game, the top part of most sprites is technically "in the air", so you don't really touch it.
@@ -119,7 +122,7 @@ public abstract class Entity {
 			if(!entity.touchedBy(this))
 				this.touchedBy(entity); // to make sure something has a chance to happen, but it doesn't happen twice.
 			
-			canMove = canMove && !blockedBy(entity);
+			canMove = canMove && entity.isPermeableBy(this);
 		}
 		
 		if(!canMove) return;
@@ -142,32 +145,22 @@ public abstract class Entity {
 		moveTo(tile.getLevel(), x, y);
 	}
 	
-	// returns the closest tile to the center of this entity, given an array of tiles.
-	@Nullable
-	public Tile getClosestTile(@NotNull Array<Tile> tiles) {
-		if(tiles.size == 0) return null;
-		
-		Vector2 center = new Vector2();
-		getBounds().getCenter(center);
-		HashMap<Vector2, Tile> tileMap = new HashMap<>();
-		for(Tile t: tiles)
-			tileMap.put(new Vector2(t.getCenterX(), t.getCenterY()), t);
-		
-		Array<Vector2> tileCenters = new Array<>(tileMap.keySet().toArray(new Vector2[tileMap.size()]));
-		tileCenters.sort((v1, v2) -> (int) (center.dst2(v1) - center.dst2(v2))); // sort, so the first one in the list is the closest one
-		
-		return tileMap.get(tileCenters.get(0));
-	}
-	
 	// returns whether anything meaningful happened; if false, then other.touchedBy(this) will be called.
+	@Override
 	public boolean touchedBy(Entity other) { return false; }
 	
 	// returns whether the other entity stops this one from moving.
 	// Generally, entities are tangible and stop each other from moving, so this returns true by default.
-	public boolean blockedBy(Entity other) { return !(other instanceof ItemEntity); }
+	//public boolean blockedBy(Entity other) { return !(other instanceof ItemEntity); }
 	
-	public boolean hurtBy(Mob mob, Item attackItem, int dmg) { return false; } // generally speaking, attacking an entity doesn't do anything; only for mobs, and maybe furniture...
-	public boolean hurtBy(Tile tile, int dmg) { return false; } // generally speaking, attacking an entity doesn't do anything; only for mobs, and maybe furniture...
+	@Override
+	public boolean isPermeableBy(Entity entity) { return entity instanceof ItemEntity; }
+	
+	@Override
+	public boolean attackedBy(Mob mob, Item attackItem) { return false; } // generally speaking, attacking an entity doesn't do anything; only for mobs, and maybe furniture...
+	
+	@Override
+	public boolean hurtBy(WorldObject obj, int dmg) { return false; } // generally speaking, attacking an entity doesn't do anything; only for mobs, and maybe furniture...
 	
 	@Override
 	public boolean equals(Object other) {

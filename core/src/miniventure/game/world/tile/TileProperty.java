@@ -10,7 +10,7 @@ public interface TileProperty {
 		LinkedHashMap<String, TileProperty> map = new LinkedHashMap<>();
 		map.put(SolidProperty.class.getName(), SolidProperty.WALKABLE);
 		map.put(DestructibleProperty.class.getName(), DestructibleProperty.INDESTRUCTIBLE);
-		map.put(InteractableProperty.class.getName(), (InteractableProperty)((p, i, t) -> {}));
+		map.put(InteractableProperty.class.getName(), (InteractableProperty)((p, i, t) -> false));
 		map.put(TouchListener.class.getName(), (TouchListener)((entity, tile) -> {}));
 		map.put(AnimationProperty.class.getName(), new AnimationProperty(AnimationType.SINGLE_FRAME));
 		map.put(ConnectionProperty.class.getName(), new ConnectionProperty(false));

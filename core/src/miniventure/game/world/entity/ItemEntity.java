@@ -2,6 +2,7 @@ package miniventure.game.world.entity;
 
 import miniventure.game.item.Item;
 import miniventure.game.world.Level;
+import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.entity.mob.Player;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -23,18 +24,9 @@ public class ItemEntity extends Entity {
 	
 	public ItemEntity(Item item, Vector2 goalDir) {
 		super(new Sprite(item.getTexture()));
-		//position = new Vector3();
 		this.item = item;
 		velocity = new Vector3(goalDir.cpy().scl(INITIAL_MOVE_FORCE), INITIAL_BOUNCE_FORCE);
-		//System.out.println("new vel: " + velocity);
 	}
-	
-	/*@Override
-	public void addedToLevel(Level level) {
-		//Vector2 pos = getBounds().getPosition(new Vector2());
-		//position.set(pos, 0);
-		time = 0;
-	}*/
 	
 	private boolean moving = true;
 	@Override
@@ -49,7 +41,6 @@ public class ItemEntity extends Entity {
 		if(level == null) return;
 		
 		if(time > LIFETIME) {
-			//System.out.println("time = " + time);
 			// remove item entity
 			level.removeEntity(this);
 		}
@@ -64,22 +55,18 @@ public class ItemEntity extends Entity {
 			velocity.y *= -1;
 		
 		if(getZ() < 0) {
-			//System.out.println("bouncing");
 			setZ(0);
 			velocity.x *= REBOUND_SPEED_FACTOR;
 			velocity.y *= REBOUND_SPEED_FACTOR;
 			velocity.z *= -REBOUND_SPEED_FACTOR;
 			if(velocity.len() < 0.001f) {
 				moving = false;
-				//System.out.println("set velocity to zero");
 				velocity.setZero();
 			}
 		}
 		
-		if(moving) {
+		if(moving)
 			velocity.add(0, 0, GRAVITY);
-			//System.out.println("velocity = " + velocity);
-		}
 		
 		time += delta;
 	}
@@ -98,5 +85,5 @@ public class ItemEntity extends Entity {
 	}
 	
 	@Override
-	public boolean blockedBy(Entity other) { return false; }
+	public boolean attackedBy(Mob mob, Item attackItem) { return false; }
 }

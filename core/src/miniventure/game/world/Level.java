@@ -136,7 +136,7 @@ public class Level {
 			entity.render(batch, delta);
 	}
 	
-	public void dropItem(@NotNull Item item, int x, int y, @NotNull Entity target) {
+	public void dropItem(@NotNull Item item, int x, int y, @NotNull WorldObject target) {
 		// this tries to drop an item toward an entity.
 		// 
 		//System.out.println("dropping item " + item + " towards " + target);

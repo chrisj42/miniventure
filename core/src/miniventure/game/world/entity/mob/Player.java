@@ -4,6 +4,7 @@ import java.util.EnumMap;
 
 import miniventure.game.item.Item;
 import miniventure.game.world.Level;
+import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.tile.Tile;
 
@@ -109,7 +110,7 @@ public class Player extends Mob {
 		otherEntities.removeValue(this, true); // use ==, not .equals()
 		boolean attacked = false;
 		for(Entity e: otherEntities)
-			attacked = attacked || e.hurtBy(this, heldItem, 1);
+			attacked = attacked || e.attackedBy(this, heldItem);
 		
 		if(attacked) return; // don't hurt the tile
 		
@@ -180,11 +181,12 @@ public class Player extends Mob {
 	public void addToInventory(Item item) { inventory.add(item.clone()); }
 	
 	@Override
-	public boolean hurtBy(Mob mob, Item attackItem, int dmg) { return hurt(dmg); }
-	@Override
-	public boolean hurtBy(Tile tile, int dmg) { return hurt(dmg); }
+	public boolean hurtBy(WorldObject obj, int dmg) { return hurt(obj, dmg); }
 	
-	private boolean hurt(int dmg) {
+	@Override
+	public boolean attackedBy(Mob mob, Item attackItem) { return hurt(mob, attackItem.getDamage()); }
+	
+	private boolean hurt(WorldObject source, int dmg) {
 		int health = stats.get(Stat.Health);
 		if(health == 0) return false;
 		stats.put(Stat.Health, Math.max(0, health - dmg));
