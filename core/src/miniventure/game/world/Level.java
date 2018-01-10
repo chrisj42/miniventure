@@ -3,6 +3,7 @@ package miniventure.game.world;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import miniventure.game.MyUtils;
 import miniventure.game.item.Item;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ItemEntity;
@@ -136,26 +137,49 @@ public class Level {
 			entity.render(batch, delta);
 	}
 	
-	public void dropItem(@NotNull Item item, int x, int y, @NotNull WorldObject target) {
-		// this tries to drop an item toward an entity.
-		// 
-		//System.out.println("dropping item " + item + " towards " + target);
+	public void dropItem(@NotNull Item item, Vector2 dropPos, @Nullable Vector2 targetPos) {
 		
-		Vector2 itemPos = new Vector2(x, y);
-		Vector2 targetPos = new Vector2();
-		target.getBounds().getCenter(targetPos);
-		ItemEntity ie = new ItemEntity(item, targetPos.sub(itemPos));
-		ie.moveTo(this, x, y);
-		addEntity(ie);
-	}
-	
-	public void dropItem(@NotNull Item item, int xt, int yt) {
-		/* this drops the itemEntity at the given coordinate, with any direction.
+		/* this drops the itemEntity at the given coordinates, with the given direction (random if null).
 		 	However, if the given coordinates reside within a solid tile, the adjacent tiles are checked.
 		 		If all surrounding tiles are solid, then it just uses the given coordinates.
 		 		But if it finds a non-solid tile, it drops it towards the non-solid tile.
 		  */
 		
+		Rectangle itemBounds = new Rectangle(dropPos.x, dropPos.y, item.getTexture().getRegionWidth(), item.getTexture().getRegionHeight());
+		Tile closest = getClosestTile(itemBounds);
+		
+		if(closest == null) {
+			System.err.println("ERROR dropping item, closest tile is null");
+			return;
+		}
+		
+		ItemEntity ie = new ItemEntity(item, Vector2.Zero.cpy());
+		
+		if(!closest.isPermeableBy(ie)) {
+			// we need to look around for a tile that the item *can* be placed on.
+			Array<Tile> adjacent = closest.getAdjacentTiles(true);
+			Tile.sortByDistance(adjacent, targetPos);
+			for(Tile adj: adjacent) {
+				if(adj.isPermeableBy(ie)) {
+					closest = adj;
+					break;
+				}
+			}
+		}
+		
+		// make sure the item will be fully inside the "closest" tile when dropped.
+		MyUtils.moveRectInside(itemBounds, closest.getBounds(), 1);
+		
+		dropPos.x = itemBounds.x;
+		dropPos.y = itemBounds.y;
+		
+		if(targetPos == null)
+			targetPos = dropPos.cpy().add(new Vector2(MathUtils.random(Tile.SIZE/2), MathUtils.random(Tile.SIZE/2)));
+		
+		ie = new ItemEntity(item, targetPos.sub(dropPos));
+		
+		ie.moveTo(this, dropPos);
+		addEntity(ie);
 	}
 	
 	@Nullable

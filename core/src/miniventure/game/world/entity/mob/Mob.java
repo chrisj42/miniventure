@@ -1,6 +1,8 @@
 package miniventure.game.world.entity.mob;
 
-import miniventure.game.item.Item;
+import miniventure.game.world.ItemDrop;
+import miniventure.game.world.Level;
+import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.MobAnimationController.AnimationState;
@@ -8,6 +10,7 @@ import miniventure.game.world.entity.mob.MobAnimationController.AnimationState;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -16,12 +19,21 @@ import org.jetbrains.annotations.NotNull;
  */
 public abstract class Mob extends Entity {
 	
+	private static final float SKID_FRICTION = 1; // this is the acceleration, in units / second, that goes against and slows your knockback velocity.
+	
 	@NotNull private Direction dir;
 	@NotNull private MobAnimationController animator;
 	
-	public Mob(@NotNull String spriteName) {
+	private int health;
+	@NotNull private ItemDrop[] itemDrops;
+	
+	private Vector2 knockbackVelocity = new Vector2(); // knockback is applied once, at the start, as a velocity. The mob is moved with this velocity constantly, slowing down at a fixed rate, until the knockback is gone.
+	
+	public Mob(@NotNull String spriteName, int health, @NotNull ItemDrop... deathDrops) {
 		super(new Sprite());
 		dir = Direction.DOWN;
+		this.health = health;
+		this.itemDrops = deathDrops;
 		
 		animator = new MobAnimationController(this, spriteName);
 	}
@@ -53,10 +65,18 @@ public abstract class Mob extends Entity {
 		}
 	}
 	
-	/*
-		So, we need a mob hurt system...
-	 */
-	
 	@Override
-	public boolean attackedBy(Mob mob, Item attackItem) { return true; } // mobs are hurt
+	public boolean hurtBy(WorldObject obj, int damage) {
+		health -= Math.min(damage, health);
+		if(health == 0) {
+			Level level = getLevel();
+			if(level != null) {
+				for (ItemDrop drop : itemDrops)
+					drop.dropItems(level, this, obj);
+				level.removeEntity(this);
+			}
+		}
+		
+		return true;
+	}
 }

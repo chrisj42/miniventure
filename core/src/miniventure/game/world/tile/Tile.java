@@ -1,6 +1,6 @@
 package miniventure.game.world.tile;
 
-import miniventure.game.GameCore;
+import miniventure.game.MyUtils;
 import miniventure.game.item.Item;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 public class Tile implements WorldObject {
@@ -131,6 +132,16 @@ public class Tile implements WorldObject {
 		}
 	}
 	
+	public static Array<Tile> sortByDistance(Array<Tile> tiles, final Vector2 position) {
+		tiles.sort((t1, t2) -> {
+			float t1diff = position.dst(t1.getBounds().getCenter(new Vector2()));
+			float t2diff = position.dst(t2.getBounds().getCenter(new Vector2()));
+			return Float.compare(t1diff, t2diff);
+		});
+		
+		return tiles;
+	}
+	
 	private void draw(SpriteBatch batch, TextureRegion texture) {
 		batch.draw(texture, x*SIZE, y*SIZE, SIZE, SIZE);
 	}
@@ -203,9 +214,9 @@ public class Tile implements WorldObject {
 	public boolean touchedBy(Entity entity) { type.touchListener.touchedBy(entity, this); return true; }
 	
 	@Override
-	public String toString() { return GameCore.toTitleCase(type+"") + " Tile"; }
+	public String toString() { return MyUtils.toTitleCase(type+"") + " Tile"; }
 	
 	public String toLocString() {
-		return x+","+y+" (" + GameCore.toTitleCase(type+"")+" Tile)";
+		return x+","+y+" (" + MyUtils.toTitleCase(type+"")+" Tile)";
 	}
 }

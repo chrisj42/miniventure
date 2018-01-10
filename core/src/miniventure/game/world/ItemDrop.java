@@ -2,7 +2,10 @@ package miniventure.game.world;
 
 import miniventure.game.item.Item;
 
+import com.badlogic.gdx.math.Vector2;
+
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class ItemDrop {
 	
@@ -111,8 +114,11 @@ public class ItemDrop {
 		return 1;
 	}
 	
-	public void dropItems(Level level, int x, int y, @NotNull WorldObject target) {
+	public void dropItems(Level level, @NotNull WorldObject source, @Nullable WorldObject target) {
+		dropItems(level, source.getBounds().getCenter(new Vector2()), target == null ? null : target.getBounds().getCenter(new Vector2()));
+	}
+	public void dropItems(Level level, Vector2 dropPos, @Nullable Vector2 targetPos) {
 		for(int i = 0; i < getItemsDropped(); i++)
-			level.dropItem(item, x, y, target);
+			level.dropItem(item, dropPos, targetPos);
 	}
 }

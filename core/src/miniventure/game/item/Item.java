@@ -1,6 +1,7 @@
 package miniventure.game.item;
 
 import miniventure.game.GameCore;
+import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.tile.Tile;
 
@@ -38,7 +39,7 @@ public abstract class Item {
 	
 	public boolean interact(Player player, Tile tile) { return false; }
 	
-	public int getDamage() { return 1; }
+	public int getDamage(WorldObject target) { return 1; }
 	
 	public abstract Item clone();
 }

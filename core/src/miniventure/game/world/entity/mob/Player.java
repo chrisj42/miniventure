@@ -47,7 +47,7 @@ public class Player extends Mob {
 	private Array<Item> inventory = new Array<>();
 	
 	public Player() {
-		super("player");
+		super("player", Stat.Health.initial);
 		heldItem = null;
 		for(Stat stat: Stat.values)
 			stats.put(stat, stat.initial);
@@ -149,29 +149,6 @@ public class Player extends Mob {
 		}
 		
 		if(heldItem.isUsed()) heldItem = inventory.size == 0 ? null : inventory.removeIndex(0);
-		
-		/*TileType newType = null;
-		
-		if(pressingKey(Input.Keys.G))
-			newType = TileType.GRASS;
-		if(pressingKey(Input.Keys.D))
-			newType = TileType.DIRT;
-		if(pressingKey(Input.Keys.H))
-			newType = TileType.HOLE;
-		if(pressingKey(Input.Keys.S))
-			newType = TileType.SAND;
-		if(pressingKey(Input.Keys.C))
-			newType = TileType.CACTUS;
-		if(pressingKey(Input.Keys.T))
-			newType = TileType.TREE;
-		if(pressingKey(Input.Keys.W))
-			newType = TileType.WATER;
-		if(pressingKey(Input.Keys.R))
-			newType = TileType.ROCK;
-		
-		if(newType != null)
-			tile.resetTile(newType);
-		*/
 	}
 	
 	private void useItem(Item item) {
@@ -181,16 +158,13 @@ public class Player extends Mob {
 	public void addToInventory(Item item) { inventory.add(item.clone()); }
 	
 	@Override
-	public boolean hurtBy(WorldObject obj, int dmg) { return hurt(obj, dmg); }
-	
-	@Override
-	public boolean attackedBy(Mob mob, Item attackItem) { return hurt(mob, attackItem.getDamage()); }
-	
-	private boolean hurt(WorldObject source, int dmg) {
+	public boolean hurtBy(WorldObject source, int dmg) {
 		int health = stats.get(Stat.Health);
 		if(health == 0) return false;
 		stats.put(Stat.Health, Math.max(0, health - dmg));
-		return true;
+		// here is where I'd make a death chest, and show the death screen.
+		
+		return super.hurtBy(source, dmg);
 	}
 	
 	private static boolean pressingKey(int keycode) {

@@ -14,6 +14,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 public abstract class Entity implements WorldObject {
@@ -131,6 +132,7 @@ public abstract class Entity implements WorldObject {
 		moveTo(level, newRect.x, newRect.y);
 	}
 	
+	public void moveTo(Level level, Vector2 pos) { moveTo(level, pos.x, pos.y); }
 	public void moveTo(Level level, float x, float y) {
 		// this method doesn't care where you end up.
 		x = Math.max(x, 0);
@@ -157,7 +159,7 @@ public abstract class Entity implements WorldObject {
 	public boolean isPermeableBy(Entity entity) { return entity instanceof ItemEntity; }
 	
 	@Override
-	public boolean attackedBy(Mob mob, Item attackItem) { return false; } // generally speaking, attacking an entity doesn't do anything; only for mobs, and maybe furniture...
+	public boolean attackedBy(Mob mob, Item attackItem) { return hurtBy(mob, attackItem.getDamage(this)); }
 	
 	@Override
 	public boolean hurtBy(WorldObject obj, int dmg) { return false; } // generally speaking, attacking an entity doesn't do anything; only for mobs, and maybe furniture...

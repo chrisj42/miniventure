@@ -9,6 +9,8 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
+import org.jetbrains.annotations.NotNull;
+
 public class ItemEntity extends Entity {
 	
 	private static final float LIFETIME = 8f;
@@ -22,7 +24,7 @@ public class ItemEntity extends Entity {
 	
 	private final Item item;
 	
-	public ItemEntity(Item item, Vector2 goalDir) {
+	public ItemEntity(Item item, @NotNull Vector2 goalDir) {
 		super(new Sprite(item.getTexture()));
 		this.item = item;
 		velocity = new Vector3(goalDir.cpy().scl(INITIAL_MOVE_FORCE), INITIAL_BOUNCE_FORCE);

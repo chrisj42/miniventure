@@ -71,7 +71,7 @@ public class DestructibleProperty implements TileProperty {
 	public TileType getCoveredTile() { return coveredTile; }
 	
 	boolean tileAttacked(Tile tile, Mob attacker, Item attackItem) {
-		int damage = getDamage(attackItem);
+		int damage = getDamage(tile, attackItem);
 		return tileAttacked(tile, attacker, damage);
 	}
 		//System.out.println("attacked tile " + tile + " with " + attackItem + "; damage = " + damage);
@@ -83,7 +83,7 @@ public class DestructibleProperty implements TileProperty {
 			if(health <= 0) {// TODO here is where we need to drop the items.
 				for(ItemDrop drop: drops)
 					if(drop != null)
-						drop.dropItems(tile.getLevel(), tile.getCenterX(), tile.getCenterY(), attacker);
+						drop.dropItems(tile.getLevel(), tile, attacker);
 				tile.resetTile(coveredTile);
 			} else
 				tile.setData(this, HEALTH_IDX, health);
@@ -94,10 +94,10 @@ public class DestructibleProperty implements TileProperty {
 		return false;
 	}
 	
-	private int getDamage(@Nullable Item attackItem) {
+	private int getDamage(@NotNull Tile attacked, @Nullable Item attackItem) {
 		int damage = 1;
 		if(attackItem != null)
-			damage = attackItem.getDamage();
+			damage = attackItem.getDamage(attacked);
 		
 		if(damageConditions.length > 0) {
 			// must satisfy at least one condition
