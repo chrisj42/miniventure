@@ -80,9 +80,9 @@ public class Player extends Mob {
 		
 		move(movement.x, movement.y);
 		
-		// Also, see what happens when I go to texturePacker and remove the outer whitespace around the player sprites. If possible, make sure they are all the same size, but see what happens if they aren't anyway.
-		//if(pressingKey(Input.Keys.E))
-			//GameCore.getGameScreen().setScreen(new InventoryMenu(this, inventory));
+		if(pressingKey(Input.Keys.Q)) cycleHeldItem(false);
+		if(pressingKey(Input.Keys.E)) cycleHeldItem(true);
+		
 		if(pressingKey(Input.Keys.C))
 			attack();
 		else if(pressingKey(Input.Keys.V))
@@ -98,6 +98,20 @@ public class Player extends Mob {
 		if(heldItem == null && inventory.size > 0) {
 			//System.out.println("updating player's active item");
 			heldItem = inventory.removeIndex(0);
+		}
+	}
+	
+	private void cycleHeldItem(boolean forward) {
+		if(inventory.size == 0) return;
+		
+		if(forward) { // add active item to the end of the list, and set the first inventory item to active.
+			if(heldItem != null)
+				inventory.add(heldItem);
+			heldItem = inventory.removeIndex(0);
+		} else { // add active to start of list, and take from the end
+			if(heldItem != null)
+				inventory.insert(0, heldItem);
+			heldItem = inventory.removeIndex(inventory.size-1);
 		}
 	}
 	
