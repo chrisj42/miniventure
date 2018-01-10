@@ -117,4 +117,14 @@ public class GameCore extends Game {
 		font.setColor(center);
 		font.draw(batch, text, x, y);
 	}
+	
+	public static String toTitleCase(String string) {
+		String[] words = string.split(" ");
+		for(int i = 0; i < words.length; i++) {
+			if(words[i].length() == 0) continue;
+			words[i] = words[i].substring(0, 1).toUpperCase() + words[i].substring(1).toLowerCase();
+		}
+		
+		return String.join(" ", words);
+	}
 }
