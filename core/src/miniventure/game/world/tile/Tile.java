@@ -159,7 +159,7 @@ public class Tile implements WorldObject {
 	}
 	
 	private void drawOverlap(SpriteBatch batch, TileType type, boolean under) {
-		Array<AtlasRegion> sprites = type.getProp(OverlapProperty.class).getSprites(this, under);
+		Array<AtlasRegion> sprites = type.getProp(OverlapProperty.class).getSprites(this, under); // "under" determines whether the other tiles overlap with their under-tiles. 
 		for(AtlasRegion sprite: sprites)
 			draw(batch, sprite);
 	}
@@ -170,15 +170,30 @@ public class Tile implements WorldObject {
 		
 		if(under != null) { // draw the tile that ought to be rendered underneath this one
 			draw(batch, under.getProp(ConnectionProperty.class).getSprite(this, true));
-			drawOverlap(batch, under, true);
+			drawOverlap(batch, under, true); // under tiles, and those without an under, are rendered.
+			// ex grass is drawn, using grass and tree tiles.
 		}
 		
 		// Due to animation, I'm going to try and draw everything without caching. Hopefully, it won't be slow.
 		draw(batch, type.getProp(ConnectionProperty.class).getSprite(this)); // draws base sprite for this tile
 		
-		drawOverlap(batch, type, true); // draw the overlap from other under tiles; considers also those without an under tile.
 		
-		drawOverlap(batch, type, false); // draw overlap from other tiles; only considers those that have an under tile.
+		drawOverlap(batch, type, under == null); // read below for explanation.
+		
+		
+		//drawOverlap(batch, type, true); // draw the overlap from other under tiles; considers also those without an under tile.
+		// ex trees are drawn, using grass from trees... that's it.
+		// or (grass tile) grass is drawn, with other grass and tree grass.
+		
+		//drawOverlap(batch, type, false); // draw overlap from other tiles; only considers those that have an under tile.
+		// ex trees are drawn, and other trees around it
+		// or grass is drawn, not connecting to other grass... or pretty much anything.
+		
+		
+		// from the above two, i conclude that if you have an under tile, draw the main with under = false
+		// if you don't have an under tile, draw the main with under = true
+		
+		// AKA draw the main with under = don't have under 
 	}
 	
 	@Override

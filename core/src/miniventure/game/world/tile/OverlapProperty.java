@@ -43,7 +43,7 @@ public class OverlapProperty implements TileProperty {
 						else
 							aroundTiles[i] = oType;
 					}
-					else if(oUnder != null)
+					else if(oUnder != null) // if not using under, those without an under tile will not be drawn.
 						aroundTiles[i] = oType;
 					
 					if(aroundTiles[i] != null && aroundTiles[i].getProp(OverlapProperty.class).overlaps)
