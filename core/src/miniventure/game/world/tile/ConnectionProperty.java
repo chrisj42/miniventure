@@ -31,7 +31,7 @@ public class ConnectionProperty implements TileProperty {
 				for (int y = -1; y <= 1; y++) {
 					Tile oTile = tile.getLevel().getTile(tile.x + x, tile.y + y);
 					if(oTile != null) {
-						TileType oUnder = oTile.getType().animationProperty.renderBehind;
+						TileType oUnder = oTile.getUnderType();
 						if(under && oUnder != null)
 							aroundTiles[i] = oUnder;
 						else
@@ -42,16 +42,16 @@ public class ConnectionProperty implements TileProperty {
 			}
 		
 			for (i = 0; i < TileTouchCheck.connectionChecks.length; i++) {
-				if (TileTouchCheck.connectionChecks[i].checkMatch(aroundTiles, aroundTiles[aroundTiles.length/2].connectionProperty.connectingTiles, null, false)) {
+				if (TileTouchCheck.connectionChecks[i].checkMatch(aroundTiles, aroundTiles[aroundTiles.length/2].getProp(ConnectionProperty.class).connectingTiles, null, false)) {
 					spriteIdx = i;
 					break;
 				}
 			}
 		}
 		
-		TileType curUnder = tile.getType().animationProperty.renderBehind;
+		TileType curUnder = tile.getUnderType();
 		TileType type = under && curUnder != null ? curUnder : tile.getType();
-		return type.animationProperty.getSprite(spriteIdx, false, tile, type);
+		return type.getProp(AnimationProperty.class).getSprite(spriteIdx, false, tile, type);
 	}
 	
 	@Override

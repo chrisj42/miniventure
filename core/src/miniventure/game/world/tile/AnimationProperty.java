@@ -55,20 +55,30 @@ public class AnimationProperty implements TileProperty {
 	
 	private final AnimationType main, overlay;
 	private final float mainFrameTime, overlayFrameTime;
-	final TileType renderBehind;
 	
-	AnimationProperty(AnimationType main) { this(null, main); }
-	AnimationProperty(TileType renderBehind, AnimationType main) { this(renderBehind, main, 0); }
-	AnimationProperty(AnimationType main, float mainFrameTime) { this(null, main, mainFrameTime); }
-	AnimationProperty(TileType renderBehind, AnimationType main, float mainFrameTime) { this(renderBehind, main, mainFrameTime, main, mainFrameTime); }
-	AnimationProperty(AnimationType main, float mainFrameTime, AnimationType overlay, float overlayFrameTime) { this(null, main, mainFrameTime, overlay, overlayFrameTime); }
-	AnimationProperty(TileType renderBehind, AnimationType main, float mainFrameTime, AnimationType overlay, float overlayFrameTime) {
-		this.renderBehind = renderBehind;
+	private final boolean isTransparent;
+	//private final TileType tileType;
+	
+	AnimationProperty(AnimationType main) { this(false, main); }
+	AnimationProperty(boolean isTransparent, AnimationType main) { this(isTransparent, main, 0); }
+	AnimationProperty(AnimationType main, float mainFrameTime) { this(false, main, mainFrameTime); }
+	AnimationProperty(boolean isTransparent, AnimationType main, float mainFrameTime) { this(isTransparent, main, mainFrameTime, main, mainFrameTime); }
+	AnimationProperty(AnimationType main, float mainFrameTime, AnimationType overlay, float overlayFrameTime) { this(false, main, mainFrameTime, overlay, overlayFrameTime); }
+	AnimationProperty(boolean isTransparent, AnimationType main, float mainFrameTime, AnimationType overlay, float overlayFrameTime) {
 		this.main = main;
 		this.overlay = overlay;
 		this.mainFrameTime = mainFrameTime;
 		this.overlayFrameTime = overlayFrameTime;
+		this.isTransparent = isTransparent;
 	}
+	
+	boolean isTransparent() { return isTransparent; }
+	
+	/*@Nullable
+	public TileType getRenderedBehind() {
+		if(!isTransparent) return null;
+		return tileType.getProp(CoveredTileProperty.class).getUnderTile();
+	}*/
 	
 	AtlasRegion getSprite(int spriteIndex, boolean isOverlapSprite, Tile tile) {
 		return getSprite(spriteIndex, isOverlapSprite, tile, tile.getType());

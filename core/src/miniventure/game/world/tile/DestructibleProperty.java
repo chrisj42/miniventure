@@ -17,7 +17,6 @@ public class DestructibleProperty implements TileProperty {
 	
 	private static final int HEALTH_IDX = 0;
 	
-	private final TileType coveredTile;
 	private final int totalHealth;
 	
 	//private final EnumMap<ToolType, Float> toolTypeDamageMultipliers = new EnumMap<>(ToolType.class);
@@ -26,8 +25,8 @@ public class DestructibleProperty implements TileProperty {
 	private final DamageConditionCheck[] damageConditions;
 	private ItemDrop[] drops;
 	
+	// indestructible constructor :3
 	private DestructibleProperty() {
-		coveredTile = null;
 		totalHealth = -1;
 		preferredTool = null;
 		damageConditions = new DamageConditionCheck[] {(item) -> false};
@@ -35,8 +34,7 @@ public class DestructibleProperty implements TileProperty {
 	}
 	
 	// this is for tiles with health
-	DestructibleProperty(int totalHealth, TileType coveredTile, @Nullable PreferredTool preferredTool, ItemDrop... drops) {
-		this.coveredTile = coveredTile;
+	DestructibleProperty(int totalHealth, @Nullable PreferredTool preferredTool, ItemDrop... drops) {
 		this.totalHealth = totalHealth;
 		this.damageConditions = new DamageConditionCheck[0];
 		this.drops = drops;
@@ -46,29 +44,26 @@ public class DestructibleProperty implements TileProperty {
 		//	toolTypeDamageMultipliers.put(tool.toolType, tool.damageMultiplier);
 	}
 	
-	private boolean dropsTileItem;
 	
-	// this is for tiles that are destroyed in one hit 
-	DestructibleProperty(TileType coveredTile, boolean dropsTileItem, DamageConditionCheck... damageConditions) {
-		this(coveredTile, null, damageConditions);
-		this.dropsTileItem = dropsTileItem;
-		//if(dropsTileItem)
-		//	drop = new TileItem()
-	}
-	DestructibleProperty(TileType coveredTile, ItemDrop drop, DamageConditionCheck... damageConditions) {
-		this.coveredTile = coveredTile;
+	/// this is for tiles that are destroyed in one hit
+	// NOTE, required tools count as damage conditions.
+	DestructibleProperty(ItemDrop drop, DamageConditionCheck... damageConditions) {
 		totalHealth = 1;
 		preferredTool = null;
 		this.damageConditions = damageConditions;
 		this.drops = new ItemDrop[] {drop};
 	}
 	
-	void init(TileType type) {
-		if(dropsTileItem)
-			drops = new ItemDrop[] {new ItemDrop(new TileItem(type))};
+	private boolean dropsTileItem = false;
+	DestructibleProperty(boolean dropsTileItem, DamageConditionCheck... damageConditions) {
+		this(null, damageConditions);
+		this.dropsTileItem = dropsTileItem;
 	}
 	
-	public TileType getCoveredTile() { return coveredTile; }
+	public void init(TileType type) {
+		if(dropsTileItem)
+			drops = new ItemDrop[] {new ItemDrop(new Item(TileItem.get(type)))};
+	}
 	
 	boolean tileAttacked(Tile tile, Mob attacker, Item attackItem) {
 		int damage = getDamage(tile, attackItem);
@@ -84,7 +79,7 @@ public class DestructibleProperty implements TileProperty {
 				for(ItemDrop drop: drops)
 					if(drop != null)
 						drop.dropItems(tile.getLevel(), tile, attacker);
-				tile.resetTile(coveredTile);
+				tile.resetTile(tile.getUnderType());
 			} else
 				tile.setData(this, HEALTH_IDX, health);
 			
@@ -101,20 +96,16 @@ public class DestructibleProperty implements TileProperty {
 		
 		if(damageConditions.length > 0) {
 			// must satisfy at least one condition
-			boolean doDamage = false;
-			for(DamageConditionCheck condition: damageConditions) {
-				if(condition.isDamagedBy(attackItem)) {
-					doDamage = true;
-					break;
-				}
-			}
+			boolean doDamage = true;
+			for(DamageConditionCheck condition: damageConditions)
+				doDamage = doDamage && condition.isDamagedBy(attackItem);
 			
 			if(!doDamage) return 0;
 			// otherwise, continue.
 		}
 		
-		if(preferredTool != null && attackItem instanceof ToolItem) {
-			ToolType type = ((ToolItem)attackItem).getType();
+		if(preferredTool != null && attackItem != null && attackItem.getItemData() instanceof ToolItem) {
+			ToolType type = ((ToolItem)attackItem.getItemData()).getType();
 			if(type == preferredTool.toolType)
 				damage = (int) Math.ceil(damage * preferredTool.damageMultiplier);
 			//if(toolTypeDamageMultipliers.containsKey(type))
@@ -159,7 +150,7 @@ public class DestructibleProperty implements TileProperty {
 		
 		@Override
 		public boolean isDamagedBy(@Nullable Item attackItem) {
-			return attackItem instanceof ToolItem && ((ToolItem)attackItem).getType() == toolType;
+			return attackItem != null && attackItem.getItemData() instanceof ToolItem && ((ToolItem)attackItem.getItemData()).getType() == toolType;
 		}
 	}
 	

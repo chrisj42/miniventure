@@ -2,7 +2,6 @@ package miniventure.game.world.tile;
 
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 
 import miniventure.game.MyUtils;
 import miniventure.game.item.ToolType;
@@ -20,40 +19,47 @@ public enum TileType {
 		new ConnectionProperty(true)
 	),
 	
-	DIRT(true,
-		new DestructibleProperty(HOLE, true)
+	DIRT(
+		new CoveredTileProperty(HOLE),
+		new DestructibleProperty(true)
 	),
 	
-	GRASS(true,
-		new DestructibleProperty(DIRT, true),
+	GRASS(
+		new CoveredTileProperty(DIRT),
+		new DestructibleProperty(true),
 		new OverlapProperty(true)
 	),
 	
-	SAND(true,
-		new DestructibleProperty(HOLE, true),
+	SAND(
+		new CoveredTileProperty(HOLE),
+		new DestructibleProperty(true),
 		new OverlapProperty(true)
 	),
 	
 	ROCK(
 		SolidProperty.SOLID,
-		new DestructibleProperty(20, DIRT, new PreferredTool(ToolType.PICKAXE, 5))
+		new CoveredTileProperty(DIRT),
+		new DestructibleProperty(20, new PreferredTool(ToolType.PICKAXE, 5))
 	),
 	
 	TREE(
 		SolidProperty.SOLID,
-		new DestructibleProperty(10, GRASS, new PreferredTool(ToolType.AXE, 2)),
-		new AnimationProperty(GRASS, AnimationType.SINGLE_FRAME),
+		new CoveredTileProperty(GRASS),
+		new DestructibleProperty(10, new PreferredTool(ToolType.AXE, 2)),
+		new AnimationProperty(true, AnimationType.SINGLE_FRAME),
 		new ConnectionProperty(true)
 	),
 	
 	CACTUS(
 		SolidProperty.SOLID,
-		new DestructibleProperty(7, SAND, null),
-		new AnimationProperty(SAND, AnimationType.SINGLE_FRAME),
+		new CoveredTileProperty(SAND),
+		new DestructibleProperty(7, null),
+		new AnimationProperty(true, AnimationType.SINGLE_FRAME),
 		(TouchListener) (e, t) -> e.hurtBy(t, 1)
 	),
 	
 	WATER(
+		new CoveredTileProperty(HOLE),
 		new AnimationProperty(AnimationType.RANDOM, 0.2f, AnimationType.SEQUENCE, 1/16f),
 		new SpreadUpdateProperty(HOLE),
 		new OverlapProperty(true)
@@ -66,58 +72,36 @@ public enum TileType {
 	
 	/*
 		Others:
-		water, lava, sand, stone, cactus, wheat, farmland, door, floor, wall, stairs?, sapling, torch, ore, cloud?,
+		wheat, farmland, door, floor, wall, stairs?, sapling, torch, ore, ice, cloud?,
 		laser source, laser, mirror, laser receiver.
-		ice
-		
-		
 	 */
 	
-	public final boolean maySpawn;
-	final SolidProperty solidProperty;
-	public final DestructibleProperty destructibleProperty;
-	final InteractableProperty interactableProperty;
-	final TouchListener touchListener;
-	final AnimationProperty animationProperty;
-	final ConnectionProperty connectionProperty;
-	final OverlapProperty overlapProperty;
-	final UpdateProperty updateProperty;
 	
-	final HashMap<TileProperty, Integer> propertyDataIndexes = new HashMap<>();
-	final HashMap<TileProperty, Integer> propertyDataLengths = new HashMap<>();
+	private final HashMap<Class<? extends TileProperty>, TileProperty> propertyMap;
+	
+	private final HashMap<TileProperty, Integer> propertyDataIndexes = new HashMap<>();
+	private final HashMap<TileProperty, Integer> propertyDataLengths = new HashMap<>();
 	private final Integer[] initialData;
 	
 	TileType(@NotNull TileProperty... properties) {
-		this(false, properties);
-	}
-	TileType(boolean maySpawn, @NotNull TileProperty... properties) {
-		this.maySpawn = maySpawn;
 		
 		// get the default properties
-		LinkedHashMap<String, TileProperty> propertyMap = TileProperty.getDefaultPropertyMap();
+		propertyMap = TileProperty.getDefaultPropertyMap();
 		
+		//System.out.println("for " + name());
 		// replace the defaults with specified properties
 		for(TileProperty property: properties) {
-			Class clazz = MyUtils.getDirectSubclass(TileProperty.class, property.getClass());
-			if(clazz == null) throw new NullPointerException();
-			String className = clazz.getName();
-			if(className.contains("$")) className = className.substring(0, className.indexOf("$")); // strip off extra stuff generated if it was a lambda expression
-			propertyMap.put(className, property);
+			Class<? extends TileProperty> clazz = MyUtils.getDirectSubclass(TileProperty.class, property.getClass());
+			//System.out.println("found class " + clazz);
+			propertyMap.put(clazz, property);
 		}
 		
-		this.solidProperty = (SolidProperty)propertyMap.get(SolidProperty.class.getName());
-		this.destructibleProperty = (DestructibleProperty)propertyMap.get(DestructibleProperty.class.getName());
-		this.interactableProperty = (InteractableProperty)propertyMap.get(InteractableProperty.class.getName());
-		this.touchListener = (TouchListener)propertyMap.get(TouchListener.class.getName());
-		this.animationProperty = (AnimationProperty)propertyMap.get(AnimationProperty.class.getName());
-		this.connectionProperty = (ConnectionProperty)propertyMap.get(ConnectionProperty.class.getName());
-		this.overlapProperty = (OverlapProperty)propertyMap.get(OverlapProperty.class.getName());
-		this.updateProperty = (UpdateProperty)propertyMap.get(UpdateProperty.class.getName());
+		for(TileProperty prop: propertyMap.values())
+			prop.init(this);
 		
-		this.connectionProperty.addConnectingType(this);
-		this.destructibleProperty.init(this);
+		getProp(ConnectionProperty.class).addConnectingType(this);
 		
-		Array<Integer> initData = new Array<Integer>();
+		Array<Integer> initData = new Array<>();
 		
 		for(TileProperty prop: propertyMap.values()) {
 			propertyDataIndexes.put(prop, initData.size);
@@ -133,7 +117,12 @@ public enum TileType {
 	
 	/// POST-INITIALIZATION
 	static {
-		HOLE.connectionProperty.addConnectingType(WATER);
+		HOLE.getProp(ConnectionProperty.class).addConnectingType(WATER);
+	}
+	
+	public <T extends TileProperty> T getProp(Class<T> clazz) {
+		//noinspection unchecked
+		return (T)propertyMap.get(clazz);
 	}
 	
 	int[] getInitialData() {
@@ -143,6 +132,18 @@ public enum TileType {
 		
 		return data;
 	}
+	
+	
+	void checkDataAccess(TileProperty property, int propDataIndex) {
+		if(!propertyDataIndexes.containsKey(property))
+			throw new IllegalArgumentException("specified property " + property + " is not from this tile's type, "+this+".");
+		
+		if(propDataIndex >= propertyDataLengths.get(property))
+			throw new IndexOutOfBoundsException("tile property " + property + " tried to access index past stated length; length="+propertyDataLengths.get(property)+", index="+propDataIndex);
+	}
+	
+	int getPropDataIndex(TileProperty prop) { return propertyDataIndexes.get(prop); }
+	int getPropDataLength(TileProperty prop) { return propertyDataLengths.get(prop); }
 	
 	
 	public static final TileType[] values = TileType.values();

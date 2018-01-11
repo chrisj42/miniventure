@@ -6,6 +6,8 @@ import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.MobAnimationController.AnimationState;
+import miniventure.game.world.tile.Tile;
+import miniventure.game.world.tile.TileType;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -26,6 +28,8 @@ public abstract class Mob extends Entity {
 	
 	private int health;
 	@NotNull private ItemDrop[] itemDrops;
+	
+	// TODO add knockback
 	
 	private Vector2 knockbackVelocity = new Vector2(); // knockback is applied once, at the start, as a velocity. The mob is moved with this velocity constantly, slowing down at a fixed rate, until the knockback is gone.
 	
@@ -78,5 +82,11 @@ public abstract class Mob extends Entity {
 		}
 		
 		return true;
+	}
+	
+	
+	public boolean maySpawn(Tile tile) {
+		TileType type = tile.getType();
+		return type == TileType.GRASS || type == TileType.DIRT || type == TileType.SAND;
 	}
 }

@@ -13,7 +13,7 @@ public class MyUtils {
 	private MyUtils() {} // can't instantiate
 	
 	@Nullable
-	public static Class getDirectSubclass(Class superClass, Class target) {
+	public static <T> Class<? extends T> getDirectSubclass(Class<T> superClass, Class<? extends T> target) {
 		Array<Class> parents = new Array<>(target.getInterfaces());
 		Class targetSuper = target.getSuperclass();
 		
@@ -23,16 +23,19 @@ public class MyUtils {
 		if(targetSuper == Object.class && parents.size == 0)
 			return null;
 		
-		if(targetSuper != Object.class) {
-			Class sub = getDirectSubclass(superClass, targetSuper);
+		if(targetSuper != Object.class && superClass.isAssignableFrom(targetSuper)) {
+			//noinspection unchecked
+			Class<? extends T> sub = MyUtils.getDirectSubclass(superClass, (Class<? extends T>)targetSuper);
 			if(sub != null) return sub;
 		}
 		
 		// go through array
 		for(Class parent: parents) {
-			Class sub = getDirectSubclass(superClass, parent);
-			if(sub != null)
-				return sub;
+			if(!superClass.isAssignableFrom(parent)) continue;
+			
+			//noinspection unchecked
+			Class<? extends T> sub = MyUtils.getDirectSubclass(superClass, (Class<? extends T>)parent);
+			if(sub != null) return sub;
 		}
 		
 		return null;

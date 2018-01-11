@@ -36,16 +36,17 @@ public class OverlapProperty implements TileProperty {
 				Tile oTile = tile.getLevel().getTile(tile.x + x, tile.y + y);
 				if(oTile != null) {
 					TileType oType = oTile.getType();
+					TileType oUnder = oTile.getUnderType();
 					if(useUnder) {
-						if(oType.animationProperty.renderBehind != null)
-							aroundTiles[i] = oType.animationProperty.renderBehind;
+						if(oUnder != null)
+							aroundTiles[i] = oUnder;
 						else
 							aroundTiles[i] = oType;
 					}
-					else if(oType.animationProperty.renderBehind != null)
+					else if(oUnder != null)
 						aroundTiles[i] = oType;
 					
-					if(aroundTiles[i] != null && aroundTiles[i].overlapProperty.overlaps)
+					if(aroundTiles[i] != null && aroundTiles[i].getProp(OverlapProperty.class).overlaps)
 						types.add(aroundTiles[i]);
 				}
 				i++;
@@ -53,10 +54,10 @@ public class OverlapProperty implements TileProperty {
 		}
 		
 		final TileType compareType;
-		TileType under = tile.getType().animationProperty.renderBehind;
+		TileType under = tile.getUnderType();
 		if(useUnder && under != null && TileType.tileSorter.compare(under, tile.getType()) < 0)
 			compareType = under;
-		else 
+		else
 			compareType = tile.getType();
 		types.removeIf(tileType -> TileType.tileSorter.compare(tileType, compareType) <= 0);
 		
@@ -80,7 +81,7 @@ public class OverlapProperty implements TileProperty {
 			if(aroundTiles[6] == type && bits[2] == 0 && bits[3] == 0) indexes.add(2);
 			if(aroundTiles[0] == type && bits[3] == 0 && bits[0] == 0) indexes.add(3);
 			for(Integer idx: indexes)
-				sprites.add(type.animationProperty.getSprite(idx, true, tile, type));
+				sprites.add(type.getProp(AnimationProperty.class).getSprite(idx, true, tile, type));
 		}
 		return sprites;
 	}

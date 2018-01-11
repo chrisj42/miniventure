@@ -3,6 +3,7 @@ package miniventure.game.world.entity.mob;
 import java.util.EnumMap;
 
 import miniventure.game.item.Item;
+import miniventure.game.item.ItemData;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.tile.Tile;
@@ -56,10 +57,11 @@ public class Player extends Mob {
 		return stats.get(stat);
 	}
 	@Nullable
-	public Item getHeldItemClone() {
+	public ItemData getHeldItemData() {
 		if(heldItem == null) return null;
-		return heldItem.clone();
+		return heldItem.getItemData();
 	}
+	public int getHeldItemStackSize() { return heldItem == null ? 0 : heldItem.getStackSize(); }
 	
 	public void checkInput(float delta, @NotNull Vector2 mouseInput) {
 		// checks for keyboard input to move the player.
@@ -167,7 +169,12 @@ public class Player extends Mob {
 		}
 	}
 	
-	public void addToInventory(Item item) { inventory.add(item.clone()); }
+	public void addToInventory(Item item) {
+		for(Item i: inventory)
+			if(i.addToStack(item)) return;
+		
+		inventory.add(item);
+	}
 	
 	@Override
 	public boolean hurtBy(WorldObject source, int dmg) {

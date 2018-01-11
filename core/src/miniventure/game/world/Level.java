@@ -145,7 +145,7 @@ public class Level {
 		 		But if it finds a non-solid tile, it drops it towards the non-solid tile.
 		  */
 		
-		Rectangle itemBounds = new Rectangle(dropPos.x, dropPos.y, item.getTexture().getRegionWidth(), item.getTexture().getRegionHeight());
+		Rectangle itemBounds = new Rectangle(dropPos.x, dropPos.y, item.getItemData().getTexture().getRegionWidth(), item.getItemData().getTexture().getRegionHeight());
 		Tile closest = getClosestTile(itemBounds);
 		
 		if(closest == null) {

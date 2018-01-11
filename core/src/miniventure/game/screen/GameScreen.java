@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import miniventure.game.GameCore;
 import miniventure.game.MyUtils;
-import miniventure.game.item.Item;
+import miniventure.game.item.ItemData;
 import miniventure.game.world.Level;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.tile.Tile;
@@ -67,7 +67,7 @@ public class GameScreen implements Screen {
 			MathUtils.random(level.getWidth()-1),
 			MathUtils.random(level.getHeight()-1)
 		);
-		while(spawnTile == null || !spawnTile.getType().maySpawn);
+		while(spawnTile == null || !mainPlayer.maySpawn(spawnTile));
 		
 		mainPlayer.moveTo(spawnTile);
 	}
@@ -167,7 +167,7 @@ public class GameScreen implements Screen {
 		// TODO other stats will be rendered in the exact same fashion, with the same sprites. So make a method for it. Maybe I should instantiate it in the Player class, or even Stat enum? 
 		
 		// draw UI for current item
-		Item heldItem = mainPlayer.getHeldItemClone();
+		ItemData heldItem = mainPlayer.getHeldItemData();
 		if(heldItem != null) {
 			float x = uiCamera.viewportWidth / 3;
 			
@@ -180,8 +180,10 @@ public class GameScreen implements Screen {
 			
 			batch.begin();
 			batch.draw(heldItem.getTexture(), x, 5);
+			MyUtils.writeOutlinedText(game.getFont(), batch, mainPlayer.getHeldItemStackSize()+"", x, 5);
 			
 			MyUtils.writeOutlinedText(game.getFont(), batch, heldItem.getName(), x+drawRect.width+10, drawRect.height*2/3);
+			
 		}
 		
 		// a list of text to display in the upper left, for debug purposes

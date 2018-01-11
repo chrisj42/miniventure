@@ -85,6 +85,7 @@ public class Tile implements WorldObject {
 	}
 	
 	public TileType getType() { return type; }
+	TileType getUnderType() { return type.getProp(CoveredTileProperty.class).getUnderTile(this); }
 	
 	@Override public Level getLevel() { return level; }
 	
@@ -99,11 +100,11 @@ public class Tile implements WorldObject {
 		Array<Tile> surroundingTiles = getAdjacentTiles(true);
 		for(Entity entity: level.getOverlappingEntities(getBounds())) {
 			// for each entity, check if it can walk on the new tile type. If not, fetch the surrounding tiles, remove those the entity can't walk on, and then fetch the closest tile of the remaining ones.
-			if(newType.solidProperty.isPermeableBy(entity)) continue; // no worries for this entity.
+			if(newType.getProp(SolidProperty.class).isPermeableBy(entity)) continue; // no worries for this entity.
 			
 			Array<Tile> aroundTiles = new Array<>(surroundingTiles);
 			for(int i = 0; i < aroundTiles.size; i++) {
-				if(!aroundTiles.get(i).type.solidProperty.isPermeableBy(entity)) {
+				if(!aroundTiles.get(i).type.getProp(SolidProperty.class).isPermeableBy(entity)) {
 					aroundTiles.removeIndex(i);
 					i--;
 				}
@@ -115,8 +116,18 @@ public class Tile implements WorldObject {
 				entity.moveTo(closest);
 		}
 		
+		if(newType.getProp(CoveredTileProperty.class).hasUnderTileData()) {
+			// the new type has no defined under type, and is transparent, so the previous tile type should be conserved.
+			int[] newData = newType.getInitialData();
+			int[] fullData = new int[data.length + newData.length];
+			System.arraycopy(newData, 0, fullData, 0, newData.length);
+			System.arraycopy(data, 0, fullData, newData.length, data.length); // for under tile
+			data = fullData;
+		}
+		else
+			data = newType.getInitialData();
+		
 		type = newType;
-		data = type.getInitialData();
 	}
 	
 	public Array<Tile> getAdjacentTiles(boolean includeCorners) {
@@ -132,6 +143,7 @@ public class Tile implements WorldObject {
 		}
 	}
 	
+	/** @noinspection UnusedReturnValue*/
 	public static Array<Tile> sortByDistance(Array<Tile> tiles, final Vector2 position) {
 		tiles.sort((t1, t2) -> {
 			float t1diff = position.dst(t1.getBounds().getCenter(new Vector2()));
@@ -147,22 +159,22 @@ public class Tile implements WorldObject {
 	}
 	
 	private void drawOverlap(SpriteBatch batch, TileType type, boolean under) {
-		Array<AtlasRegion> sprites = type.overlapProperty.getSprites(this, under);
+		Array<AtlasRegion> sprites = type.getProp(OverlapProperty.class).getSprites(this, under);
 		for(AtlasRegion sprite: sprites)
 			draw(batch, sprite);
 	}
 	
 	@Override
 	public void render(SpriteBatch batch, float delta) {
-		TileType under = type.animationProperty.renderBehind;
+		TileType under = getUnderType();
 		
 		if(under != null) { // draw the tile that ought to be rendered underneath this one
-			draw(batch, under.connectionProperty.getSprite(this, true));
+			draw(batch, under.getProp(ConnectionProperty.class).getSprite(this, true));
 			drawOverlap(batch, under, true);
 		}
 		
 		// Due to animation, I'm going to try and draw everything without caching. Hopefully, it won't be slow.
-		draw(batch, type.connectionProperty.getSprite(this)); // draws base sprite for this tile
+		draw(batch, type.getProp(ConnectionProperty.class).getSprite(this)); // draws base sprite for this tile
 		
 		drawOverlap(batch, type, true); // draw the overlap from other under tiles; considers also those without an under tile.
 		
@@ -171,47 +183,49 @@ public class Tile implements WorldObject {
 	
 	@Override
 	public void update(float delta) {
-		type.updateProperty.update(delta, this);
+		type.getProp(UpdateProperty.class).update(delta, this);
 	}
 	
-	private void checkDataAccess(TileProperty property, int propDataIndex) {
-		if(!type.propertyDataIndexes.containsKey(property))
-			throw new IllegalArgumentException("specified property " + property + " is not from this tile's type, "+type+".");
+	int getData(TileProperty property, int propDataIndex) { return getData(property, propDataIndex, false); }
+	int getData(TileProperty property, int propDataIndex, boolean under) {
+		TileType type = under ? getUnderType() : this.type;
 		
-		if(propDataIndex >= type.propertyDataLengths.get(property))
-			throw new IndexOutOfBoundsException("tile property " + property + " tried to access index past stated length; length="+type.propertyDataLengths.get(property)+", index="+propDataIndex);
+		type.checkDataAccess(property, propDataIndex);
+		
+		int offset = under ? this.type.getPropDataLength(property) : 0;
+		return this.data[type.getPropDataIndex(property) + propDataIndex + offset];
 	}
 	
-	int getData(TileProperty property, int propDataIndex) {
-		checkDataAccess(property, propDataIndex);
-		return this.data[type.propertyDataIndexes.get(property)+propDataIndex];
-	}
-	
-	void setData(TileProperty property, int propDataIndex, int data) {
-		checkDataAccess(property, propDataIndex);
-		this.data[type.propertyDataIndexes.get(property)+propDataIndex] = data;
+	void setData(TileProperty property, int propDataIndex, int data)  { setData(property, propDataIndex, data, false); }
+	void setData(TileProperty property, int propDataIndex, int data, boolean under) {
+		TileType type = under ? getUnderType() : this.type;
+		
+		type.checkDataAccess(property, propDataIndex);
+		
+		int offset = under ? this.type.getPropDataLength(property) : 0;
+		this.data[type.getPropDataIndex(property) + propDataIndex + offset] = data;
 	}
 	
 	@Override
 	public boolean isPermeableBy(Entity entity) {
-		return type.solidProperty.isPermeableBy(entity);
+		return type.getProp(SolidProperty.class).isPermeableBy(entity);
 	}
 	
 	@Override
 	public boolean attackedBy(Mob mob, Item attackItem) {
-		return type.destructibleProperty.tileAttacked(this, mob, attackItem);
+		return type.getProp(DestructibleProperty.class).tileAttacked(this, mob, attackItem);
 	}
 	
 	@Override
 	public boolean hurtBy(WorldObject obj, int damage) {
-		return type.destructibleProperty.tileAttacked(this, obj, damage);
+		return type.getProp(DestructibleProperty.class).tileAttacked(this, obj, damage);
 	}
 	
 	@Override
-	public boolean interactWith(Player player, Item heldItem) { return type.interactableProperty.interact(player, heldItem, this); }
+	public boolean interactWith(Player player, Item heldItem) { return type.getProp(InteractableProperty.class).interact(player, heldItem, this); }
 	
 	@Override
-	public boolean touchedBy(Entity entity) { type.touchListener.touchedBy(entity, this); return true; }
+	public boolean touchedBy(Entity entity) { type.getProp(TouchListener.class).touchedBy(entity, this); return true; }
 	
 	@Override
 	public void touching(Entity entity) {}

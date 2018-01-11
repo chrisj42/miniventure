@@ -25,7 +25,7 @@ public class ItemEntity extends Entity {
 	private final Item item;
 	
 	public ItemEntity(Item item, @NotNull Vector2 goalDir) {
-		super(new Sprite(item.getTexture()));
+		super(new Sprite(item.getItemData().getTexture()));
 		this.item = item;
 		velocity = new Vector3(goalDir.cpy().scl(INITIAL_MOVE_FORCE), INITIAL_BOUNCE_FORCE);
 	}
