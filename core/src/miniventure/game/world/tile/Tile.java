@@ -175,7 +175,7 @@ public class Tile implements WorldObject {
 		}
 		
 		// Due to animation, I'm going to try and draw everything without caching. Hopefully, it won't be slow.
-		draw(batch, type.getProp(ConnectionProperty.class).getSprite(this)); // draws base sprite for this tile
+		draw(batch, type.getProp(ConnectionProperty.class).getSprite(this, false)); // draws base sprite for this tile
 		
 		
 		drawOverlap(batch, type, under == null); // read below for explanation.

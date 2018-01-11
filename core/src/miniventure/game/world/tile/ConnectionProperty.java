@@ -18,12 +18,9 @@ public class ConnectionProperty implements TileProperty {
 			connectingTiles.add(type);
 	}
 	
-	AtlasRegion getSprite(Tile tile) {
-		return getSprite(tile, false);
-	}
 	AtlasRegion getSprite(Tile tile, boolean under) {
-		
 		int spriteIdx = 0;
+		
 		if(connects) {
 			TileType[] aroundTiles = new TileType[9];
 			int i = 0;
