@@ -34,11 +34,11 @@ public class TileItem extends ItemData {
 	private TileType placeOn, result;
 	
 	private TileItem(@NotNull TileType type) {
-		this(MyUtils.toTitleCase(type.name()), GameCore.tileAtlas.findRegion(type.name().toLowerCase()+"/00"), type, type.getProp(CoveredTileProperty.class).getUnderTile()); // so, if the placeOn is null, then...
+		this(MyUtils.toTitleCase(type.name()), GameCore.tileAtlas.findRegion(type.name().toLowerCase()+"/00"), type, type.getProp(CoveredTileProperty.class).getCoveredTile()); // so, if the placeOn is null, then...
 	}
 	
 	private TileItem(String name, TextureRegion texture, TileType result, TileType placeOn) {
-		super(name, texture); 
+		super(name, texture);
 		this.placeOn = placeOn;
 		this.result = result;
 	}
@@ -49,7 +49,7 @@ public class TileItem extends ItemData {
 		
 		if(obj instanceof Tile) {
 			Tile tile = (Tile) obj;
-			if (placeOn == tile.getType()) {
+			if (placeOn == tile.getGroundType()) {
 				tile.resetTile(result);
 				item.setUsed();
 				return true;

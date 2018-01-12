@@ -56,42 +56,40 @@ public class AnimationProperty implements TileProperty {
 	private final AnimationType main, overlay;
 	private final float mainFrameTime, overlayFrameTime;
 	
-	private final boolean isTransparent;
-	//private final TileType tileType;
+	private TileType tileType;
 	
-	AnimationProperty(AnimationType main) { this(false, main); }
-	AnimationProperty(boolean isTransparent, AnimationType main) { this(isTransparent, main, 0); }
-	AnimationProperty(AnimationType main, float mainFrameTime) { this(false, main, mainFrameTime); }
-	AnimationProperty(boolean isTransparent, AnimationType main, float mainFrameTime) { this(isTransparent, main, mainFrameTime, main, mainFrameTime); }
-	AnimationProperty(AnimationType main, float mainFrameTime, AnimationType overlay, float overlayFrameTime) { this(false, main, mainFrameTime, overlay, overlayFrameTime); }
-	AnimationProperty(boolean isTransparent, AnimationType main, float mainFrameTime, AnimationType overlay, float overlayFrameTime) {
+	AnimationProperty(AnimationType main) { this(main, 0); }
+	//AnimationProperty(boolean isTransparent, AnimationType main) { this(isTransparent, main, 0); }
+	AnimationProperty(AnimationType main, float mainFrameTime) { this(main, mainFrameTime, main, mainFrameTime); }
+	//AnimationProperty(boolean isTransparent, AnimationType main, float mainFrameTime) { this(isTransparent, main, mainFrameTime, main, mainFrameTime); }
+	AnimationProperty(AnimationType main, float mainFrameTime, AnimationType overlay, float overlayFrameTime) {
 		this.main = main;
 		this.overlay = overlay;
 		this.mainFrameTime = mainFrameTime;
 		this.overlayFrameTime = overlayFrameTime;
-		this.isTransparent = isTransparent;
 	}
 	
-	boolean isTransparent() { return isTransparent; }
+	@Override
+	public void init(TileType type) { this.tileType = type; }
 	
 	/*@Nullable
 	public TileType getRenderedBehind() {
 		if(!isTransparent) return null;
-		return tileType.getProp(CoveredTileProperty.class).getUnderTile();
+		return tileType.getProp(CoveredTileProperty.class).getCoveredTile();
 	}*/
 	
-	AtlasRegion getSprite(int spriteIndex, boolean isOverlapSprite, Tile tile) {
+	/*AtlasRegion getSprite(int spriteIndex, boolean isOverlapSprite, Tile tile) {
 		return getSprite(spriteIndex, isOverlapSprite, tile, tile.getType());
-	}
-	AtlasRegion getSprite(int spriteIndex, boolean isOverlapSprite, Tile tile, TileType type) {
-		return getSprite(spriteIndex, isOverlapSprite, tile, type, GameCore.getElapsedProgramTime());
-	}
-	/*AtlasRegion getSprite(int spriteIndex, boolean isOverlapSprite, Tile tile, float timeElapsed) {
-		return getSprite(spriteIndex, isOverlapSprite, tile, tile.getType(), timeElapsed);
 	}*/
-	AtlasRegion getSprite(int spriteIndex, boolean isOverlapSprite, Tile tile, TileType type, float timeElapsed) {
+	AtlasRegion getSprite(int spriteIndex, boolean isOverlapSprite, Tile tile) {
+		return getSprite(spriteIndex, isOverlapSprite, tile, GameCore.getElapsedProgramTime());
+	}
+	AtlasRegion getSprite(int spriteIndex, boolean isOverlapSprite, Tile tile, float timeElapsed) {
+		if(!isOverlapSprite && tileType != tile.getGroundType() && tileType != tile.getSurfaceType())
+			System.err.println("Warning: fetching sprite for tile "+tile+" that doesn't have the intended type " + tileType);
+		
 		Array<AtlasRegion> frames;
-		String typeName = type.name().toLowerCase();
+		String typeName = tileType.name().toLowerCase();
 		String indexString = (spriteIndex < 10 ? "0" : "") + spriteIndex;
 		if(isOverlapSprite) {
 			frames = tileOverlapAnimations.get(typeName).get(indexString);

@@ -13,12 +13,14 @@ public class OverlapProperty implements TileProperty {
 		this.overlaps = overlaps;
 	}
 	
-	Array<AtlasRegion> getSprites(Tile tile) {
-		return getSprites(tile, false);
-	}
-	Array<AtlasRegion> getSprites(Tile tile, boolean useUnder) {
+	// one renders with ground tiles and 
+	Array<AtlasRegion> getSprites(Tile tile, boolean surfaceOnly) {
 		Array<AtlasRegion> sprites = new Array<>();
 		
+		/*if(tile.getType() == TileType.HOLE) {
+			System.out.println();
+			System.out.println("getting overlaps with under = " + useUnder);
+		}*/
 		/*
 			Steps:
 				- get a list of the different tile types around the given tile, ordered according to the z index.
@@ -35,17 +37,21 @@ public class OverlapProperty implements TileProperty {
 			for (int y = -1; y <= 1; y++) {
 				Tile oTile = tile.getLevel().getTile(tile.x + x, tile.y + y);
 				if(oTile != null) {
-					TileType oType = oTile.getType();
-					TileType oUnder = oTile.getUnderType();
-					if(useUnder) {
-						if(oUnder != null)
-							aroundTiles[i] = oUnder;
-						else
-							aroundTiles[i] = oType;
-					}
-					else if(oUnder != null) // if not using under, those without an under tile will not be drawn.
-						aroundTiles[i] = oType;
+					//TileType oSurface = oTile.getSurfaceType();
+					//TileType oGround = oTile.getGroundType();
 					
+					aroundTiles[i] = surfaceOnly ? oTile.getSurfaceType() : oTile.getGroundType();
+					
+					/*if(!surfaceOnly)
+						aroundTiles[i] = oGround;
+					else if(oSurface != null)
+						aroundTiles[i] = oSurface;
+					*/	
+					//else if(oSurface != null) // if not using under, those without an under tile will not be drawn.
+					//	aroundTiles[i] = oSurface;
+					
+					//if(tile.getType() == TileType.HOLE)
+					//	System.out.println("for around tile " + oType + ", with under " + oUnder + ", will use " + aroundTiles[i]);
 					if(aroundTiles[i] != null && aroundTiles[i].getProp(OverlapProperty.class).overlaps)
 						types.add(aroundTiles[i]);
 				}
@@ -53,13 +59,23 @@ public class OverlapProperty implements TileProperty {
 			}
 		}
 		
+		//if(tile.getType() == TileType.HOLE)
+		//	System.out.println("overlap found: " + types);
+		
+		TileType surface = tile.getSurfaceType();
+		TileType ground = tile.getGroundType();
+		
 		final TileType compareType;
-		TileType under = tile.getUnderType();
-		if(useUnder && under != null && TileType.tileSorter.compare(under, tile.getType()) < 0)
-			compareType = under;
+		//TileType ground = tile.getGroundType();
+		if(surfaceOnly && surface != null && TileType.tileSorter.compare(ground, surface) < 0)
+			compareType = surface;
 		else
-			compareType = tile.getType();
+			compareType = ground;
 		types.removeIf(tileType -> TileType.tileSorter.compare(tileType, compareType) <= 0);
+		
+		//if(tile.getType() == TileType.HOLE)
+		//	System.out.println("types after removal: " + types);
+		
 		
 		Array<Integer> indexes = new Array<>();
 		for(TileType type: types) {
@@ -81,7 +97,7 @@ public class OverlapProperty implements TileProperty {
 			if(aroundTiles[6] == type && bits[2] == 0 && bits[3] == 0) indexes.add(2);
 			if(aroundTiles[0] == type && bits[3] == 0 && bits[0] == 0) indexes.add(3);
 			for(Integer idx: indexes)
-				sprites.add(type.getProp(AnimationProperty.class).getSprite(idx, true, tile, type));
+				sprites.add(type.getProp(AnimationProperty.class).getSprite(idx, true, tile));
 		}
 		return sprites;
 	}

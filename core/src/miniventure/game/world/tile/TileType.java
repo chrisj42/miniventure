@@ -36,25 +36,25 @@ public enum TileType {
 		new OverlapProperty(true)
 	),
 	
-	ROCK(
+	ROCK(false,
 		SolidProperty.SOLID,
 		new CoveredTileProperty(DIRT),
 		new DestructibleProperty(20, new PreferredTool(ToolType.PICKAXE, 5))
 	),
 	
-	TREE(
+	TREE(false,
 		SolidProperty.SOLID,
 		new CoveredTileProperty(GRASS),
 		new DestructibleProperty(10, new PreferredTool(ToolType.AXE, 2)),
-		new AnimationProperty(true, AnimationType.SINGLE_FRAME),
+		new AnimationProperty(AnimationType.SINGLE_FRAME),
 		new ConnectionProperty(true)
 	),
 	
-	CACTUS(
+	CACTUS(false,
 		SolidProperty.SOLID,
 		new CoveredTileProperty(SAND),
 		new DestructibleProperty(7, null),
-		new AnimationProperty(true, AnimationType.SINGLE_FRAME),
+		new AnimationProperty(AnimationType.SINGLE_FRAME),
 		(TouchListener) (e, t) -> e.hurtBy(t, 1)
 	),
 	
@@ -77,18 +77,20 @@ public enum TileType {
 	 */
 	
 	
+	private final boolean isGroundTile;
 	private final HashMap<Class<? extends TileProperty>, TileProperty> propertyMap;
 	
 	private final HashMap<TileProperty, Integer> propertyDataIndexes = new HashMap<>();
 	private final HashMap<TileProperty, Integer> propertyDataLengths = new HashMap<>();
 	private final Integer[] initialData;
 	
-	TileType(@NotNull TileProperty... properties) {
+	TileType(@NotNull TileProperty... properties) { this(true, properties); }
+	TileType(boolean isGroundTile, @NotNull TileProperty... properties) {
+		this.isGroundTile = isGroundTile;
 		
 		// get the default properties
 		propertyMap = TileProperty.getDefaultPropertyMap();
 		
-		//System.out.println("for " + name());
 		// replace the defaults with specified properties
 		for(TileProperty property: properties) {
 			Class<? extends TileProperty> clazz = MyUtils.getDirectSubclass(TileProperty.class, property.getClass());
@@ -98,8 +100,6 @@ public enum TileType {
 		
 		for(TileProperty prop: propertyMap.values())
 			prop.init(this);
-		
-		getProp(ConnectionProperty.class).addConnectingType(this);
 		
 		Array<Integer> initData = new Array<>();
 		
@@ -120,10 +120,14 @@ public enum TileType {
 		HOLE.getProp(ConnectionProperty.class).addConnectingType(WATER);
 	}
 	
+	boolean isGroundTile() { return isGroundTile; }
+	
 	public <T extends TileProperty> T getProp(Class<T> clazz) {
 		//noinspection unchecked
 		return (T)propertyMap.get(clazz);
 	}
+	
+	int getDataLength() { return initialData.length; }
 	
 	int[] getInitialData() {
 		int[] data = new int[initialData.length];

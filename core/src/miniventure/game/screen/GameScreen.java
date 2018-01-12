@@ -180,7 +180,7 @@ public class GameScreen implements Screen {
 			
 			batch.begin();
 			batch.draw(heldItem.getTexture(), x, 5);
-			MyUtils.writeOutlinedText(game.getFont(), batch, mainPlayer.getHeldItemStackSize()+"", x, 10);
+			MyUtils.writeOutlinedText(game.getFont(), batch, mainPlayer.getHeldItemStackSize()+"", x, 5+game.getFont().getCapHeight());
 			
 			MyUtils.writeOutlinedText(game.getFont(), batch, heldItem.getName(), x+drawRect.width+10, drawRect.height*2/3);
 			

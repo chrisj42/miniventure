@@ -2,37 +2,38 @@ package miniventure.game.world.tile;
 
 public class CoveredTileProperty implements TileProperty {
 	
-	private final TileType underTile;
+	private final TileType coveredTile;
+	private TileType tileType;
 	private int dataLength = 0;
 	
-	CoveredTileProperty(TileType underTile) {
-		this.underTile = underTile;
+	CoveredTileProperty(TileType coveredTile) {
+		this.coveredTile = coveredTile;
 	}
 	
 	@Override
 	public void init(TileType type) {
-		if(underTile == null && type.getProp(AnimationProperty.class).isTransparent())
+		this.tileType = type;
+		if(coveredTile == null && !type.isGroundTile())
 			dataLength = 1;
 	}
 	
 	// this is called when resetting a tile. 
 	public void tilePlaced(Tile tile, TileType previous) {
-		if(underTile == null) {
-			// it varies, fetch from data
+		if(previous == null) return;
+		if(dataLength > 0) // fetch from data
 			tile.setData(this, 0, previous.ordinal());
-		}
-		else if(previous != underTile && previous != null)
-			System.err.println("Warning: under tile does not equal previous tile");
+		else if(tile.getType() != tileType/* || previous != coveredTile*/)
+			System.err.println("Warning: unexpected placement of tile type "+tile.getType()+", using property for " + tileType);
 	}
 	
-	public TileType getUnderTile() { return underTile; }
-	public TileType getUnderTile(Tile tile) {
+	public TileType getCoveredTile() { return coveredTile; }
+	public TileType getCoveredTile(Tile tile) {
 		if(dataLength > 0) 
 			return TileType.values[tile.getData(this, 0)];
-		return underTile;
+		return coveredTile;
 	}
 	
-	boolean hasUnderTileData() { return dataLength > 0; }
+	//boolean hasUnderTileData() { return dataLength > 0; }
 	
 	@Override
 	public Integer[] getInitData() { return new Integer[dataLength]; }

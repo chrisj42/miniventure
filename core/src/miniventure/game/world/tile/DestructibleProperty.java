@@ -79,7 +79,7 @@ public class DestructibleProperty implements TileProperty {
 				for(ItemDrop drop: drops)
 					if(drop != null)
 						drop.dropItems(tile.getLevel(), tile, attacker);
-				tile.resetTile(tile.getUnderType());
+				tile.resetTile(tile.getType().getProp(CoveredTileProperty.class).getCoveredTile(tile));
 			} else
 				tile.setData(this, HEALTH_IDX, health);
 			

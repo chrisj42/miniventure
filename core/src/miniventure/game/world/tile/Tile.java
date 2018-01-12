@@ -69,7 +69,7 @@ public class Tile implements WorldObject {
 	
 	public static final int SIZE = 32;
 	
-	private TileType type;
+	private TileType groundType, surfaceType;
 	
 	private Level level;
 	protected final int x, y;
@@ -77,15 +77,26 @@ public class Tile implements WorldObject {
 	
 	public Tile(TileType type, Level level, int x, int y) { this(type, level, x, y, type.getInitialData()); }
 	public Tile(TileType type, Level level, int x, int y, int[] data) {
-		this.type = type;
 		this.level = level;
 		this.x = x;
 		this.y = y;
 		this.data = data;
+		
+		surfaceType = type.isGroundTile() ? null : type;
+		// with the surfaceType, data, and other tile info being set above, the CoveredTileProperty should have no problem fetching the correct ground tile type.
+		groundType = type.isGroundTile() ? type : type.getProp(CoveredTileProperty.class).getCoveredTile(this);
 	}
 	
-	public TileType getType() { return type; }
-	TileType getUnderType() { return type.getProp(CoveredTileProperty.class).getUnderTile(this); }
+	public TileType getType() { return surfaceType == null ? groundType : surfaceType; }
+	public TileType getGroundType() { return groundType; }
+	public TileType getSurfaceType() { return surfaceType; }
+	/*TileType getUnderType() { return getUnderType(false); } // generally when you fetch the under type, you are doing it for rendering purposes.
+	TileType getUnderType(boolean fetchIfHidden) {
+		TileType under = groundType.getProp(CoveredTileProperty.class).getCoveredTile(this);
+		if(fetchIfHidden || groundType.getProp(AnimationProperty.class).isTransparent())
+			return under;
+		return null;
+	}*/
 	
 	@Override public Level getLevel() { return level; }
 	
@@ -96,6 +107,11 @@ public class Tile implements WorldObject {
 	public Rectangle getBounds() { return new Rectangle(x*SIZE, y*SIZE, SIZE, SIZE); }
 	
 	public void resetTile(TileType newType) {
+		if(newType == null) {
+			System.err.println("ERROR tried to set tile " + this + " to null tile type.");
+			return;
+		}
+		
 		// check for entities that will not be allowed on the new tile, and move them to the closest adjacent tile they are allowed on.
 		Array<Tile> surroundingTiles = getAdjacentTiles(true);
 		for(Entity entity: level.getOverlappingEntities(getBounds())) {
@@ -104,7 +120,7 @@ public class Tile implements WorldObject {
 			
 			Array<Tile> aroundTiles = new Array<>(surroundingTiles);
 			for(int i = 0; i < aroundTiles.size; i++) {
-				if(!aroundTiles.get(i).type.getProp(SolidProperty.class).isPermeableBy(entity)) {
+				if(!aroundTiles.get(i).groundType.getProp(SolidProperty.class).isPermeableBy(entity)) {
 					aroundTiles.removeIndex(i);
 					i--;
 				}
@@ -116,18 +132,31 @@ public class Tile implements WorldObject {
 				entity.moveTo(closest);
 		}
 		
-		if(newType.getProp(CoveredTileProperty.class).hasUnderTileData()) {
-			// the new type has no defined under type, and is transparent, so the previous tile type should be conserved.
-			int[] newData = newType.getInitialData();
-			int[] fullData = new int[data.length + newData.length];
-			System.arraycopy(newData, 0, fullData, 0, newData.length);
-			System.arraycopy(data, 0, fullData, newData.length, data.length); // for under tile
-			data = fullData;
-		}
-		else
-			data = newType.getInitialData();
+		TileType prev = getType();
 		
-		type = newType;
+		if(!newType.isGroundTile()) {
+			// the new type has no defined under type, so the previous tile type should be conserved.
+			// also, since you should never place one surface tile directly on another surface tile, I can technically assume that the current data array only has the ground tile data. But, since creative mode could be a thing, and it isn't too hard, I'm goinf to double check anyway.
+			
+			int[] newData = newType.getInitialData();
+			int groundDataLen = groundType.getDataLength();
+			int[] fullData = new int[groundDataLen + newData.length];
+			System.arraycopy(data, 0, fullData, 0, groundDataLen); // copy ground tile data, first
+			System.arraycopy(newData, 0, fullData, groundDataLen, newData.length); // copy surface tile data
+			data = fullData;
+			
+			surfaceType = newType;
+		}
+		else { // new type is ground tile, remove surface type if present
+			data = newType.getInitialData();
+			surfaceType = null;
+			
+			groundType = newType;
+		}
+		
+		newType.getProp(CoveredTileProperty.class).tilePlaced(this, prev);
+		
+		//level.setTileUpdates(this, (surfaceType == null ? 0 : surfaceType.getProp(UpdateProperty.class).getTicksPerSecond()) + (groundType == null ? 0 : groundType.getProp(UpdateProperty.class).getTicksPerSecond()));
 	}
 	
 	public Array<Tile> getAdjacentTiles(boolean includeCorners) {
@@ -158,27 +187,40 @@ public class Tile implements WorldObject {
 		batch.draw(texture, x*SIZE, y*SIZE, SIZE, SIZE);
 	}
 	
-	private void drawOverlap(SpriteBatch batch, TileType type, boolean under) {
-		Array<AtlasRegion> sprites = type.getProp(OverlapProperty.class).getSprites(this, under); // "under" determines whether the other tiles overlap with their under-tiles. 
+	private void drawConnections(SpriteBatch batch, TileType type, boolean useSurface) {
+		draw(batch, type.getProp(ConnectionProperty.class).getSprite(this, useSurface));
+	}
+	
+	private void drawOverlap(SpriteBatch batch, TileType type, boolean useSurface) {
+		Array<AtlasRegion> sprites = type.getProp(OverlapProperty.class).getSprites(this, useSurface); // "under" determines whether the other tiles overlap with their under-tiles. 
 		for(AtlasRegion sprite: sprites)
 			draw(batch, sprite);
 	}
 	
 	@Override
 	public void render(SpriteBatch batch, float delta) {
-		TileType under = getUnderType();
+		boolean hasSurface = surfaceType != null;
 		
-		if(under != null) { // draw the tile that ought to be rendered underneath this one
+		// draw the ground sprites and overlaps
+		drawConnections(batch, groundType, !hasSurface);
+		drawOverlap(batch, groundType, !hasSurface);
+		
+		if(hasSurface) {
+			draw(batch, surfaceType.getProp(ConnectionProperty.class).getSprite(this, true));
+			drawOverlap(batch, surfaceType, true);
+		}
+		
+		/*if(under != null) { // draw the tile that ought to be rendered underneath this one
 			draw(batch, under.getProp(ConnectionProperty.class).getSprite(this, true));
 			drawOverlap(batch, under, true); // under tiles, and those without an under, are rendered.
 			// ex grass is drawn, using grass and tree tiles.
-		}
+		}*/
 		
 		// Due to animation, I'm going to try and draw everything without caching. Hopefully, it won't be slow.
-		draw(batch, type.getProp(ConnectionProperty.class).getSprite(this, false)); // draws base sprite for this tile
+		//draw(batch, groundType.getProp(ConnectionProperty.class).getSprite(this, false)); // draws base sprite for this tile
 		
 		
-		drawOverlap(batch, type, under == null); // read below for explanation.
+		//drawOverlap(batch, groundType, under == null); // read below for explanation.
 		
 		
 		//drawOverlap(batch, type, true); // draw the overlap from other under tiles; considers also those without an under tile.
@@ -196,59 +238,60 @@ public class Tile implements WorldObject {
 		// AKA draw the main with under = don't have under 
 	}
 	
+	
 	@Override
 	public void update(float delta) {
-		type.getProp(UpdateProperty.class).update(delta, this);
+		groundType.getProp(UpdateProperty.class).update(delta, this);
+		if(surfaceType != null)
+			surfaceType.getProp(UpdateProperty.class).update(delta, this);
 	}
 	
 	int getData(TileProperty property, int propDataIndex) { return getData(property, propDataIndex, false); }
-	int getData(TileProperty property, int propDataIndex, boolean under) {
-		TileType type = under ? getUnderType() : this.type;
+	int getData(TileProperty property, int propDataIndex, boolean useSurface) {
+		TileType type = useSurface ? surfaceType : groundType;
 		
 		type.checkDataAccess(property, propDataIndex);
 		
-		int offset = under ? this.type.getPropDataLength(property) : 0;
+		int offset = useSurface ? groundType.getPropDataLength(property) : 0;
 		return this.data[type.getPropDataIndex(property) + propDataIndex + offset];
 	}
 	
 	void setData(TileProperty property, int propDataIndex, int data)  { setData(property, propDataIndex, data, false); }
-	void setData(TileProperty property, int propDataIndex, int data, boolean under) {
-		TileType type = under ? getUnderType() : this.type;
+	void setData(TileProperty property, int propDataIndex, int data, boolean useSurface) {
+		TileType type = useSurface ? surfaceType : groundType;
 		
 		type.checkDataAccess(property, propDataIndex);
 		
-		int offset = under ? this.type.getPropDataLength(property) : 0;
+		int offset = useSurface ? groundType.getPropDataLength(property) : 0;
 		this.data[type.getPropDataIndex(property) + propDataIndex + offset] = data;
 	}
 	
 	@Override
 	public boolean isPermeableBy(Entity entity) {
-		return type.getProp(SolidProperty.class).isPermeableBy(entity);
+		return getType().getProp(SolidProperty.class).isPermeableBy(entity);
 	}
 	
 	@Override
 	public boolean attackedBy(Mob mob, Item attackItem) {
-		return type.getProp(DestructibleProperty.class).tileAttacked(this, mob, attackItem);
+		return getType().getProp(DestructibleProperty.class).tileAttacked(this, mob, attackItem);
 	}
 	
 	@Override
 	public boolean hurtBy(WorldObject obj, int damage) {
-		return type.getProp(DestructibleProperty.class).tileAttacked(this, obj, damage);
+		return getType().getProp(DestructibleProperty.class).tileAttacked(this, obj, damage);
 	}
 	
 	@Override
-	public boolean interactWith(Player player, Item heldItem) { return type.getProp(InteractableProperty.class).interact(player, heldItem, this); }
+	public boolean interactWith(Player player, Item heldItem) { return getType().getProp(InteractableProperty.class).interact(player, heldItem, this); }
 	
 	@Override
-	public boolean touchedBy(Entity entity) { type.getProp(TouchListener.class).touchedBy(entity, this); return true; }
+	public boolean touchedBy(Entity entity) { getType().getProp(TouchListener.class).touchedBy(entity, this); return true; }
 	
 	@Override
 	public void touching(Entity entity) {}
 	
 	@Override
-	public String toString() { return MyUtils.toTitleCase(type+"") + " Tile"; }
+	public String toString() { return MyUtils.toTitleCase(getType().name()) + " Tile" + (surfaceType != null ? " on " + MyUtils.toTitleCase(groundType.name()) : ""); }
 	
-	public String toLocString() {
-		return x+","+y+" (" + MyUtils.toTitleCase(type+"")+" Tile)";
-	}
+	public String toLocString() { return x+","+y+" ("+toString()+")"; }
 }

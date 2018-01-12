@@ -15,7 +15,7 @@ public interface TileProperty {
 		map.put(AnimationProperty.class, new AnimationProperty(AnimationType.SINGLE_FRAME));
 		map.put(ConnectionProperty.class, new ConnectionProperty(false));
 		map.put(OverlapProperty.class, new OverlapProperty(false));
-		map.put(UpdateProperty.class, (UpdateProperty) ((delta, tile) -> {}));
+		map.put(UpdateProperty.class, (UpdateProperty)(delta, tile) -> {});
 		map.put(CoveredTileProperty.class, new CoveredTileProperty(null));
 		return map;
 	}
