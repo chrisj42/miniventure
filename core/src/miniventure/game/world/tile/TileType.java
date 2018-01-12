@@ -80,8 +80,8 @@ public enum TileType {
 	private final boolean isGroundTile;
 	private final HashMap<Class<? extends TileProperty>, TileProperty> propertyMap;
 	
-	private final HashMap<TileProperty, Integer> propertyDataIndexes = new HashMap<>();
-	private final HashMap<TileProperty, Integer> propertyDataLengths = new HashMap<>();
+	private final HashMap<Class<? extends TileProperty>, Integer> propertyDataIndexes = new HashMap<>();
+	private final HashMap<Class<? extends TileProperty>, Integer> propertyDataLengths = new HashMap<>();
 	private final Integer[] initialData;
 	
 	TileType(@NotNull TileProperty... properties) { this(true, properties); }
@@ -104,9 +104,9 @@ public enum TileType {
 		Array<Integer> initData = new Array<>();
 		
 		for(TileProperty prop: propertyMap.values()) {
-			propertyDataIndexes.put(prop, initData.size);
+			propertyDataIndexes.put(prop.getClass(), initData.size);
 			Integer[] propData = prop.getInitData();
-			propertyDataLengths.put(prop, propData.length);
+			propertyDataLengths.put(prop.getClass(), propData.length);
 			initData.addAll(propData);
 		}
 		
@@ -138,7 +138,7 @@ public enum TileType {
 	}
 	
 	
-	void checkDataAccess(TileProperty property, int propDataIndex) {
+	void checkDataAccess(Class<? extends TileProperty> property, int propDataIndex) {
 		if(!propertyDataIndexes.containsKey(property))
 			throw new IllegalArgumentException("specified property " + property + " is not from this tile's type, "+this+".");
 		
@@ -146,8 +146,8 @@ public enum TileType {
 			throw new IndexOutOfBoundsException("tile property " + property + " tried to access index past stated length; length="+propertyDataLengths.get(property)+", index="+propDataIndex);
 	}
 	
-	int getPropDataIndex(TileProperty prop) { return propertyDataIndexes.get(prop); }
-	int getPropDataLength(TileProperty prop) { return propertyDataLengths.get(prop); }
+	int getPropDataIndex(Class<? extends TileProperty> prop) { return propertyDataIndexes.get(prop); }
+	int getPropDataLength(Class<? extends TileProperty> prop) { return propertyDataLengths.get(prop); }
 	
 	
 	public static final TileType[] values = TileType.values();

@@ -215,24 +215,20 @@ public class Tile implements WorldObject {
 			surfaceType.getProp(UpdateProperty.class).update(delta, this);
 	}
 	
-	int getData(TileProperty property, int propDataIndex) { return getData(property, propDataIndex, false); }
-	int getData(TileProperty property, int propDataIndex, boolean useSurface) {
-		TileType type = useSurface ? surfaceType : groundType;
+	int getData(TileProperty property, TileType type, int propDataIndex) {
+		// assumed that the type is either the groundType or the surfaceType of this tile.
+		type.checkDataAccess(property.getClass(), propDataIndex);
 		
-		type.checkDataAccess(property, propDataIndex);
-		
-		int offset = useSurface ? groundType.getPropDataLength(property) : 0;
-		return this.data[type.getPropDataIndex(property) + propDataIndex + offset];
+		int offset = !type.isGroundTile() ? groundType.getPropDataLength(property.getClass()) : 0;
+		return this.data[type.getPropDataIndex(property.getClass()) + propDataIndex + offset];
 	}
 	
-	void setData(TileProperty property, int propDataIndex, int data)  { setData(property, propDataIndex, data, false); }
-	void setData(TileProperty property, int propDataIndex, int data, boolean useSurface) {
-		TileType type = useSurface ? surfaceType : groundType;
+	void setData(TileProperty property, TileType type, int propDataIndex, int data) {
+		// assumed that the type is either the groundType or the surfaceType of this tile.
+		type.checkDataAccess(property.getClass(), propDataIndex);
 		
-		type.checkDataAccess(property, propDataIndex);
-		
-		int offset = useSurface ? groundType.getPropDataLength(property) : 0;
-		this.data[type.getPropDataIndex(property) + propDataIndex + offset] = data;
+		int offset = !type.isGroundTile() ? groundType.getPropDataLength(property.getClass()) : 0;
+		this.data[type.getPropDataIndex(property.getClass()) + propDataIndex + offset] = data;
 	}
 	
 	@Override

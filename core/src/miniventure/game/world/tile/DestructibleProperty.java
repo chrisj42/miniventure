@@ -25,6 +25,8 @@ public class DestructibleProperty implements TileProperty {
 	private final DamageConditionCheck[] damageConditions;
 	private ItemDrop[] drops;
 	
+	private TileType tileType;
+	
 	// indestructible constructor :3
 	private DestructibleProperty() {
 		totalHealth = -1;
@@ -63,6 +65,8 @@ public class DestructibleProperty implements TileProperty {
 	public void init(TileType type) {
 		if(dropsTileItem)
 			drops = new ItemDrop[] {new ItemDrop(new Item(TileItem.get(type)))};
+		
+		this.tileType = type;
 	}
 	
 	boolean tileAttacked(Tile tile, Mob attacker, Item attackItem) {
@@ -73,15 +77,15 @@ public class DestructibleProperty implements TileProperty {
 	
 	boolean tileAttacked(Tile tile, WorldObject attacker, int damage) {
 		if(damage > 0) {
-			int health = totalHealth > 1 ? tile.getData(this, HEALTH_IDX) : 1;
+			int health = totalHealth > 1 ? tile.getData(this, tileType, HEALTH_IDX) : 1;
 			health -= damage;
-			if(health <= 0) {// TODO here is where we need to drop the items.
+			if(health <= 0) {
 				for(ItemDrop drop: drops)
 					if(drop != null)
 						drop.dropItems(tile.getLevel(), tile, attacker);
 				tile.resetTile(tile.getType().getProp(CoveredTileProperty.class).getCoveredTile(tile));
 			} else
-				tile.setData(this, HEALTH_IDX, health);
+				tile.setData(this, tileType, HEALTH_IDX, health);
 			
 			return true;
 		}
