@@ -8,20 +8,25 @@ public class ConnectionProperty implements TileProperty {
 	private final boolean connects;
 	private final Array<TileType> connectingTiles;
 	
+	private TileType tileType;
+	
 	ConnectionProperty(boolean connects, TileType... connectingTiles) {
 		this.connects = connects;
 		this.connectingTiles = new Array<>(connectingTiles);
 	}
 	
 	@Override
-	public void init(TileType type) { addConnectingType(type); }
+	public void init(TileType type) {
+		addConnectingType(type);
+		this.tileType = type;
+	}
 	
 	void addConnectingType(TileType type) {
 		if(!connectingTiles.contains(type, true))
 			connectingTiles.add(type);
 	}
 	
-	AtlasRegion getSprite(Tile tile, boolean useSurface) {
+	AtlasRegion getSprite(Tile tile) {
 		int spriteIdx = 0;
 		
 		if(connects) {
@@ -31,7 +36,7 @@ public class ConnectionProperty implements TileProperty {
 				for (int y = -1; y <= 1; y++) {
 					Tile oTile = tile.getLevel().getTile(tile.x + x, tile.y + y);
 					if(oTile != null) {
-						if(useSurface) aroundTiles[i] = oTile.getSurfaceType();
+						if(!tileType.isGroundTile()) aroundTiles[i] = oTile.getSurfaceType();
 						if(aroundTiles[i] == null) // surface == false or no surface tile exists
 							aroundTiles[i] = oTile.getGroundType();
 					}
@@ -47,9 +52,7 @@ public class ConnectionProperty implements TileProperty {
 			}
 		}
 		
-		TileType surfaceType = tile.getSurfaceType();
-		TileType connectType = useSurface && surfaceType != null ? surfaceType : tile.getGroundType();
-		return connectType.getProp(AnimationProperty.class).getSprite(spriteIdx, false, tile);
+		return tileType.getProp(AnimationProperty.class).getSprite(spriteIdx, false, tile);
 	}
 	
 	@Override

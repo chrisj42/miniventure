@@ -10,10 +10,11 @@ import miniventure.game.world.entity.mob.Player;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+
+import org.jetbrains.annotations.NotNull;
 
 public class Tile implements WorldObject {
 	
@@ -183,59 +184,27 @@ public class Tile implements WorldObject {
 		return tiles;
 	}
 	
-	private void draw(SpriteBatch batch, TextureRegion texture) {
-		batch.draw(texture, x*SIZE, y*SIZE, SIZE, SIZE);
+	private void draw(SpriteBatch batch, Array<AtlasRegion> textures) {
+		for(AtlasRegion texture: textures)
+			batch.draw(texture, x*SIZE, y*SIZE, SIZE, SIZE);
 	}
 	
-	private void drawConnections(SpriteBatch batch, TileType type, boolean useSurface) {
-		draw(batch, type.getProp(ConnectionProperty.class).getSprite(this, useSurface));
-	}
-	
-	private void drawOverlap(SpriteBatch batch, TileType type, boolean useSurface) {
-		Array<AtlasRegion> sprites = type.getProp(OverlapProperty.class).getSprites(this, useSurface); // "under" determines whether the other tiles overlap with their under-tiles. 
-		for(AtlasRegion sprite: sprites)
-			draw(batch, sprite);
+	private void renderTileType(@NotNull TileType type, SpriteBatch batch) {
+		Array<AtlasRegion> sprites = type.getProp(OverlapProperty.class).getSprites(this);
+		sprites.insert(0, type.getProp(ConnectionProperty.class).getSprite(this));
+		
+		draw(batch, sprites);
 	}
 	
 	@Override
 	public void render(SpriteBatch batch, float delta) {
-		boolean hasSurface = surfaceType != null;
 		
-		// draw the ground sprites and overlaps
-		drawConnections(batch, groundType, !hasSurface);
-		drawOverlap(batch, groundType, !hasSurface);
+		// draw the ground sprite and overlaps
+		renderTileType(groundType, batch);
 		
-		if(hasSurface) {
-			draw(batch, surfaceType.getProp(ConnectionProperty.class).getSprite(this, true));
-			drawOverlap(batch, surfaceType, true);
-		}
-		
-		/*if(under != null) { // draw the tile that ought to be rendered underneath this one
-			draw(batch, under.getProp(ConnectionProperty.class).getSprite(this, true));
-			drawOverlap(batch, under, true); // under tiles, and those without an under, are rendered.
-			// ex grass is drawn, using grass and tree tiles.
-		}*/
-		
-		// Due to animation, I'm going to try and draw everything without caching. Hopefully, it won't be slow.
-		//draw(batch, groundType.getProp(ConnectionProperty.class).getSprite(this, false)); // draws base sprite for this tile
-		
-		
-		//drawOverlap(batch, groundType, under == null); // read below for explanation.
-		
-		
-		//drawOverlap(batch, type, true); // draw the overlap from other under tiles; considers also those without an under tile.
-		// ex trees are drawn, using grass from trees... that's it.
-		// or (grass tile) grass is drawn, with other grass and tree grass.
-		
-		//drawOverlap(batch, type, false); // draw overlap from other tiles; only considers those that have an under tile.
-		// ex trees are drawn, and other trees around it
-		// or grass is drawn, not connecting to other grass... or pretty much anything.
-		
-		
-		// from the above two, i conclude that if you have an under tile, draw the main with under = false
-		// if you don't have an under tile, draw the main with under = true
-		
-		// AKA draw the main with under = don't have under 
+		// draw the surface sprite and overlaps
+		if(surfaceType != null)
+			renderTileType(surfaceType, batch);
 	}
 	
 	
