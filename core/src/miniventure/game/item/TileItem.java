@@ -49,7 +49,7 @@ public class TileItem extends ItemData {
 		
 		if(obj instanceof Tile) {
 			Tile tile = (Tile) obj;
-			if (placeOn == tile.getGroundType()) {
+			if (placeOn == tile.getType()) {
 				tile.resetTile(result);
 				item.setUsed();
 				return true;

@@ -93,8 +93,7 @@ public enum TileType {
 		
 		// replace the defaults with specified properties
 		for(TileProperty property: properties) {
-			Class<? extends TileProperty> clazz = MyUtils.getDirectSubclass(TileProperty.class, property.getClass());
-			//System.out.println("found class " + clazz);
+			Class<? extends TileProperty> clazz = castProp(property.getClass());
 			propertyMap.put(clazz, property);
 		}
 		
@@ -115,6 +114,11 @@ public enum TileType {
 			initialData[i] = initData.get(i);
 	}
 	
+	private static Class<? extends TileProperty> castProp(Class<? extends TileProperty> prop) {
+		// to make for less typing and clutter. :)
+		return MyUtils.getDirectSubclass(TileProperty.class, prop);
+	}
+	
 	/// POST-INITIALIZATION
 	static {
 		HOLE.getProp(ConnectionProperty.class).addConnectingType(WATER);
@@ -122,9 +126,14 @@ public enum TileType {
 	
 	boolean isGroundTile() { return isGroundTile; }
 	
+	/* What I've learned:
+		Casting with parenthesis works because the generic type is replaced by Object during runtime, or, if you've specified bounds, as specific a class as you can get with the specified bounds.
+		But calling (T var).getClass().cast(Tile t) doesn't always work because getClass() returns the actual class of the generic variable, and that may not be compatible with whatever you're trying to cast.
+	 */
+	
 	public <T extends TileProperty> T getProp(Class<T> clazz) {
 		//noinspection unchecked
-		return (T)propertyMap.get(clazz);
+		return (T)propertyMap.get(castProp(clazz));
 	}
 	
 	int getDataLength() { return initialData.length; }
@@ -137,17 +146,20 @@ public enum TileType {
 		return data;
 	}
 	
-	
-	void checkDataAccess(Class<? extends TileProperty> property, int propDataIndex) {
+	void checkDataAccess(Class<? extends TileProperty> property, Tile context, int propDataIndex) {
+		if((isGroundTile ? context.getGroundType() : context.getSurfaceType()) != this)
+			throw new IllegalArgumentException("Tile " + context + " does not have a " + this + " type for the "+(isGroundTile?"ground":"surface")+", the data will not be correct.");
+		
+		// technically, the below should never happen, unless it's passed the TileProperty class or a dynamically generated class, or something, because the propertyMap should have an instance of each implementer of the TileProperty interface.
 		if(!propertyDataIndexes.containsKey(property))
-			throw new IllegalArgumentException("specified property " + property + " is not from this tile's type, "+this+".");
+			throw new IllegalArgumentException("The specified property class, " + property + ", is not part of the list of TileType property classes.");
 		
 		if(propDataIndex >= propertyDataLengths.get(property))
-			throw new IndexOutOfBoundsException("tile property " + property + " tried to access index past stated length; length="+propertyDataLengths.get(property)+", index="+propDataIndex);
+			throw new IllegalArgumentException("Tile property " + property + " tried to access index past stated length; length="+propertyDataLengths.get(property)+", index="+propDataIndex);
 	}
 	
-	int getPropDataIndex(Class<? extends TileProperty> prop) { return propertyDataIndexes.get(prop); }
-	int getPropDataLength(Class<? extends TileProperty> prop) { return propertyDataLengths.get(prop); }
+	int getPropDataIndex(Class<? extends TileProperty> prop) { return propertyDataIndexes.get(castProp(prop)); }
+	int getPropDataLength(Class<? extends TileProperty> prop) { return propertyDataLengths.get(castProp(prop)); }
 	
 	
 	public static final TileType[] values = TileType.values();
@@ -164,4 +176,6 @@ public enum TileType {
 		
 		return 0; // shouldn't ever reach here...
 	};
+	
+	public String getName() { return MyUtils.toTitleCase(name()); }
 }

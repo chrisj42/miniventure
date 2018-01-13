@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class ItemEntity extends Entity {
 	
+	private static final float PICKUP_DELAY = 0.5f;
 	private static final float LIFETIME = 8f;
 	
 	private static final float INITIAL_BOUNCE_FORCE = 5, INITIAL_MOVE_FORCE = 0.04f;
@@ -76,7 +77,7 @@ public class ItemEntity extends Entity {
 	
 	@Override
 	public boolean touchedBy(Entity other) {
-		if(other instanceof Player && time > 1) {
+		if(other instanceof Player && time > PICKUP_DELAY) {
 			((Player)other).addToInventory(item);
 			Level level = Level.getEntityLevel(this);
 			if(level != null)

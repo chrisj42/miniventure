@@ -6,39 +6,45 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 public class MyUtils {
 	
 	private MyUtils() {} // can't instantiate
 	
-	@Nullable
-	public static <T> Class<? extends T> getDirectSubclass(Class<T> superClass, Class<? extends T> target) {
-		Array<Class> parents = new Array<>(target.getInterfaces());
-		Class targetSuper = target.getSuperclass();
+	// In terms of types, what this method guarantees is that, given a target super class, and a starting class that extends the super, it will return a class that is a super of T, and extends S, ideally one level below. But if the target equals the superClass from the beginning (which can't be prevented), that is the only case where it won't return a direct subclass of superClass.
+	/** @noinspection unchecked*/
+	@NotNull
+	public static <S, T extends S> Class<? extends S> getDirectSubclass(@NotNull Class<S> superClass, @NotNull Class<T> target) {
+		if (superClass.equals(target))
+			return target; // this returns the super class, not it's direct subclass, but in this situation that's that best we're gonna get.
 		
-		if(parents.contains(superClass, false) || targetSuper.equals(superClass))
+		// because we only ever use super classes from the original target, it is safe at any time to assume that any class found is super T.
+		
+		Class<? super T> targetSuper = target.getSuperclass(); // due to the equality check above, this class will always extend S.
+		
+		boolean hasSuper = targetSuper != null; // if target is the Object class, then there won't a super class.
+		if (hasSuper && targetSuper.equals(superClass))
 			return target;
 		
-		if(targetSuper == Object.class && parents.size == 0)
-			return null;
+		Array<Class<? super T>> parents = new Array<>((Class<? super T>[]) target.getInterfaces());
+		if (parents.contains(superClass, false))
+			return target;
 		
-		if(targetSuper != Object.class && superClass.isAssignableFrom(targetSuper)) {
-			//noinspection unchecked
-			Class<? extends T> sub = MyUtils.getDirectSubclass(superClass, (Class<? extends T>)targetSuper);
-			if(sub != null) return sub;
-		}
+		// target is not a direct subclass of superClass, so recurse first into the super class, and then into the interfaces.
 		
-		// go through array
-		for(Class parent: parents) {
-			if(!superClass.isAssignableFrom(parent)) continue;
+		if (hasSuper && superClass.isAssignableFrom(targetSuper))
+			return getDirectSubclass(superClass, (Class<? extends S>) targetSuper);
+		else {
+			// it HAS to be one of the interfaces that extend the superClass.
+			for(Class<? super T> parent: parents)
+				if(superClass.isAssignableFrom(parent))
+					return getDirectSubclass(superClass, (Class<? extends S>) parent);
 			
-			//noinspection unchecked
-			Class<? extends T> sub = MyUtils.getDirectSubclass(superClass, (Class<? extends T>)parent);
-			if(sub != null) return sub;
+			// if the code reaches here, then something went terribly wrong, because target is required to extend superClass, but at this point we've gone through both the interfaces and the super class, and haven't found it.
+			
+			throw new IncompatibleClassChangeError("Class " + target + " is required by generics to extend " + superClass + ", but neither the super class nor any implemented interfaces do.");
 		}
-		
-		return null;
 	}
 	
 	public static void writeOutlinedText(BitmapFont font, SpriteBatch batch, String text, float x, float y) {

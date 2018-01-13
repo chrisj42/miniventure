@@ -1,6 +1,5 @@
 package miniventure.game.world.tile;
 
-import miniventure.game.MyUtils;
 import miniventure.game.item.Item;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
@@ -89,15 +88,8 @@ public class Tile implements WorldObject {
 	}
 	
 	public TileType getType() { return surfaceType == null ? groundType : surfaceType; }
-	public TileType getGroundType() { return groundType; }
-	public TileType getSurfaceType() { return surfaceType; }
-	/*TileType getUnderType() { return getUnderType(false); } // generally when you fetch the under type, you are doing it for rendering purposes.
-	TileType getUnderType(boolean fetchIfHidden) {
-		TileType under = groundType.getProp(CoveredTileProperty.class).getCoveredTile(this);
-		if(fetchIfHidden || groundType.getProp(AnimationProperty.class).isTransparent())
-			return under;
-		return null;
-	}*/
+	TileType getGroundType() { return groundType; }
+	TileType getSurfaceType() { return surfaceType; }
 	
 	@Override public Level getLevel() { return level; }
 	
@@ -107,12 +99,7 @@ public class Tile implements WorldObject {
 	@Override
 	public Rectangle getBounds() { return new Rectangle(x*SIZE, y*SIZE, SIZE, SIZE); }
 	
-	public void resetTile(TileType newType) {
-		if(newType == null) {
-			System.err.println("ERROR tried to set tile " + this + " to null tile type.");
-			return;
-		}
-		
+	public void resetTile(@NotNull TileType newType) {
 		// check for entities that will not be allowed on the new tile, and move them to the closest adjacent tile they are allowed on.
 		Array<Tile> surroundingTiles = getAdjacentTiles(true);
 		for(Entity entity: level.getOverlappingEntities(getBounds())) {
@@ -156,8 +143,6 @@ public class Tile implements WorldObject {
 		}
 		
 		newType.getProp(CoveredTileProperty.class).tilePlaced(this, prev);
-		
-		//level.setTileUpdates(this, (surfaceType == null ? 0 : surfaceType.getProp(UpdateProperty.class).getTicksPerSecond()) + (groundType == null ? 0 : groundType.getProp(UpdateProperty.class).getTicksPerSecond()));
 	}
 	
 	public Array<Tile> getAdjacentTiles(boolean includeCorners) {
@@ -215,20 +200,20 @@ public class Tile implements WorldObject {
 			surfaceType.getProp(UpdateProperty.class).update(delta, this);
 	}
 	
-	int getData(TileProperty property, TileType type, int propDataIndex) {
-		// assumed that the type is either the groundType or the surfaceType of this tile.
-		type.checkDataAccess(property.getClass(), propDataIndex);
+	private int getIndex(Class<? extends TileProperty> property, TileType type, int propDataIndex) {
+		type.checkDataAccess(property, this, propDataIndex);
 		
-		int offset = !type.isGroundTile() ? groundType.getPropDataLength(property.getClass()) : 0;
-		return this.data[type.getPropDataIndex(property.getClass()) + propDataIndex + offset];
+		int offset = !type.isGroundTile() ? groundType.getPropDataLength(property) : 0;
+		
+		return type.getPropDataIndex(property) + propDataIndex + offset;
 	}
 	
-	void setData(TileProperty property, TileType type, int propDataIndex, int data) {
-		// assumed that the type is either the groundType or the surfaceType of this tile.
-		type.checkDataAccess(property.getClass(), propDataIndex);
-		
-		int offset = !type.isGroundTile() ? groundType.getPropDataLength(property.getClass()) : 0;
-		this.data[type.getPropDataIndex(property.getClass()) + propDataIndex + offset] = data;
+	int getData(Class<? extends TileProperty> property, TileType type, int propDataIndex) {
+		return this.data[getIndex(property, type, propDataIndex)];
+	}
+	
+	void setData(Class<? extends TileProperty> property, TileType type, int propDataIndex, int data) {
+		this.data[getIndex(property, type, propDataIndex)] = data;
 	}
 	
 	@Override
@@ -256,7 +241,7 @@ public class Tile implements WorldObject {
 	public void touching(Entity entity) {}
 	
 	@Override
-	public String toString() { return MyUtils.toTitleCase(getType().name()) + " Tile" + (surfaceType != null ? " on " + MyUtils.toTitleCase(groundType.name()) : ""); }
+	public String toString() { return getType().getName() + " Tile" + (surfaceType != null ? " on " + groundType.getName() : ""); }
 	
 	public String toLocString() { return x+","+y+" ("+toString()+")"; }
 }

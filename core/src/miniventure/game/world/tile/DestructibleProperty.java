@@ -77,7 +77,7 @@ public class DestructibleProperty implements TileProperty {
 	
 	boolean tileAttacked(Tile tile, WorldObject attacker, int damage) {
 		if(damage > 0) {
-			int health = totalHealth > 1 ? tile.getData(this, tileType, HEALTH_IDX) : 1;
+			int health = totalHealth > 1 ? tile.getData(getClass(), tileType, HEALTH_IDX) : 1;
 			health -= damage;
 			if(health <= 0) {
 				for(ItemDrop drop: drops)
@@ -85,7 +85,7 @@ public class DestructibleProperty implements TileProperty {
 						drop.dropItems(tile.getLevel(), tile, attacker);
 				tile.resetTile(tile.getType().getProp(CoveredTileProperty.class).getCoveredTile(tile));
 			} else
-				tile.setData(this, tileType, HEALTH_IDX, health);
+				tile.setData(getClass(), tileType, HEALTH_IDX, health);
 			
 			return true;
 		}

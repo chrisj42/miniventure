@@ -21,7 +21,7 @@ public class CoveredTileProperty implements TileProperty {
 	public void tilePlaced(Tile tile, TileType previous) {
 		if(previous == null) return;
 		if(dataLength > 0) // fetch from data
-			tile.setData(this, tileType,0, previous.ordinal());
+			tile.setData(getClass(), tileType,0, previous.ordinal());
 		else if(tile.getType() != tileType/* || previous != coveredTile*/)
 			System.err.println("Warning: unexpected placement of tile type "+tile.getType()+", using property for " + tileType);
 	}
@@ -29,7 +29,7 @@ public class CoveredTileProperty implements TileProperty {
 	public TileType getCoveredTile() { return coveredTile; }
 	public TileType getCoveredTile(Tile tile) {
 		if(dataLength > 0) 
-			return TileType.values[tile.getData(this, tileType,0)];
+			return TileType.values[tile.getData(getClass(), tileType,0)];
 		return coveredTile;
 	}
 	
