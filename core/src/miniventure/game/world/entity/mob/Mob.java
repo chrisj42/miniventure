@@ -74,11 +74,11 @@ public abstract class Mob extends Entity {
 		health -= Math.min(damage, health);
 		if(health == 0) {
 			Level level = getLevel();
-			if(level != null) {
+			if(level != null)
 				for (ItemDrop drop : itemDrops)
 					drop.dropItems(level, this, obj);
-				level.removeEntity(this);
-			}
+			
+			remove();
 		}
 		
 		return true;

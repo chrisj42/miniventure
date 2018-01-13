@@ -63,17 +63,16 @@ public class DestructibleProperty implements TileProperty {
 	}
 	
 	public void init(TileType type) {
-		if(dropsTileItem)
-			drops = new ItemDrop[] {new ItemDrop(new Item(TileItem.get(type)))};
-		
 		this.tileType = type;
+		
+		if(dropsTileItem) 
+			drops[0] = new ItemDrop(TileItem.get(type));
 	}
 	
 	boolean tileAttacked(Tile tile, Mob attacker, Item attackItem) {
 		int damage = getDamage(tile, attackItem);
 		return tileAttacked(tile, attacker, damage);
 	}
-		//System.out.println("attacked tile " + tile + " with " + attackItem + "; damage = " + damage);
 	
 	boolean tileAttacked(Tile tile, WorldObject attacker, int damage) {
 		if(damage > 0) {

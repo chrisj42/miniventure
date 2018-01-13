@@ -153,7 +153,7 @@ public class Level {
 			return;
 		}
 		
-		ItemEntity ie = new ItemEntity(item, Vector2.Zero.cpy());
+		ItemEntity ie = new ItemEntity(item, Vector2.Zero.cpy()); // this is a dummy variable.
 		
 		if(!closest.isPermeableBy(ie)) {
 			// we need to look around for a tile that the item *can* be placed on.

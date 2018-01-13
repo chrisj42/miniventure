@@ -44,11 +44,6 @@ public class ItemEntity extends Entity {
 		Level level = Level.getEntityLevel(this);
 		if(level == null) return;
 		
-		if(time > LIFETIME) {
-			// remove item entity
-			level.removeEntity(this);
-		}
-		
 		Vector2 pos = getBounds().getPosition(new Vector2());
 		move(velocity.x, velocity.y, velocity.z);
 		Vector2 newPos = getBounds().getPosition(new Vector2());
@@ -73,15 +68,16 @@ public class ItemEntity extends Entity {
 			velocity.add(0, 0, GRAVITY);
 		
 		time += delta;
+		
+		if(time > LIFETIME)
+			remove();
 	}
 	
 	@Override
 	public boolean touchedBy(Entity other) {
 		if(other instanceof Player && time > PICKUP_DELAY) {
 			((Player)other).addToInventory(item);
-			Level level = Level.getEntityLevel(this);
-			if(level != null)
-				level.removeEntity(this);
+			remove();
 			return true;
 		}
 		

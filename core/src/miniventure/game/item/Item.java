@@ -21,11 +21,8 @@ public final class Item {
 	private boolean used = false;
 	private int stackSize = 1;
 	
-	//public Item(TextureRegion texture) { this(false, texture); }
 	public Item(ItemData data) {
 		this.itemData = data;
-		//this.texture = texture == null ? missing : texture;
-		//this.reflexive = reflexive;
 	}
 	
 	public ItemData getItemData() { return itemData; }
@@ -80,5 +77,6 @@ public final class Item {
 	}
 	
 	public int getDamage(WorldObject obj) { return itemData.getDamage(obj); }
+	
 	//public Item clone() { return new Item(itemData); }
 }

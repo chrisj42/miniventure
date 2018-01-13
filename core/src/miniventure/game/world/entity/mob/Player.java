@@ -170,8 +170,12 @@ public class Player extends Mob {
 	}
 	
 	public void addToInventory(Item item) {
+		if(heldItem != null && heldItem.addToStack(item))
+			return;
+		
 		for(Item i: inventory)
-			if(i.addToStack(item)) return;
+			if(i.addToStack(item))
+				return;
 		
 		inventory.add(item);
 	}

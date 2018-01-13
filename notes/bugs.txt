@@ -1,8 +1,1 @@
-tile overlaps don't work fully anymore; it seems to work between those with surface tiles and those without, though; just not between two tiles without.
-
-****
-
-Item stacking isn't working. The item count increases exponentially, so I bet it's some sort of leaked reference bug or something, which, ironically, was exactly what I was trying to avoid.
-
-****
-
+no bugs here. :)

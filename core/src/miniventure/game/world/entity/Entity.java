@@ -39,6 +39,13 @@ public abstract class Entity implements WorldObject {
 	@Override
 	public Level getLevel() { return Level.getEntityLevel(this); }
 	
+	/// this is called only to remove an entity completely from the game, not to change levels.
+	protected final void remove() {
+		Level level = Level.getEntityLevel(this);
+		if(level != null)
+			level.removeEntity(this);
+	}
+	
 	@Override
 	public void update(float delta) {
 		Level level = getLevel();
