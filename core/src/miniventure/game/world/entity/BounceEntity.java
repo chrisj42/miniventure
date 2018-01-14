@@ -4,6 +4,7 @@ import miniventure.game.world.Level;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -13,6 +14,9 @@ public class BounceEntity extends Entity {
 	private static final float INITIAL_BOUNCE_FORCE = 5, INITIAL_MOVE_FORCE = 0.04f;
 	private static final float GRAVITY = -0.5f;
 	private static final float REBOUND_SPEED_FACTOR = 0.5f;
+	
+	private static final float BLINK_THRESHOLD = 0.75f; // the minimum percentage of lifetime that time has to be for the entity to start blinking, signaling that it's about to disappear.
+	private static final float BLINK_RATE = 0.005f; // the rate at which the entity blinks, in seconds/blink.
 	
 	private final float lifetime;
 	
@@ -74,4 +78,16 @@ public class BounceEntity extends Entity {
 			remove();
 	}
 	
+	protected boolean shouldRender() {
+		return !(
+			time >= lifetime * BLINK_THRESHOLD &&
+			time % (BLINK_RATE * 2) > BLINK_RATE
+		);
+	}
+	
+	@Override
+	public void render(SpriteBatch batch, float delta) {
+		if(shouldRender())
+			super.render(batch, delta);
+	}
 }

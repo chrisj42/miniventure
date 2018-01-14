@@ -27,6 +27,8 @@ public class TextParticle extends BounceEntity {
 	
 	@Override
 	public void render(SpriteBatch batch, float delta) {
+		if(!shouldRender()) return;
+		
 		Vector2 pos = getBounds().getCenter(new Vector2());
 		pos.y += getZ();
 		font.setColor(shadow);
