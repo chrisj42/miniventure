@@ -93,4 +93,8 @@ public class MyUtils {
 		
 		return toMove;
 	}
+	
+	public static float map(float num, float prevMin, float prevMax, float newMin, float newMax) {
+		return (num-prevMin)/(prevMax-prevMin) * (newMax-newMin) + newMin;
+	}
 }

@@ -90,9 +90,8 @@ public abstract class Entity implements WorldObject {
 	
 	public boolean interactWith(Player player, Item item) { return false; }
 	
-	public void move(float xd, float yd) {
-		move(xd, yd, 0);
-	}
+	public void move(Vector2 v) { move(v.x, v.y); }
+	public void move(float xd, float yd) { move(xd, yd, 0); }
 	public void move(float xd, float yd, float zd) {
 		moveAxis(true, xd);
 		moveAxis(false, yd);
@@ -176,7 +175,7 @@ public abstract class Entity implements WorldObject {
 	//public boolean blockedBy(Entity other) { return !(other instanceof ItemEntity); }
 	
 	@Override
-	public boolean isPermeableBy(Entity entity) { return this instanceof ItemEntity || entity instanceof ItemEntity; }
+	public boolean isPermeableBy(Entity entity) { return this instanceof BounceEntity || entity instanceof BounceEntity; }
 	
 	@Override
 	public boolean attackedBy(Mob mob, Item attackItem) { return hurtBy(mob, attackItem.getDamage(this)); }

@@ -3,6 +3,8 @@ package miniventure.game.world.levelgen;
 import java.util.Arrays;
 import java.util.Random;
 
+import miniventure.game.MyUtils;
+
 class Noise {
 	static float[] getWhiteNoise(long seed, int length) {
 		float[] noise = new float[length];
@@ -151,17 +153,13 @@ class Noise {
 		return filteredNoise;
 	}
 	
-	static float map(float num, float prevMin, float prevMax, float newMin, float newMax) {
-		return (num-prevMin)/(prevMax-prevMin) * (newMax-newMin) + newMin;
-	}
-	
 	static float[] map(float[] nums, float newMin, float newMax) {
 		float[] extrema = getMinMax(nums);
 		float min = extrema[0], max = extrema[1];
 		
 		float[] newNums = new float[nums.length];
 		for(int i = 0; i < nums.length; i++)
-			newNums[i] = map(nums[i], min, max, newMin, newMax);
+			newNums[i] = MyUtils.map(nums[i], min, max, newMin, newMax);
 		
 		return newNums;
 	}
