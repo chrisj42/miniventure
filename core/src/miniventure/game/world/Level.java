@@ -66,7 +66,11 @@ public class Level {
 	public int getWidth() { return width; }
 	public int getHeight() { return height; }
 	
-	
+	public void addEntity(Entity e, Vector2 pos) { addEntity(e, pos.x, pos.y); }
+	public void addEntity(Entity e, float x, float y) {
+		e.moveTo(this, x, y);
+		addEntity(e);
+	}
 	public void addEntity(Entity e) {
 		//System.out.println("adding entity " + e + " to level " + this + " at " + e.getBounds().x+","+e.getBounds().y);
 		//synchronized (entitiesToAdd) {

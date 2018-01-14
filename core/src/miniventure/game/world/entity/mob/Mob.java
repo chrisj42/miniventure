@@ -116,7 +116,7 @@ public abstract class Mob extends Entity {
 		
 		Level level = getLevel();
 		if(level != null) {
-			level.addEntity(new TextParticle(damage+"", this instanceof Player ? Color.PINK : Color.RED));
+			level.addEntity(new TextParticle(damage+"", this instanceof Player ? Color.PINK : Color.RED), getBounds().getCenter(new Vector2()));
 			
 			if (health == 0) {
 				for (ItemDrop drop : itemDrops)
@@ -124,7 +124,8 @@ public abstract class Mob extends Entity {
 				
 				remove();
 			}
-		}
+		} else
+			System.out.println("level is null for mob " + this);
 		
 		return true;
 	}
