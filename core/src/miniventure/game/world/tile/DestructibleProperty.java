@@ -6,7 +6,10 @@ import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolType;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.WorldObject;
+import miniventure.game.world.entity.TextParticle;
 import miniventure.game.world.entity.mob.Mob;
+
+import com.badlogic.gdx.math.Vector2;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -78,6 +81,8 @@ public class DestructibleProperty implements TileProperty {
 		if(damage > 0) {
 			int health = totalHealth > 1 ? tile.getData(getClass(), tileType, HEALTH_IDX) : 1;
 			health -= damage;
+			if(totalHealth > 1)
+				tile.getLevel().addEntity(new TextParticle(damage+""), tile.getBounds().getCenter(new Vector2()));
 			if(health <= 0) {
 				for(ItemDrop drop: drops)
 					if(drop != null)
