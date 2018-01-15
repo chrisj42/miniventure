@@ -182,12 +182,13 @@ public class Player extends Mob {
 	
 	@Override
 	public boolean hurtBy(WorldObject source, int dmg) {
-		int health = stats.get(Stat.Health);
-		if(health == 0) return false;
-		stats.put(Stat.Health, Math.max(0, health - dmg));
-		// here is where I'd make a death chest, and show the death screen.
-		
-		return super.hurtBy(source, dmg);
+		if(super.hurtBy(source, dmg)) {
+			int health = stats.get(Stat.Health);
+			if (health == 0) return false;
+			stats.put(Stat.Health, Math.max(0, health - dmg));
+			// here is where I'd make a death chest, and show the death screen.
+		}
+		return false;
 	}
 	
 	private static boolean pressingKey(int keycode) {

@@ -62,9 +62,13 @@ public abstract class Entity implements WorldObject {
 	@Override
 	public void render(SpriteBatch batch, float delta) {
 		float prevY = sprite.getY();
-		sprite.setY(prevY+z);
-		sprite.draw(batch);
+		drawSprite(batch, sprite.getX(), prevY+z);
 		sprite.setY(prevY);
+	}
+	
+	protected void drawSprite(SpriteBatch batch, float x, float y) {
+		sprite.setPosition(x, y);
+		sprite.draw(batch);
 	}
 	
 	protected void setSprite(TextureRegion texture) {

@@ -1,6 +1,7 @@
 package miniventure.game.world.entity.mob;
 
-import miniventure.game.MyUtils;
+import miniventure.game.util.FrameBlinker;
+import miniventure.game.util.MyUtils;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
@@ -31,6 +32,9 @@ public abstract class Mob extends Entity {
 	private static final float MAX_KNOCKBACK_TIME = 0.25f;
 	private static final float DAMAGE_PERCENT_FOR_MAX_PUSH = 0.2f;
 	
+	private static final float HURT_COOLDOWN = 0.5f; // minimum time between taking damage, in seconds; prevents a mob from getting hurt multiple times in quick succession. 
+	private static final int HURT_BLINK_RATE = 2; // rate at which the mob blinks when hurt and cooling down, in frames/blink.
+	
 	@NotNull private Direction dir;
 	@NotNull private MobAnimationController animator;
 	
@@ -41,6 +45,9 @@ public abstract class Mob extends Entity {
 	private float knockbackTimeLeft = 0;
 	private Vector2 knockbackVelocity = new Vector2(); // knockback is applied once, at the start, as a velocity. The mob is moved with this velocity constantly, slowing down at a fixed rate, until the knockback is gone.
 	
+	private float invulnerableTime = 0;
+	private FrameBlinker blinker;
+	
 	public Mob(@NotNull String spriteName, int health, @NotNull ItemDrop... deathDrops) {
 		super(new Sprite());
 		dir = Direction.DOWN;
@@ -48,14 +55,20 @@ public abstract class Mob extends Entity {
 		this.health = health;
 		this.itemDrops = deathDrops;
 		
+		blinker = new FrameBlinker(5, 1, false);
+		
 		animator = new MobAnimationController(this, spriteName);
 	}
 	
 	public Direction getDirection() { return dir; }
 	
+	@Override
 	public void render(SpriteBatch batch, float delta) {
+		blinker.update(delta);
+		
 		setSprite(animator.pollAnimation(delta));
-		super.render(batch, delta);
+		if(invulnerableTime <= 0 || blinker.shouldRender())
+			super.render(batch, delta);
 	}
 	
 	@Override
@@ -70,6 +83,8 @@ public abstract class Mob extends Entity {
 				knockbackVelocity.setZero();
 			}
 		}
+		
+		if(invulnerableTime > 0) invulnerableTime -= Math.min(invulnerableTime, delta);
 	}
 	
 	@Override
@@ -94,7 +109,10 @@ public abstract class Mob extends Entity {
 	
 	@Override
 	public boolean hurtBy(WorldObject obj, int damage) {
+		if(invulnerableTime > 0) return false; // this ought to return false because returning true would use up weapons and such, and that's not fair. Downside is, it'll then try to interact with other things...
+		
 		health -= Math.min(damage, health);
+		invulnerableTime = HURT_COOLDOWN;
 		
 		if(health > 0) {
 			// do knockback

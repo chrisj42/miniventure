@@ -1,5 +1,6 @@
 package miniventure.game.world.entity;
 
+import miniventure.game.util.FrameBlinker;
 import miniventure.game.world.Level;
 import miniventure.game.world.tile.Tile;
 
@@ -16,12 +17,12 @@ public class BounceEntity extends Entity {
 	private static final float REBOUND_SPEED_FACTOR = 0.5f;
 	
 	private static final float BLINK_THRESHOLD = 0.75f; // the minimum percentage of lifetime that time has to be for the entity to start blinking, signaling that it's about to disappear.
-	private static final float BLINK_RATE = 0.005f; // the rate at which the entity blinks, in seconds/blink.
 	
 	private final float lifetime;
 	
 	private Vector3 velocity;
 	private float time; // the current time relative to the creation of this item entity. used as the current position along the "x-axis".
+	private FrameBlinker blinker;
 	
 	
 	public BounceEntity(Sprite sprite, float lifetime) {
@@ -30,6 +31,8 @@ public class BounceEntity extends Entity {
 	public BounceEntity(Sprite sprite, Vector2 goalDir, float lifetime) {
 		super(sprite);
 		this.lifetime = lifetime;
+		
+		blinker = new FrameBlinker(1, 1, false);
 		
 		velocity = new Vector3(goalDir.cpy().scl(INITIAL_MOVE_FORCE), INITIAL_BOUNCE_FORCE);
 	}
@@ -78,16 +81,11 @@ public class BounceEntity extends Entity {
 			remove();
 	}
 	
-	protected boolean shouldRender() {
-		return !(
-			time >= lifetime * BLINK_THRESHOLD &&
-			time % (BLINK_RATE * 2) > BLINK_RATE
-		);
-	}
-	
 	@Override
 	public void render(SpriteBatch batch, float delta) {
-		if(shouldRender())
+		blinker.update(delta);
+		
+		if(time < lifetime * BLINK_THRESHOLD || blinker.shouldRender())
 			super.render(batch, delta);
 	}
 }

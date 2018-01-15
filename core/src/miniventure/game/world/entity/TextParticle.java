@@ -1,17 +1,16 @@
 package miniventure.game.world.entity;
 
+import miniventure.game.GameCore;
+
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Align;
 
 import org.jetbrains.annotations.NotNull;
 
 public class TextParticle extends BounceEntity {
-	
-	private static final BitmapFont font = new BitmapFont();
 	
 	@NotNull private final String text;
 	@NotNull private final Color main, shadow;
@@ -26,14 +25,11 @@ public class TextParticle extends BounceEntity {
 	}
 	
 	@Override
-	public void render(SpriteBatch batch, float delta) {
-		if(!shouldRender()) return;
-		
-		Vector2 pos = getBounds().getCenter(new Vector2());
-		pos.y += getZ();
+	protected void drawSprite(SpriteBatch batch, float x, float y) {
+		BitmapFont font = GameCore.getFont();
 		font.setColor(shadow);
-		font.draw(batch, text, pos.x-1, pos.y+1, 0, Align.center, false);
+		font.draw(batch, text, x-1, y+1, 0, Align.center, false);
 		font.setColor(main);
-		font.draw(batch, text, pos.x, pos.y, 0, Align.center, false);
+		font.draw(batch, text, x, y, 0, Align.center, false);
 	}
 }
