@@ -1,6 +1,6 @@
 package miniventure.game.world.entity;
 
-import miniventure.game.GameCore;
+import miniventure.game.screen.GameCore;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;

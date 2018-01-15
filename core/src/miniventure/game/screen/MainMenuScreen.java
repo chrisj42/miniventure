@@ -1,7 +1,5 @@
 package miniventure.game.screen;
 
-import miniventure.game.GameCore;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
@@ -13,19 +11,15 @@ import com.badlogic.gdx.utils.Align;
 
 public class MainMenuScreen implements Screen {
 	
-	private final GameCore game;
-	
-	private SpriteBatch batch;
+	private GameCore game = GameCore.getGame();
+	private SpriteBatch batch = game.getBatch();
+	private BitmapFont font = GameCore.getFont();
 	
 	private OrthographicCamera camera;
 	
 	private boolean clicked = false, rendered = false;
 	
-	public MainMenuScreen(final GameCore game) {
-		this.game = game;
-		
-		batch = game.getBatch();
-		
+	public MainMenuScreen() {
 		camera = new OrthographicCamera();
 		camera.setToOrtho(false, GameCore.SCREEN_WIDTH, GameCore.SCREEN_HEIGHT);
 	}
@@ -37,7 +31,7 @@ public class MainMenuScreen implements Screen {
 	public void render(float delta) {
 		
 		if(rendered) {
-			game.setScreen(new GameScreen(game));
+			game.setScreen(new GameScreen());
 			dispose();
 			return;
 		}
@@ -49,7 +43,6 @@ public class MainMenuScreen implements Screen {
 		
 		batch.setProjectionMatrix(camera.combined); // tells the batch to use the camera's coordinate system.
 		batch.begin();
-		BitmapFont font = GameCore.getFont();
 		
 		if(clicked) {
 			font.draw(batch, "Loading...", camera.viewportWidth / 2, camera.viewportHeight / 2, 0, Align.center, false);

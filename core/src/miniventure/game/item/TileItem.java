@@ -2,7 +2,7 @@ package miniventure.game.item;
 
 import java.util.HashMap;
 
-import miniventure.game.GameCore;
+import miniventure.game.screen.GameCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;

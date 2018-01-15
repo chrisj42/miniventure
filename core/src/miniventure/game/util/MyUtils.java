@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
@@ -59,6 +60,10 @@ public class MyUtils {
 		font.draw(batch, text, x+1, y+1);
 		font.setColor(center);
 		font.draw(batch, text, x, y);
+	}
+	
+	public static void drawTextCentered(BitmapFont font, SpriteBatch batch, String text, float width, float height) {
+		font.draw(batch, text, width/2, height/2, 0, Align.center, true);
 	}
 	
 	public static String toTitleCase(String string) {

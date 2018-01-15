@@ -2,7 +2,7 @@ package miniventure.game.world.tile;
 
 import java.util.HashMap;
 
-import miniventure.game.GameCore;
+import miniventure.game.screen.GameCore;
 
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.math.MathUtils;

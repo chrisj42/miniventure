@@ -1,4 +1,4 @@
-package miniventure.game;
+package miniventure.game.util;
 
 import org.jetbrains.annotations.NotNull;
 

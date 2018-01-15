@@ -1,9 +1,8 @@
-package miniventure.game;
+package miniventure.game.screen;
 
 import java.util.HashMap;
 
-import miniventure.game.screen.GameScreen;
-import miniventure.game.screen.MainMenuScreen;
+import miniventure.game.util.Version;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -29,6 +28,8 @@ public class GameCore extends Game {
 	
 	private static GameScreen gameScreen; // Screens ought to be disposed, but aren't automatically disposed; so we need to do it ourselves.
 	
+	private static GameCore game;
+	
 	@Override
 	public void create () {
 		entityAtlas = new TextureAtlas("sprites/entities.txt");
@@ -41,10 +42,12 @@ public class GameCore extends Game {
 		for(AtlasRegion region: iconAtlas.getRegions())
 			icons.put(region.name, region);
 		
-		this.setScreen(new MainMenuScreen(this));
+		game = this;
+		
+		this.setScreen(new MainMenuScreen());
 	}
 	
-	//public static GameScreen getGameScreen() { return gameScreen; }
+	public static GameCore getGame() { return game; }
 	
 	@Override
 	public void dispose () {

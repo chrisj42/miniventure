@@ -1,8 +1,9 @@
 package miniventure.game.desktop;
 
+import miniventure.game.screen.GameCore;
+
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import miniventure.game.GameCore;
 
 public class DesktopLauncher {
 	public static void main (String[] arg) {
