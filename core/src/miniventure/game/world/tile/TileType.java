@@ -3,8 +3,8 @@ package miniventure.game.world.tile;
 import java.util.Comparator;
 import java.util.HashMap;
 
-import miniventure.game.MyUtils;
 import miniventure.game.item.ToolType;
+import miniventure.game.util.MyUtils;
 import miniventure.game.world.tile.AnimationProperty.AnimationType;
 import miniventure.game.world.tile.DestructibleProperty.PreferredTool;
 

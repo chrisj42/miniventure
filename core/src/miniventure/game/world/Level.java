@@ -3,8 +3,8 @@ package miniventure.game.world;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import miniventure.game.MyUtils;
 import miniventure.game.item.Item;
+import miniventure.game.util.MyUtils;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ItemEntity;
 import miniventure.game.world.levelgen.LevelGenerator;

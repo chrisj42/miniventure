@@ -3,8 +3,8 @@ package miniventure.game.screen;
 import java.util.HashMap;
 
 import miniventure.game.GameCore;
-import miniventure.game.MyUtils;
 import miniventure.game.item.ItemData;
+import miniventure.game.util.MyUtils;
 import miniventure.game.world.Level;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.tile.Tile;

@@ -3,7 +3,7 @@ package miniventure.game.world.levelgen;
 import java.util.Arrays;
 import java.util.Random;
 
-import miniventure.game.MyUtils;
+import miniventure.game.util.MyUtils;
 
 class Noise {
 	static float[] getWhiteNoise(long seed, int length) {
