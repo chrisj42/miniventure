@@ -9,14 +9,20 @@ public class OverlapProperty implements TileProperty {
 	
 	private final boolean overlaps;
 	
+	private TileType tileType;
+	private boolean useSurface;
+	
 	OverlapProperty(boolean overlaps) {
 		this.overlaps = overlaps;
 	}
 	
-	Array<AtlasRegion> getSprites(Tile tile) {
-		return getSprites(tile, false);
+	@Override public void init(TileType type) {
+		this.tileType = type;
+		useSurface = !tileType.isGroundTile();
 	}
-	Array<AtlasRegion> getSprites(Tile tile, boolean useUnder) {
+	
+	// one renders with ground tiles and 
+	Array<AtlasRegion> getSprites(Tile tile) {
 		Array<AtlasRegion> sprites = new Array<>();
 		
 		/*
@@ -35,30 +41,16 @@ public class OverlapProperty implements TileProperty {
 			for (int y = -1; y <= 1; y++) {
 				Tile oTile = tile.getLevel().getTile(tile.x + x, tile.y + y);
 				if(oTile != null) {
-					TileType oType = oTile.getType();
-					if(useUnder) {
-						if(oType.animationProperty.renderBehind != null)
-							aroundTiles[i] = oType.animationProperty.renderBehind;
-						else
-							aroundTiles[i] = oType;
-					}
-					else if(oType.animationProperty.renderBehind != null)
-						aroundTiles[i] = oType;
+					aroundTiles[i] = useSurface ? oTile.getSurfaceType() : oTile.getGroundType();
 					
-					if(aroundTiles[i] != null && aroundTiles[i].overlapProperty.overlaps)
+					if(aroundTiles[i] != null && aroundTiles[i].getProp(OverlapProperty.class).overlaps)
 						types.add(aroundTiles[i]);
 				}
 				i++;
 			}
 		}
 		
-		final TileType compareType;
-		TileType under = tile.getType().animationProperty.renderBehind;
-		if(useUnder && under != null && TileType.tileSorter.compare(under, tile.getType()) < 0)
-			compareType = under;
-		else 
-			compareType = tile.getType();
-		types.removeIf(tileType -> TileType.tileSorter.compare(tileType, compareType) <= 0);
+		types.removeIf(tileType -> TileType.tileSorter.compare(tileType, this.tileType) <= 0);
 		
 		Array<Integer> indexes = new Array<>();
 		for(TileType type: types) {
@@ -80,7 +72,7 @@ public class OverlapProperty implements TileProperty {
 			if(aroundTiles[6] == type && bits[2] == 0 && bits[3] == 0) indexes.add(2);
 			if(aroundTiles[0] == type && bits[3] == 0 && bits[0] == 0) indexes.add(3);
 			for(Integer idx: indexes)
-				sprites.add(type.animationProperty.getSprite(idx, true, tile, type));
+				sprites.add(type.getProp(AnimationProperty.class).getSprite(idx, true, tile));
 		}
 		return sprites;
 	}

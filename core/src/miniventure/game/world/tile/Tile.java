@@ -2,15 +2,20 @@ package miniventure.game.world.tile;
 
 import miniventure.game.item.Item;
 import miniventure.game.world.Level;
+import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
+import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.entity.mob.Player;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
-public class Tile {
+import org.jetbrains.annotations.NotNull;
+
+public class Tile implements WorldObject {
 	
 	/*
 		So, tiles can have any of the following properties/features:
@@ -64,7 +69,7 @@ public class Tile {
 	
 	public static final int SIZE = 32;
 	
-	private TileType type;
+	private TileType groundType, surfaceType;
 	
 	private Level level;
 	protected final int x, y;
@@ -72,23 +77,72 @@ public class Tile {
 	
 	public Tile(TileType type, Level level, int x, int y) { this(type, level, x, y, type.getInitialData()); }
 	public Tile(TileType type, Level level, int x, int y, int[] data) {
-		this.type = type;
 		this.level = level;
 		this.x = x;
 		this.y = y;
 		this.data = data;
+		
+		surfaceType = type.isGroundTile() ? null : type;
+		// with the surfaceType, data, and other tile info being set above, the CoveredTileProperty should have no problem fetching the correct ground tile type.
+		groundType = type.isGroundTile() ? type : type.getProp(CoveredTileProperty.class).getCoveredTile(this);
 	}
 	
-	public TileType getType() { return type; }
+	public TileType getType() { return surfaceType == null ? groundType : surfaceType; }
+	TileType getGroundType() { return groundType; }
+	TileType getSurfaceType() { return surfaceType; }
 	
-	public Level getLevel() { return level; }
+	@Override public Level getLevel() { return level; }
 	
 	public int getCenterX() { return x*SIZE + SIZE/2; }
 	public int getCenterY() { return y*SIZE + SIZE/2; }
 	
-	public void resetTile(TileType newType) {
-		type = newType;
-		data = type.getInitialData();
+	@Override
+	public Rectangle getBounds() { return new Rectangle(x*SIZE, y*SIZE, SIZE, SIZE); }
+	
+	public void resetTile(@NotNull TileType newType) {
+		// check for entities that will not be allowed on the new tile, and move them to the closest adjacent tile they are allowed on.
+		Array<Tile> surroundingTiles = getAdjacentTiles(true);
+		for(Entity entity: level.getOverlappingEntities(getBounds())) {
+			// for each entity, check if it can walk on the new tile type. If not, fetch the surrounding tiles, remove those the entity can't walk on, and then fetch the closest tile of the remaining ones.
+			if(newType.getProp(SolidProperty.class).isPermeableBy(entity)) continue; // no worries for this entity.
+			
+			Array<Tile> aroundTiles = new Array<>(surroundingTiles);
+			for(int i = 0; i < aroundTiles.size; i++) {
+				if(!aroundTiles.get(i).groundType.getProp(SolidProperty.class).isPermeableBy(entity)) {
+					aroundTiles.removeIndex(i);
+					i--;
+				}
+			}
+			
+			Tile closest = entity.getClosestTile(aroundTiles);
+			// if none remain (returned tile is null), take no action for that entity. If a tile is returned, then move the entity to the center of that tile.
+			if(closest != null)
+				entity.moveTo(closest);
+		}
+		
+		TileType prev = getType();
+		
+		if(!newType.isGroundTile()) {
+			// the new type has no defined under type, so the previous tile type should be conserved.
+			// also, since you should never place one surface tile directly on another surface tile, I can technically assume that the current data array only has the ground tile data. But, since creative mode could be a thing, and it isn't too hard, I'm goinf to double check anyway.
+			
+			int[] newData = newType.getInitialData();
+			int groundDataLen = groundType.getDataLength();
+			int[] fullData = new int[groundDataLen + newData.length];
+			System.arraycopy(data, 0, fullData, 0, groundDataLen); // copy ground tile data, first
+			System.arraycopy(newData, 0, fullData, groundDataLen, newData.length); // copy surface tile data
+			data = fullData;
+			
+			surfaceType = newType;
+		}
+		else { // new type is ground tile, remove surface type if present
+			data = newType.getInitialData();
+			surfaceType = null;
+			
+			groundType = newType;
+		}
+		
+		newType.getProp(CoveredTileProperty.class).tilePlaced(this, prev);
 	}
 	
 	public Array<Tile> getAdjacentTiles(boolean includeCorners) {
@@ -104,66 +158,90 @@ public class Tile {
 		}
 	}
 	
-	private void draw(SpriteBatch batch, TextureRegion texture) {
-		batch.draw(texture, x*SIZE, y*SIZE, SIZE, SIZE);
-	}
-	
-	private void drawOverlap(SpriteBatch batch, TileType type, boolean under) {
-		Array<AtlasRegion> sprites = type.overlapProperty.getSprites(this, under);
-		for(AtlasRegion sprite: sprites)
-			draw(batch, sprite);
-	}
-	
-	public void render(SpriteBatch batch, float delta) {
-		TileType under = type.animationProperty.renderBehind;
+	/** @noinspection UnusedReturnValue*/
+	public static Array<Tile> sortByDistance(Array<Tile> tiles, final Vector2 position) {
+		tiles.sort((t1, t2) -> {
+			float t1diff = position.dst(t1.getBounds().getCenter(new Vector2()));
+			float t2diff = position.dst(t2.getBounds().getCenter(new Vector2()));
+			return Float.compare(t1diff, t2diff);
+		});
 		
-		if(under != null) { // draw the tile that ought to be rendered underneath this one
-			draw(batch, under.connectionProperty.getSprite(this, true));
-			drawOverlap(batch, under, true);
-		}
+		return tiles;
+	}
+	
+	private void draw(SpriteBatch batch, Array<AtlasRegion> textures) {
+		for(AtlasRegion texture: textures)
+			batch.draw(texture, x*SIZE, y*SIZE, SIZE, SIZE);
+	}
+	
+	private void renderTileType(@NotNull TileType type, SpriteBatch batch) {
+		Array<AtlasRegion> sprites = type.getProp(OverlapProperty.class).getSprites(this);
+		sprites.insert(0, type.getProp(ConnectionProperty.class).getSprite(this));
 		
-		// Due to animation, I'm going to try and draw everything without caching. Hopefully, it won't be slow.
-		draw(batch, type.connectionProperty.getSprite(this)); // draws base sprite for this tile
-		
-		drawOverlap(batch, type, true); // draw the overlap from other under tiles; considers also those without an under tile.
-		
-		drawOverlap(batch, type, false); // draw overlap from other tiles; only considers those that have an under tile.
+		draw(batch, sprites);
 	}
-	
-	public void update(float delta) {
-		type.updateProperty.update(delta, this);
-	}
-	
-	private void checkDataAccess(TileProperty property, int propDataIndex) {
-		if(!type.propertyDataIndexes.containsKey(property))
-			throw new IllegalArgumentException("specified property " + property + " is not from this tile's type, "+type+".");
-		
-		if(propDataIndex >= type.propertyDataLengths.get(property))
-			throw new IndexOutOfBoundsException("tile property " + property + " tried to access index past stated length; length="+type.propertyDataLengths.get(property)+", index="+propDataIndex);
-	}
-	
-	int getData(TileProperty property, int propDataIndex) {
-		checkDataAccess(property, propDataIndex);
-		return this.data[type.propertyDataIndexes.get(property)+propDataIndex];
-	}
-	
-	void setData(TileProperty property, int propDataIndex, int data) {
-		checkDataAccess(property, propDataIndex);
-		this.data[type.propertyDataIndexes.get(property)+propDataIndex] = data;
-	}
-	
-	public boolean isPermeableBy(Entity entity) {
-		return type.solidProperty.isPermeableBy(entity);
-	}
-	
-	public void attackedBy(Player player, Item heldItem) {
-		type.destructibleProperty.tileAttacked(this, heldItem);
-	}
-	
-	public void interactWith(Player player, Item heldItem) { type.interactableProperty.interact(player, heldItem, this); }
-	
-	public void touchedBy(Entity entity) { type.touchListener.touchedBy(entity, this); }
 	
 	@Override
-	public String toString() { return type + " Tile"; }
+	public void render(SpriteBatch batch, float delta) {
+		
+		// draw the ground sprite and overlaps
+		renderTileType(groundType, batch);
+		
+		// draw the surface sprite and overlaps
+		if(surfaceType != null)
+			renderTileType(surfaceType, batch);
+	}
+	
+	
+	@Override
+	public void update(float delta) {
+		groundType.getProp(UpdateProperty.class).update(delta, this);
+		if(surfaceType != null)
+			surfaceType.getProp(UpdateProperty.class).update(delta, this);
+	}
+	
+	private int getIndex(Class<? extends TileProperty> property, TileType type, int propDataIndex) {
+		type.checkDataAccess(property, this, propDataIndex);
+		
+		int offset = !type.isGroundTile() ? groundType.getPropDataLength(property) : 0;
+		
+		return type.getPropDataIndex(property) + propDataIndex + offset;
+	}
+	
+	int getData(Class<? extends TileProperty> property, TileType type, int propDataIndex) {
+		return this.data[getIndex(property, type, propDataIndex)];
+	}
+	
+	void setData(Class<? extends TileProperty> property, TileType type, int propDataIndex, int data) {
+		this.data[getIndex(property, type, propDataIndex)] = data;
+	}
+	
+	@Override
+	public boolean isPermeableBy(Entity entity) {
+		return getType().getProp(SolidProperty.class).isPermeableBy(entity);
+	}
+	
+	@Override
+	public boolean attackedBy(Mob mob, Item attackItem) {
+		return getType().getProp(DestructibleProperty.class).tileAttacked(this, mob, attackItem);
+	}
+	
+	@Override
+	public boolean hurtBy(WorldObject obj, int damage) {
+		return getType().getProp(DestructibleProperty.class).tileAttacked(this, obj, damage);
+	}
+	
+	@Override
+	public boolean interactWith(Player player, Item heldItem) { return getType().getProp(InteractableProperty.class).interact(player, heldItem, this); }
+	
+	@Override
+	public boolean touchedBy(Entity entity) { getType().getProp(TouchListener.class).touchedBy(entity, this); return true; }
+	
+	@Override
+	public void touching(Entity entity) {}
+	
+	@Override
+	public String toString() { return getType().getName() + " Tile" + (surfaceType != null ? " on " + groundType.getName() : ""); }
+	
+	public String toLocString() { return x+","+y+" ("+toString()+")"; }
 }

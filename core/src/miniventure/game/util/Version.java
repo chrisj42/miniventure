@@ -1,4 +1,4 @@
-package miniventure.game;
+package miniventure.game.util;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -48,6 +48,6 @@ public class Version implements Comparable<Version> {
 	
 	@Override
 	public String toString() {
-		return make+"."+major+(minor<0?" official":"."+minor);
+		return make+"."+major+(minor<0?" official":", pre-release "+minor);
 	}
 }

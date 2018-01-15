@@ -1,23 +1,41 @@
 package miniventure.game.world.entity;
 
 import miniventure.game.item.Item;
+import miniventure.game.world.entity.mob.Mob;
+import miniventure.game.world.entity.mob.Player;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector2;
 
-public class ItemEntity extends Entity {
+import org.jetbrains.annotations.NotNull;
+
+public class ItemEntity extends BounceEntity {
 	
-	public ItemEntity(Item item, int xvel, int yvel) {
-		super(new Sprite(item.getTexture(), 0, 0, 0, 0));
+	private static final float PICKUP_DELAY = 0.5f;
+	
+	private final Item item;
+	
+	public ItemEntity(Item item, @NotNull Vector2 goalDir) {
+		super(new Sprite(item.getItemData().getTexture()), goalDir,8f);
+		this.item = item;
 	}
 	
 	@Override
-	public void update(float delta) {
+	public boolean touchedBy(Entity other) {
+		if(other instanceof Player && getTime() > PICKUP_DELAY) {
+			((Player)other).addToInventory(item);
+			remove();
+			return true;
+		}
 		
+		return false;
 	}
 	
 	@Override
-	public void render(SpriteBatch batch, float delta) {
-		
+	public void touching(Entity entity) {
+		touchedBy(entity);
 	}
+	
+	@Override
+	public boolean attackedBy(Mob mob, Item attackItem) { return false; }
 }

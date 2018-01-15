@@ -8,7 +8,7 @@ public interface InteractableProperty extends TileProperty {
 	
 	//InteractableProperty NONE = (p, i, t) -> {};
 	
-	void interact(Player player, Item heldItem, Tile tile);
+	boolean interact(Player player, Item heldItem, Tile tile);
 	
 	@Override
 	default Integer[] getInitData() { return new Integer[0]; }

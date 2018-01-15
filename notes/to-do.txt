@@ -1,0 +1,4 @@
+Make the torch TileType, and a LightProperty to go along with it. It wouldn't really make sense *now*, though, becuase there's no darkness to light up.
+
+****
+

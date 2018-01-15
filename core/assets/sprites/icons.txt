@@ -1,0 +1,40 @@
+icons.png
+size: 32, 64
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+gem-sword
+  rotate: false
+  xy: 3, 3
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+heart-dead-left
+  rotate: false
+  xy: 23, 3
+  size: 6, 12
+  orig: 6, 12
+  offset: 0, 0
+  index: -1
+heart-dead-right
+  rotate: false
+  xy: 23, 19
+  size: 6, 12
+  orig: 6, 12
+  offset: 0, 0
+  index: -1
+heart-left
+  rotate: false
+  xy: 3, 23
+  size: 6, 12
+  orig: 6, 12
+  offset: 0, 0
+  index: -1
+heart-right
+  rotate: false
+  xy: 13, 23
+  size: 6, 12
+  orig: 6, 12
+  offset: 0, 0
+  index: -1

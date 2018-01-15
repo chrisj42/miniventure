@@ -1,6 +1,12 @@
 package miniventure.game.world;
 
 import miniventure.game.item.Item;
+import miniventure.game.item.ItemData;
+
+import com.badlogic.gdx.math.Vector2;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class ItemDrop {
 	
@@ -71,9 +77,9 @@ public class ItemDrop {
 		iron: 
 	*/
 	
-	private Item item;
+	private ItemData item;
 	
-	public ItemDrop(Item item, int minCount, int maxCount, float biasAmt, boolean roundUp) {
+	public ItemDrop(ItemData item, int minCount, int maxCount, float biasAmt, boolean roundUp) {
 		/*
 			this varies between the min count and max count depending on the difficulty. Well, it will depending on the biasAmt argument, a value from 0 to 1.
 				- 0 means there is equal chance for any amount to be dropped on any difficulty.
@@ -89,15 +95,15 @@ public class ItemDrop {
 		
 	}
 	
-	public ItemDrop(Item item) {
+	public ItemDrop(ItemData item) {
+		this.item = item;
+	}
+	
+	public ItemDrop(ItemData item, int count) {
 		
 	}
 	
-	public ItemDrop(Item item, int count) {
-		
-	}
-	
-	public ItemDrop(Item item, int peaceCount, int easyCount, int mediumCount, int hardCount) {
+	public ItemDrop(ItemData item, int peaceCount, int easyCount, int mediumCount, int hardCount) {
 		
 	}
 	
@@ -106,11 +112,14 @@ public class ItemDrop {
 	
 	public int getItemsDropped() {
 		// TODO implement this
-		return 0;
+		return 1;
 	}
 	
-	public void dropItems(Level level, int x, int y) {
+	public void dropItems(Level level, @NotNull WorldObject source, @Nullable WorldObject target) {
+		dropItems(level, source.getBounds().getCenter(new Vector2()), target == null ? null : target.getBounds().getCenter(new Vector2()));
+	}
+	public void dropItems(Level level, Vector2 dropPos, @Nullable Vector2 targetPos) {
 		for(int i = 0; i < getItemsDropped(); i++)
-			level.dropItem(item, x, y);
+			level.dropItem(new Item(item), dropPos, targetPos);
 	}
 }

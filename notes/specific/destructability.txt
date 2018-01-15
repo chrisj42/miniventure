@@ -1,0 +1,23 @@
+so i'm getting qualms about how tiles are destroyed, and such. It's annoying how I have to specify the same tile to both the animation property and the destructible property.
+It is good that there is a single tile that can be under any given tile, but that can't always be the case, due to things like torches, and maybe later, lasers. They can go on almost any tile. So I have to keep track on the tile under other tiles at least sometimes.
+I'll probably add a property to keep track of that when necessary.
+
+In fact, I think I need to redo the destructible property. It's so broad, it's causing problems.
+There are a few different behaviors relating to removing tiles:
+ - tile can be removed in one hit, but only with a select set of items
+ - tile has health, and goes away when the health runs out; different items do more or less damage
+ + the tile under the original tile may sometimes vary for tiles of the same type, and so will need to be stored in the data
+ 	+ the tiles underneath will sometimes need to be drawn under the main tile
+
+
+In common:
+- drops items
+- can be removed (though... technically this doesn't have to be req'd)
+- 
+
+one hit vs health
+single tile below vs variable tile
+
+
+So, I'm going to need to separate the property into this:
+ - have a subclass for those that 

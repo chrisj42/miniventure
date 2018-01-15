@@ -1,0 +1,9 @@
+I think I'm going to try to make the inventory somewhat limited, rather than infinite. This will allow for a number of things, for example slots.
+
+I could have a number of views, each one is a sort method, like recent, alphabetical, and type/category.
+
+
+About chests:
+- they cannot be stored in your inventory unless they are empty. You can pick up filled chests, but you can't put them away into your inventory. one will just stay in your hands until you put it down.
+- hitting one with an axe will break it, and all the items contained within will pop out. Maybe the item entity lifetime should be increased slightly..?
+	- or, alternate idea, only allow empty chests to be destroyed.

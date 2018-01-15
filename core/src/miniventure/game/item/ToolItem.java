@@ -1,17 +1,13 @@
 package miniventure.game.item;
 
-public class ToolItem extends Item {
+public class ToolItem extends ItemData {
 	
 	private final ToolType toolType;
 	
 	public ToolItem(ToolType type) {
-		super(type.texture);
+		super(type.name(), type.texture, 1);
 		this.toolType = type;
 	}
 	
 	public ToolType getType() { return toolType; }
-	
-	
-	@Override
-	public boolean isReflexive() { return false; }
 }

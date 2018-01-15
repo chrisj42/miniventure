@@ -1,25 +1,73 @@
 package miniventure.game.world.entity;
 
+import java.util.HashMap;
+
 import miniventure.game.item.Item;
 import miniventure.game.world.Level;
+import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Mob;
+import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
-public abstract class Entity {
+public abstract class Entity implements WorldObject {
+	
+	private static final HashMap<Integer, Entity> takenIDs = new HashMap<>();
 	
 	private Sprite sprite;
+	private final int eid;
+	private float z = 0;
 	
-	public Entity(Sprite sprite) { this.sprite = sprite; }
+	public Entity(Sprite sprite) {
+		this.sprite = sprite;
+		
+		int eid;
+		do {
+			eid = MathUtils.random.nextInt();
+		} while(takenIDs.containsKey(eid));
+		this.eid = eid;
+		takenIDs.put(eid, this);
+	}
 	
-	public abstract void update(float delta);
+	@Override
+	public Level getLevel() { return Level.getEntityLevel(this); }
 	
+	/// this is called only to remove an entity completely from the game, not to change levels.
+	protected final void remove() {
+		Level level = Level.getEntityLevel(this);
+		if(level != null)
+			level.removeEntity(this);
+	}
+	
+	@Override
+	public void update(float delta) {
+		Level level = getLevel();
+		if(level == null) return;
+		Array<WorldObject> objects = new Array<>();
+		objects.addAll(level.getOverlappingEntities(getBounds(), this));
+		Tile tile = level.getClosestTile(getBounds());
+		if(tile != null) objects.add(tile);
+		
+		for(WorldObject obj: objects)
+			obj.touching(this);
+	}
+	
+	@Override
 	public void render(SpriteBatch batch, float delta) {
+		float prevY = sprite.getY();
+		drawSprite(batch, sprite.getX(), prevY+z);
+		sprite.setY(prevY);
+	}
+	
+	protected void drawSprite(SpriteBatch batch, float x, float y) {
+		sprite.setPosition(x, y);
 		sprite.draw(batch);
 	}
 	
@@ -28,22 +76,34 @@ public abstract class Entity {
 		float x = sprite.getX(), y = sprite.getY();
 		sprite = new Sprite(texture);
 		sprite.setPosition(x, y);
+		z = 0;
 	}
 	
+	float getZ() { return z; }
+	void setZ(float z) { this.z = z; }
+	
+	@Override
 	public Rectangle getBounds() {
-		Rectangle bounds = new Rectangle(sprite.getBoundingRectangle());
 		//bounds.setX(bounds.getX()+bounds.getWidth()/5);
 		//bounds.setSize(bounds.getWidth()*3/5, bounds.getHeight()/2); // due to the weird perspective of the game, the top part of most sprites is technically "in the air", so you don't really touch it.
-		bounds.setHeight(bounds.getHeight()*4/5);
-		return bounds;
+		//bounds.setHeight(bounds.getHeight()*4/5);
+		return new Rectangle(sprite.getBoundingRectangle());
 	}
 	
-	public void move(float xd, float yd) {
+	public void addedToLevel(Level level) {}
+	
+	public boolean interactWith(Player player, Item item) { return false; }
+	
+	public void move(Vector2 v) { move(v.x, v.y); }
+	public void move(float xd, float yd) { move(xd, yd, 0); }
+	public void move(float xd, float yd, float zd) {
 		moveAxis(true, xd);
 		moveAxis(false, yd);
+		z += zd;
 	}
 	
 	private void moveAxis(boolean xaxis, float amt) {
+		if(amt == 0) return;
 		Rectangle oldRect = sprite.getBoundingRectangle();
 		Rectangle newRect = new Rectangle(sprite.getX()+(xaxis?amt:0), sprite.getY()+(xaxis?0:amt), oldRect.width, oldRect.height);
 		
@@ -59,13 +119,18 @@ public abstract class Entity {
 		if(level == null) return; // can't move if you're not in a level...
 		
 		Array<Tile> newTiles = level.getOverlappingTiles(newRect);
-		newTiles.removeAll(level.getOverlappingTiles(oldRect), true); // "true" means use == for comparison rather than .equals()
+		Array<Tile> oldTiles = level.getOverlappingTiles(oldRect);
+		newTiles.removeAll(oldTiles, true); // "true" means use == for comparison rather than .equals()
 		
 		// we now have a list of the tiles that will be touched, but aren't now.
+		boolean canMoveCurrent = true;
+		for(Tile tile: oldTiles) {
+			canMoveCurrent = canMoveCurrent && tile.isPermeableBy(this);
+		}
 		boolean canMove = true;
 		for(Tile tile: newTiles) {
 			tile.touchedBy(this); // NOTE: I can see this causing an issue if you move too fast; it will "touch" tiles that could be far away, if the player will move there next frame.
-			canMove = canMove && tile.isPermeableBy(this);
+			canMove = canMove && (!canMoveCurrent || tile.isPermeableBy(this));
 		}
 		
 		if(!canMove) return; // don't bother interacting with entities if tiles prevent movement.
@@ -78,7 +143,7 @@ public abstract class Entity {
 			if(!entity.touchedBy(this))
 				this.touchedBy(entity); // to make sure something has a chance to happen, but it doesn't happen twice.
 			
-			canMove = canMove && !blockedBy(entity);
+			canMove = canMove && entity.isPermeableBy(this);
 		}
 		
 		if(!canMove) return;
@@ -87,6 +152,7 @@ public abstract class Entity {
 		moveTo(level, newRect.x, newRect.y);
 	}
 	
+	public void moveTo(Level level, Vector2 pos) { moveTo(level, pos.x, pos.y); }
 	public void moveTo(Level level, float x, float y) {
 		// this method doesn't care where you end up.
 		x = Math.max(x, 0);
@@ -102,12 +168,32 @@ public abstract class Entity {
 	}
 	
 	// returns whether anything meaningful happened; if false, then other.touchedBy(this) will be called.
+	@Override
 	public boolean touchedBy(Entity other) { return false; }
+	
+	@Override
+	public void touching(Entity entity) {}
 	
 	// returns whether the other entity stops this one from moving.
 	// Generally, entities are tangible and stop each other from moving, so this returns true by default.
-	public boolean blockedBy(Entity other) { return true; }
+	//public boolean blockedBy(Entity other) { return !(other instanceof ItemEntity); }
 	
-	public boolean hurtBy(Mob mob, Item attackItem) { return false; } // generally speaking, attacking an entity doesn't do anything; only for mobs, and maybe furniture...
-	public boolean hurtBy(Tile tile) { return false; } // generally speaking, attacking an entity doesn't do anything; only for mobs, and maybe furniture...
+	@Override
+	public boolean isPermeableBy(Entity entity) { return this instanceof BounceEntity || entity instanceof BounceEntity; }
+	
+	@Override
+	public boolean attackedBy(Mob mob, Item attackItem) { return hurtBy(mob, attackItem.getDamage(this)); }
+	
+	@Override
+	public boolean hurtBy(WorldObject obj, int dmg) { return false; } // generally speaking, attacking an entity doesn't do anything; only for mobs, and maybe furniture...
+	
+	@Override
+	public boolean equals(Object other) {
+		return other instanceof Entity && ((Entity)other).eid == eid;
+	}
+	
+	@Override
+	public int hashCode() {
+		return eid;
+	}
 }
