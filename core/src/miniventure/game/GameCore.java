@@ -25,7 +25,7 @@ public class GameCore extends Game {
 	public static HashMap<String, TextureRegion> icons = new HashMap<>();
 	
 	private SpriteBatch batch;
-	private BitmapFont font; // this is stored here because it is a really good idea to reuse objects where ever possible; and don't repeat instantiations, aka make a font instance in two classes when the fonts are the same.
+	private static BitmapFont font; // this is stored here because it is a really good idea to reuse objects where ever possible; and don't repeat instantiations, aka make a font instance in two classes when the fonts are the same.
 	
 	private static GameScreen gameScreen; // Screens ought to be disposed, but aren't automatically disposed; so we need to do it ourselves.
 	
@@ -44,7 +44,7 @@ public class GameCore extends Game {
 		this.setScreen(new MainMenuScreen(this));
 	}
 	
-	public static GameScreen getGameScreen() { return gameScreen; }
+	//public static GameScreen getGameScreen() { return gameScreen; }
 	
 	@Override
 	public void dispose () {
@@ -59,20 +59,12 @@ public class GameCore extends Game {
 		iconAtlas.dispose();
 	}
 	
-	public SpriteBatch getBatch() {
-		return batch;
-	}
+	public SpriteBatch getBatch() { return batch; }
 	
-	public BitmapFont getFont() {
-		return font;
-	}
+	public static BitmapFont getFont() { return font; }
 	
-	public void setGameScreen(GameScreen gameScreen) {
-		GameCore.gameScreen = gameScreen;
-	}
+	public void setGameScreen(GameScreen gameScreen) { GameCore.gameScreen = gameScreen; }
 	
-	public static float getElapsedProgramTime() {
-		return (System.nanoTime() - START_TIME)/1E9f;
-	}
+	public static float getElapsedProgramTime() { return (System.nanoTime() - START_TIME)/1E9f; }
 	
 }
