@@ -2,7 +2,6 @@ package miniventure.game.screen;
 
 import java.util.HashMap;
 
-import miniventure.game.GameCore;
 import miniventure.game.item.ItemData;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Level;
@@ -15,6 +14,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -29,20 +29,19 @@ import org.jetbrains.annotations.NotNull;
 
 public class GameScreen implements Screen {
 	
+	private final GameCore game = GameCore.getGame();
+	private SpriteBatch batch = game.getBatch();
+	private BitmapFont font = GameCore.getFont();
+	
 	private final OrthographicCamera camera, uiCamera;
 	private int zoom = 0;
-	private SpriteBatch batch;
 	
 	private ShapeRenderer shapeRenderer = new ShapeRenderer();
 	
 	private Player mainPlayer;
 	private int curLevel;
 	
-	private final GameCore game;
-	
-	public GameScreen(GameCore game) {
-		this.game = game;
-		batch = game.getBatch();
+	public GameScreen() {
 		game.setGameScreen(this);
 		
 		createWorld();
@@ -56,20 +55,6 @@ public class GameScreen implements Screen {
 	private void createWorld() {
 		Level.resetLevels();
 		curLevel = 0;
-		
-		mainPlayer = new Player();
-		
-		Level level = Level.getLevel(curLevel);
-		level.addEntity(mainPlayer);
-		
-		Tile spawnTile;
-		do spawnTile = level.getTile(
-			MathUtils.random(level.getWidth()-1),
-			MathUtils.random(level.getHeight()-1)
-		);
-		while(spawnTile == null || !mainPlayer.maySpawn(spawnTile));
-		
-		mainPlayer.moveTo(spawnTile);
 	}
 	
 	@Override
@@ -80,6 +65,11 @@ public class GameScreen implements Screen {
 		// clears the screen with a green color.
 		Gdx.gl.glClearColor(0.1f, 0.5f, 0.1f, 1); // these are floats from 0 to 1.
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		
+		if(mainPlayer.getLevel() == null) {
+			game.setScreen(new RespawnScreen(this));
+			return;
+		}
 		
 		mainPlayer.checkInput(delta, getMouseInput());
 		Level.getLevel(curLevel).update(delta);
@@ -180,9 +170,9 @@ public class GameScreen implements Screen {
 			
 			batch.begin();
 			batch.draw(heldItem.getTexture(), x, 5);
-			MyUtils.writeOutlinedText(game.getFont(), batch, mainPlayer.getHeldItemStackSize()+"", x, 5+game.getFont().getCapHeight());
+			MyUtils.writeOutlinedText(font, batch, mainPlayer.getHeldItemStackSize()+"", x, 5+font.getCapHeight());
 			
-			MyUtils.writeOutlinedText(game.getFont(), batch, heldItem.getName(), x+drawRect.width+10, drawRect.height*2/3);
+			MyUtils.writeOutlinedText(font, batch, heldItem.getName(), x+drawRect.width+10, drawRect.height*2/3);
 			
 		}
 		
@@ -202,7 +192,7 @@ public class GameScreen implements Screen {
 		debugInfo.add("Looking at: " + (interactTile == null ? "Null" : interactTile.toLocString()));
 		
 		for(int i = 0; i < debugInfo.size; i++)
-			MyUtils.writeOutlinedText(game.getFont(), batch, debugInfo.get(i), 0, uiCamera.viewportHeight-5-15*i);
+			MyUtils.writeOutlinedText(font, batch, debugInfo.get(i), 0, uiCamera.viewportHeight-5-15*i);
 	}
 	
 	private void zoom(int dir) {
@@ -222,6 +212,20 @@ public class GameScreen implements Screen {
 	@Override public void pause() {}
 	@Override public void resume() {}
 	
-	@Override public void show() {}
+	@Override public void show() {
+		mainPlayer = new Player();
+		
+		Level level = Level.getLevel(curLevel);
+		level.addEntity(mainPlayer);
+		
+		Tile spawnTile;
+		do spawnTile = level.getTile(
+			MathUtils.random(level.getWidth()-1),
+			MathUtils.random(level.getHeight()-1)
+		);
+		while(spawnTile == null || !mainPlayer.maySpawn(spawnTile));
+		
+		mainPlayer.moveTo(spawnTile);
+	}
 	@Override public void hide() {}
 }
