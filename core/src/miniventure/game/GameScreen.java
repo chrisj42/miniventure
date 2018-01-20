@@ -1,8 +1,9 @@
-package miniventure.game.screen;
+package miniventure.game;
 
 import java.util.HashMap;
 
 import miniventure.game.item.ItemData;
+import miniventure.game.screen.RespawnScreen;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Level;
 import miniventure.game.world.entity.mob.Player;
@@ -10,15 +11,11 @@ import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -27,84 +24,72 @@ import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
 
-public class GameScreen implements Screen {
+public class GameScreen {
 	
-	private final GameCore game = GameCore.getGame();
-	private SpriteBatch batch = game.getBatch();
+	private SpriteBatch batch = GameCore.getBatch();
 	private BitmapFont font = GameCore.getFont();
 	
 	private final OrthographicCamera camera, uiCamera;
 	private int zoom = 0;
 	
-	private ShapeRenderer shapeRenderer = new ShapeRenderer();
-	
-	private Player mainPlayer;
-	private int curLevel;
-	
 	public GameScreen() {
-		game.setGameScreen(this);
-		
-		createWorld();
-		
 		camera = new OrthographicCamera();
-		camera.setToOrtho(false, GameCore.SCREEN_WIDTH, GameCore.SCREEN_HEIGHT);
+		camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		uiCamera = new OrthographicCamera();
-		uiCamera.setToOrtho(false, GameCore.SCREEN_WIDTH, GameCore.SCREEN_HEIGHT);
+		uiCamera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 	}
 	
-	private void createWorld() {
-		Level.resetLevels();
-		curLevel = 0;
-	}
-	
-	@Override
-	public void dispose() {}
-	
-	@Override
-	public void render(float delta) {
-		// clears the screen with a green color.
-		Gdx.gl.glClearColor(0.1f, 0.5f, 0.1f, 1); // these are floats from 0 to 1.
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		
-		if(mainPlayer.getLevel() == null) {
-			game.setScreen(new RespawnScreen(this));
-			return;
-		}
-		
-		mainPlayer.checkInput(delta, getMouseInput());
-		Level.getLevel(curLevel).update(delta);
+	public void handleInput(@NotNull Player player) {
+		player.checkInput(getMouseInput(player));
 		
 		if(Gdx.input.isKeyJustPressed(Keys.MINUS))
 			zoom(-1);
 		if(Gdx.input.isKeyJustPressed(Keys.EQUALS) || Gdx.input.isKeyJustPressed(Keys.PLUS))
 			zoom(1);
+	}
+	
+	public void update(@NotNull Player mainPlayer, @NotNull Level level) {
+		if(mainPlayer.getLevel() == null) {
+			System.out.println("main player level is null");
+			GameCore.setScreen(new RespawnScreen());
+			return;
+		}
 		
-		Level level = Level.getLevel(curLevel);
+		level.update(Gdx.graphics.getDeltaTime());
+	}
+	
+	public void render(@NotNull Player mainPlayer, @NotNull Level level, boolean updateCamera) {
+		// clears the screen with a green color.
+		Gdx.gl.glClearColor(0.1f, 0.5f, 0.1f, 1); // these are floats from 0 to 1.
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		
-		Vector2 playerPos = new Vector2();
-		mainPlayer.getBounds().getCenter(playerPos);
 		float viewWidth = camera.viewportWidth;
 		float viewHeight = camera.viewportHeight;
-		int lvlWidth = level.getWidth() * Tile.SIZE;
-		int lvlHeight = level.getHeight() * Tile.SIZE;
-		playerPos.x = MathUtils.clamp(playerPos.x, Math.min(viewWidth/2, lvlWidth/2), Math.max(lvlWidth/2, lvlWidth-viewWidth/2));
-		playerPos.y = MathUtils.clamp(playerPos.y, Math.min(viewHeight/2, lvlHeight/2), Math.max(lvlHeight/2, lvlHeight-viewHeight/2));
-		camera.position.set(playerPos, camera.position.z);
-		camera.update(); // updates the camera "matrices"
-		uiCamera.update();
+		
+		if(updateCamera) {
+			Vector2 playerPos = new Vector2();
+			mainPlayer.getBounds().getCenter(playerPos);
+			int lvlWidth = level.getWidth() * Tile.SIZE;
+			int lvlHeight = level.getHeight() * Tile.SIZE;
+			playerPos.x = MathUtils.clamp(playerPos.x, Math.min(viewWidth/2, lvlWidth/2), Math.max(lvlWidth/2, lvlWidth-viewWidth/2));
+			playerPos.y = MathUtils.clamp(playerPos.y, Math.min(viewHeight/2, lvlHeight/2), Math.max(lvlHeight/2, lvlHeight-viewHeight/2));
+			camera.position.set(playerPos, camera.position.z);
+			camera.update(); // updates the camera "matrices"
+			uiCamera.update();
+		}
 		
 		Rectangle renderSpace = new Rectangle(camera.position.x - viewWidth/2, camera.position.y - viewHeight/2, viewWidth, viewHeight);
 		//Rectangle renderSpace = new Rectangle(0, 0, lvlWidth, lvlHeight);
 		
 		batch.setProjectionMatrix(camera.combined); // tells the batch to use the camera's coordinate system.
 		batch.begin();
-		level.render(renderSpace, batch, delta);
-		renderGui();
+		level.render(renderSpace, batch, Gdx.graphics.getDeltaTime());
+		renderGui(mainPlayer, level);
 		batch.end();
 	}
 	
 	@NotNull
-	private Vector2 getMouseInput() {
+	private Vector2 getMouseInput(@NotNull Player mainPlayer) {
 		if(Gdx.input.isTouched()) {
 			
 			Vector2 mousePos = new Vector2(Gdx.input.getX(), Gdx.input.getY());
@@ -143,11 +128,11 @@ public class GameScreen implements Screen {
 		};
 		heartSprites.put(false, deadHearts);
 	}
+	private static final TextureRegion hotbar = GameCore.icons.get("hotbar");
 	
-	private void renderGui() {
+	private void renderGui(@NotNull Player mainPlayer, @NotNull Level level) {
 		//System.out.println("rendering GUI");
 		batch.setProjectionMatrix(uiCamera.combined);
-		shapeRenderer.setProjectionMatrix(uiCamera.combined);
 		
 		// render health
 		for(int i = 0; i < Player.Stat.Health.max; i++) {
@@ -161,19 +146,27 @@ public class GameScreen implements Screen {
 		if(heldItem != null) {
 			float x = uiCamera.viewportWidth / 3;
 			
-			Rectangle drawRect = new Rectangle(x, 5, heldItem.getTexture().getRegionWidth(), heldItem.getTexture().getRegionHeight());
-			batch.end();
+			//Rectangle drawRect = new Rectangle(x, 5, heldItem.getTexture().getRegionWidth(), heldItem.getTexture().getRegionHeight());
+			/*batch.end();
 			shapeRenderer.begin(ShapeType.Filled);
 			shapeRenderer.setColor(Color.BLACK);
 			shapeRenderer.rect(drawRect.x-2, drawRect.y-2, drawRect.width+4, drawRect.height+4);
 			shapeRenderer.end();
 			
-			batch.begin();
+			batch.begin();*/
+			/*batch.draw(hotbar, drawRect.x-2, drawRect.y-2);
 			batch.draw(heldItem.getTexture(), x, 5);
 			MyUtils.writeOutlinedText(font, batch, mainPlayer.getHeldItemStackSize()+"", x, 5+font.getCapHeight());
 			
-			MyUtils.writeOutlinedText(font, batch, heldItem.getName(), x+drawRect.width+10, drawRect.height*2/3);
+			MyUtils.writeOutlinedText(font, batch, heldItem.getName(), x+drawRect.width+10, drawRect.height*2/3);*/
 			
+			heldItem.drawItem(mainPlayer.getHeldItemStackSize(), batch, font, x, 5);
+		}
+		
+		Tile interactTile = level.getClosestTile(mainPlayer.getInteractionRect());
+		if(interactTile != null) {
+			Vector3 tilePos = camera.project(new Vector3(interactTile.getX(), interactTile.getY(), 0));
+			batch.draw(GameCore.icons.get("tile-frame"), tilePos.x, tilePos.y);
 		}
 		
 		// a list of text to display in the upper left, for debug purposes
@@ -186,9 +179,8 @@ public class GameScreen implements Screen {
 		debugInfo.add("X = "+((int)(x/Tile.SIZE))+" - "+x);
 		debugInfo.add("Y = "+((int)(y/Tile.SIZE))+" - "+y);
 		
-		Tile playerTile = Level.getLevel(curLevel).getClosestTile(mainPlayer.getBounds());
+		Tile playerTile = level.getClosestTile(mainPlayer.getBounds());
 		debugInfo.add("Tile = " + (playerTile == null ? "Null" : playerTile.getType()));
-		Tile interactTile = Level.getLevel(curLevel).getClosestTile(mainPlayer.getInteractionRect());
 		debugInfo.add("Looking at: " + (interactTile == null ? "Null" : interactTile.toLocString()));
 		
 		for(int i = 0; i < debugInfo.size; i++)
@@ -203,29 +195,9 @@ public class GameScreen implements Screen {
 		camera.viewportWidth /= zoomFactor;
 	}
 	
-	@Override public void resize(int width, int height) {
+	void resize(int width, int height) {
 		float zoomFactor = (float) Math.pow(2, zoom);
 		camera.setToOrtho(false, width/zoomFactor, height/zoomFactor);
 		uiCamera.setToOrtho(false, width, height);
 	}
-	
-	@Override public void pause() {}
-	@Override public void resume() {}
-	
-	@Override public void show() {
-		mainPlayer = new Player();
-		
-		Level level = Level.getLevel(curLevel);
-		level.addEntity(mainPlayer);
-		
-		Tile spawnTile;
-		do spawnTile = level.getTile(
-			MathUtils.random(level.getWidth()-1),
-			MathUtils.random(level.getHeight()-1)
-		);
-		while(spawnTile == null || !mainPlayer.maySpawn(spawnTile));
-		
-		mainPlayer.moveTo(spawnTile);
-	}
-	@Override public void hide() {}
 }

@@ -2,8 +2,10 @@ package miniventure.game.world.entity.mob;
 
 import java.util.EnumMap;
 
+import miniventure.game.GameCore;
 import miniventure.game.item.Item;
 import miniventure.game.item.ItemData;
+import miniventure.game.screen.InventoryScreen;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.tile.Tile;
@@ -63,7 +65,7 @@ public class Player extends Mob {
 	}
 	public int getHeldItemStackSize() { return heldItem == null ? 0 : heldItem.getStackSize(); }
 	
-	public void checkInput(float delta, @NotNull Vector2 mouseInput) {
+	public void checkInput(@NotNull Vector2 mouseInput) {
 		// checks for keyboard input to move the player.
 		// getDeltaTime() returns the time passed between the last and the current frame in seconds.
 		int speed = Tile.SIZE * 5; // this is technically in units/second.
@@ -78,12 +80,12 @@ public class Player extends Mob {
 		movement.add(mouseInput);
 		movement.nor();
 		
-		movement.scl(speed * delta);
+		movement.scl(speed * Gdx.graphics.getDeltaTime());
 		
 		move(movement.x, movement.y);
 		
-		if(pressingKey(Input.Keys.Q)) cycleHeldItem(false);
-		if(pressingKey(Input.Keys.E)) cycleHeldItem(true);
+		//if(pressingKey(Input.Keys.Q)) cycleHeldItem(false);
+		//if(pressingKey(Input.Keys.E)) cycleHeldItem(true);
 		
 		if(pressingKey(Input.Keys.C))
 			attack();
@@ -91,19 +93,38 @@ public class Player extends Mob {
 			interact();
 		
 		heldItem = heldItem == null ? null : heldItem.consume();
+		
+		if(pressingKey(Input.Keys.E)) {
+			if(heldItem != null) {
+				//System.out.println("adding " + heldItem + " to inventory");
+				addToInventory(heldItem, true);
+				heldItem = null;
+			}
+			//System.out.println("inv: " + inventory);
+			GameCore.setScreen(new InventoryScreen(this, inventory));
+		}
+		/*else if(heldItem == null && inventory.size > 0) {
+			//System.out.println("updating player's active item");
+			heldItem = inventory.removeIndex(0);
+		}*/
 	}
 	
 	@Override
 	public void update(float delta) {
 		super.update(delta);
 		// update things like hunger, stamina, etc.
-		if(heldItem == null && inventory.size > 0) {
-			//System.out.println("updating player's active item");
-			heldItem = inventory.removeIndex(0);
-		}
 	}
 	
-	private void cycleHeldItem(boolean forward) {
+	public void setActiveItem(int invIdx) {
+		Item prev = heldItem;
+		
+		heldItem = inventory.removeIndex(invIdx);
+		
+		if(prev != null)
+			addToInventory(prev);
+	}
+	
+	/*private void cycleHeldItem(boolean forward) {
 		if(inventory.size == 0) return;
 		
 		if(forward) { // add active item to the end of the list, and set the first inventory item to active.
@@ -115,7 +136,7 @@ public class Player extends Mob {
 				inventory.insert(0, heldItem);
 			heldItem = inventory.removeIndex(inventory.size-1);
 		}
-	}
+	}*/
 	
 	public Rectangle getInteractionRect() {
 		Rectangle bounds = getBounds();
@@ -169,15 +190,19 @@ public class Player extends Mob {
 		}
 	}
 	
-	public void addToInventory(Item item) {
-		if(heldItem != null && heldItem.addToStack(item))
+	public void addToInventory(Item item) { addToInventory(item, false); }
+	private void addToInventory(Item item, boolean ignoreActiveItem) {
+		if(!ignoreActiveItem && heldItem != null && heldItem.addToStack(item))
 			return;
 		
 		for(Item i: inventory)
 			if(i.addToStack(item))
 				return;
 		
-		inventory.add(item);
+		if(!ignoreActiveItem && heldItem == null)
+			heldItem = item;
+		else
+			inventory.add(item);
 	}
 	
 	@Override
@@ -198,6 +223,6 @@ public class Player extends Mob {
 			I would like to have that functionality, but it seems I'm going to have to do it myself.
 		 */
 		
-		return Gdx.input.isKeyJustPressed(keycode);
+		return Gdx.input.isKeyJustPressed(keycode) && !GameCore.hasMenu();
 	}
 }

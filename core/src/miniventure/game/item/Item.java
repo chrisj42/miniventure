@@ -1,6 +1,6 @@
 package miniventure.game.item;
 
-import miniventure.game.screen.GameCore;
+import miniventure.game.GameCore;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;
 
@@ -79,4 +79,8 @@ public final class Item {
 	public int getDamage(WorldObject obj) { return itemData.getDamage(obj); }
 	
 	//public Item clone() { return new Item(itemData); }
+	
+	public String toString() {
+		return itemData.getName() + " item ("+stackSize+" stack)";
+	}
 }

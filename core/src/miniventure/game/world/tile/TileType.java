@@ -31,7 +31,7 @@ public enum TileType {
 	),
 	
 	SAND(
-		new CoveredTileProperty(HOLE),
+		new CoveredTileProperty(DIRT),
 		new DestructibleProperty(true),
 		new OverlapProperty(true)
 	),

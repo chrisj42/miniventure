@@ -1,8 +1,8 @@
 package miniventure.game.util;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
@@ -48,11 +48,11 @@ public class MyUtils {
 		}
 	}
 	
-	public static void writeOutlinedText(BitmapFont font, SpriteBatch batch, String text, float x, float y) {
+	public static void writeOutlinedText(BitmapFont font, Batch batch, String text, float x, float y) {
 		writeOutlinedText(font, batch, text, x, y, Color.WHITE, Color.BLACK);
 	}
 	
-	public static void writeOutlinedText(BitmapFont font, SpriteBatch batch, String text, float x, float y, Color center, Color outline) {
+	public static void writeOutlinedText(BitmapFont font, Batch batch, String text, float x, float y, Color center, Color outline) {
 		font.setColor(outline);
 		font.draw(batch, text, x-1, y-1);
 		font.draw(batch, text, x-1, y+1);
@@ -62,7 +62,7 @@ public class MyUtils {
 		font.draw(batch, text, x, y);
 	}
 	
-	public static void drawTextCentered(BitmapFont font, SpriteBatch batch, String text, float width, float height) {
+	public static void drawTextCentered(BitmapFont font, Batch batch, String text, float width, float height) {
 		font.draw(batch, text, width/2, height/2, 0, Align.center, true);
 	}
 	

@@ -1,40 +1,54 @@
 icons.png
-size: 32, 64
+size: 64, 128
 format: RGBA8888
 filter: Linear,Linear
 repeat: none
 gem-sword
   rotate: false
-  xy: 3, 3
+  xy: 43, 3
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 heart-dead-left
   rotate: false
-  xy: 23, 3
+  xy: 43, 23
   size: 6, 12
   orig: 6, 12
   offset: 0, 0
   index: -1
 heart-dead-right
   rotate: false
-  xy: 23, 19
+  xy: 53, 23
   size: 6, 12
   orig: 6, 12
   offset: 0, 0
   index: -1
 heart-left
   rotate: false
-  xy: 3, 23
+  xy: 43, 39
   size: 6, 12
   orig: 6, 12
   offset: 0, 0
   index: -1
 heart-right
   rotate: false
-  xy: 13, 23
+  xy: 53, 39
   size: 6, 12
   orig: 6, 12
+  offset: 0, 0
+  index: -1
+hotbar
+  rotate: false
+  xy: 3, 3
+  size: 36, 36
+  orig: 36, 36
+  offset: 0, 0
+  index: -1
+tile-frame
+  rotate: false
+  xy: 3, 43
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: -1

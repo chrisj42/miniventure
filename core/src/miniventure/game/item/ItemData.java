@@ -1,8 +1,12 @@
 package miniventure.game.item;
 
+import miniventure.game.GameCore;
+import miniventure.game.util.MyUtils;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;
 
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 import org.jetbrains.annotations.NotNull;
@@ -41,4 +45,13 @@ public class ItemData {
 	
 	public int getDamage(WorldObject target) { return 1; } // by default
 	
+	public void drawItem(int stackSize, Batch batch, BitmapFont font, float x, float y) {
+		batch.draw(GameCore.icons.get("hotbar"), x-2, y-2);
+		batch.draw(texture, x, y);
+		MyUtils.writeOutlinedText(font, batch, stackSize+"", x, y+font.getCapHeight());
+		
+		float width = texture.getRegionWidth();
+		float height = texture.getRegionHeight();
+		MyUtils.writeOutlinedText(font, batch, name, x+width+10, y-5+height*2/3);
+	}
 }

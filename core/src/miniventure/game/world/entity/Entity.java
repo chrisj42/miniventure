@@ -104,7 +104,7 @@ public abstract class Entity implements WorldObject {
 	
 	private void moveAxis(boolean xaxis, float amt) {
 		if(amt == 0) return;
-		Rectangle oldRect = sprite.getBoundingRectangle();
+		Rectangle oldRect = getBounds();//sprite.getBoundingRectangle(); // getBounds?
 		Rectangle newRect = new Rectangle(sprite.getX()+(xaxis?amt:0), sprite.getY()+(xaxis?0:amt), oldRect.width, oldRect.height);
 		
 		// check and see if the entity can go to the new coordinates.
@@ -182,7 +182,7 @@ public abstract class Entity implements WorldObject {
 	public boolean isPermeableBy(Entity entity) { return this instanceof BounceEntity || entity instanceof BounceEntity; }
 	
 	@Override
-	public boolean attackedBy(Mob mob, Item attackItem) { return hurtBy(mob, attackItem.getDamage(this)); }
+	public boolean attackedBy(Mob mob, Item attackItem) { return hurtBy(mob, attackItem==null?1:attackItem.getDamage(this)); }
 	
 	@Override
 	public boolean hurtBy(WorldObject obj, int dmg) { return false; } // generally speaking, attacking an entity doesn't do anything; only for mobs, and maybe furniture...
