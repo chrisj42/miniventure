@@ -127,7 +127,7 @@ public class GameScreen {
 		};
 		heartSprites.put(false, deadHearts);
 	}
-	private static final TextureRegion hotbar = GameCore.icons.get("hotbar");
+	//private static final TextureRegion hotbar = GameCore.icons.get("hotbar");
 	
 	private void renderGui(@NotNull Player mainPlayer, @NotNull Level level) {
 		//System.out.println("rendering GUI");

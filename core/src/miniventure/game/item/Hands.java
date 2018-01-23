@@ -21,7 +21,7 @@ public class Hands {
 	}
 	
 	@NotNull private Item item;
-	private int count;
+	private int count = 1;
 	private final Player player;
 	private boolean used = false;
 	
@@ -93,8 +93,11 @@ public class Hands {
 	}
 	
 	public boolean attack(WorldObject obj) {
+		System.out.println("attacking with " + item);
 		if(used()) return false;
+		System.out.println("not used");
 		if(item.attack(obj, player) || obj.attackedBy(player, item)) used = true;
+		System.out.println("item used: " + used);
 		return used;
 	}
 	

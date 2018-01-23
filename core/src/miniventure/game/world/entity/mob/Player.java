@@ -116,7 +116,7 @@ public class Player extends Mob {
 	
 	public void drawGui(Rectangle canvas, SpriteBatch batch, BitmapFont font) {
 		// TODO I might separate this into a bunch of calls instead, like "drawStat(stat)" a number of times, and "drawHotbar"; maybe.
-		
+		hands.getItem().drawItem(hands.getCount(), batch, font, canvas.width/2, 20);
 	}
 	
 	@Override
