@@ -76,7 +76,7 @@ public class DestructibleProperty implements TileProperty {
 	}
 	
 	boolean tileAttacked(Tile tile, WorldObject attacker, int damage) {
-		System.out.println("attacking tile with " + damage + " damage");
+		//System.out.println("attacking tile with " + damage + " damage");
 		if(damage > 0) {
 			int health = totalHealth > 1 ? tile.getData(getClass(), tileType, HEALTH_IDX) : 1;
 			health -= damage;

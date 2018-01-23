@@ -5,8 +5,10 @@ import miniventure.game.util.MyUtils;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 import org.jetbrains.annotations.NotNull;
@@ -17,6 +19,8 @@ public class Item {
 	// TODO allow items to be animated
 	
 	// NOTE: all data aspects should be final, because one item instance is used to represent a whole stack. Now, with this in mind, one can set a temp var to determine what sort of item to return from the use() method. It should be reset following that, however.
+	
+	private static GlyphLayout layout = new GlyphLayout(GameCore.getFont(), "");
 	
 	@NotNull private final TextureRegion texture;
 	private final String name;
@@ -43,13 +47,20 @@ public class Item {
 	public int getDamage(WorldObject target) { return 1; } // by default
 	
 	public void drawItem(int stackSize, Batch batch, BitmapFont font, float x, float y) {
-		batch.draw(GameCore.icons.get("hotbar"), x-2, y-2);
+		MyUtils.fillRect(x-2, y-2, Color.BLACK, batch);
 		batch.draw(texture, x, y);
 		MyUtils.writeOutlinedText(font, batch, stackSize+"", x+1, y+font.getCapHeight()+1);
-		
 		float width = texture.getRegionWidth();
 		float height = texture.getRegionHeight();
 		MyUtils.writeOutlinedText(font, batch, name, x+width+10, y-5+height*2/3);
+	}
+	
+	public float getRenderHeight() {
+		return Math.max(texture.getRegionHeight(), GameCore.getTextLayout(name).height);
+	}
+	
+	public float getRenderWidth() {
+		return texture.getRegionWidth() + 10 + GameCore.getTextLayout(name).width;
 	}
 	
 	@Override

@@ -4,10 +4,11 @@ import miniventure.game.GameCore;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
-import com.kotcrab.vis.ui.widget.VisTable;
 
 public class MenuScreen extends Stage {
 	
@@ -18,11 +19,17 @@ public class MenuScreen extends Stage {
 	 */
 	
 	private MenuScreen parent;
-	protected VisTable table;
+	protected Table table;
 	
 	public MenuScreen() {
 		super(new ExtendViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()), GameCore.getBatch());
-		table = new VisTable(true);
+		table = new Table(GameCore.getSkin()) {
+			@Override
+			public void draw(Batch batch, float parentAlpha) {
+				drawTable(batch, parentAlpha);
+				super.draw(batch, parentAlpha);
+			}
+		};
 		table.setPosition(getWidth()/2, getHeight()*2/3, Align.center);
 		addActor(table);
 	}
@@ -30,6 +37,8 @@ public class MenuScreen extends Stage {
 	public void setParent(MenuScreen parent) { this.parent = parent; }
 	
 	public boolean usesWholeScreen() { return true; }
+	
+	protected void drawTable(Batch batch, float parentAlpha) {}
 	
 	@Override
 	public void draw() {

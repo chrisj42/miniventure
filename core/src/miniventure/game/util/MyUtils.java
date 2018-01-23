@@ -1,5 +1,7 @@
 package miniventure.game.util;
 
+import miniventure.game.GameCore;
+
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -101,5 +103,24 @@ public class MyUtils {
 	
 	public static float map(float num, float prevMin, float prevMax, float newMin, float newMax) {
 		return (num-prevMin)/(prevMax-prevMin) * (newMax-newMin) + newMin;
+	}
+	
+	public static void fillRect(Rectangle rect, Color c, Batch batch) {
+		fillRect(rect.x, rect.y, rect.width, rect.height, c.r, c.g, c.b, c.a, batch);
+	}
+	public static void fillRect(float x, float y, Color c, Batch batch) {
+		fillRect(x, y, c.r, c.g, c.b, c.a, batch);
+	}
+	public static void fillRect(float x, float y, float width, float height, float r, float g, float b, float a, Batch batch) {
+		Color c = batch.getColor();
+		batch.setColor(r, g, b, a);
+		batch.draw(GameCore.icons.get("white"), x, y, width, height);
+		batch.setColor(c);
+	}
+	public static void fillRect(float x, float y, float r, float g, float b, float a, Batch batch) {
+		Color c = batch.getColor();
+		batch.setColor(r, g, b, a);
+		batch.draw(GameCore.icons.get("white"), x, y);
+		batch.setColor(c);
 	}
 }

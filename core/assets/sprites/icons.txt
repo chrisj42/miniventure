@@ -1,8 +1,15 @@
 icons.png
-size: 64, 128
+size: 128, 128
 format: RGBA8888
 filter: Linear,Linear
 repeat: none
+black
+  rotate: false
+  xy: 3, 3
+  size: 36, 36
+  orig: 36, 36
+  offset: 0, 0
+  index: -1
 blank
   rotate: false
   xy: 3, 43
@@ -33,28 +40,28 @@ heart-dead-right
   index: -1
 heart-left
   rotate: false
-  xy: 43, 39
+  xy: 63, 3
   size: 6, 12
   orig: 6, 12
   offset: 0, 0
   index: -1
 heart-right
   rotate: false
-  xy: 53, 39
+  xy: 63, 19
   size: 6, 12
   orig: 6, 12
-  offset: 0, 0
-  index: -1
-hotbar
-  rotate: false
-  xy: 3, 3
-  size: 36, 36
-  orig: 36, 36
   offset: 0, 0
   index: -1
 tile-frame
   rotate: false
   xy: 3, 79
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+white
+  rotate: false
+  xy: 39, 43
   size: 32, 32
   orig: 32, 32
   offset: 0, 0

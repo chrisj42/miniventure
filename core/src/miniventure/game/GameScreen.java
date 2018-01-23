@@ -82,6 +82,11 @@ public class GameScreen {
 		batch.setProjectionMatrix(camera.combined); // tells the batch to use the camera's coordinate system.
 		batch.begin();
 		level.render(renderSpace, batch, Gdx.graphics.getDeltaTime());
+		
+		Tile interactTile = level.getClosestTile(mainPlayer.getInteractionRect());
+		if(interactTile != null)
+			batch.draw(GameCore.icons.get("tile-frame"), interactTile.getX(), interactTile.getY());
+		
 		renderGui(mainPlayer, level);
 		batch.end();
 	}
@@ -140,11 +145,6 @@ public class GameScreen {
 		
 		mainPlayer.drawGui(new Rectangle(0, 0, uiCamera.viewportWidth, uiCamera.viewportHeight), batch, font);
 		
-		Tile interactTile = level.getClosestTile(mainPlayer.getInteractionRect());
-		if(interactTile != null) {
-			Vector3 tilePos = camera.project(new Vector3(interactTile.getX(), interactTile.getY(), 0));
-			batch.draw(GameCore.icons.get("tile-frame"), tilePos.x, tilePos.y);
-		}
 		
 		// a list of text to display in the upper left, for debug purposes
 		Array<String> debugInfo = new Array<>(); 
@@ -158,6 +158,7 @@ public class GameScreen {
 		
 		Tile playerTile = level.getClosestTile(mainPlayer.getBounds());
 		debugInfo.add("Tile = " + (playerTile == null ? "Null" : playerTile.getType()));
+		Tile interactTile = level.getClosestTile(mainPlayer.getInteractionRect());
 		debugInfo.add("Looking at: " + (interactTile == null ? "Null" : interactTile.toLocString()));
 		
 		for(int i = 0; i < debugInfo.size; i++)

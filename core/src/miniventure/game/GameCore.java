@@ -9,10 +9,12 @@ import miniventure.game.util.Version;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.kotcrab.vis.ui.VisUI;
 
 import org.jetbrains.annotations.Nullable;
@@ -36,6 +38,8 @@ public class GameCore extends ApplicationAdapter {
 	
 	private static SpriteBatch batch;
 	private static BitmapFont font; // this is stored here because it is a really good idea to reuse objects where ever possible; and don't repeat instantiations, aka make a font instance in two classes when the fonts are the same.
+	private static GlyphLayout layout;
+	private static Skin skin;
 	
 	
 	@Override
@@ -49,6 +53,8 @@ public class GameCore extends ApplicationAdapter {
 		
 		batch = new SpriteBatch();
 		font = new BitmapFont(); // uses libGDX's default Arial font
+		layout = new GlyphLayout(font, "");
+		skin = new Skin(Gdx.files.internal("skins/visui/uiskin.json"));
 		
 		for(AtlasRegion region: iconAtlas.getRegions())
 			icons.put(region.name, region);
@@ -84,13 +90,14 @@ public class GameCore extends ApplicationAdapter {
 		Gdx.input.setInputProcessor(menuScreen);
 	}
 	
-	@Nullable
-	static MenuScreen getScreen() { return menuScreen; }
-	
 	@Override
 	public void dispose () {
 		batch.dispose();
 		font.dispose();
+		skin.dispose();
+		
+		if(menuScreen != null)
+			menuScreen.dispose();
 		
 		entityAtlas.dispose();
 		tileAtlas.dispose();
@@ -102,7 +109,19 @@ public class GameCore extends ApplicationAdapter {
 	public void resize(int width, int height) {
 		if(gameScreen != null)
 			gameScreen.resize(width, height);
+		if(menuScreen != null)
+			menuScreen.getViewport().update(width, height, false);
 	}
+	
+	
+	public static GlyphLayout getTextLayout(String text) {
+		layout.setText(font, text);
+		return layout;
+	}
+	
+	@Nullable static MenuScreen getScreen() { return menuScreen; }
+	
+	public static Skin getSkin() { return skin; }
 	
 	public static LevelManager getWorld() { return world; }
 	

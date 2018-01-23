@@ -5,14 +5,17 @@ import miniventure.game.item.Hands;
 import miniventure.game.item.Inventory;
 import miniventure.game.item.Item;
 import miniventure.game.item.ItemStack;
+import miniventure.game.util.MyUtils;
 
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.kotcrab.vis.ui.widget.VisTextButton;
+import com.badlogic.gdx.utils.Align;
 
 public class InventoryScreen extends MenuScreen {
 	
@@ -23,10 +26,22 @@ public class InventoryScreen extends MenuScreen {
 		this.inventory = inventory;
 		this.hands = hands;
 		
+		float maxWidth = 0;
 		for(int i = 0; i < inventory.getFilledSlots(); i++) {
-			table.add(new InventoryItem(inventory.getItemAt(i), i)).left();
-			table.row();
+			Item item = inventory.getItemAt(i);
+			InventoryItem invItem = new InventoryItem(item, i);
+			Cell c = table.add(invItem).left();
+			c.size(item.getRenderWidth()+10, item.getRenderHeight()+10);
+			maxWidth = Math.max(maxWidth, c.getPrefWidth());
+			table.row().space(10);
 		}
+		
+		for(Cell cell: table.getCells())
+			cell.width(maxWidth);
+		
+		table.setOrigin(Align.center);
+		table.setPosition(getWidth()/2, getHeight()/2, Align.center);
+		table.pack();
 		
 		getRoot().addListener(new InputListener() {
 			@Override
@@ -34,20 +49,16 @@ public class InventoryScreen extends MenuScreen {
 				if(keycode == Keys.E)
 					GameCore.setScreen(null);
 				return true;
-				//return false;
 			}
 		});
 		
 		setKeyboardFocus(table.getCells().size > 0 ? table.getCells().get(0).getActor() : getRoot());
 	}
 	
-	/*@Override
-	public void draw() {
-		getBatch().begin();
-		getBatch().draw(GameCore.icons.get("hotbar"), table.getX(), table.getHeight(), table.getWidth(), table.getHeight());
-		getBatch().end();
-		super.draw();
-	}*/
+	@Override
+	protected void drawTable(Batch batch, float parentAlpha) {
+		MyUtils.fillRect(table.getX(), table.getY(), table.getWidth(), table.getHeight(), .2f, .4f, 1f, parentAlpha, batch);
+	}
 	
 	private void moveFocus(int amt) {
 		Actor focused = getKeyboardFocus();
@@ -61,16 +72,16 @@ public class InventoryScreen extends MenuScreen {
 	public boolean usesWholeScreen() { return false; }
 	
 	
-	private class InventoryItem extends VisTextButton {
+	private class InventoryItem extends Button {
 		
 		private final Item item;
 		private final int idx;
 		
 		InventoryItem(Item item, int idx) {
-			super(item.getName());
-			//setHeight(Tile.SIZE*4/3);
+			super(GameCore.getSkin());
 			this.item = item;
 			this.idx = idx;
+			
 			addListener(new InputListener() {
 				@Override
 				public boolean keyDown (InputEvent event, int keycode) {
@@ -82,9 +93,12 @@ public class InventoryScreen extends MenuScreen {
 						select();
 					else if(keycode == Keys.E)
 						GameCore.setScreen(null);
-					//else return false;
-					
 					return true;
+				}
+				
+				@Override
+				public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+					setKeyboardFocus(InventoryItem.this);
 				}
 			});
 			
@@ -97,7 +111,6 @@ public class InventoryScreen extends MenuScreen {
 		}
 		
 		private void select() {
-			//int idx = table.getCell(InventoryItem.this).getRow();
 			ItemStack stack = inventory.removeItemAt(idx);
 			hands.clearItem(inventory); // just in case.
 			hands.setItem(stack.item, stack.count);
@@ -106,10 +119,10 @@ public class InventoryScreen extends MenuScreen {
 		
 		@Override
 		public void draw(Batch batch, float parentAlpha) {
-			//super.draw(batch, parentAlpha);
-			item.drawItem(inventory.getStackSizeAt(idx), batch, GameCore.getFont(), getX(), getY());
 			if(getKeyboardFocus() == this)
-				batch.draw(GameCore.icons.get("tile-frame"), getX(), getY());
+				MyUtils.fillRect(getX(), getY(), getWidth(), getHeight(), .8f, .8f, .8f, 0.5f*parentAlpha, batch);
+			
+			item.drawItem(inventory.getStackSizeAt(idx), batch, GameCore.getFont(), getX()+5, getY()+5);
 		}
 	}
 }
