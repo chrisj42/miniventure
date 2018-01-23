@@ -3,8 +3,9 @@ package miniventure.game.world.entity.mob;
 import java.util.EnumMap;
 
 import miniventure.game.GameCore;
+import miniventure.game.item.Hands;
+import miniventure.game.item.Inventory;
 import miniventure.game.item.Item;
-import miniventure.game.item.ItemData;
 import miniventure.game.screen.InventoryScreen;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
@@ -12,12 +13,13 @@ import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class Player extends Mob {
 	
@@ -44,26 +46,34 @@ public class Player extends Mob {
 	}
 	
 	private final EnumMap<Stat, Integer> stats = new EnumMap<>(Stat.class);
-	@Nullable private Item heldItem;
 	
-	private Array<Item> inventory = new Array<>();
+	@NotNull private final Hands hands;
+	private Inventory inventory;
 	
 	public Player() {
 		super("player", Stat.Health.initial);
-		heldItem = null;
 		for(Stat stat: Stat.values)
 			stats.put(stat, stat.initial);
+		
+		hands = new Hands(this);
+		inventory = new Inventory(20, hands);
 	}
 	
 	public int getStat(@NotNull Stat stat) {
 		return stats.get(stat);
 	}
-	@Nullable
-	public ItemData getHeldItemData() {
-		if(heldItem == null) return null;
-		return heldItem.getItemData();
+	public void changeStat(@NotNull Stat stat, int amt) {
+		stats.put(stat, Math.max(0, Math.min(stat.max, stats.get(stat) + amt)));
 	}
-	public int getHeldItemStackSize() { return heldItem == null ? 0 : heldItem.getStackSize(); }
+	
+	/*public boolean payStamina(int amt) {
+		if(stats.get(Stat.Stamina) >= amt) {
+			changeStat(Stat.Stamina, -amt);
+			return true;
+		}
+		
+		return false;
+	}*/
 	
 	public void checkInput(@NotNull Vector2 mouseInput) {
 		// checks for keyboard input to move the player.
@@ -92,21 +102,21 @@ public class Player extends Mob {
 		else if(pressingKey(Input.Keys.V))
 			interact();
 		
-		heldItem = heldItem == null ? null : heldItem.consume();
+		hands.resetItemUsage();
 		
 		if(pressingKey(Input.Keys.E)) {
-			if(heldItem != null) {
-				//System.out.println("adding " + heldItem + " to inventory");
-				addToInventory(heldItem, true);
-				heldItem = null;
-			}
-			//System.out.println("inv: " + inventory);
-			GameCore.setScreen(new InventoryScreen(this, inventory));
+			hands.clearItem(inventory);
+			GameCore.setScreen(new InventoryScreen(inventory, hands));
 		}
 		/*else if(heldItem == null && inventory.size > 0) {
 			//System.out.println("updating player's active item");
 			heldItem = inventory.removeIndex(0);
 		}*/
+	}
+	
+	public void drawGui(Rectangle canvas, SpriteBatch batch, BitmapFont font) {
+		// TODO I might separate this into a bunch of calls instead, like "drawStat(stat)" a number of times, and "drawHotbar"; maybe.
+		
 	}
 	
 	@Override
@@ -115,13 +125,16 @@ public class Player extends Mob {
 		// update things like hunger, stamina, etc.
 	}
 	
-	public void setActiveItem(int invIdx) {
-		Item prev = heldItem;
-		
-		heldItem = inventory.removeIndex(invIdx);
-		
-		if(prev != null)
-			addToInventory(prev);
+	/*public void setActiveItem(int invIdx) {
+		hands.clearItem(inventory);
+		inventory.setHand
+	}*/
+	
+	public boolean takeItem(@NotNull Item item) {
+		if(hands.addItem(item))
+			return true;
+		else
+			return inventory.addItem(item, 1) == 1;
 	}
 	
 	/*private void cycleHeldItem(boolean forward) {
@@ -167,43 +180,20 @@ public class Player extends Mob {
 	}
 	
 	private void attack() {
-		if(heldItem != null && heldItem.isUsed()) return;
-		
-		for(WorldObject obj: getInteractionQueue()) {
-			if(heldItem == null || !heldItem.isUsed() && !heldItem.attack(obj, this)) {
-				if(obj.attackedBy(this, heldItem))
-					return;
-			} else return;
-		}
+		for(WorldObject obj: getInteractionQueue())
+			if(hands.attack(obj))
+				return;
 	}
 	
 	private void interact() {
-		if(heldItem != null && heldItem.isUsed()) return;
+		if(hands.interact()) return;
 		
-		if(heldItem != null && heldItem.interact(this)) return;
-		
-		for(WorldObject obj: getInteractionQueue()) {
-			if(heldItem == null || !heldItem.isUsed() && !heldItem.interact(obj, this)) {
-				if(obj.interactWith(this, heldItem))
-					return;
-			} else return;
-		}
+		for(WorldObject obj: getInteractionQueue())
+			if(hands.interact(obj))
+				return;
 	}
 	
-	public void addToInventory(Item item) { addToInventory(item, false); }
-	private void addToInventory(Item item, boolean ignoreActiveItem) {
-		if(!ignoreActiveItem && heldItem != null && heldItem.addToStack(item))
-			return;
-		
-		for(Item i: inventory)
-			if(i.addToStack(item))
-				return;
-		
-		if(!ignoreActiveItem && heldItem == null)
-			heldItem = item;
-		else
-			inventory.add(item);
-	}
+	public boolean interactWith(Item item) { return false; }
 	
 	@Override
 	public boolean hurtBy(WorldObject source, int dmg) {

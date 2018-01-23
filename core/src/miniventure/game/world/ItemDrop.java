@@ -1,7 +1,6 @@
 package miniventure.game.world;
 
 import miniventure.game.item.Item;
-import miniventure.game.item.ItemData;
 
 import com.badlogic.gdx.math.Vector2;
 
@@ -77,9 +76,9 @@ public class ItemDrop {
 		iron: 
 	*/
 	
-	private ItemData item;
+	private Item item;
 	
-	public ItemDrop(ItemData item, int minCount, int maxCount, float biasAmt, boolean roundUp) {
+	public ItemDrop(Item item, int minCount, int maxCount, float biasAmt, boolean roundUp) {
 		/*
 			this varies between the min count and max count depending on the difficulty. Well, it will depending on the biasAmt argument, a value from 0 to 1.
 				- 0 means there is equal chance for any amount to be dropped on any difficulty.
@@ -95,15 +94,15 @@ public class ItemDrop {
 		
 	}
 	
-	public ItemDrop(ItemData item) {
+	public ItemDrop(Item item) {
 		this.item = item;
 	}
 	
-	public ItemDrop(ItemData item, int count) {
+	public ItemDrop(Item item, int count) {
 		
 	}
 	
-	public ItemDrop(ItemData item, int peaceCount, int easyCount, int mediumCount, int hardCount) {
+	public ItemDrop(Item item, int peaceCount, int easyCount, int mediumCount, int hardCount) {
 		
 	}
 	
@@ -120,6 +119,6 @@ public class ItemDrop {
 	}
 	public void dropItems(Level level, Vector2 dropPos, @Nullable Vector2 targetPos) {
 		for(int i = 0; i < getItemsDropped(); i++)
-			level.dropItem(new Item(item), dropPos, targetPos);
+			level.dropItem(item.copy(), dropPos, targetPos);
 	}
 }

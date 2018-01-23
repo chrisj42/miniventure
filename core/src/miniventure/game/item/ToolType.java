@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public enum ToolType {
 	
-	PICKAXE, SHOVEL, AXE, SWORD;
+	Pickaxe, Shovel, Axe, Sword;
 	
 	public final TextureRegion texture = GameCore.icons.get("gem-sword");
 }

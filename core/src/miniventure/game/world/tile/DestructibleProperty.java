@@ -3,6 +3,7 @@ package miniventure.game.world.tile;
 import miniventure.game.item.Item;
 import miniventure.game.item.TileItem;
 import miniventure.game.item.ToolItem;
+import miniventure.game.item.ToolItem.Material;
 import miniventure.game.item.ToolType;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.WorldObject;
@@ -65,14 +66,14 @@ public class DestructibleProperty implements TileProperty {
 		this.dropsTileItem = dropsTileItem;
 	}
 	
-	public void init(TileType type) {
+	public void init(@NotNull TileType type) {
 		this.tileType = type;
 		
-		if(dropsTileItem) 
+		if(dropsTileItem)
 			drops[0] = new ItemDrop(TileItem.get(type));
 	}
 	
-	boolean tileAttacked(Tile tile, Mob attacker, Item attackItem) {
+	boolean tileAttacked(@NotNull Tile tile, @NotNull Mob attacker, @NotNull Item attackItem) {
 		int damage = getDamage(tile, attackItem);
 		return tileAttacked(tile, attacker, damage);
 	}
@@ -97,10 +98,8 @@ public class DestructibleProperty implements TileProperty {
 		return false;
 	}
 	
-	private int getDamage(@NotNull Tile attacked, @Nullable Item attackItem) {
-		int damage = 1;
-		if(attackItem != null)
-			damage = attackItem.getDamage(attacked);
+	private int getDamage(@NotNull Tile attacked, @NotNull Item attackItem) {
+		int damage = attackItem.getDamage(attacked);
 		
 		if(damageConditions.length > 0) {
 			// must satisfy at least one condition
@@ -112,8 +111,8 @@ public class DestructibleProperty implements TileProperty {
 			// otherwise, continue.
 		}
 		
-		if(preferredTool != null && attackItem != null && attackItem.getItemData() instanceof ToolItem) {
-			ToolType type = ((ToolItem)attackItem.getItemData()).getType();
+		if(preferredTool != null && attackItem instanceof ToolItem) {
+			ToolType type = ((ToolItem)attackItem).getType();
 			if(type == preferredTool.toolType)
 				damage = (int) Math.ceil(damage * preferredTool.damageMultiplier);
 			//if(toolTypeDamageMultipliers.containsKey(type))
@@ -150,15 +149,21 @@ public class DestructibleProperty implements TileProperty {
 	
 	static class RequiredTool implements DamageConditionCheck {
 		
-		private final ToolType toolType;
+		@Nullable private final ToolType toolType;
+		@Nullable private final Material material;
 		
-		public RequiredTool(ToolType toolType) {
+		public RequiredTool(@Nullable ToolType toolType, @Nullable Material material) {
 			this.toolType = toolType;
+			this.material = material;
 		}
 		
 		@Override
 		public boolean isDamagedBy(@Nullable Item attackItem) {
-			return attackItem != null && attackItem.getItemData() instanceof ToolItem && ((ToolItem)attackItem.getItemData()).getType() == toolType;
+			if(attackItem == null || !(attackItem instanceof ToolItem))
+				return false;
+			
+			ToolItem tool = (ToolItem) attackItem;
+			return (toolType == null || tool.getType() == toolType) && (material == null || tool.getMaterial() == material);
 		}
 	}
 	

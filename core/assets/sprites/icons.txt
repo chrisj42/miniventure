@@ -3,6 +3,13 @@ size: 64, 128
 format: RGBA8888
 filter: Linear,Linear
 repeat: none
+blank
+  rotate: false
+  xy: 3, 43
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
 gem-sword
   rotate: false
   xy: 43, 3
@@ -47,7 +54,7 @@ hotbar
   index: -1
 tile-frame
   rotate: false
-  xy: 3, 43
+  xy: 3, 79
   size: 32, 32
   orig: 32, 32
   offset: 0, 0

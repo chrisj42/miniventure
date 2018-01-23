@@ -2,7 +2,6 @@ package miniventure.game;
 
 import java.util.HashMap;
 
-import miniventure.game.item.ItemData;
 import miniventure.game.screen.RespawnScreen;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Level;
@@ -142,9 +141,12 @@ public class GameScreen {
 		// TODO other stats will be rendered in the exact same fashion, with the same sprites. So make a method for it. Maybe I should instantiate it in the Player class, or even Stat enum? 
 		
 		// draw UI for current item
-		ItemData heldItem = mainPlayer.getHeldItemData();
-		if(heldItem != null) {
-			float x = uiCamera.viewportWidth / 3;
+		
+		//mainPlayer.drawGui(uiCamera.viewportWidth / 3, 5, batch, font);
+		mainPlayer.drawGui(new Rectangle(0, 0, uiCamera.viewportWidth, uiCamera.viewportHeight), batch, font);
+		//Item heldItem = mainPlayer.getHeldItem();
+			
+		//if(heldItem != null) {
 			
 			//Rectangle drawRect = new Rectangle(x, 5, heldItem.getTexture().getRegionWidth(), heldItem.getTexture().getRegionHeight());
 			/*batch.end();
@@ -160,8 +162,8 @@ public class GameScreen {
 			
 			MyUtils.writeOutlinedText(font, batch, heldItem.getName(), x+drawRect.width+10, drawRect.height*2/3);*/
 			
-			heldItem.drawItem(mainPlayer.getHeldItemStackSize(), batch, font, x, 5);
-		}
+		//	heldItem.drawItem(mainPlayer.getHeldItemStackSize(), batch, font, x, 5);
+		//}
 		
 		Tile interactTile = level.getClosestTile(mainPlayer.getInteractionRect());
 		if(interactTile != null) {

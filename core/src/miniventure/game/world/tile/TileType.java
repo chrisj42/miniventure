@@ -39,13 +39,13 @@ public enum TileType {
 	ROCK(false,
 		SolidProperty.SOLID,
 		new CoveredTileProperty(DIRT),
-		new DestructibleProperty(20, new PreferredTool(ToolType.PICKAXE, 5))
+		new DestructibleProperty(20, new PreferredTool(ToolType.Pickaxe, 5))
 	),
 	
 	TREE(false,
 		SolidProperty.SOLID,
 		new CoveredTileProperty(GRASS),
-		new DestructibleProperty(10, new PreferredTool(ToolType.AXE, 2)),
+		new DestructibleProperty(10, new PreferredTool(ToolType.Axe, 2)),
 		new AnimationProperty(AnimationType.SINGLE_FRAME),
 		new ConnectionProperty(true)
 	),

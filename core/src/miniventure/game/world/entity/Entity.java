@@ -182,7 +182,7 @@ public abstract class Entity implements WorldObject {
 	public boolean isPermeableBy(Entity entity) { return this instanceof BounceEntity || entity instanceof BounceEntity; }
 	
 	@Override
-	public boolean attackedBy(Mob mob, Item attackItem) { return hurtBy(mob, attackItem==null?1:attackItem.getDamage(this)); }
+	public boolean attackedBy(Mob mob, Item attackItem) { return hurtBy(mob, attackItem.getDamage(this)); }
 	
 	@Override
 	public boolean hurtBy(WorldObject obj, int dmg) { return false; } // generally speaking, attacking an entity doesn't do anything; only for mobs, and maybe furniture...
