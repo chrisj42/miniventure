@@ -16,7 +16,7 @@ public class Hands {
 	
 	private class HandItem extends Item {
 		HandItem() {
-			super("", GameCore.icons.get("blank"));
+			super("Hand", GameCore.icons.get("blank"));
 		}
 		
 		@Override
@@ -73,8 +73,6 @@ public class Hands {
 		Item newItem = item.use();
 		
 		player.changeStat(Stat.Stamina, -item.getStaminaUsage());
-		//if(!player.payStamina(item.getStaminaUsage()))
-		//	return; // don't "use" the item.
 		
 		if(count == 1)
 			item = newItem == null ? new HandItem() : newItem;
@@ -101,11 +99,8 @@ public class Hands {
 	}
 	
 	public boolean attack(WorldObject obj) {
-		//System.out.println("attacking with " + item);
 		if(used()) return false;
-		//System.out.println("not used");
 		if(item.attack(obj, player) || obj.attackedBy(player, item)) used = true;
-		//System.out.println("item used: " + used);
 		return used;
 	}
 	

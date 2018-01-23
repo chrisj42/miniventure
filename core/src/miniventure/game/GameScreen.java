@@ -78,7 +78,6 @@ public class GameScreen {
 		}
 		
 		Rectangle renderSpace = new Rectangle(camera.position.x - viewWidth/2, camera.position.y - viewHeight/2, viewWidth, viewHeight);
-		//Rectangle renderSpace = new Rectangle(0, 0, lvlWidth, lvlHeight);
 		
 		batch.setProjectionMatrix(camera.combined); // tells the batch to use the camera's coordinate system.
 		batch.begin();
@@ -103,7 +102,6 @@ public class GameScreen {
 			Vector2 mouseMove = new Vector2();
 			mouseMove.x = mousePos.x - playerScreenPos.x;
 			mouseMove.y = mousePos.y - playerScreenPos.y;
-			//mouseMove.y -= GameCore.getGameScreen().getScreenHeight()/2;
 			mouseMove.nor();
 			
 			return mouseMove;
@@ -127,10 +125,8 @@ public class GameScreen {
 		};
 		heartSprites.put(false, deadHearts);
 	}
-	//private static final TextureRegion hotbar = GameCore.icons.get("hotbar");
 	
 	private void renderGui(@NotNull Player mainPlayer, @NotNull Level level) {
-		//System.out.println("rendering GUI");
 		batch.setProjectionMatrix(uiCamera.combined);
 		
 		// render health
@@ -142,28 +138,7 @@ public class GameScreen {
 		
 		// draw UI for current item
 		
-		//mainPlayer.drawGui(uiCamera.viewportWidth / 3, 5, batch, font);
 		mainPlayer.drawGui(new Rectangle(0, 0, uiCamera.viewportWidth, uiCamera.viewportHeight), batch, font);
-		//Item heldItem = mainPlayer.getHeldItem();
-			
-		//if(heldItem != null) {
-			
-			//Rectangle drawRect = new Rectangle(x, 5, heldItem.getTexture().getRegionWidth(), heldItem.getTexture().getRegionHeight());
-			/*batch.end();
-			shapeRenderer.begin(ShapeType.Filled);
-			shapeRenderer.setColor(Color.BLACK);
-			shapeRenderer.rect(drawRect.x-2, drawRect.y-2, drawRect.width+4, drawRect.height+4);
-			shapeRenderer.end();
-			
-			batch.begin();*/
-			/*batch.draw(hotbar, drawRect.x-2, drawRect.y-2);
-			batch.draw(heldItem.getTexture(), x, 5);
-			MyUtils.writeOutlinedText(font, batch, mainPlayer.getHeldItemStackSize()+"", x, 5+font.getCapHeight());
-			
-			MyUtils.writeOutlinedText(font, batch, heldItem.getName(), x+drawRect.width+10, drawRect.height*2/3);*/
-			
-		//	heldItem.drawItem(mainPlayer.getHeldItemStackSize(), batch, font, x, 5);
-		//}
 		
 		Tile interactTile = level.getClosestTile(mainPlayer.getInteractionRect());
 		if(interactTile != null) {

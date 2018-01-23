@@ -23,7 +23,6 @@ public class DestructibleProperty implements TileProperty {
 	
 	private final int totalHealth;
 	
-	//private final EnumMap<ToolType, Float> toolTypeDamageMultipliers = new EnumMap<>(ToolType.class);
 	private final PreferredTool preferredTool;
 	
 	private final DamageConditionCheck[] damageConditions;
@@ -46,8 +45,6 @@ public class DestructibleProperty implements TileProperty {
 		this.drops = drops;
 		
 		this.preferredTool = preferredTool;
-		//for(PreferredTool tool: preferredTools)
-		//	toolTypeDamageMultipliers.put(tool.toolType, tool.damageMultiplier);
 	}
 	
 	
@@ -116,8 +113,6 @@ public class DestructibleProperty implements TileProperty {
 			ToolType type = ((ToolItem)attackItem).getType();
 			if(type == preferredTool.toolType)
 				damage = (int) Math.ceil(damage * preferredTool.damageMultiplier);
-			//if(toolTypeDamageMultipliers.containsKey(type))
-			//	damage = (int) (damage * toolTypeDamageMultipliers.get(type));
 		}
 		
 		return damage;

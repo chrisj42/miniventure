@@ -66,15 +66,6 @@ public class Player extends Mob {
 		stats.put(stat, Math.max(0, Math.min(stat.max, stats.get(stat) + amt)));
 	}
 	
-	/*public boolean payStamina(int amt) {
-		if(stats.get(Stat.Stamina) >= amt) {
-			changeStat(Stat.Stamina, -amt);
-			return true;
-		}
-		
-		return false;
-	}*/
-	
 	public void checkInput(@NotNull Vector2 mouseInput) {
 		// checks for keyboard input to move the player.
 		// getDeltaTime() returns the time passed between the last and the current frame in seconds.
@@ -94,9 +85,6 @@ public class Player extends Mob {
 		
 		move(movement.x, movement.y);
 		
-		//if(pressingKey(Input.Keys.Q)) cycleHeldItem(false);
-		//if(pressingKey(Input.Keys.E)) cycleHeldItem(true);
-		
 		if(pressingKey(Input.Keys.C))
 			attack();
 		else if(pressingKey(Input.Keys.V))
@@ -108,10 +96,6 @@ public class Player extends Mob {
 			hands.clearItem(inventory);
 			GameCore.setScreen(new InventoryScreen(inventory, hands));
 		}
-		/*else if(heldItem == null && inventory.size > 0) {
-			//System.out.println("updating player's active item");
-			heldItem = inventory.removeIndex(0);
-		}*/
 	}
 	
 	public void drawGui(Rectangle canvas, SpriteBatch batch, BitmapFont font) {
@@ -126,11 +110,6 @@ public class Player extends Mob {
 		changeStat(Stat.Stamina, 1);
 	}
 	
-	/*public void setActiveItem(int invIdx) {
-		hands.clearItem(inventory);
-		inventory.setHand
-	}*/
-	
 	public boolean takeItem(@NotNull Item item) {
 		if(hands.addItem(item))
 			return true;
@@ -138,24 +117,9 @@ public class Player extends Mob {
 			return inventory.addItem(item, 1) == 1;
 	}
 	
-	/*private void cycleHeldItem(boolean forward) {
-		if(inventory.size == 0) return;
-		
-		if(forward) { // add active item to the end of the list, and set the first inventory item to active.
-			if(heldItem != null)
-				inventory.add(heldItem);
-			heldItem = inventory.removeIndex(0);
-		} else { // add active to start of list, and take from the end
-			if(heldItem != null)
-				inventory.insert(0, heldItem);
-			heldItem = inventory.removeIndex(inventory.size-1);
-		}
-	}*/
-	
 	public Rectangle getInteractionRect() {
 		Rectangle bounds = getBounds();
 		Vector2 dirVector = getDirection().getVector();
-		//System.out.println("dir vector="+dirVector);
 		bounds.setX(bounds.getX()+bounds.getWidth()*dirVector.x);
 		bounds.setY(bounds.getY()+bounds.getHeight()*dirVector.y);
 		return bounds;

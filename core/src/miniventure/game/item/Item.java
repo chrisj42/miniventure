@@ -19,19 +19,11 @@ public class Item {
 	// NOTE: all data aspects should be final, because one item instance is used to represent a whole stack. Now, with this in mind, one can set a temp var to determine what sort of item to return from the use() method. It should be reset following that, however.
 	
 	@NotNull private final TextureRegion texture;
-	//private final boolean reflexive;
 	private final String name;
-	//private final int maxStackSize;
 	
-	//private boolean depleted = false;
-	//private String data; // i may just keep this sort of thing in the local classes.
-	
-	//Item(String name, TextureRegion texture) { this(name, texture, 64); }
-	//Item(String name, TextureRegion texture, int maxStackSize) { this(name, texture, maxStackSize); }
 	Item(String name, @NotNull TextureRegion texture) {
-		this.texture = texture;//new TextureRegion(texture);
+		this.texture = texture;
 		this.name = name;
-		//this.maxStackSize = maxStackSize;
 	}
 	
 	@NotNull public TextureRegion getTexture() { return texture; }
@@ -64,12 +56,12 @@ public class Item {
 	public boolean equals(Object other) {
 		if(!getClass().equals(other.getClass())) return false;
 		Item o = (Item) other;
-		return name.equals(o.name)/* && data.equals(o.data)*/;
+		return name.equals(o.name);
 	}
 	
 	@Override
 	public int hashCode() {
-		return name.hashCode()/* + 17 * data.hashCode()*/;
+		return name.hashCode();
 	}
 	
 	public Item copy() {
