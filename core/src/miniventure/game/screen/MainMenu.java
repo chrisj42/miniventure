@@ -12,8 +12,13 @@ public class MainMenu extends MenuScreen {
 	public MainMenu() {
 		super();
 		
-		table.add(new VisLabel("Miniventure"));
-		table.row();
+		addLabel("Miniventure", 20);
+		addLabel("You are playing version " + GameCore.VERSION, 15);
+		
+		addLabel("Use mouse or arrow keys to move around.", 10);
+		addLabel("C to attack, V to interact, E to open your inventory.", 30);
+		//addLabel("", 10);
+		
 		VisTextButton button = new VisTextButton("Play");
 		
 		button.addListener(new ClickListener() {
@@ -24,5 +29,10 @@ public class MainMenu extends MenuScreen {
 		});
 		
 		table.add(button);
+	}
+	
+	private void addLabel(String msg, int spacing) {
+		table.add(new VisLabel(msg));
+		table.row().space(spacing);
 	}
 }
