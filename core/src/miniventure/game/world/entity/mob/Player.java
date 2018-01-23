@@ -123,6 +123,7 @@ public class Player extends Mob {
 	public void update(float delta) {
 		super.update(delta);
 		// update things like hunger, stamina, etc.
+		changeStat(Stat.Stamina, 1);
 	}
 	
 	/*public void setActiveItem(int invIdx) {

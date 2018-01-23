@@ -5,6 +5,9 @@ import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.mob.Player.Stat;
 
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+
 import org.jetbrains.annotations.NotNull;
 
 public class Hands {
@@ -18,6 +21,9 @@ public class Hands {
 		
 		@Override
 		public Item use() { return this; }
+		
+		@Override
+		public void drawItem(int stackSize, Batch batch, BitmapFont font, float x, float y) {}
 	}
 	
 	@NotNull private Item item;
@@ -37,12 +43,14 @@ public class Hands {
 	}
 	
 	public boolean addItem(@NotNull Item other) {
-		if(item.equals(other)) {
+		if(item instanceof HandItem)
+			item = other;
+		else if(item.equals(other))
 			count++;
-			return true;
-		}
+		else
+			return false;
 		
-		return false;
+		return true;
 	}
 	
 	public void clearItem(Inventory inv) {
@@ -93,11 +101,11 @@ public class Hands {
 	}
 	
 	public boolean attack(WorldObject obj) {
-		System.out.println("attacking with " + item);
+		//System.out.println("attacking with " + item);
 		if(used()) return false;
-		System.out.println("not used");
+		//System.out.println("not used");
 		if(item.attack(obj, player) || obj.attackedBy(player, item)) used = true;
-		System.out.println("item used: " + used);
+		//System.out.println("item used: " + used);
 		return used;
 	}
 	

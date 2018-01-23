@@ -32,6 +32,7 @@ public class TileItem extends Item {
 	}
 	
 	private TileType placeOn, result;
+	private boolean placed = false;
 	
 	private TileItem(@NotNull TileType type) {
 		this(MyUtils.toTitleCase(type.name()), GameCore.tileAtlas.findRegion(type.name().toLowerCase()+"/00"), type, type.getProp(CoveredTileProperty.class).getCoveredTile()); // so, if the placeOn is null, then...
@@ -49,11 +50,22 @@ public class TileItem extends Item {
 			Tile tile = (Tile) obj;
 			if (placeOn == tile.getType()) {
 				tile.resetTile(result);
+				placed = true;
 				return true;
 			}
 		}
 		
 		return false;
+	}
+	
+	@Override
+	public TileItem use() {
+		if(placed) {
+			placed = false;
+			return null;
+		}
+		else
+			return this;
 	}
 	
 	@Override

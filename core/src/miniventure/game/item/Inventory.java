@@ -33,7 +33,12 @@ public class Inventory {
 	public int addItem(Item item, int count) { return addItem(item, count, true); }
 	public int addItem(Item item, int count, boolean addToTop) { return addItem(item, count, addToTop, true); }
 	private int addItem(Item item, int count, boolean addToTop, boolean checkMustFit) {
-		if(checkMustFit && mustFit != null) 
+		if(item.getName().length() == 0) {
+			System.out.println("attempted addition of hand item");
+			Thread.dumpStack();
+			return 0;
+		}
+		if(checkMustFit && mustFit != null && mustFit.getItem().getName().length() > 0) 
 			addItem(mustFit.getItem(), mustFit.getCount(), false, false);
 		
 		int left = count;

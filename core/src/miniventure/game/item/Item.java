@@ -75,4 +75,9 @@ public class Item {
 	public Item copy() {
 		return new Item(name, texture);
 	}
+	
+	@Override
+	public String toString() {
+		return name + " Item";
+	}
 }
