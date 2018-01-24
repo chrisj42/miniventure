@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class Hands {
 	
@@ -62,14 +63,16 @@ public class Hands {
 	}
 	
 	public void resetItemUsage() {
+		if(count <= 0) { // this shouldn't happen, generally... unless stuff has been removed from the active item by the crafting menu.
+			item = new HandItem();
+			count = 1;
+			used = false;
+			return;
+		}
+		
 		if(!used) return;
 		
 		used = false;
-		if(count <= 0) { // this shouldn't happen
-			item = new HandItem();
-			count = 1;
-			return;
-		}
 		Item newItem = item.use();
 		
 		player.changeStat(Stat.Stamina, -item.getStaminaUsage());
@@ -105,6 +108,8 @@ public class Hands {
 	}
 	
 	@NotNull
-	public Item getItem() { return item; }
+	public Item getUsableItem() { return item; }
+	@Nullable
+	Item getEffectiveItem() { return item instanceof HandItem ? null : item; }
 	public int getCount() { return count; }
 }

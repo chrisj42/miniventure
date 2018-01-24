@@ -33,13 +33,15 @@ public class Inventory {
 	public int addItem(Item item, int count) { return addItem(item, count, true); }
 	public int addItem(Item item, int count, boolean addToTop) { return addItem(item, count, addToTop, true); }
 	private int addItem(Item item, int count, boolean addToTop, boolean checkMustFit) {
-		if(item.getName().length() == 0) {
+		if(item.getName().equalsIgnoreCase("hand")) {
 			System.out.println("attempted addition of hand item");
 			Thread.dumpStack();
 			return 0;
 		}
-		if(checkMustFit && mustFit != null && mustFit.getItem().getName().length() > 0) 
-			addItem(mustFit.getItem(), mustFit.getCount(), false, false);
+		if(checkMustFit && mustFit != null && mustFit.getEffectiveItem() != null) 
+			addItem(mustFit.getEffectiveItem(), mustFit.getCount(), false, false);
+		else
+			checkMustFit = false; // so that it doesn't attempt to remove the "mustFit" item afterward
 		
 		int left = count;
 		int idx = 0;
@@ -66,7 +68,7 @@ public class Inventory {
 		}
 		
 		if(checkMustFit && mustFit != null)
-			removeItem(mustFit.getItem(), mustFit.getCount());
+			removeItem(mustFit.getEffectiveItem(), mustFit.getCount());
 		
 		return count - left;
 	}
@@ -88,6 +90,13 @@ public class Inventory {
 			left -= removed;
 		}
 		
+		if(left > 0 && mustFit != null && mustFit.getUsableItem().equals(item)) {
+			int removed = Math.min(left, mustFit.getCount());
+			mustFit.setItem(mustFit.getUsableItem(), mustFit.getCount() - removed);
+			mustFit.resetItemUsage(); // clears empty stacks
+			left -= removed;
+		}
+		
 		return count - left;
 	}
 	
@@ -99,6 +108,9 @@ public class Inventory {
 		for(int i = 0; i < items.size; i++)
 			if(items.get(i).equals(item))
 				count += stackSizes.get(i);
+		
+		if(mustFit != null && mustFit.getUsableItem().equals(item))
+			count += mustFit.getCount();
 		
 		return count;
 	}

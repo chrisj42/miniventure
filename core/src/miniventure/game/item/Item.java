@@ -68,7 +68,7 @@ public class Item {
 		
 		float textOff = font.getCapHeight() + font.getAscent();
 		MyUtils.writeOutlinedText(font, batch, stackSize+"", x+1, y+textOff-font.getDescent(), textColor);
-		MyUtils.writeOutlinedText(font, batch, name, x+width+10, y+(getRenderHeight()+textOff)/2);
+		MyUtils.writeOutlinedText(font, batch, name, x+width+10, y+(getRenderHeight()+textOff)/2, textColor);
 	}
 	
 	public float getRenderHeight() {
