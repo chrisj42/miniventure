@@ -46,7 +46,7 @@ public class Hands {
 	public boolean addItem(@NotNull Item other) {
 		if(item instanceof HandItem)
 			item = other;
-		else if(item.equals(other))
+		else if(item.equals(other) && count < item.getMaxStackSize())
 			count++;
 		else
 			return false;

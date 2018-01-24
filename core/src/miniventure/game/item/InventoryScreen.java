@@ -25,8 +25,8 @@ public class InventoryScreen extends MenuScreen {
 		vGroup.setOrigin(Align.right);
 		vGroup.columnAlign(Align.left);
 		vGroup.align(Align.center);
-		vGroup.setPosition(getWidth()/2, getHeight()/2, Align.center);
 		vGroup.pack();
+		vGroup.setPosition(getWidth()/2, getHeight()/2, Align.center);
 		
 		getRoot().addListener(new InputListener() {
 			@Override

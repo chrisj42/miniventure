@@ -67,18 +67,21 @@ public class Inventory {
 			}
 		}
 		
-		if(checkMustFit && mustFit != null)
-			removeItem(mustFit.getEffectiveItem(), mustFit.getCount());
+		if(checkMustFit)
+			removeItem(mustFit.getEffectiveItem(), mustFit.getCount(), true);
 		
 		return count - left;
 	}
 	
 	/// Returns how many items could successfully be removed.
 	public int removeItem(Item item) { return removeItem(item, 1); }
-	public int removeItem(Item item, int count) {
+	public int removeItem(Item item, int count) { return removeItem(item, count, true); }
+	public int removeItem(Item item, int count, boolean startFromBack) {
 		int left = count;
-		int idx = 0;
-		while(left > 0 && (idx = getFirstMatch(idx, item, true)) >= 0) {
+		int idx = startFromBack ? items.size - 1 : 0;
+		while(left > 0 && (idx = 
+			startFromBack ? getLastMatch(idx, item, true) : getFirstMatch(idx, item, true)
+		) >= 0) {
 			int removed = Math.min(left, stackSizes.get(idx));
 			if(removed == stackSizes.get(idx)) {
 				items.removeIndex(idx);
@@ -119,6 +122,15 @@ public class Inventory {
 	private int getFirstMatch(Item item, boolean matchFull) { return getFirstMatch(0, item, matchFull); }
 	private int getFirstMatch(int startIdx, Item item, boolean matchFull) {
 		for(int i = startIdx; i < items.size; i++)
+			if(items.get(i).equals(item) && (matchFull || stackSizes.get(i) < item.getMaxStackSize()))
+				return i;
+		
+		return -1;
+	}
+	
+	private int getLastMatch(Item item, boolean matchFull) { return getLastMatch(0, item, matchFull); }
+	private int getLastMatch(int startIdx, Item item, boolean matchFull) {
+		for(int i = Math.min(startIdx, items.size-1); i >= 0; i--)
 			if(items.get(i).equals(item) && (matchFull || stackSizes.get(i) < item.getMaxStackSize()))
 				return i;
 		
