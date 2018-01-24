@@ -121,17 +121,17 @@ public class Inventory {
 		return stacks;
 	}*/
 	
-	public Item getItemAt(int idx) {
+	Item getItemAt(int idx) {
 		checkIndex(idx);
 		return items.get(idx);
 	}
 	
-	public int getStackSizeAt(int idx) {
+	int getStackSizeAt(int idx) {
 		checkIndex(idx);
 		return stackSizes.get(idx);
 	}
 	
-	public ItemStack removeItemAt(int idx) {
+	ItemStack removeItemAt(int idx) {
 		checkIndex(idx);
 		
 		int count = stackSizes.removeIndex(idx);

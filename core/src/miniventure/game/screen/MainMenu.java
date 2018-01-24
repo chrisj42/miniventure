@@ -28,6 +28,8 @@ public class MainMenu extends MenuScreen {
 			}
 		});
 		
+		vGroup.remove();
+		addActor(table);
 		table.add(button);
 	}
 	

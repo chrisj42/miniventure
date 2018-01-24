@@ -12,9 +12,9 @@ public class RespawnScreen extends MenuScreen {
 	public RespawnScreen() {
 		super();
 		
-		table.add(new VisLabel("You died!"));
-		table.row();
-		table.add(new VisTextButton("Respawn", new ChangeListener() {
+		vGroup.addActor(new VisLabel("You died!"));
+		
+		vGroup.addActor(new VisTextButton("Respawn", new ChangeListener() {
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
 				GameCore.getWorld().respawn();

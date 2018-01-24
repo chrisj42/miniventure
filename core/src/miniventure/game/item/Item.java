@@ -4,6 +4,7 @@ import miniventure.game.GameCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;
+import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -46,21 +47,44 @@ public class Item {
 	
 	public int getDamage(WorldObject target) { return 1; } // by default
 	
+	private float renderWidth;
+	private float renderHeight;
+	private boolean initializedWidth = false;
+	private boolean initializedHeight = false;
+	
 	public void drawItem(int stackSize, Batch batch, BitmapFont font, float x, float y) {
-		MyUtils.fillRect(x-2, y-2, Color.BLACK, batch);
-		batch.draw(texture, x, y);
-		MyUtils.writeOutlinedText(font, batch, stackSize+"", x+1, y+font.getCapHeight()+1);
+		drawItem(stackSize, batch, font, x, y, Color.WHITE);
+	}
+	public void drawItem(int stackSize, Batch batch, BitmapFont font, float x, float y, Color textColor) {
 		float width = texture.getRegionWidth();
-		float height = texture.getRegionHeight();
-		MyUtils.writeOutlinedText(font, batch, name, x+width+10, y-5+height*2/3);
+		//float height = texture.getRegionHeight();
+		float tx = x + Math.max(0, (Tile.SIZE - texture.getRegionWidth())/2);
+		
+		Color prev = batch.getColor();
+		batch.setColor(Color.BLACK);
+		batch.draw(texture, tx-2, y-2);
+		batch.setColor(prev);
+		batch.draw(texture, tx, y);
+		
+		float textOff = font.getCapHeight() + font.getAscent();
+		MyUtils.writeOutlinedText(font, batch, stackSize+"", x+1, y+textOff-font.getDescent(), textColor);
+		MyUtils.writeOutlinedText(font, batch, name, x+width+10, y+(getRenderHeight()+textOff)/2);
 	}
 	
 	public float getRenderHeight() {
-		return Math.max(texture.getRegionHeight(), GameCore.getTextLayout(name).height);
+		if(!initializedHeight) {
+			renderHeight = Math.max(texture.getRegionHeight(), GameCore.getTextLayout(name).height);
+			initializedHeight = true;
+		}
+		return renderHeight;
 	}
 	
 	public float getRenderWidth() {
-		return texture.getRegionWidth() + 10 + GameCore.getTextLayout(name).width;
+		if(!initializedWidth) {
+			renderWidth = texture.getRegionWidth() + 10 + GameCore.getTextLayout(name).width;
+			initializedWidth = true;
+		}
+		return renderWidth;
 	}
 	
 	@Override

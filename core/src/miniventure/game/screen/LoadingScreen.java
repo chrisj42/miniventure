@@ -21,9 +21,9 @@ public class LoadingScreen extends MenuScreen {
 	
 	public LoadingScreen() {
 		//messageLabelnew VisLabel(message);
-		/*table.add(messageLabel);
-		table.row();
-		table.add(labelPercent);*/
+		/*vGroup.add(messageLabel);
+		vGroup.row();
+		vGroup.add(labelPercent);*/
 	}
 	
 	/*@Override
@@ -39,9 +39,7 @@ public class LoadingScreen extends MenuScreen {
 		final VisLabel label = new VisLabel(message);
 		messageLabels.add(label);
 		Gdx.app.postRunnable(() -> {
-			table.row();
-			table.add(label);
-			table.row();
+			vGroup.addActor(label);
 		});
 		return messageLabels.size-1;
 	}
@@ -59,10 +57,7 @@ public class LoadingScreen extends MenuScreen {
 	public void removeMessage(int idx) {
 		VisLabel removed = messageLabels.removeIndex(idx);
 		Gdx.app.postRunnable(() -> {
-			int row = table.getCell(removed).getRow();
-			table.removeActor(removed); // FIXME this won't work right, as this will not remove the extra spacing rows. And even if it did, I would have to be careful because I give out the row index as an identifier.
-			if(row+2 == table.getCells().size)
-				table.getCells().removeRange(row-1, row+1);
+			vGroup.removeActor(removed); // FIXME this won't work right, because I give out the row index as an identifier.
 		});
 	}
 	

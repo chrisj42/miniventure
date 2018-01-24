@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
@@ -19,20 +20,50 @@ public class MenuScreen extends Stage {
 	 */
 	
 	private MenuScreen parent;
+	protected VerticalGroup vGroup;
 	protected Table table;
 	
 	public MenuScreen() {
 		super(new ExtendViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()), GameCore.getBatch());
-		table = new Table(GameCore.getSkin()) {
+		vGroup = new VerticalGroup() {
 			@Override
 			public void draw(Batch batch, float parentAlpha) {
 				drawTable(batch, parentAlpha);
 				super.draw(batch, parentAlpha);
 			}
 		};
+		
+		table = new Table() {
+			@Override
+			public void draw(Batch batch, float parentAlpha) {
+				drawTable(batch, parentAlpha);
+				super.draw(batch, parentAlpha);
+			}
+		};
+		
+		vGroup.space(10);
+		vGroup.setOrigin(Align.top);
+		vGroup.setPosition(getWidth()/2, getHeight()*2/3, Align.center);
+		
 		table.setPosition(getWidth()/2, getHeight()*2/3, Align.center);
-		addActor(table);
+		addActor(vGroup);
 	}
+	
+	/*protected float addToTableSameRowWidth(int spacing, Actor... actors) {
+		float maxWidth = 0;
+		for(Actor a: actors) {
+			table.addActor(a);
+			//System.out.println("made cell " + c + " with actor " + a);
+			//c.size(a.getWidth(), a.getHeight());
+			//maxWidth = Math.max(maxWidth, c.getPrefWidth());
+			//table.row().space(spacing);
+		}
+		
+		for(Cell cell: table.getCells())
+			cell.width(maxWidth);
+		
+		return maxWidth;
+	}*/
 	
 	public void setParent(MenuScreen parent) { this.parent = parent; }
 	

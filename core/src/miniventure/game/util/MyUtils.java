@@ -50,11 +50,10 @@ public class MyUtils {
 		}
 	}
 	
-	public static void writeOutlinedText(BitmapFont font, Batch batch, String text, float x, float y) {
-		writeOutlinedText(font, batch, text, x, y, Color.WHITE, Color.BLACK);
-	}
-	
+	public static void writeOutlinedText(BitmapFont font, Batch batch, String text, float x, float y) { writeOutlinedText(font, batch, text, x, y, Color.WHITE); }
+	public static void writeOutlinedText(BitmapFont font, Batch batch, String text, float x, float y, Color center) { writeOutlinedText(font, batch, text, x, y, center, Color.BLACK); }
 	public static void writeOutlinedText(BitmapFont font, Batch batch, String text, float x, float y, Color center, Color outline) {
+		Color prev = font.getColor();
 		font.setColor(outline);
 		font.draw(batch, text, x-1, y-1);
 		font.draw(batch, text, x-1, y+1);
@@ -62,6 +61,7 @@ public class MyUtils {
 		font.draw(batch, text, x+1, y+1);
 		font.setColor(center);
 		font.draw(batch, text, x, y);
+		font.setColor(prev);
 	}
 	
 	public static void drawTextCentered(BitmapFont font, Batch batch, String text, float width, float height) {
@@ -110,6 +110,9 @@ public class MyUtils {
 	}
 	public static void fillRect(float x, float y, Color c, Batch batch) {
 		fillRect(x, y, c.r, c.g, c.b, c.a, batch);
+	}
+	public static void fillRect(float x, float y, float width, float height, Color c, Batch batch) {
+		fillRect(x, y, width, height, c.r, c.g, c.b, c.a, batch);
 	}
 	public static void fillRect(float x, float y, float width, float height, float r, float g, float b, float a, Batch batch) {
 		Color c = batch.getColor();

@@ -3,10 +3,12 @@ package miniventure.game.world.entity.mob;
 import java.util.EnumMap;
 
 import miniventure.game.GameCore;
+import miniventure.game.item.CraftingScreen;
 import miniventure.game.item.Hands;
 import miniventure.game.item.Inventory;
+import miniventure.game.item.InventoryScreen;
 import miniventure.game.item.Item;
-import miniventure.game.screen.InventoryScreen;
+import miniventure.game.item.Recipes;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.tile.Tile;
@@ -96,6 +98,8 @@ public class Player extends Mob {
 			hands.clearItem(inventory);
 			GameCore.setScreen(new InventoryScreen(inventory, hands));
 		}
+		else if(pressingKey(Input.Keys.Z))
+			GameCore.setScreen(new CraftingScreen(Recipes.recipes, inventory));
 	}
 	
 	public void drawGui(Rectangle canvas, SpriteBatch batch, BitmapFont font) {
@@ -120,8 +124,8 @@ public class Player extends Mob {
 	public Rectangle getInteractionRect() {
 		Rectangle bounds = getBounds();
 		Vector2 dirVector = getDirection().getVector();
-		bounds.setX(bounds.getX()+bounds.getWidth()*dirVector.x);
-		bounds.setY(bounds.getY()+bounds.getHeight()*dirVector.y);
+		bounds.setX(bounds.getX()+Tile.SIZE*dirVector.x);
+		bounds.setY(bounds.getY()+Tile.SIZE*dirVector.y);
 		return bounds;
 	}
 	

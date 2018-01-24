@@ -8,6 +8,7 @@ import miniventure.game.util.Version;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -21,7 +22,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class GameCore extends ApplicationAdapter {
 	
-	public static final Version VERSION = new Version("1.1.1");
+	public static final Version VERSION = new Version("1.1.2");
 	
 	//public static final int SCREEN_WIDTH = 800, SCREEN_HEIGHT = 450;
 	private static final long START_TIME = System.nanoTime();
@@ -41,7 +42,6 @@ public class GameCore extends ApplicationAdapter {
 	private static GlyphLayout layout;
 	private static Skin skin;
 	
-	
 	@Override
 	public void create () {
 		VisUI.load(Gdx.files.internal("skins/visui/uiskin.json"));
@@ -53,6 +53,7 @@ public class GameCore extends ApplicationAdapter {
 		
 		batch = new SpriteBatch();
 		font = new BitmapFont(); // uses libGDX's default Arial font
+		font.setColor(Color.WHITE);
 		layout = new GlyphLayout(font, "");
 		skin = new Skin(Gdx.files.internal("skins/visui/uiskin.json"));
 		
