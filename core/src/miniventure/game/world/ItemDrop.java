@@ -77,6 +77,7 @@ public class ItemDrop {
 	*/
 	
 	private Item item;
+	private int count;
 	
 	public ItemDrop(Item item, int minCount, int maxCount, float biasAmt, boolean roundUp) {
 		/*
@@ -90,28 +91,28 @@ public class ItemDrop {
 				0, min=1, max=8: 
 		 */
 		
-		this.item = item;
-		
+		this(item, (maxCount+minCount)/2);
 	}
 	
 	public ItemDrop(Item item) {
-		this.item = item;
+		this(item, 1);
 	}
 	
 	public ItemDrop(Item item, int count) {
-		
+		this.item = item;
+		this.count = count;
 	}
 	
 	public ItemDrop(Item item, int peaceCount, int easyCount, int mediumCount, int hardCount) {
-		
+		this(item, mediumCount);
 	}
 	
 	
 	
 	
 	public int getItemsDropped() {
-		// TODO implement this
-		return 1;
+		// TODO implement this for different counts
+		return count;
 	}
 	
 	public void dropItems(Level level, @NotNull WorldObject source, @Nullable WorldObject target) {

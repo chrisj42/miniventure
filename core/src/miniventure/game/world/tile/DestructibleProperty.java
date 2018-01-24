@@ -27,6 +27,7 @@ public class DestructibleProperty implements TileProperty {
 	
 	private final DamageConditionCheck[] damageConditions;
 	private ItemDrop[] drops;
+	private boolean dropsTileItem = false;
 	
 	private TileType tileType;
 	
@@ -39,6 +40,10 @@ public class DestructibleProperty implements TileProperty {
 	}
 	
 	// this is for tiles with health
+	DestructibleProperty(int totalHealth, @Nullable PreferredTool preferredTool, boolean dropsTileItem) {
+		this(totalHealth, preferredTool, new ItemDrop[1]);
+		this.dropsTileItem = dropsTileItem;
+	}
 	DestructibleProperty(int totalHealth, @Nullable PreferredTool preferredTool, ItemDrop... drops) {
 		this.totalHealth = totalHealth;
 		this.damageConditions = new DamageConditionCheck[0];
@@ -57,7 +62,6 @@ public class DestructibleProperty implements TileProperty {
 		this.drops = new ItemDrop[] {drop};
 	}
 	
-	private boolean dropsTileItem = false;
 	DestructibleProperty(boolean dropsTileItem, DamageConditionCheck... damageConditions) {
 		this(null, damageConditions);
 		this.dropsTileItem = dropsTileItem;
@@ -148,6 +152,9 @@ public class DestructibleProperty implements TileProperty {
 		@Nullable private final ToolType toolType;
 		@Nullable private final Material material;
 		
+		public RequiredTool(@Nullable ToolType toolType) {
+			this(toolType, null);
+		}
 		public RequiredTool(@Nullable ToolType toolType, @Nullable Material material) {
 			this.toolType = toolType;
 			this.material = material;

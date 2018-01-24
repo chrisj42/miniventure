@@ -493,154 +493,154 @@ hole/46
   orig: 32, 32
   offset: 0, 0
   index: -1
-rock/00
+sand/00
   rotate: false
   xy: 2, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-sand/00
+sand/o00
   rotate: false
   xy: 38, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-sand/o00
+sand/o01
   rotate: false
   xy: 74, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-sand/o01
+sand/o02
   rotate: false
   xy: 110, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-sand/o02
+sand/o03
   rotate: false
   xy: 146, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-sand/o03
+sand/o04
   rotate: false
   xy: 182, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-sand/o04
+sand/o05
   rotate: false
   xy: 218, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-sand/o05
+sand/o06
   rotate: false
   xy: 254, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-sand/o06
+sand/o07
   rotate: false
   xy: 290, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-sand/o07
+sand/o08
   rotate: false
   xy: 326, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-sand/o08
+sand/o09
   rotate: false
   xy: 362, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-sand/o09
+sand/o10
   rotate: false
   xy: 398, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-sand/o10
+sand/o11
   rotate: false
   xy: 434, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-sand/o11
+sand/o12
   rotate: false
   xy: 470, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-sand/o12
+sand/o13
   rotate: false
   xy: 2, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-sand/o13
+sand/o14
   rotate: false
   xy: 38, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-sand/o14
+sand/o15
   rotate: false
   xy: 74, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-sand/o15
+sand/o16
   rotate: false
   xy: 110, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-sand/o16
+sand/o17
   rotate: false
   xy: 146, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-sand/o17
+sand/o18
   rotate: false
   xy: 182, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-sand/o18
+sand/o19
   rotate: false
   xy: 218, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-sand/o19
+stone/00
   rotate: false
   xy: 254, 218
   size: 32, 32

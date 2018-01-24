@@ -8,7 +8,6 @@ public class Recipe {
 	public Recipe(ItemStack result, ItemStack... costs) {
 		this.result = result;
 		this.costs = costs;
-		System.out.println("made recipe for " + result.item);
 	}
 	
 	ItemStack getResult() { return result; }

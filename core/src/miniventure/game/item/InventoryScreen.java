@@ -42,7 +42,7 @@ public class InventoryScreen extends MenuScreen {
 	
 	@Override
 	protected void drawTable(Batch batch, float parentAlpha) {
-		MyUtils.fillRect(vGroup.getX(), vGroup.getY(), vGroup.getWidth(), vGroup.getHeight(), .2f, .4f, 1f, parentAlpha, batch);
+		MyUtils.fillRect(vGroup.getX(), vGroup.getY(), Math.max(vGroup.getWidth(), 100), Math.max(vGroup.getHeight(),120), .2f, .4f, 1f, parentAlpha, batch);
 	}
 	
 	@Override

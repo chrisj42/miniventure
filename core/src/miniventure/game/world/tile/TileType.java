@@ -3,10 +3,13 @@ package miniventure.game.world.tile;
 import java.util.Comparator;
 import java.util.HashMap;
 
+import miniventure.game.item.ResourceItem;
 import miniventure.game.item.ToolType;
 import miniventure.game.util.MyUtils;
+import miniventure.game.world.ItemDrop;
 import miniventure.game.world.tile.AnimationProperty.AnimationType;
 import miniventure.game.world.tile.DestructibleProperty.PreferredTool;
+import miniventure.game.world.tile.DestructibleProperty.RequiredTool;
 
 import com.badlogic.gdx.utils.Array;
 
@@ -21,31 +24,31 @@ public enum TileType {
 	
 	DIRT(
 		new CoveredTileProperty(HOLE),
-		new DestructibleProperty(true)
+		new DestructibleProperty(true, new RequiredTool(ToolType.Shovel))
 	),
 	
 	GRASS(
 		new CoveredTileProperty(DIRT),
-		new DestructibleProperty(true),
+		new DestructibleProperty(true, new RequiredTool(ToolType.Shovel)),
 		new OverlapProperty(true)
 	),
 	
 	SAND(
 		new CoveredTileProperty(DIRT),
-		new DestructibleProperty(true),
+		new DestructibleProperty(true, new RequiredTool(ToolType.Shovel)),
 		new OverlapProperty(true)
 	),
 	
 	STONE(false,
 		SolidProperty.SOLID,
 		new CoveredTileProperty(DIRT),
-		new DestructibleProperty(20, new PreferredTool(ToolType.Pickaxe, 5))
+		new DestructibleProperty(20, new PreferredTool(ToolType.Pickaxe, 5), true)
 	),
 	
 	TREE(false,
 		SolidProperty.SOLID,
 		new CoveredTileProperty(GRASS),
-		new DestructibleProperty(10, new PreferredTool(ToolType.Axe, 2)),
+		new DestructibleProperty(10, new PreferredTool(ToolType.Axe, 2), new ItemDrop(ResourceItem.Log.get(), 2)),
 		new AnimationProperty(AnimationType.SINGLE_FRAME),
 		new ConnectionProperty(true)
 	),
@@ -53,7 +56,7 @@ public enum TileType {
 	CACTUS(false,
 		SolidProperty.SOLID,
 		new CoveredTileProperty(SAND),
-		new DestructibleProperty(7, null),
+		new DestructibleProperty(7, null, true),
 		new AnimationProperty(AnimationType.SINGLE_FRAME),
 		(TouchListener) (e, t) -> e.hurtBy(t, 1)
 	),
