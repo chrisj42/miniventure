@@ -36,7 +36,7 @@ public enum TileType {
 		new OverlapProperty(true)
 	),
 	
-	ROCK(false,
+	STONE(false,
 		SolidProperty.SOLID,
 		new CoveredTileProperty(DIRT),
 		new DestructibleProperty(20, new PreferredTool(ToolType.Pickaxe, 5))
@@ -164,7 +164,7 @@ public enum TileType {
 	
 	public static final TileType[] values = TileType.values();
 	public static final TileType[] zOrder = { // first tile is drawn over by all.
-		HOLE, DIRT, SAND, GRASS, WATER, ROCK, CACTUS, TREE
+		HOLE, DIRT, SAND, GRASS, WATER, STONE, CACTUS, TREE
 	};
 	
 	public static final Comparator<TileType> tileSorter = (t1, t2) -> {

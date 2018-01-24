@@ -18,7 +18,7 @@ class Testing {
 		tileMap.put(TileType.WATER, Color.BLUE);
 		tileMap.put(TileType.TREE, Color.GREEN.darker().darker());
 		tileMap.put(TileType.GRASS, Color.GREEN);
-		tileMap.put(TileType.ROCK, Color.GRAY);
+		tileMap.put(TileType.STONE, Color.GRAY);
 		tileMap.put(TileType.SAND, Color.YELLOW);
 		tileMap.put(TileType.DIRT, Color.ORANGE.darker().darker());
 	}
