@@ -16,7 +16,8 @@ public class MainMenu extends MenuScreen {
 		addLabel("You are playing version " + GameCore.VERSION, 15);
 		
 		addLabel("Use mouse or arrow keys to move around.", 10);
-		addLabel("C to attack, V to interact, E to open your inventory.", 30);
+		addLabel("C to attack, V to interact.", 10);
+		addLabel("E to open your inventory, Z to craft items.", 30);
 		//addLabel("", 10);
 		
 		VisTextButton button = new VisTextButton("Play");
