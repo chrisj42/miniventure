@@ -48,7 +48,7 @@ public enum TileType {
 	TREE(false,
 		SolidProperty.SOLID,
 		new CoveredTileProperty(GRASS),
-		new DestructibleProperty(10, new PreferredTool(ToolType.Axe, 2), new ItemDrop(ResourceItem.Log.get(), 2)),
+		new DestructibleProperty(10, new PreferredTool(ToolType.Axe, 2), new ItemDrop(ResourceItem.Log.get())),
 		new AnimationProperty(AnimationType.SINGLE_FRAME),
 		new ConnectionProperty(true)
 	),
