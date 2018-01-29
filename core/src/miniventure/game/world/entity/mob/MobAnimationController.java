@@ -3,7 +3,7 @@ package miniventure.game.world.entity.mob;
 import java.util.HashMap;
 import java.util.PriorityQueue;
 
-import miniventure.game.screen.GameCore;
+import miniventure.game.GameCore;
 import miniventure.game.world.entity.Direction;
 
 import com.badlogic.gdx.graphics.g2d.Animation;

@@ -90,7 +90,7 @@ public abstract class Mob extends Entity {
 	@Override
 	public Rectangle getBounds() {
 		Rectangle bounds = super.getBounds();
-		bounds.setHeight(bounds.getHeight()*4/5);
+		bounds.setHeight(bounds.getHeight()*2/3);
 		return bounds;
 	}
 	

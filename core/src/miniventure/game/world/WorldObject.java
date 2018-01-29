@@ -51,7 +51,7 @@ public interface WorldObject {
 		getBounds().getCenter(center);
 		HashMap<Vector2, Tile> tileMap = new HashMap<>();
 		for(Tile t: tiles)
-			tileMap.put(new Vector2(t.getCenterX(), t.getCenterY()), t);
+			tileMap.put(t.getBounds().getCenter(new Vector2()), t);
 		
 		Array<Vector2> tileCenters = new Array<>(tileMap.keySet().toArray(new Vector2[tileMap.size()]));
 		tileCenters.sort((v1, v2) -> (int) (center.dst2(v1) - center.dst2(v2))); // sort, so the first one in the list is the closest one

@@ -1,8 +1,10 @@
 package miniventure.game.util;
 
+import miniventure.game.GameCore;
+
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
@@ -48,11 +50,10 @@ public class MyUtils {
 		}
 	}
 	
-	public static void writeOutlinedText(BitmapFont font, SpriteBatch batch, String text, float x, float y) {
-		writeOutlinedText(font, batch, text, x, y, Color.WHITE, Color.BLACK);
-	}
-	
-	public static void writeOutlinedText(BitmapFont font, SpriteBatch batch, String text, float x, float y, Color center, Color outline) {
+	public static void writeOutlinedText(BitmapFont font, Batch batch, String text, float x, float y) { writeOutlinedText(font, batch, text, x, y, Color.WHITE); }
+	public static void writeOutlinedText(BitmapFont font, Batch batch, String text, float x, float y, Color center) { writeOutlinedText(font, batch, text, x, y, center, Color.BLACK); }
+	public static void writeOutlinedText(BitmapFont font, Batch batch, String text, float x, float y, Color center, Color outline) {
+		Color prev = font.getColor();
 		font.setColor(outline);
 		font.draw(batch, text, x-1, y-1);
 		font.draw(batch, text, x-1, y+1);
@@ -60,9 +61,10 @@ public class MyUtils {
 		font.draw(batch, text, x+1, y+1);
 		font.setColor(center);
 		font.draw(batch, text, x, y);
+		font.setColor(prev);
 	}
 	
-	public static void drawTextCentered(BitmapFont font, SpriteBatch batch, String text, float width, float height) {
+	public static void drawTextCentered(BitmapFont font, Batch batch, String text, float width, float height) {
 		font.draw(batch, text, width/2, height/2, 0, Align.center, true);
 	}
 	
@@ -101,5 +103,27 @@ public class MyUtils {
 	
 	public static float map(float num, float prevMin, float prevMax, float newMin, float newMax) {
 		return (num-prevMin)/(prevMax-prevMin) * (newMax-newMin) + newMin;
+	}
+	
+	public static void fillRect(Rectangle rect, Color c, Batch batch) {
+		fillRect(rect.x, rect.y, rect.width, rect.height, c.r, c.g, c.b, c.a, batch);
+	}
+	public static void fillRect(float x, float y, Color c, Batch batch) {
+		fillRect(x, y, c.r, c.g, c.b, c.a, batch);
+	}
+	public static void fillRect(float x, float y, float width, float height, Color c, Batch batch) {
+		fillRect(x, y, width, height, c.r, c.g, c.b, c.a, batch);
+	}
+	public static void fillRect(float x, float y, float width, float height, float r, float g, float b, float a, Batch batch) {
+		Color c = batch.getColor();
+		batch.setColor(r, g, b, a);
+		batch.draw(GameCore.icons.get("white"), x, y, width, height);
+		batch.setColor(c);
+	}
+	public static void fillRect(float x, float y, float r, float g, float b, float a, Batch batch) {
+		Color c = batch.getColor();
+		batch.setColor(r, g, b, a);
+		batch.draw(GameCore.icons.get("white"), x, y);
+		batch.setColor(c);
 	}
 }

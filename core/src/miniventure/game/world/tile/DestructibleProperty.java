@@ -3,6 +3,7 @@ package miniventure.game.world.tile;
 import miniventure.game.item.Item;
 import miniventure.game.item.TileItem;
 import miniventure.game.item.ToolItem;
+import miniventure.game.item.ToolItem.Material;
 import miniventure.game.item.ToolType;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.WorldObject;
@@ -22,11 +23,11 @@ public class DestructibleProperty implements TileProperty {
 	
 	private final int totalHealth;
 	
-	//private final EnumMap<ToolType, Float> toolTypeDamageMultipliers = new EnumMap<>(ToolType.class);
 	private final PreferredTool preferredTool;
 	
 	private final DamageConditionCheck[] damageConditions;
 	private ItemDrop[] drops;
+	private boolean dropsTileItem = false;
 	
 	private TileType tileType;
 	
@@ -39,14 +40,16 @@ public class DestructibleProperty implements TileProperty {
 	}
 	
 	// this is for tiles with health
+	DestructibleProperty(int totalHealth, @Nullable PreferredTool preferredTool, boolean dropsTileItem) {
+		this(totalHealth, preferredTool, new ItemDrop[1]);
+		this.dropsTileItem = dropsTileItem;
+	}
 	DestructibleProperty(int totalHealth, @Nullable PreferredTool preferredTool, ItemDrop... drops) {
 		this.totalHealth = totalHealth;
 		this.damageConditions = new DamageConditionCheck[0];
 		this.drops = drops;
 		
 		this.preferredTool = preferredTool;
-		//for(PreferredTool tool: preferredTools)
-		//	toolTypeDamageMultipliers.put(tool.toolType, tool.damageMultiplier);
 	}
 	
 	
@@ -59,25 +62,25 @@ public class DestructibleProperty implements TileProperty {
 		this.drops = new ItemDrop[] {drop};
 	}
 	
-	private boolean dropsTileItem = false;
 	DestructibleProperty(boolean dropsTileItem, DamageConditionCheck... damageConditions) {
 		this(null, damageConditions);
 		this.dropsTileItem = dropsTileItem;
 	}
 	
-	public void init(TileType type) {
+	public void init(@NotNull TileType type) {
 		this.tileType = type;
 		
-		if(dropsTileItem) 
+		if(dropsTileItem)
 			drops[0] = new ItemDrop(TileItem.get(type));
 	}
 	
-	boolean tileAttacked(Tile tile, Mob attacker, Item attackItem) {
+	boolean tileAttacked(@NotNull Tile tile, @NotNull Mob attacker, @NotNull Item attackItem) {
 		int damage = getDamage(tile, attackItem);
 		return tileAttacked(tile, attacker, damage);
 	}
 	
 	boolean tileAttacked(Tile tile, WorldObject attacker, int damage) {
+		//System.out.println("attacking tile with " + damage + " damage");
 		if(damage > 0) {
 			int health = totalHealth > 1 ? tile.getData(getClass(), tileType, HEALTH_IDX) : 1;
 			health -= damage;
@@ -97,10 +100,8 @@ public class DestructibleProperty implements TileProperty {
 		return false;
 	}
 	
-	private int getDamage(@NotNull Tile attacked, @Nullable Item attackItem) {
-		int damage = 1;
-		if(attackItem != null)
-			damage = attackItem.getDamage(attacked);
+	private int getDamage(@NotNull Tile attacked, @NotNull Item attackItem) {
+		int damage = attackItem.getDamage(attacked);
 		
 		if(damageConditions.length > 0) {
 			// must satisfy at least one condition
@@ -112,12 +113,10 @@ public class DestructibleProperty implements TileProperty {
 			// otherwise, continue.
 		}
 		
-		if(preferredTool != null && attackItem != null && attackItem.getItemData() instanceof ToolItem) {
-			ToolType type = ((ToolItem)attackItem.getItemData()).getType();
+		if(preferredTool != null && attackItem instanceof ToolItem) {
+			ToolType type = ((ToolItem)attackItem).getType();
 			if(type == preferredTool.toolType)
 				damage = (int) Math.ceil(damage * preferredTool.damageMultiplier);
-			//if(toolTypeDamageMultipliers.containsKey(type))
-			//	damage = (int) (damage * toolTypeDamageMultipliers.get(type));
 		}
 		
 		return damage;
@@ -150,15 +149,24 @@ public class DestructibleProperty implements TileProperty {
 	
 	static class RequiredTool implements DamageConditionCheck {
 		
-		private final ToolType toolType;
+		@Nullable private final ToolType toolType;
+		@Nullable private final Material material;
 		
-		public RequiredTool(ToolType toolType) {
+		public RequiredTool(@Nullable ToolType toolType) {
+			this(toolType, null);
+		}
+		public RequiredTool(@Nullable ToolType toolType, @Nullable Material material) {
 			this.toolType = toolType;
+			this.material = material;
 		}
 		
 		@Override
 		public boolean isDamagedBy(@Nullable Item attackItem) {
-			return attackItem != null && attackItem.getItemData() instanceof ToolItem && ((ToolItem)attackItem.getItemData()).getType() == toolType;
+			if(attackItem == null || !(attackItem instanceof ToolItem))
+				return false;
+			
+			ToolItem tool = (ToolItem) attackItem;
+			return (toolType == null || tool.getType() == toolType) && (material == null || tool.getMaterial() == material);
 		}
 	}
 	

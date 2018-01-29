@@ -2,20 +2,26 @@ package miniventure.game.world.entity.mob;
 
 import java.util.EnumMap;
 
+import miniventure.game.GameCore;
+import miniventure.game.item.CraftingScreen;
+import miniventure.game.item.Hands;
+import miniventure.game.item.Inventory;
+import miniventure.game.item.InventoryScreen;
 import miniventure.game.item.Item;
-import miniventure.game.item.ItemData;
+import miniventure.game.item.Recipes;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class Player extends Mob {
 	
@@ -42,28 +48,27 @@ public class Player extends Mob {
 	}
 	
 	private final EnumMap<Stat, Integer> stats = new EnumMap<>(Stat.class);
-	@Nullable private Item heldItem;
 	
-	private Array<Item> inventory = new Array<>();
+	@NotNull private final Hands hands;
+	private Inventory inventory;
 	
 	public Player() {
 		super("player", Stat.Health.initial);
-		heldItem = null;
 		for(Stat stat: Stat.values)
 			stats.put(stat, stat.initial);
+		
+		hands = new Hands(this);
+		inventory = new Inventory(20, hands);
 	}
 	
 	public int getStat(@NotNull Stat stat) {
 		return stats.get(stat);
 	}
-	@Nullable
-	public ItemData getHeldItemData() {
-		if(heldItem == null) return null;
-		return heldItem.getItemData();
+	public void changeStat(@NotNull Stat stat, int amt) {
+		stats.put(stat, Math.max(0, Math.min(stat.max, stats.get(stat) + amt)));
 	}
-	public int getHeldItemStackSize() { return heldItem == null ? 0 : heldItem.getStackSize(); }
 	
-	public void checkInput(float delta, @NotNull Vector2 mouseInput) {
+	public void checkInput(@NotNull Vector2 mouseInput) {
 		// checks for keyboard input to move the player.
 		// getDeltaTime() returns the time passed between the last and the current frame in seconds.
 		int speed = Tile.SIZE * 5; // this is technically in units/second.
@@ -78,51 +83,49 @@ public class Player extends Mob {
 		movement.add(mouseInput);
 		movement.nor();
 		
-		movement.scl(speed * delta);
+		movement.scl(speed * Gdx.graphics.getDeltaTime());
 		
 		move(movement.x, movement.y);
-		
-		if(pressingKey(Input.Keys.Q)) cycleHeldItem(false);
-		if(pressingKey(Input.Keys.E)) cycleHeldItem(true);
 		
 		if(pressingKey(Input.Keys.C))
 			attack();
 		else if(pressingKey(Input.Keys.V))
 			interact();
 		
-		heldItem = heldItem == null ? null : heldItem.consume();
+		hands.resetItemUsage();
+		
+		if(pressingKey(Input.Keys.E)) {
+			hands.clearItem(inventory);
+			GameCore.setScreen(new InventoryScreen(inventory, hands));
+		}
+		else if(pressingKey(Input.Keys.Z))
+			GameCore.setScreen(new CraftingScreen(Recipes.recipes, inventory));
+	}
+	
+	public void drawGui(Rectangle canvas, SpriteBatch batch, BitmapFont font) {
+		// TODO I might separate this into a bunch of calls instead, like "drawStat(stat)" a number of times, and "drawHotbar"; maybe.
+		hands.getUsableItem().drawItem(hands.getCount(), batch, font, canvas.width/2, 20);
 	}
 	
 	@Override
 	public void update(float delta) {
 		super.update(delta);
 		// update things like hunger, stamina, etc.
-		if(heldItem == null && inventory.size > 0) {
-			//System.out.println("updating player's active item");
-			heldItem = inventory.removeIndex(0);
-		}
+		changeStat(Stat.Stamina, 1);
 	}
 	
-	private void cycleHeldItem(boolean forward) {
-		if(inventory.size == 0) return;
-		
-		if(forward) { // add active item to the end of the list, and set the first inventory item to active.
-			if(heldItem != null)
-				inventory.add(heldItem);
-			heldItem = inventory.removeIndex(0);
-		} else { // add active to start of list, and take from the end
-			if(heldItem != null)
-				inventory.insert(0, heldItem);
-			heldItem = inventory.removeIndex(inventory.size-1);
-		}
+	public boolean takeItem(@NotNull Item item) {
+		if(hands.addItem(item))
+			return true;
+		else
+			return inventory.addItem(item, 1) == 1;
 	}
 	
 	public Rectangle getInteractionRect() {
 		Rectangle bounds = getBounds();
 		Vector2 dirVector = getDirection().getVector();
-		//System.out.println("dir vector="+dirVector);
-		bounds.setX(bounds.getX()+bounds.getWidth()*dirVector.x);
-		bounds.setY(bounds.getY()+bounds.getHeight()*dirVector.y);
+		bounds.setX(bounds.getX()+Tile.SIZE*dirVector.x);
+		bounds.setY(bounds.getY()+Tile.SIZE*dirVector.y);
 		return bounds;
 	}
 	
@@ -146,39 +149,20 @@ public class Player extends Mob {
 	}
 	
 	private void attack() {
-		if(heldItem != null && heldItem.isUsed()) return;
-		
-		for(WorldObject obj: getInteractionQueue()) {
-			if(heldItem == null || !heldItem.isUsed() && !heldItem.attack(obj, this)) {
-				if(obj.attackedBy(this, heldItem))
-					return;
-			} else return;
-		}
+		for(WorldObject obj: getInteractionQueue())
+			if(hands.attack(obj))
+				return;
 	}
 	
 	private void interact() {
-		if(heldItem != null && heldItem.isUsed()) return;
+		if(hands.interact()) return;
 		
-		if(heldItem != null && heldItem.interact(this)) return;
-		
-		for(WorldObject obj: getInteractionQueue()) {
-			if(heldItem == null || !heldItem.isUsed() && !heldItem.interact(obj, this)) {
-				if(obj.interactWith(this, heldItem))
-					return;
-			} else return;
-		}
+		for(WorldObject obj: getInteractionQueue())
+			if(hands.interact(obj))
+				return;
 	}
 	
-	public void addToInventory(Item item) {
-		if(heldItem != null && heldItem.addToStack(item))
-			return;
-		
-		for(Item i: inventory)
-			if(i.addToStack(item))
-				return;
-		
-		inventory.add(item);
-	}
+	public boolean interactWith(Item item) { return false; }
 	
 	@Override
 	public boolean hurtBy(WorldObject source, int dmg) {
@@ -198,6 +182,6 @@ public class Player extends Mob {
 			I would like to have that functionality, but it seems I'm going to have to do it myself.
 		 */
 		
-		return Gdx.input.isKeyJustPressed(keycode);
+		return Gdx.input.isKeyJustPressed(keycode) && !GameCore.hasMenu();
 	}
 }

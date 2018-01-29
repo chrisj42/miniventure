@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import miniventure.game.item.Item;
+import miniventure.game.screen.LoadingScreen;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ItemEntity;
@@ -22,21 +23,31 @@ import org.jetbrains.annotations.Nullable;
 
 public class Level {
 	
+	private static final String[] levelNames = {"Surface"};
+	private static final int minDepth = 0;
+	
+	//private static final int maxDepth = minDepth+levelNames.length;
+	
 	private static Level[] levels = new Level[0];
 	private static final HashMap<Entity, Level> entityLevels = new HashMap<>();
 	
 	private static final float percentTilesUpdatedPerSecond = 2f; // this represents the percent of the total number of tiles in the map that are updated per second.
 	
-	public static void resetLevels() {
+	public static void resetLevels(LoadingScreen display) {
 		entityLevels.clear();
 		for(Level level: levels)
 			level.entities.clear();
 		
-		levels = new Level[1];
-		levels[0] = new Level(256, 256);
+		levels = new Level[levelNames.length];
+		int msg = display.addIncrement("Loading level 0/"+levels.length+"...");
+		for(int i = 0; i < levels.length; i++) {
+			display.setMessage(msg, "Loading level "+(i+1)+"/"+levels.length+"...");
+			levels[i] = new Level(i + minDepth, 256, 256);
+		}
+		display.removeMessage(msg);
 	}
 	
-	public static Level getLevel(int idx) { return levels[idx]; }
+	public static Level getLevel(int depth) { return levels[depth-minDepth]; }
 	
 	@Nullable
 	public static Level getEntityLevel(Entity entity) { return entityLevels.get(entity); }
@@ -50,7 +61,7 @@ public class Level {
 	//private final HashSet<Entity> entitiesToAdd = new HashSet<>();
 	//private final HashSet<Entity> entitiesToRemove = new HashSet<>();
 	
-	public Level(int width, int height) {
+	public Level(int depth, int width, int height) {
 		this.width = width;
 		this.height = height;
 		tiles = new Tile[width][height];
@@ -149,7 +160,7 @@ public class Level {
 		 		But if it finds a non-solid tile, it drops it towards the non-solid tile.
 		  */
 		
-		Rectangle itemBounds = new Rectangle(dropPos.x, dropPos.y, item.getItemData().getTexture().getRegionWidth(), item.getItemData().getTexture().getRegionHeight());
+		Rectangle itemBounds = new Rectangle(dropPos.x, dropPos.y, item.getTexture().getRegionWidth(), item.getTexture().getRegionHeight());
 		Tile closest = getClosestTile(itemBounds);
 		
 		if(closest == null) {

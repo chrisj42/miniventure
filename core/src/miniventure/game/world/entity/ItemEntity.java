@@ -16,14 +16,13 @@ public class ItemEntity extends BounceEntity {
 	private final Item item;
 	
 	public ItemEntity(Item item, @NotNull Vector2 goalDir) {
-		super(new Sprite(item.getItemData().getTexture()), goalDir,8f);
+		super(new Sprite(item.getTexture()), goalDir,8f);
 		this.item = item;
 	}
 	
 	@Override
 	public boolean touchedBy(Entity other) {
-		if(other instanceof Player && getTime() > PICKUP_DELAY) {
-			((Player)other).addToInventory(item);
+		if(other instanceof Player && getTime() > PICKUP_DELAY && ((Player)other).takeItem(item)) {
 			remove();
 			return true;
 		}

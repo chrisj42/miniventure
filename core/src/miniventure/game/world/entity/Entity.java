@@ -104,7 +104,7 @@ public abstract class Entity implements WorldObject {
 	
 	private void moveAxis(boolean xaxis, float amt) {
 		if(amt == 0) return;
-		Rectangle oldRect = sprite.getBoundingRectangle();
+		Rectangle oldRect = getBounds();//sprite.getBoundingRectangle(); // getBounds?
 		Rectangle newRect = new Rectangle(sprite.getX()+(xaxis?amt:0), sprite.getY()+(xaxis?0:amt), oldRect.width, oldRect.height);
 		
 		// check and see if the entity can go to the new coordinates.

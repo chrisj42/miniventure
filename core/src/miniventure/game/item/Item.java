@@ -1,82 +1,110 @@
 package miniventure.game.item;
 
-import miniventure.game.screen.GameCore;
+import miniventure.game.GameCore;
+import miniventure.game.util.MyUtils;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;
+import miniventure.game.world.tile.Tile;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
-public final class Item {
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+public class Item {
 	
-	/*
-		Will have a use() method, to mark that an item has gotten used. Called by tiles and entities. This class will determine whether it can be used again, however.
-		Perhaps later I can add a parameter to the use method to specify how *much* to use it.
-		
-		
-	 */
+	// TODO allow items to be animated
 	
-	private static final TextureRegion missing = GameCore.icons.get("missing");
+	// NOTE: all data aspects should be final, because one item instance is used to represent a whole stack. Now, with this in mind, one can set a temp var to determine what sort of item to return from the use() method. It should be reset following that, however.
 	
-	private final ItemData itemData;
-	private boolean used = false;
-	private int stackSize = 1;
+	private static GlyphLayout layout = new GlyphLayout(GameCore.getFont(), "");
 	
-	public Item(ItemData data) {
-		this.itemData = data;
+	@NotNull private final TextureRegion texture;
+	private final String name;
+	
+	Item(String name, @NotNull TextureRegion texture) {
+		this.texture = texture;
+		this.name = name;
 	}
 	
-	public ItemData getItemData() { return itemData; }
+	@NotNull public TextureRegion getTexture() { return texture; }
+	public String getName() { return name; }
+	public int getMaxStackSize() { return 64; } // by default
+	public int getStaminaUsage() { return 1; } // default; note that without a successful attack or interaction, no stamina is lost.
 	
-	void setUsed() { used = true; }
-	public boolean isUsed() { return used; }
+	/// The item has been used. For most items, this means the item is now depleted, and can no longer be used. Note that there is a contract with this method; it should not modify the state of the current item, however it can return a slightly modified version to be used instead.
+	@Nullable public Item use() { return null; }
 	
-	public Item consume() {
-		if(!used) return this;
+	// these three below are in case the item has anything to do with the events.
+	
+	boolean interact(Player player) { return false; } // interact reflexively.
+	boolean interact(WorldObject obj, Player player) { return false; }
+	boolean attack(WorldObject obj, Player player) { return false; }
+	
+	public int getDamage(WorldObject target) { return 1; } // by default
+	
+	private float renderWidth;
+	private float renderHeight;
+	private boolean initializedWidth = false;
+	private boolean initializedHeight = false;
+	
+	public void drawItem(int stackSize, Batch batch, BitmapFont font, float x, float y) {
+		drawItem(stackSize, batch, font, x, y, Color.WHITE);
+	}
+	public void drawItem(int stackSize, Batch batch, BitmapFont font, float x, float y, Color textColor) {
+		float width = texture.getRegionWidth();
+		//float height = texture.getRegionHeight();
+		float tx = x + Math.max(0, (Tile.SIZE - texture.getRegionWidth())/2);
 		
-		stackSize--;
+		Color prev = batch.getColor();
+		batch.setColor(Color.BLACK);
+		batch.draw(texture, tx-2, y-2);
+		batch.setColor(prev);
+		batch.draw(texture, tx, y);
 		
-		if(stackSize == 0)
-			return null; // generally, used up items disappear. But, tool items will only lose durability, and stacks will decrease by one.
-		else {
-			used = false;
-			return this;
+		float textOff = font.getCapHeight() + font.getAscent();
+		MyUtils.writeOutlinedText(font, batch, stackSize+"", x+1, y+textOff-font.getDescent(), textColor);
+		MyUtils.writeOutlinedText(font, batch, name, x+width+10, y+(getRenderHeight()+textOff)/2, textColor);
+	}
+	
+	public float getRenderHeight() {
+		if(!initializedHeight) {
+			renderHeight = Math.max(texture.getRegionHeight(), GameCore.getTextLayout(name).height);
+			initializedHeight = true;
 		}
+		return renderHeight;
 	}
 	
-	public int getStackSize() { return stackSize; }
-	
-	public boolean addToStack(Item other) {
-		if(other.itemData == itemData) {
-			stackSize += other.stackSize;
-			if(stackSize > itemData.getMaxStackSize()) {
-				other.stackSize = stackSize - itemData.getMaxStackSize();
-				return false;
-			}
-			return true;
+	public float getRenderWidth() {
+		if(!initializedWidth) {
+			renderWidth = texture.getRegionWidth() + 10 + GameCore.getTextLayout(name).width;
+			initializedWidth = true;
 		}
-		
-		return false;
+		return renderWidth;
 	}
 	
-	public boolean attack(WorldObject obj, Player player) {
-		if(used) return true;
-		return itemData.attack(this, obj, player);
+	@Override
+	public boolean equals(Object other) {
+		if(!getClass().equals(other.getClass())) return false;
+		Item o = (Item) other;
+		return name.equals(o.name);
 	}
 	
-	public boolean interact(Player player) {
-		if(itemData.isReflexive()) {
-			player.interactWith(player, this);
-			return true; // do not interact with other things
-		}
-		return false; // continue
+	@Override
+	public int hashCode() {
+		return name.hashCode();
 	}
 	
-	public boolean interact(WorldObject obj, Player player) {
-		if(used) return true;
-		return itemData.interact(this, obj, player);
+	public Item copy() {
+		return new Item(name, texture);
 	}
 	
-	public int getDamage(WorldObject obj) { return itemData.getDamage(obj); }
-	
-	//public Item clone() { return new Item(itemData); }
+	@Override
+	public String toString() {
+		return name + " Item";
+	}
 }
