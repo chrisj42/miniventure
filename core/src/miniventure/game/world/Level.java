@@ -8,6 +8,7 @@ import miniventure.game.screen.LoadingScreen;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ItemEntity;
+import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.levelgen.LevelGenerator;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileType;
@@ -256,5 +257,24 @@ public class Level {
 		y /= Tile.SIZE;
 		
 		return getTile(x, y);
+	}
+	
+	@Nullable
+	public Player getClosestPlayer(final Vector2 pos) {
+		Array<Player> players = new Array<>();
+		for(Entity e: entities)
+			if(e instanceof Player)
+				players.add((Player)e);
+		
+		if(players.size == 0) return null;
+		
+		players.sort((p1, p2) -> {
+			Vector2 p1Pos = p1.getBounds().getCenter(new Vector2());
+			Vector2 p2Pos = p2.getBounds().getCenter(new Vector2());
+			
+			return Float.compare(p1Pos.dst(pos), p2Pos.dst(pos));
+		});
+		
+		return players.get(0);
 	}
 }
