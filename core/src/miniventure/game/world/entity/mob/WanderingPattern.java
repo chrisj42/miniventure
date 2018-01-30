@@ -10,7 +10,7 @@ public class WanderingPattern implements MovementPattern {
 	private static final float MIN_MOVE_TIME = 0.5f;
 	private static final float MAX_MOVE_TIME = 5f;
 	
-	private static final float MOVEMENT_SPEED = 1f; // in tiles/second.
+	public static final float MOVEMENT_SPEED = 1.8f; // in tiles/second.
 	
 	
 	private float movementTimeLeft = 0;
@@ -35,8 +35,8 @@ public class WanderingPattern implements MovementPattern {
 		Vector2 movement = new Vector2();
 		
 		if(!isStopped) {
-			movement.setLength(MOVEMENT_SPEED * delta);
-			movement.setAngle(moveDir.angle());
+			movement.set(moveDir);
+			movement.scl(MOVEMENT_SPEED * delta);
 		}
 		
 		if(movementTimeLeft <= 0)

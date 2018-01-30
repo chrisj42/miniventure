@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 public class FleePattern extends PursuePattern {
 	public FleePattern() { super(); }
 	public FleePattern(EntityFollower followBehavior) { super(followBehavior); }
+	public FleePattern(EntityFollower followBehavior, float followSpeed) { super(followBehavior, followSpeed); }
 	public FleePattern(@NotNull EntityFollower followBehavior, float maxDist, float followSpeed) {
 		super(followBehavior, maxDist, followSpeed);
 	}

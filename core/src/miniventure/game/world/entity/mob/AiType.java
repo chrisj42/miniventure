@@ -12,6 +12,8 @@ public enum AiType {
 	
 	Cow(12, new WanderingPattern(), null),
 	
+	CROCODILE(18, new WanderingPattern(), HitReaction.CHASE),
+	
 	Zombie(15, new PursuePattern(EntityFollower.NEAREST_PLAYER), null);
 	
 	private final int health;
@@ -36,4 +38,6 @@ public enum AiType {
 		};
 	}
 	
+	
+	public static final AiType[] values = AiType.values();
 }

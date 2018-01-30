@@ -134,6 +134,8 @@ public class GameScreen {
 		Tile interactTile = level.getClosestTile(mainPlayer.getInteractionRect());
 		debugInfo.add("Looking at: " + (interactTile == null ? "Null" : interactTile.toLocString()));
 		
+		debugInfo.add("Entities in level: " + level.getEntityCount()+"/"+level.getEntityCap());
+		
 		for(int i = 0; i < debugInfo.size; i++)
 			MyUtils.writeOutlinedText(font, batch, debugInfo.get(i), 0, uiCamera.viewportHeight-5-15*i);
 	}

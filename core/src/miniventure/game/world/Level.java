@@ -8,6 +8,8 @@ import miniventure.game.screen.LoadingScreen;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ItemEntity;
+import miniventure.game.world.entity.mob.AiType;
+import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.levelgen.LevelGenerator;
 import miniventure.game.world.tile.Tile;
@@ -62,6 +64,8 @@ public class Level {
 	//private final HashSet<Entity> entitiesToAdd = new HashSet<>();
 	//private final HashSet<Entity> entitiesToRemove = new HashSet<>();
 	
+	private int entityCap = 50;
+	
 	public Level(int depth, int width, int height) {
 		this.width = width;
 		this.height = height;
@@ -77,6 +81,9 @@ public class Level {
 	
 	public int getWidth() { return width; }
 	public int getHeight() { return height; }
+	public int getEntityCap() { return entityCap; }
+	
+	public int getEntityCount() { return entities.size(); }
 	
 	public void addEntity(Entity e, Vector2 pos) { addEntity(e, pos.x, pos.y); }
 	public void addEntity(Entity e, float x, float y) {
@@ -136,6 +143,21 @@ public class Level {
 				entities.remove(e);
 			entitiesToRemove.clear();
 		}*/
+		
+		if(this.entities.size() < entityCap && MathUtils.randomBoolean(0.01f))
+			spawnMob(AiType.values[MathUtils.random(AiType.values.length-1)].makeMob());
+	}
+	
+	public void spawnMob(Mob mob) {
+		Tile spawnTile;
+		do spawnTile = getTile(
+			MathUtils.random(getWidth()-1),
+			MathUtils.random(getHeight()-1)
+		);
+		while(spawnTile == null || !mob.maySpawn(spawnTile));
+		
+		mob.moveTo(spawnTile);
+		addEntity(mob);
 	}
 	
 	public void render(Rectangle renderSpace, SpriteBatch batch, float delta) {

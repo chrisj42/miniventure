@@ -94,16 +94,18 @@ public abstract class Entity implements WorldObject {
 	
 	public boolean interactWith(Player player, Item item) { return false; }
 	
-	public void move(Vector2 v) { move(v.x, v.y); }
-	public void move(float xd, float yd) { move(xd, yd, 0); }
-	public void move(float xd, float yd, float zd) {
-		moveAxis(true, xd);
-		moveAxis(false, yd);
+	public boolean move(Vector2 v) { return move(v.x, v.y); }
+	public boolean move(float xd, float yd) { return move(xd, yd, 0); }
+	public boolean move(float xd, float yd, float zd) {
+		boolean moved;
+		moved = moveAxis(true, xd);
+		moved = moveAxis(false, yd) || moved;
 		z += zd;
+		return moved;
 	}
 	
-	private void moveAxis(boolean xaxis, float amt) {
-		if(amt == 0) return;
+	private boolean moveAxis(boolean xaxis, float amt) {
+		if(amt == 0) return true;
 		Rectangle oldRect = getBounds();//sprite.getBoundingRectangle(); // getBounds?
 		Rectangle newRect = new Rectangle(sprite.getX()+(xaxis?amt:0), sprite.getY()+(xaxis?0:amt), oldRect.width, oldRect.height);
 		
@@ -116,7 +118,7 @@ public abstract class Entity implements WorldObject {
 		 */
 		
 		Level level = Level.getEntityLevel(this);
-		if(level == null) return; // can't move if you're not in a level...
+		if(level == null) return false; // can't move if you're not in a level...
 		
 		Array<Tile> newTiles = level.getOverlappingTiles(newRect);
 		Array<Tile> oldTiles = level.getOverlappingTiles(oldRect);
@@ -133,7 +135,7 @@ public abstract class Entity implements WorldObject {
 			canMove = canMove && (!canMoveCurrent || tile.isPermeableBy(this));
 		}
 		
-		if(!canMove) return; // don't bother interacting with entities if tiles prevent movement.
+		if(!canMove) return false; // don't bother interacting with entities if tiles prevent movement.
 		
 		// get and touch entities, and check for blockage
 		
@@ -146,10 +148,12 @@ public abstract class Entity implements WorldObject {
 			canMove = canMove && entity.isPermeableBy(this);
 		}
 		
-		if(!canMove) return;
+		if(!canMove) return false;
 		
 		// FINALLY, the entity can move.
 		moveTo(level, newRect.x, newRect.y);
+		
+		return true;
 	}
 	
 	public void moveTo(Level level, Vector2 pos) { moveTo(level, pos.x, pos.y); }

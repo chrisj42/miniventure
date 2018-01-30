@@ -31,7 +31,8 @@ public class PursuePattern implements MovementPattern {
 	private boolean wasFollowing = false;
 	
 	public PursuePattern() { this(EntityFollower.NEAREST_PLAYER); }
-	public PursuePattern(EntityFollower followBehavior) { this(followBehavior, 8 * Tile.SIZE, 1f); }
+	public PursuePattern(EntityFollower followBehavior) { this(followBehavior, 2.5f); }
+	public PursuePattern(EntityFollower followBehavior, float followSpeed) { this(followBehavior, 8 * Tile.SIZE, followSpeed); }
 	public PursuePattern(@NotNull EntityFollower behavior, float maxDist, float followSpeed) {
 		this.followBehavior = behavior;
 		this.maxDist = maxDist;

@@ -4,10 +4,8 @@ import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.world.Level;
 import miniventure.game.world.entity.mob.Player;
-import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.math.MathUtils;
 
 public class LevelManager {
 	
@@ -84,15 +82,7 @@ public class LevelManager {
 		mainPlayer = new Player();
 		
 		Level level = Level.getLevel(curLevel);
-		level.addEntity(mainPlayer);
 		
-		Tile spawnTile;
-		do spawnTile = level.getTile(
-			MathUtils.random(level.getWidth()-1),
-			MathUtils.random(level.getHeight()-1)
-		);
-		while(spawnTile == null || !mainPlayer.maySpawn(spawnTile));
-		
-		mainPlayer.moveTo(spawnTile);
+		level.spawnMob(mainPlayer);
 	}
 }
