@@ -1,7 +1,5 @@
 package miniventure.game;
 
-import java.util.HashMap;
-
 import miniventure.game.screen.RespawnScreen;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Level;
@@ -14,7 +12,6 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -115,34 +112,10 @@ public class GameScreen {
 		return new Vector2();
 	}
 	
-	
-	private static HashMap<Boolean, TextureRegion[]> heartSprites = new HashMap<>();
-	static {
-		TextureRegion[] fullHearts = {
-			GameCore.icons.get("heart-left"),
-			GameCore.icons.get("heart-right")
-		};
-		heartSprites.put(true, fullHearts);
-		
-		TextureRegion[] deadHearts = {
-			GameCore.icons.get("heart-dead-left"),
-			GameCore.icons.get("heart-dead-right")
-		};
-		heartSprites.put(false, deadHearts);
-	}
-	
 	private void renderGui(@NotNull Player mainPlayer, @NotNull Level level) {
 		batch.setProjectionMatrix(uiCamera.combined);
 		
-		// render health
-		for(int i = 0; i < Player.Stat.Health.max; i++) {
-			TextureRegion heart = heartSprites.get(i < mainPlayer.getStat(Player.Stat.Health))[i % 2];
-			batch.draw(heart, i*heart.getRegionWidth(), heart.getRegionHeight() * 0.25f);
-		}
-		// TODO other stats will be rendered in the exact same fashion, with the same sprites. So make a method for it. Maybe I should instantiate it in the Player class, or even Stat enum? 
-		
-		// draw UI for current item
-		
+		// draw UI for current item, and stats
 		mainPlayer.drawGui(new Rectangle(0, 0, uiCamera.viewportWidth, uiCamera.viewportHeight), batch, font);
 		
 		

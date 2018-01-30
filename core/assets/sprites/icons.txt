@@ -10,39 +10,39 @@ blank
   orig: 32, 32
   offset: 0, 0
   index: -1
+burger-outline
+  rotate: false
+  xy: 35, 111
+  size: 10, 9
+  orig: 10, 9
+  offset: 0, 0
+  index: -1
+burger
+  rotate: false
+  xy: 105, 3
+  size: 10, 9
+  orig: 10, 9
+  offset: 0, 0
+  index: -1
 gem-sword
   rotate: false
-  xy: 79, 3
+  xy: 85, 3
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-heart-dead-left
+heart-outline
   rotate: false
   xy: 3, 111
-  size: 6, 12
-  orig: 6, 12
+  size: 12, 12
+  orig: 12, 12
   offset: 0, 0
   index: -1
-heart-dead-right
+heart
   rotate: false
-  xy: 13, 111
-  size: 6, 12
-  orig: 6, 12
-  offset: 0, 0
-  index: -1
-heart-left
-  rotate: false
-  xy: 23, 111
-  size: 6, 12
-  orig: 6, 12
-  offset: 0, 0
-  index: -1
-heart-right
-  rotate: false
-  xy: 33, 111
-  size: 6, 12
-  orig: 6, 12
+  xy: 19, 111
+  size: 12, 12
+  orig: 12, 12
   offset: 0, 0
   index: -1
 log
@@ -61,7 +61,7 @@ tile-frame
   index: -1
 white
   rotate: false
-  xy: 43, 3
+  xy: 49, 3
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
