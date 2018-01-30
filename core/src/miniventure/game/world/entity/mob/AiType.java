@@ -12,7 +12,7 @@ public enum AiType {
 	
 	Cow(12, new WanderingPattern(), null),
 	
-	CROCODILE(18, new WanderingPattern(), HitReaction.CHASE),
+	Crocodile(18, new WanderingPattern(), HitReaction.CHASE),
 	
 	Zombie(15, new PursuePattern(EntityFollower.NEAREST_PLAYER), null);
 	

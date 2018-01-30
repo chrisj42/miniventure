@@ -22,7 +22,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class GameCore extends ApplicationAdapter {
 	
-	public static final Version VERSION = new Version("1.1.3");
+	public static final Version VERSION = new Version("1.1.4");
 	
 	//public static final int SCREEN_WIDTH = 800, SCREEN_HEIGHT = 450;
 	private static final long START_TIME = System.nanoTime();
