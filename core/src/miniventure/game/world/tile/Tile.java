@@ -164,8 +164,8 @@ public class Tile implements WorldObject {
 		
 		String[] newData = newType.getInitialData();
 		String[] fullData = new String[data.length + newData.length];
-		System.arraycopy(data, 0, fullData, newData.length, data.length); // copy ground tile data, first
-		System.arraycopy(newData, 0, fullData, 0, newData.length); // copy surface tile data
+		System.arraycopy(data, 0, fullData, newData.length, data.length); // copy old data to end of data
+		System.arraycopy(newData, 0, fullData, 0, newData.length); // copy new data to front of data
 		data = fullData;
 		
 		return true;
