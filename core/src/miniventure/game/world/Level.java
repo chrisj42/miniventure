@@ -74,7 +74,7 @@ public class Level {
 		TileType[][] tileTypes = LevelGenerator.generateLevel(width, height);
 		for(int x = 0; x < tiles.length; x++)
 			for(int y = 0; y < tiles[x].length; y++)
-				tiles[x][y] = new Tile(tileTypes[x][y]/*(x<5?TileType.TREE:width-x<5? TileType.CACTUS:TileType.GRASS)*/, this, x, y);
+				tiles[x][y] = new Tile(this, x, y, tileTypes[x][y]/*(x<5?TileType.TREE:width-x<5? TileType.CACTUS:TileType.GRASS)*/);
 		
 		//tiles[5][0].resetTile(TileType.WATER);
 	}

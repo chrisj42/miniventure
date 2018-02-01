@@ -12,15 +12,15 @@ public interface TileProperty {
 		map.put(DestructibleProperty.class, DestructibleProperty.INDESTRUCTIBLE);
 		map.put(InteractableProperty.class, (InteractableProperty)((p, i, t) -> false));
 		map.put(TouchListener.class, (TouchListener)((entity, tile) -> {}));
-		map.put(AnimationProperty.class, new AnimationProperty(AnimationType.SINGLE_FRAME));
+		map.put(AnimationProperty.class, new AnimationProperty(true, AnimationType.SINGLE_FRAME));
 		map.put(ConnectionProperty.class, new ConnectionProperty(false));
 		map.put(OverlapProperty.class, new OverlapProperty(false));
 		map.put(UpdateProperty.class, (UpdateProperty)(delta, tile) -> {});
-		map.put(CoveredTileProperty.class, new CoveredTileProperty(null));
+		map.put(CoveredTileProperty.class, new CoveredTileProperty((TileType[])null));
 		return map;
 	}
 	
-	Integer[] getInitData();
+	default String[] getInitData() { return new String[0]; }
 	
 	default void init(TileType type) {}
 }

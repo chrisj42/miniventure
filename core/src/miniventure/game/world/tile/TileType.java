@@ -19,6 +19,7 @@ public enum TileType {
 	
 	HOLE(
 		SolidProperty.SOLID,
+		new CoveredTileProperty(),
 		new ConnectionProperty(true)
 	),
 	
@@ -39,31 +40,31 @@ public enum TileType {
 		new OverlapProperty(true)
 	),
 	
-	STONE(false,
+	STONE(
 		SolidProperty.SOLID,
 		new CoveredTileProperty(DIRT),
 		new DestructibleProperty(20, new PreferredTool(ToolType.Pickaxe, 5), true)
 	),
 	
-	TREE(false,
+	TREE(
 		SolidProperty.SOLID,
 		new CoveredTileProperty(GRASS),
 		new DestructibleProperty(10, new PreferredTool(ToolType.Axe, 2), new ItemDrop(ResourceItem.Log.get())),
-		new AnimationProperty(AnimationType.SINGLE_FRAME),
+		new AnimationProperty(false, AnimationType.SINGLE_FRAME),
 		new ConnectionProperty(true)
 	),
 	
-	CACTUS(false,
+	CACTUS(
 		SolidProperty.SOLID,
 		new CoveredTileProperty(SAND),
 		new DestructibleProperty(7, null, true),
-		new AnimationProperty(AnimationType.SINGLE_FRAME),
+		new AnimationProperty(false, AnimationType.SINGLE_FRAME),
 		(TouchListener) (e, t) -> e.hurtBy(t, 1)
 	),
 	
 	WATER(
 		new CoveredTileProperty(HOLE),
-		new AnimationProperty(AnimationType.RANDOM, 0.2f, AnimationType.SEQUENCE, 1/16f),
+		new AnimationProperty(true, AnimationType.RANDOM, 0.2f, AnimationType.SEQUENCE, 1/16f),
 		new SpreadUpdateProperty(HOLE),
 		new OverlapProperty(true)
 	);
@@ -80,16 +81,16 @@ public enum TileType {
 	 */
 	
 	
-	private final boolean isGroundTile;
+	//private final boolean isGroundTile; // this means that there is no tile under this one.
 	private final HashMap<Class<? extends TileProperty>, TileProperty> propertyMap;
 	
 	private final HashMap<Class<? extends TileProperty>, Integer> propertyDataIndexes = new HashMap<>();
 	private final HashMap<Class<? extends TileProperty>, Integer> propertyDataLengths = new HashMap<>();
-	private final Integer[] initialData;
+	private final String[] initialData;
 	
-	TileType(@NotNull TileProperty... properties) { this(true, properties); }
-	TileType(boolean isGroundTile, @NotNull TileProperty... properties) {
-		this.isGroundTile = isGroundTile;
+	TileType(@NotNull TileProperty... properties) {// this(true, properties); }
+	//TileType(boolean isGroundTile, @NotNull TileProperty... properties) {
+		//this.isGroundTile = isGroundTile;
 		
 		// get the default properties
 		propertyMap = TileProperty.getDefaultPropertyMap();
@@ -103,16 +104,16 @@ public enum TileType {
 		for(TileProperty prop: propertyMap.values())
 			prop.init(this);
 		
-		Array<Integer> initData = new Array<>();
+		Array<String> initData = new Array<>();
 		
 		for(TileProperty prop: propertyMap.values()) {
 			propertyDataIndexes.put(prop.getClass(), initData.size);
-			Integer[] propData = prop.getInitData();
+			String[] propData = prop.getInitData();
 			propertyDataLengths.put(prop.getClass(), propData.length);
 			initData.addAll(propData);
 		}
 		
-		initialData = new Integer[initData.size];
+		initialData = new String[initData.size];
 		for(int i = 0; i < initialData.length; i++)
 			initialData[i] = initData.get(i);
 	}
@@ -127,7 +128,7 @@ public enum TileType {
 		HOLE.getProp(ConnectionProperty.class).addConnectingType(WATER);
 	}
 	
-	boolean isGroundTile() { return isGroundTile; }
+	//boolean isGroundTile() { return isGroundTile; }
 	
 	/* What I've learned:
 		Casting with parenthesis works because the generic type is replaced by Object during runtime, or, if you've specified bounds, as specific a class as you can get with the specified bounds.
@@ -141,18 +142,15 @@ public enum TileType {
 	
 	int getDataLength() { return initialData.length; }
 	
-	int[] getInitialData() {
-		int[] data = new int[initialData.length];
+	String[] getInitialData() {
+		String[] data = new String[initialData.length];
 		for(int i = 0; i < data.length; i++)
 			data[i] = initialData[i];
 		
 		return data;
 	}
 	
-	void checkDataAccess(Class<? extends TileProperty> property, Tile context, int propDataIndex) {
-		if((isGroundTile ? context.getGroundType() : context.getSurfaceType()) != this)
-			throw new IllegalArgumentException("Tile " + context + " does not have a " + this + " type for the "+(isGroundTile?"ground":"surface")+", the data will not be correct.");
-		
+	void checkDataAccess(Class<? extends TileProperty> property, int propDataIndex) {
 		// technically, the below should never happen, unless it's passed the TileProperty class or a dynamically generated class, or something, because the propertyMap should have an instance of each implementer of the TileProperty interface.
 		if(!propertyDataIndexes.containsKey(property))
 			throw new IllegalArgumentException("The specified property class, " + property + ", is not part of the list of TileType property classes.");
