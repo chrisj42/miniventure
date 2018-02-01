@@ -157,7 +157,7 @@ public class Tile implements WorldObject {
 		// first, check to see if the newType can validly be placed on the current type.
 		if(newType == getType()
 			|| !newType.getProp(CoveredTileProperty.class).canCover(getType())
-			|| TileType.tileSorter.compare(newType, getType()) <= 0)
+			|| newType.compareTo(getType()) <= 0)
 			return false;
 		
 		// check for entities that will not be allowed on the new tile, and move them to the closest adjacent tile they are allowed on.
@@ -260,7 +260,7 @@ public class Tile implements WorldObject {
 		}
 		
 		// To find overlap sprites, it's easier if the tiles are sorted by TileType first, and then position.
-		TreeMap<TileType, Boolean[]> overlappingTypes = new TreeMap<>(TileType.tileSorter);
+		TreeMap<TileType, Boolean[]> overlappingTypes = new TreeMap<>();
 		Boolean[] model = new Boolean[9];
 		Arrays.fill(model, Boolean.FALSE);
 		for(int i = 0; i < aroundTypes.length; i++) {
@@ -278,7 +278,7 @@ public class Tile implements WorldObject {
 		for(int i = firstIdx; i < mainTypes.length; i++) {
 			sprites.add(mainTypes[i].getProp(ConnectionProperty.class).getSprite(this, aroundTypes));
 			
-			while(overlapType != null && (i >= mainTypes.length-1 || TileType.tileSorter.compare(mainTypes[i+1], overlapType) > 0)) {
+			while(overlapType != null && (i >= mainTypes.length-1 || mainTypes[i+1].compareTo(overlapType) > 0)) {
 				sprites.addAll(mainTypes[i].getProp(OverlapProperty.class).getSprites(this, overlapType, overlappingTypes.get(overlapType)));
 				overlapType = overlapTypeIter.hasNext() ? overlapTypeIter.next() : null;
 			}

@@ -1,6 +1,5 @@
 package miniventure.game.world.tile;
 
-import java.util.Comparator;
 import java.util.HashMap;
 
 import miniventure.game.item.ResourceItem;
@@ -28,15 +27,22 @@ public enum TileType {
 		new DestructibleProperty(true, new RequiredTool(ToolType.Shovel))
 	),
 	
+	SAND(
+		new CoveredTileProperty(DIRT),
+		new DestructibleProperty(true, new RequiredTool(ToolType.Shovel)),
+		new OverlapProperty(true)
+	),
+	
 	GRASS(
 		new CoveredTileProperty(DIRT),
 		new DestructibleProperty(true, new RequiredTool(ToolType.Shovel)),
 		new OverlapProperty(true)
 	),
 	
-	SAND(
-		new CoveredTileProperty(DIRT),
-		new DestructibleProperty(true, new RequiredTool(ToolType.Shovel)),
+	WATER(
+		new CoveredTileProperty(HOLE),
+		new AnimationProperty(true, AnimationType.RANDOM, 0.2f, AnimationType.SEQUENCE, 1/16f),
+		new SpreadUpdateProperty(HOLE),
 		new OverlapProperty(true)
 	),
 	
@@ -44,14 +50,6 @@ public enum TileType {
 		SolidProperty.SOLID,
 		new CoveredTileProperty(DIRT),
 		new DestructibleProperty(20, new PreferredTool(ToolType.Pickaxe, 5), true)
-	),
-	
-	TREE(
-		SolidProperty.SOLID,
-		new CoveredTileProperty(GRASS),
-		new DestructibleProperty(10, new PreferredTool(ToolType.Axe, 2), new ItemDrop(ResourceItem.Log.get())),
-		new AnimationProperty(false, AnimationType.SINGLE_FRAME),
-		new ConnectionProperty(true)
 	),
 	
 	CACTUS(
@@ -62,11 +60,12 @@ public enum TileType {
 		(TouchListener) (e, t) -> e.hurtBy(t, 1)
 	),
 	
-	WATER(
-		new CoveredTileProperty(HOLE),
-		new AnimationProperty(true, AnimationType.RANDOM, 0.2f, AnimationType.SEQUENCE, 1/16f),
-		new SpreadUpdateProperty(HOLE),
-		new OverlapProperty(true)
+	TREE(
+		SolidProperty.SOLID,
+		new CoveredTileProperty(GRASS),
+		new DestructibleProperty(10, new PreferredTool(ToolType.Axe, 2), new ItemDrop(ResourceItem.Log.get())),
+		new AnimationProperty(false, AnimationType.SINGLE_FRAME),
+		new ConnectionProperty(true)
 	);
 	
 	/*LAVA(
@@ -158,19 +157,6 @@ public enum TileType {
 	
 	
 	public static final TileType[] values = TileType.values();
-	public static final TileType[] zOrder = { // first tile is drawn over by all.
-		HOLE, DIRT, SAND, GRASS, WATER, STONE, CACTUS, TREE
-	};
-	
-	public static final Comparator<TileType> tileSorter = (t1, t2) -> {
-		if(t1 == t2) return 0;
-		for(TileType type: zOrder) {
-			if(type == t1) return -1;
-			if(type == t2) return 1;
-		}
-		
-		return 0; // shouldn't ever reach here...
-	};
 	
 	public String getName() { return MyUtils.toTitleCase(name()); }
 }

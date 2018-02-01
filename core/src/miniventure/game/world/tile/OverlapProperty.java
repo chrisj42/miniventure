@@ -26,7 +26,7 @@ public class OverlapProperty implements TileProperty {
 		Array<AtlasRegion> sprites = new Array<>();
 		
 		if(!aroundType.getProp(OverlapProperty.class).overlaps) return sprites;
-		if(TileType.tileSorter.compare(tileType, aroundType) >= 0) return sprites;
+		if(tileType.compareTo(aroundType) >= 0) return sprites;
 		
 		
 		Array<Integer> indexes = new Array<>();
