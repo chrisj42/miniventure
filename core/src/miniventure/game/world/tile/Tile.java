@@ -160,6 +160,31 @@ public class Tile implements WorldObject {
 			|| newType.compareTo(getType()) <= 0)
 			return false;
 		
+		moveEntities(newType);
+		
+		String[] newData = newType.getInitialData();
+		String[] fullData = new String[data.length + newData.length];
+		System.arraycopy(data, 0, fullData, newData.length, data.length); // copy ground tile data, first
+		System.arraycopy(newData, 0, fullData, 0, newData.length); // copy surface tile data
+		data = fullData;
+		
+		return true;
+	}
+	
+	void breakTile() {
+		TileType prevType = tileTypes.pop();
+		
+		String[] newData = new String[data.length - prevType.getDataLength()];
+		System.arraycopy(data, prevType.getDataLength(), newData, 0, newData.length);
+		data = newData;
+		
+		if(tileTypes.size() == 0)
+			addTile(baseType);
+		else
+			moveEntities(getType());
+	}
+	
+	private void moveEntities(TileType newType) {
 		// check for entities that will not be allowed on the new tile, and move them to the closest adjacent tile they are allowed on.
 		Array<Tile> surroundingTiles = getAdjacentTiles(true);
 		for(Entity entity: level.getOverlappingEntities(getBounds())) {
@@ -183,25 +208,6 @@ public class Tile implements WorldObject {
 				entity.moveTo(closest.level, entityBounds.x, entityBounds.y);
 			}
 		}
-		
-		String[] newData = newType.getInitialData();
-		String[] fullData = new String[data.length + newData.length];
-		System.arraycopy(data, 0, fullData, newData.length, data.length); // copy ground tile data, first
-		System.arraycopy(newData, 0, fullData, 0, newData.length); // copy surface tile data
-		data = fullData;
-		
-		return true;
-	}
-	
-	void breakTile() {
-		TileType prevType = tileTypes.pop();
-		
-		String[] newData = new String[data.length - prevType.getDataLength()];
-		System.arraycopy(data, prevType.getDataLength(), newData, 0, newData.length);
-		data = newData;
-		
-		if(tileTypes.size() == 0)
-			addTile(baseType);
 	}
 	
 	public Array<Tile> getAdjacentTiles(boolean includeCorners) {
