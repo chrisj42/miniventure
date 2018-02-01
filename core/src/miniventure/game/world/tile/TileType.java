@@ -81,17 +81,13 @@ public enum TileType {
 	 */
 	
 	
-	//private final boolean isGroundTile; // this means that there is no tile under this one.
 	private final HashMap<Class<? extends TileProperty>, TileProperty> propertyMap;
 	
 	private final HashMap<Class<? extends TileProperty>, Integer> propertyDataIndexes = new HashMap<>();
 	private final HashMap<Class<? extends TileProperty>, Integer> propertyDataLengths = new HashMap<>();
 	private final String[] initialData;
 	
-	TileType(@NotNull TileProperty... properties) {// this(true, properties); }
-	//TileType(boolean isGroundTile, @NotNull TileProperty... properties) {
-		//this.isGroundTile = isGroundTile;
-		
+	TileType(@NotNull TileProperty... properties) {
 		// get the default properties
 		propertyMap = TileProperty.getDefaultPropertyMap();
 		
@@ -127,8 +123,6 @@ public enum TileType {
 	static {
 		HOLE.getProp(ConnectionProperty.class).addConnectingType(WATER);
 	}
-	
-	//boolean isGroundTile() { return isGroundTile; }
 	
 	/* What I've learned:
 		Casting with parenthesis works because the generic type is replaced by Object during runtime, or, if you've specified bounds, as specific a class as you can get with the specified bounds.

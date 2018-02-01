@@ -29,8 +29,6 @@ public class Level {
 	private static final String[] levelNames = {"Surface"};
 	private static final int minDepth = 0;
 	
-	//private static final int maxDepth = minDepth+levelNames.length;
-	
 	private static Level[] levels = new Level[0];
 	private static final HashMap<Entity, Level> entityLevels = new HashMap<>();
 	
@@ -61,8 +59,6 @@ public class Level {
 	private final Tile[][] tiles;
 	
 	private final HashSet<Entity> entities = new HashSet<>();
-	//private final HashSet<Entity> entitiesToAdd = new HashSet<>();
-	//private final HashSet<Entity> entitiesToRemove = new HashSet<>();
 	
 	private int entityCap = 50;
 	
@@ -74,9 +70,7 @@ public class Level {
 		TileType[][] tileTypes = LevelGenerator.generateLevel(width, height);
 		for(int x = 0; x < tiles.length; x++)
 			for(int y = 0; y < tiles[x].length; y++)
-				tiles[x][y] = new Tile(this, x, y, tileTypes[x][y]/*(x<5?TileType.TREE:width-x<5? TileType.CACTUS:TileType.GRASS)*/);
-		
-		//tiles[5][0].resetTile(TileType.WATER);
+				tiles[x][y] = new Tile(this, x, y, tileTypes[x][y]);
 	}
 	
 	public int getWidth() { return width; }
@@ -91,24 +85,16 @@ public class Level {
 		addEntity(e);
 	}
 	public void addEntity(Entity e) {
-		//System.out.println("adding entity " + e + " to level " + this + " at " + e.getBounds().x+","+e.getBounds().y);
-		//synchronized (entitiesToAdd) {
 		entities.add(e);
-		//	entitiesToAdd.add(e);
-			Level oldLevel = entityLevels.put(e, this); // replaces the level for the entity
-			if (oldLevel != null && oldLevel != this)
-				oldLevel.removeEntity(e); // remove it from the other level's entity set.
-		//}
+		Level oldLevel = entityLevels.put(e, this); // replaces the level for the entity
+		if (oldLevel != null && oldLevel != this)
+			oldLevel.removeEntity(e); // remove it from the other level's entity set.
 	}
 	
 	public void removeEntity(Entity e) {
-		//System.out.println("removing entity "+e+" from level "+this);
-		//synchronized (entitiesToRemove) {
-			//entitiesToRemove.add(e);
-			entities.remove(e);
-			if (entityLevels.get(e) == this)
-				entityLevels.remove(e);
-		//}
+		entities.remove(e);
+		if (entityLevels.get(e) == this)
+			entityLevels.remove(e);
 	}
 	
 	public void update(float delta) {
@@ -120,29 +106,10 @@ public class Level {
 			tiles[x][y].update(delta);
 		}
 		
-		//System.out.println("entities tracked: " + entities);
-		
 		// update entities
 		Entity[] entities = this.entities.toArray(new Entity[this.entities.size()]);
 		for(Entity e: entities)
 			e.update(delta);
-		
-		/*synchronized (entitiesToAdd) {
-			for (Entity e : entitiesToAdd) {
-				for (Level level : levels)
-					level.entities.remove(e);
-				entities.add(e);
-				e.addedToLevel(this);
-			}
-			
-			entitiesToAdd.clear();
-		}
-		
-		synchronized (entitiesToRemove) {
-			for (Entity e : entitiesToRemove)
-				entities.remove(e);
-			entitiesToRemove.clear();
-		}*/
 		
 		if(this.entities.size() < entityCap && MathUtils.randomBoolean(0.01f))
 			spawnMob(AiType.values[MathUtils.random(AiType.values.length-1)].makeMob());
@@ -161,16 +128,10 @@ public class Level {
 	}
 	
 	public void render(Rectangle renderSpace, SpriteBatch batch, float delta) {
-		// the game renders around the main player. For now, the level shall be the same size as the screen, so no camera fanciness or coordinate manipulation is needed.
-		
-		//batch.disableBlending(); // this prevents alpha from being rendered, which gives a performance boost. When drawing tiles, we don't need alpha (yet), so we'll disable it.
-		//for(Tile[] tiles: this.tiles)
-			for(Tile tile: getOverlappingTiles(renderSpace))
-				tile.render(batch, delta);
-		//batch.enableBlending(); // re-enable alpha for the drawing of entities.
+		for(Tile tile: getOverlappingTiles(renderSpace))
+			tile.render(batch, delta);
 		
 		Array<Entity> overlapping = getOverlappingEntities(renderSpace);
-		//System.out.println("entities being rendered: " + overlapping);
 		for(Entity entity: overlapping)
 			entity.render(batch, delta);
 	}

@@ -57,37 +57,16 @@ class TileTouchCheck {
 		}
 	}
 	
-	/*boolean checkMatch(TileType[] tiles, TileType black, TileType white, boolean nullMatches) {
-		return checkMatch(tiles, new Array<>(new TileType[] {black}), new Array<>(new TileType[] {white}), nullMatches);
-	}*/
 	boolean checkMatch(boolean[] aroundMatches) {
 		if(aroundMatches.length != map.length)
 			throw new IllegalArgumentException("tile type array must be of equal size to map array; "+aroundMatches.length+"!="+map.length);
 		
-		// if the white or black tiles are null, then it means it works if it doesn't match the other color.
-		
 		for(int i = 0; i < map.length; i++) {
 			int matchRule = map[i];
 			if(matchRule == SKIP) continue;
-			/*TileType type = tiles[i];
-			if(type == null) {
-				if(nullMatches) continue;
-				else return false;
-			}*/
 			
-			/*if(matchRule == NOMATCH && (white == null && black.contains(type, true) || white != null && !white.contains(type, true)))
-				return false;
-			if(matchRule == MATCH && (black == null && white.contains(type, true) || black != null && !black.contains(type, true)))
-				return false;*/
 			if(aroundMatches[i] != (matchRule == MATCH)) // if the actual match does not agree with the required match
 				return false;
-			
-			/*if(black == null && type != white && (matchRule == BLACK || matchRule == WHITE)) {
-				// here, make sure that if the tile is adjacent to a white tile, that the current type is not greater than the white tile in z order.
-				if(i >= height && map[i-height] == WHITE && tiles[i-height] == white || i+height < tiles.length && map[i+height] == WHITE && tiles[i+height] == white || i%height > 0 && map[i-1] == WHITE && tiles[i-1] == white || i%height < height-1 && map[i+1] == WHITE && tiles[i+1] == white)
-					if(TileType.tileSorter.compare(type, white) > 0)
-						return false;
-			}*/
 		}
 		
 		return true;

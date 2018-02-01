@@ -30,33 +30,9 @@ public class ConnectionProperty implements TileProperty {
 		int spriteIdx = 0;
 		
 		if(connects) {
-			/*TileType[] aroundTiles = new TileType[9];
-			int i = 0;
-			for(int x = -1; x <= 1; x++) {
-				for (int y = -1; y <= 1; y++) {
-					Tile oTile = tile.getLevel().getTile(tile.x + x, tile.y + y);
-					if(oTile != null) {
-						if(!tileType.isGroundTile()) aroundTiles[i] = oTile.getSurfaceType();
-						if(aroundTiles[i] == null) // surface == false or no surface tile exists
-							aroundTiles[i] = oTile.getGroundType();
-					}
-					i++;
-				}
-			}*/
-			
-			/*Array<Boolean[]> connectingTypes = new Array<>();
-			
-			Iterator<TileType> aroundIter = aroundTypes.descendingKeySet().iterator();
-			TileType first = aroundIter.next();
-			while(aroundIter.hasNext() && !first.getProp(AnimationProperty.class).isOpaque())
-				first = aroundIter.next();
-			for(TileType type: aroundTypes.tailMap(first, true).keySet())
-				if(connectingTiles.contains(type, true))
-					connectingTypes.add(aroundTypes.get(type));
-			*/
-			
 			boolean[] tileConnections = new boolean[9];
 			tileConnections[4] = true;
+			
 			for(int i = 0; i < aroundTypes.length; i++) {
 				// Note that THE TILE MATCHING THIS ONE CONTAINS NO TYPES. So you must manually skip the center, and set it to true.
 				if(i == 4) continue;

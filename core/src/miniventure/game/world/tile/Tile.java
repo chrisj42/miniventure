@@ -141,9 +141,6 @@ public class Tile implements WorldObject {
 	public TileType getType() { return tileTypes.peek(); }
 	private TileType[] getTypes() { return tileTypes.toArray(new TileType[tileTypes.size()]); }
 	boolean hasType(TileType type) { return tileTypes.contains(type); }
-	//public TileType getType() { return surfaceType == null ? groundType : surfaceType; }
-	//TileType getGroundType() { return groundType; }
-	//TileType getSurfaceType() { return surfaceType; }
 	
 	@NotNull @Override public Level getLevel() { return level; }
 	
@@ -187,24 +184,11 @@ public class Tile implements WorldObject {
 			}
 		}
 		
-		//TileType prev = getType();
-		
-		//if(!newType.isGroundTile()) {
-			// the new type has no defined under type, so the previous tile type should be conserved.
-			// also, since you should never place one surface tile directly on another surface tile, I can technically assume that the current data array only has the ground tile data. But, since creative mode could be a thing, and it isn't too hard, I'm going to double check anyway.
-			
-			String[] newData = newType.getInitialData();
-			//int groundDataLen = data.getDataLength();
-			String[] fullData = new String[data.length + newData.length];
-			System.arraycopy(data, 0, fullData, newData.length, data.length); // copy ground tile data, first
-			System.arraycopy(newData, 0, fullData, 0, newData.length); // copy surface tile data
-			data = fullData;
-			
-			//surfaceType = newType;
-		//}
-		
-		
-		//newType.getProp(CoveredTileProperty.class).tilePlaced(this, prev);
+		String[] newData = newType.getInitialData();
+		String[] fullData = new String[data.length + newData.length];
+		System.arraycopy(data, 0, fullData, newData.length, data.length); // copy ground tile data, first
+		System.arraycopy(newData, 0, fullData, 0, newData.length); // copy surface tile data
+		data = fullData;
 		
 		return true;
 	}
@@ -243,18 +227,6 @@ public class Tile implements WorldObject {
 		
 		return tiles;
 	}
-	
-	private void draw(SpriteBatch batch, Array<AtlasRegion> textures) {
-		for(AtlasRegion texture: textures)
-			batch.draw(texture, x*SIZE, y*SIZE, SIZE, SIZE);
-	}
-	
-	/*private void renderTileType(@NotNull TileType type, SpriteBatch batch) {
-		Array<AtlasRegion> sprites = type.getProp(OverlapProperty.class).getSprites(this);
-		sprites.insert(0, type.getProp(ConnectionProperty.class).getSprite(this));
-		
-		draw(batch, sprites);
-	}*/
 	
 	@Override
 	public void render(SpriteBatch batch, float delta) {
@@ -312,15 +284,14 @@ public class Tile implements WorldObject {
 			}
 		}
 		
-		draw(batch, sprites);
+		
+		for(AtlasRegion texture: sprites)
+			batch.draw(texture, x*SIZE, y*SIZE, SIZE, SIZE);
 	}
 	
 	
 	@Override
 	public void update(float delta) {
-		/*groundType.getProp(UpdateProperty.class).update(delta, this);
-		if(surfaceType != null)
-			surfaceType.getProp(UpdateProperty.class).update(delta, this);*/
 		for(TileType type: tileTypes) // goes from bottom to top
 			type.getProp(UpdateProperty.class).update(delta, this);
 	}
