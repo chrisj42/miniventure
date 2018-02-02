@@ -10,6 +10,9 @@ public enum ResourceItem {
 	
 	@NotNull
 	public Item get() {
-		return new Item(name(), GameCore.icons.get(name().toLowerCase()));
+		return new Item(name(), GameCore.icons.get(name().toLowerCase())) {
+			@Override public Item use() { return this; }
+			@Override public Item copy() { return this; }
+		};
 	}
 }

@@ -17,6 +17,8 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
+import org.jetbrains.annotations.Nullable;
+
 public abstract class Entity implements WorldObject {
 	
 	private static final HashMap<Integer, Entity> takenIDs = new HashMap<>();
@@ -36,7 +38,7 @@ public abstract class Entity implements WorldObject {
 		takenIDs.put(eid, this);
 	}
 	
-	@Override
+	@Override @Nullable
 	public Level getLevel() { return Level.getEntityLevel(this); }
 	
 	/// this is called only to remove an entity completely from the game, not to change levels.

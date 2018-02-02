@@ -9,19 +9,16 @@ import miniventure.game.world.tile.Tile;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class Item {
+public abstract class Item {
 	
 	// TODO allow items to be animated
 	
 	// NOTE: all data aspects should be final, because one item instance is used to represent a whole stack. Now, with this in mind, one can set a temp var to determine what sort of item to return from the use() method. It should be reset following that, however.
-	
-	private static GlyphLayout layout = new GlyphLayout(GameCore.getFont(), "");
 	
 	@NotNull private final TextureRegion texture;
 	private final String name;
@@ -99,9 +96,7 @@ public class Item {
 		return name.hashCode();
 	}
 	
-	public Item copy() {
-		return new Item(name, texture);
-	}
+	public abstract Item copy();
 	
 	@Override
 	public String toString() {
