@@ -8,6 +8,7 @@ import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -54,7 +55,8 @@ public class GameScreen {
 		level.update(Gdx.graphics.getDeltaTime());
 	}
 	
-	public void render(@NotNull Player mainPlayer, @NotNull Level level, boolean updateCamera) {
+	// timeOfDay is 0 to 1.
+	public void render(@NotNull Player mainPlayer, float alphaOverlay, @NotNull Level level, boolean updateCamera) {
 		// clears the screen with a green color.
 		Gdx.gl.glClearColor(0.1f, 0.5f, 0.1f, 1); // these are floats from 0 to 1.
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -79,6 +81,9 @@ public class GameScreen {
 		batch.setProjectionMatrix(camera.combined); // tells the batch to use the camera's coordinate system.
 		batch.begin();
 		level.render(renderSpace, batch, Gdx.graphics.getDeltaTime());
+		
+		// shade according to time of day 
+		MyUtils.fillRect(renderSpace, new Color(0, 0, 0, alphaOverlay), batch);
 		
 		Tile interactTile = level.getClosestTile(mainPlayer.getInteractionRect());
 		if(interactTile != null)

@@ -22,10 +22,13 @@ public class LevelManager {
 		GameScreen... game screen won't do much, just do the rendering. 
 	 */
 	
+	private static final float LENGTH_OF_HALF_DAY = .5f * 60 * 2; // 5 minutes is like 24 hours in-game.
+	
 	private boolean worldLoaded = false;
 	
 	private int curLevel;
 	private Player mainPlayer;
+	private float gameTime;
 	
 	LevelManager() {
 		
@@ -49,10 +52,29 @@ public class LevelManager {
 		boolean update = menu == null; // later add "|| multiplayer";
 		
 		if(menu == null || !menu.usesWholeScreen())
-			game.render(mainPlayer, level, update);
+			game.render(mainPlayer, getDaylightOverlay(), level, update);
 		
-		if(update)
+		if(update) {
 			game.update(mainPlayer, level);
+			gameTime += Gdx.graphics.getDeltaTime();
+		}
+	}
+	
+	private float getDaylightOverlay() {
+		if(gameTime < LENGTH_OF_HALF_DAY) return 0;
+		
+		// lightest at midday, darkest at midnight
+		float timeSinceMidday = (gameTime + LENGTH_OF_HALF_DAY) % (LENGTH_OF_HALF_DAY*2);
+		
+		//boolean afternoon = timeSinceMidday < LENGTH_OF_HALF_DAY;
+		
+		float alpha = timeSinceMidday / LENGTH_OF_HALF_DAY;
+		if(alpha > 1)
+			alpha = 2 - alpha;
+		
+		alpha *= 0.75f; // max of 0.75 alpha.
+		
+		return alpha;
 	}
 	
 	public void createWorld() {
@@ -60,6 +82,7 @@ public class LevelManager {
 		LoadingScreen loadingScreen = new LoadingScreen();
 		GameCore.setScreen(loadingScreen);
 		curLevel = 0;
+		gameTime = 0;
 		/// IDEA How about I have MenuScreen be an interface; or make another interface that MenuScreen implements. The idea is that I can have displays that don't use Scene2D (like the the loading screen, or level transitions if that's a thing), since they don't have options.
 		new Thread(() -> {
 			Level.resetLevels(loadingScreen);
