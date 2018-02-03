@@ -17,6 +17,7 @@ public interface TileProperty {
 		map.put(OverlapProperty.class, new OverlapProperty(false));
 		map.put(UpdateProperty.class, (UpdateProperty)(delta, tile) -> {});
 		map.put(CoveredTileProperty.class, new CoveredTileProperty((TileType[])null));
+		map.put(LightProperty.class, (LightProperty) () -> 0);
 		return map;
 	}
 	

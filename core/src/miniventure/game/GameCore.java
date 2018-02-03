@@ -98,6 +98,8 @@ public class GameCore extends ApplicationAdapter {
 		
 		if(menuScreen != null)
 			menuScreen.dispose();
+		if(gameScreen != null)
+			gameScreen.dispose();
 		
 		entityAtlas.dispose();
 		tileAtlas.dispose();

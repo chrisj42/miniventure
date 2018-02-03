@@ -8,11 +8,13 @@ import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -28,12 +30,19 @@ public class GameScreen {
 	
 	private final OrthographicCamera camera, uiCamera;
 	private int zoom = 0;
+	private FrameBuffer lightingBuffer;
 	
 	public GameScreen() {
 		camera = new OrthographicCamera();
 		camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		uiCamera = new OrthographicCamera();
 		uiCamera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		lightingBuffer = FrameBuffer.createFrameBuffer(Format.RGBA8888, (int)camera.viewportWidth, (int)camera.viewportHeight, false);
+	}
+	
+	void dispose() {
+		if(lightingBuffer != null)
+			lightingBuffer.dispose();
 	}
 	
 	public void handleInput(@NotNull Player player) {
@@ -57,9 +66,6 @@ public class GameScreen {
 	
 	// timeOfDay is 0 to 1.
 	public void render(@NotNull Player mainPlayer, float alphaOverlay, @NotNull Level level, boolean updateCamera) {
-		// clears the screen with a green color.
-		Gdx.gl.glClearColor(0.1f, 0.5f, 0.1f, 1); // these are floats from 0 to 1.
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		
 		float viewWidth = camera.viewportWidth;
 		float viewHeight = camera.viewportHeight;
@@ -78,16 +84,44 @@ public class GameScreen {
 		
 		Rectangle renderSpace = new Rectangle(camera.position.x - viewWidth/2, camera.position.y - viewHeight/2, viewWidth, viewHeight);
 		
+		
+		lightingBuffer.begin();
+		Gdx.gl.glClearColor(0, 0, 0, alphaOverlay);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		
+		batch.setProjectionMatrix(uiCamera.combined);
+		batch.begin();
+		batch.setBlendFunction(GL20.GL_ZERO, GL20.GL_ONE_MINUS_SRC_ALPHA);
+		
+		Array<Vector3> lights = level.renderLighting(renderSpace, batch);
+		final TextureRegion lightTexture = GameCore.icons.get("light");
+		
+		for(Vector3 light: lights) {
+			float radius = light.z * (float) Math.pow(2, zoom);
+			camera.project(light);
+			Vector2 screenPos = new Vector2(light.x, light.y);
+			//System.out.println("drawing light at " + light + ", radius " + radius);
+			batch.draw(lightTexture, screenPos.x - radius, screenPos.y - radius, radius*2, radius*2);
+		}
+		
+		batch.end();
+		lightingBuffer.end();
+		
+		// clears the screen with a green color.
+		Gdx.gl.glClearColor(0.1f, 0.5f, 0.1f, 1); // these are floats from 0 to 1.
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		
 		batch.setProjectionMatrix(camera.combined); // tells the batch to use the camera's coordinate system.
 		batch.begin();
+		batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA); // default
 		level.render(renderSpace, batch, Gdx.graphics.getDeltaTime());
-		
-		// shade according to time of day 
-		MyUtils.fillRect(renderSpace, new Color(0, 0, 0, alphaOverlay), batch);
 		
 		Tile interactTile = level.getClosestTile(mainPlayer.getInteractionRect());
 		if(interactTile != null)
 			batch.draw(GameCore.icons.get("tile-frame"), interactTile.getX(), interactTile.getY());
+		
+		batch.setProjectionMatrix(uiCamera.combined);
+		batch.draw(lightingBuffer.getColorBufferTexture(), 0, 0);
 		
 		renderGui(mainPlayer, level);
 		batch.end();
@@ -157,5 +191,8 @@ public class GameScreen {
 		float zoomFactor = (float) Math.pow(2, zoom);
 		camera.setToOrtho(false, width/zoomFactor, height/zoomFactor);
 		uiCamera.setToOrtho(false, width, height);
+		
+		lightingBuffer.dispose();
+		lightingBuffer = FrameBuffer.createFrameBuffer(Format.RGBA8888, (int)uiCamera.viewportWidth, (int)uiCamera.viewportHeight, false);
 	}
 }

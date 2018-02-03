@@ -22,7 +22,7 @@ public class LevelManager {
 		GameScreen... game screen won't do much, just do the rendering. 
 	 */
 	
-	private static final float LENGTH_OF_HALF_DAY = .5f * 60 * 2; // 5 minutes is like 24 hours in-game.
+	private static final float LENGTH_OF_HALF_DAY = .5f * 60 * 5; // 5 minutes is like 24 hours in-game.
 	
 	private boolean worldLoaded = false;
 	

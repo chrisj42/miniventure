@@ -52,6 +52,11 @@ public enum TileType {
 		new DestructibleProperty(20, new PreferredTool(ToolType.Pickaxe, 5), true)
 	),
 	
+	/*TORCH(
+		new DestructibleProperty(true),
+		(LightProperty) () -> Tile.SIZE * 2
+	),*/
+	
 	CACTUS(
 		SolidProperty.SOLID,
 		new CoveredTileProperty(SAND),
