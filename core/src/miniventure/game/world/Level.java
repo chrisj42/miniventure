@@ -139,7 +139,7 @@ public class Level {
 			obj.render(batch, delta);
 	}
 	
-	public Array<Vector3> renderLighting(Rectangle renderSpace, SpriteBatch batch) {
+	public Array<Vector3> renderLighting(Rectangle renderSpace) {
 		final TextureRegion light = GameCore.icons.get("light");
 		
 		Rectangle expandedSpace = new Rectangle(renderSpace.x - Tile.SIZE*10, renderSpace.y - Tile.SIZE*10, renderSpace.width+Tile.SIZE*10*2, renderSpace.height+Tile.SIZE*10*2);

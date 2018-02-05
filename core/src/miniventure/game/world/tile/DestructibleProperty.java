@@ -70,8 +70,8 @@ public class DestructibleProperty implements TileProperty {
 	public void init(@NotNull TileType type) {
 		this.tileType = type;
 		
-		if(dropsTileItem)
-			drops[0] = new ItemDrop(TileItem.get(type));
+		//if(dropsTileItem)
+		//	drops[0] = new ItemDrop(TileItem.get(type));
 	}
 	
 	boolean tileAttacked(@NotNull Tile tile, @NotNull Mob attacker, @NotNull Item attackItem) {
@@ -86,6 +86,8 @@ public class DestructibleProperty implements TileProperty {
 			if(totalHealth > 1)
 				tile.getLevel().addEntity(new TextParticle(damage+""), tile.getBounds().getCenter(new Vector2()));
 			if(health <= 0) {
+				if(drops.length > 0 && drops[0] == null && dropsTileItem)
+					drops[0] = new ItemDrop(TileItem.get(tileType));
 				for(ItemDrop drop: drops)
 					if(drop != null)
 						drop.dropItems(tile.getLevel(), tile, attacker);

@@ -168,6 +168,8 @@ public class Tile implements WorldObject {
 		System.arraycopy(newData, 0, fullData, 0, newData.length); // copy new data to front of data
 		data = fullData;
 		
+		tileTypes.push(newType);
+		
 		return true;
 	}
 	
@@ -323,7 +325,14 @@ public class Tile implements WorldObject {
 	}
 	
 	
-	
+	@Override
+	public float getLightRadius() {
+		float maxRadius = 0;
+		for(TileType type: tileTypes)
+			maxRadius = Math.max(maxRadius, type.getProp(LightProperty.class).getLightRadius());
+		
+		return maxRadius;
+	}
 	
 	@Override
 	public boolean isPermeableBy(Entity entity) {

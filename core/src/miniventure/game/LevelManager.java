@@ -23,6 +23,10 @@ public class LevelManager {
 	 */
 	
 	private static final float LENGTH_OF_HALF_DAY = .5f * 60 * 5; // 5 minutes is like 24 hours in-game.
+	// private static final float DAWN_START_TIME = 5f/24;
+	// private static final float DAWN_END_TIME = 6f/24;
+	// private static final float DUSK_START_TIME = 20f/24;
+	// private static final float DUSK_END_TIME = 21f/24;
 	
 	private boolean worldLoaded = false;
 	
@@ -63,16 +67,32 @@ public class LevelManager {
 	private float getDaylightOverlay() {
 		if(gameTime < LENGTH_OF_HALF_DAY) return 0;
 		
+		/*
+			5AM - 6AM = sunrise
+			7PM - 8PM = sunset
+		 */
+		
+		/*float alpha;
+		
+		float timeOfDay = gameTime % (LENGTH_OF_HALF_DAY * 2);
+		if(timeOfDay < DAWN_START_TIME || timeOfDay > DUSK_END_TIME)
+			alpha = 1;
+		else if(timeOfDay > DAWN_END_TIME && timeOfDay < DUSK_START_TIME)
+			alpha = 0;
+		else if(timeOfDay > DUSK_START_TIME)
+			alpha = (timeOfDay - DUSK_START_TIME) / (DUSK_END_TIME - DUSK_START_TIME);
+		else
+			alpha = (timeOfDay - DAWN_START_TIME) / (DAWN_END_TIME - DAWN_START_TIME);
+		
+		*/
 		// lightest at midday, darkest at midnight
 		float timeSinceMidday = (gameTime + LENGTH_OF_HALF_DAY) % (LENGTH_OF_HALF_DAY*2);
-		
-		//boolean afternoon = timeSinceMidday < LENGTH_OF_HALF_DAY;
 		
 		float alpha = timeSinceMidday / LENGTH_OF_HALF_DAY;
 		if(alpha > 1)
 			alpha = 2 - alpha;
 		
-		alpha *= 0.75f; // max of 0.75 alpha.
+		alpha *= 0.66f; // max of 0.75 alpha.
 		
 		return alpha;
 	}

@@ -86,19 +86,24 @@ public class GameScreen {
 		
 		
 		lightingBuffer.begin();
-		Gdx.gl.glClearColor(0, 0, 0, alphaOverlay);
+		//Gdx.gl.glClearColor(0, 0, 0, alphaOverlay);
+		//Color c = new Color(0, 0, 0, 0.63f);
+		//java.awt.Color c = new java.awt.Color(0, 72, 225, 255*7/10);
+		//Gdx.gl.glClearColor(0, 72f/255, 225f/255, 0.2f);
+		Gdx.gl.glClearColor(0, 0.03f, 0.278f, alphaOverlay);
+		//Gdx.gl.glClearColor(0, 72f/255, 225f/255, 20f/255);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		
 		batch.setProjectionMatrix(uiCamera.combined);
 		batch.begin();
 		batch.setBlendFunction(GL20.GL_ZERO, GL20.GL_ONE_MINUS_SRC_ALPHA);
 		
-		Array<Vector3> lights = level.renderLighting(renderSpace, batch);
+		Array<Vector3> lights = level.renderLighting(renderSpace);
 		final TextureRegion lightTexture = GameCore.icons.get("light");
 		
 		for(Vector3 light: lights) {
 			float radius = light.z * (float) Math.pow(2, zoom);
-			camera.project(light);
+			uiCamera.unproject(camera.project(light));
 			Vector2 screenPos = new Vector2(light.x, light.y);
 			//System.out.println("drawing light at " + light + ", radius " + radius);
 			batch.draw(lightTexture, screenPos.x - radius, screenPos.y - radius, radius*2, radius*2);

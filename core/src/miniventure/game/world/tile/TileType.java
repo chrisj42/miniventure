@@ -52,10 +52,11 @@ public enum TileType {
 		new DestructibleProperty(20, new PreferredTool(ToolType.Pickaxe, 5), true)
 	),
 	
-	/*TORCH(
+	TORCH(
 		new DestructibleProperty(true),
-		(LightProperty) () -> Tile.SIZE * 2
-	),*/
+		(LightProperty) () -> Tile.SIZE * 2,
+		new AnimationProperty(false, AnimationType.SEQUENCE, 1/12f)
+	),
 	
 	CACTUS(
 		SolidProperty.SOLID,

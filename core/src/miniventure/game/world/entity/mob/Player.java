@@ -3,8 +3,12 @@ package miniventure.game.world.entity.mob;
 import java.util.EnumMap;
 
 import miniventure.game.GameCore;
-import miniventure.game.item.*;
-import miniventure.game.item.ToolItem.Material;
+import miniventure.game.item.CraftingScreen;
+import miniventure.game.item.Hands;
+import miniventure.game.item.Inventory;
+import miniventure.game.item.InventoryScreen;
+import miniventure.game.item.Item;
+import miniventure.game.item.Recipes;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.tile.Tile;
@@ -60,7 +64,7 @@ public class Player extends Mob {
 		
 		hands = new Hands(this);
 		inventory = new Inventory(20, hands);
-		inventory.addItem(new ToolItem(ToolType.Shovel, Material.Gem));
+		//inventory.addItem(new ToolItem(ToolType.Shovel, Material.Gem));
 	}
 	
 	public int getStat(@NotNull Stat stat) {

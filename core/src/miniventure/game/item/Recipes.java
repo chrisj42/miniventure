@@ -42,7 +42,12 @@ public class Recipes {
 		new Recipe(new ItemStack(new ToolItem(ToolType.Axe, Material.Stone), 1),
 			new ItemStack(TileItem.get(TileType.STONE), 3),
 			new ItemStack(ResourceItem.Log.get(), 1)
-		)/*,
+		),
+		
+		new Recipe(new ItemStack(TileItem.get(TileType.TORCH), 2),
+			new ItemStack(ResourceItem.Log.get(), 1)
+		)
+		/*,
 		
 		new Recipe(new ItemStack(TileItem.get(TileType.WATER), 1),
 			new ItemStack(TileItem.get(TileType.SAND), 1),

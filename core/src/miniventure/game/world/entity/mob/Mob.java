@@ -71,7 +71,7 @@ public abstract class Mob extends Entity {
 			super.render(batch, delta);
 	}
 	
-	@Override public float getLightRadius() { return Tile.SIZE*3; }
+	//@Override public float getLightRadius() { return Tile.SIZE*3; }
 	
 	@Override
 	public void update(float delta) {

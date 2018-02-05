@@ -24,6 +24,7 @@ public class TileItem extends Item {
 		// TODO here, I should put all the tile items that I want to have custom info, not directly fetched from the tile.
 		// for example, acorns.
 		// one improvement, btw, could be that in the current system, there can only be one item per tile. You can't have two items that end up producing the same tile. You even search by TileType.
+		items.put(TileType.TORCH, new TileItem(TileType.TORCH, TileType.GRASS, TileType.SAND, TileType.DIRT));
 	}
 	
 	@NotNull
@@ -41,7 +42,7 @@ public class TileItem extends Item {
 		this(MyUtils.toTitleCase(type.name()), GameCore.tileAtlas.findRegion(type.name().toLowerCase()+"/00"), type, canPlaceOn); // so, if the placeOn is null, then...
 	}
 	
-	private TileItem(String name, TextureRegion texture, @NotNull TileType result, @Nullable TileType... placeOn) {
+	private TileItem(String name, @NotNull TextureRegion texture, @NotNull TileType result, @Nullable TileType... placeOn) {
 		super(name, texture);
 		this.canPlaceOn = placeOn;
 		this.result = result;
