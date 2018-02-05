@@ -3,7 +3,6 @@ package miniventure.game.world;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import miniventure.game.GameCore;
 import miniventure.game.item.Item;
 import miniventure.game.screen.LoadingScreen;
 import miniventure.game.util.MyUtils;
@@ -17,7 +16,6 @@ import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileType;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -140,8 +138,6 @@ public class Level {
 	}
 	
 	public Array<Vector3> renderLighting(Rectangle renderSpace) {
-		final TextureRegion light = GameCore.icons.get("light");
-		
 		Rectangle expandedSpace = new Rectangle(renderSpace.x - Tile.SIZE*10, renderSpace.y - Tile.SIZE*10, renderSpace.width+Tile.SIZE*10*2, renderSpace.height+Tile.SIZE*10*2);
 		
 		Array<WorldObject> objects = new Array<>();
@@ -152,13 +148,8 @@ public class Level {
 		
 		for(WorldObject obj: objects) {
 			float lightR = obj.getLightRadius();
-			if(lightR > 0) {
+			if(lightR > 0)
 				lighting.add(new Vector3(obj.getBounds().getCenter(new Vector2()), lightR));
-				// so apparently the light draws with the origin for the image in the upper left, rather than the bottom left. No clue why.
-				//Vector2 center = obj.getBounds().getCenter(new Vector2());
-				//System.out.println("drawing light at " + (center.x-renderSpace.x-lightR)+","+(center.y-renderSpace.y-lightR));
-				//batch.draw(light, center.x-renderSpace.x-lightR, renderSpace.height - (center.y-renderSpace.y)-lightR, lightR*2, lightR*2);
-			}
 		}
 		
 		return lighting;

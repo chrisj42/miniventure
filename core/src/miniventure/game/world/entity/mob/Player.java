@@ -64,7 +64,6 @@ public class Player extends Mob {
 		
 		hands = new Hands(this);
 		inventory = new Inventory(20, hands);
-		//inventory.addItem(new ToolItem(ToolType.Shovel, Material.Gem));
 	}
 	
 	public int getStat(@NotNull Stat stat) {
