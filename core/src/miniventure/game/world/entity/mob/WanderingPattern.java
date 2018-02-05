@@ -56,4 +56,9 @@ public class WanderingPattern implements MovementPattern {
 		if(!isStopped)
 			moveDir.setToRandomDirection();
 	}
+	
+	@Override
+	public MovementPattern copy() {
+		return new WanderingPattern();
+	}
 }

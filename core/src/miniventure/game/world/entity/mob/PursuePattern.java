@@ -60,4 +60,31 @@ public class PursuePattern implements MovementPattern {
 		
 		return dist;
 	}
+	
+	@Override
+	public MovementPattern copy() {
+		return new PursuePattern(followBehavior, maxDist, followSpeed);
+	}
+	
+	public static class FleePattern extends PursuePattern {
+		
+		public FleePattern() { super(); }
+		public FleePattern(EntityFollower followBehavior) { super(followBehavior); }
+		public FleePattern(EntityFollower followBehavior, float followSpeed) { super(followBehavior, followSpeed); }
+		public FleePattern(@NotNull EntityFollower followBehavior, float maxDist, float followSpeed) {
+			super(followBehavior, maxDist, followSpeed);
+		}
+		
+		@Override
+		public Vector2 move(float delta, MobAi mob) {
+			Vector2 vector = super.move(delta, mob);
+			vector.rotate(180); // this will technically affect vectors from the idle wandering pattern, but it doesn't really matter, since the direction is random anyway.
+			return vector;
+		}
+		
+		@Override
+		public MovementPattern copy() {
+			return new FleePattern(super.followBehavior, super.maxDist, super.followSpeed);
+		}
+	}
 }

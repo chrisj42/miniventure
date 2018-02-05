@@ -33,7 +33,7 @@ public class MobAi extends Mob {
 	}
 	public MobAi(@NotNull String spriteName, int health, @NotNull MovementPattern movePattern, @NotNull ItemDrop... deathDrops) {
 		super("player", health, deathDrops);
-		this.movePattern = movePattern;
+		this.movePattern = movePattern.copy();
 	}
 	
 	protected void setMovePattern(@NotNull MovementPattern pattern) { movePattern = pattern; }

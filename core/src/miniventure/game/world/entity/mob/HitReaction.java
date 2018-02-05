@@ -1,6 +1,7 @@
 package miniventure.game.world.entity.mob;
 
 import miniventure.game.item.Item;
+import miniventure.game.world.entity.mob.PursuePattern.FleePattern;
 
 @FunctionalInterface
 public interface HitReaction {
