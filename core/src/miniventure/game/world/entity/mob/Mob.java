@@ -71,6 +71,8 @@ public abstract class Mob extends Entity {
 			super.render(batch, delta);
 	}
 	
+	//@Override public float getLightRadius() { return Tile.SIZE*3; }
+	
 	@Override
 	public void update(float delta) {
 		super.update(delta);
@@ -95,8 +97,8 @@ public abstract class Mob extends Entity {
 	}
 	
 	@Override
-	public void move(float xd, float yd) {
-		super.move(xd, yd);
+	public boolean move(float xd, float yd) {
+		boolean moved = super.move(xd, yd);
 		
 		if(xd != 0 || yd != 0) animator.requestState(AnimationState.WALK);
 		
@@ -105,6 +107,8 @@ public abstract class Mob extends Entity {
 			// change sprite direction
 			this.dir = dir;
 		}
+		
+		return moved;
 	}
 	
 	@Override

@@ -19,8 +19,7 @@ public class SpreadUpdateProperty implements UpdateProperty {
 	
 	@Override
 	public void update(float delta, Tile tile) {
-		boolean isGround = type.isGroundTile();
-		if(type != (isGround ? tile.getGroundType() : tile.getSurfaceType())) {
+		if(!tile.hasType(type)) {
 			System.err.println("Warning: SpreadUpdateProperty for " + type + " being used for tile " + tile + "; not updating");
 			return; // the current tile being updated is not of the original tile type which is supposed to be spreading. This should never happen, but it can't hurt anything to have this here.
 		}
@@ -28,8 +27,8 @@ public class SpreadUpdateProperty implements UpdateProperty {
 		Array<Tile> around = tile.getAdjacentTiles(false);
 		around.shuffle();
 		for(Tile t: around) {
-			if(replaces.contains(isGround ? t.getGroundType() : t.getSurfaceType())) {
-				t.resetTile(type);
+			if(replaces.contains(t.getType())) {
+				t.addTile(type);
 				//break;
 			}
 		}

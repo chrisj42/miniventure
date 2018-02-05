@@ -5,63 +5,70 @@ filter: Linear,Linear
 repeat: none
 blank
   rotate: false
-  xy: 3, 3
+  xy: 3, 71
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
+burger-outline
+  rotate: false
+  xy: 55, 107
+  size: 10, 9
+  orig: 10, 9
+  offset: 0, 0
+  index: -1
+burger
+  rotate: false
+  xy: 69, 107
+  size: 10, 9
+  orig: 10, 9
+  offset: 0, 0
+  index: -1
 gem-sword
   rotate: false
-  xy: 79, 3
+  xy: 3, 107
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-heart-dead-left
+heart-outline
   rotate: false
-  xy: 3, 111
-  size: 6, 12
-  orig: 6, 12
+  xy: 23, 107
+  size: 12, 12
+  orig: 12, 12
   offset: 0, 0
   index: -1
-heart-dead-right
+heart
   rotate: false
-  xy: 13, 111
-  size: 6, 12
-  orig: 6, 12
+  xy: 39, 107
+  size: 12, 12
+  orig: 12, 12
   offset: 0, 0
   index: -1
-heart-left
+light
   rotate: false
-  xy: 23, 111
-  size: 6, 12
-  orig: 6, 12
-  offset: 0, 0
-  index: -1
-heart-right
-  rotate: false
-  xy: 33, 111
-  size: 6, 12
-  orig: 6, 12
+  xy: 3, 3
+  size: 64, 64
+  orig: 64, 64
   offset: 0, 0
   index: -1
 log
   rotate: false
-  xy: 3, 39
+  xy: 39, 71
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile-frame
   rotate: false
-  xy: 3, 75
+  xy: 83, 3
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 white
   rotate: false
-  xy: 43, 3
+  xy: 83, 39
   size: 32, 32
   orig: 32, 32
   offset: 0, 0

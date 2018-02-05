@@ -1,7 +1,5 @@
 package miniventure.game;
 
-import java.util.HashMap;
-
 import miniventure.game.screen.RespawnScreen;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Level;
@@ -12,9 +10,11 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -30,12 +30,19 @@ public class GameScreen {
 	
 	private final OrthographicCamera camera, uiCamera;
 	private int zoom = 0;
+	private FrameBuffer lightingBuffer;
 	
 	public GameScreen() {
 		camera = new OrthographicCamera();
 		camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		uiCamera = new OrthographicCamera();
 		uiCamera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		lightingBuffer = FrameBuffer.createFrameBuffer(Format.RGBA8888, (int)camera.viewportWidth, (int)camera.viewportHeight, false);
+	}
+	
+	void dispose() {
+		if(lightingBuffer != null)
+			lightingBuffer.dispose();
 	}
 	
 	public void handleInput(@NotNull Player player) {
@@ -57,10 +64,8 @@ public class GameScreen {
 		level.update(Gdx.graphics.getDeltaTime());
 	}
 	
-	public void render(@NotNull Player mainPlayer, @NotNull Level level, boolean updateCamera) {
-		// clears the screen with a green color.
-		Gdx.gl.glClearColor(0.1f, 0.5f, 0.1f, 1); // these are floats from 0 to 1.
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+	// timeOfDay is 0 to 1.
+	public void render(@NotNull Player mainPlayer, float alphaOverlay, @NotNull Level level, boolean updateCamera) {
 		
 		float viewWidth = camera.viewportWidth;
 		float viewHeight = camera.viewportHeight;
@@ -79,13 +84,43 @@ public class GameScreen {
 		
 		Rectangle renderSpace = new Rectangle(camera.position.x - viewWidth/2, camera.position.y - viewHeight/2, viewWidth, viewHeight);
 		
+		
+		lightingBuffer.begin();
+		Gdx.gl.glClearColor(0, 0.03f, 0.278f, alphaOverlay);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		
+		batch.setProjectionMatrix(uiCamera.combined);
+		batch.begin();
+		batch.setBlendFunction(GL20.GL_ZERO, GL20.GL_ONE_MINUS_SRC_ALPHA);
+		
+		Array<Vector3> lights = level.renderLighting(renderSpace);
+		final TextureRegion lightTexture = GameCore.icons.get("light");
+		
+		for(Vector3 light: lights) {
+			float radius = light.z * (float) Math.pow(2, zoom);
+			uiCamera.unproject(camera.project(light));
+			Vector2 screenPos = new Vector2(light.x, light.y);
+			batch.draw(lightTexture, screenPos.x - radius, screenPos.y - radius, radius*2, radius*2);
+		}
+		
+		batch.end();
+		lightingBuffer.end();
+		
+		// clears the screen with a green color.
+		Gdx.gl.glClearColor(0.1f, 0.5f, 0.1f, 1); // these are floats from 0 to 1.
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		
 		batch.setProjectionMatrix(camera.combined); // tells the batch to use the camera's coordinate system.
 		batch.begin();
+		batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA); // default
 		level.render(renderSpace, batch, Gdx.graphics.getDeltaTime());
 		
 		Tile interactTile = level.getClosestTile(mainPlayer.getInteractionRect());
 		if(interactTile != null)
 			batch.draw(GameCore.icons.get("tile-frame"), interactTile.getX(), interactTile.getY());
+		
+		batch.setProjectionMatrix(uiCamera.combined);
+		batch.draw(lightingBuffer.getColorBufferTexture(), 0, 0);
 		
 		renderGui(mainPlayer, level);
 		batch.end();
@@ -115,34 +150,10 @@ public class GameScreen {
 		return new Vector2();
 	}
 	
-	
-	private static HashMap<Boolean, TextureRegion[]> heartSprites = new HashMap<>();
-	static {
-		TextureRegion[] fullHearts = {
-			GameCore.icons.get("heart-left"),
-			GameCore.icons.get("heart-right")
-		};
-		heartSprites.put(true, fullHearts);
-		
-		TextureRegion[] deadHearts = {
-			GameCore.icons.get("heart-dead-left"),
-			GameCore.icons.get("heart-dead-right")
-		};
-		heartSprites.put(false, deadHearts);
-	}
-	
 	private void renderGui(@NotNull Player mainPlayer, @NotNull Level level) {
 		batch.setProjectionMatrix(uiCamera.combined);
 		
-		// render health
-		for(int i = 0; i < Player.Stat.Health.max; i++) {
-			TextureRegion heart = heartSprites.get(i < mainPlayer.getStat(Player.Stat.Health))[i % 2];
-			batch.draw(heart, i*heart.getRegionWidth(), heart.getRegionHeight() * 0.25f);
-		}
-		// TODO other stats will be rendered in the exact same fashion, with the same sprites. So make a method for it. Maybe I should instantiate it in the Player class, or even Stat enum? 
-		
-		// draw UI for current item
-		
+		// draw UI for current item, and stats
 		mainPlayer.drawGui(new Rectangle(0, 0, uiCamera.viewportWidth, uiCamera.viewportHeight), batch, font);
 		
 		
@@ -161,6 +172,8 @@ public class GameScreen {
 		Tile interactTile = level.getClosestTile(mainPlayer.getInteractionRect());
 		debugInfo.add("Looking at: " + (interactTile == null ? "Null" : interactTile.toLocString()));
 		
+		debugInfo.add("Entities in level: " + level.getEntityCount()+"/"+level.getEntityCap());
+		
 		for(int i = 0; i < debugInfo.size; i++)
 			MyUtils.writeOutlinedText(font, batch, debugInfo.get(i), 0, uiCamera.viewportHeight-5-15*i);
 	}
@@ -177,5 +190,8 @@ public class GameScreen {
 		float zoomFactor = (float) Math.pow(2, zoom);
 		camera.setToOrtho(false, width/zoomFactor, height/zoomFactor);
 		uiCamera.setToOrtho(false, width, height);
+		
+		lightingBuffer.dispose();
+		lightingBuffer = FrameBuffer.createFrameBuffer(Format.RGBA8888, (int)uiCamera.viewportWidth, (int)uiCamera.viewportHeight, false);
 	}
 }

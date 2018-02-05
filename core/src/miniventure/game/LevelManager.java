@@ -4,10 +4,8 @@ import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.world.Level;
 import miniventure.game.world.entity.mob.Player;
-import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.math.MathUtils;
 
 public class LevelManager {
 	
@@ -24,10 +22,17 @@ public class LevelManager {
 		GameScreen... game screen won't do much, just do the rendering. 
 	 */
 	
+	private static final float LENGTH_OF_HALF_DAY = .5f * 60 * 5; // 5 minutes is like 24 hours in-game.
+	// private static final float DAWN_START_TIME = 5f/24;
+	// private static final float DAWN_END_TIME = 6f/24;
+	// private static final float DUSK_START_TIME = 20f/24;
+	// private static final float DUSK_END_TIME = 21f/24;
+	
 	private boolean worldLoaded = false;
 	
 	private int curLevel;
 	private Player mainPlayer;
+	private float gameTime;
 	
 	LevelManager() {
 		
@@ -51,10 +56,45 @@ public class LevelManager {
 		boolean update = menu == null; // later add "|| multiplayer";
 		
 		if(menu == null || !menu.usesWholeScreen())
-			game.render(mainPlayer, level, update);
+			game.render(mainPlayer, getDaylightOverlay(), level, update);
 		
-		if(update)
+		if(update) {
 			game.update(mainPlayer, level);
+			gameTime += Gdx.graphics.getDeltaTime();
+		}
+	}
+	
+	private float getDaylightOverlay() {
+		if(gameTime < LENGTH_OF_HALF_DAY) return 0;
+		
+		/*
+			5AM - 6AM = sunrise
+			7PM - 8PM = sunset
+		 */
+		
+		/*float alpha;
+		
+		float timeOfDay = gameTime % (LENGTH_OF_HALF_DAY * 2);
+		if(timeOfDay < DAWN_START_TIME || timeOfDay > DUSK_END_TIME)
+			alpha = 1;
+		else if(timeOfDay > DAWN_END_TIME && timeOfDay < DUSK_START_TIME)
+			alpha = 0;
+		else if(timeOfDay > DUSK_START_TIME)
+			alpha = (timeOfDay - DUSK_START_TIME) / (DUSK_END_TIME - DUSK_START_TIME);
+		else
+			alpha = (timeOfDay - DAWN_START_TIME) / (DAWN_END_TIME - DAWN_START_TIME);
+		
+		*/
+		// lightest at midday, darkest at midnight
+		float timeSinceMidday = (gameTime + LENGTH_OF_HALF_DAY) % (LENGTH_OF_HALF_DAY*2);
+		
+		float alpha = timeSinceMidday / LENGTH_OF_HALF_DAY;
+		if(alpha > 1)
+			alpha = 2 - alpha;
+		
+		alpha *= 0.66f; // max of 0.75 alpha.
+		
+		return alpha;
 	}
 	
 	public void createWorld() {
@@ -62,6 +102,7 @@ public class LevelManager {
 		LoadingScreen loadingScreen = new LoadingScreen();
 		GameCore.setScreen(loadingScreen);
 		curLevel = 0;
+		gameTime = 0;
 		/// IDEA How about I have MenuScreen be an interface; or make another interface that MenuScreen implements. The idea is that I can have displays that don't use Scene2D (like the the loading screen, or level transitions if that's a thing), since they don't have options.
 		new Thread(() -> {
 			Level.resetLevels(loadingScreen);
@@ -84,15 +125,7 @@ public class LevelManager {
 		mainPlayer = new Player();
 		
 		Level level = Level.getLevel(curLevel);
-		level.addEntity(mainPlayer);
 		
-		Tile spawnTile;
-		do spawnTile = level.getTile(
-			MathUtils.random(level.getWidth()-1),
-			MathUtils.random(level.getHeight()-1)
-		);
-		while(spawnTile == null || !mainPlayer.maySpawn(spawnTile));
-		
-		mainPlayer.moveTo(spawnTile);
+		level.spawnMob(mainPlayer);
 	}
 }

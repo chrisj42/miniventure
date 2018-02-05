@@ -1,12 +1,14 @@
 package miniventure.game.item;
 
 import miniventure.game.GameCore;
+import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.mob.Player.Stat;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.math.Vector2;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,6 +24,7 @@ public class Hands {
 		
 		@Override
 		public Item use() { return this; }
+		@Override public Item copy() { return new HandItem(); }
 		
 		@Override
 		public void drawItem(int stackSize, Batch batch, BitmapFont font, float x, float y) {}
@@ -81,12 +84,15 @@ public class Hands {
 			item = newItem == null ? new HandItem() : newItem;
 		else {
 			count--;
-			if(newItem != null && !player.takeItem(newItem)) // will add it to hand, or inventory, whichever fits.
-				count++; // if there was a new item, and it couldn't be picked up, then the count is not decreased.
+			if(newItem != null && !player.takeItem(newItem)) {// will add it to hand, or inventory, whichever fits.
+				Level level = player.getLevel();
+				if(level != null)
+					level.dropItem(newItem, player.getBounds().getCenter(new Vector2()), null);//count++; // if there was a new item, and it couldn't be picked up, then the count is not decreased.
+			}
 		}
 	}
 	
-	private boolean used() { return used || count <= 0 || player.getStat(Stat.Stamina) < item.getStaminaUsage(); }
+	private boolean used() { return used || count <= 0/* || player.getStat(Stat.Stamina) < item.getStaminaUsage()*/; }
 	
 	// reflexive usage
 	public boolean interact() {

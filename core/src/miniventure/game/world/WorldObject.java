@@ -26,6 +26,8 @@ public interface WorldObject {
 	
 	void render(SpriteBatch batch, float delta);
 	
+	default float getLightRadius() { return 0; }
+	
 	// returns whether the given entity can share the same space as this object.
 	boolean isPermeableBy(Entity entity);
 	

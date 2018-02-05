@@ -15,6 +15,48 @@ public class MyUtils {
 	
 	private MyUtils() {} // can't instantiate
 	
+	public static String toTitleCase(String string) {
+		String[] words = string.split(" ");
+		for(int i = 0; i < words.length; i++) {
+			if(words[i].length() == 0) continue;
+			words[i] = words[i].substring(0, 1).toUpperCase() + words[i].substring(1).toLowerCase();
+		}
+		
+		return String.join(" ", words);
+	}
+	
+	public static String encodeStringArray(String[] strings, char elementStart, char elementEnd, char delimiter) {
+		StringBuilder str = new StringBuilder();
+		for(int i = 0; i < strings.length; i++) {
+			str.append(elementStart);
+			str.append(strings[i]);
+			str.append(elementEnd);
+			if(i < strings.length-1)
+				str.append(delimiter);
+		}
+		
+		return str.toString();
+	}
+	
+	public static String[] parseLayeredString(String str, char layerStart, char layerEnd, char delimiter) {
+		Array<String> result = new Array<>();
+		char[] chars = str.toCharArray();
+		int offset = 0;
+		int curLayers = 0;
+		for(int i = 0; i < chars.length; i++) {
+			if(chars[i] == delimiter && curLayers == 0) {
+				result.add(new String(chars, offset, i - offset));
+				offset = i+1;
+			}
+			else if(chars[i] == layerStart) curLayers++;
+			else if(chars[i] == layerEnd) curLayers--;
+		}
+		
+		result.add(str.substring(offset));
+		
+		return result.items;
+	}
+	
 	// In terms of types, what this method guarantees is that, given a target super class, and a starting class that extends the super, it will return a class that is a super of T, and extends S, ideally one level below. But if the target equals the superClass from the beginning (which can't be prevented), that is the only case where it won't return a direct subclass of superClass.
 	/** @noinspection unchecked*/
 	@NotNull
@@ -66,16 +108,6 @@ public class MyUtils {
 	
 	public static void drawTextCentered(BitmapFont font, Batch batch, String text, float width, float height) {
 		font.draw(batch, text, width/2, height/2, 0, Align.center, true);
-	}
-	
-	public static String toTitleCase(String string) {
-		String[] words = string.split(" ");
-		for(int i = 0; i < words.length; i++) {
-			if(words[i].length() == 0) continue;
-			words[i] = words[i].substring(0, 1).toUpperCase() + words[i].substring(1).toLowerCase();
-		}
-		
-		return String.join(" ", words);
 	}
 	
 	// this method moves a rectangle *just* enough so that it fits inside another rectangle. In the event that the "outer" rect is smaller than the rect being moved, the rect being moved will be centered onto the outer rect. The padding is only used if the moving rect isn't already inside the outer one.

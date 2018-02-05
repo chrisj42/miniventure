@@ -22,9 +22,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class GameCore extends ApplicationAdapter {
 	
-	public static final Version VERSION = new Version("1.1.3");
+	public static final Version VERSION = new Version("1.1.5");
 	
-	//public static final int SCREEN_WIDTH = 800, SCREEN_HEIGHT = 450;
 	private static final long START_TIME = System.nanoTime();
 	
 	public static TextureAtlas entityAtlas, tileAtlas, tileConnectionAtlas; // tile overlap atlas not needed b/c the overlap sprite layout is simple enough to code; it goes in binary. However, the tile connection sprite layout is more complicated, so a map is needed to compare against.
@@ -99,6 +98,8 @@ public class GameCore extends ApplicationAdapter {
 		
 		if(menuScreen != null)
 			menuScreen.dispose();
+		if(gameScreen != null)
+			gameScreen.dispose();
 		
 		entityAtlas.dispose();
 		tileAtlas.dispose();

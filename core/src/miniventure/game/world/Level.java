@@ -8,6 +8,9 @@ import miniventure.game.screen.LoadingScreen;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ItemEntity;
+import miniventure.game.world.entity.mob.AiType;
+import miniventure.game.world.entity.mob.Mob;
+import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.levelgen.LevelGenerator;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileType;
@@ -16,6 +19,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
@@ -25,8 +29,6 @@ public class Level {
 	
 	private static final String[] levelNames = {"Surface"};
 	private static final int minDepth = 0;
-	
-	//private static final int maxDepth = minDepth+levelNames.length;
 	
 	private static Level[] levels = new Level[0];
 	private static final HashMap<Entity, Level> entityLevels = new HashMap<>();
@@ -58,8 +60,8 @@ public class Level {
 	private final Tile[][] tiles;
 	
 	private final HashSet<Entity> entities = new HashSet<>();
-	//private final HashSet<Entity> entitiesToAdd = new HashSet<>();
-	//private final HashSet<Entity> entitiesToRemove = new HashSet<>();
+	
+	private int entityCap = 50;
 	
 	public Level(int depth, int width, int height) {
 		this.width = width;
@@ -69,13 +71,14 @@ public class Level {
 		TileType[][] tileTypes = LevelGenerator.generateLevel(width, height);
 		for(int x = 0; x < tiles.length; x++)
 			for(int y = 0; y < tiles[x].length; y++)
-				tiles[x][y] = new Tile(tileTypes[x][y]/*(x<5?TileType.TREE:width-x<5? TileType.CACTUS:TileType.GRASS)*/, this, x, y);
-		
-		//tiles[5][0].resetTile(TileType.WATER);
+				tiles[x][y] = new Tile(this, x, y, tileTypes[x][y]);
 	}
 	
 	public int getWidth() { return width; }
 	public int getHeight() { return height; }
+	public int getEntityCap() { return entityCap; }
+	
+	public int getEntityCount() { return entities.size(); }
 	
 	public void addEntity(Entity e, Vector2 pos) { addEntity(e, pos.x, pos.y); }
 	public void addEntity(Entity e, float x, float y) {
@@ -83,24 +86,16 @@ public class Level {
 		addEntity(e);
 	}
 	public void addEntity(Entity e) {
-		//System.out.println("adding entity " + e + " to level " + this + " at " + e.getBounds().x+","+e.getBounds().y);
-		//synchronized (entitiesToAdd) {
 		entities.add(e);
-		//	entitiesToAdd.add(e);
-			Level oldLevel = entityLevels.put(e, this); // replaces the level for the entity
-			if (oldLevel != null && oldLevel != this)
-				oldLevel.removeEntity(e); // remove it from the other level's entity set.
-		//}
+		Level oldLevel = entityLevels.put(e, this); // replaces the level for the entity
+		if (oldLevel != null && oldLevel != this)
+			oldLevel.removeEntity(e); // remove it from the other level's entity set.
 	}
 	
 	public void removeEntity(Entity e) {
-		//System.out.println("removing entity "+e+" from level "+this);
-		//synchronized (entitiesToRemove) {
-			//entitiesToRemove.add(e);
-			entities.remove(e);
-			if (entityLevels.get(e) == this)
-				entityLevels.remove(e);
-		//}
+		entities.remove(e);
+		if (entityLevels.get(e) == this)
+			entityLevels.remove(e);
 	}
 	
 	public void update(float delta) {
@@ -112,44 +107,52 @@ public class Level {
 			tiles[x][y].update(delta);
 		}
 		
-		//System.out.println("entities tracked: " + entities);
-		
 		// update entities
 		Entity[] entities = this.entities.toArray(new Entity[this.entities.size()]);
 		for(Entity e: entities)
 			e.update(delta);
 		
-		/*synchronized (entitiesToAdd) {
-			for (Entity e : entitiesToAdd) {
-				for (Level level : levels)
-					level.entities.remove(e);
-				entities.add(e);
-				e.addedToLevel(this);
-			}
-			
-			entitiesToAdd.clear();
-		}
+		if(this.entities.size() < entityCap && MathUtils.randomBoolean(0.01f))
+			spawnMob(AiType.values[MathUtils.random(AiType.values.length-1)].makeMob());
+	}
+	
+	public void spawnMob(Mob mob) {
+		Tile spawnTile;
+		do spawnTile = getTile(
+			MathUtils.random(getWidth()-1),
+			MathUtils.random(getHeight()-1)
+		);
+		while(spawnTile == null || !mob.maySpawn(spawnTile));
 		
-		synchronized (entitiesToRemove) {
-			for (Entity e : entitiesToRemove)
-				entities.remove(e);
-			entitiesToRemove.clear();
-		}*/
+		mob.moveTo(spawnTile);
+		addEntity(mob);
 	}
 	
 	public void render(Rectangle renderSpace, SpriteBatch batch, float delta) {
-		// the game renders around the main player. For now, the level shall be the same size as the screen, so no camera fanciness or coordinate manipulation is needed.
+		Array<WorldObject> objects = new Array<>();
+		objects.addAll(getOverlappingTiles(renderSpace)); // tiles first
+		objects.addAll(getOverlappingEntities(renderSpace)); // entities second
 		
-		//batch.disableBlending(); // this prevents alpha from being rendered, which gives a performance boost. When drawing tiles, we don't need alpha (yet), so we'll disable it.
-		//for(Tile[] tiles: this.tiles)
-			for(Tile tile: getOverlappingTiles(renderSpace))
-				tile.render(batch, delta);
-		//batch.enableBlending(); // re-enable alpha for the drawing of entities.
+		for(WorldObject obj: objects)
+			obj.render(batch, delta);
+	}
+	
+	public Array<Vector3> renderLighting(Rectangle renderSpace) {
+		Rectangle expandedSpace = new Rectangle(renderSpace.x - Tile.SIZE*10, renderSpace.y - Tile.SIZE*10, renderSpace.width+Tile.SIZE*10*2, renderSpace.height+Tile.SIZE*10*2);
 		
-		Array<Entity> overlapping = getOverlappingEntities(renderSpace);
-		//System.out.println("entities being rendered: " + overlapping);
-		for(Entity entity: overlapping)
-			entity.render(batch, delta);
+		Array<WorldObject> objects = new Array<>();
+		objects.addAll(getOverlappingTiles(expandedSpace));
+		objects.addAll(getOverlappingEntities(expandedSpace));
+		
+		Array<Vector3> lighting = new Array<>();
+		
+		for(WorldObject obj: objects) {
+			float lightR = obj.getLightRadius();
+			if(lightR > 0)
+				lighting.add(new Vector3(obj.getBounds().getCenter(new Vector2()), lightR));
+		}
+		
+		return lighting;
 	}
 	
 	public void dropItem(@NotNull Item item, Vector2 dropPos, @Nullable Vector2 targetPos) {
@@ -256,5 +259,24 @@ public class Level {
 		y /= Tile.SIZE;
 		
 		return getTile(x, y);
+	}
+	
+	@Nullable
+	public Player getClosestPlayer(final Vector2 pos) {
+		Array<Player> players = new Array<>();
+		for(Entity e: entities)
+			if(e instanceof Player)
+				players.add((Player)e);
+		
+		if(players.size == 0) return null;
+		
+		players.sort((p1, p2) -> {
+			Vector2 p1Pos = p1.getBounds().getCenter(new Vector2());
+			Vector2 p2Pos = p2.getBounds().getCenter(new Vector2());
+			
+			return Float.compare(p1Pos.dst(pos), p2Pos.dst(pos));
+		});
+		
+		return players.get(0);
 	}
 }

@@ -17,6 +17,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
@@ -25,23 +26,27 @@ import org.jetbrains.annotations.NotNull;
 
 public class Player extends Mob {
 	
+	public static final float MOVE_SPEED = 5;
+	
 	public enum Stat {
-		Health(20),
+		Health("heart", 10, 20),
 		
-		Stamina(10),
+		Stamina("", 10, 10),
 		
-		Hunger(10),
+		Hunger("burger", 10, 10),
 		
-		Armor(10, 0);
+		Armor("", 10, 10, 0);
 		
-		public final int max, initial;
+		public final int max, initial, iconCount;
+		public final String icon, outlineIcon;
 		
-		Stat(int max) {
-			this(max, max);
-		}
-		Stat(int max, int initial) {
+		Stat(String icon, int iconCount, int max) { this(icon, iconCount, max, max); }
+		Stat(String icon, int iconCount, int max, int initial) {
 			this.max = max;
 			this.initial = initial;
+			this.icon = icon;
+			this.outlineIcon = icon+"-outline";
+			this.iconCount = iconCount;
 		}
 		
 		public static final Stat[] values = Stat.values();
@@ -71,7 +76,7 @@ public class Player extends Mob {
 	public void checkInput(@NotNull Vector2 mouseInput) {
 		// checks for keyboard input to move the player.
 		// getDeltaTime() returns the time passed between the last and the current frame in seconds.
-		int speed = Tile.SIZE * 5; // this is technically in units/second.
+		float speed = Tile.SIZE * MOVE_SPEED; // this is technically in units/second.
 		Vector2 movement = new Vector2();
 		if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) movement.x--;
 		if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) movement.x++;
@@ -103,8 +108,33 @@ public class Player extends Mob {
 	}
 	
 	public void drawGui(Rectangle canvas, SpriteBatch batch, BitmapFont font) {
-		// TODO I might separate this into a bunch of calls instead, like "drawStat(stat)" a number of times, and "drawHotbar"; maybe.
 		hands.getUsableItem().drawItem(hands.getCount(), batch, font, canvas.width/2, 20);
+		
+		renderBar(Stat.Health, canvas.x, canvas.y+3, batch);
+		//renderBar(Stat.Hunger, canvas.x + canvas.width - GameCore.icons.get(Stat.Hunger.icon).getRegionWidth()*Stat.Hunger.iconCount, canvas.y+3, batch);
+	}
+	
+	private void renderBar(Stat stat, float x, float y, SpriteBatch batch) {
+		float pointsPerIcon = stat.max*1f / stat.iconCount;
+		TextureRegion fullIcon = GameCore.icons.get(stat.icon);
+		TextureRegion emptyIcon = GameCore.icons.get(stat.outlineIcon);
+		
+		// for each icon...
+		for(int i = 0; i < stat.iconCount; i++) {
+			// gets the amount this icon should be "filled" with the fullIcon
+			float iconFillAmount = Math.min(Math.max(0, stats.get(stat) - i * pointsPerIcon) / pointsPerIcon, 1);
+			
+			// converts it to a pixel width
+			int fullWidth = (int) (iconFillAmount * fullIcon.getRegionWidth());
+			if(fullWidth > 0)
+				batch.draw(fullIcon.getTexture(), x+i*fullIcon.getRegionWidth(), y, fullIcon.getRegionX(), fullIcon.getRegionY(), fullWidth, fullIcon.getRegionHeight());
+			
+			// repeats some of the above, for the empty icon
+			int emptyWidth = (int) ((1 - iconFillAmount) * emptyIcon.getRegionWidth());
+			int emptyOffset = emptyIcon.getRegionWidth() - emptyWidth;
+			if(emptyWidth > 0)
+				batch.draw(emptyIcon.getTexture(), x+i*fullIcon.getRegionWidth()+emptyOffset, y, emptyIcon.getRegionX() + emptyOffset, emptyIcon.getRegionY(), emptyWidth, emptyIcon.getRegionHeight());
+		}
 	}
 	
 	@Override

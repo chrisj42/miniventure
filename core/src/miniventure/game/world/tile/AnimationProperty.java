@@ -31,6 +31,24 @@ public class AnimationProperty implements TileProperty {
 		}
 	}
 	
+	private class TileAnimation {
+		private final AnimationType animationType;
+		private final float frameTime;
+		private final HashMap<String, HashMap<String, Array<AtlasRegion>>> tileAnimationFrames;
+		
+		TileAnimation(AnimationType animationType, float frameTime, HashMap<String, HashMap<String, Array<AtlasRegion>>> tileAnimationFrames) {
+			this.animationType = animationType;
+			this.frameTime = frameTime;
+			this.tileAnimationFrames = tileAnimationFrames;
+		}
+		
+		AtlasRegion getSprite(Tile tile, int spriteIndex, float timeElapsed) {
+			String typeName = tileType.name().toLowerCase();
+			String indexString = (spriteIndex < 10 ? "0" : "") + spriteIndex;
+			return animationType.getSprite(tile, tileAnimationFrames.get(typeName).get(indexString), (int)(timeElapsed/frameTime));
+		}
+	}
+	
 	@FunctionalInterface
 	private interface SpriteFetcher {
 		AtlasRegion getSprite(Tile tile, Array<AtlasRegion> frames, int frameIdx);
@@ -46,62 +64,40 @@ public class AnimationProperty implements TileProperty {
 		
 		SINGLE_FRAME((tile, frames, frameIdx) -> frames.get(0));
 		
-		private SpriteFetcher fetcher;
+		private final SpriteFetcher fetcher;
 		
 		AnimationType(SpriteFetcher fetcher) { this.fetcher = fetcher; }
 		
 		public AtlasRegion getSprite(Tile tile, Array<AtlasRegion> frames, int frameIdx) { return fetcher.getSprite(tile, frames, frameIdx); }
 	}
 	
-	private final AnimationType main, overlay;
-	private final float mainFrameTime, overlayFrameTime;
-	
+	private final boolean isOpaque;
+	private final TileAnimation main, overlay;
 	private TileType tileType;
 	
-	AnimationProperty(AnimationType main) { this(main, 0); }
-	//AnimationProperty(boolean isTransparent, AnimationType main) { this(isTransparent, main, 0); }
-	AnimationProperty(AnimationType main, float mainFrameTime) { this(main, mainFrameTime, main, mainFrameTime); }
-	//AnimationProperty(boolean isTransparent, AnimationType main, float mainFrameTime) { this(isTransparent, main, mainFrameTime, main, mainFrameTime); }
-	AnimationProperty(AnimationType main, float mainFrameTime, AnimationType overlay, float overlayFrameTime) {
-		this.main = main;
-		this.overlay = overlay;
-		this.mainFrameTime = mainFrameTime;
-		this.overlayFrameTime = overlayFrameTime;
+	AnimationProperty(boolean isOpaque, AnimationType main) { this(isOpaque, main, 0); }
+	AnimationProperty(boolean isOpaque, AnimationType main, float mainFrameTime) { this(isOpaque, main, mainFrameTime, main, mainFrameTime); }
+	AnimationProperty(boolean isOpaque, AnimationType main, float mainFrameTime, AnimationType overlay, float overlayFrameTime) {
+		this.main = new TileAnimation(main, mainFrameTime, tileConnectionAnimations);
+		this.overlay = new TileAnimation(overlay, overlayFrameTime, tileOverlapAnimations);
+		this.isOpaque = isOpaque;
 	}
 	
 	@Override
 	public void init(TileType type) { this.tileType = type; }
 	
-	/*@Nullable
-	public TileType getRenderedBehind() {
-		if(!isTransparent) return null;
-		return tileType.getProp(CoveredTileProperty.class).getCoveredTile();
-	}*/
+	public boolean isOpaque() { return isOpaque; }
 	
-	/*AtlasRegion getSprite(int spriteIndex, boolean isOverlapSprite, Tile tile) {
-		return getSprite(spriteIndex, isOverlapSprite, tile, tile.getType());
-	}*/
+	
 	AtlasRegion getSprite(int spriteIndex, boolean isOverlapSprite, Tile tile) {
 		return getSprite(spriteIndex, isOverlapSprite, tile, GameCore.getElapsedProgramTime());
 	}
 	AtlasRegion getSprite(int spriteIndex, boolean isOverlapSprite, Tile tile, float timeElapsed) {
-		if(!isOverlapSprite && tileType != tile.getGroundType() && tileType != tile.getSurfaceType())
+		if(!isOverlapSprite && !tile.hasType(tileType))
 			System.err.println("Warning: fetching sprite for tile "+tile+" that doesn't have the intended type " + tileType);
 		
-		Array<AtlasRegion> frames;
-		String typeName = tileType.name().toLowerCase();
-		String indexString = (spriteIndex < 10 ? "0" : "") + spriteIndex;
-		if(isOverlapSprite) {
-			frames = tileOverlapAnimations.get(typeName).get(indexString);
-			return overlay.getSprite(tile, frames, (int)(timeElapsed/overlayFrameTime));
-		} else {
-			frames = tileConnectionAnimations.get(typeName).get(indexString);
-			//if(!indexString.equals("00"))
-			//	System.out.println("fetching sprites for " + typeName + " at " + indexString + " as a connection sprite, from the main animation type " + main + "; frames="+frames);
-			return main.getSprite(tile, frames, (int)(timeElapsed/mainFrameTime));
-		}
+		TileAnimation animation = isOverlapSprite ? overlay : main;
+		
+		return animation.getSprite(tile, spriteIndex, timeElapsed);
 	}
-	
-	@Override
-	public Integer[] getInitData() { return new Integer[0]; }
 }

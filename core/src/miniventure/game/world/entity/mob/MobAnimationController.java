@@ -11,21 +11,25 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class MobAnimationController {
 	
-	private static final HashMap<Class<? extends Mob>, MobAnimation> mobAnimations = new HashMap<>();
+	private static final HashMap<String, HashMap<String, Animation<TextureRegion>>> mobAnimations = new HashMap<>();
 	
-	private static class MobAnimation {
-		private final HashMap<String, Animation<TextureRegion>> animations;
+	private static HashMap<String, Animation<TextureRegion>> getMobAnimation(String mobSpriteName) {
+		HashMap<String, Animation<TextureRegion>> animations = mobAnimations.get(mobSpriteName);
 		
-		public MobAnimation(String mobSpriteName) {
+		if(animations == null) {
 			animations = new HashMap<>();
 			
-			for(AnimationState state: AnimationState.values) {
-				for(String dir: Direction.names) {
-					String name = state.name().toLowerCase()+"-"+dir;
-					animations.put(name, new Animation<>(state.frameDuration, GameCore.entityAtlas.findRegions(mobSpriteName+"/"+name)));
+			for (AnimationState state : AnimationState.values) {
+				for (String dir : Direction.names) {
+					String name = state.name().toLowerCase() + "-" + dir;
+					animations.put(name, new Animation<>(state.frameDuration, GameCore.entityAtlas.findRegions(mobSpriteName + "/" + name)));
 				}
 			}
+			
+			mobAnimations.put(mobSpriteName, animations);
 		}
+		
+		return animations;
 	}
 	
 	public enum AnimationState {
@@ -43,7 +47,6 @@ public class MobAnimationController {
 	}
 	
 	private Mob mob;
-	//private TextureAtlas atlas; // TODO this needs to be redone so that there is a single, static animator instance of each type of mob, so that they are not continuously created, which is not efficient.
 	/** @noinspection FieldCanBeLocal*/
 	private AnimationState prevState, state;
 	
@@ -58,12 +61,7 @@ public class MobAnimationController {
 		
 		requestedAnimations = new PriorityQueue<>();
 		
-		Class<? extends Mob> mobClass = mob.getClass();
-		
-		if(!mobAnimations.containsKey(mobClass))
-			mobAnimations.put(mobClass, new MobAnimation(spriteName));
-		
-		animations = mobAnimations.get(mobClass).animations;
+		animations = getMobAnimation(spriteName);
 	}
 	
 	// the animation time is reset in getFrame, so this will never overflow.

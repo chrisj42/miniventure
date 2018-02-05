@@ -10,7 +10,4 @@ public interface TouchListener extends TileProperty {
 	void touchedBy(Entity entity, Tile tile);
 	//void stillTouchedBy(Entity entity);
 	//void steppedOff(Entity entity); // idk, this will be much later.
-	
-	@Override
-	default Integer[] getInitData() { return new Integer[0]; }
 }
