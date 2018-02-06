@@ -65,7 +65,7 @@ public class GameScreen {
 	}
 	
 	// timeOfDay is 0 to 1.
-	public void render(@NotNull Player mainPlayer, float alphaOverlay, @NotNull Level level) {
+	public void render(@NotNull Player mainPlayer, float alphaNight, float alphaSun, @NotNull Level level) {
 		
 		float viewWidth = camera.viewportWidth;
 		float viewHeight = camera.viewportHeight;
@@ -86,7 +86,7 @@ public class GameScreen {
 		
 		
 		lightingBuffer.begin();
-		Gdx.gl.glClearColor(0, 0.03f, 0.278f, alphaOverlay);
+		Gdx.gl.glClearColor(0, 0.03f, 0.278f, alphaNight);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		
 		batch.setProjectionMatrix(uiCamera.combined);
@@ -121,6 +121,8 @@ public class GameScreen {
 		
 		batch.setProjectionMatrix(uiCamera.combined);
 		batch.draw(lightingBuffer.getColorBufferTexture(), 0, 0);
+		
+		//MyUtils.fillRect(0, 0, uiCamera.viewportWidth, uiCamera.viewportHeight, new Color(1, 0.6f, 0.2f, alphaSun), batch);
 		
 		renderGui(mainPlayer, level);
 		batch.end();
@@ -173,6 +175,8 @@ public class GameScreen {
 		debugInfo.add("Looking at: " + (interactTile == null ? "Null" : interactTile.toLocString()));
 		
 		debugInfo.add("Entities in level: " + level.getEntityCount()+"/"+level.getEntityCap());
+		
+		debugInfo.add("Time of Day: " + GameCore.getWorld().getTimeOfDayString());
 		
 		for(int i = 0; i < debugInfo.size; i++)
 			MyUtils.writeOutlinedText(font, batch, debugInfo.get(i), 0, uiCamera.viewportHeight-5-15*i);
