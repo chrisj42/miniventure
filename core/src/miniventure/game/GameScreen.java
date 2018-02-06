@@ -65,12 +65,12 @@ public class GameScreen {
 	}
 	
 	// timeOfDay is 0 to 1.
-	public void render(@NotNull Player mainPlayer, float alphaOverlay, @NotNull Level level, boolean updateCamera) {
+	public void render(@NotNull Player mainPlayer, float alphaOverlay, @NotNull Level level) {
 		
 		float viewWidth = camera.viewportWidth;
 		float viewHeight = camera.viewportHeight;
 		
-		if(updateCamera) {
+		//if(updateCamera) {
 			Vector2 playerPos = new Vector2();
 			mainPlayer.getBounds().getCenter(playerPos);
 			int lvlWidth = level.getWidth() * Tile.SIZE;
@@ -80,7 +80,7 @@ public class GameScreen {
 			camera.position.set(playerPos, camera.position.z);
 			camera.update(); // updates the camera "matrices"
 			uiCamera.update();
-		}
+		//}
 		
 		Rectangle renderSpace = new Rectangle(camera.position.x - viewWidth/2, camera.position.y - viewHeight/2, viewWidth, viewHeight);
 		

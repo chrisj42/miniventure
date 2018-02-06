@@ -24,6 +24,9 @@ public class GameCore extends ApplicationAdapter {
 	
 	public static final Version VERSION = new Version("1.1");
 	
+	public static final int DEFAULT_SCREEN_WIDTH = 800;
+	public static final int DEFAULT_SCREEN_HEIGHT = 450;
+	
 	private static final long START_TIME = System.nanoTime();
 	
 	public static TextureAtlas entityAtlas, tileAtlas, tileConnectionAtlas; // tile overlap atlas not needed b/c the overlap sprite layout is simple enough to code; it goes in binary. However, the tile connection sprite layout is more complicated, so a map is needed to compare against.
@@ -112,7 +115,7 @@ public class GameCore extends ApplicationAdapter {
 		if(gameScreen != null)
 			gameScreen.resize(width, height);
 		if(menuScreen != null)
-			menuScreen.getViewport().update(width, height, false);
+			menuScreen.getViewport().update(width, height, true);
 	}
 	
 	

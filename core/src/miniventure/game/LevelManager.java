@@ -56,7 +56,7 @@ public class LevelManager {
 		boolean update = menu == null; // later add "|| multiplayer";
 		
 		if(menu == null || !menu.usesWholeScreen())
-			game.render(mainPlayer, getDaylightOverlay(), level, update);
+			game.render(mainPlayer, getDaylightOverlay(), level);
 		
 		if(update) {
 			game.update(mainPlayer, level);
