@@ -62,6 +62,8 @@ public abstract class Mob extends Entity {
 	
 	public Direction getDirection() { return dir; }
 	
+	public boolean isKnockedBack() { return knockbackTimeLeft > 0 && knockbackVelocity.len() > 0; }
+	
 	@Override
 	public void render(SpriteBatch batch, float delta) {
 		blinker.update(delta);

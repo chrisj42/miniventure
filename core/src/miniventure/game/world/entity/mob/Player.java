@@ -92,10 +92,12 @@ public class Player extends Mob {
 		
 		move(movement.x, movement.y);
 		
-		if(pressingKey(Input.Keys.C))
-			attack();
-		else if(pressingKey(Input.Keys.V))
-			interact();
+		if(!isKnockedBack()) {
+			if (pressingKey(Input.Keys.C))
+				attack();
+			else if (pressingKey(Input.Keys.V))
+				interact();
+		}
 		
 		hands.resetItemUsage();
 		
