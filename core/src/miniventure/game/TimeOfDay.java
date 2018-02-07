@@ -6,13 +6,13 @@ import org.jetbrains.annotations.NotNull;
 
 enum TimeOfDay {
 	
-	Dawn(0.08f, 0.02f, new Color(1, 0.980f, 0, 0.478f)),
+	Dawn(0.08f, 0.035f, new Color(1, 0.980f, 0, 0.478f)),
 	
 	Day(0.5f, 0.1f, new Color(0, 0, 0, 0)),
 	
-	Dusk(0.58f, 0.02f, new Color(0.286f, 0, 0.580f, 0.484f)),
+	Dusk(0.58f, 0.035f, new Color(0.286f, 0, 0.580f, 0.484f)),
 	
-	Night(1f, 0.1f, new Color(0, 0.03f, 0.278f, 0.66f));
+	Night(1f, 0.1f, new Color(0, 0.03f, 0.278f, 0.75f));
 	
 	private static final float LENGTH_OF_DAY = 60 * 5; // 5 minutes is like 24 hours in-game. 
 	
