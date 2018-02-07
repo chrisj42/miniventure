@@ -13,8 +13,8 @@ import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileType;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
@@ -33,7 +33,6 @@ public abstract class Mob extends Entity {
 	private static final float DAMAGE_PERCENT_FOR_MAX_PUSH = 0.2f;
 	
 	private static final float HURT_COOLDOWN = 0.5f; // minimum time between taking damage, in seconds; prevents a mob from getting hurt multiple times in quick succession. 
-	private static final int HURT_BLINK_RATE = 2; // rate at which the mob blinks when hurt and cooling down, in frames/blink.
 	
 	@NotNull private Direction dir;
 	@NotNull private MobAnimationController animator;
@@ -49,7 +48,7 @@ public abstract class Mob extends Entity {
 	private FrameBlinker blinker;
 	
 	public Mob(@NotNull String spriteName, int health, @NotNull ItemDrop... deathDrops) {
-		super(new Sprite());
+		super(new TextureRegion());
 		dir = Direction.DOWN;
 		this.maxHealth = health;
 		this.health = health;
@@ -58,6 +57,7 @@ public abstract class Mob extends Entity {
 		blinker = new FrameBlinker(5, 1, false);
 		
 		animator = new MobAnimationController(this, spriteName);
+		setSprite(animator.pollAnimation(0));
 	}
 	
 	public Direction getDirection() { return dir; }
@@ -70,8 +70,6 @@ public abstract class Mob extends Entity {
 		if(invulnerableTime <= 0 || blinker.shouldRender())
 			super.render(batch, delta);
 	}
-	
-	//@Override public float getLightRadius() { return Tile.SIZE*3; }
 	
 	@Override
 	public void update(float delta) {

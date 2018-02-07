@@ -53,6 +53,9 @@ public class GameScreen {
 			zoom(-1);
 		if(Gdx.input.isKeyJustPressed(Keys.EQUALS) || Gdx.input.isKeyJustPressed(Keys.PLUS))
 			zoom(1);
+		
+		if(Gdx.input.isKeyJustPressed(Keys.R) && Gdx.input.isKeyPressed(Keys.SHIFT_LEFT))
+			GameCore.getWorld().respawn();
 	}
 	
 	public void update(@NotNull Player mainPlayer, @NotNull Level level) {
@@ -130,8 +133,6 @@ public class GameScreen {
 		
 		batch.setProjectionMatrix(uiCamera.combined);
 		batch.draw(lightingBuffer.getColorBufferTexture(), 0, 0);
-		
-		//MyUtils.fillRect(0, 0, uiCamera.viewportWidth, uiCamera.viewportHeight, new Color(1, 0.6f, 0.2f, alphaSun), batch);
 		
 		renderGui(mainPlayer, level);
 		batch.end();

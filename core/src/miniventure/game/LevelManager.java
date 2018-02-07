@@ -68,7 +68,7 @@ public class LevelManager {
 		LoadingScreen loadingScreen = new LoadingScreen();
 		GameCore.setScreen(loadingScreen);
 		curLevel = 0;
-		gameTime = 60*4 + 20;
+		gameTime = 0;
 		/// IDEA How about I have MenuScreen be an interface; or make another interface that MenuScreen implements. The idea is that I can have displays that don't use Scene2D (like the the loading screen, or level transitions if that's a thing), since they don't have options.
 		new Thread(() -> {
 			Level.resetLevels(loadingScreen);
@@ -88,6 +88,7 @@ public class LevelManager {
 	}
 	
 	public void respawn() {
+		if(mainPlayer != null) mainPlayer.remove();
 		mainPlayer = new Player();
 		
 		Level level = Level.getLevel(curLevel);
