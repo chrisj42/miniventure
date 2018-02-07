@@ -8,6 +8,7 @@ import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap.Format;
@@ -52,6 +53,9 @@ public class GameScreen {
 			zoom(-1);
 		if(Gdx.input.isKeyJustPressed(Keys.EQUALS) || Gdx.input.isKeyJustPressed(Keys.PLUS))
 			zoom(1);
+		
+		if(Gdx.input.isKeyJustPressed(Keys.R) && Gdx.input.isKeyPressed(Keys.SHIFT_LEFT))
+			GameCore.getWorld().respawn();
 	}
 	
 	public void update(@NotNull Player mainPlayer, @NotNull Level level) {
@@ -65,12 +69,12 @@ public class GameScreen {
 	}
 	
 	// timeOfDay is 0 to 1.
-	public void render(@NotNull Player mainPlayer, float alphaOverlay, @NotNull Level level, boolean updateCamera) {
+	public void render(@NotNull Player mainPlayer, Color[] lightOverlays, @NotNull Level level) {
 		
 		float viewWidth = camera.viewportWidth;
 		float viewHeight = camera.viewportHeight;
 		
-		if(updateCamera) {
+		//if(updateCamera) {
 			Vector2 playerPos = new Vector2();
 			mainPlayer.getBounds().getCenter(playerPos);
 			int lvlWidth = level.getWidth() * Tile.SIZE;
@@ -80,17 +84,25 @@ public class GameScreen {
 			camera.position.set(playerPos, camera.position.z);
 			camera.update(); // updates the camera "matrices"
 			uiCamera.update();
-		}
+		//}
 		
 		Rectangle renderSpace = new Rectangle(camera.position.x - viewWidth/2, camera.position.y - viewHeight/2, viewWidth, viewHeight);
 		
 		
 		lightingBuffer.begin();
-		Gdx.gl.glClearColor(0, 0.03f, 0.278f, alphaOverlay);
+		Gdx.gl.glClearColor(0, 0, 0, 0);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		
 		batch.setProjectionMatrix(uiCamera.combined);
 		batch.begin();
+		
+		for(Color color: lightOverlays) {
+			//System.out.println("drawing color " + color.r+","+color.g+","+color.b+","+color.a);
+			if (color.a > 0) {
+				MyUtils.fillRect(0, 0, uiCamera.viewportWidth, uiCamera.viewportHeight, color, batch);
+			}
+		}
+		
 		batch.setBlendFunction(GL20.GL_ZERO, GL20.GL_ONE_MINUS_SRC_ALPHA);
 		
 		Array<Vector3> lights = level.renderLighting(renderSpace);
@@ -116,8 +128,10 @@ public class GameScreen {
 		level.render(renderSpace, batch, Gdx.graphics.getDeltaTime());
 		
 		Tile interactTile = level.getClosestTile(mainPlayer.getInteractionRect());
-		if(interactTile != null)
-			batch.draw(GameCore.icons.get("tile-frame"), interactTile.getX(), interactTile.getY());
+		if(interactTile != null) {
+			Vector2 pos = interactTile.getPosition();
+			batch.draw(GameCore.icons.get("tile-frame"), pos.x, pos.y);
+		}
 		
 		batch.setProjectionMatrix(uiCamera.combined);
 		batch.draw(lightingBuffer.getColorBufferTexture(), 0, 0);
@@ -133,7 +147,7 @@ public class GameScreen {
 			Vector2 mousePos = new Vector2(Gdx.input.getX(), Gdx.input.getY());
 			mousePos.y = uiCamera.viewportHeight - mousePos.y; // origin is top left corner, so reverse Y dir
 			
-			Vector2 playerPos = mainPlayer.getBounds().getCenter(new Vector2());
+			Vector2 playerPos = mainPlayer.getCenter();
 			
 			// Note: the camera pos is in the center of the screen.
 			
@@ -173,6 +187,8 @@ public class GameScreen {
 		debugInfo.add("Looking at: " + (interactTile == null ? "Null" : interactTile.toLocString()));
 		
 		debugInfo.add("Entities in level: " + level.getEntityCount()+"/"+level.getEntityCap());
+		
+		debugInfo.add("Time: " + GameCore.getWorld().getTimeOfDayString());
 		
 		for(int i = 0; i < debugInfo.size; i++)
 			MyUtils.writeOutlinedText(font, batch, debugInfo.get(i), 0, uiCamera.viewportHeight-5-15*i);

@@ -4,7 +4,6 @@ import miniventure.game.GameCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;
-import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -15,6 +14,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class Item {
+	
+	public static final float ICON_SIZE = 32;
 	
 	// TODO allow items to be animated
 	
@@ -55,7 +56,7 @@ public abstract class Item {
 	public void drawItem(int stackSize, Batch batch, BitmapFont font, float x, float y, Color textColor) {
 		float width = texture.getRegionWidth();
 		//float height = texture.getRegionHeight();
-		float tx = x + Math.max(0, (Tile.SIZE - texture.getRegionWidth())/2);
+		float tx = x + Math.max(0, (ICON_SIZE - texture.getRegionWidth())/2);
 		
 		Color prev = batch.getColor();
 		batch.setColor(Color.BLACK);

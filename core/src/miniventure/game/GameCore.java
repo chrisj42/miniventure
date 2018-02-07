@@ -22,7 +22,10 @@ import org.jetbrains.annotations.Nullable;
 
 public class GameCore extends ApplicationAdapter {
 	
-	public static final Version VERSION = new Version("1.1.5");
+	public static final Version VERSION = new Version("1.1");
+	
+	public static final int DEFAULT_SCREEN_WIDTH = 800;
+	public static final int DEFAULT_SCREEN_HEIGHT = 450;
 	
 	private static final long START_TIME = System.nanoTime();
 	
@@ -112,7 +115,7 @@ public class GameCore extends ApplicationAdapter {
 		if(gameScreen != null)
 			gameScreen.resize(width, height);
 		if(menuScreen != null)
-			menuScreen.getViewport().update(width, height, false);
+			menuScreen.getViewport().update(width, height, true);
 	}
 	
 	

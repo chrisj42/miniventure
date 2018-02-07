@@ -9,7 +9,6 @@ import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.tile.Tile;
 
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
@@ -17,18 +16,19 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class Entity implements WorldObject {
 	
 	private static final HashMap<Integer, Entity> takenIDs = new HashMap<>();
 	
-	private Sprite sprite;
+	private TextureRegion texture;
 	private final int eid;
-	private float z = 0;
+	private float x, y, z = 0;
 	
-	public Entity(Sprite sprite) {
-		this.sprite = sprite;
+	public Entity(TextureRegion texture) {
+		this.texture = texture;
 		
 		int eid;
 		do {
@@ -42,7 +42,7 @@ public abstract class Entity implements WorldObject {
 	public Level getLevel() { return Level.getEntityLevel(this); }
 	
 	/// this is called only to remove an entity completely from the game, not to change levels.
-	protected final void remove() {
+	public final void remove() {
 		Level level = Level.getEntityLevel(this);
 		if(level != null)
 			level.removeEntity(this);
@@ -63,33 +63,26 @@ public abstract class Entity implements WorldObject {
 	
 	@Override
 	public void render(SpriteBatch batch, float delta) {
-		float prevY = sprite.getY();
-		drawSprite(batch, sprite.getX(), prevY+z);
-		sprite.setY(prevY);
+		drawSprite(batch, x, y+z);
 	}
 	
 	protected void drawSprite(SpriteBatch batch, float x, float y) {
-		sprite.setPosition(x, y);
-		sprite.draw(batch);
+		batch.draw(texture, x, y);
 	}
 	
 	protected void setSprite(TextureRegion texture) {
-		//sprite.setRegion(texture);
-		float x = sprite.getX(), y = sprite.getY();
-		sprite = new Sprite(texture);
-		sprite.setPosition(x, y);
+		this.texture = texture;
+		if(getLevel() != null)
+			moveTo(getLevel(), x, y);
 		z = 0;
 	}
 	
-	float getZ() { return z; }
-	void setZ(float z) { this.z = z; }
+	protected float getZ() { return z; }
+	protected void setZ(float z) { this.z = z; }
 	
 	@Override
 	public Rectangle getBounds() {
-		//bounds.setX(bounds.getX()+bounds.getWidth()/5);
-		//bounds.setSize(bounds.getWidth()*3/5, bounds.getHeight()/2); // due to the weird perspective of the game, the top part of most sprites is technically "in the air", so you don't really touch it.
-		//bounds.setHeight(bounds.getHeight()*4/5);
-		return new Rectangle(sprite.getBoundingRectangle());
+		return new Rectangle(x, y, texture.getRegionWidth(), texture.getRegionHeight());
 	}
 	
 	public void addedToLevel(Level level) {}
@@ -108,8 +101,8 @@ public abstract class Entity implements WorldObject {
 	
 	private boolean moveAxis(boolean xaxis, float amt) {
 		if(amt == 0) return true;
-		Rectangle oldRect = getBounds();//sprite.getBoundingRectangle(); // getBounds?
-		Rectangle newRect = new Rectangle(sprite.getX()+(xaxis?amt:0), sprite.getY()+(xaxis?0:amt), oldRect.width, oldRect.height);
+		Rectangle oldRect = getBounds();
+		Rectangle newRect = new Rectangle(x+(xaxis?amt:0), y+(xaxis?0:amt), oldRect.width, oldRect.height);
 		
 		// check and see if the entity can go to the new coordinates.
 		/*
@@ -158,19 +151,20 @@ public abstract class Entity implements WorldObject {
 		return true;
 	}
 	
-	public void moveTo(Level level, Vector2 pos) { moveTo(level, pos.x, pos.y); }
-	public void moveTo(Level level, float x, float y) {
+	public void moveTo(@NotNull Level level, @NotNull Vector2 pos) { moveTo(level, pos.x, pos.y); }
+	public void moveTo(@NotNull Level level, float x, float y) {
 		// this method doesn't care where you end up.
 		x = Math.max(x, 0);
 		y = Math.max(y, 0);
-		x = Math.min(x, level.getWidth()*Tile.SIZE - sprite.getRegionWidth());
-		y = Math.min(y, level.getHeight()*Tile.SIZE - sprite.getRegionHeight());
-		sprite.setPosition(x, y);
+		x = Math.min(x, level.getWidth()*Tile.SIZE - texture.getRegionWidth());
+		y = Math.min(y, level.getHeight()*Tile.SIZE - texture.getRegionHeight());
+		this.x = x;
+		this.y = y;
 	}
-	public void moveTo(Tile tile) {
-		int x = tile.getCenterX() - sprite.getRegionWidth()/2;
-		int y = tile.getCenterY() - sprite.getRegionHeight()/2;
-		moveTo(tile.getLevel(), x, y);
+	public void moveTo(@NotNull Tile tile) {
+		Vector2 pos = tile.getCenter();
+		pos.sub(getSize().scl(0.5f));
+		moveTo(tile.getLevel(), pos);
 	}
 	
 	// returns whether anything meaningful happened; if false, then other.touchedBy(this) will be called.
@@ -179,10 +173,6 @@ public abstract class Entity implements WorldObject {
 	
 	@Override
 	public void touching(Entity entity) {}
-	
-	// returns whether the other entity stops this one from moving.
-	// Generally, entities are tangible and stop each other from moving, so this returns true by default.
-	//public boolean blockedBy(Entity other) { return !(other instanceof ItemEntity); }
 	
 	@Override
 	public boolean isPermeableBy(Entity entity) { return this instanceof BounceEntity || entity instanceof BounceEntity; }
@@ -194,12 +184,8 @@ public abstract class Entity implements WorldObject {
 	public boolean hurtBy(WorldObject obj, int dmg) { return false; } // generally speaking, attacking an entity doesn't do anything; only for mobs, and maybe furniture...
 	
 	@Override
-	public boolean equals(Object other) {
-		return other instanceof Entity && ((Entity)other).eid == eid;
-	}
+	public boolean equals(Object other) { return other instanceof Entity && ((Entity)other).eid == eid; }
 	
 	@Override
-	public int hashCode() {
-		return eid;
-	}
+	public int hashCode() { return eid; }
 }

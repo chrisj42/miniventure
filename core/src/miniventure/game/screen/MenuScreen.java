@@ -24,7 +24,7 @@ public class MenuScreen extends Stage {
 	protected Table table;
 	
 	public MenuScreen() {
-		super(new ExtendViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()), GameCore.getBatch());
+		super(new ExtendViewport(GameCore.DEFAULT_SCREEN_WIDTH, GameCore.DEFAULT_SCREEN_HEIGHT), GameCore.getBatch());
 		vGroup = new VerticalGroup() {
 			@Override
 			public void draw(Batch batch, float parentAlpha) {
@@ -42,7 +42,7 @@ public class MenuScreen extends Stage {
 		};
 		
 		vGroup.space(10);
-		vGroup.setOrigin(Align.top);
+		vGroup.setOrigin(Align.topLeft);
 		vGroup.setPosition(getWidth()/2, getHeight()*2/3, Align.center);
 		
 		table.setPosition(getWidth()/2, getHeight()*2/3, Align.center);

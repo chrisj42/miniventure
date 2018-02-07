@@ -9,8 +9,8 @@ public class DesktopLauncher {
 	public static void main (String[] arg) {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		config.title = "Miniventure";
-		config.width = 800;
-		config.height = 450;
+		config.width = GameCore.DEFAULT_SCREEN_WIDTH;
+		config.height = GameCore.DEFAULT_SCREEN_HEIGHT;
 		new LwjglApplication(new GameCore(), config);
 	}
 }

@@ -10,8 +10,6 @@ import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.TextParticle;
 import miniventure.game.world.entity.mob.Mob;
 
-import com.badlogic.gdx.math.Vector2;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -84,14 +82,14 @@ public class DestructibleProperty implements TileProperty {
 			int health = totalHealth > 1 ? new Integer(tile.getData(getClass(), tileType, HEALTH_IDX)) : 1;
 			health -= damage;
 			if(totalHealth > 1)
-				tile.getLevel().addEntity(new TextParticle(damage+""), tile.getBounds().getCenter(new Vector2()));
+				tile.getLevel().addEntity(new TextParticle(damage+""), tile.getCenter());
 			if(health <= 0) {
+				tile.breakTile();
 				if(drops.length > 0 && drops[0] == null && dropsTileItem)
 					drops[0] = new ItemDrop(TileItem.get(tileType));
 				for(ItemDrop drop: drops)
 					if(drop != null)
 						drop.dropItems(tile.getLevel(), tile, attacker);
-				tile.breakTile();
 			} else
 				tile.setData(getClass(), tileType, HEALTH_IDX, health+"");
 			

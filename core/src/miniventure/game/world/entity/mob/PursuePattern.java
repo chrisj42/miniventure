@@ -19,7 +19,7 @@ public class PursuePattern implements MovementPattern {
 			Level level = self.getLevel();
 			if(level == null) return null;
 			
-			return level.getClosestPlayer(self.getBounds().getCenter(new Vector2()));
+			return level.getClosestPlayer(self.getCenter());
 		};
 	}
 	
@@ -46,8 +46,8 @@ public class PursuePattern implements MovementPattern {
 		Entity follow = followBehavior.getEntityToFollow(mob);
 		if(follow == null) return new Vector2();
 		
-		Vector2 dist = follow.getBounds().getCenter(new Vector2());
-		dist.sub(mob.getBounds().getCenter(new Vector2()));
+		Vector2 dist = follow.getCenter();
+		dist.sub(mob.getCenter());
 		
 		if(maxDist <= 0 || dist.len() < maxDist) { // move toward the entity
 			dist.setLength(followSpeed * delta);
@@ -59,5 +59,32 @@ public class PursuePattern implements MovementPattern {
 		}
 		
 		return dist;
+	}
+	
+	@Override
+	public MovementPattern copy() {
+		return new PursuePattern(followBehavior, maxDist, followSpeed);
+	}
+	
+	public static class FleePattern extends PursuePattern {
+		
+		public FleePattern() { super(); }
+		public FleePattern(EntityFollower followBehavior) { super(followBehavior); }
+		public FleePattern(EntityFollower followBehavior, float followSpeed) { super(followBehavior, followSpeed); }
+		public FleePattern(@NotNull EntityFollower followBehavior, float maxDist, float followSpeed) {
+			super(followBehavior, maxDist, followSpeed);
+		}
+		
+		@Override
+		public Vector2 move(float delta, MobAi mob) {
+			Vector2 vector = super.move(delta, mob);
+			vector.rotate(180); // this will technically affect vectors from the idle wandering pattern, but it doesn't really matter, since the direction is random anyway.
+			return vector;
+		}
+		
+		@Override
+		public MovementPattern copy() {
+			return new FleePattern(super.followBehavior, super.maxDist, super.followSpeed);
+		}
 	}
 }

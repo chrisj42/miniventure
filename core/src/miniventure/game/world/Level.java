@@ -149,13 +149,13 @@ public class Level {
 		for(WorldObject obj: objects) {
 			float lightR = obj.getLightRadius();
 			if(lightR > 0)
-				lighting.add(new Vector3(obj.getBounds().getCenter(new Vector2()), lightR));
+				lighting.add(new Vector3(obj.getCenter(), lightR));
 		}
 		
 		return lighting;
 	}
 	
-	public void dropItem(@NotNull Item item, Vector2 dropPos, @Nullable Vector2 targetPos) {
+	public void dropItem(@NotNull Item item, @NotNull Vector2 dropPos, @Nullable Vector2 targetPos) {
 		
 		/* this drops the itemEntity at the given coordinates, with the given direction (random if null).
 		 	However, if the given coordinates reside within a solid tile, the adjacent tiles are checked.
@@ -163,20 +163,21 @@ public class Level {
 		 		But if it finds a non-solid tile, it drops it towards the non-solid tile.
 		  */
 		
+		ItemEntity ie = new ItemEntity(item, Vector2.Zero.cpy()); // this is a dummy variable.
+		
+		Tile closest = getClosestTile(dropPos);
+		
 		Rectangle itemBounds = new Rectangle(dropPos.x, dropPos.y, item.getTexture().getRegionWidth(), item.getTexture().getRegionHeight());
-		Tile closest = getClosestTile(itemBounds);
 		
 		if(closest == null) {
 			System.err.println("ERROR dropping item, closest tile is null");
 			return;
 		}
 		
-		ItemEntity ie = new ItemEntity(item, Vector2.Zero.cpy()); // this is a dummy variable.
-		
 		if(!closest.isPermeableBy(ie)) {
 			// we need to look around for a tile that the item *can* be placed on.
 			Array<Tile> adjacent = closest.getAdjacentTiles(true);
-			Tile.sortByDistance(adjacent, targetPos);
+			Tile.sortByDistance(adjacent, targetPos == null ? dropPos : targetPos);
 			for(Tile adj: adjacent) {
 				if(adj.isPermeableBy(ie)) {
 					closest = adj;
@@ -250,15 +251,17 @@ public class Level {
 	}
 	
 	@Nullable
-	public Tile getClosestTile(Rectangle area) {
-		Vector2 center = new Vector2();
-		area.getCenter(center);
-		int x = (int)center.x;
-		int y = (int)center.y;
-		x /= Tile.SIZE;
-		y /= Tile.SIZE;
+	public Tile getClosestTile(Rectangle area) { return getClosestTile(area.getCenter(new Vector2())); }
+	@Nullable
+	public Tile getClosestTile(Vector2 point) { return getClosestTile(point.x, point.y); }
+	@Nullable
+	public Tile getClosestTile(float x, float y) {
+		int xp = (int)x;
+		int yp = (int)y;
+		xp /= Tile.SIZE;
+		yp /= Tile.SIZE;
 		
-		return getTile(x, y);
+		return getTile(xp, yp);
 	}
 	
 	@Nullable
@@ -271,8 +274,8 @@ public class Level {
 		if(players.size == 0) return null;
 		
 		players.sort((p1, p2) -> {
-			Vector2 p1Pos = p1.getBounds().getCenter(new Vector2());
-			Vector2 p2Pos = p2.getBounds().getCenter(new Vector2());
+			Vector2 p1Pos = p1.getCenter();
+			Vector2 p2Pos = p2.getCenter();
 			
 			return Float.compare(p1Pos.dst(pos), p2Pos.dst(pos));
 		});

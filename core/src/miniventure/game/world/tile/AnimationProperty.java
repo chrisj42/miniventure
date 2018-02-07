@@ -58,7 +58,7 @@ public class AnimationProperty implements TileProperty {
 		SEQUENCE((tile, frames, frameIdx) -> frames.get(frameIdx % frames.size)),
 		
 		RANDOM((tile, frames, frameIdx) -> {
-			MathUtils.random.setSeed((long)(frameIdx) + tile.getCenterX() * tile.getCenterX() + tile.getCenterY());
+			MathUtils.random.setSeed((long)(frameIdx) + tile.getPosition().hashCode() * 17);
 			return frames.get(MathUtils.random(frames.size-1));
 		}),
 		

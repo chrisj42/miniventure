@@ -8,7 +8,6 @@ import miniventure.game.world.entity.mob.Player.Stat;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.math.Vector2;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -87,7 +86,7 @@ public class Hands {
 			if(newItem != null && !player.takeItem(newItem)) {// will add it to hand, or inventory, whichever fits.
 				Level level = player.getLevel();
 				if(level != null)
-					level.dropItem(newItem, player.getBounds().getCenter(new Vector2()), null);//count++; // if there was a new item, and it couldn't be picked up, then the count is not decreased.
+					level.dropItem(newItem, player.getCenter(), null);//count++; // if there was a new item, and it couldn't be picked up, then the count is not decreased.
 			}
 		}
 	}
