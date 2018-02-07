@@ -116,7 +116,7 @@ public class ItemDrop {
 	}
 	
 	public void dropItems(Level level, @NotNull WorldObject source, @Nullable WorldObject target) {
-		dropItems(level, source.getBounds().getCenter(new Vector2()), target == null ? null : target.getBounds().getCenter(new Vector2()));
+		dropItems(level, source.getCenter(), target == null ? null : target.getCenter());
 	}
 	public void dropItems(Level level, Vector2 dropPos, @Nullable Vector2 targetPos) {
 		for(int i = 0; i < getItemsDropped(); i++)

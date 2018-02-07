@@ -98,7 +98,7 @@ public abstract class Entity implements WorldObject {
 	
 	private boolean moveAxis(boolean xaxis, float amt) {
 		if(amt == 0) return true;
-		Rectangle oldRect = getBounds();//sprite.getBoundingRectangle(); // getBounds?
+		Rectangle oldRect = getBounds();
 		Rectangle newRect = new Rectangle(x+(xaxis?amt:0), y+(xaxis?0:amt), oldRect.width, oldRect.height);
 		
 		// check and see if the entity can go to the new coordinates.

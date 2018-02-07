@@ -145,7 +145,7 @@ public class GameScreen {
 			Vector2 mousePos = new Vector2(Gdx.input.getX(), Gdx.input.getY());
 			mousePos.y = uiCamera.viewportHeight - mousePos.y; // origin is top left corner, so reverse Y dir
 			
-			Vector2 playerPos = mainPlayer.getBounds().getCenter(new Vector2());
+			Vector2 playerPos = mainPlayer.getCenter();
 			
 			// Note: the camera pos is in the center of the screen.
 			

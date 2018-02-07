@@ -21,6 +21,9 @@ public interface WorldObject {
 	Level getLevel();
 	
 	Rectangle getBounds();
+	default Vector2 getCenter() { return getBounds().getCenter(new Vector2()); }
+	default Vector2 getPosition() { return getBounds().getPosition(new Vector2()); }
+	default Vector2 getSize() { return getBounds().getSize(new Vector2()); }
 	
 	void update(float delta);
 	
@@ -53,7 +56,7 @@ public interface WorldObject {
 		getBounds().getCenter(center);
 		HashMap<Vector2, Tile> tileMap = new HashMap<>();
 		for(Tile t: tiles)
-			tileMap.put(t.getBounds().getCenter(new Vector2()), t);
+			tileMap.put(t.getCenter(), t);
 		
 		Array<Vector2> tileCenters = new Array<>(tileMap.keySet().toArray(new Vector2[tileMap.size()]));
 		tileCenters.sort((v1, v2) -> (int) (center.dst2(v1) - center.dst2(v2))); // sort, so the first one in the list is the closest one

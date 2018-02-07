@@ -52,9 +52,9 @@ public class BounceEntity extends Entity {
 		Level level = Level.getEntityLevel(this);
 		if(level == null) return;
 		
-		Vector2 pos = getBounds().getPosition(new Vector2());
+		Vector2 pos = getPosition();
 		move(velocity.x, velocity.y, velocity.z);
-		Vector2 newPos = getBounds().getPosition(new Vector2());
+		Vector2 newPos = getPosition();
 		
 		if(newPos.x != pos.x+velocity.x)
 			velocity.x *= -1;

@@ -149,7 +149,7 @@ public class Level {
 		for(WorldObject obj: objects) {
 			float lightR = obj.getLightRadius();
 			if(lightR > 0)
-				lighting.add(new Vector3(obj.getBounds().getCenter(new Vector2()), lightR));
+				lighting.add(new Vector3(obj.getCenter(), lightR));
 		}
 		
 		return lighting;
@@ -274,8 +274,8 @@ public class Level {
 		if(players.size == 0) return null;
 		
 		players.sort((p1, p2) -> {
-			Vector2 p1Pos = p1.getBounds().getCenter(new Vector2());
-			Vector2 p2Pos = p2.getBounds().getCenter(new Vector2());
+			Vector2 p1Pos = p1.getCenter();
+			Vector2 p2Pos = p2.getCenter();
 			
 			return Float.compare(p1Pos.dst(pos), p2Pos.dst(pos));
 		});

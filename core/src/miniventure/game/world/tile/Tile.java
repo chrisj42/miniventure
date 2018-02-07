@@ -228,8 +228,8 @@ public class Tile implements WorldObject {
 	/** @noinspection UnusedReturnValue*/
 	public static Array<Tile> sortByDistance(Array<Tile> tiles, @NotNull final Vector2 position) {
 		tiles.sort((t1, t2) -> {
-			float t1diff = position.dst(t1.getBounds().getCenter(new Vector2()));
-			float t2diff = position.dst(t2.getBounds().getCenter(new Vector2()));
+			float t1diff = position.dst(t1.getCenter());
+			float t2diff = position.dst(t2.getCenter());
 			return Float.compare(t1diff, t2diff);
 		});
 		

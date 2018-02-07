@@ -19,7 +19,7 @@ public class PursuePattern implements MovementPattern {
 			Level level = self.getLevel();
 			if(level == null) return null;
 			
-			return level.getClosestPlayer(self.getBounds().getCenter(new Vector2()));
+			return level.getClosestPlayer(self.getCenter());
 		};
 	}
 	
@@ -46,8 +46,8 @@ public class PursuePattern implements MovementPattern {
 		Entity follow = followBehavior.getEntityToFollow(mob);
 		if(follow == null) return new Vector2();
 		
-		Vector2 dist = follow.getBounds().getCenter(new Vector2());
-		dist.sub(mob.getBounds().getCenter(new Vector2()));
+		Vector2 dist = follow.getCenter();
+		dist.sub(mob.getCenter());
 		
 		if(maxDist <= 0 || dist.len() < maxDist) { // move toward the entity
 			dist.setLength(followSpeed * delta);

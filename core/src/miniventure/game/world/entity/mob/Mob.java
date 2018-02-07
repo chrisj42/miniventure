@@ -119,7 +119,7 @@ public abstract class Mob extends Entity {
 		if(health > 0) {
 			// do knockback
 			
-			knockbackVelocity.set(getBounds().getCenter(new Vector2()).sub(obj.getBounds().getCenter(new Vector2())).nor().scl(KNOCKBACK_SPEED));
+			knockbackVelocity.set(getCenter().sub(obj.getCenter()).nor().scl(KNOCKBACK_SPEED));
 			
 			/*
 				I want the player to be pushed back somewhere between min and max time.
@@ -136,7 +136,7 @@ public abstract class Mob extends Entity {
 		
 		Level level = getLevel();
 		if(level != null) {
-			level.addEntity(new TextParticle(damage+"", this instanceof Player ? Color.PINK : Color.RED), getBounds().getCenter(new Vector2()));
+			level.addEntity(new TextParticle(damage+"", this instanceof Player ? Color.PINK : Color.RED), getCenter());
 			
 			if (health == 0) {
 				for (ItemDrop drop : itemDrops)
