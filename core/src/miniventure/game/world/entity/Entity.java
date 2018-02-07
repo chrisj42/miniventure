@@ -16,6 +16,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class Entity implements WorldObject {
@@ -71,6 +72,8 @@ public abstract class Entity implements WorldObject {
 	
 	protected void setSprite(TextureRegion texture) {
 		this.texture = texture;
+		if(getLevel() != null)
+			moveTo(getLevel(), x, y);
 		z = 0;
 	}
 	
@@ -148,8 +151,8 @@ public abstract class Entity implements WorldObject {
 		return true;
 	}
 	
-	public void moveTo(Level level, Vector2 pos) { moveTo(level, pos.x, pos.y); }
-	public void moveTo(Level level, float x, float y) {
+	public void moveTo(@NotNull Level level, @NotNull Vector2 pos) { moveTo(level, pos.x, pos.y); }
+	public void moveTo(@NotNull Level level, float x, float y) {
 		// this method doesn't care where you end up.
 		x = Math.max(x, 0);
 		y = Math.max(y, 0);
@@ -158,10 +161,10 @@ public abstract class Entity implements WorldObject {
 		this.x = x;
 		this.y = y;
 	}
-	public void moveTo(Tile tile) {
-		int x = tile.getCenterX() - texture.getRegionWidth()/2;
-		int y = tile.getCenterY() - texture.getRegionHeight()/2;
-		moveTo(tile.getLevel(), x, y);
+	public void moveTo(@NotNull Tile tile) {
+		Vector2 pos = tile.getCenter();
+		pos.sub(getSize().scl(0.5f));
+		moveTo(tile.getLevel(), pos);
 	}
 	
 	// returns whether anything meaningful happened; if false, then other.touchedBy(this) will be called.

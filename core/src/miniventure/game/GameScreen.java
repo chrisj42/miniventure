@@ -128,8 +128,10 @@ public class GameScreen {
 		level.render(renderSpace, batch, Gdx.graphics.getDeltaTime());
 		
 		Tile interactTile = level.getClosestTile(mainPlayer.getInteractionRect());
-		if(interactTile != null)
-			batch.draw(GameCore.icons.get("tile-frame"), interactTile.getX(), interactTile.getY());
+		if(interactTile != null) {
+			Vector2 pos = interactTile.getPosition();
+			batch.draw(GameCore.icons.get("tile-frame"), pos.x, pos.y);
+		}
 		
 		batch.setProjectionMatrix(uiCamera.combined);
 		batch.draw(lightingBuffer.getColorBufferTexture(), 0, 0);

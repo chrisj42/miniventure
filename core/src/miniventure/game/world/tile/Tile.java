@@ -144,12 +144,6 @@ public class Tile implements WorldObject {
 	
 	@NotNull @Override public Level getLevel() { return level; }
 	
-	public int getX() { return x*SIZE; }
-	public int getY() { return y*SIZE; }
-	
-	public int getCenterX() { return x*SIZE + SIZE/2; }
-	public int getCenterY() { return y*SIZE + SIZE/2; }
-	
 	@Override
 	public Rectangle getBounds() { return new Rectangle(x*SIZE, y*SIZE, SIZE, SIZE); }
 	
