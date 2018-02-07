@@ -6,7 +6,6 @@ import miniventure.game.world.Level;
 import miniventure.game.world.entity.mob.Player;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.math.Vector2;
 
 public class LevelManager {
 	
@@ -23,11 +22,22 @@ public class LevelManager {
 		GameScreen... game screen won't do much, just do the rendering. 
 	 */
 	
-	private static final float LENGTH_OF_DAY = 60 * 5; // 5 minutes is like 24 hours in-game.
-	private static final float DAWN_START_TIME = 5f/24;
-	private static final float DAWN_END_TIME = 6f/24;
-	private static final float DUSK_START_TIME = 20f/24;
-	private static final float DUSK_END_TIME = 21f/24;
+	/*
+		So, time of day lighting has a few different factors:
+			- for each time of day, there can be a list of different overlays to render, usually just two.
+			- a time of day can have a lead in color, that starts out full, and fades out; a main color, which fades in, and then out; and a lead out color. Or, maybe, they just all have main colors
+		
+		What's needed is a special DaylightOverlay class, that returns an array of colors.
+		
+		
+	 */
+	
+	//static final float LENGTH_OF_DAY = 60 * 5; // 5 minutes is like 24 hours in-game.
+	
+	// private static final float DAWN_START_TIME = 5f/24;
+	// private static final float DAWN_END_TIME = 6f/24;
+	// private static final float DUSK_START_TIME = 20f/24;
+	// private static final float DUSK_END_TIME = 21f/24;
 	
 	private boolean worldLoaded = false;
 	
@@ -57,8 +67,7 @@ public class LevelManager {
 		boolean update = menu == null; // later add "|| multiplayer";
 		
 		if(menu == null || !menu.usesWholeScreen()) {
-			Vector2 overlays = getDaylightOverlays();
-			game.render(mainPlayer, overlays.x, overlays.y, level);
+			game.render(mainPlayer, TimeOfDay.getTimeOfDay(gameTime).getSkyColors(gameTime), level);
 		}
 		
 		if(update) {
@@ -67,13 +76,17 @@ public class LevelManager {
 		}
 	}
 	
-	private Vector2 getDaylightOverlays() {
-		if(gameTime < LENGTH_OF_DAY / 2) return new Vector2();
+	String getTimeOfDayString() {
+		return TimeOfDay.getTimeOfDay(gameTime).getTimeString(gameTime);
+	}
+	
+	/*private void renderDaylightOverlay(Batch batch) {
+		if(gameTime < LENGTH_OF_DAY / 2) return;
 		
-		/*
+		*//*
 			5AM - 6AM = sunrise
 			7PM - 8PM = sunset
-		 */
+		 *//*
 		
 		Vector2 alphas = new Vector2();
 		
@@ -91,19 +104,19 @@ public class LevelManager {
 		}
 		
 		// lightest at midday, darkest at midnight
-		/*float timeSinceMidday = (gameTime + LENGTH_OF_HALF_DAY) % (LENGTH_OF_HALF_DAY*2);
+		*//*float timeSinceMidday = (gameTime + LENGTH_OF_HALF_DAY) % (LENGTH_OF_HALF_DAY*2);
 		
 		float alpha = timeSinceMidday / LENGTH_OF_HALF_DAY;
 		if(alpha > 1)
 			alpha = 2 - alpha;
-		*/
+		*//*
 		alphas.x *= 0.66f; // max of 0.66 alpha.
 		alphas.y *= 0.40f;
 		
 		return alphas;
-	}
+	}*/
 	
-	public String getTimeOfDayString() {
+	/*public String getTimeOfDayString() {
 		float timeOfDay = (gameTime % LENGTH_OF_DAY) / LENGTH_OF_DAY;
 		
 		if(gameTime < DAWN_END_TIME * LENGTH_OF_DAY)
@@ -133,14 +146,14 @@ public class LevelManager {
 		timeString += " ("+Math.round(timeOfDay*100)+"% through day)";
 		
 		return timeString;
-	}
+	}*/
 	
 	public void createWorld() {
 		worldLoaded = false;
 		LoadingScreen loadingScreen = new LoadingScreen();
 		GameCore.setScreen(loadingScreen);
 		curLevel = 0;
-		gameTime = 0;
+		gameTime = 60*4 + 20;
 		/// IDEA How about I have MenuScreen be an interface; or make another interface that MenuScreen implements. The idea is that I can have displays that don't use Scene2D (like the the loading screen, or level transitions if that's a thing), since they don't have options.
 		new Thread(() -> {
 			Level.resetLevels(loadingScreen);

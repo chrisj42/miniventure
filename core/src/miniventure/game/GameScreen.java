@@ -8,6 +8,7 @@ import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap.Format;
@@ -65,7 +66,7 @@ public class GameScreen {
 	}
 	
 	// timeOfDay is 0 to 1.
-	public void render(@NotNull Player mainPlayer, float alphaNight, float alphaSun, @NotNull Level level) {
+	public void render(@NotNull Player mainPlayer, Color[] lightOverlays, @NotNull Level level) {
 		
 		float viewWidth = camera.viewportWidth;
 		float viewHeight = camera.viewportHeight;
@@ -86,11 +87,19 @@ public class GameScreen {
 		
 		
 		lightingBuffer.begin();
-		Gdx.gl.glClearColor(0, 0.03f, 0.278f, alphaNight);
+		Gdx.gl.glClearColor(0, 0, 0, 0);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		
 		batch.setProjectionMatrix(uiCamera.combined);
 		batch.begin();
+		
+		for(Color color: lightOverlays) {
+			//System.out.println("drawing color " + color.r+","+color.g+","+color.b+","+color.a);
+			if (color.a > 0) {
+				MyUtils.fillRect(0, 0, uiCamera.viewportWidth, uiCamera.viewportHeight, color, batch);
+			}
+		}
+		
 		batch.setBlendFunction(GL20.GL_ZERO, GL20.GL_ONE_MINUS_SRC_ALPHA);
 		
 		Array<Vector3> lights = level.renderLighting(renderSpace);
@@ -176,7 +185,7 @@ public class GameScreen {
 		
 		debugInfo.add("Entities in level: " + level.getEntityCount()+"/"+level.getEntityCap());
 		
-		debugInfo.add("Time of Day: " + GameCore.getWorld().getTimeOfDayString());
+		debugInfo.add("Time: " + GameCore.getWorld().getTimeOfDayString());
 		
 		for(int i = 0; i < debugInfo.size; i++)
 			MyUtils.writeOutlinedText(font, batch, debugInfo.get(i), 0, uiCamera.viewportHeight-5-15*i);
