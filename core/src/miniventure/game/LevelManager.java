@@ -22,23 +22,6 @@ public class LevelManager {
 		GameScreen... game screen won't do much, just do the rendering. 
 	 */
 	
-	/*
-		So, time of day lighting has a few different factors:
-			- for each time of day, there can be a list of different overlays to render, usually just two.
-			- a time of day can have a lead in color, that starts out full, and fades out; a main color, which fades in, and then out; and a lead out color. Or, maybe, they just all have main colors
-		
-		What's needed is a special DaylightOverlay class, that returns an array of colors.
-		
-		
-	 */
-	
-	//static final float LENGTH_OF_DAY = 60 * 5; // 5 minutes is like 24 hours in-game.
-	
-	// private static final float DAWN_START_TIME = 5f/24;
-	// private static final float DAWN_END_TIME = 6f/24;
-	// private static final float DUSK_START_TIME = 20f/24;
-	// private static final float DUSK_END_TIME = 21f/24;
-	
 	private boolean worldLoaded = false;
 	
 	private int curLevel;
@@ -79,74 +62,6 @@ public class LevelManager {
 	String getTimeOfDayString() {
 		return TimeOfDay.getTimeOfDay(gameTime).getTimeString(gameTime);
 	}
-	
-	/*private void renderDaylightOverlay(Batch batch) {
-		if(gameTime < LENGTH_OF_DAY / 2) return;
-		
-		*//*
-			5AM - 6AM = sunrise
-			7PM - 8PM = sunset
-		 *//*
-		
-		Vector2 alphas = new Vector2();
-		
-		float timeOfDay = (gameTime % LENGTH_OF_DAY) / LENGTH_OF_DAY;
-		if(timeOfDay < DAWN_START_TIME || timeOfDay > DUSK_END_TIME)
-			alphas.set(1, 0);
-		else if(timeOfDay > DAWN_END_TIME && timeOfDay < DUSK_START_TIME)
-			alphas.set(0, 0);
-		else if(timeOfDay > DUSK_START_TIME) {
-			alphas.x = (timeOfDay - DUSK_START_TIME) / (DUSK_END_TIME - DUSK_START_TIME);
-			alphas.y = (alphas.x > 0.5f ? 1 - alphas.x : alphas.x) * 2;
-		} else {
-			alphas.x = 1 - ((timeOfDay - DAWN_START_TIME) / (DAWN_END_TIME - DAWN_START_TIME)); // alpha should start at 1
-			alphas.y = (alphas.x > 0.5f ? 1 - alphas.x : alphas.x) * 2; // alpha should still start at zero 
-		}
-		
-		// lightest at midday, darkest at midnight
-		*//*float timeSinceMidday = (gameTime + LENGTH_OF_HALF_DAY) % (LENGTH_OF_HALF_DAY*2);
-		
-		float alpha = timeSinceMidday / LENGTH_OF_HALF_DAY;
-		if(alpha > 1)
-			alpha = 2 - alpha;
-		*//*
-		alphas.x *= 0.66f; // max of 0.66 alpha.
-		alphas.y *= 0.40f;
-		
-		return alphas;
-	}*/
-	
-	/*public String getTimeOfDayString() {
-		float timeOfDay = (gameTime % LENGTH_OF_DAY) / LENGTH_OF_DAY;
-		
-		if(gameTime < DAWN_END_TIME * LENGTH_OF_DAY)
-			return "First Morning Light, " + (Math.round((1-((DAWN_END_TIME - timeOfDay) / DAWN_END_TIME))*100))+"% past";
-		
-		
-		float timeSinceDawn = (timeOfDay - DAWN_START_TIME + 1) % 1f;
-		
-		String timeString = "";
-		
-		String[] timeNames = {"", "Morning", "Day", "Dusk", "Night"};
-		float[] times = {DAWN_START_TIME, DAWN_END_TIME, DUSK_START_TIME, DUSK_END_TIME, 1 + DAWN_START_TIME};
-		for(int i = 0; i < times.length; i++)
-			times[i] -= DAWN_START_TIME;
-		
-		for(int i = 1; i < times.length; i++) {
-			if(timeSinceDawn < times[i]) {
-				timeString += timeNames[i] + ", ";
-				// now add percentage
-				float duration = times[i] - times[i-1];
-				float percent = (timeSinceDawn - times[i-1]) / duration;
-				timeString += Math.round(percent * 100)+"% past";
-				break;
-			}
-		}
-		
-		timeString += " ("+Math.round(timeOfDay*100)+"% through day)";
-		
-		return timeString;
-	}*/
 	
 	public void createWorld() {
 		worldLoaded = false;
