@@ -38,7 +38,7 @@ class Testing {
 		Color[][] colors = new Color[width][height];
 		for(int x = 0; x < width; x++) {
 			for(int y = 0; y < height; y++) {
-				int col = getIndex(256, noise[x][y]);
+				int col = (int) (noise[x][y] * 255);
 				colors[x][y] = new Color(col, col, col);
 			}
 		}
@@ -84,6 +84,4 @@ class Testing {
 		
 		displayNoiseGrayscale(width, height, values, scale);
 	}
-	
-	static int getIndex(int arrayLength, float val) { return Math.min(arrayLength-1, (int) (val*arrayLength)); }
 }

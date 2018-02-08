@@ -10,7 +10,7 @@ class Coherent2DNoiseFunction {
 	private final float noiseCoordsPerValue;
 	private final int numCurves;
 	
-	Coherent2DNoiseFunction(long seed, int noiseCoordsPerValue) { this(seed, noiseCoordsPerValue, 1); }
+	Coherent2DNoiseFunction(long seed, int noiseCoordsPerValue) { this(seed, noiseCoordsPerValue, 2); }
 	Coherent2DNoiseFunction(long seed, int noiseCoordsPerValue, int numCurves) {
 		hashFunction = LongHashFunction.xx(seed);
 		this.noiseCoordsPerValue = noiseCoordsPerValue;
