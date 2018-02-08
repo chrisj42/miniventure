@@ -64,7 +64,7 @@ class Testing {
 			protected void paintComponent(Graphics g) { g.drawImage(image, 0, 0, null); }
 		};
 		
-		JOptionPane.showMessageDialog(null, viewPanel, "Level", JOptionPane.PLAIN_MESSAGE);
+		JOptionPane.showMessageDialog(null, viewPanel, "Noise", JOptionPane.PLAIN_MESSAGE);
 	}
 	
 	

@@ -4,14 +4,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import net.openhft.hashing.LongHashFunction;
 
-public class Coherent2DNoiseFunction {
-	
-	/*
-		This will have a 2D integer noise function at its core; it will simply interpolate values in between.
-		
-		These will simply be the noise, nothing else, so they won't worry about the "scale" of the values they are given. Instead, I will have a wrapper class that will accept world coordinates, and return a value. It will have a scale, so that one world coordinate will equal so many noise coordinates.
-		Or maybe that can be here...
-	 */
+class Coherent2DNoiseFunction {
 	
 	private final LongHashFunction hashFunction;
 	private final float noiseCoordsPerValue;
@@ -28,17 +21,6 @@ public class Coherent2DNoiseFunction {
 		
 		float xVal = x / noiseCoordsPerValue;
 		float yVal = y / noiseCoordsPerValue;
-		
-		//System.out.println("getting value for "+xVal+","+yVal);
-		
-		/*
-			Take x and y value, convert to local units... then get interpolated random value from surrounding integers.
-			start by finding the surrounding integers, and then interpolate on one axis, then the next.
-			
-			for x and y...
-				- check if the value is sitting on an integer already
-				- if not, interpolate it between two 
-		 */
 		
 		int xMin = MathUtils.floor(xVal);
 		int yMin = MathUtils.floor(yVal);
@@ -59,7 +41,6 @@ public class Coherent2DNoiseFunction {
 		for(int i = 0; i < numCurves; i++)
 			totalHash = curveCubic(totalHash);
 		
-		//System.out.println("returning " + totalHash);
 		return totalHash;
 	}
 	
@@ -71,6 +52,8 @@ public class Coherent2DNoiseFunction {
 			- get the vector of data point - ref point
 			- return dot product
 		 */
+		
+		// alternate way of getting random dir, I don't like it
 		// MathUtils.random.setSeed(hashFunction.hashInts(new int[] {xRef, yRef}));
 		// ref.setToRandomDirection();
 		ref.x = (int) hashFunction.hashInts(new int[] {xRef, yRef});
@@ -79,28 +62,13 @@ public class Coherent2DNoiseFunction {
 		
 		diff.set(x, y);
 		diff.sub(xRef, yRef);
-		float result = ref.crs(diff);
-		//if(result == 0)
-		//	return ref.angle()/180-1;
-		//System.out.println("hash value from ref: " + result);
-		return result;
+		return ref.dot(diff);
 	}
 	
-	/*private float getHashValue(int... ints) {
-		long hashSeed = hashFunction.hashInts(ints);
-		MathUtils.random.setSeed(hashSeed);
-		float ran = MathUtils.random.nextFloat();
-		//System.out.println("random hash value: " + ran);
-		return ran;
-	}*/
-	
 	private float interpolate(float a, float b, float weight) {
-		float oldWeight = weight;
 		// cubic equation: -2x^3 + 3x^2
 		weight = curveCubic(weight);
-		float result = MathUtils.lerp(a, b, weight);
-		//System.out.println("interpolated from "+a+" to "+b+", with weight transformed from "+oldWeight+" to "+weight);
-		return result;
+		return MathUtils.lerp(a, b, weight);
 	}
 	
 	private float curveCubic(float value) {
