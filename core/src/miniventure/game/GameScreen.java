@@ -1,6 +1,5 @@
 package miniventure.game;
 
-import miniventure.game.screen.RespawnScreen;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Level;
 import miniventure.game.world.entity.mob.Player;
@@ -16,7 +15,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -25,6 +23,8 @@ import com.badlogic.gdx.utils.Array;
 import org.jetbrains.annotations.NotNull;
 
 public class GameScreen {
+	
+	private static final float OFF_SCREEN_LIGHT_RADIUS = 10;
 	
 	private SpriteBatch batch = GameCore.getBatch();
 	private BitmapFont font = GameCore.getFont();
@@ -35,10 +35,8 @@ public class GameScreen {
 	
 	public GameScreen() {
 		camera = new OrthographicCamera();
-		camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		uiCamera = new OrthographicCamera();
-		uiCamera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		lightingBuffer = FrameBuffer.createFrameBuffer(Format.RGBA8888, (int)camera.viewportWidth, (int)camera.viewportHeight, false);
+		resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 	}
 	
 	void dispose() {
@@ -58,36 +56,21 @@ public class GameScreen {
 			GameCore.getWorld().respawn();
 	}
 	
-	public void update(@NotNull Player mainPlayer, @NotNull Level level) {
-		if(mainPlayer.getLevel() == null) {
-			System.out.println("main player level is null");
-			GameCore.setScreen(new RespawnScreen());
-			return;
-		}
-		
-		level.update(Gdx.graphics.getDeltaTime());
-	}
-	
 	// timeOfDay is 0 to 1.
 	public void render(@NotNull Player mainPlayer, Color[] lightOverlays, @NotNull Level level) {
 		
 		float viewWidth = camera.viewportWidth;
 		float viewHeight = camera.viewportHeight;
 		
-		//if(updateCamera) {
-			Vector2 playerPos = new Vector2();
-			mainPlayer.getBounds().getCenter(playerPos);
-			int lvlWidth = level.getWidth() * Tile.SIZE;
-			int lvlHeight = level.getHeight() * Tile.SIZE;
-			playerPos.x = MathUtils.clamp(playerPos.x, Math.min(viewWidth/2, lvlWidth/2), Math.max(lvlWidth/2, lvlWidth-viewWidth/2));
-			playerPos.y = MathUtils.clamp(playerPos.y, Math.min(viewHeight/2, lvlHeight/2), Math.max(lvlHeight/2, lvlHeight-viewHeight/2));
-			camera.position.set(playerPos, camera.position.z);
-			camera.update(); // updates the camera "matrices"
-			uiCamera.update();
-		//}
+		// the camera position is always relative to the current chunk.
+		camera.position.set(mainPlayer.getCenter(), camera.position.z);
+		camera.update(); // updates the camera "matrices"
+		uiCamera.update();
 		
 		Rectangle renderSpace = new Rectangle(camera.position.x - viewWidth/2, camera.position.y - viewHeight/2, viewWidth, viewHeight);
 		
+		final float extra = OFF_SCREEN_LIGHT_RADIUS;
+		Rectangle lightRenderSpace = new Rectangle(renderSpace.x - extra, renderSpace.y - extra, renderSpace.width + extra*2, renderSpace.height + extra*2);
 		
 		lightingBuffer.begin();
 		Gdx.gl.glClearColor(0, 0, 0, 0);
@@ -96,16 +79,13 @@ public class GameScreen {
 		batch.setProjectionMatrix(uiCamera.combined);
 		batch.begin();
 		
-		for(Color color: lightOverlays) {
-			//System.out.println("drawing color " + color.r+","+color.g+","+color.b+","+color.a);
-			if (color.a > 0) {
+		for(Color color: lightOverlays)
+			if (color.a > 0)
 				MyUtils.fillRect(0, 0, uiCamera.viewportWidth, uiCamera.viewportHeight, color, batch);
-			}
-		}
 		
 		batch.setBlendFunction(GL20.GL_ZERO, GL20.GL_ONE_MINUS_SRC_ALPHA);
 		
-		Array<Vector3> lights = level.renderLighting(renderSpace);
+		Array<Vector3> lights = level.renderLighting(lightRenderSpace);
 		final TextureRegion lightTexture = GameCore.icons.get("light");
 		
 		for(Vector3 light: lights) {
@@ -204,10 +184,11 @@ public class GameScreen {
 	
 	void resize(int width, int height) {
 		float zoomFactor = (float) Math.pow(2, zoom);
-		camera.setToOrtho(false, width/zoomFactor, height/zoomFactor);
+		camera.setToOrtho(false, width/zoomFactor/Tile.SIZE, height/zoomFactor/Tile.SIZE);
 		uiCamera.setToOrtho(false, width, height);
 		
-		lightingBuffer.dispose();
+		if(lightingBuffer != null)
+			lightingBuffer.dispose();
 		lightingBuffer = FrameBuffer.createFrameBuffer(Format.RGBA8888, (int)uiCamera.viewportWidth, (int)uiCamera.viewportHeight, false);
 	}
 }

@@ -3,6 +3,7 @@ package miniventure.game.world.entity;
 import java.util.HashMap;
 
 import miniventure.game.item.Item;
+import miniventure.game.world.Chunk;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Mob;
@@ -72,8 +73,7 @@ public abstract class Entity implements WorldObject {
 	
 	protected void setSprite(TextureRegion texture) {
 		this.texture = texture;
-		if(getLevel() != null)
-			moveTo(getLevel(), x, y);
+		moveIfLevel(x, y);
 		z = 0;
 	}
 	
@@ -92,17 +92,22 @@ public abstract class Entity implements WorldObject {
 	public boolean move(Vector2 v) { return move(v.x, v.y); }
 	public boolean move(float xd, float yd) { return move(xd, yd, 0); }
 	public boolean move(float xd, float yd, float zd) {
-		boolean moved;
-		moved = moveAxis(true, xd);
-		moved = moveAxis(false, yd) || moved;
+		Level level = getLevel();
+		if(level == null) return false; // can't move if you're not in a level...
+		Vector2 movement = new Vector2();
+		movement.x = moveAxis(level, true, xd, 0);
+		movement.y = moveAxis(level, false, yd, movement.x);
 		z += zd;
+		boolean moved = !movement.isZero();
+		if(moved) moveTo(level, x+movement.x, y+movement.y);
 		return moved;
 	}
 	
-	private boolean moveAxis(boolean xaxis, float amt) {
-		if(amt == 0) return true;
+	private float moveAxis(@NotNull Level level, boolean xaxis, float amt, float other) {
+		if(amt == 0) return 0;
 		Rectangle oldRect = getBounds();
-		Rectangle newRect = new Rectangle(x+(xaxis?amt:0), y+(xaxis?0:amt), oldRect.width, oldRect.height);
+		oldRect.setPosition(x+(xaxis?0:other), y+(xaxis?other:0));
+		Rectangle newRect = new Rectangle(oldRect.x+(xaxis?amt:0), oldRect.y+(xaxis?0:amt), oldRect.width, oldRect.height);
 		
 		// check and see if the entity can go to the new coordinates.
 		/*
@@ -111,9 +116,6 @@ public abstract class Entity implements WorldObject {
 				- determining which tiles the entity is going to touch, that it isn't already in, and checking to see if any of them prevent movement
 				- calling any interaction methods along the way
 		 */
-		
-		Level level = Level.getEntityLevel(this);
-		if(level == null) return false; // can't move if you're not in a level...
 		
 		Array<Tile> newTiles = level.getOverlappingTiles(newRect);
 		Array<Tile> oldTiles = level.getOverlappingTiles(oldRect);
@@ -130,7 +132,7 @@ public abstract class Entity implements WorldObject {
 			canMove = canMove && (!canMoveCurrent || tile.isPermeableBy(this));
 		}
 		
-		if(!canMove) return false; // don't bother interacting with entities if tiles prevent movement.
+		if(!canMove) return 0; // don't bother interacting with entities if tiles prevent movement.
 		
 		// get and touch entities, and check for blockage
 		
@@ -143,12 +145,14 @@ public abstract class Entity implements WorldObject {
 			canMove = canMove && entity.isPermeableBy(this);
 		}
 		
-		if(!canMove) return false;
+		if(!canMove) return 0;
 		
 		// FINALLY, the entity can move.
-		moveTo(level, newRect.x, newRect.y);
+		//this.x = newRect.x;
+		//this.y = newRect.y;
+		//moveTo(level, newRect.x, newRect.y);
 		
-		return true;
+		return amt;
 	}
 	
 	public void moveTo(@NotNull Level level, @NotNull Vector2 pos) { moveTo(level, pos.x, pos.y); }
@@ -156,15 +160,30 @@ public abstract class Entity implements WorldObject {
 		// this method doesn't care where you end up.
 		x = Math.max(x, 0);
 		y = Math.max(y, 0);
-		x = Math.min(x, level.getWidth()*Tile.SIZE - texture.getRegionWidth());
-		y = Math.min(y, level.getHeight()*Tile.SIZE - texture.getRegionHeight());
+		x = Math.min(x, level.getWidth() - texture.getRegionWidth());
+		y = Math.min(y, level.getHeight() - texture.getRegionHeight());
+		
+		// check and see if the entity is changing chunks from their current position.
+		boolean changedChunk = 
+			((int)x) / Chunk.SIZE != ((int)this.x) / Chunk.SIZE ||
+			((int)y) / Chunk.SIZE != ((int)this.y) / Chunk.SIZE;
+		
 		this.x = x;
 		this.y = y;
+		
+		if(changedChunk)
+			level.entityMoved(this);
 	}
 	public void moveTo(@NotNull Tile tile) {
 		Vector2 pos = tile.getCenter();
 		pos.sub(getSize().scl(0.5f));
 		moveTo(tile.getLevel(), pos);
+	}
+	
+	protected void moveIfLevel(float x, float y) {
+		Level level = getLevel();
+		if(level != null)
+			moveTo(level, x, y);
 	}
 	
 	// returns whether anything meaningful happened; if false, then other.touchedBy(this) will be called.

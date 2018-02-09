@@ -1,7 +1,8 @@
 package miniventure.game.screen;
 
+import java.util.Stack;
+
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.utils.Array;
 import com.kotcrab.vis.ui.widget.VisLabel;
 
 public class LoadingScreen extends MenuScreen {
@@ -17,48 +18,28 @@ public class LoadingScreen extends MenuScreen {
 		Like that.  
 	 */
 	
-	private Array<VisLabel> messageLabels = new Array<>();
+	private Stack<VisLabel> messageLabels = new Stack<>();
 	
 	public LoadingScreen() {
-		//messageLabelnew VisLabel(message);
-		/*vGroup.add(messageLabel);
-		vGroup.row();
-		vGroup.add(labelPercent);*/
+		
 	}
 	
-	/*@Override
-	public void draw() {
-		for(int i = 0; i < messages.size; i++) {
-			messageLabels.get(i).setText(messages.get(i));
-		}
-		
-		super.draw();
-	}*/
-	
-	public int addIncrement(String message) {
+	public void pushMessage(String message) {
 		final VisLabel label = new VisLabel(message);
-		messageLabels.add(label);
+		messageLabels.push(label);
 		Gdx.app.postRunnable(() -> {
 			vGroup.addActor(label);
 		});
-		return messageLabels.size-1;
 	}
 	
-	/*public void inc(double amt, String msg) {
-		percent += amt;
-		labelPercent.setText(percent+"%");
-		messageLabel.setText(msg+"...");
-	}*/
-	
-	public void setMessage(final int idx, final String message) {
-		Gdx.app.postRunnable(() -> messageLabels.get(idx).setText(message));
+	public void editMessage(final String message) {
+		final VisLabel label = messageLabels.peek();
+		Gdx.app.postRunnable(() -> label.setText(message));
 	}
 	
-	public void removeMessage(int idx) {
-		VisLabel removed = messageLabels.removeIndex(idx);
-		Gdx.app.postRunnable(() -> {
-			vGroup.removeActor(removed); // FIXME this won't work right, because I give out the row index as an identifier.
-		});
+	public void popMessage() {
+		VisLabel removed = messageLabels.pop();
+		Gdx.app.postRunnable(() -> vGroup.removeActor(removed));
 	}
 	
 }

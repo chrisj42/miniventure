@@ -25,7 +25,7 @@ public class MainMenu extends MenuScreen {
 		button.addListener(new ClickListener() {
 			@Override
 			public void clicked(InputEvent e, float x, float y) {
-				GameCore.getWorld().createWorld();
+				GameCore.getWorld().createWorld(0, 0);
 			}
 		});
 		

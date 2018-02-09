@@ -153,8 +153,7 @@ public abstract class Mob extends Entity {
 	}
 	
 	
-	public boolean maySpawn(Tile tile) {
-		TileType type = tile.getType();
+	public boolean maySpawn(TileType type) {
 		return type == TileType.GRASS || type == TileType.DIRT || type == TileType.SAND;
 	}
 }

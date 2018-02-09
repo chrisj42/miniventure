@@ -54,7 +54,7 @@ public class MyUtils {
 		
 		result.add(str.substring(offset));
 		
-		return result.items;
+		return result.toArray(String.class);
 	}
 	
 	// In terms of types, what this method guarantees is that, given a target super class, and a starting class that extends the super, it will return a class that is a super of T, and extends S, ideally one level below. But if the target equals the superClass from the beginning (which can't be prevented), that is the only case where it won't return a direct subclass of superClass.

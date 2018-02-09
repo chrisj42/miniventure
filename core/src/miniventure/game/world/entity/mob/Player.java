@@ -156,8 +156,8 @@ public class Player extends Mob {
 	public Rectangle getInteractionRect() {
 		Rectangle bounds = getBounds();
 		Vector2 dirVector = getDirection().getVector();
-		bounds.setX(bounds.getX()+Tile.SIZE*dirVector.x);
-		bounds.setY(bounds.getY()+Tile.SIZE*dirVector.y);
+		bounds.x += dirVector.x;
+		bounds.y += dirVector.y;
 		return bounds;
 	}
 	
