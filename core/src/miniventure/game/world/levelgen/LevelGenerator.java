@@ -8,22 +8,26 @@ import miniventure.game.world.tile.TileType;
 public class LevelGenerator {
 	
 	private static final BiomeSelector biomeSelector = new BiomeSelector(
-		Biome.PLAINS+"_1",
+		/*Biome.PLAINS+"_1",
 		Biome.FOREST+"_4",
 		Biome.PLAINS+"_6",
 		Biome.DESERT+"_2",
 		Biome.MOUNTAIN+"_3",
-		Biome.PLAINS+"_1"
+		Biome.PLAINS+"_1"*/
+		BiomeCategory.WET+"_2",
+		BiomeCategory.DRY+"_5",
+		BiomeCategory.ROCKY+"_3"
 	);
 	
 	private static final int MAX_WORLD_SIZE = Integer.MAX_VALUE/2;
 	
-	private final Coherent2DNoiseFunction biomeNoise, detailNoise;
+	private final Coherent2DNoiseFunction categoryNoise, biomeNoise, detailNoise;
 	public final int worldWidth, worldHeight;
 	
 	public LevelGenerator(long seed, int biomeSize, int detailSize) { this(seed, 0, 0, biomeSize, detailSize); }
 	public LevelGenerator(long seed, int width, int height, int biomeSize, int detailSize) {
 		Random seedPicker = new Random(seed); // I wonder what would happen if I used a hash function for this, and just used the seed to get another long, and then use that, and so forth...
+		categoryNoise = new Coherent2DNoiseFunction(seedPicker.nextLong(), 48);
 		biomeNoise = new Coherent2DNoiseFunction(seedPicker.nextLong(), biomeSize);
 		detailNoise = new Coherent2DNoiseFunction(seedPicker.nextLong(), detailSize);
 		
@@ -78,7 +82,7 @@ public class LevelGenerator {
 		if(x < 0 || y < 0 || x >= worldWidth || y >= worldHeight)
 			throw new IllegalArgumentException("Requested tile is outside world bounds; x="+x+", y="+y+". Actual world size: ("+worldWidth+","+worldHeight+")");
 		
-		Biome biome = biomeSelector.getBiome(biomeNoise.getValue(x, y));
+		Biome biome = biomeSelector.getBiome(categoryNoise.getValue(x, y)).getBiome(biomeNoise.getValue(x, y));
 		return biome.getTile(detailNoise.getValue(x, y));
 	}
 }

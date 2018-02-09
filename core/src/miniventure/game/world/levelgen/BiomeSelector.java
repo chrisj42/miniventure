@@ -1,19 +1,17 @@
 package miniventure.game.world.levelgen;
 
-import miniventure.game.world.tile.TileType;
-
 import org.jetbrains.annotations.NotNull;
 
 public class BiomeSelector {
 	
-	@NotNull private final EnumFetcher<Biome> biomeFetcher;
+	@NotNull private final EnumFetcher<BiomeCategory> biomeFetcher;
 	
 	public BiomeSelector(@NotNull String... biomesWithOccurrences) {
-		biomeFetcher = new EnumFetcher<>(Biome.class, biomesWithOccurrences);
+		biomeFetcher = new EnumFetcher<>(BiomeCategory.class, biomesWithOccurrences);
 	}
 	
-	Biome getBiome(float noise) { return biomeFetcher.getType(noise); }
+	BiomeCategory getBiome(float noise) { return biomeFetcher.getType(noise); }
 	
-	public TileType getTile(float noise) { return biomeFetcher.getType(noise).getTile(noise); }
+	//public TileType getTile(float noise) { return biomeFetcher.getType(noise).getBiome(noise).getTile(noise); }
 	
 }
