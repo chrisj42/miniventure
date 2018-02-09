@@ -13,7 +13,7 @@ public class AnimationProperty implements TileProperty {
 	private static HashMap<String, HashMap<String, Array<AtlasRegion>>> tileConnectionAnimations = new HashMap<>();
 	private static HashMap<String, HashMap<String, Array<AtlasRegion>>> tileOverlapAnimations = new HashMap<>();
 	static {
-		Array<AtlasRegion> regions = GameCore.tileAtlas.getRegions();
+		Array<AtlasRegion> regions = GameCore.tileAtlas != null ? GameCore.tileAtlas.getRegions() : new Array<>();
 		for(AtlasRegion region: regions) {
 			String tilename = region.name.substring(0, region.name.indexOf("/"));
 			String spriteIdx = region.name.substring(region.name.indexOf("/")+1);

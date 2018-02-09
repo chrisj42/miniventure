@@ -12,7 +12,7 @@ import miniventure.game.world.entity.ItemEntity;
 import miniventure.game.world.entity.mob.AiType;
 import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.entity.mob.Player;
-import miniventure.game.world.levelgen.InfiniteLevelGenerator;
+import miniventure.game.world.levelgen.LevelGenerator;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileType;
 
@@ -30,7 +30,7 @@ public class Level {
 	
 	private static final float percentTilesUpdatedPerSecond = 2f; // this represents the percent of the total number of tiles in the map that are updated per second.
 	
-	private final InfiniteLevelGenerator levelGenerator;
+	private final LevelGenerator levelGenerator;
 	private final HashMap<Point, Chunk> loadedChunks = new HashMap<>();
 	private int tileCount;
 	
@@ -38,7 +38,7 @@ public class Level {
 	
 	private int entityCap = 50;
 	
-	public Level(int depth, InfiniteLevelGenerator levelGenerator) {
+	public Level(int depth, LevelGenerator levelGenerator) {
 		this.levelGenerator = levelGenerator;
 		
 		/*
@@ -382,7 +382,7 @@ public class Level {
 		levels = new Level[0];
 	}
 	
-	public static void resetLevels(LoadingScreen display, InfiniteLevelGenerator levelGenerator) {
+	public static void resetLevels(LoadingScreen display, LevelGenerator levelGenerator) {
 		clearLevels();
 		levels = new Level[levelNames.length];
 		display.pushMessage("Loading level 0/"+levels.length+"...");

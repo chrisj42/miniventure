@@ -7,24 +7,29 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.util.HashMap;
 import java.util.Random;
 
+import miniventure.game.world.tile.TileType;
+
 class Testing {
-	/*private static final HashMap<TileType, Color> tileMap = new HashMap<>();
+	private static final HashMap<TileType, Color> tileMap = new HashMap<>();
 	static {
 		tileMap.put(TileType.WATER, Color.BLUE);
 		tileMap.put(TileType.TREE, Color.GREEN.darker().darker());
+		tileMap.put(TileType.CACTUS, Color.GREEN.darker());
 		tileMap.put(TileType.GRASS, Color.GREEN);
 		tileMap.put(TileType.STONE, Color.GRAY);
 		tileMap.put(TileType.SAND, Color.YELLOW);
-		tileMap.put(TileType.DIRT, Color.ORANGE.darker().darker());
-	}*/
+		//tileMap.put(TileType.DIRT, Color.ORANGE.darker().darker());
+	}
 	
-	/*private static void displayLevelVisually(int width, int height, int scale) {
+	private static void displayLevelVisually(int width, int height, int scale) {
 		displayLevelVisually(width, height, scale, new Random().nextLong());
 	}
 	private static void displayLevelVisually(int width, int height, int scale, long seed) {
-		TileType[][] tiles = LevelGenerator.generateLevel(seed, width, height);
+		LevelGenerator gen = new LevelGenerator(seed, 0, 0, 32, 6);
+		TileType[][] tiles = gen.generateTiles(0, 0, width, height);
 		
 		Color[][] colors = new Color[width][height];
 		for(int x = 0; x < tiles.length; x++)
@@ -32,7 +37,7 @@ class Testing {
 				colors[x][y] = tileMap.get(tiles[x][y]);
 		
 		displayMap(width, height, colors, scale);
-	}*/
+	}
 	
 	private static void displayNoiseGrayscale(int width, int height, float[][] noise, int scale) {
 		Color[][] colors = new Color[width][height];
@@ -69,8 +74,8 @@ class Testing {
 	
 	
 	public static void main(String[] args) {
-		while(true) testTerrainGen(128, 64, 8, 16, 2);
-		//displayLevelVisually(20, 16, 32);
+		while(true) //testTerrainGen(128, 64, 8, 16, 2);
+		displayLevelVisually(128, 64, 8);
 	}
 	
 	/** @noinspection SameParameterValue*/

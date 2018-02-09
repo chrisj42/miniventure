@@ -10,7 +10,7 @@ import miniventure.game.world.Chunk;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;
-import miniventure.game.world.levelgen.InfiniteLevelGenerator;
+import miniventure.game.world.levelgen.LevelGenerator;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.Gdx;
@@ -37,7 +37,7 @@ public class LevelManager {
 	
 	private boolean worldLoaded = false;
 	
-	private InfiniteLevelGenerator levelGenerator;
+	private LevelGenerator levelGenerator;
 	
 	private Player mainPlayer;
 	private float gameTime;
@@ -90,7 +90,7 @@ public class LevelManager {
 		GameCore.setScreen(loadingScreen);
 		gameTime = 0;
 		
-		levelGenerator = new InfiniteLevelGenerator(MathUtils.random.nextLong(), width, height, 32, 6);
+		levelGenerator = new LevelGenerator(MathUtils.random.nextLong(), width, height, 32, 6);
 		
 		new Thread(() -> {
 			Level.resetLevels(loadingScreen, levelGenerator);

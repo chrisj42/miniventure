@@ -5,7 +5,7 @@ import java.util.Random;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.tile.TileType;
 
-public class InfiniteLevelGenerator {
+public class LevelGenerator {
 	
 	private static final BiomeSelector biomeSelector = new BiomeSelector(
 		Biome.PLAINS+"_1",
@@ -21,8 +21,8 @@ public class InfiniteLevelGenerator {
 	private final Coherent2DNoiseFunction biomeNoise, detailNoise;
 	public final int worldWidth, worldHeight;
 	
-	public InfiniteLevelGenerator(long seed, int biomeSize, int detailSize) { this(seed, 0, 0, biomeSize, detailSize); }
-	public InfiniteLevelGenerator(long seed, int width, int height, int biomeSize, int detailSize) {
+	public LevelGenerator(long seed, int biomeSize, int detailSize) { this(seed, 0, 0, biomeSize, detailSize); }
+	public LevelGenerator(long seed, int width, int height, int biomeSize, int detailSize) {
 		Random seedPicker = new Random(seed); // I wonder what would happen if I used a hash function for this, and just used the seed to get another long, and then use that, and so forth...
 		biomeNoise = new Coherent2DNoiseFunction(seedPicker.nextLong(), biomeSize);
 		detailNoise = new Coherent2DNoiseFunction(seedPicker.nextLong(), detailSize);
@@ -56,6 +56,10 @@ public class InfiniteLevelGenerator {
 		if(width <= 0 || height <= 0)
 			throw new IndexOutOfBoundsException("Requested chunk is outside world bounds; chunkX="+x+", chunkY="+y+". Max x requested: "+((x+1)*Chunk.SIZE-1)+", max y requested: "+((y+1)*Chunk.SIZE-1)+". Actual world size: ("+worldWidth+","+worldHeight+")");
 		
+		return generateTiles(x, y, width, height);
+	}
+	
+	TileType[][] generateTiles(int x, int y, int width, int height) {
 		TileType[][] tiles = new TileType[width][height];
 		int xt = x * Chunk.SIZE;
 		int yt = y * Chunk.SIZE;
