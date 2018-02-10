@@ -16,6 +16,7 @@ import miniventure.game.world.levelgen.LevelGenerator;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileType;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -191,6 +192,8 @@ public class Level {
 	}
 	
 	public void render(Rectangle renderSpace, SpriteBatch batch, float delta, Vector2 posOffset) {
+		renderSpace = new Rectangle(Math.max(0, renderSpace.x), Math.max(0, renderSpace.y), Math.min(getWidth()-renderSpace.x, renderSpace.width), Math.min(getHeight()-renderSpace.y, renderSpace.height));
+		//System.out.println("render space: " + renderSpace);
 		// pass the offset vector to all objects being rendered.
 		
 		Array<WorldObject> objects = new Array<>();
@@ -202,6 +205,17 @@ public class Level {
 		
 		for(WorldObject obj: objects)
 			obj.render(batch, delta, posOffset);
+		
+		// render chunk boundaries
+		int minX = MathUtils.ceil(renderSpace.x) / Chunk.SIZE * Chunk.SIZE;
+		int minY = MathUtils.ceil(renderSpace.y) / Chunk.SIZE * Chunk.SIZE;
+		int maxX = MathUtils.ceil((renderSpace.x + renderSpace.width) / Chunk.SIZE) * Chunk.SIZE;
+		int maxY = MathUtils.ceil((renderSpace.y + renderSpace.height) / Chunk.SIZE) * Chunk.SIZE;
+		
+		for(int x = minX; x <= maxX; x+=Chunk.SIZE)
+			MyUtils.fillRect((x-posOffset.x)*Tile.SIZE - 2, (minY-posOffset.y)*Tile.SIZE, 5, (maxY-minY)*Tile.SIZE, Color.PINK, batch);
+		for(int y = minY; y <= maxY; y+=Chunk.SIZE)
+			MyUtils.fillRect((minX-posOffset.x)*Tile.SIZE, (y-posOffset.y)*Tile.SIZE - 2, (maxX-minX)*Tile.SIZE, 5, Color.PINK, batch);
 	}
 	
 	public Array<Vector3> renderLighting(Rectangle renderSpace) {
