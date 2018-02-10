@@ -144,8 +144,8 @@ public class Tile implements WorldObject {
 	
 	@NotNull @Override public Level getLevel() { return level; }
 	
-	@Override
-	public Rectangle getBounds() { return new Rectangle(x, y, 1, 1); }
+	@Override public Rectangle getBounds() { return new Rectangle(x, y, 1, 1); }
+	@Override public Vector2 getCenter() { return new Vector2(x+0.5f, y+0.5f); }
 	
 	public boolean addTile(@NotNull TileType newType) {
 		// first, check to see if the newType can validly be placed on the current type.

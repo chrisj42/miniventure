@@ -160,8 +160,9 @@ public abstract class Entity implements WorldObject {
 		// this method doesn't care where you end up.
 		x = Math.max(x, 0);
 		y = Math.max(y, 0);
-		x = Math.min(x, level.getWidth() - texture.getRegionWidth());
-		y = Math.min(y, level.getHeight() - texture.getRegionHeight());
+		Vector2 size = getSize();
+		x = Math.min(x, level.getWidth() - size.x);
+		y = Math.min(y, level.getHeight() - size.y);
 		
 		// check and see if the entity is changing chunks from their current position.
 		boolean changedChunk = Level.getEntityLevel(this) == level && (

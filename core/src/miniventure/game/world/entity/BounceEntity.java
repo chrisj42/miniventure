@@ -11,7 +11,7 @@ import com.badlogic.gdx.math.Vector3;
 
 public class BounceEntity extends Entity {
 	
-	private static final float GRAVITY = -4;
+	private static final float GRAVITY = -50;
 	private static final float REBOUND_SPEED_FACTOR = 0.5f;
 	
 	private static final float BLINK_THRESHOLD = 0.75f; // the minimum percentage of lifetime that time has to be for the entity to start blinking, signaling that it's about to disappear.
@@ -21,6 +21,8 @@ public class BounceEntity extends Entity {
 	private Vector3 velocity; // in tiles / second.
 	private float time; // the current time relative to the creation of this item entity. used as the current position along the "x-axis".
 	private FrameBlinker blinker;
+	
+	private float lastBounceTime; // used to halt the entity once it starts bouncing a lot really quickly.
 	
 	
 	public BounceEntity(Sprite sprite, float lifetime) {
@@ -32,7 +34,7 @@ public class BounceEntity extends Entity {
 		
 		blinker = new FrameBlinker(1, 1, false);
 		
-		velocity = new Vector3(goalDir.cpy().nor().scl(MathUtils.random(0.8f, 1.5f)), MathUtils.random(0.8f, 2f));
+		velocity = new Vector3(goalDir.cpy().nor().scl(MathUtils.random(0.5f, 2.5f)), MathUtils.random(8f, 12f));
 	}
 	
 	float getTime() { return time; }
@@ -51,28 +53,30 @@ public class BounceEntity extends Entity {
 		if(level == null) return;
 		
 		Vector2 pos = getPosition();
-		Vector3 velocity = this.velocity.cpy().scl(delta);
-		move(velocity.x, velocity.y, velocity.z);
+		Vector3 vel = velocity.cpy().scl(delta);
+		move(vel.x, vel.y, vel.z);
 		Vector2 newPos = getPosition();
 		
-		if(newPos.x != pos.x+velocity.x)
-			this.velocity.x *= -1;
-		if(newPos.y != pos.y+velocity.y)
-			this.velocity.y *= -1;
+		if(newPos.x != pos.x+vel.x)
+			velocity.x *= -1;
+		if(newPos.y != pos.y+vel.y)
+			velocity.y *= -1;
+		
+		time += delta;
 		
 		if(getZ() < 0) {
 			setZ(0);
-			this.velocity.scl(REBOUND_SPEED_FACTOR, REBOUND_SPEED_FACTOR, -REBOUND_SPEED_FACTOR);
-			if(velocity.len() < 0.001f) {
+			velocity.scl(REBOUND_SPEED_FACTOR, REBOUND_SPEED_FACTOR, -REBOUND_SPEED_FACTOR);
+			if(time - lastBounceTime < 0.01f) {
 				moving = false;
 				velocity.setZero();
 			}
+			else
+				lastBounceTime = time;
 		}
 		
 		if(moving)
 			velocity.add(0, 0, GRAVITY*delta);
-		
-		time += delta;
 		
 		if(time > lifetime)
 			remove();

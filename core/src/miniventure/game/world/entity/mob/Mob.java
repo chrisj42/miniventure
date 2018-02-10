@@ -137,7 +137,7 @@ public abstract class Mob extends Entity {
 		
 		Level level = getLevel();
 		if(level != null) {
-			level.addEntity(new TextParticle(damage+"", this instanceof Player ? Color.PINK : Color.RED), getCenter());
+			level.addEntity(new TextParticle(damage+"", this instanceof Player ? Color.PINK : Color.RED), getCenter(), true);
 			
 			if (health == 0) {
 				for (ItemDrop drop : itemDrops)

@@ -92,8 +92,13 @@ public class Level {
 		}
 	}
 	
-	public void addEntity(Entity e, Vector2 pos) { addEntity(e, pos.x, pos.y); }
-	public void addEntity(Entity e, float x, float y) {
+	public void addEntity(Entity e, Vector2 pos, boolean center) { addEntity(e, pos.x, pos.y, center); }
+	public void addEntity(Entity e, float x, float y, boolean center) {
+		if(center) {
+			Vector2 size = e.getSize();
+			x -= size.x/2;
+			y -= size.y/2;
+		}
 		e.moveTo(this, x, y);
 		addEntity(e);
 	}
@@ -232,7 +237,8 @@ public class Level {
 		
 		Tile closest = getTile(dropPos.x, dropPos.y);
 		
-		Rectangle itemBounds = new Rectangle(dropPos.x, dropPos.y, item.getTexture().getRegionWidth(), item.getTexture().getRegionHeight());
+		Rectangle itemBounds = ie.getBounds();
+		itemBounds.setPosition(dropPos);
 		
 		if(closest == null) {
 			System.err.println("ERROR dropping item, closest tile is null");
