@@ -26,8 +26,8 @@ public class GameScreen {
 	
 	private static final float OFF_SCREEN_LIGHT_RADIUS = 5; // in tiles
 	
-	private static final float MAX_SCREEN_WIDTH_TILES = 20;
-	private static final float MAX_SCREEN_HEIGHT_TILES = 20;
+	private static final float MAX_SCREEN_WIDTH_TILES = 30;
+	private static final float MAX_SCREEN_HEIGHT_TILES = 30;
 	
 	private SpriteBatch batch = GameCore.getBatch();
 	private BitmapFont font = GameCore.getFont();
@@ -176,16 +176,64 @@ public class GameScreen {
 		resetCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 	}
 	
-	private void resetCamera(int width, int height) {
-		float viewWidth = MAX_SCREEN_WIDTH_TILES;
-		float viewHeight = MAX_SCREEN_HEIGHT_TILES;
-		float wh = width*1f/height;
-		if(wh > 1)
-			viewHeight /= wh;
-		if(wh < 1)
-			viewWidth *= wh;
+	/** @noinspection SuspiciousNameCombination, ConstantConditions */
+	private void resetCamera(float width, float height) { // these are always going to be ints, but I need to use them as floats.
+		float viewWidth, viewHeight;
+		// constrain the matching viewport dim for the smaller window dimension, so that it doesn't display everything it can.
+		if(width > height) {
+			//viewHeight /= viewWidth;//viewHeight = viewWidth * viewWidth / viewHeight * height / width;
+			viewWidth = 1;
+			viewHeight = height / width;
+		}
+		else if(height > width) {
+			//viewWidth = viewHeight * viewHeight / viewWidth * width / height;
+			viewHeight = 1;
+			viewWidth = width / height;
+		}
+		else {
+			viewWidth = 1;
+			viewHeight = 1;
+		}
+		
+		/*
+			Now, find the max window dim, and the max viewport dim.
+			If they are opposite:
+				though the max dimension has a lower maximum tile length, that still becomes the width of the viewport. the other dim is the tile length times itself.
+			if they are the same:
+				the max dimension has the max tile width. careful! if the aspect ratio says width is 2x the height, but the max tile height is 4 while the max tile width is 16, then the tile height cannot exceed 4!
+				So, it's about whichever hits the max first.
+			if they are a square:
+				the dim with the smaller maximum tile length becomes the side length
+		 */
+		
+		boolean biggerWindowWidth = width > height;
+		boolean biggerViewportWidth = MAX_SCREEN_WIDTH_TILES > MAX_SCREEN_HEIGHT_TILES;
+		float maxViewDim;
+		
+		if(width == height) {
+			maxViewDim = Math.min(MAX_SCREEN_WIDTH_TILES, MAX_SCREEN_HEIGHT_TILES);
+		} else if(biggerWindowWidth == biggerViewportWidth) {
+			float maxViewWidth = viewWidth * MAX_SCREEN_WIDTH_TILES;
+			float maxViewHeight = viewHeight * MAX_SCREEN_HEIGHT_TILES;
+			if(maxViewHeight > maxViewWidth)
+				maxViewDim = MAX_SCREEN_WIDTH_TILES;
+			else
+				maxViewDim = MAX_SCREEN_HEIGHT_TILES;
+		}
+		else {
+			// max window dim is the lower viewport dim.
+			if(width > height)
+				maxViewDim = MAX_SCREEN_WIDTH_TILES;
+			else
+				maxViewDim = MAX_SCREEN_HEIGHT_TILES;
+		}
+		
+		viewWidth *= maxViewDim;
+		viewHeight *= maxViewDim;
 		
 		float zoomFactor = (float) Math.pow(2, zoom);
+		
+		//System.out.println("window size: " + width+","+height+"; view size:" + viewWidth+","+viewHeight);
 		
 		camera.setToOrtho(false, viewWidth*Tile.SIZE / zoomFactor, viewHeight*Tile.SIZE / zoomFactor);
 	}
