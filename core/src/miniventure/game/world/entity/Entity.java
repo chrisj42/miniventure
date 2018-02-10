@@ -117,19 +117,42 @@ public abstract class Entity implements WorldObject {
 				- calling any interaction methods along the way
 		 */
 		
-		Array<Tile> newTiles = level.getOverlappingTiles(newRect);
-		Array<Tile> oldTiles = level.getOverlappingTiles(oldRect);
-		newTiles.removeAll(oldTiles, true); // "true" means use == for comparison rather than .equals()
+		boolean debug = this instanceof Player;
+		
+		Array<Tile> futureTiles = level.getOverlappingTiles(newRect);
+		Array<Tile> currentTiles = level.getOverlappingTiles(oldRect);
+		Array<Tile> newTiles = new Array<>(futureTiles);
+		
+		
+		newTiles.removeAll(currentTiles, false); // "true" means use == for comparison rather than .equals()
 		
 		// we now have a list of the tiles that will be touched, but aren't now.
-		boolean canMoveCurrent = true;
-		for(Tile tile: oldTiles) {
-			canMoveCurrent = canMoveCurrent && tile.isPermeableBy(this);
-		}
+		boolean canMoveCurrent = false;
+		for(Tile tile: currentTiles) // if any are permeable, then don't let the player escape to new impermeable tiles.
+			canMoveCurrent = canMoveCurrent || tile.isPermeableBy(this);
+		
 		boolean canMove = true;
 		for(Tile tile: newTiles) {
 			tile.touchedBy(this); // NOTE: I can see this causing an issue if you move too fast; it will "touch" tiles that could be far away, if the player will move there next frame.
 			canMove = canMove && (!canMoveCurrent || tile.isPermeableBy(this));
+		}
+		
+		if(canMove && canMoveCurrent) {
+			Array<Tile> oldTiles = new Array<>(currentTiles);
+			oldTiles.removeAll(futureTiles, false);
+			
+			Array<Tile> sameTiles = new Array<>(futureTiles);
+			sameTiles.removeAll(newTiles, false);
+			
+			// check the sameTiles; if at least one is not permeable, and at least one oldTile is, then stop the move.
+			boolean canMoveOld = false, canMoveSame = true;
+			for(Tile oldTile: oldTiles)
+				canMoveOld = canMoveOld || oldTile.isPermeableBy(this);
+			for(Tile sameTile: sameTiles)
+				canMoveSame = canMoveSame && sameTile.isPermeableBy(this);
+			
+			if(!canMoveSame && canMoveOld)
+				canMove = false;
 		}
 		
 		if(!canMove) return 0; // don't bother interacting with entities if tiles prevent movement.
@@ -147,10 +170,7 @@ public abstract class Entity implements WorldObject {
 		
 		if(!canMove) return 0;
 		
-		// FINALLY, the entity can move.
-		//this.x = newRect.x;
-		//this.y = newRect.y;
-		//moveTo(level, newRect.x, newRect.y);
+		// the entity can move.
 		
 		return amt;
 	}

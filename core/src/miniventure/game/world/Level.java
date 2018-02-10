@@ -31,6 +31,8 @@ public class Level {
 	
 	private static final float percentTilesUpdatedPerSecond = 2f; // this represents the percent of the total number of tiles in the map that are updated per second.
 	
+	private final int depth;
+	
 	private final LevelGenerator levelGenerator;
 	private final HashMap<Point, Chunk> loadedChunks = new HashMap<>();
 	private int tileCount;
@@ -41,7 +43,7 @@ public class Level {
 	
 	public Level(int depth, LevelGenerator levelGenerator) {
 		this.levelGenerator = levelGenerator;
-		
+		this.depth = depth;
 		/*
 			At any given time, I will load a chunk, and all the chunks in a 2 chunk radius.
 			
@@ -54,8 +56,8 @@ public class Level {
 	
 	public int getWidth() { return levelGenerator.worldWidth; }
 	public int getHeight() { return levelGenerator.worldHeight; }
+	public int getDepth() { return depth; }
 	public int getEntityCap() { return entityCap; }
-	
 	public int getEntityCount() { return entities.size(); }
 	
 	public void entityMoved(Entity entity) {
@@ -395,6 +397,11 @@ public class Level {
 		
 		return players.get(0);
 	}
+	
+	
+	@Override
+	public boolean equals(Object other) { return other instanceof Level && ((Level)other).depth == depth; }
+	@Override public int hashCode() { return depth; }
 	
 	
 	

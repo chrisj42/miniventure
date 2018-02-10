@@ -56,7 +56,7 @@ public class GameScreen {
 			zoom(1);
 		
 		if(Gdx.input.isKeyJustPressed(Keys.R) && Gdx.input.isKeyPressed(Keys.SHIFT_LEFT))
-			GameCore.getWorld().respawn();
+			GameCore.getWorld().createWorld(0, 0);
 	}
 	
 	public void render(@NotNull Player mainPlayer, Color[] lightOverlays, @NotNull Level level) {

@@ -8,6 +8,7 @@ import java.util.TreeMap;
 import miniventure.game.item.Item;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Level;
+import miniventure.game.world.Point;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Mob;
@@ -355,9 +356,19 @@ public class Tile implements WorldObject {
 	public void touching(Entity entity) {}
 	
 	@Override
-	public String toString() { return getType().getName() + " Tile (all:"+tileTypes+")"; }
+	public String toString() { return getType().getName()/* + " Tile (all:"+tileTypes+")"*/; }
 	
 	public String toLocString() { return x+","+y+" ("+toString()+")"; }
+	
+	@Override
+	public boolean equals(Object other) {
+		if(!(other instanceof Tile)) return false;
+		Tile o = (Tile) other;
+		return level.equals(o.level) && x == o.x && y == o.y;
+	}
+	
+	@Override
+	public int hashCode() { return new Point(x, y).hashCode() + level.getDepth() * 17; }
 	
 	// I can use the string encoder and string parser in MyUtils to encode the tile data in a way so that I can always re-parse the encoded array. I can use this internally to, with other things, whenever I need to encode a list of objects and don't want to worry about finding the delimiter symbol in string somewhere I don't expect.
 }

@@ -1,6 +1,6 @@
 package miniventure.game.world;
 
-class Point {
+public class Point {
 	
 	public final int x, y;
 	
