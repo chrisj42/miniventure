@@ -24,9 +24,11 @@ import org.jetbrains.annotations.NotNull;
 
 public class GameScreen {
 	
-	private static final float OFF_SCREEN_LIGHT_RADIUS = 5; // in tiles
-	private static final float DEFAULT_VIEWPORT_SIZE = 20;
+	private static final float OFF_SCREEN_LIGHT_RADIUS = 5; // in tiles; used to render light halos when the object creating said halo could be off screen. any halos bigger than this in radius will appear to disappear suddenly when the object casting it goes too far off screen; but increasing this value means iterating through a lot more objects. Your average halo isn't going to bigger than 5 tiles in radius, though, so 5 is a good enough value.
 	
+	private static final float DEFAULT_VIEWPORT_SIZE = 20; // in tiles
+	
+	// these two values determine how much of the level to render in either dimension, and are also used to fit the viewport to the game window. Later, they should be customizable by the user; for now, they'll remain at 0, meaning it doesn't limit the number of tiles rendered, and the default viewport size will be used for fitting.
 	private float maxWorldViewWidth = 0;
 	private float maxWorldViewHeight = 0;
 	
@@ -74,6 +76,7 @@ public class GameScreen {
 		
 		Rectangle renderSpace = new Rectangle(offset.x, offset.y, screenSize.x, screenSize.y); // world coords
 		
+		// trim the rendering space to not exceed the max in either direction.
 		if(maxWorldViewWidth > 0)
 			renderSpace.width = Math.min(renderSpace.width, maxWorldViewWidth);
 		if(maxWorldViewHeight > 0)
