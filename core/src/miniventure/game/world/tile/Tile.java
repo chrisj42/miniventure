@@ -145,7 +145,7 @@ public class Tile implements WorldObject {
 	@NotNull @Override public Level getLevel() { return level; }
 	
 	@Override
-	public Rectangle getBounds() { return new Rectangle(x*SIZE, y*SIZE, SIZE, SIZE); }
+	public Rectangle getBounds() { return new Rectangle(x, y, 1, 1); }
 	
 	public boolean addTile(@NotNull TileType newType) {
 		// first, check to see if the newType can validly be placed on the current type.
@@ -215,6 +215,8 @@ public class Tile implements WorldObject {
 			if(y < level.getHeight()-1) tiles.add(level.getTile(x, y+1));
 			if(x < level.getWidth()-1) tiles.add(level.getTile(x+1, y));
 			if(y > 0) tiles.add(level.getTile(x, y-1));
+			boolean hasNull = true;
+			while(hasNull) hasNull = tiles.removeValue(null, true);
 			return tiles;
 		}
 	}
@@ -231,7 +233,7 @@ public class Tile implements WorldObject {
 	}
 	
 	@Override
-	public void render(SpriteBatch batch, float delta) {
+	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
 		
 		/*
 			- Get the surrounding tile types for a tile
@@ -288,7 +290,7 @@ public class Tile implements WorldObject {
 		
 		
 		for(AtlasRegion texture: sprites)
-			batch.draw(texture, x*SIZE, y*SIZE, SIZE, SIZE);
+			batch.draw(texture, (x-posOffset.x) * SIZE, (y-posOffset.y) * SIZE);
 	}
 	
 	

@@ -63,8 +63,8 @@ public abstract class Entity implements WorldObject {
 	}
 	
 	@Override
-	public void render(SpriteBatch batch, float delta) {
-		drawSprite(batch, x, y+z);
+	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
+		drawSprite(batch, (x-posOffset.x) * Tile.SIZE, (y+z - posOffset.y) * Tile.SIZE);
 	}
 	
 	protected void drawSprite(SpriteBatch batch, float x, float y) {
@@ -74,7 +74,7 @@ public abstract class Entity implements WorldObject {
 	protected void setSprite(TextureRegion texture) {
 		this.texture = texture;
 		moveIfLevel(x, y);
-		z = 0;
+		//z = 0;
 	}
 	
 	protected float getZ() { return z; }
@@ -82,7 +82,7 @@ public abstract class Entity implements WorldObject {
 	
 	@Override
 	public Rectangle getBounds() {
-		return new Rectangle(x, y, texture.getRegionWidth(), texture.getRegionHeight());
+		return new Rectangle(x, y, texture.getRegionWidth()*1f/Tile.SIZE, texture.getRegionHeight()*1f/Tile.SIZE);
 	}
 	
 	public void addedToLevel(Level level) {}
@@ -164,9 +164,9 @@ public abstract class Entity implements WorldObject {
 		y = Math.min(y, level.getHeight() - texture.getRegionHeight());
 		
 		// check and see if the entity is changing chunks from their current position.
-		boolean changedChunk = 
+		boolean changedChunk = Level.getEntityLevel(this) == level && (
 			((int)x) / Chunk.SIZE != ((int)this.x) / Chunk.SIZE ||
-			((int)y) / Chunk.SIZE != ((int)this.y) / Chunk.SIZE;
+			((int)y) / Chunk.SIZE != ((int)this.y) / Chunk.SIZE);
 		
 		this.x = x;
 		this.y = y;

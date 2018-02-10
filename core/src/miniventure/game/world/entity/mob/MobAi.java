@@ -1,9 +1,6 @@
 package miniventure.game.world.entity.mob;
 
 import miniventure.game.world.ItemDrop;
-import miniventure.game.world.tile.Tile;
-
-import com.badlogic.gdx.math.Vector2;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -51,9 +48,7 @@ public class MobAi extends Mob {
 		if(tempTimeLeft <= 0 && tempMovePattern != null)
 			tempMovePattern = null;
 		
-		Vector2 moveAmt = (tempMovePattern == null ? movePattern : tempMovePattern).move(delta, this);
-		moveAmt.scl(Tile.SIZE); // b/c we used tiles / second, not world coords / second.
-		move(moveAmt);
+		move((tempMovePattern == null ? movePattern : tempMovePattern).move(delta, this));
 	}
 	
 }

@@ -97,7 +97,10 @@ public class LevelManager {
 			respawn();
 			//noinspection ConstantConditions
 			Tile spawnTile = mainPlayer.getLevel().getClosestTile(mainPlayer.getBounds());
-			keepAlives.add(spawnTile);
+			if (spawnTile != null) {
+				mainPlayer.moveTo(spawnTile);
+				keepAlives.add(spawnTile);
+			}
 			worldLoaded = true;
 			Gdx.app.postRunnable(() -> GameCore.setScreen(null));
 		}).start();

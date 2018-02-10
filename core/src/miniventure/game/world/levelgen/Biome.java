@@ -26,8 +26,8 @@ enum Biome {
 	
 	@NotNull private final EnumFetcher<TileType> tileFetcher;
 	
-	Biome(@NotNull String... tilesWithOccurances) {
-		tileFetcher = new EnumFetcher<>(TileType.class, tilesWithOccurances);
+	Biome(@NotNull String... tilesWithOccurrences) {
+		tileFetcher = new EnumFetcher<>(TileType.class, tilesWithOccurrences);
 	}
 	
 	public TileType getTile(float noise) { return tileFetcher.getType(noise); }

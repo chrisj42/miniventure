@@ -27,7 +27,7 @@ public interface WorldObject {
 	
 	void update(float delta);
 	
-	void render(SpriteBatch batch, float delta);
+	void render(SpriteBatch batch, float delta, Vector2 posOffset);
 	
 	default float getLightRadius() { return 0; }
 	

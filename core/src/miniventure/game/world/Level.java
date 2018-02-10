@@ -185,16 +185,23 @@ public class Level {
 		}
 	}
 	
-	public void render(Rectangle renderSpace, SpriteBatch batch, float delta) {
+	public void render(Rectangle renderSpace, SpriteBatch batch, float delta, Vector2 posOffset) {
+		// pass the offset vector to all objects being rendered.
+		
 		Array<WorldObject> objects = new Array<>();
 		objects.addAll(getOverlappingTiles(renderSpace)); // tiles first
+		
+		//int tileCount = objects.size;
 		
 		Array<Entity> entities = getOverlappingEntities(renderSpace); // entities second
 		entities.sort((e1, e2) -> Float.compare(e2.getCenter().y, e1.getCenter().y));
 		objects.addAll(entities);
 		
+		//objects.shrink();
+		//System.out.println("rendering "+tileCount+" tiles and "+(objects.size-tileCount)+" entities...");
+		
 		for(WorldObject obj: objects)
-			obj.render(batch, delta);
+			obj.render(batch, delta, posOffset);
 	}
 	
 	public Array<Vector3> renderLighting(Rectangle renderSpace) {
@@ -250,10 +257,13 @@ public class Level {
 		dropPos.x = itemBounds.x;
 		dropPos.y = itemBounds.y;
 		
+		Vector2 dropDir;
 		if(targetPos == null)
-			targetPos = dropPos.cpy().add(new Vector2(MathUtils.random(Tile.SIZE/2), MathUtils.random(Tile.SIZE/2)));
+			dropDir = new Vector2().setToRandomDirection();
+		else
+			dropDir = targetPos.sub(dropPos);
 		
-		ie = new ItemEntity(item, targetPos.sub(dropPos));
+		ie = new ItemEntity(item, dropDir);
 		
 		ie.moveTo(this, dropPos);
 		addEntity(ie);
@@ -283,8 +293,13 @@ public class Level {
 	
 	public Array<Tile> getOverlappingTiles(Rectangle rect) {
 		Array<Tile> overlappingTiles = new Array<>();
-		for(int x = (int)rect.x; x <= (int)(rect.x+rect.width); x++) {
-			for (int y = (int) rect.y; y <= (int) (rect.y + rect.height); y++) {
+		int minX = Math.max(0, (int) rect.x);
+		int minY = Math.max(0, (int) rect.y);
+		int maxX = Math.min(getWidth(), (int) (rect.x + rect.width));
+		int maxY = Math.min(getHeight(), (int) (rect.y + rect.height));
+		
+		for(int x = minX; x <= maxX; x++) {
+			for (int y = minY; y <= maxY; y++) {
 				Tile tile = getTile(x, y);
 				if(tile != null)
 					overlappingTiles.add(tile);

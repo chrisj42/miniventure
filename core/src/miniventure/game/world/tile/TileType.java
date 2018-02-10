@@ -54,7 +54,7 @@ public enum TileType {
 	
 	TORCH(
 		new DestructibleProperty(true),
-		(LightProperty) () -> Tile.SIZE * 2,
+		(LightProperty) () -> 2,
 		new AnimationProperty(false, AnimationType.SEQUENCE, 1/12f)
 	),
 	
