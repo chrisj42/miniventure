@@ -196,14 +196,9 @@ public class Level {
 		Array<WorldObject> objects = new Array<>();
 		objects.addAll(getOverlappingTiles(renderSpace)); // tiles first
 		
-		//int tileCount = objects.size;
-		
 		Array<Entity> entities = getOverlappingEntities(renderSpace); // entities second
 		entities.sort((e1, e2) -> Float.compare(e2.getCenter().y, e1.getCenter().y));
 		objects.addAll(entities);
-		
-		//objects.shrink();
-		//System.out.println("rendering "+tileCount+" tiles and "+(objects.size-tileCount)+" entities...");
 		
 		for(WorldObject obj: objects)
 			obj.render(batch, delta, posOffset);

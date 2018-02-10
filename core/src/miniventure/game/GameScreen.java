@@ -59,7 +59,6 @@ public class GameScreen {
 			GameCore.getWorld().respawn();
 	}
 	
-	// timeOfDay is 0 to 1.
 	public void render(@NotNull Player mainPlayer, Color[] lightOverlays, @NotNull Level level) {
 		
 		// get the size of the area of the game on screen by projecting the application window dimensions into world space.
@@ -90,7 +89,6 @@ public class GameScreen {
 		
 		batch.setBlendFunction(GL20.GL_ZERO, GL20.GL_ONE_MINUS_SRC_ALPHA);
 		
-		//System.out.println("rendering lighting");
 		Array<Vector3> lights = level.renderLighting(lightRenderSpace);
 		final TextureRegion lightTexture = GameCore.icons.get("light");
 		

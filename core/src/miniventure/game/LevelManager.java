@@ -137,7 +137,7 @@ public class LevelManager {
 		Rectangle spawnBounds = new Rectangle(0, 0, getSpawnDim(level.getWidth()), getSpawnDim(level.getHeight()));
 		spawnBounds.setCenter(level.getWidth()/2, level.getHeight()/2);
 		
-		//level.spawnMob(mainPlayer, spawnBouGamends);
+		//level.spawnMob(mainPlayer, spawnBounds);
 		level.addEntity(mainPlayer, 12.5f, 12.5f, true);
 	}
 	
