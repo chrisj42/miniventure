@@ -134,23 +134,10 @@ public class LevelManager {
 		
 		// find a good spawn location near the middle of the map
 		
-		Rectangle spawnBounds = new Rectangle(0, 0, getSpawnDim(level.getWidth()), getSpawnDim(level.getHeight()));
+		Rectangle spawnBounds = new Rectangle(0, 0, Math.min(level.getWidth(), 5*Chunk.SIZE), Math.min(level.getHeight(), 5*Chunk.SIZE));
 		spawnBounds.setCenter(level.getWidth()/2, level.getHeight()/2);
 		
 		level.spawnMob(mainPlayer, spawnBounds);
-		//level.addEntity(mainPlayer, 50, 50, true);
-	}
-	
-	private int getSpawnDim(int levelDim) {
-		if(spawnTile != null)
-			return Math.min(levelDim, 5*Chunk.SIZE);
-		
-		levelDim = Math.min(20*Chunk.SIZE, levelDim);
-		
-		if(levelDim <= Chunk.SIZE)
-			return levelDim;
-		
-		return levelDim / 2;
 	}
 	
 	public boolean isKeepAlive(WorldObject obj) {

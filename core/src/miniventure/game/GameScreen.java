@@ -189,8 +189,8 @@ public class GameScreen {
 		
 		// player coordinates, for debug
 		Rectangle playerBounds = mainPlayer.getBounds();
-		debugInfo.add("X = "+playerBounds.x);
-		debugInfo.add("Y = "+playerBounds.y);
+		debugInfo.add("X = "+(playerBounds.x-level.getWidth()/2));
+		debugInfo.add("Y = "+(playerBounds.y-level.getHeight()/2));
 		
 		Tile playerTile = level.getClosestTile(playerBounds);
 		debugInfo.add("Tile = " + (playerTile == null ? "Null" : playerTile.getType()));

@@ -175,9 +175,8 @@ public class Level {
 		spawnMob(mob, tiles.toArray(Tile.class));
 	}
 	
+	// only spawns within the given area
 	public void spawnMob(Mob mob, Rectangle spawnArea) {
-		// only spawns within the given area
-		spawnArea.fitInside(new Rectangle(0, 0, getWidth(), getHeight()));
 		// if the mob is a keepAlive mob, then unloaded tiles are considered; otherwise, they are not.
 		if(!GameCore.getWorld().isKeepAlive(mob))
 			spawnMob(mob, getOverlappingTiles(spawnArea).toArray(Tile.class));

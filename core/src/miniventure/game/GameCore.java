@@ -22,7 +22,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class GameCore extends ApplicationAdapter {
 	
-	public static final Version VERSION = new Version("1.2.1");
+	public static final Version VERSION = new Version("1.2.2");
 	
 	public static final int DEFAULT_SCREEN_WIDTH = 800;
 	public static final int DEFAULT_SCREEN_HEIGHT = 450;

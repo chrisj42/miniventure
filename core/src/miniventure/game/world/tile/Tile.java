@@ -358,7 +358,7 @@ public class Tile implements WorldObject {
 	@Override
 	public String toString() { return getType().getName()/* + " Tile (all:"+tileTypes+")"*/; }
 	
-	public String toLocString() { return x+","+y+" ("+toString()+")"; }
+	public String toLocString() { return (x-level.getWidth()/2)+","+(y-level.getHeight()/2)+" ("+toString()+")"; }
 	
 	@Override
 	public boolean equals(Object other) {
