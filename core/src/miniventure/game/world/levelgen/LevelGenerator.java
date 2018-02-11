@@ -19,7 +19,8 @@ public class LevelGenerator {
 		BiomeCategory.ROCKY+"_3"
 	);
 	
-	private static final int MAX_WORLD_SIZE = Integer.MAX_VALUE/2;
+	// TO-DO I don't really know why, but things get messed up when you go really far out, and have big numbers for your coordinates, even though it's nowhere near the number limit. I want to fix this, but I have no idea how, and I have a feeling that it is going to be more complicated than I think, and I really don't want to deal with it. So, for now, I'm just going to use a considerably smaller value, in the range of 10,000s. It's plenty big, honestly, so it'll just have to do for now until whenever I decide to try and figure out the issue.
+	private static final int MAX_WORLD_SIZE = (int) (Math.sqrt(Math.min(Integer.MAX_VALUE, Float.MAX_VALUE)));
 	
 	private final Coherent2DNoiseFunction categoryNoise, biomeNoise, detailNoise;
 	public final int worldWidth, worldHeight;
@@ -52,10 +53,10 @@ public class LevelGenerator {
 	
 	public TileType[][] generateChunk(final int x, final int y) {
 		int width = Chunk.SIZE, height = Chunk.SIZE;
-		if((x+1) * width > worldWidth)
+		if(x * width + width >= worldWidth)
 			width = worldWidth - x*width;
-		if((y+1) * height > worldHeight)
-			height = worldHeight - x*height;
+		if(y * height + height >= worldHeight)
+			height = worldHeight - y*height;
 		
 		if(width <= 0 || height <= 0)
 			throw new IndexOutOfBoundsException("Requested chunk is outside world bounds; chunkX="+x+", chunkY="+y+". Max x requested: "+((x+1)*Chunk.SIZE-1)+", max y requested: "+((y+1)*Chunk.SIZE-1)+". Actual world size: ("+worldWidth+","+worldHeight+")");

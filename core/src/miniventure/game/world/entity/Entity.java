@@ -3,7 +3,6 @@ package miniventure.game.world.entity;
 import java.util.HashMap;
 
 import miniventure.game.item.Item;
-import miniventure.game.world.Chunk;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Mob;
@@ -117,8 +116,6 @@ public abstract class Entity implements WorldObject {
 				- calling any interaction methods along the way
 		 */
 		
-		boolean debug = this instanceof Player;
-		
 		Array<Tile> futureTiles = level.getOverlappingTiles(newRect);
 		Array<Tile> currentTiles = level.getOverlappingTiles(oldRect);
 		Array<Tile> newTiles = new Array<>(futureTiles);
@@ -185,14 +182,14 @@ public abstract class Entity implements WorldObject {
 		y = Math.min(y, level.getHeight() - size.y);
 		
 		// check and see if the entity is changing chunks from their current position.
-		boolean changedChunk = Level.getEntityLevel(this) == level && (
-			((int)x) / Chunk.SIZE != ((int)this.x) / Chunk.SIZE ||
-			((int)y) / Chunk.SIZE != ((int)this.y) / Chunk.SIZE);
+		// boolean changedChunk = Level.getEntityLevel(this) == level && (
+		// 	Chunk.getCoord(x) != Chunk.getCoord(this.x) ||
+		// 	Chunk.getCoord(y) != Chunk.getCoord(this.y) );
 		
 		this.x = x;
 		this.y = y;
 		
-		if(changedChunk)
+		// if(changedChunk)
 			level.entityMoved(this);
 	}
 	public void moveTo(@NotNull Tile tile) {

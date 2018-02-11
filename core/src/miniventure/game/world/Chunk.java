@@ -3,6 +3,8 @@ package miniventure.game.world;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileType;
 
+import com.badlogic.gdx.math.MathUtils;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,4 +36,9 @@ public class Chunk {
 	}
 	
 	@NotNull Tile[][] getTiles() { return tiles; }
+	
+	public static int getCoord(float pos) {
+		int worldCoord = MathUtils.floor(pos);
+		return worldCoord / SIZE;
+	}
 }

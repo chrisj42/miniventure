@@ -16,7 +16,6 @@ import miniventure.game.world.levelgen.LevelGenerator;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileType;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -61,7 +60,13 @@ public class Level {
 	public int getEntityCount() { return entities.size(); }
 	
 	public void entityMoved(Entity entity) {
-		if(!GameCore.getWorld().isKeepAlive(entity)) return;
+		if(!GameCore.getWorld().isKeepAlive(entity)) {
+			// check if they've gone (mostly?) out of bounds, if so, remove them
+			Vector2 pos = entity.getCenter();
+			if(!loadedChunks.containsKey(new Point(Chunk.getCoord(pos.x), Chunk.getCoord(pos.y))))
+				entity.remove();
+			return;
+		}
 		
 		if(entity.getLevel() == this) {
 			// load all surrounding chunks
@@ -207,17 +212,6 @@ public class Level {
 		
 		for(WorldObject obj: objects)
 			obj.render(batch, delta, posOffset);
-		
-		// render chunk boundaries
-		int minX = MathUtils.ceil(renderSpace.x) / Chunk.SIZE * Chunk.SIZE;
-		int minY = MathUtils.ceil(renderSpace.y) / Chunk.SIZE * Chunk.SIZE;
-		int maxX = MathUtils.ceil((renderSpace.x + renderSpace.width) / Chunk.SIZE) * Chunk.SIZE;
-		int maxY = MathUtils.ceil((renderSpace.y + renderSpace.height) / Chunk.SIZE) * Chunk.SIZE;
-		
-		for(int x = minX; x <= maxX; x+=Chunk.SIZE)
-			MyUtils.fillRect((x-posOffset.x)*Tile.SIZE - 2, (minY-posOffset.y)*Tile.SIZE, 5, (maxY-minY)*Tile.SIZE, Color.PINK, batch);
-		for(int y = minY; y <= maxY; y+=Chunk.SIZE)
-			MyUtils.fillRect((minX-posOffset.x)*Tile.SIZE, (y-posOffset.y)*Tile.SIZE - 2, (maxX-minX)*Tile.SIZE, 5, Color.PINK, batch);
 	}
 	
 	public Array<Vector3> renderLighting(Rectangle renderSpace) {
@@ -308,8 +302,8 @@ public class Level {
 		return null;
 	}
 	
-	public Array<Tile> getOverlappingTiles(Rectangle rect) {
-		Array<Tile> overlappingTiles = new Array<>();
+	private Array<Point> getOverlappingTileCoords(Rectangle rect) {
+		Array<Point> overlappingTiles = new Array<>();
 		int minX = Math.max(0, (int) rect.x);
 		int minY = Math.max(0, (int) rect.y);
 		int maxX = Math.min(getWidth(), (int) (rect.x + rect.width));
@@ -317,13 +311,37 @@ public class Level {
 		
 		for(int x = minX; x <= maxX; x++) {
 			for (int y = minY; y <= maxY; y++) {
-				Tile tile = getTile(x, y);
-				if(tile != null)
-					overlappingTiles.add(tile);
+				overlappingTiles.add(new Point(x, y));
 			}
 		}
 		
 		return overlappingTiles;
+	}
+	
+	public Array<Tile> getOverlappingTiles(Rectangle rect) {
+		Array<Tile> overlappingTiles = new Array<>();
+		Array<Point> points = getOverlappingTileCoords(rect);
+		
+		for(Point p: points) {
+			Tile tile = getTile(p.x, p.y);
+			if (tile != null)
+				overlappingTiles.add(tile);
+		}
+		
+		return overlappingTiles;
+	}
+	
+	private Array<Point> getOverlappingChunks(Rectangle rect) {
+		Array<Point> overlappingChunks = new Array<>();
+		Array<Point> points = getOverlappingTileCoords(rect);
+		
+		for(Point p: points) {
+			Point chunk = new Point(Chunk.getCoord(p.x), Chunk.getCoord(p.y));
+			if(!overlappingChunks.contains(chunk, false))
+				overlappingChunks.add(chunk);
+		}
+		
+		return overlappingChunks;
 	}
 	
 	public Array<Entity> getOverlappingEntities(Rectangle rect) {
@@ -360,7 +378,7 @@ public class Level {
 		return getAreaChunks(tilePos.x, tilePos.y, radius, loaded, unloaded);
 	}
 	private Array<Point> getAreaChunks(float x, float y, int radius, boolean loaded, boolean unloaded) {
-		return getAreaChunks(((int)x) / Chunk.SIZE, ((int)y) / Chunk.SIZE, radius, loaded, unloaded);
+		return getAreaChunks(Chunk.getCoord(x), Chunk.getCoord(y), radius, loaded, unloaded);
 	}
 	private Array<Point> getAreaChunks(int chunkX, int chunkY, int radius, boolean loaded, boolean unloaded) {
 		Array<Point> chunkCoords = new Array<>();

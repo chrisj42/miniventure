@@ -1,6 +1,7 @@
 package miniventure.game;
 
 import miniventure.game.util.MyUtils;
+import miniventure.game.world.Chunk;
 import miniventure.game.world.Level;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.tile.Tile;
@@ -15,6 +16,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -39,6 +41,8 @@ public class GameScreen {
 	private int zoom = 0;
 	private FrameBuffer lightingBuffer;
 	
+	private boolean debug = false;
+	
 	public GameScreen() {
 		camera = new OrthographicCamera();
 		uiCamera = new OrthographicCamera();
@@ -60,6 +64,9 @@ public class GameScreen {
 		
 		if(Gdx.input.isKeyJustPressed(Keys.R) && Gdx.input.isKeyPressed(Keys.SHIFT_LEFT))
 			GameCore.getWorld().createWorld(0, 0);
+		
+		if(Gdx.input.isKeyJustPressed(Keys.B))
+			debug = !debug;
 	}
 	
 	public void render(@NotNull Player mainPlayer, Color[] lightOverlays, @NotNull Level level) {
@@ -120,6 +127,23 @@ public class GameScreen {
 		batch.begin();
 		batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA); // default
 		level.render(renderSpace, batch, Gdx.graphics.getDeltaTime(), offset); // renderSpace in world coords, but offset can give render coords
+		
+		if(debug) {
+			// render chunk boundaries
+			int minX = MathUtils.ceil(renderSpace.x) / Chunk.SIZE * Chunk.SIZE;
+			int minY = MathUtils.ceil(renderSpace.y) / Chunk.SIZE * Chunk.SIZE;
+			int maxX = MathUtils.ceil((renderSpace.x + renderSpace.width) / Chunk.SIZE) * Chunk.SIZE;
+			int maxY = MathUtils.ceil((renderSpace.y + renderSpace.height) / Chunk.SIZE) * Chunk.SIZE;
+			
+			int lineThickness = (int) Math.pow(2, -zoom);
+			
+			for (int x = minX; x <= maxX; x += Chunk.SIZE) {
+				MyUtils.fillRect((x - offset.x) * Tile.SIZE-lineThickness, (minY - offset.y) * Tile.SIZE, lineThickness*2+1, (maxY - minY) * Tile.SIZE, Color.PINK, batch);
+			}
+			for (int y = minY; y <= maxY; y += Chunk.SIZE) {
+				MyUtils.fillRect((minX - offset.x) * Tile.SIZE, (y - offset.y) * Tile.SIZE-lineThickness, (maxX - minX) * Tile.SIZE, lineThickness*2+1, Color.PINK, batch);
+			}
+		}
 		
 		Tile interactTile = level.getClosestTile(mainPlayer.getInteractionRect());
 		if(interactTile != null) {
