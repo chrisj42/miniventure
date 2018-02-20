@@ -82,7 +82,7 @@ public class DestructibleProperty implements TileProperty {
 			int health = totalHealth > 1 ? new Integer(tile.getData(getClass(), tileType, HEALTH_IDX)) : 1;
 			health -= damage;
 			if(totalHealth > 1)
-				tile.getLevel().addEntity(new TextParticle(damage+""), tile.getCenter());
+				tile.getLevel().addEntity(new TextParticle(damage+""), tile.getCenter(), true);
 			if(health <= 0) {
 				tile.breakTile();
 				if(drops.length > 0 && drops[0] == null && dropsTileItem)

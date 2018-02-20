@@ -17,7 +17,9 @@ public class MainMenu extends MenuScreen {
 		
 		addLabel("Use mouse or arrow keys to move around.", 10);
 		addLabel("C to attack, V to interact.", 10);
-		addLabel("E to open your inventory, Z to craft items.", 30);
+		addLabel("E to open your inventory, Z to craft items.", 10);
+		addLabel("+ and - keys to zoom in and out.", 30);
+		//addLabel("(press b to show/hide chunk boundaries)", 30);
 		//addLabel("", 10);
 		
 		VisTextButton button = new VisTextButton("Play");
@@ -25,7 +27,7 @@ public class MainMenu extends MenuScreen {
 		button.addListener(new ClickListener() {
 			@Override
 			public void clicked(InputEvent e, float x, float y) {
-				GameCore.getWorld().createWorld();
+				GameCore.getWorld().createWorld(0, 0);
 			}
 		});
 		

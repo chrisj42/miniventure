@@ -9,7 +9,6 @@ import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.TextParticle;
 import miniventure.game.world.entity.mob.MobAnimationController.AnimationState;
-import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileType;
 
 import com.badlogic.gdx.graphics.Color;
@@ -27,7 +26,7 @@ public abstract class Mob extends Entity {
 	
 	// for knockback, the whole process should take about 0.5s. The first half at a constant speed, and the second half can be spend slowing down at a linear pace.
 	
-	private static final float KNOCKBACK_SPEED = 10 * Tile.SIZE; // in units / second
+	private static final float KNOCKBACK_SPEED = 10; // in tiles / second
 	private static final float MIN_KNOCKBACK_TIME = 0.05f;
 	private static final float MAX_KNOCKBACK_TIME = 0.25f;
 	private static final float DAMAGE_PERCENT_FOR_MAX_PUSH = 0.2f;
@@ -65,12 +64,12 @@ public abstract class Mob extends Entity {
 	public boolean isKnockedBack() { return knockbackTimeLeft > 0 && knockbackVelocity.len() > 0; }
 	
 	@Override
-	public void render(SpriteBatch batch, float delta) {
+	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
 		blinker.update(delta);
 		
 		setSprite(animator.pollAnimation(delta));
 		if(invulnerableTime <= 0 || blinker.shouldRender())
-			super.render(batch, delta);
+			super.render(batch, delta, posOffset);
 	}
 	
 	@Override
@@ -138,7 +137,7 @@ public abstract class Mob extends Entity {
 		
 		Level level = getLevel();
 		if(level != null) {
-			level.addEntity(new TextParticle(damage+"", this instanceof Player ? Color.PINK : Color.RED), getCenter());
+			level.addEntity(new TextParticle(damage+"", this instanceof Player ? Color.PINK : Color.RED), getCenter(), true);
 			
 			if (health == 0) {
 				for (ItemDrop drop : itemDrops)
@@ -153,8 +152,7 @@ public abstract class Mob extends Entity {
 	}
 	
 	
-	public boolean maySpawn(Tile tile) {
-		TileType type = tile.getType();
+	public boolean maySpawn(TileType type) {
 		return type == TileType.GRASS || type == TileType.DIRT || type == TileType.SAND;
 	}
 }

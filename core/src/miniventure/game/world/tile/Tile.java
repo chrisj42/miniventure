@@ -8,6 +8,7 @@ import java.util.TreeMap;
 import miniventure.game.item.Item;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Level;
+import miniventure.game.world.Point;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Mob;
@@ -144,8 +145,8 @@ public class Tile implements WorldObject {
 	
 	@NotNull @Override public Level getLevel() { return level; }
 	
-	@Override
-	public Rectangle getBounds() { return new Rectangle(x*SIZE, y*SIZE, SIZE, SIZE); }
+	@Override public Rectangle getBounds() { return new Rectangle(x, y, 1, 1); }
+	@Override public Vector2 getCenter() { return new Vector2(x+0.5f, y+0.5f); }
 	
 	public boolean addTile(@NotNull TileType newType) {
 		// first, check to see if the newType can validly be placed on the current type.
@@ -215,6 +216,8 @@ public class Tile implements WorldObject {
 			if(y < level.getHeight()-1) tiles.add(level.getTile(x, y+1));
 			if(x < level.getWidth()-1) tiles.add(level.getTile(x+1, y));
 			if(y > 0) tiles.add(level.getTile(x, y-1));
+			boolean hasNull = true;
+			while(hasNull) hasNull = tiles.removeValue(null, true);
 			return tiles;
 		}
 	}
@@ -231,7 +234,7 @@ public class Tile implements WorldObject {
 	}
 	
 	@Override
-	public void render(SpriteBatch batch, float delta) {
+	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
 		
 		/*
 			- Get the surrounding tile types for a tile
@@ -288,7 +291,7 @@ public class Tile implements WorldObject {
 		
 		
 		for(AtlasRegion texture: sprites)
-			batch.draw(texture, x*SIZE, y*SIZE, SIZE, SIZE);
+			batch.draw(texture, (x-posOffset.x) * SIZE, (y-posOffset.y) * SIZE);
 	}
 	
 	
@@ -353,9 +356,19 @@ public class Tile implements WorldObject {
 	public void touching(Entity entity) {}
 	
 	@Override
-	public String toString() { return getType().getName() + " Tile (all:"+tileTypes+")"; }
+	public String toString() { return getType().getName()/* + " Tile (all:"+tileTypes+")"*/; }
 	
-	public String toLocString() { return x+","+y+" ("+toString()+")"; }
+	public String toLocString() { return (x-level.getWidth()/2)+","+(y-level.getHeight()/2)+" ("+toString()+")"; }
+	
+	@Override
+	public boolean equals(Object other) {
+		if(!(other instanceof Tile)) return false;
+		Tile o = (Tile) other;
+		return level.equals(o.level) && x == o.x && y == o.y;
+	}
+	
+	@Override
+	public int hashCode() { return new Point(x, y).hashCode() + level.getDepth() * 17; }
 	
 	// I can use the string encoder and string parser in MyUtils to encode the tile data in a way so that I can always re-parse the encoded array. I can use this internally to, with other things, whenever I need to encode a list of objects and don't want to worry about finding the delimiter symbol in string somewhere I don't expect.
 }

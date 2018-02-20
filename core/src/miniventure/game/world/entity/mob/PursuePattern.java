@@ -2,7 +2,6 @@ package miniventure.game.world.entity.mob;
 
 import miniventure.game.world.Level;
 import miniventure.game.world.entity.Entity;
-import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.math.Vector2;
 
@@ -32,7 +31,7 @@ public class PursuePattern implements MovementPattern {
 	
 	public PursuePattern() { this(EntityFollower.NEAREST_PLAYER); }
 	public PursuePattern(EntityFollower followBehavior) { this(followBehavior, 2.5f); }
-	public PursuePattern(EntityFollower followBehavior, float followSpeed) { this(followBehavior, 8 * Tile.SIZE, followSpeed); }
+	public PursuePattern(EntityFollower followBehavior, float followSpeed) { this(followBehavior, 8, followSpeed); }
 	public PursuePattern(@NotNull EntityFollower behavior, float maxDist, float followSpeed) {
 		this.followBehavior = behavior;
 		this.maxDist = maxDist;

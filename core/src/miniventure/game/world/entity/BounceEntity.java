@@ -2,7 +2,6 @@ package miniventure.game.world.entity;
 
 import miniventure.game.util.FrameBlinker;
 import miniventure.game.world.Level;
-import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -12,21 +11,22 @@ import com.badlogic.gdx.math.Vector3;
 
 public class BounceEntity extends Entity {
 	
-	private static final float INITIAL_BOUNCE_FORCE = 5, INITIAL_MOVE_FORCE = 0.04f;
-	private static final float GRAVITY = -0.5f;
+	private static final float GRAVITY = -50;
 	private static final float REBOUND_SPEED_FACTOR = 0.5f;
 	
 	private static final float BLINK_THRESHOLD = 0.75f; // the minimum percentage of lifetime that time has to be for the entity to start blinking, signaling that it's about to disappear.
 	
 	private final float lifetime;
 	
-	private Vector3 velocity;
+	private Vector3 velocity; // in tiles / second.
 	private float time; // the current time relative to the creation of this item entity. used as the current position along the "x-axis".
 	private FrameBlinker blinker;
 	
+	private float lastBounceTime; // used to halt the entity once it starts bouncing a lot really quickly.
+	
 	
 	public BounceEntity(Sprite sprite, float lifetime) {
-		this(sprite, new Vector2().setToRandomDirection().scl(Tile.SIZE * MathUtils.random(0.8f, 1.5f)), lifetime);
+		this(sprite, new Vector2().setToRandomDirection(), lifetime);
 	}
 	public BounceEntity(Sprite sprite, Vector2 goalDir, float lifetime) {
 		super(sprite);
@@ -34,7 +34,7 @@ public class BounceEntity extends Entity {
 		
 		blinker = new FrameBlinker(1, 1, false);
 		
-		velocity = new Vector3(goalDir.cpy().scl(INITIAL_MOVE_FORCE), INITIAL_BOUNCE_FORCE);
+		velocity = new Vector3(goalDir.cpy().nor().scl(MathUtils.random(0.5f, 2.5f)), MathUtils.random(8f, 12f));
 	}
 	
 	float getTime() { return time; }
@@ -53,39 +53,40 @@ public class BounceEntity extends Entity {
 		if(level == null) return;
 		
 		Vector2 pos = getPosition();
-		move(velocity.x, velocity.y, velocity.z);
+		Vector3 vel = velocity.cpy().scl(delta);
+		move(vel.x, vel.y, vel.z);
 		Vector2 newPos = getPosition();
 		
-		if(newPos.x != pos.x+velocity.x)
+		if(newPos.x != pos.x+vel.x)
 			velocity.x *= -1;
-		if(newPos.y != pos.y+velocity.y)
+		if(newPos.y != pos.y+vel.y)
 			velocity.y *= -1;
+		
+		time += delta;
 		
 		if(getZ() < 0) {
 			setZ(0);
-			velocity.x *= REBOUND_SPEED_FACTOR;
-			velocity.y *= REBOUND_SPEED_FACTOR;
-			velocity.z *= -REBOUND_SPEED_FACTOR;
-			if(velocity.len() < 0.001f) {
+			velocity.scl(REBOUND_SPEED_FACTOR, REBOUND_SPEED_FACTOR, -REBOUND_SPEED_FACTOR);
+			if(time - lastBounceTime < 0.01f) {
 				moving = false;
 				velocity.setZero();
 			}
+			else
+				lastBounceTime = time;
 		}
 		
 		if(moving)
-			velocity.add(0, 0, GRAVITY);
-		
-		time += delta;
+			velocity.add(0, 0, GRAVITY*delta);
 		
 		if(time > lifetime)
 			remove();
 	}
 	
 	@Override
-	public void render(SpriteBatch batch, float delta) {
+	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
 		blinker.update(delta);
 		
 		if(time < lifetime * BLINK_THRESHOLD || blinker.shouldRender())
-			super.render(batch, delta);
+			super.render(batch, delta, posOffset);
 	}
 }

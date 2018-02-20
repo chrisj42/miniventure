@@ -1,6 +1,6 @@
 package miniventure.game.world;
 
-import java.util.HashMap;
+import java.util.TreeMap;
 
 import miniventure.game.item.Item;
 import miniventure.game.world.entity.Entity;
@@ -27,7 +27,7 @@ public interface WorldObject {
 	
 	void update(float delta);
 	
-	void render(SpriteBatch batch, float delta);
+	void render(SpriteBatch batch, float delta, Vector2 posOffset);
 	
 	default float getLightRadius() { return 0; }
 	
@@ -52,15 +52,11 @@ public interface WorldObject {
 	default Tile getClosestTile(@NotNull Array<Tile> tiles) {
 		if(tiles.size == 0) return null;
 		
-		Vector2 center = new Vector2();
-		getBounds().getCenter(center);
-		HashMap<Vector2, Tile> tileMap = new HashMap<>();
+		final Vector2 center = getBounds().getCenter(new Vector2());
+		TreeMap<Vector2, Tile> tileMap = new TreeMap<>((v1, v2) -> (int) (center.dst2(v1) - center.dst2(v2)));
 		for(Tile t: tiles)
 			tileMap.put(t.getCenter(), t);
 		
-		Array<Vector2> tileCenters = new Array<>(tileMap.keySet().toArray(new Vector2[tileMap.size()]));
-		tileCenters.sort((v1, v2) -> (int) (center.dst2(v1) - center.dst2(v2))); // sort, so the first one in the list is the closest one
-		
-		return tileMap.get(tileCenters.get(0));
+		return tileMap.firstEntry().getValue();
 	}
 }

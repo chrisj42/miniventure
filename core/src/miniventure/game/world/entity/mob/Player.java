@@ -76,7 +76,7 @@ public class Player extends Mob {
 	public void checkInput(@NotNull Vector2 mouseInput) {
 		// checks for keyboard input to move the player.
 		// getDeltaTime() returns the time passed between the last and the current frame in seconds.
-		float speed = Tile.SIZE * MOVE_SPEED; // this is technically in units/second.
+		//float speed = MOVE_SPEED; // this is technically in units/second.
 		Vector2 movement = new Vector2();
 		if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) movement.x--;
 		if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) movement.x++;
@@ -88,7 +88,7 @@ public class Player extends Mob {
 		movement.add(mouseInput);
 		movement.nor();
 		
-		movement.scl(speed * Gdx.graphics.getDeltaTime());
+		movement.scl(MOVE_SPEED * Gdx.graphics.getDeltaTime());
 		
 		move(movement.x, movement.y);
 		
@@ -156,8 +156,8 @@ public class Player extends Mob {
 	public Rectangle getInteractionRect() {
 		Rectangle bounds = getBounds();
 		Vector2 dirVector = getDirection().getVector();
-		bounds.setX(bounds.getX()+Tile.SIZE*dirVector.x);
-		bounds.setY(bounds.getY()+Tile.SIZE*dirVector.y);
+		bounds.x += dirVector.x;
+		bounds.y += dirVector.y;
 		return bounds;
 	}
 	

@@ -17,17 +17,19 @@ class Testing {
 	static {
 		tileMap.put(TileType.WATER, Color.BLUE);
 		tileMap.put(TileType.TREE, Color.GREEN.darker().darker());
+		tileMap.put(TileType.CACTUS, Color.GREEN.darker());
 		tileMap.put(TileType.GRASS, Color.GREEN);
 		tileMap.put(TileType.STONE, Color.GRAY);
 		tileMap.put(TileType.SAND, Color.YELLOW);
-		tileMap.put(TileType.DIRT, Color.ORANGE.darker().darker());
+		//tileMap.put(TileType.DIRT, Color.ORANGE.darker().darker());
 	}
 	
 	private static void displayLevelVisually(int width, int height, int scale) {
 		displayLevelVisually(width, height, scale, new Random().nextLong());
 	}
 	private static void displayLevelVisually(int width, int height, int scale, long seed) {
-		TileType[][] tiles = LevelGenerator.generateLevel(seed, width, height);
+		LevelGenerator gen = new LevelGenerator(seed, 0, 0, 32, 6);
+		TileType[][] tiles = gen.generateTiles(0, 0, width, height);
 		
 		Color[][] colors = new Color[width][height];
 		for(int x = 0; x < tiles.length; x++)
@@ -41,7 +43,7 @@ class Testing {
 		Color[][] colors = new Color[width][height];
 		for(int x = 0; x < width; x++) {
 			for(int y = 0; y < height; y++) {
-				int col = LevelGenerator.getIndex(256, noise[x][y]);
+				int col = (int) (noise[x][y] * 255);
 				colors[x][y] = new Color(col, col, col);
 			}
 		}
@@ -67,20 +69,24 @@ class Testing {
 			protected void paintComponent(Graphics g) { g.drawImage(image, 0, 0, null); }
 		};
 		
-		JOptionPane.showMessageDialog(null, viewPanel, "Level", JOptionPane.PLAIN_MESSAGE);
+		JOptionPane.showMessageDialog(null, viewPanel, "Noise", JOptionPane.PLAIN_MESSAGE);
 	}
 	
 	
 	public static void main(String[] args) {
-		while(true) //testTerrainGen(256, 256, 2);
-		displayLevelVisually(20, 16, 32);
+		while(true) //testTerrainGen(128, 64, 8, 16, 2);
+		displayLevelVisually(128, 64, 8);
 	}
 	
-	private static void testTerrainGen(int width, int height, int scale) { testTerrainGen(width, height, scale, new Random().nextLong()); }
-	private static void testTerrainGen(int width, int height, int scale, long seed) {
-		displayNoiseGrayscale(width, height, LevelGenerator.generateTerrain(seed, width, height,
-			new int[] {32, 16, 2},
-			new int[] {16, 8, 4, 2, 1}
-		), scale);
+	/** @noinspection SameParameterValue*/
+	private static void testTerrainGen(int width, int height, int scale, int noiseCoordsPerPixel, int numCurves) { testTerrainGen(width, height, scale, new Random().nextLong(), noiseCoordsPerPixel, numCurves); }
+	private static void testTerrainGen(int width, int height, int scale, long seed, int noiseCoordsPerPixel, int numCurves) {
+		float[][] values = new float[width][height];
+		Coherent2DNoiseFunction noise = new Coherent2DNoiseFunction(seed, noiseCoordsPerPixel, numCurves);
+		for(int x = 0; x < width; x++)
+			for(int y = 0; y < height; y++)
+				values[x][y] = noise.getValue(x, y);
+		
+		displayNoiseGrayscale(width, height, values, scale);
 	}
 }

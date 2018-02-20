@@ -1,11 +1,24 @@
 package miniventure.game;
 
+import java.util.HashSet;
+
 import miniventure.game.screen.LoadingScreen;
+import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
+import miniventure.game.screen.RespawnScreen;
+import miniventure.game.world.Chunk;
 import miniventure.game.world.Level;
+import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;
+import miniventure.game.world.levelgen.LevelGenerator;
+import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.Array;
+
+import org.jetbrains.annotations.NotNull;
 
 public class LevelManager {
 	
@@ -24,9 +37,13 @@ public class LevelManager {
 	
 	private boolean worldLoaded = false;
 	
-	private int curLevel;
+	private LevelGenerator levelGenerator;
+	
 	private Player mainPlayer;
 	private float gameTime;
+	
+	private Tile spawnTile = null;
+	private final HashSet<WorldObject> keepAlives = new HashSet<>(); // always keep chunks around these objects loaded.
 	
 	LevelManager() {
 		
@@ -37,8 +54,12 @@ public class LevelManager {
 	void render(GameScreen game, MenuScreen menu) {
 		if(!worldLoaded || mainPlayer == null) return;
 		
-		Level level = Level.getLevel(curLevel);
-		if(level == null) return;
+		Level level = mainPlayer.getLevel();
+		if(level == null) {
+			if(!(menu instanceof RespawnScreen))
+				GameCore.setScreen(new RespawnScreen());
+			return;
+		}
 		
 		// render if no menu, or menu that has part of screen (update camera if update or multiplayer)
 		// check input if no menu
@@ -54,7 +75,7 @@ public class LevelManager {
 		}
 		
 		if(update) {
-			game.update(mainPlayer, level);
+			level.update(Gdx.graphics.getDeltaTime());
 			gameTime += Gdx.graphics.getDeltaTime();
 		}
 	}
@@ -63,16 +84,23 @@ public class LevelManager {
 		return TimeOfDay.getTimeOfDay(gameTime).getTimeString(gameTime);
 	}
 	
-	public void createWorld() {
+	public void createWorld(int width, int height) {
 		worldLoaded = false;
 		LoadingScreen loadingScreen = new LoadingScreen();
 		GameCore.setScreen(loadingScreen);
-		curLevel = 0;
 		gameTime = 0;
-		/// IDEA How about I have MenuScreen be an interface; or make another interface that MenuScreen implements. The idea is that I can have displays that don't use Scene2D (like the the loading screen, or level transitions if that's a thing), since they don't have options.
+		
+		levelGenerator = new LevelGenerator(MathUtils.random.nextLong(), width, height, 32, 6);
+		
 		new Thread(() -> {
-			Level.resetLevels(loadingScreen);
+			Level.resetLevels(loadingScreen, levelGenerator);
 			respawn();
+			//noinspection ConstantConditions
+			Tile spawnTile = mainPlayer.getLevel().getClosestTile(mainPlayer.getBounds());
+			if (spawnTile != null) {
+				mainPlayer.moveTo(spawnTile);
+				keepAlives.add(spawnTile);
+			}
 			worldLoaded = true;
 			Gdx.app.postRunnable(() -> GameCore.setScreen(null));
 		}).start();
@@ -85,14 +113,43 @@ public class LevelManager {
 	public void exitToMenu() { // returns to title screen
 		// set menu to main menu, and dispose of level/world resources
 		worldLoaded = false;
+		keepAlives.clear();
+		mainPlayer = null;
+		Level.clearLevels();
+		levelGenerator = null;
+		spawnTile = null;
+		GameCore.setScreen(new MainMenu());
 	}
 	
 	public void respawn() {
 		if(mainPlayer != null) mainPlayer.remove();
+		keepAlives.remove(mainPlayer);
 		mainPlayer = new Player();
+		keepAlives.add(mainPlayer);
 		
-		Level level = Level.getLevel(curLevel);
+		Level level = Level.getLevel(0);
 		
-		level.spawnMob(mainPlayer);
+		if(level == null)
+			throw new NullPointerException("Surface level found to be null while attempting to respawn player.");
+		
+		// find a good spawn location near the middle of the map
+		
+		Rectangle spawnBounds = new Rectangle(0, 0, Math.min(level.getWidth(), 5*Chunk.SIZE), Math.min(level.getHeight(), 5*Chunk.SIZE));
+		spawnBounds.setCenter(level.getWidth()/2, level.getHeight()/2);
+		
+		level.spawnMob(mainPlayer, spawnBounds);
+	}
+	
+	public boolean isKeepAlive(WorldObject obj) {
+		return keepAlives.contains(obj);
+	}
+	
+	public Array<WorldObject> getKeepAlives(@NotNull Level level) {
+		Array<WorldObject> keepAlives = new Array<>();
+		for(WorldObject obj: this.keepAlives)
+			if(obj.getLevel() == level)
+				keepAlives.add(obj);
+		
+		return keepAlives;
 	}
 }
