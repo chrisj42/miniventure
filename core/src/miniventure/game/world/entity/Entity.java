@@ -19,7 +19,7 @@ import com.badlogic.gdx.utils.Array;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class Entity implements WorldObject {
+public class Entity implements WorldObject {
 	
 	private static final HashMap<Integer, Entity> takenIDs = new HashMap<>();
 	
@@ -212,7 +212,13 @@ public abstract class Entity implements WorldObject {
 	public void touching(Entity entity) {}
 	
 	@Override
-	public boolean isPermeableBy(Entity entity) { return this instanceof BounceEntity || entity instanceof BounceEntity; }
+	public final boolean isPermeableBy(Entity entity) { return isPermeableBy(entity, true); }
+	
+	public boolean isPermeableBy(Entity entity, boolean delegate) {
+		if(delegate)
+			return entity.isPermeableBy(this, false);
+		return false;
+	}
 	
 	@Override
 	public boolean attackedBy(Mob mob, Item attackItem) { return hurtBy(mob, attackItem.getDamage(this)); }
