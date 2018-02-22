@@ -6,7 +6,9 @@ import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolItem.Material;
 import miniventure.game.item.ToolType;
 import miniventure.game.world.ItemDrop;
+import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
+import miniventure.game.world.entity.ActionParticle;
 import miniventure.game.world.entity.TextParticle;
 import miniventure.game.world.entity.mob.Mob;
 
@@ -79,6 +81,9 @@ public class DestructibleProperty implements TileProperty {
 	
 	boolean tileAttacked(Tile tile, WorldObject attacker, int damage) {
 		if(damage > 0) {
+			// add damage particle
+			tile.getLevel().addEntity(ActionParticle.ActionType.IMPACT.get(null), tile.getCenter(), true);
+			
 			int health = totalHealth > 1 ? new Integer(tile.getData(getClass(), tileType, HEALTH_IDX)) : 1;
 			health -= damage;
 			if(totalHealth > 1)

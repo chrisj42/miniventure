@@ -10,7 +10,7 @@ import com.badlogic.gdx.utils.Align;
 
 import org.jetbrains.annotations.NotNull;
 
-public class TextParticle extends BounceEntity {
+public class TextParticle extends BounceEntity implements Particle {
 	
 	@NotNull private final String text;
 	@NotNull private final Color main, shadow;

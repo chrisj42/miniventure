@@ -11,6 +11,9 @@ import miniventure.game.item.Item;
 import miniventure.game.item.Recipes;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
+import miniventure.game.world.entity.ActionParticle;
+import miniventure.game.world.entity.ActionParticle.ActionType;
+import miniventure.game.world.entity.mob.MobAnimationController.AnimationState;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.Gdx;
@@ -97,6 +100,9 @@ public class Player extends Mob {
 				attack();
 			else if (pressingKey(Input.Keys.V))
 				interact();
+			
+			//if(Gdx.input.isKeyPressed(Input.Keys.C) || Gdx.input.isKeyPressed(Input.Keys.V))
+			//	animator.requestState(AnimationState.ATTACK);
 		}
 		
 		hands.resetItemUsage();
@@ -181,9 +187,20 @@ public class Player extends Mob {
 	}
 	
 	private void attack() {
-		for(WorldObject obj: getInteractionQueue())
-			if(hands.attack(obj))
+		Level level = getLevel();
+		
+		for(WorldObject obj: getInteractionQueue()) {
+			if (hands.attack(obj)) {
+				if(level != null)
+					level.addEntity(ActionParticle.ActionType.SLASH.get(getDirection()), getCenter().add(getDirection().getVector().scl(getSize().scl(0.5f)))/*getInteractionRect().getCenter(new Vector2())*/, true);
 				return;
+			}
+		}
+		
+		// didn't hit anything
+		
+		if(level != null)
+			level.addEntity(ActionParticle.ActionType.PUNCH.get(getDirection()), /*getCenter().add(getDirection().getVector().scl(getSize().scl(0.5f)))*/getInteractionRect().getCenter(new Vector2()), true);
 	}
 	
 	private void interact() {

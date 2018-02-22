@@ -10,9 +10,27 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
-public class ActionParticle extends Entity {
+public class ActionParticle extends Entity implements Particle {
 	
 	// may be animated; lasts as long as the animation, or lasts a given time, with a single frame.
+	
+	public enum ActionType {
+		SLASH(0.5f, true),
+		PUNCH(0.3f, true),
+		IMPACT(0.4f, false);
+		
+		private final float animationTime;
+		private final boolean directional;
+		
+		ActionType(float animationTime, boolean directional) {
+			this.animationTime = animationTime;
+			this.directional = directional;
+		}
+		
+		public ActionParticle get(Direction dir) {
+			return new ActionParticle("particle/"+name().toLowerCase()+(directional?"-"+dir.name().toLowerCase():""), animationTime);
+		}
+	}
 	
 	private Animation<TextureRegion> animation;
 	private final float animationTime;
@@ -23,13 +41,8 @@ public class ActionParticle extends Entity {
 		this.animationTime = animationTime;
 		Array<AtlasRegion> frames = GameCore.entityAtlas.findRegions(spriteName);
 		animation = new Animation<>(animationTime / frames.size, frames);
-	}
-	
-	@Override
-	public Rectangle getBounds() {
-		Rectangle bounds = super.getBounds();
-		bounds.setSize(1);
-		return bounds;
+		
+		setSprite(animation.getKeyFrame(0));
 	}
 	
 	@Override

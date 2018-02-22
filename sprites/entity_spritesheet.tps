@@ -4,7 +4,7 @@
         <key>fileFormatVersion</key>
         <int>4</int>
         <key>texturePackerVersion</key>
-        <string>4.5.0</string>
+        <string>4.6.2</string>
         <key>fileName</key>
         <string>/home/chris/Documents/minicraft/miniventure/sprites/entity_spritesheet.tps</string>
         <key>autoSDSettings</key>
@@ -199,6 +199,87 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
+            <key type="filename">entity-sprites/particle/impact_00.png</key>
+            <key type="filename">entity-sprites/particle/impact_01.png</key>
+            <key type="filename">entity-sprites/particle/impact_02.png</key>
+            <key type="filename">entity-sprites/particle/impact_03.png</key>
+            <key type="filename">entity-sprites/particle/impact_04.png</key>
+            <key type="filename">entity-sprites/particle/impact_05.png</key>
+            <key type="filename">entity-sprites/particle/impact_06.png</key>
+            <key type="filename">entity-sprites/particle/impact_07.png</key>
+            <key type="filename">entity-sprites/particle/impact_08.png</key>
+            <key type="filename">entity-sprites/particle/impact_09.png</key>
+            <key type="filename">entity-sprites/particle/impact_10.png</key>
+            <key type="filename">entity-sprites/particle/impact_11.png</key>
+            <key type="filename">entity-sprites/particle/impact_12.png</key>
+            <key type="filename">entity-sprites/particle/punch-down_00.png</key>
+            <key type="filename">entity-sprites/particle/punch-down_01.png</key>
+            <key type="filename">entity-sprites/particle/punch-down_02.png</key>
+            <key type="filename">entity-sprites/particle/punch-down_03.png</key>
+            <key type="filename">entity-sprites/particle/punch-down_04.png</key>
+            <key type="filename">entity-sprites/particle/punch-down_05.png</key>
+            <key type="filename">entity-sprites/particle/punch-left_00.png</key>
+            <key type="filename">entity-sprites/particle/punch-left_01.png</key>
+            <key type="filename">entity-sprites/particle/punch-left_02.png</key>
+            <key type="filename">entity-sprites/particle/punch-left_03.png</key>
+            <key type="filename">entity-sprites/particle/punch-left_04.png</key>
+            <key type="filename">entity-sprites/particle/punch-left_05.png</key>
+            <key type="filename">entity-sprites/particle/punch-right_00.png</key>
+            <key type="filename">entity-sprites/particle/punch-right_01.png</key>
+            <key type="filename">entity-sprites/particle/punch-right_02.png</key>
+            <key type="filename">entity-sprites/particle/punch-right_03.png</key>
+            <key type="filename">entity-sprites/particle/punch-right_04.png</key>
+            <key type="filename">entity-sprites/particle/punch-right_05.png</key>
+            <key type="filename">entity-sprites/particle/punch-up_00.png</key>
+            <key type="filename">entity-sprites/particle/punch-up_01.png</key>
+            <key type="filename">entity-sprites/particle/punch-up_02.png</key>
+            <key type="filename">entity-sprites/particle/punch-up_03.png</key>
+            <key type="filename">entity-sprites/particle/punch-up_04.png</key>
+            <key type="filename">entity-sprites/particle/punch-up_05.png</key>
+            <key type="filename">entity-sprites/particle/slash-down_00.png</key>
+            <key type="filename">entity-sprites/particle/slash-down_01.png</key>
+            <key type="filename">entity-sprites/particle/slash-down_02.png</key>
+            <key type="filename">entity-sprites/particle/slash-down_03.png</key>
+            <key type="filename">entity-sprites/particle/slash-down_04.png</key>
+            <key type="filename">entity-sprites/particle/slash-down_05.png</key>
+            <key type="filename">entity-sprites/particle/slash-down_06.png</key>
+            <key type="filename">entity-sprites/particle/slash-down_07.png</key>
+            <key type="filename">entity-sprites/particle/slash-left_00.png</key>
+            <key type="filename">entity-sprites/particle/slash-left_01.png</key>
+            <key type="filename">entity-sprites/particle/slash-left_02.png</key>
+            <key type="filename">entity-sprites/particle/slash-left_03.png</key>
+            <key type="filename">entity-sprites/particle/slash-left_04.png</key>
+            <key type="filename">entity-sprites/particle/slash-left_05.png</key>
+            <key type="filename">entity-sprites/particle/slash-left_06.png</key>
+            <key type="filename">entity-sprites/particle/slash-left_07.png</key>
+            <key type="filename">entity-sprites/particle/slash-right_00.png</key>
+            <key type="filename">entity-sprites/particle/slash-right_01.png</key>
+            <key type="filename">entity-sprites/particle/slash-right_02.png</key>
+            <key type="filename">entity-sprites/particle/slash-right_03.png</key>
+            <key type="filename">entity-sprites/particle/slash-right_04.png</key>
+            <key type="filename">entity-sprites/particle/slash-right_05.png</key>
+            <key type="filename">entity-sprites/particle/slash-right_06.png</key>
+            <key type="filename">entity-sprites/particle/slash-right_07.png</key>
+            <key type="filename">entity-sprites/particle/slash-up_00.png</key>
+            <key type="filename">entity-sprites/particle/slash-up_01.png</key>
+            <key type="filename">entity-sprites/particle/slash-up_02.png</key>
+            <key type="filename">entity-sprites/particle/slash-up_03.png</key>
+            <key type="filename">entity-sprites/particle/slash-up_04.png</key>
+            <key type="filename">entity-sprites/particle/slash-up_05.png</key>
+            <key type="filename">entity-sprites/particle/slash-up_06.png</key>
+            <key type="filename">entity-sprites/particle/slash-up_07.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>8,8,16,16</rect>
+                <key>scale9Paddings</key>
+                <rect>8,8,16,16</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">entity-sprites/player/idle-down_1.png</key>
             <key type="filename">entity-sprites/player/idle-up_1.png</key>
             <struct type="IndividualSpriteSettings">

@@ -9,6 +9,7 @@ import miniventure.game.screen.LoadingScreen;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ItemEntity;
+import miniventure.game.world.entity.Particle;
 import miniventure.game.world.entity.mob.AiType;
 import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.entity.mob.Player;
@@ -206,7 +207,13 @@ public class Level {
 		objects.addAll(getOverlappingTiles(renderSpace)); // tiles first
 		
 		Array<Entity> entities = getOverlappingEntities(renderSpace); // entities second
-		entities.sort((e1, e2) -> Float.compare(e2.getCenter().y, e1.getCenter().y));
+		entities.sort((e1, e2) -> {
+			if(e1 instanceof Particle && !(e2 instanceof Particle))
+				return 1;
+			if(!(e1 instanceof Particle) && e2 instanceof Particle)
+				return -1;
+			return Float.compare(e2.getCenter().y, e1.getCenter().y);
+		});
 		objects.addAll(entities);
 		
 		for(WorldObject obj: objects)
