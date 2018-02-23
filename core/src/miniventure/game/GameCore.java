@@ -1,5 +1,10 @@
 package miniventure.game;
 
+import javax.swing.JOptionPane;
+import javax.swing.JTextArea;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.HashMap;
 
 import miniventure.game.screen.MainMenu;
@@ -69,13 +74,25 @@ public class GameCore extends ApplicationAdapter {
 	
 	@Override
 	public void render() {
-		if(world.worldLoaded())
-			world.render(gameScreen, menuScreen);
-		
-		hasMenu = menuScreen != null;
-		if(menuScreen != null) {
-			menuScreen.act();
-			menuScreen.draw();
+		try {
+			if (world.worldLoaded())
+				world.updateAndRender(gameScreen, menuScreen);
+			
+			hasMenu = menuScreen != null;
+			if (menuScreen != null) {
+				menuScreen.act();
+				menuScreen.draw();
+			}
+		} catch(Throwable t) {
+			StringWriter string = new StringWriter();
+			PrintWriter printer = new PrintWriter(string);
+			t.printStackTrace(printer);
+			
+			JTextArea errorDisplay = new JTextArea(string.toString());
+			errorDisplay.setEditable(false);
+			JOptionPane.showMessageDialog(null, errorDisplay, "An error has occurred", JOptionPane.ERROR_MESSAGE);
+			
+			throw t;
 		}
 	}
 	

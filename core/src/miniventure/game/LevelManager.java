@@ -42,7 +42,7 @@ public class LevelManager {
 	private Player mainPlayer;
 	private float gameTime;
 	
-	private Tile spawnTile = null;
+	//private Tile spawnTile = null;
 	private final HashSet<WorldObject> keepAlives = new HashSet<>(); // always keep chunks around these objects loaded.
 	
 	LevelManager() {
@@ -51,7 +51,7 @@ public class LevelManager {
 	
 	boolean worldLoaded() { return worldLoaded; }
 	
-	void render(GameScreen game, MenuScreen menu) {
+	void updateAndRender(GameScreen game, MenuScreen menu) {
 		if(!worldLoaded || mainPlayer == null) return;
 		
 		Level level = mainPlayer.getLevel();
@@ -117,7 +117,7 @@ public class LevelManager {
 		mainPlayer = null;
 		Level.clearLevels();
 		levelGenerator = null;
-		spawnTile = null;
+		//spawnTile = null;
 		GameCore.setScreen(new MainMenu());
 	}
 	
