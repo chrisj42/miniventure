@@ -1,571 +1,571 @@
 entities.png
-size: 512, 1024
+size: 512, 512
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
 particle/impact
   rotate: false
   xy: 2, 2
-  size: 72, 70
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 0
 particle/impact
   rotate: false
   xy: 2, 2
-  size: 72, 70
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 1
 particle/impact
   rotate: false
-  xy: 76, 2
-  size: 72, 70
+  xy: 2, 68
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 2
 particle/impact
   rotate: false
-  xy: 150, 2
-  size: 72, 70
+  xy: 2, 134
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 3
 particle/impact
   rotate: false
-  xy: 224, 2
-  size: 72, 70
+  xy: 2, 200
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 4
 particle/impact
   rotate: false
-  xy: 298, 2
-  size: 72, 70
+  xy: 2, 266
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 5
 particle/impact
   rotate: false
-  xy: 372, 2
-  size: 72, 70
+  xy: 2, 332
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 6
 particle/impact
   rotate: false
-  xy: 2, 74
-  size: 72, 70
+  xy: 2, 398
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 7
 particle/impact
   rotate: false
-  xy: 76, 74
-  size: 72, 70
+  xy: 70, 2
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 8
 particle/impact
   rotate: false
-  xy: 2, 74
-  size: 72, 70
+  xy: 2, 398
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 9
 particle/impact
   rotate: false
-  xy: 150, 74
-  size: 72, 70
+  xy: 136, 2
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 10
 particle/impact
   rotate: false
-  xy: 2, 74
-  size: 72, 70
+  xy: 2, 398
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 11
 particle/impact
   rotate: false
-  xy: 224, 74
-  size: 72, 70
+  xy: 202, 2
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 12
 particle/punch-down
   rotate: false
-  xy: 298, 74
-  size: 72, 70
+  xy: 268, 2
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 0
 particle/punch-down
   rotate: false
-  xy: 372, 74
-  size: 72, 70
+  xy: 334, 2
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 1
 particle/punch-down
   rotate: false
-  xy: 2, 146
-  size: 72, 70
+  xy: 400, 2
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 2
 particle/punch-down
   rotate: false
-  xy: 76, 146
-  size: 72, 70
+  xy: 68, 70
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 3
 particle/punch-down
   rotate: false
-  xy: 150, 146
-  size: 72, 70
+  xy: 68, 136
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 4
 particle/punch-down
   rotate: false
-  xy: 224, 146
-  size: 72, 70
+  xy: 68, 202
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 5
 particle/punch-left
   rotate: false
-  xy: 298, 146
-  size: 72, 70
+  xy: 68, 268
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 0
 particle/punch-left
   rotate: false
-  xy: 372, 146
-  size: 72, 70
+  xy: 68, 334
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 1
 particle/punch-left
   rotate: false
-  xy: 2, 218
-  size: 72, 70
+  xy: 94, 434
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 2
 particle/punch-left
   rotate: false
-  xy: 76, 218
-  size: 72, 70
+  xy: 160, 68
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 3
 particle/punch-left
   rotate: false
-  xy: 150, 218
-  size: 72, 70
+  xy: 226, 68
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 4
 particle/punch-left
   rotate: false
-  xy: 224, 218
-  size: 72, 70
+  xy: 292, 68
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 5
 particle/punch-right
   rotate: false
-  xy: 298, 218
-  size: 72, 70
+  xy: 358, 68
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 0
 particle/punch-right
   rotate: false
-  xy: 372, 218
-  size: 72, 70
+  xy: 134, 158
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 1
 particle/punch-right
   rotate: false
-  xy: 2, 290
-  size: 72, 70
+  xy: 134, 224
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 2
 particle/punch-right
   rotate: false
-  xy: 76, 290
-  size: 72, 70
+  xy: 134, 290
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 3
 particle/punch-right
   rotate: false
-  xy: 150, 290
-  size: 72, 70
+  xy: 160, 424
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 4
 particle/punch-right
   rotate: false
-  xy: 224, 290
-  size: 72, 70
+  xy: 226, 134
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 5
 particle/punch-up
   rotate: false
-  xy: 298, 290
-  size: 72, 70
+  xy: 200, 224
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 0
 particle/punch-up
   rotate: false
-  xy: 372, 290
-  size: 72, 70
+  xy: 200, 290
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 1
 particle/punch-up
   rotate: false
-  xy: 2, 362
-  size: 72, 70
+  xy: 226, 424
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 2
 particle/punch-up
   rotate: false
-  xy: 76, 362
-  size: 72, 70
+  xy: 292, 134
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 3
 particle/punch-up
   rotate: false
-  xy: 150, 362
-  size: 72, 70
+  xy: 358, 134
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 4
 particle/punch-up
   rotate: false
-  xy: 224, 362
-  size: 72, 70
+  xy: 292, 200
+  size: 64, 64
   orig: 64, 64
-  offset: 0, -6
+  offset: 0, 0
   index: 5
 particle/slash-down
   rotate: false
-  xy: 446, 2
-  size: 48, 42
+  xy: 2, 464
+  size: 32, 32
   orig: 32, 32
-  offset: 0, -10
+  offset: 0, 0
   index: 0
 particle/slash-down
   rotate: false
-  xy: 446, 46
-  size: 48, 42
+  xy: 36, 464
+  size: 32, 32
   orig: 32, 32
-  offset: 0, -10
+  offset: 0, 0
   index: 1
 particle/slash-down
   rotate: false
-  xy: 446, 90
-  size: 48, 42
+  xy: 466, 2
+  size: 32, 32
   orig: 32, 32
-  offset: 0, -10
+  offset: 0, 0
   index: 2
 particle/slash-down
   rotate: false
-  xy: 446, 134
-  size: 48, 42
+  xy: 466, 36
+  size: 32, 32
   orig: 32, 32
-  offset: 0, -10
+  offset: 0, 0
   index: 3
 particle/slash-down
   rotate: false
-  xy: 446, 178
-  size: 48, 42
+  xy: 68, 400
+  size: 32, 32
   orig: 32, 32
-  offset: 0, -10
+  offset: 0, 0
   index: 4
 particle/slash-down
   rotate: false
-  xy: 446, 222
-  size: 48, 42
+  xy: 102, 400
+  size: 32, 32
   orig: 32, 32
-  offset: 0, -10
+  offset: 0, 0
   index: 5
 particle/slash-down
   rotate: false
-  xy: 446, 266
-  size: 48, 42
+  xy: 424, 68
+  size: 32, 32
   orig: 32, 32
-  offset: 0, -10
+  offset: 0, 0
   index: 6
 particle/slash-down
   rotate: false
-  xy: 446, 310
-  size: 48, 42
+  xy: 458, 70
+  size: 32, 32
   orig: 32, 32
-  offset: 0, -10
+  offset: 0, 0
   index: 7
 particle/slash-left
   rotate: false
-  xy: 446, 354
-  size: 48, 42
+  xy: 424, 102
+  size: 32, 32
   orig: 32, 32
-  offset: 0, -10
+  offset: 0, 0
   index: 0
 particle/slash-left
   rotate: false
-  xy: 298, 362
-  size: 48, 42
+  xy: 458, 104
+  size: 32, 32
   orig: 32, 32
-  offset: 0, -10
+  offset: 0, 0
   index: 1
 particle/slash-left
   rotate: false
-  xy: 348, 362
-  size: 48, 42
+  xy: 134, 356
+  size: 32, 32
   orig: 32, 32
-  offset: 0, -10
+  offset: 0, 0
   index: 2
 particle/slash-left
   rotate: false
-  xy: 424, 398
-  size: 48, 42
+  xy: 136, 390
+  size: 32, 32
   orig: 32, 32
-  offset: 0, -10
+  offset: 0, 0
   index: 3
 particle/slash-left
   rotate: false
-  xy: 298, 406
-  size: 48, 42
+  xy: 168, 356
+  size: 32, 32
   orig: 32, 32
-  offset: 0, -10
+  offset: 0, 0
   index: 4
 particle/slash-left
   rotate: false
-  xy: 348, 406
-  size: 48, 42
+  xy: 170, 390
+  size: 32, 32
   orig: 32, 32
-  offset: 0, -10
+  offset: 0, 0
   index: 5
 particle/slash-left
   rotate: false
-  xy: 424, 442
-  size: 48, 42
+  xy: 202, 356
+  size: 32, 32
   orig: 32, 32
-  offset: 0, -10
+  offset: 0, 0
   index: 6
 particle/slash-left
   rotate: false
-  xy: 2, 434
-  size: 48, 42
+  xy: 204, 390
+  size: 32, 32
   orig: 32, 32
-  offset: 0, -10
+  offset: 0, 0
   index: 7
 particle/slash-right
   rotate: false
-  xy: 52, 434
-  size: 48, 42
+  xy: 236, 356
+  size: 32, 32
   orig: 32, 32
-  offset: 0, -10
+  offset: 0, 0
   index: 0
 particle/slash-right
   rotate: false
-  xy: 102, 434
-  size: 48, 42
+  xy: 238, 390
+  size: 32, 32
   orig: 32, 32
-  offset: 0, -10
+  offset: 0, 0
   index: 1
 particle/slash-right
   rotate: false
-  xy: 152, 434
-  size: 48, 42
+  xy: 424, 136
+  size: 32, 32
   orig: 32, 32
-  offset: 0, -10
+  offset: 0, 0
   index: 2
 particle/slash-right
   rotate: false
-  xy: 202, 434
-  size: 48, 42
+  xy: 458, 138
+  size: 32, 32
   orig: 32, 32
-  offset: 0, -10
+  offset: 0, 0
   index: 3
 particle/slash-right
   rotate: false
-  xy: 278, 450
-  size: 48, 42
+  xy: 424, 170
+  size: 32, 32
   orig: 32, 32
-  offset: 0, -10
+  offset: 0, 0
   index: 4
 particle/slash-right
   rotate: false
-  xy: 328, 450
-  size: 48, 42
+  xy: 458, 172
+  size: 32, 32
   orig: 32, 32
-  offset: 0, -10
+  offset: 0, 0
   index: 5
 particle/slash-right
   rotate: false
-  xy: 404, 486
-  size: 48, 42
+  xy: 266, 290
+  size: 32, 32
   orig: 32, 32
-  offset: 0, -10
+  offset: 0, 0
   index: 6
 particle/slash-right
   rotate: false
-  xy: 454, 488
-  size: 48, 42
+  xy: 270, 324
+  size: 32, 32
   orig: 32, 32
-  offset: 0, -10
+  offset: 0, 0
   index: 7
 particle/slash-up
   rotate: false
-  xy: 2, 478
-  size: 48, 42
+  xy: 300, 266
+  size: 32, 32
   orig: 32, 32
-  offset: 0, -10
+  offset: 0, 0
   index: 0
 particle/slash-up
   rotate: false
-  xy: 52, 478
-  size: 48, 42
+  xy: 272, 358
+  size: 32, 32
   orig: 32, 32
-  offset: 0, -10
+  offset: 0, 0
   index: 1
 particle/slash-up
   rotate: false
-  xy: 102, 478
-  size: 48, 42
+  xy: 304, 300
+  size: 32, 32
   orig: 32, 32
-  offset: 0, -10
+  offset: 0, 0
   index: 2
 particle/slash-up
   rotate: false
-  xy: 152, 478
-  size: 48, 42
+  xy: 334, 266
+  size: 32, 32
   orig: 32, 32
-  offset: 0, -10
+  offset: 0, 0
   index: 3
 particle/slash-up
   rotate: false
-  xy: 202, 478
-  size: 48, 42
+  xy: 368, 200
+  size: 32, 32
   orig: 32, 32
-  offset: 0, -10
+  offset: 0, 0
   index: 4
 particle/slash-up
   rotate: false
-  xy: 252, 494
-  size: 48, 42
+  xy: 402, 204
+  size: 32, 32
   orig: 32, 32
-  offset: 0, -10
+  offset: 0, 0
   index: 5
 particle/slash-up
   rotate: false
-  xy: 302, 494
-  size: 48, 42
+  xy: 368, 234
+  size: 32, 32
   orig: 32, 32
-  offset: 0, -10
+  offset: 0, 0
   index: 6
 particle/slash-up
   rotate: false
-  xy: 352, 512
-  size: 48, 42
+  xy: 436, 206
+  size: 32, 32
   orig: 32, 32
-  offset: 0, -10
+  offset: 0, 0
   index: 7
 player/idle-down
   rotate: false
-  xy: 398, 362
+  xy: 68, 434
   size: 24, 28
-  orig: 20, 26
-  offset: 0, -2
+  orig: 24, 28
+  offset: 0, 0
   index: 1
 player/idle-left
   rotate: false
-  xy: 398, 392
+  xy: 134, 68
   size: 24, 28
-  orig: 16, 28
+  orig: 24, 28
   offset: 0, 0
   index: 1
 player/idle-right
   rotate: false
-  xy: 474, 398
+  xy: 134, 98
   size: 24, 28
-  orig: 16, 28
+  orig: 24, 28
   offset: 0, 0
   index: 1
 player/idle-up
   rotate: false
-  xy: 474, 428
-  size: 24, 28
-  orig: 20, 26
-  offset: 0, -2
-  index: 1
-player/walk-down
-  rotate: false
-  xy: 398, 422
+  xy: 134, 128
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
   index: 1
 player/walk-down
   rotate: false
-  xy: 474, 458
+  xy: 200, 134
+  size: 24, 28
+  orig: 24, 28
+  offset: 0, 0
+  index: 1
+player/walk-down
+  rotate: false
+  xy: 200, 164
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
   index: 2
 player/walk-left
   rotate: false
-  xy: 252, 434
+  xy: 200, 194
   size: 24, 28
-  orig: 20, 28
+  orig: 24, 28
   offset: 0, 0
   index: 1
 player/walk-left
   rotate: false
-  xy: 398, 392
+  xy: 134, 68
   size: 24, 28
-  orig: 16, 28
+  orig: 24, 28
   offset: 0, 0
   index: 2
 player/walk-right
   rotate: false
-  xy: 252, 464
+  xy: 266, 200
   size: 24, 28
-  orig: 20, 28
+  orig: 24, 28
   offset: 0, 0
   index: 1
 player/walk-right
   rotate: false
-  xy: 474, 398
+  xy: 134, 98
   size: 24, 28
-  orig: 16, 28
+  orig: 24, 28
   offset: 0, 0
   index: 2
 player/walk-up
   rotate: false
-  xy: 378, 452
+  xy: 266, 230
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
   index: 1
 player/walk-up
   rotate: false
-  xy: 378, 482
+  xy: 266, 260
   size: 24, 28
   orig: 24, 28
   offset: 0, 0

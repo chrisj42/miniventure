@@ -236,6 +236,18 @@
             <key type="filename">entity-sprites/particle/punch-up_03.png</key>
             <key type="filename">entity-sprites/particle/punch-up_04.png</key>
             <key type="filename">entity-sprites/particle/punch-up_05.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>16,16,32,32</rect>
+                <key>scale9Paddings</key>
+                <rect>16,16,32,32</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">entity-sprites/particle/slash-down_00.png</key>
             <key type="filename">entity-sprites/particle/slash-down_01.png</key>
             <key type="filename">entity-sprites/particle/slash-down_02.png</key>
@@ -281,37 +293,15 @@
                 <false/>
             </struct>
             <key type="filename">entity-sprites/player/idle-down_1.png</key>
-            <key type="filename">entity-sprites/player/idle-up_1.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>5,7,10,13</rect>
-                <key>scale9Paddings</key>
-                <rect>5,7,10,13</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
             <key type="filename">entity-sprites/player/idle-left_1.png</key>
             <key type="filename">entity-sprites/player/idle-right_1.png</key>
-            <key type="filename">entity-sprites/player/walk-left_2.png</key>
-            <key type="filename">entity-sprites/player/walk-right_2.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>4,7,8,14</rect>
-                <key>scale9Paddings</key>
-                <rect>4,7,8,14</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
+            <key type="filename">entity-sprites/player/idle-up_1.png</key>
             <key type="filename">entity-sprites/player/walk-down_1.png</key>
             <key type="filename">entity-sprites/player/walk-down_2.png</key>
+            <key type="filename">entity-sprites/player/walk-left_1.png</key>
+            <key type="filename">entity-sprites/player/walk-left_2.png</key>
+            <key type="filename">entity-sprites/player/walk-right_1.png</key>
+            <key type="filename">entity-sprites/player/walk-right_2.png</key>
             <key type="filename">entity-sprites/player/walk-up_1.png</key>
             <key type="filename">entity-sprites/player/walk-up_2.png</key>
             <struct type="IndividualSpriteSettings">
@@ -323,20 +313,6 @@
                 <rect>6,7,12,14</rect>
                 <key>scale9Paddings</key>
                 <rect>6,7,12,14</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">entity-sprites/player/walk-left_1.png</key>
-            <key type="filename">entity-sprites/player/walk-right_1.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>5,7,10,14</rect>
-                <key>scale9Paddings</key>
-                <rect>5,7,10,14</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -352,9 +328,9 @@
         <key>ignoredWarnings</key>
         <array/>
         <key>commonDivisorX</key>
-        <uint>24</uint>
+        <uint>1</uint>
         <key>commonDivisorY</key>
-        <uint>14</uint>
+        <uint>1</uint>
         <key>packNormalMaps</key>
         <false/>
         <key>autodetectNormalMaps</key>
