@@ -91,7 +91,7 @@ public class Hands {
 		}
 	}
 	
-	private boolean used() { return used || count <= 0/* || player.getStat(Stat.Stamina) < item.getStaminaUsage()*/; }
+	private boolean used() { return used || count <= 0 || player.getStat(Stat.Stamina) < item.getStaminaUsage(); }
 	
 	// reflexive usage
 	public boolean interact() {

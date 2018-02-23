@@ -13,7 +13,6 @@ import miniventure.game.util.Version;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -110,7 +109,7 @@ public class GameCore extends ApplicationAdapter {
 		System.out.println("setting screen to " + screen);
 		
 		menuScreen = screen;
-		Gdx.input.setInputProcessor(menuScreen == null ? input : new InputMultiplexer(input, menuScreen));
+		Gdx.input.setInputProcessor(menuScreen == null ? input : menuScreen);
 	}
 	
 	@Override

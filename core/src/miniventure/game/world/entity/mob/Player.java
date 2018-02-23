@@ -1,6 +1,7 @@
 package miniventure.game.world.entity.mob;
 
 import java.util.EnumMap;
+import java.util.HashMap;
 
 import miniventure.game.GameCore;
 import miniventure.game.item.CraftingScreen;
@@ -19,6 +20,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
@@ -27,7 +29,23 @@ import org.jetbrains.annotations.NotNull;
 
 public class Player extends Mob {
 	
-	public static final float MOVE_SPEED = 5;
+	static final float MOVE_SPEED = 5;
+	
+	interface StatEvolver { void update(float delta); }
+	
+	private final HashMap<Class<? extends StatEvolver>, StatEvolver> statEvoMap = new HashMap<>();
+	private <T extends StatEvolver> void addStatEvo(T evolver) {
+		statEvoMap.put(evolver.getClass(), evolver);
+	}
+	private <T extends StatEvolver> T getStatEvo(Class<T> clazz) {
+		//noinspection unchecked
+		return (T) statEvoMap.get(clazz);
+	}
+	{
+		addStatEvo(new StaminaSystem());
+		addStatEvo(new HealthSystem());
+		addStatEvo(new HungerSystem());
+	}
 	
 	public enum Stat {
 		Health("heart", 10, 20),
@@ -38,8 +56,8 @@ public class Player extends Mob {
 		
 		Armor("", 10, 10, 0);
 		
-		public final int max, initial, iconCount;
-		public final String icon, outlineIcon;
+		private final int max, initial, iconCount;
+		private final String icon, outlineIcon;
 		
 		Stat(String icon, int iconCount, int max) { this(icon, iconCount, max, max); }
 		Stat(String icon, int iconCount, int max, int initial) {
@@ -77,7 +95,6 @@ public class Player extends Mob {
 	public void checkInput(@NotNull Vector2 mouseInput) {
 		// checks for keyboard input to move the player.
 		// getDeltaTime() returns the time passed between the last and the current frame in seconds.
-		//float speed = MOVE_SPEED; // this is technically in units/second.
 		Vector2 movement = new Vector2();
 		if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) movement.x--;
 		if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) movement.x++;
@@ -92,6 +109,8 @@ public class Player extends Mob {
 		movement.scl(MOVE_SPEED * Gdx.graphics.getDeltaTime());
 		
 		move(movement.x, movement.y);
+		
+		getStatEvo(StaminaSystem.class).curStaminaRate = movement.isZero() ? 1 : 0.75f;
 		
 		if(!isKnockedBack()) {
 			if (GameCore.input.pressingKey(Input.Keys.C))
@@ -117,7 +136,7 @@ public class Player extends Mob {
 		hands.getUsableItem().drawItem(hands.getCount(), batch, font, canvas.width/2, 20);
 		
 		renderBar(Stat.Health, canvas.x, canvas.y+3, batch);
-		//renderBar(Stat.Stamina, canvas.x, canvas.y+6+GameCore.icons.get(Stat.Health.icon).getRegionHeight(), batch);
+		renderBar(Stat.Stamina, canvas.x, canvas.y+6+GameCore.icons.get(Stat.Health.icon).getRegionHeight(), batch);
 		//renderBar(Stat.Hunger, canvas.x + canvas.width - GameCore.icons.get(Stat.Hunger.icon).getRegionWidth()*Stat.Hunger.iconCount, canvas.y+3, batch);
 	}
 	
@@ -151,8 +170,10 @@ public class Player extends Mob {
 	@Override
 	public void update(float delta) {
 		super.update(delta);
+		
 		// update things like hunger, stamina, etc.
-		changeStat(Stat.Stamina, 1);
+		for(StatEvolver evo: statEvoMap.values())
+			evo.update(delta);
 	}
 	
 	public boolean takeItem(@NotNull Item item) {
@@ -201,9 +222,11 @@ public class Player extends Mob {
 		}
 		
 		// didn't hit anything
-		
-		if(level != null)
-			level.addEntity(ActionParticle.ActionType.PUNCH.get(getDirection()), /*getCenter().add(getDirection().getVector().scl(getSize().scl(0.5f)))*/getInteractionRect().getCenter(new Vector2()), true);
+		if(getStat(Stat.Stamina) >= MathUtils.ceil(hands.getUsableItem().getStaminaUsage()/2f)) {
+			changeStat(Stat.Stamina, -MathUtils.ceil(hands.getUsableItem().getStaminaUsage()/2f));
+			if (level != null)
+				level.addEntity(ActionParticle.ActionType.PUNCH.get(getDirection()), /*getCenter().add(getDirection().getVector().scl(getSize().scl(0.5f)))*/getInteractionRect().getCenter(new Vector2()), true);
+		}
 	}
 	
 	private void interact() {
@@ -225,5 +248,47 @@ public class Player extends Mob {
 			// here is where I'd make a death chest, and show the death screen.
 		}
 		return false;
+	}
+	
+	
+	private class StaminaSystem implements StatEvolver {
+		
+		private static final float STAMINA_REGEN_RATE = 0.25f; // time taken to regen 1 stamina point.
+		
+		private float curStaminaRate = 1;
+		private float regenTime;
+		
+		public StaminaSystem() {}
+		
+		@Override
+		public void update(float delta) {
+			regenTime += delta;
+			float regenRate = STAMINA_REGEN_RATE * curStaminaRate;
+			int staminaGained = MathUtils.floor(regenTime / regenRate);
+			if(staminaGained > 0) {
+				regenTime -= staminaGained * regenRate;
+				changeStat(Stat.Stamina, staminaGained);
+			}
+		}
+	}
+	
+	private class HealthSystem implements StatEvolver {
+		
+		public HealthSystem() {}
+		
+		@Override
+		public void update(float delta) {
+			
+		}
+	}
+	
+	private class HungerSystem implements StatEvolver {
+		
+		public HungerSystem() {}
+		
+		@Override
+		public void update(float delta) {
+			
+		}
 	}
 }

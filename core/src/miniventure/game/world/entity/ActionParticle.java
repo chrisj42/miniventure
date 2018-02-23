@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
 public class ActionParticle extends Entity implements Particle {
@@ -15,7 +14,7 @@ public class ActionParticle extends Entity implements Particle {
 	// may be animated; lasts as long as the animation, or lasts a given time, with a single frame.
 	
 	public enum ActionType {
-		SLASH(0.5f, true),
+		SLASH(0.35f, true),
 		PUNCH(0.3f, true),
 		IMPACT(0.4f, false);
 		
