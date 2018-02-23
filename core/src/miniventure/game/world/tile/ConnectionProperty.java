@@ -3,6 +3,8 @@ package miniventure.game.world.tile;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.utils.Array;
 
+import org.jetbrains.annotations.NotNull;
+
 public class ConnectionProperty implements TileProperty {
 	
 	private final boolean connects;
@@ -16,7 +18,7 @@ public class ConnectionProperty implements TileProperty {
 	}
 	
 	@Override
-	public void init(TileType type) {
+	public void init(@NotNull TileType type) {
 		addConnectingType(type);
 		this.tileType = type;
 	}

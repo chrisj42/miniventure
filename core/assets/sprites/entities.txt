@@ -1,7 +1,7 @@
 entities.png
 size: 512, 1024
 format: RGBA8888
-filter: Linear,Linear
+filter: Nearest,Nearest
 repeat: none
 particle/impact
   rotate: false

@@ -55,7 +55,8 @@ public enum TileType {
 	TORCH(
 		new DestructibleProperty(true),
 		(LightProperty) () -> 2,
-		new AnimationProperty(false, AnimationType.SEQUENCE, 1/12f)
+		new AnimationProperty(false, AnimationType.SEQUENCE, 1/12f),
+		new TransitionProperty(new TransitionAnimation("enter", true, 1/12f))
 	),
 	
 	CACTUS(

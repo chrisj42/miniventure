@@ -8,6 +8,8 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 
+import org.jetbrains.annotations.NotNull;
+
 public class AnimationProperty implements TileProperty {
 	
 	private static HashMap<String, HashMap<String, Array<AtlasRegion>>> tileConnectionAnimations = new HashMap<>();
@@ -84,7 +86,7 @@ public class AnimationProperty implements TileProperty {
 	}
 	
 	@Override
-	public void init(TileType type) { this.tileType = type; }
+	public void init(@NotNull TileType type) { this.tileType = type; }
 	
 	public boolean isOpaque() { return isOpaque; }
 	

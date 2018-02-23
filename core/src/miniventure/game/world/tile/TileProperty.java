@@ -4,6 +4,8 @@ import java.util.HashMap;
 
 import miniventure.game.world.tile.AnimationProperty.AnimationType;
 
+import org.jetbrains.annotations.NotNull;
+
 public interface TileProperty {
 	
 	static HashMap<Class<? extends TileProperty>, TileProperty> getDefaultPropertyMap() {
@@ -18,10 +20,11 @@ public interface TileProperty {
 		map.put(UpdateProperty.class, (UpdateProperty)(delta, tile) -> {});
 		map.put(CoveredTileProperty.class, new CoveredTileProperty((TileType[])null));
 		map.put(LightProperty.class, (LightProperty) () -> 0);
+		map.put(TransitionProperty.class, new TransitionProperty());
 		return map;
 	}
 	
 	default String[] getInitData() { return new String[0]; }
 	
-	default void init(TileType type) {}
+	default void init(@NotNull TileType type) {}
 }

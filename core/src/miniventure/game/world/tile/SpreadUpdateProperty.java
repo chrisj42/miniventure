@@ -5,6 +5,8 @@ import java.util.HashSet;
 
 import com.badlogic.gdx.utils.Array;
 
+import org.jetbrains.annotations.NotNull;
+
 public class SpreadUpdateProperty implements UpdateProperty {
 	
 	private final HashSet<TileType> replaces;
@@ -15,7 +17,7 @@ public class SpreadUpdateProperty implements UpdateProperty {
 	}
 	
 	@Override
-	public void init(TileType type) { this.type = type; }
+	public void init(@NotNull TileType type) { this.type = type; }
 	
 	@Override
 	public void update(float delta, Tile tile) {

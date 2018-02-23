@@ -15,7 +15,7 @@ public class OverlapProperty implements TileProperty {
 		this.overlaps = overlaps;
 	}
 	
-	@Override public void init(TileType type) {
+	@Override public void init(@NotNull TileType type) {
 		this.tileType = type;
 	}
 	

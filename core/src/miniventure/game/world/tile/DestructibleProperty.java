@@ -6,7 +6,6 @@ import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolItem.Material;
 import miniventure.game.item.ToolType;
 import miniventure.game.world.ItemDrop;
-import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ActionParticle;
 import miniventure.game.world.entity.TextParticle;

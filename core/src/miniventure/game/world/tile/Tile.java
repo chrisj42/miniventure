@@ -163,12 +163,26 @@ public class Tile implements WorldObject {
 		System.arraycopy(newData, 0, fullData, 0, newData.length); // copy new data to front of data
 		data = fullData;
 		
+		TileType prevType = getType();
+		
 		tileTypes.push(newType);
+		
+		// check for an entrance animation
+		getType().getProp(TransitionProperty.class).tryStartAnimation(this, prevType);
+		// we don't use the return value because transition or not, there's nothing we need to do. :P
 		
 		return true;
 	}
 	
-	void breakTile() {
+	void breakTile() { breakTile(true); }
+	void breakTile(boolean checkForExitAnim) {
+		if(checkForExitAnim) {
+			TileType type = getType();
+			if(type.getProp(TransitionProperty.class).tryStartAnimation(this, tileTypes.size() == 1 ? type : tileTypes.elementAt(tileTypes.size()-2), false))
+				// transitioning successful
+				return; // don't actually break the tile yet
+		}
+		
 		TileType prevType = tileTypes.pop();
 		
 		String[] newData = new String[data.length - prevType.getDataLength()];
@@ -179,6 +193,40 @@ public class Tile implements WorldObject {
 			addTile(baseType);
 		else
 			moveEntities(getType());
+	}
+	
+	boolean replaceTile(@NotNull TileType newType) {
+		// for doors, the animations will be attached to the open door type; an entrance when coming from a closed door, and an exit when going to a closed door.
+		/*
+			when adding a type, check only for an entrance animation on the new type, and do it after adding it to the stack. when the animation finishes, do nothing except finish the animation.
+			when removing a type, check for an exit anim on the type, before removing. When animation finishes, remove the type for real.
+			
+			when replacing a type, the old type is checked for an exit anim. but the new type is also
+		 */
+		
+		TileType type = getType();
+		
+		if(newType == type) {
+			// just reset the data
+			String[] initData = type.getInitialData();
+			if(initData.length > 0)
+				System.arraycopy(initData, 0, data, data.length-initData.length, initData.length);
+			return true;
+		}
+		
+		// check that the new type can be placed on the type that was under the previous type
+		if(!newType.getProp(CoveredTileProperty.class).canCover(getType())
+			|| newType.compareTo(getType()) <= 0)
+			return false; // cannot replace tile
+		
+		if(type.getProp(TransitionProperty.class).tryStartAnimation(this, newType, true))
+			// there is an exit animation; it needs to be played. So let that happen, the tile will be replaced later
+			return true; // can replace (but will do it in a second)
+		
+		// no exit animation, so remove the current tile (without doing the exit anim obviously, since we just checked) and add the new one
+		breakTile(false);
+		return addTile(newType); // already checks for entrance animation, so we don't need to worry about that.
+		// the above should always return true, btw, because we already checked with the same conditional a few lines up.
 	}
 	
 	private void moveEntities(TileType newType) {
@@ -235,7 +283,6 @@ public class Tile implements WorldObject {
 	
 	@Override
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
-		
 		/*
 			- Get the surrounding tile types for a tile
 			- draw an overlap only after all the centers under it have been drawn
@@ -281,7 +328,11 @@ public class Tile implements WorldObject {
 		TileType overlapType = overlapTypeIter.hasNext() ? overlapTypeIter.next() : null; // this type will always be just above mainTypes[firstIdx].
 		
 		for(int i = firstIdx; i < mainTypes.length; i++) {
-			sprites.add(mainTypes[i].getProp(ConnectionProperty.class).getSprite(this, aroundTypes));
+			// before we use the connection property of the main type, let's check and see if we are transitioning.
+			if(i == mainTypes.length - 1 && mainTypes[i].getProp(TransitionProperty.class).playingAnimation(this)) // only the top tile can ever be transitioning.
+				sprites.add(mainTypes[i].getProp(TransitionProperty.class).getAnimationFrame(this));
+			else // otherwise, use connection sprite.
+				sprites.add(mainTypes[i].getProp(ConnectionProperty.class).getSprite(this, aroundTypes));
 			
 			while(overlapType != null && (i >= mainTypes.length-1 || mainTypes[i+1].compareTo(overlapType) > 0)) {
 				sprites.addAll(mainTypes[i].getProp(OverlapProperty.class).getSprites(this, overlapType, overlappingTypes.get(overlapType)));
@@ -297,8 +348,10 @@ public class Tile implements WorldObject {
 	
 	@Override
 	public void update(float delta) {
-		for(TileType type: tileTypes) // goes from bottom to top
-			type.getProp(UpdateProperty.class).update(delta, this);
+		for(TileType type: tileTypes) {// goes from bottom to top
+			if(!(type == getType() && type.getProp(TransitionProperty.class).playingAnimation(this))) // only update main tile if not transitioning.
+				type.getProp(UpdateProperty.class).update(delta, this);
+		}
 	}
 	
 	private int getIndex(TileType type, Class<? extends TileProperty> property, int propDataIndex) {
