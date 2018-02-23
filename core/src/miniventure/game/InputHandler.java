@@ -37,7 +37,7 @@ public class InputHandler implements InputProcessor {
 	}
 	
 	public boolean pressingKey(int keycode) {
-		return Gdx.input.isKeyJustPressed(keycode) || pressedKeys.contains(keycode);
+		return !GameCore.hasMenu() && (Gdx.input.isKeyJustPressed(keycode) || pressedKeys.contains(keycode));
 	}
 	
 	
