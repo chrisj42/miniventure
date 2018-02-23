@@ -110,7 +110,7 @@ public class GameCore extends ApplicationAdapter {
 		System.out.println("setting screen to " + screen);
 		
 		menuScreen = screen;
-		Gdx.input.setInputProcessor(new InputMultiplexer(input, menuScreen));
+		Gdx.input.setInputProcessor(menuScreen == null ? input : new InputMultiplexer(input, menuScreen));
 	}
 	
 	@Override

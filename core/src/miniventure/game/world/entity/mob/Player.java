@@ -32,7 +32,7 @@ public class Player extends Mob {
 	public enum Stat {
 		Health("heart", 10, 20),
 		
-		Stamina("", 10, 10),
+		Stamina("bolt", 12, 100),
 		
 		Hunger("burger", 10, 10),
 		
@@ -117,13 +117,18 @@ public class Player extends Mob {
 		hands.getUsableItem().drawItem(hands.getCount(), batch, font, canvas.width/2, 20);
 		
 		renderBar(Stat.Health, canvas.x, canvas.y+3, batch);
+		//renderBar(Stat.Stamina, canvas.x, canvas.y+6+GameCore.icons.get(Stat.Health.icon).getRegionHeight(), batch);
 		//renderBar(Stat.Hunger, canvas.x + canvas.width - GameCore.icons.get(Stat.Hunger.icon).getRegionWidth()*Stat.Hunger.iconCount, canvas.y+3, batch);
 	}
 	
-	private void renderBar(Stat stat, float x, float y, SpriteBatch batch) {
+	private void renderBar(Stat stat, float x, float y, SpriteBatch batch) { renderBar(stat, x, y, batch, 0); }
+	private void renderBar(Stat stat, float x, float y, SpriteBatch batch, int spacing) {
 		float pointsPerIcon = stat.max*1f / stat.iconCount;
 		TextureRegion fullIcon = GameCore.icons.get(stat.icon);
 		TextureRegion emptyIcon = GameCore.icons.get(stat.outlineIcon);
+		
+		int iconWidth = Math.max(fullIcon.getRegionWidth(), emptyIcon.getRegionWidth()) + spacing;
+		int iconHeight = Math.max(fullIcon.getRegionHeight(), emptyIcon.getRegionHeight());
 		
 		// for each icon...
 		for(int i = 0; i < stat.iconCount; i++) {
@@ -133,13 +138,13 @@ public class Player extends Mob {
 			// converts it to a pixel width
 			int fullWidth = (int) (iconFillAmount * fullIcon.getRegionWidth());
 			if(fullWidth > 0)
-				batch.draw(fullIcon.getTexture(), x+i*fullIcon.getRegionWidth(), y, fullIcon.getRegionX(), fullIcon.getRegionY(), fullWidth, fullIcon.getRegionHeight());
+				batch.draw(fullIcon.getTexture(), x+i*iconWidth, y, fullIcon.getRegionX(), fullIcon.getRegionY(), fullWidth, fullIcon.getRegionHeight());
 			
 			// repeats some of the above, for the empty icon
 			int emptyWidth = (int) ((1 - iconFillAmount) * emptyIcon.getRegionWidth());
 			int emptyOffset = emptyIcon.getRegionWidth() - emptyWidth;
 			if(emptyWidth > 0)
-				batch.draw(emptyIcon.getTexture(), x+i*fullIcon.getRegionWidth()+emptyOffset, y, emptyIcon.getRegionX() + emptyOffset, emptyIcon.getRegionY(), emptyWidth, emptyIcon.getRegionHeight());
+				batch.draw(emptyIcon.getTexture(), x+i*iconWidth+emptyOffset, y, emptyIcon.getRegionX() + emptyOffset, emptyIcon.getRegionY(), emptyWidth, emptyIcon.getRegionHeight());
 		}
 	}
 	
