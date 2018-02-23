@@ -77,6 +77,7 @@ public class GameCore extends ApplicationAdapter {
 	@Override
 	public void render() {
 		try {
+			input.update();
 			if (world.worldLoaded())
 				world.updateAndRender(gameScreen, menuScreen);
 			
@@ -110,6 +111,7 @@ public class GameCore extends ApplicationAdapter {
 		
 		menuScreen = screen;
 		Gdx.input.setInputProcessor(menuScreen == null ? input : menuScreen);
+		input.reset();
 	}
 	
 	@Override

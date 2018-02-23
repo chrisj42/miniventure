@@ -9,7 +9,7 @@ import com.badlogic.gdx.InputProcessor;
 public class InputHandler implements InputProcessor {
 	
 	private static final float INITIAL_DELAY = 0.5f; // delay between initial press and first simulated press.
-	private static final float REPEAT_DELAY = 0.1f; // delay between each simulated press.
+	private static final float REPEAT_DELAY = 0.2f; // delay between each simulated press.
 	
 	private final HashMap<Integer, Float> keyPresses = new HashMap<>(); // keys in here are currently being held down. The value stored is the initial time of press.
 	private final HashSet<Integer> pressedKeys = new HashSet<>(); // keys here are treated as being just pressed down.
@@ -20,9 +20,11 @@ public class InputHandler implements InputProcessor {
 	void update() {
 		pressedKeys.clear();
 		
-		final float curTime = GameCore.getElapsedProgramTime();
+		final float elapTime = GameCore.getElapsedProgramTime();
 		
 		for(Integer keycode: keyPresses.keySet()) {
+			final float curTime = elapTime - keyPresses.get(keycode);
+			final float prevUpdate = this.prevUpdate - keyPresses.get(keycode);
 			if(prevUpdate < INITIAL_DELAY && curTime >= INITIAL_DELAY)
 				pressedKeys.add(keycode);
 			else if(prevUpdate >= INITIAL_DELAY) {
@@ -33,7 +35,11 @@ public class InputHandler implements InputProcessor {
 			}
 		}
 		
-		prevUpdate = curTime;
+		prevUpdate = elapTime;
+	}
+	
+	void reset() {
+		keyPresses.clear();
 	}
 	
 	public boolean pressingKey(int keycode) {
