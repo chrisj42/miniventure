@@ -12,8 +12,6 @@ import miniventure.game.item.Recipes;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ActionParticle;
-import miniventure.game.world.entity.ActionParticle.ActionType;
-import miniventure.game.world.entity.mob.MobAnimationController.AnimationState;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.Gdx;
@@ -96,9 +94,9 @@ public class Player extends Mob {
 		move(movement.x, movement.y);
 		
 		if(!isKnockedBack()) {
-			if (pressingKey(Input.Keys.C))
+			if (GameCore.input.pressingKey(Input.Keys.C))
 				attack();
-			else if (pressingKey(Input.Keys.V))
+			else if (GameCore.input.pressingKey(Input.Keys.V))
 				interact();
 			
 			//if(Gdx.input.isKeyPressed(Input.Keys.C) || Gdx.input.isKeyPressed(Input.Keys.V))
@@ -107,11 +105,11 @@ public class Player extends Mob {
 		
 		hands.resetItemUsage();
 		
-		if(pressingKey(Input.Keys.E)) {
+		if(GameCore.input.pressingKey(Input.Keys.E)) {
 			hands.clearItem(inventory);
 			GameCore.setScreen(new InventoryScreen(inventory, hands));
 		}
-		else if(pressingKey(Input.Keys.Z))
+		else if(GameCore.input.pressingKey(Input.Keys.Z))
 			GameCore.setScreen(new CraftingScreen(Recipes.recipes, inventory));
 	}
 	
@@ -222,15 +220,5 @@ public class Player extends Mob {
 			// here is where I'd make a death chest, and show the death screen.
 		}
 		return false;
-	}
-	
-	private static boolean pressingKey(int keycode) {
-		/*
-			The only reason this is necessary is because libGDX doesn't seem to have functionality to make it so if you hold down a key, it fires once immediately, waits a half-second, and then fires a lot more rapidly.
-			
-			I would like to have that functionality, but it seems I'm going to have to do it myself.
-		 */
-		
-		return Gdx.input.isKeyJustPressed(keycode) && !GameCore.hasMenu();
 	}
 }

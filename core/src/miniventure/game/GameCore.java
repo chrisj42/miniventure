@@ -13,6 +13,7 @@ import miniventure.game.util.Version;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -43,6 +44,8 @@ public class GameCore extends ApplicationAdapter {
 	private static MenuScreen menuScreen;
 	private static LevelManager world;
 	private static GameScreen gameScreen;
+	
+	public static final InputHandler input = new InputHandler();
 	
 	private static SpriteBatch batch;
 	private static BitmapFont font; // this is stored here because it is a really good idea to reuse objects where ever possible; and don't repeat instantiations, aka make a font instance in two classes when the fonts are the same.
@@ -107,7 +110,7 @@ public class GameCore extends ApplicationAdapter {
 		System.out.println("setting screen to " + screen);
 		
 		menuScreen = screen;
-		Gdx.input.setInputProcessor(menuScreen);
+		Gdx.input.setInputProcessor(new InputMultiplexer(input, menuScreen));
 	}
 	
 	@Override
