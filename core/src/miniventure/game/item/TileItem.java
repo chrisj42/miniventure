@@ -25,6 +25,8 @@ public class TileItem extends Item {
 		// for example, acorns.
 		// one improvement, btw, could be that in the current system, there can only be one item per tile. You can't have two items that end up producing the same tile. You even search by TileType.
 		items.put(TileType.TORCH, new TileItem(TileType.TORCH, TileType.GRASS, TileType.SAND, TileType.DIRT));
+		items.put(TileType.DOOR_CLOSED, new TileItem("Door", GameCore.tileAtlas.findRegion("door_closed/00"), TileType.DOOR_CLOSED, (TileType[])null));
+		items.put(TileType.DOOR_OPEN, items.get(TileType.DOOR_CLOSED));
 	}
 	
 	@NotNull
