@@ -1,7 +1,5 @@
 package miniventure.game.world;
 
-import java.util.TreeMap;
-
 import miniventure.game.item.Item;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Mob;
@@ -24,6 +22,17 @@ public interface WorldObject {
 	default Vector2 getCenter() { return getBounds().getCenter(new Vector2()); }
 	default Vector2 getPosition() { return getBounds().getPosition(new Vector2()); }
 	default Vector2 getSize() { return getBounds().getSize(new Vector2()); }
+	
+	default Rectangle getBounds(boolean worldOriginCenter) {
+		Rectangle bounds = getBounds();
+		if(worldOriginCenter) {
+			bounds.x -= getLevel().getWidth()/2;
+			bounds.y -= getLevel().getHeight()/2;
+		}
+		return bounds;
+	}
+	default Vector2 getCenter(boolean worldOriginCenter) { return getBounds(worldOriginCenter).getCenter(new Vector2()); }
+	default Vector2 getPosition(boolean worldOriginCenter) { return getBounds(worldOriginCenter).getPosition(new Vector2()); }
 	
 	void update(float delta);
 	
@@ -52,11 +61,19 @@ public interface WorldObject {
 	default Tile getClosestTile(@NotNull Array<Tile> tiles) {
 		if(tiles.size == 0) return null;
 		
-		final Vector2 center = getBounds().getCenter(new Vector2());
-		TreeMap<Vector2, Tile> tileMap = new TreeMap<>((v1, v2) -> (int) (center.dst2(v1) - center.dst2(v2)));
-		for(Tile t: tiles)
-			tileMap.put(t.getCenter(), t);
+		Array<Tile> sorted = new Array<>(tiles);
+		sortByDistance(sorted, getCenter());
+		return sorted.get(0);
+	}
+	
+	/** @noinspection UnusedReturnValue*/
+	static <E extends WorldObject> Array<E> sortByDistance(@NotNull Array<E> objects, @NotNull Vector2 pos) {
+		objects.sort((o1, o2) -> {
+			float o1Diff = Math.abs(pos.dst(o1.getCenter()));
+			float o2Diff = Math.abs(pos.dst(o2.getCenter()));
+			return Float.compare(o1Diff, o2Diff);
+		});
 		
-		return tileMap.firstEntry().getValue();
+		return objects;
 	}
 }

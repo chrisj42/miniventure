@@ -195,6 +195,7 @@ public class Tile implements WorldObject {
 			moveEntities(getType());
 	}
 	
+	/** @noinspection UnusedReturnValue*/
 	boolean replaceTile(@NotNull TileType newType) {
 		// for doors, the animations will be attached to the open door type; an entrance when coming from a closed door, and an exit when going to a closed door.
 		/*
@@ -248,8 +249,19 @@ public class Tile implements WorldObject {
 			Tile closest = entity.getClosestTile(aroundTiles);
 			// if none remain (returned tile is null), take no action for that entity. If a tile is returned, then move the entity just barely inside the new tile.
 			if(closest != null) {
+				Rectangle tileBounds = closest.getBounds();
+				
+				Tile secClosest = closest;
+				do {
+					aroundTiles.removeValue(secClosest, false);
+					secClosest = entity.getClosestTile(aroundTiles);
+				} while(secClosest != null && secClosest.x != closest.x && secClosest.y != closest.y);
+				if(secClosest != null)
+					// expand the rect that the player can be moved to so it's not so large.
+					tileBounds.merge(secClosest.getBounds());
+				
 				Rectangle entityBounds = entity.getBounds();
-				MyUtils.moveRectInside(entityBounds, closest.getBounds(), 1);
+				MyUtils.moveRectInside(entityBounds, tileBounds, 0.05f);
 				entity.moveTo(closest.level, entityBounds.x, entityBounds.y);
 			}
 		}
@@ -268,17 +280,6 @@ public class Tile implements WorldObject {
 			while(hasNull) hasNull = tiles.removeValue(null, true);
 			return tiles;
 		}
-	}
-	
-	/** @noinspection UnusedReturnValue*/
-	public static Array<Tile> sortByDistance(Array<Tile> tiles, @NotNull final Vector2 position) {
-		tiles.sort((t1, t2) -> {
-			float t1diff = position.dst(t1.getCenter());
-			float t2diff = position.dst(t2.getCenter());
-			return Float.compare(t1diff, t2diff);
-		});
-		
-		return tiles;
 	}
 	
 	@Override

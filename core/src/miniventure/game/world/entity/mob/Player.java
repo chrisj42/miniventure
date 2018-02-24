@@ -202,6 +202,7 @@ public class Player extends Mob {
 		Rectangle interactionBounds = getInteractionRect();
 		
 		objects.addAll(level.getOverlappingEntities(interactionBounds, this));
+		WorldObject.sortByDistance(objects, getCenter());
 		
 		Tile tile = level.getClosestTile(interactionBounds);
 		if(tile != null)

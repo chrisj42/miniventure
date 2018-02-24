@@ -259,7 +259,7 @@ public class Level {
 		if(!closest.isPermeableBy(ie)) {
 			// we need to look around for a tile that the item *can* be placed on.
 			Array<Tile> adjacent = closest.getAdjacentTiles(true);
-			Tile.sortByDistance(adjacent, targetPos == null ? dropPos : targetPos);
+			WorldObject.sortByDistance(adjacent, targetPos == null ? dropPos : targetPos);
 			for(Tile adj: adjacent) {
 				if(adj.isPermeableBy(ie)) {
 					closest = adj;
@@ -269,7 +269,7 @@ public class Level {
 		}
 		
 		// make sure the item will be fully inside the "closest" tile when dropped.
-		MyUtils.moveRectInside(itemBounds, closest.getBounds(), 1);
+		MyUtils.moveRectInside(itemBounds, closest.getBounds(), 0.05f);
 		
 		dropPos.x = itemBounds.x;
 		dropPos.y = itemBounds.y;
