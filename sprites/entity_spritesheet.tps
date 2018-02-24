@@ -199,7 +199,6 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
-            <key type="filename">entity-sprites/particle/impact_00.png</key>
             <key type="filename">entity-sprites/particle/impact_01.png</key>
             <key type="filename">entity-sprites/particle/impact_02.png</key>
             <key type="filename">entity-sprites/particle/impact_03.png</key>
@@ -207,11 +206,6 @@
             <key type="filename">entity-sprites/particle/impact_05.png</key>
             <key type="filename">entity-sprites/particle/impact_06.png</key>
             <key type="filename">entity-sprites/particle/impact_07.png</key>
-            <key type="filename">entity-sprites/particle/impact_08.png</key>
-            <key type="filename">entity-sprites/particle/impact_09.png</key>
-            <key type="filename">entity-sprites/particle/impact_10.png</key>
-            <key type="filename">entity-sprites/particle/impact_11.png</key>
-            <key type="filename">entity-sprites/particle/impact_12.png</key>
             <key type="filename">entity-sprites/particle/punch-down_00.png</key>
             <key type="filename">entity-sprites/particle/punch-down_01.png</key>
             <key type="filename">entity-sprites/particle/punch-down_02.png</key>
