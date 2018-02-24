@@ -13,11 +13,11 @@ public class ToolItem extends Item {
 	private static final float DURABILITY_BAR_HEIGHT = 4; // 8 pixels.
 	
 	public enum Material {
-		Wood(30, 1, 15),
+		Wood(30, 1, 5),
 		
-		Stone(80, 2, 10),
+		Stone(80, 2, 5),
 		
-		Iron(250, 4, 5),
+		Iron(250, 4, 4),
 		
 		Gem(800, 8, 3);
 		
