@@ -66,9 +66,13 @@ public enum TileType {
 		SolidProperty.WALKABLE,
 		new AnimationProperty(false, AnimationType.SINGLE_FRAME),
 		new TransitionProperty(
-			new TransitionAnimation("open", true, 1/12f, DOOR_CLOSED),
-			new TransitionAnimation("close", false, 1/12f, DOOR_CLOSED)
-		)
+			new TransitionAnimation("open", true, 1/24f, DOOR_CLOSED),
+			new TransitionAnimation("close", false, 1/24f, DOOR_CLOSED)
+		),
+		(InteractableProperty) (p, i, t) -> {
+			t.replaceTile(DOOR_CLOSED);
+			return true;
+		}
 	),
 	
 	TORCH(

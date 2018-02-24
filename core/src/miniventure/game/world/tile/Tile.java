@@ -148,7 +148,8 @@ public class Tile implements WorldObject {
 	@Override public Rectangle getBounds() { return new Rectangle(x, y, 1, 1); }
 	@Override public Vector2 getCenter() { return new Vector2(x+0.5f, y+0.5f); }
 	
-	public boolean addTile(@NotNull TileType newType) {
+	public boolean addTile(@NotNull TileType newType) { return addTile(newType, getType()); }
+	private boolean addTile(@NotNull TileType newType, @NotNull TileType prevType) {
 		// first, check to see if the newType can validly be placed on the current type.
 		if(newType == getType()
 			|| !newType.getProp(CoveredTileProperty.class).canCover(getType())
@@ -163,12 +164,10 @@ public class Tile implements WorldObject {
 		System.arraycopy(newData, 0, fullData, 0, newData.length); // copy new data to front of data
 		data = fullData;
 		
-		TileType prevType = getType();
-		
 		tileTypes.push(newType);
 		
 		// check for an entrance animation
-		getType().getProp(TransitionProperty.class).tryStartAnimation(this, prevType);
+		newType.getProp(TransitionProperty.class).tryStartAnimation(this, prevType);
 		// we don't use the return value because transition or not, there's nothing we need to do. :P
 		
 		return true;
@@ -206,6 +205,7 @@ public class Tile implements WorldObject {
 		 */
 		
 		TileType type = getType();
+		TileType underType = tileTypes.size() == 1 ? type : tileTypes.elementAt(tileTypes.size()-2);
 		
 		if(newType == type) {
 			// just reset the data
@@ -216,8 +216,8 @@ public class Tile implements WorldObject {
 		}
 		
 		// check that the new type can be placed on the type that was under the previous type
-		if(!newType.getProp(CoveredTileProperty.class).canCover(getType())
-			|| newType.compareTo(getType()) <= 0)
+		if(!newType.getProp(CoveredTileProperty.class).canCover(underType)
+			|| newType.compareTo(underType) <= 0)
 			return false; // cannot replace tile
 		
 		if(type.getProp(TransitionProperty.class).tryStartAnimation(this, newType, true))
@@ -226,7 +226,7 @@ public class Tile implements WorldObject {
 		
 		// no exit animation, so remove the current tile (without doing the exit anim obviously, since we just checked) and add the new one
 		breakTile(false);
-		return addTile(newType); // already checks for entrance animation, so we don't need to worry about that.
+		return addTile(newType, type); // already checks for entrance animation, so we don't need to worry about that; but we do need to pass the previous type, otherwise it will compare with the under type.
 		// the above should always return true, btw, because we already checked with the same conditional a few lines up.
 	}
 	

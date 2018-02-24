@@ -117,7 +117,7 @@ public class TransitionProperty implements TileProperty {
 			if(!anim.isEntrance()) {
 				tile.breakTile(false);
 				if(nextTileTypeData.length() > 0)
-					tile.addTile(TileType.values[Integer.parseInt(nextTileTypeData)]);
+					tile.addTile(Enum.valueOf(TileType.class, nextTileTypeData));
 			}
 		}
 	}
