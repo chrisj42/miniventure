@@ -39,7 +39,8 @@ public class Level {
 	
 	private final HashSet<Entity> entities = new HashSet<>();
 	
-	private int entityCap = 50;
+	/** @noinspection FieldCanBeLocal*/
+	private int entityCap = 8; // per chunk
 	
 	public Level(int depth, LevelGenerator levelGenerator) {
 		this.levelGenerator = levelGenerator;
@@ -57,7 +58,7 @@ public class Level {
 	public int getWidth() { return levelGenerator.worldWidth; }
 	public int getHeight() { return levelGenerator.worldHeight; }
 	public int getDepth() { return depth; }
-	public int getEntityCap() { return entityCap; }
+	public int getEntityCap() { return entityCap*loadedChunks.size(); }
 	public int getEntityCount() { return entities.size(); }
 	
 	public void entityMoved(Entity entity) {
@@ -145,7 +146,7 @@ public class Level {
 		for(Entity e: entities)
 			e.update(delta);
 		
-		if(this.entities.size() < entityCap && MathUtils.randomBoolean(0.01f))
+		if(this.entities.size() < getEntityCap() && MathUtils.randomBoolean(0.01f))
 			spawnMob(AiType.values[MathUtils.random(AiType.values.length-1)].makeMob());
 	}
 	
