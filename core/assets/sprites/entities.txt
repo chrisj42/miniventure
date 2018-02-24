@@ -5,303 +5,219 @@ filter: Nearest,Nearest
 repeat: none
 particle/impact
   rotate: false
-  xy: 2, 2
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 0
-particle/impact
-  rotate: false
-  xy: 2, 2
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 1
-particle/impact
-  rotate: false
-  xy: 2, 68
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 2
-particle/impact
-  rotate: false
-  xy: 2, 134
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 3
-particle/impact
-  rotate: false
-  xy: 2, 200
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 4
-particle/impact
-  rotate: false
-  xy: 2, 266
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 5
-particle/impact
-  rotate: false
-  xy: 2, 332
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 6
-particle/impact
-  rotate: false
-  xy: 2, 398
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 7
-particle/impact
-  rotate: false
-  xy: 70, 2
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 8
-particle/impact
-  rotate: false
-  xy: 2, 398
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 9
-particle/impact
-  rotate: false
-  xy: 136, 2
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 10
-particle/impact
-  rotate: false
-  xy: 2, 398
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 11
-particle/impact
-  rotate: false
-  xy: 202, 2
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 12
-particle/punch-down
-  rotate: false
-  xy: 268, 2
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 0
-particle/punch-down
-  rotate: false
-  xy: 334, 2
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 1
-particle/punch-down
-  rotate: false
-  xy: 400, 2
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 2
-particle/punch-down
-  rotate: false
-  xy: 68, 70
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 3
-particle/punch-down
-  rotate: false
-  xy: 68, 136
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 4
-particle/punch-down
-  rotate: false
-  xy: 68, 202
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 5
-particle/punch-left
-  rotate: false
-  xy: 68, 268
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 0
-particle/punch-left
-  rotate: false
-  xy: 68, 334
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 1
-particle/punch-left
-  rotate: false
-  xy: 94, 434
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 2
-particle/punch-left
-  rotate: false
-  xy: 160, 68
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 3
-particle/punch-left
-  rotate: false
-  xy: 226, 68
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 4
-particle/punch-left
-  rotate: false
-  xy: 292, 68
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 5
-particle/punch-right
-  rotate: false
-  xy: 358, 68
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 0
-particle/punch-right
-  rotate: false
-  xy: 134, 158
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 1
-particle/punch-right
-  rotate: false
-  xy: 134, 224
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 2
-particle/punch-right
-  rotate: false
-  xy: 134, 290
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 3
-particle/punch-right
-  rotate: false
-  xy: 160, 424
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 4
-particle/punch-right
-  rotate: false
-  xy: 226, 134
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 5
-particle/punch-up
-  rotate: false
-  xy: 200, 224
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 0
-particle/punch-up
-  rotate: false
-  xy: 200, 290
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 1
-particle/punch-up
-  rotate: false
-  xy: 226, 424
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 2
-particle/punch-up
-  rotate: false
-  xy: 292, 134
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 3
-particle/punch-up
-  rotate: false
-  xy: 358, 134
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 4
-particle/punch-up
-  rotate: false
-  xy: 292, 200
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: 5
-particle/slash-down
-  rotate: false
   xy: 2, 464
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 0
-particle/slash-down
+  index: 1
+particle/impact
   rotate: false
   xy: 36, 464
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 1
-particle/slash-down
+  index: 2
+particle/impact
   rotate: false
   xy: 466, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 2
-particle/slash-down
+  index: 3
+particle/impact
   rotate: false
   xy: 466, 36
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 3
-particle/slash-down
+  index: 4
+particle/impact
   rotate: false
   xy: 68, 400
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 4
-particle/slash-down
+  index: 5
+particle/impact
   rotate: false
   xy: 102, 400
   size: 32, 32
   orig: 32, 32
+  offset: 0, 0
+  index: 6
+particle/impact
+  rotate: false
+  xy: 102, 400
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 7
+particle/punch-down
+  rotate: false
+  xy: 2, 2
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: 0
+particle/punch-down
+  rotate: false
+  xy: 2, 68
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: 1
+particle/punch-down
+  rotate: false
+  xy: 2, 134
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: 2
+particle/punch-down
+  rotate: false
+  xy: 2, 200
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: 3
+particle/punch-down
+  rotate: false
+  xy: 2, 266
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: 4
+particle/punch-down
+  rotate: false
+  xy: 2, 332
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: 5
+particle/punch-left
+  rotate: false
+  xy: 2, 398
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: 0
+particle/punch-left
+  rotate: false
+  xy: 70, 2
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: 1
+particle/punch-left
+  rotate: false
+  xy: 136, 2
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: 2
+particle/punch-left
+  rotate: false
+  xy: 202, 2
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: 3
+particle/punch-left
+  rotate: false
+  xy: 268, 2
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: 4
+particle/punch-left
+  rotate: false
+  xy: 334, 2
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: 5
+particle/punch-right
+  rotate: false
+  xy: 400, 2
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: 0
+particle/punch-right
+  rotate: false
+  xy: 68, 70
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: 1
+particle/punch-right
+  rotate: false
+  xy: 68, 136
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: 2
+particle/punch-right
+  rotate: false
+  xy: 68, 202
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: 3
+particle/punch-right
+  rotate: false
+  xy: 68, 268
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: 4
+particle/punch-right
+  rotate: false
+  xy: 68, 334
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: 5
+particle/punch-up
+  rotate: false
+  xy: 94, 434
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: 0
+particle/punch-up
+  rotate: false
+  xy: 160, 68
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: 1
+particle/punch-up
+  rotate: false
+  xy: 226, 68
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: 2
+particle/punch-up
+  rotate: false
+  xy: 292, 68
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: 3
+particle/punch-up
+  rotate: false
+  xy: 358, 68
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: 4
+particle/punch-up
+  rotate: false
+  xy: 134, 158
+  size: 64, 64
+  orig: 64, 64
   offset: 0, 0
   index: 5
 particle/slash-down
@@ -310,178 +226,220 @@ particle/slash-down
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 6
+  index: 0
 particle/slash-down
   rotate: false
   xy: 458, 70
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 7
-particle/slash-left
+  index: 1
+particle/slash-down
   rotate: false
   xy: 424, 102
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 0
-particle/slash-left
+  index: 2
+particle/slash-down
   rotate: false
   xy: 458, 104
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
+  index: 3
+particle/slash-down
+  rotate: false
+  xy: 134, 224
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 4
+particle/slash-down
+  rotate: false
+  xy: 134, 258
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 5
+particle/slash-down
+  rotate: false
+  xy: 134, 292
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 6
+particle/slash-down
+  rotate: false
+  xy: 134, 326
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 7
+particle/slash-left
+  rotate: false
+  xy: 134, 360
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 0
+particle/slash-left
+  rotate: false
+  xy: 136, 394
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
   index: 1
 particle/slash-left
   rotate: false
-  xy: 134, 356
+  xy: 160, 428
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 2
 particle/slash-left
   rotate: false
-  xy: 136, 390
+  xy: 160, 462
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 3
 particle/slash-left
   rotate: false
-  xy: 168, 356
+  xy: 168, 224
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 4
 particle/slash-left
   rotate: false
-  xy: 170, 390
+  xy: 200, 138
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 5
 particle/slash-left
   rotate: false
-  xy: 202, 356
+  xy: 200, 172
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 6
 particle/slash-left
   rotate: false
-  xy: 204, 390
+  xy: 168, 258
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 7
 particle/slash-right
   rotate: false
-  xy: 236, 356
+  xy: 168, 292
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 0
 particle/slash-right
   rotate: false
-  xy: 238, 390
+  xy: 168, 326
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 1
 particle/slash-right
   rotate: false
-  xy: 424, 136
+  xy: 168, 360
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 2
 particle/slash-right
   rotate: false
-  xy: 458, 138
+  xy: 170, 394
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 3
 particle/slash-right
   rotate: false
-  xy: 424, 170
+  xy: 194, 428
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 4
 particle/slash-right
   rotate: false
-  xy: 458, 172
+  xy: 194, 462
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 5
 particle/slash-right
   rotate: false
-  xy: 266, 290
+  xy: 202, 206
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 6
 particle/slash-right
   rotate: false
-  xy: 270, 324
+  xy: 234, 138
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 7
 particle/slash-up
   rotate: false
-  xy: 300, 266
+  xy: 234, 172
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 0
 particle/slash-up
   rotate: false
-  xy: 272, 358
+  xy: 202, 240
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 1
 particle/slash-up
   rotate: false
-  xy: 304, 300
+  xy: 202, 274
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 2
 particle/slash-up
   rotate: false
-  xy: 334, 266
+  xy: 202, 308
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 3
 particle/slash-up
   rotate: false
-  xy: 368, 200
+  xy: 202, 342
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 4
 particle/slash-up
   rotate: false
-  xy: 402, 204
+  xy: 204, 376
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 5
 particle/slash-up
   rotate: false
-  xy: 368, 234
+  xy: 228, 410
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 6
 particle/slash-up
   rotate: false
-  xy: 436, 206
+  xy: 228, 444
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -516,21 +474,21 @@ player/idle-up
   index: 1
 player/walk-down
   rotate: false
-  xy: 200, 134
+  xy: 228, 478
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
   index: 1
 player/walk-down
   rotate: false
-  xy: 200, 164
+  xy: 254, 478
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
   index: 2
 player/walk-left
   rotate: false
-  xy: 200, 194
+  xy: 280, 134
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
@@ -544,7 +502,7 @@ player/walk-left
   index: 2
 player/walk-right
   rotate: false
-  xy: 266, 200
+  xy: 306, 134
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
@@ -558,14 +516,14 @@ player/walk-right
   index: 2
 player/walk-up
   rotate: false
-  xy: 266, 230
+  xy: 332, 134
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
   index: 1
 player/walk-up
   rotate: false
-  xy: 266, 260
+  xy: 358, 134
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
