@@ -2,6 +2,7 @@ package miniventure.game.world.tile;
 
 import java.util.HashMap;
 
+import miniventure.game.item.FoodItem;
 import miniventure.game.item.ResourceItem;
 import miniventure.game.item.TileItem;
 import miniventure.game.item.ToolType;
@@ -93,7 +94,7 @@ public enum TileType {
 	TREE(
 		SolidProperty.SOLID,
 		new CoveredTileProperty(GRASS),
-		new DestructibleProperty(10, new PreferredTool(ToolType.Axe, 2), new ItemDrop(ResourceItem.Log.get())),
+		new DestructibleProperty(10, new PreferredTool(ToolType.Axe, 2), new ItemDrop(ResourceItem.Log.get()), new ItemDrop(FoodItem.Apple.get())),
 		new AnimationProperty(false, AnimationType.SINGLE_FRAME),
 		new ConnectionProperty(true)
 	);

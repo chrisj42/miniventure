@@ -10,6 +10,7 @@ import miniventure.game.item.Inventory;
 import miniventure.game.item.InventoryScreen;
 import miniventure.game.item.Item;
 import miniventure.game.item.Recipes;
+import miniventure.game.util.MyUtils;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ActionParticle.ActionType;
@@ -53,7 +54,7 @@ public class Player extends Mob {
 		
 		Stamina("bolt", 12, 100),
 		
-		Hunger("burger", 10, 10),
+		Hunger("burger", 10, 20),
 		
 		Armor("", 10, 10, 0);
 		
@@ -98,8 +99,13 @@ public class Player extends Mob {
 	public int getStat(@NotNull Stat stat) {
 		return stats.get(stat);
 	}
-	public void changeStat(@NotNull Stat stat, int amt) {
+	public int changeStat(@NotNull Stat stat, int amt) {
+		int prevVal = stats.get(stat);
 		stats.put(stat, Math.max(0, Math.min(stat.max, stats.get(stat) + amt)));
+		if(stat == Stat.Health && amt > 0)
+			regenHealth(amt);
+		
+		return stats.get(stat) - prevVal;
 	}
 	
 	public void checkInput(@NotNull Vector2 mouseInput) {
@@ -120,7 +126,9 @@ public class Player extends Mob {
 		
 		move(movement.x, movement.y);
 		
-		getStatEvo(StaminaSystem.class).curStaminaRate = movement.isZero() ? 1 : 0.75f;
+		getStatEvo(StaminaSystem.class).isMoving = !movement.isZero();
+		if(!movement.isZero())
+			getStatEvo(HungerSystem.class).addHunger(Gdx.graphics.getDeltaTime() * 0.35f);
 		
 		if(!isKnockedBack()) {
 			if (GameCore.input.pressingKey(Input.Keys.C))
@@ -161,8 +169,6 @@ public class Player extends Mob {
 		
 		int iconWidth = stat.iconWidth + spacing;
 		
-		if(!rightSide) x -= stat.iconCount * iconWidth;
-		
 		// for each icon...
 		for(int i = 0; i < stat.iconCount; i++) {
 			// gets the amount this icon should be "filled" with the fullIcon
@@ -170,13 +176,15 @@ public class Player extends Mob {
 			
 			// converts it to a pixel width
 			int fullWidth = (int) (iconFillAmount * fullIcon.getRegionWidth());
+			float fullX = rightSide ? x+i*iconWidth : x - i*iconWidth - fullWidth;
 			if(fullWidth > 0)
-				batch.draw(fullIcon.getTexture(), x+i*iconWidth, y, fullIcon.getRegionX(), fullIcon.getRegionY(), fullWidth, fullIcon.getRegionHeight());
+				batch.draw(fullIcon.getTexture(), fullX, y, fullIcon.getRegionX() + (rightSide?0:fullIcon.getRegionWidth()-fullWidth), fullIcon.getRegionY(), fullWidth, fullIcon.getRegionHeight());
 			
 			// now draw the rest of the icon with the empty sprite.
 			int emptyWidth = emptyIcon.getRegionWidth()-fullWidth;
+			float emptyX = rightSide ? x+i*iconWidth+fullWidth : x - (i+1)*iconWidth;
 			if(emptyWidth > 0)
-				batch.draw(emptyIcon.getTexture(), x+i*iconWidth+fullWidth, y, emptyIcon.getRegionX() + fullWidth, emptyIcon.getRegionY(), emptyWidth, emptyIcon.getRegionHeight());
+				batch.draw(emptyIcon.getTexture(), emptyX, y, emptyIcon.getRegionX() + (rightSide?fullWidth:0), emptyIcon.getRegionY(), emptyWidth, emptyIcon.getRegionHeight());
 		}
 	}
 	
@@ -287,15 +295,19 @@ public class Player extends Mob {
 		
 		private static final float STAMINA_REGEN_RATE = 0.25f; // time taken to regen 1 stamina point.
 		
-		private float curStaminaRate = 1;
+		private boolean isMoving = false;
 		private float regenTime;
 		
-		public StaminaSystem() {}
+		StaminaSystem() {}
 		
 		@Override
 		public void update(float delta) {
 			regenTime += delta;
-			float regenRate = STAMINA_REGEN_RATE * curStaminaRate;
+			float regenRate = STAMINA_REGEN_RATE;
+			if(isMoving) regenRate *= 0.75f;
+			if(getStat(Stat.Health) != Stat.Health.max)
+				regenRate *= 1 - (0.5f * getStat(Stat.Hunger) / Stat.Hunger.max); // slow the stamina gen based on how fast you're regen-ing health; if you have very little hunger, then you aren't regen-ing much, so your stamina isn't affected as much.
+			
 			int staminaGained = MathUtils.floor(regenTime / regenRate);
 			if(staminaGained > 0) {
 				regenTime -= staminaGained * regenRate;
@@ -306,21 +318,58 @@ public class Player extends Mob {
 	
 	private class HealthSystem implements StatEvolver {
 		
-		public HealthSystem() {}
+		private static final float REGEN_RATE = 2f; // whenever the regenTime reaches this value, a health point is added.
+		private float regenTime;
+		
+		HealthSystem() {}
 		
 		@Override
 		public void update(float delta) {
-			
+			if(getStat(Stat.Health) != Stat.Health.max) {
+				float hungerRatio = getStat(Stat.Hunger)*1f / Stat.Hunger.max;
+				regenTime += delta * hungerRatio;
+				if(regenTime >= REGEN_RATE) {
+					int healthGained = MathUtils.floor(regenTime / REGEN_RATE);
+					changeStat(Stat.Health, healthGained);
+					regenTime -= healthGained * REGEN_RATE;
+				}
+			}
+			else regenTime = 0;
 		}
 	}
 	
 	private class HungerSystem implements StatEvolver {
+		/*
+			Hunger... you get it:
+				- over time
+				- walking
+				- doing things (aka when stamina is low)
+		 */
 		
-		public HungerSystem() {}
+		private static final float HUNGER_RATE = 60f; // whenever the hunger count reaches this value, a hunger point is taken off.
+		private static final float MAX_STAMINA_MULTIPLIER = 8; // you will lose hunger this many times as fast if you have absolutely no stamina.
+		
+		private float hunger = 0;
+		
+		HungerSystem() {}
+		
+		public void addHunger(float amt) {
+			float hungerRatio = getStat(Stat.Hunger)*1f / Stat.Hunger.max;
+			// make it so a ratio of 1 means x2 addition, and a ratio of 0 makes it 0.5 addition
+			float amtMult = MyUtils.map(hungerRatio, 0, 1, 0.5f, 2);
+			hunger += amt * amtMult;
+		}
 		
 		@Override
 		public void update(float delta) {
+			float staminaRatio = 1 + (1 - (getStat(Stat.Stamina)*1f / Stat.Stamina.max)) * MAX_STAMINA_MULTIPLIER;
+			addHunger(delta * staminaRatio);
 			
+			if(hunger >= HUNGER_RATE) {
+				int hungerLost = MathUtils.floor(hunger / HUNGER_RATE);
+				changeStat(Stat.Hunger, -hungerLost);
+				hunger -= hungerLost * HUNGER_RATE;
+			}
 		}
 	}
 }

@@ -163,6 +163,7 @@ public abstract class Mob extends Entity {
 		return true;
 	}
 	
+	void regenHealth(int amount) { health = Math.min(maxHealth, health + amount); }
 	
 	public boolean maySpawn(TileType type) {
 		return type == TileType.GRASS || type == TileType.DIRT || type == TileType.SAND;
