@@ -5,7 +5,6 @@ import java.util.HashMap;
 import miniventure.game.item.Item;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
-import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.tile.Tile;
 
@@ -19,7 +18,7 @@ import com.badlogic.gdx.utils.Array;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class Entity implements WorldObject {
+public class Entity implements WorldObject {
 	
 	private static final HashMap<Integer, Entity> takenIDs = new HashMap<>();
 	
@@ -86,7 +85,7 @@ public abstract class Entity implements WorldObject {
 	
 	public void addedToLevel(Level level) {}
 	
-	public boolean interactWith(Player player, Item item) { return false; }
+	public boolean interactWith(Player player, @Nullable Item item) { return false; }
 	
 	public boolean move(Vector2 v) { return move(v.x, v.y); }
 	public boolean move(float xd, float yd) { return move(xd, yd, 0); }
@@ -212,13 +211,16 @@ public abstract class Entity implements WorldObject {
 	public void touching(Entity entity) {}
 	
 	@Override
-	public boolean isPermeableBy(Entity entity) { return this instanceof BounceEntity || entity instanceof BounceEntity; }
+	public final boolean isPermeableBy(Entity entity) { return isPermeableBy(entity, true); }
+	
+	public boolean isPermeableBy(Entity entity, boolean delegate) {
+		if(delegate)
+			return entity.isPermeableBy(this, false);
+		return false;
+	}
 	
 	@Override
-	public boolean attackedBy(Mob mob, Item attackItem) { return hurtBy(mob, attackItem.getDamage(this)); }
-	
-	@Override
-	public boolean hurtBy(WorldObject obj, int dmg) { return false; } // generally speaking, attacking an entity doesn't do anything; only for mobs, and maybe furniture...
+	public boolean attackedBy(WorldObject obj, @Nullable Item attackItem, int damage) { return false; }
 	
 	@Override
 	public boolean equals(Object other) { return other instanceof Entity && ((Entity)other).eid == eid; }

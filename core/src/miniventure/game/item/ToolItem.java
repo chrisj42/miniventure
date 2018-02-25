@@ -2,7 +2,7 @@ package miniventure.game.item;
 
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.WorldObject;
-import miniventure.game.world.entity.mob.Mob;
+import miniventure.game.world.entity.mob.Player;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -13,13 +13,13 @@ public class ToolItem extends Item {
 	private static final float DURABILITY_BAR_HEIGHT = 4; // 8 pixels.
 	
 	public enum Material {
-		Wood(20, 1, 4),
+		Wood(30, 1, 5),
 		
-		Stone(80, 2, 3),
+		Stone(80, 2, 5),
 		
-		Iron(250, 4, 2),
+		Iron(250, 4, 4),
 		
-		Gem(800, 8, 1);
+		Gem(800, 8, 3);
 		
 		public final int maxDurability; // the number of uses this level of tool gets.
 		public final int damageMultiplier; // damage done by this tool is multiplied by this number.
@@ -52,7 +52,7 @@ public class ToolItem extends Item {
 	public Material getMaterial() { return material; }
 	
 	@Override
-	public ToolItem use() {
+	public ToolItem getUsedItem() {
 		if(durability > 1)
 			return new ToolItem(toolType, material, durability-1);
 		
@@ -62,18 +62,10 @@ public class ToolItem extends Item {
 	@Override
 	public int getStaminaUsage() { return material.staminaUsage; }
 	
-	// note, the tool will not specify how much damage it does to a tile, generally. 
-	@Override
-	public int getDamage(WorldObject target) {
-		int damage = 1;
-		if(target instanceof Mob) {
-			if(toolType == ToolType.Sword)
-				damage = 3;
-			if(toolType == ToolType.Axe)
-				damage = 2;
-		}
-		
-		return damage * material.damageMultiplier;
+	@Override public boolean attack(WorldObject obj, Player player) {
+		boolean success = obj.attackedBy(player, this, material.damageMultiplier);
+		if(success) use();
+		return success;
 	}
 	
 	@Override

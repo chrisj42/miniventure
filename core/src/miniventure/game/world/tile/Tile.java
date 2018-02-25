@@ -11,7 +11,6 @@ import miniventure.game.world.Level;
 import miniventure.game.world.Point;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
-import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.entity.mob.Player;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -21,6 +20,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class Tile implements WorldObject {
 	
@@ -148,7 +148,8 @@ public class Tile implements WorldObject {
 	@Override public Rectangle getBounds() { return new Rectangle(x, y, 1, 1); }
 	@Override public Vector2 getCenter() { return new Vector2(x+0.5f, y+0.5f); }
 	
-	public boolean addTile(@NotNull TileType newType) {
+	public boolean addTile(@NotNull TileType newType) { return addTile(newType, getType()); }
+	private boolean addTile(@NotNull TileType newType, @NotNull TileType prevType) {
 		// first, check to see if the newType can validly be placed on the current type.
 		if(newType == getType()
 			|| !newType.getProp(CoveredTileProperty.class).canCover(getType())
@@ -165,10 +166,22 @@ public class Tile implements WorldObject {
 		
 		tileTypes.push(newType);
 		
+		// check for an entrance animation
+		newType.getProp(TransitionProperty.class).tryStartAnimation(this, prevType);
+		// we don't use the return value because transition or not, there's nothing we need to do. :P
+		
 		return true;
 	}
 	
-	void breakTile() {
+	void breakTile() { breakTile(true); }
+	void breakTile(boolean checkForExitAnim) {
+		if(checkForExitAnim) {
+			TileType type = getType();
+			if(type.getProp(TransitionProperty.class).tryStartAnimation(this, tileTypes.size() == 1 ? type : tileTypes.elementAt(tileTypes.size()-2), false))
+				// transitioning successful
+				return; // don't actually break the tile yet
+		}
+		
 		TileType prevType = tileTypes.pop();
 		
 		String[] newData = new String[data.length - prevType.getDataLength()];
@@ -179,6 +192,42 @@ public class Tile implements WorldObject {
 			addTile(baseType);
 		else
 			moveEntities(getType());
+	}
+	
+	/** @noinspection UnusedReturnValue*/
+	boolean replaceTile(@NotNull TileType newType) {
+		// for doors, the animations will be attached to the open door type; an entrance when coming from a closed door, and an exit when going to a closed door.
+		/*
+			when adding a type, check only for an entrance animation on the new type, and do it after adding it to the stack. when the animation finishes, do nothing except finish the animation.
+			when removing a type, check for an exit anim on the type, before removing. When animation finishes, remove the type for real.
+			
+			when replacing a type, the old type is checked for an exit anim. but the new type is also
+		 */
+		
+		TileType type = getType();
+		TileType underType = tileTypes.size() == 1 ? type : tileTypes.elementAt(tileTypes.size()-2);
+		
+		if(newType == type) {
+			// just reset the data
+			String[] initData = type.getInitialData();
+			if(initData.length > 0)
+				System.arraycopy(initData, 0, data, data.length-initData.length, initData.length);
+			return true;
+		}
+		
+		// check that the new type can be placed on the type that was under the previous type
+		if(!newType.getProp(CoveredTileProperty.class).canCover(underType)
+			|| newType.compareTo(underType) <= 0)
+			return false; // cannot replace tile
+		
+		if(type.getProp(TransitionProperty.class).tryStartAnimation(this, newType, true))
+			// there is an exit animation; it needs to be played. So let that happen, the tile will be replaced later
+			return true; // can replace (but will do it in a second)
+		
+		// no exit animation, so remove the current tile (without doing the exit anim obviously, since we just checked) and add the new one
+		breakTile(false);
+		return addTile(newType, type); // already checks for entrance animation, so we don't need to worry about that; but we do need to pass the previous type, otherwise it will compare with the under type.
+		// the above should always return true, btw, because we already checked with the same conditional a few lines up.
 	}
 	
 	private void moveEntities(TileType newType) {
@@ -200,8 +249,19 @@ public class Tile implements WorldObject {
 			Tile closest = entity.getClosestTile(aroundTiles);
 			// if none remain (returned tile is null), take no action for that entity. If a tile is returned, then move the entity just barely inside the new tile.
 			if(closest != null) {
+				Rectangle tileBounds = closest.getBounds();
+				
+				Tile secClosest = closest;
+				do {
+					aroundTiles.removeValue(secClosest, false);
+					secClosest = entity.getClosestTile(aroundTiles);
+				} while(secClosest != null && secClosest.x != closest.x && secClosest.y != closest.y);
+				if(secClosest != null)
+					// expand the rect that the player can be moved to so it's not so large.
+					tileBounds.merge(secClosest.getBounds());
+				
 				Rectangle entityBounds = entity.getBounds();
-				MyUtils.moveRectInside(entityBounds, closest.getBounds(), 1);
+				MyUtils.moveRectInside(entityBounds, tileBounds, 0.05f);
 				entity.moveTo(closest.level, entityBounds.x, entityBounds.y);
 			}
 		}
@@ -222,20 +282,8 @@ public class Tile implements WorldObject {
 		}
 	}
 	
-	/** @noinspection UnusedReturnValue*/
-	public static Array<Tile> sortByDistance(Array<Tile> tiles, @NotNull final Vector2 position) {
-		tiles.sort((t1, t2) -> {
-			float t1diff = position.dst(t1.getCenter());
-			float t2diff = position.dst(t2.getCenter());
-			return Float.compare(t1diff, t2diff);
-		});
-		
-		return tiles;
-	}
-	
 	@Override
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
-		
 		/*
 			- Get the surrounding tile types for a tile
 			- draw an overlap only after all the centers under it have been drawn
@@ -281,7 +329,11 @@ public class Tile implements WorldObject {
 		TileType overlapType = overlapTypeIter.hasNext() ? overlapTypeIter.next() : null; // this type will always be just above mainTypes[firstIdx].
 		
 		for(int i = firstIdx; i < mainTypes.length; i++) {
-			sprites.add(mainTypes[i].getProp(ConnectionProperty.class).getSprite(this, aroundTypes));
+			// before we use the connection property of the main type, let's check and see if we are transitioning.
+			if(i == mainTypes.length - 1 && mainTypes[i].getProp(TransitionProperty.class).playingAnimation(this)) // only the top tile can ever be transitioning.
+				sprites.add(mainTypes[i].getProp(TransitionProperty.class).getAnimationFrame(this));
+			else // otherwise, use connection sprite.
+				sprites.add(mainTypes[i].getProp(ConnectionProperty.class).getSprite(this, aroundTypes));
 			
 			while(overlapType != null && (i >= mainTypes.length-1 || mainTypes[i+1].compareTo(overlapType) > 0)) {
 				sprites.addAll(mainTypes[i].getProp(OverlapProperty.class).getSprites(this, overlapType, overlappingTypes.get(overlapType)));
@@ -297,8 +349,10 @@ public class Tile implements WorldObject {
 	
 	@Override
 	public void update(float delta) {
-		for(TileType type: tileTypes) // goes from bottom to top
-			type.getProp(UpdateProperty.class).update(delta, this);
+		for(TileType type: tileTypes) {// goes from bottom to top
+			if(!(type == getType() && type.getProp(TransitionProperty.class).playingAnimation(this))) // only update main tile if not transitioning.
+				type.getProp(UpdateProperty.class).update(delta, this);
+		}
 	}
 	
 	private int getIndex(TileType type, Class<? extends TileProperty> property, int propDataIndex) {
@@ -337,17 +391,12 @@ public class Tile implements WorldObject {
 	}
 	
 	@Override
-	public boolean attackedBy(Mob mob, Item attackItem) {
-		return getType().getProp(DestructibleProperty.class).tileAttacked(this, mob, attackItem);
+	public boolean attackedBy(WorldObject obj, @Nullable Item item, int damage) {
+		return getType().getProp(DestructibleProperty.class).tileAttacked(this, obj, item, damage);
 	}
 	
 	@Override
-	public boolean hurtBy(WorldObject obj, int damage) {
-		return getType().getProp(DestructibleProperty.class).tileAttacked(this, obj, damage);
-	}
-	
-	@Override
-	public boolean interactWith(Player player, Item heldItem) { return getType().getProp(InteractableProperty.class).interact(player, heldItem, this); }
+	public boolean interactWith(Player player, @Nullable Item heldItem) { return getType().getProp(InteractableProperty.class).interact(player, heldItem, this); }
 	
 	@Override
 	public boolean touchedBy(Entity entity) { getType().getProp(TouchListener.class).touchedBy(entity, this); return true; }

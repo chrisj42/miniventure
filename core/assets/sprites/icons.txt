@@ -1,48 +1,69 @@
 icons.png
-size: 128, 128
+size: 128, 256
 format: RGBA8888
-filter: Linear,Linear
+filter: Nearest,Nearest
 repeat: none
-blank
+apple
   rotate: false
-  xy: 3, 71
+  xy: 71, 3
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
+blank
+  rotate: false
+  xy: 71, 39
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+bolt-outline
+  rotate: false
+  xy: 103, 75
+  size: 20, 24
+  orig: 20, 24
+  offset: 0, 0
+  index: -1
+bolt
+  rotate: false
+  xy: 103, 103
+  size: 20, 24
+  orig: 20, 24
+  offset: 0, 0
+  index: -1
 burger-outline
   rotate: false
-  xy: 55, 107
-  size: 10, 9
-  orig: 10, 9
+  xy: 67, 111
+  size: 20, 18
+  orig: 20, 18
   offset: 0, 0
   index: -1
 burger
   rotate: false
-  xy: 69, 107
-  size: 10, 9
-  orig: 10, 9
+  xy: 39, 127
+  size: 20, 18
+  orig: 20, 18
   offset: 0, 0
   index: -1
 gem-sword
   rotate: false
-  xy: 3, 107
+  xy: 107, 3
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 heart-outline
   rotate: false
-  xy: 23, 107
-  size: 12, 12
-  orig: 12, 12
+  xy: 39, 71
+  size: 24, 24
+  orig: 24, 24
   offset: 0, 0
   index: -1
 heart
   rotate: false
-  xy: 39, 107
-  size: 12, 12
-  orig: 12, 12
+  xy: 39, 99
+  size: 24, 24
+  orig: 24, 24
   offset: 0, 0
   index: -1
 light
@@ -54,21 +75,21 @@ light
   index: -1
 log
   rotate: false
-  xy: 39, 71
+  xy: 3, 71
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile-frame
   rotate: false
-  xy: 83, 3
+  xy: 67, 75
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 white
   rotate: false
-  xy: 83, 39
+  xy: 3, 107
   size: 32, 32
   orig: 32, 32
   offset: 0, 0

@@ -9,6 +9,7 @@ import miniventure.game.screen.LoadingScreen;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ItemEntity;
+import miniventure.game.world.entity.Particle;
 import miniventure.game.world.entity.mob.AiType;
 import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.entity.mob.Player;
@@ -38,7 +39,8 @@ public class Level {
 	
 	private final HashSet<Entity> entities = new HashSet<>();
 	
-	private int entityCap = 50;
+	/** @noinspection FieldCanBeLocal*/
+	private int entityCap = 8; // per chunk
 	
 	public Level(int depth, LevelGenerator levelGenerator) {
 		this.levelGenerator = levelGenerator;
@@ -56,7 +58,7 @@ public class Level {
 	public int getWidth() { return levelGenerator.worldWidth; }
 	public int getHeight() { return levelGenerator.worldHeight; }
 	public int getDepth() { return depth; }
-	public int getEntityCap() { return entityCap; }
+	public int getEntityCap() { return entityCap*loadedChunks.size(); }
 	public int getEntityCount() { return entities.size(); }
 	
 	public void entityMoved(Entity entity) {
@@ -144,7 +146,7 @@ public class Level {
 		for(Entity e: entities)
 			e.update(delta);
 		
-		if(this.entities.size() < entityCap && MathUtils.randomBoolean(0.01f))
+		if(this.entities.size() < getEntityCap() && MathUtils.randomBoolean(0.01f))
 			spawnMob(AiType.values[MathUtils.random(AiType.values.length-1)].makeMob());
 	}
 	
@@ -206,7 +208,13 @@ public class Level {
 		objects.addAll(getOverlappingTiles(renderSpace)); // tiles first
 		
 		Array<Entity> entities = getOverlappingEntities(renderSpace); // entities second
-		entities.sort((e1, e2) -> Float.compare(e2.getCenter().y, e1.getCenter().y));
+		entities.sort((e1, e2) -> {
+			if(e1 instanceof Particle && !(e2 instanceof Particle))
+				return 1;
+			if(!(e1 instanceof Particle) && e2 instanceof Particle)
+				return -1;
+			return Float.compare(e2.getCenter().y, e1.getCenter().y);
+		});
 		objects.addAll(entities);
 		
 		for(WorldObject obj: objects)
@@ -252,7 +260,7 @@ public class Level {
 		if(!closest.isPermeableBy(ie)) {
 			// we need to look around for a tile that the item *can* be placed on.
 			Array<Tile> adjacent = closest.getAdjacentTiles(true);
-			Tile.sortByDistance(adjacent, targetPos == null ? dropPos : targetPos);
+			WorldObject.sortByDistance(adjacent, targetPos == null ? dropPos : targetPos);
 			for(Tile adj: adjacent) {
 				if(adj.isPermeableBy(ie)) {
 					closest = adj;
@@ -262,7 +270,7 @@ public class Level {
 		}
 		
 		// make sure the item will be fully inside the "closest" tile when dropped.
-		MyUtils.moveRectInside(itemBounds, closest.getBounds(), 1);
+		MyUtils.moveRectInside(itemBounds, closest.getBounds(), 0.05f);
 		
 		dropPos.x = itemBounds.x;
 		dropPos.y = itemBounds.y;

@@ -21,9 +21,19 @@ public class Hands {
 			super("Hand", GameCore.icons.get("blank"));
 		}
 		
-		@Override
-		public Item use() { return this; }
+		@Override public Item getUsedItem() { return this; }
 		@Override public Item copy() { return new HandItem(); }
+		
+		@Override public boolean interact(WorldObject obj, Player player) {
+			boolean success = obj.interactWith(player, null);
+			if(success) use();
+			return success;
+		}
+		@Override public boolean attack(WorldObject obj, Player player) {
+			boolean success = obj.attackedBy(player, null, 1);
+			if(success) use();
+			return success;
+		}
 		
 		@Override
 		public void drawItem(int stackSize, Batch batch, BitmapFont font, float x, float y) {}
@@ -32,7 +42,6 @@ public class Hands {
 	@NotNull private Item item;
 	private int count = 1;
 	private final Player player;
-	private boolean used = false;
 	
 	public Hands(Player player) {
 		this.player = player;
@@ -42,7 +51,6 @@ public class Hands {
 	public void setItem(@NotNull Item item, int count) {
 		this.item = item;
 		this.count = count;
-		used = false;
 	}
 	
 	public boolean addItem(@NotNull Item other) {
@@ -68,22 +76,21 @@ public class Hands {
 		if(count <= 0) { // this shouldn't happen, generally... unless stuff has been removed from the active item by the crafting menu.
 			item = new HandItem();
 			count = 1;
-			used = false;
 			return;
 		}
 		
-		if(!used) return;
+		if(!item.isUsed()) return;
 		
-		used = false;
-		Item newItem = item.use();
+		Item newItem = item.resetUsage();
 		
 		player.changeStat(Stat.Stamina, -item.getStaminaUsage());
 		
-		if(count == 1)
-			item = newItem == null ? new HandItem() : newItem;
+		if(count == 1 || item instanceof HandItem)
+			setItem(newItem == null ? new HandItem() : newItem, 1);
 		else {
 			count--;
 			if(newItem != null && !player.takeItem(newItem)) {// will add it to hand, or inventory, whichever fits.
+				// this happens if the inventory is full; in such a case, drop the new item on the ground.
 				Level level = player.getLevel();
 				if(level != null)
 					level.dropItem(newItem, player.getCenter(), null);//count++; // if there was a new item, and it couldn't be picked up, then the count is not decreased.
@@ -91,30 +98,12 @@ public class Hands {
 		}
 	}
 	
-	private boolean used() { return used || count <= 0/* || player.getStat(Stat.Stamina) < item.getStaminaUsage()*/; }
-	
-	// reflexive usage
-	public boolean interact() {
-		if(used()) return false;
-		if(item.interact(player) || player.interactWith(item)) used = true;
-		return used;
-	}
-	
-	public boolean interact(WorldObject obj) {
-		if(used()) return false;
-		if(item.interact(obj, player) || obj.interactWith(player, item)) used = true;
-		return used;
-	}
-	
-	public boolean attack(WorldObject obj) {
-		if(used()) return false;
-		if(item.attack(obj, player) || obj.attackedBy(player, item)) used = true;
-		return used;
-	}
+	public boolean hasUsableItem() { return !(item.isUsed() || count <= 0 || player.getStat(Stat.Stamina) < item.getStaminaUsage()); }
 	
 	@NotNull
 	public Item getUsableItem() { return item; }
 	@Nullable
-	Item getEffectiveItem() { return item instanceof HandItem ? null : item; }
+	public Item getEffectiveItem() { return item instanceof HandItem ? null : item; }
+	
 	public int getCount() { return count; }
 }

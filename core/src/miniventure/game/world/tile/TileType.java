@@ -2,7 +2,9 @@ package miniventure.game.world.tile;
 
 import java.util.HashMap;
 
+import miniventure.game.item.FoodItem;
 import miniventure.game.item.ResourceItem;
+import miniventure.game.item.TileItem;
 import miniventure.game.item.ToolType;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.ItemDrop;
@@ -23,17 +25,20 @@ public enum TileType {
 	),
 	
 	DIRT(
+		SolidProperty.WALKABLE,
 		new CoveredTileProperty(HOLE),
 		new DestructibleProperty(true, new RequiredTool(ToolType.Shovel))
 	),
 	
 	SAND(
+		SolidProperty.WALKABLE,
 		new CoveredTileProperty(DIRT),
 		new DestructibleProperty(true, new RequiredTool(ToolType.Shovel)),
 		new OverlapProperty(true)
 	),
 	
 	GRASS(
+		SolidProperty.WALKABLE,
 		new CoveredTileProperty(DIRT),
 		new DestructibleProperty(true, new RequiredTool(ToolType.Shovel)),
 		new OverlapProperty(true)
@@ -41,7 +46,7 @@ public enum TileType {
 	
 	WATER(
 		new CoveredTileProperty(HOLE),
-		new AnimationProperty(true, AnimationType.RANDOM, 0.2f, AnimationType.SEQUENCE, 1/16f),
+		new AnimationProperty(true, AnimationType.RANDOM, 0.2f, AnimationType.SEQUENCE, 1/24f),
 		new SpreadUpdateProperty(HOLE),
 		new OverlapProperty(true)
 	),
@@ -52,10 +57,30 @@ public enum TileType {
 		new DestructibleProperty(20, new PreferredTool(ToolType.Pickaxe, 5), true)
 	),
 	
+	DOOR_CLOSED(
+		SolidProperty.SOLID,
+		new DestructibleProperty(true, new RequiredTool(ToolType.Axe)),
+		new AnimationProperty(true, AnimationType.SINGLE_FRAME)
+	),
+	
+	DOOR_OPEN(
+		SolidProperty.WALKABLE,
+		new AnimationProperty(false, AnimationType.SINGLE_FRAME),
+		new TransitionProperty(
+			new TransitionAnimation("open", true, 1/24f, DOOR_CLOSED),
+			new TransitionAnimation("close", false, 1/24f, DOOR_CLOSED)
+		),
+		(InteractableProperty) (p, i, t) -> {
+			t.replaceTile(DOOR_CLOSED);
+			return true;
+		}
+	),
+	
 	TORCH(
 		new DestructibleProperty(true),
 		(LightProperty) () -> 2,
-		new AnimationProperty(false, AnimationType.SEQUENCE, 1/12f)
+		new AnimationProperty(false, AnimationType.SEQUENCE, 1/12f),
+		new TransitionProperty(new TransitionAnimation("enter", true, 1/12f))
 	),
 	
 	CACTUS(
@@ -63,19 +88,19 @@ public enum TileType {
 		new CoveredTileProperty(SAND),
 		new DestructibleProperty(7, null, true),
 		new AnimationProperty(false, AnimationType.SINGLE_FRAME),
-		(TouchListener) (e, t) -> e.hurtBy(t, 1)
+		(TouchListener) (e, t) -> e.attackedBy(t, null, 1)
 	),
 	
 	TREE(
 		SolidProperty.SOLID,
 		new CoveredTileProperty(GRASS),
-		new DestructibleProperty(10, new PreferredTool(ToolType.Axe, 2), new ItemDrop(ResourceItem.Log.get())),
+		new DestructibleProperty(10, new PreferredTool(ToolType.Axe, 2), new ItemDrop(ResourceItem.Log.get()), new ItemDrop(FoodItem.Apple.get())),
 		new AnimationProperty(false, AnimationType.SINGLE_FRAME),
 		new ConnectionProperty(true)
 	);
 	
 	/*LAVA(
-		(TouchListener) Entity::hurtBy,
+		(TouchListener) (e, t) -> e.attackedBy(t, null, 5),
 		new AnimationProperty.RandomFrame(0.1f)
 	);*/
 	
@@ -127,6 +152,14 @@ public enum TileType {
 	/// POST-INITIALIZATION
 	static {
 		HOLE.getProp(ConnectionProperty.class).addConnectingType(WATER);
+		
+		// NOTE this normally SHOULD NOT BE DONE!! Any modification to the property map after initialization WILL mess things up if the property you are replacing had a different data length. However, this is not the case here, so we should be fine.
+		DOOR_CLOSED.propertyMap.put(InteractableProperty.class, (InteractableProperty) (p, i, t) -> {
+			t.replaceTile(DOOR_OPEN);
+			return true;
+		});
+		
+		DOOR_OPEN.propertyMap.put(DestructibleProperty.class, new DestructibleProperty(new ItemDrop(TileItem.get(TileType.DOOR_CLOSED)), new RequiredTool(ToolType.Axe)));
 	}
 	
 	/* What I've learned:

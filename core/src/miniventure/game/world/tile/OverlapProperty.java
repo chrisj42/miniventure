@@ -15,7 +15,7 @@ public class OverlapProperty implements TileProperty {
 		this.overlaps = overlaps;
 	}
 	
-	@Override public void init(TileType type) {
+	@Override public void init(@NotNull TileType type) {
 		this.tileType = type;
 	}
 	
@@ -36,12 +36,13 @@ public class OverlapProperty implements TileProperty {
 		if(aroundMatches[5]) bits[1] = 1;
 		if(aroundMatches[7]) bits[2] = 1;
 		if(aroundMatches[3]) bits[3] = 1;
-		int total = 4, value = 1;
+		int total = 0, value = 1;
 		for(int num: bits) {
 			total += num * value;
 			value *= 2;
 		}
-		indexes.add(total);
+		if(total > 0) indexes.add(total+3); // don't care to add if all zeros, because then it's just blank. Also, the +3 is to skip past the first 4 sprites, which are the corners (we add 3 instead of 4 because total will start at 1 rather than 0).
+		// four corners
 		if(aroundMatches[2] && bits[0] == 0 && bits[1] == 0) indexes.add(0);
 		if(aroundMatches[8] && bits[1] == 0 && bits[2] == 0) indexes.add(1);
 		if(aroundMatches[6] && bits[2] == 0 && bits[3] == 0) indexes.add(2);

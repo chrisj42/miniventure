@@ -4,7 +4,7 @@
         <key>fileFormatVersion</key>
         <int>4</int>
         <key>texturePackerVersion</key>
-        <string>4.5.0</string>
+        <string>4.6.2</string>
         <key>fileName</key>
         <string>/home/chris/Documents/minicraft/miniventure/sprites/icon_spritesheet.tps</string>
         <key>autoSDSettings</key>
@@ -66,9 +66,9 @@
             <key>filtering</key>
             <struct type="LibGDXFiltering">
                 <key>x</key>
-                <enum type="LibGDXFiltering::Filtering">Linear</enum>
+                <enum type="LibGDXFiltering::Filtering">Nearest</enum>
                 <key>y</key>
-                <enum type="LibGDXFiltering::Filtering">Linear</enum>
+                <enum type="LibGDXFiltering::Filtering">Nearest</enum>
             </struct>
         </struct>
         <key>shapePadding</key>
@@ -199,6 +199,7 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
+            <key type="filename">icon-sprites/apple.png</key>
             <key type="filename">icon-sprites/blank.png</key>
             <key type="filename">icon-sprites/tile-frame.png</key>
             <key type="filename">icon-sprites/white.png</key>
@@ -211,6 +212,20 @@
                 <rect>8,8,16,16</rect>
                 <key>scale9Paddings</key>
                 <rect>8,8,16,16</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">icon-sprites/bolt-outline.png</key>
+            <key type="filename">icon-sprites/bolt.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>3,3,5,6</rect>
+                <key>scale9Paddings</key>
+                <rect>3,3,5,6</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>

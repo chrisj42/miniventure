@@ -83,6 +83,9 @@ public class BounceEntity extends Entity {
 	}
 	
 	@Override
+	public boolean isPermeableBy(Entity entity, boolean delegate) { return true; }
+	
+	@Override
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
 		blinker.update(delta);
 		

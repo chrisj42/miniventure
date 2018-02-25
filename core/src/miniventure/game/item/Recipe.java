@@ -1,17 +1,22 @@
 package miniventure.game.item;
 
+import org.jetbrains.annotations.NotNull;
+
 public class Recipe {
 	
-	private final ItemStack result;
-	private final ItemStack[] costs;
+	@NotNull private final ItemStack result;
+	@NotNull private final ItemStack[] costs;
 	
-	public Recipe(ItemStack result, ItemStack... costs) {
+	public Recipe(@NotNull Item result, @NotNull ItemStack... costs) {
+		this(new ItemStack(result, 1), costs);
+	}
+	public Recipe(@NotNull ItemStack result, @NotNull ItemStack... costs) {
 		this.result = result;
 		this.costs = costs;
 	}
 	
-	ItemStack getResult() { return result; }
-	ItemStack[] getCosts() { return costs; }
+	@NotNull ItemStack getResult() { return result; }
+	@NotNull ItemStack[] getCosts() { return costs; }
 	
 	public boolean canCraft(Inventory inv) {
 		for(ItemStack cost: costs)

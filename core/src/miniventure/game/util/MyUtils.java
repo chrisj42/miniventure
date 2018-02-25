@@ -112,7 +112,7 @@ public class MyUtils {
 	
 	// this method moves a rectangle *just* enough so that it fits inside another rectangle. In the event that the "outer" rect is smaller than the rect being moved, the rect being moved will be centered onto the outer rect. The padding is only used if the moving rect isn't already inside the outer one.
 	public static Rectangle moveRectInside(Rectangle toMove, Rectangle outer, float padding) {
-		if(toMove.width >= outer.width)
+		if(toMove.width+padding*2 >= outer.width)
 			toMove.x = outer.x - (toMove.width - outer.width) / 2;
 		else {
 			if(toMove.x < outer.x)
@@ -121,7 +121,7 @@ public class MyUtils {
 				toMove.x = outer.x + outer.width - toMove.width - padding;
 		}
 		
-		if(toMove.height >= outer.height)
+		if(toMove.height+padding*2 >= outer.height)
 			toMove.y = outer.y - (toMove.height - outer.height) / 2;
 		else {
 			if(toMove.y < outer.y)

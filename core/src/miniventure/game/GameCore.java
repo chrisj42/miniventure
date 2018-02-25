@@ -1,5 +1,10 @@
 package miniventure.game;
 
+import javax.swing.JOptionPane;
+import javax.swing.JTextArea;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.HashMap;
 
 import miniventure.game.screen.MainMenu;
@@ -22,7 +27,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class GameCore extends ApplicationAdapter {
 	
-	public static final Version VERSION = new Version("1.2.2");
+	public static final Version VERSION = new Version("1.2.7");
 	
 	public static final int DEFAULT_SCREEN_WIDTH = 800;
 	public static final int DEFAULT_SCREEN_HEIGHT = 450;
@@ -38,6 +43,8 @@ public class GameCore extends ApplicationAdapter {
 	private static MenuScreen menuScreen;
 	private static LevelManager world;
 	private static GameScreen gameScreen;
+	
+	public static final InputHandler input = new InputHandler();
 	
 	private static SpriteBatch batch;
 	private static BitmapFont font; // this is stored here because it is a really good idea to reuse objects where ever possible; and don't repeat instantiations, aka make a font instance in two classes when the fonts are the same.
@@ -69,13 +76,26 @@ public class GameCore extends ApplicationAdapter {
 	
 	@Override
 	public void render() {
-		if(world.worldLoaded())
-			world.render(gameScreen, menuScreen);
-		
-		hasMenu = menuScreen != null;
-		if(menuScreen != null) {
-			menuScreen.act();
-			menuScreen.draw();
+		try {
+			input.update();
+			if (world.worldLoaded())
+				world.updateAndRender(gameScreen, menuScreen);
+			
+			hasMenu = menuScreen != null;
+			if (menuScreen != null) {
+				menuScreen.act();
+				menuScreen.draw();
+			}
+		} catch(Throwable t) {
+			StringWriter string = new StringWriter();
+			PrintWriter printer = new PrintWriter(string);
+			t.printStackTrace(printer);
+			
+			JTextArea errorDisplay = new JTextArea(string.toString());
+			errorDisplay.setEditable(false);
+			JOptionPane.showMessageDialog(null, errorDisplay, "An error has occurred", JOptionPane.ERROR_MESSAGE);
+			
+			throw t;
 		}
 	}
 	
@@ -90,7 +110,8 @@ public class GameCore extends ApplicationAdapter {
 		System.out.println("setting screen to " + screen);
 		
 		menuScreen = screen;
-		Gdx.input.setInputProcessor(menuScreen);
+		Gdx.input.setInputProcessor(menuScreen == null ? input : menuScreen);
+		input.reset();
 	}
 	
 	@Override
