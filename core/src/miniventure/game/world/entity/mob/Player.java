@@ -240,6 +240,8 @@ public class Player extends Mob {
 		}
 		
 		// didn't hit anything
+		if(!heldItem.isUsed())
+			changeStat(Stat.Stamina, -1); // for trying...
 		if (level != null)
 			level.addEntity(ActionParticle.ActionType.PUNCH.get(getDirection()), /*getCenter().add(getDirection().getVector().scl(getSize().scl(0.5f)))*/getInteractionRect().getCenter(new Vector2()), true);
 	}
@@ -256,6 +258,9 @@ public class Player extends Mob {
 		
 		// none of the above interactions were successful, do the reflexive use.
 		heldItem.interact(this);
+		
+		if(!heldItem.isUsed())
+			changeStat(Stat.Stamina, -1); // for trying...
 	}
 	
 	@Override

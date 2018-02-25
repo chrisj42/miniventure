@@ -21,12 +21,19 @@ public class Hands {
 			super("Hand", GameCore.icons.get("blank"));
 		}
 		
-		@Override public boolean isUsed() { return true; } // always use the stamina... note, this may have undesired results if anything else checks to see if the item is used, besides here...
 		@Override public Item getUsedItem() { return this; }
 		@Override public Item copy() { return new HandItem(); }
 		
-		@Override public boolean interact(WorldObject obj, Player player) { return obj.interactWith(player, null); }
-		@Override public boolean attack(WorldObject obj, Player player) { return obj.attackedBy(player, null, 1); }
+		@Override public boolean interact(WorldObject obj, Player player) {
+			boolean success = obj.interactWith(player, null);
+			if(success) use();
+			return success;
+		}
+		@Override public boolean attack(WorldObject obj, Player player) {
+			boolean success = obj.attackedBy(player, null, 1);
+			if(success) use();
+			return success;
+		}
 		
 		@Override
 		public void drawItem(int stackSize, Batch batch, BitmapFont font, float x, float y) {}
