@@ -173,11 +173,10 @@ public class Player extends Mob {
 			if(fullWidth > 0)
 				batch.draw(fullIcon.getTexture(), x+i*iconWidth, y, fullIcon.getRegionX(), fullIcon.getRegionY(), fullWidth, fullIcon.getRegionHeight());
 			
-			// repeats some of the above, for the empty icon
-			int emptyWidth = (int) ((1 - iconFillAmount) * emptyIcon.getRegionWidth());
-			int emptyOffset = emptyIcon.getRegionWidth() - emptyWidth;
+			// now draw the rest of the icon with the empty sprite.
+			int emptyWidth = emptyIcon.getRegionWidth()-fullWidth;
 			if(emptyWidth > 0)
-				batch.draw(emptyIcon.getTexture(), x+i*iconWidth+emptyOffset, y, emptyIcon.getRegionX() + emptyOffset, emptyIcon.getRegionY(), emptyWidth, emptyIcon.getRegionHeight());
+				batch.draw(emptyIcon.getTexture(), x+i*iconWidth+fullWidth, y, emptyIcon.getRegionX() + fullWidth, emptyIcon.getRegionY(), emptyWidth, emptyIcon.getRegionHeight());
 		}
 	}
 	

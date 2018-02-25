@@ -199,6 +199,7 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
+            <key type="filename">icon-sprites/apple.png</key>
             <key type="filename">icon-sprites/blank.png</key>
             <key type="filename">icon-sprites/tile-frame.png</key>
             <key type="filename">icon-sprites/white.png</key>
