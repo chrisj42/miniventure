@@ -26,6 +26,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class Player extends Mob {
 	
@@ -68,10 +69,13 @@ public class Player extends Mob {
 			this.outlineIcon = icon+"-outline";
 			this.iconCount = iconCount;
 			
-			TextureRegion fullIcon = GameCore.icons.get(icon);
-			TextureRegion emptyIcon = GameCore.icons.get(outlineIcon);
-			iconWidth = Math.max(fullIcon.getRegionWidth(), emptyIcon.getRegionWidth());
-			iconHeight = Math.max(fullIcon.getRegionHeight(), emptyIcon.getRegionHeight());
+			if(icon.length() > 0) {
+				TextureRegion fullIcon = GameCore.icons.get(icon);
+				TextureRegion emptyIcon = GameCore.icons.get(outlineIcon);
+				iconWidth = Math.max(fullIcon.getRegionWidth(), emptyIcon.getRegionWidth());
+				iconHeight = Math.max(fullIcon.getRegionHeight(), emptyIcon.getRegionHeight());
+			} else
+				iconWidth = iconHeight = 0;
 		}
 		
 		public static final Stat[] values = Stat.values();
@@ -222,10 +226,13 @@ public class Player extends Mob {
 	}
 	
 	private void attack() {
+		if(!hands.hasUsableItem()) return;
+		
 		Level level = getLevel();
+		Item heldItem = hands.getUsableItem();
 		
 		for(WorldObject obj: getInteractionQueue()) {
-			if (hands.attack(obj)) {
+			if (heldItem.attack(obj, this)) {
 				if(level != null)
 					level.addEntity(ActionParticle.ActionType.SLASH.get(getDirection()), getCenter().add(getDirection().getVector().scl(getSize().scl(0.5f)))/*getInteractionRect().getCenter(new Vector2())*/, true);
 				return;
@@ -233,11 +240,8 @@ public class Player extends Mob {
 		}
 		
 		// didn't hit anything
-		if(getStat(Stat.Stamina) >= MathUtils.ceil(hands.getUsableItem().getStaminaUsage()/2f)) {
-			changeStat(Stat.Stamina, -MathUtils.ceil(hands.getUsableItem().getStaminaUsage()/2f));
-			if (level != null)
-				level.addEntity(ActionParticle.ActionType.PUNCH.get(getDirection()), /*getCenter().add(getDirection().getVector().scl(getSize().scl(0.5f)))*/getInteractionRect().getCenter(new Vector2()), true);
-		}
+		if (level != null)
+			level.addEntity(ActionParticle.ActionType.PUNCH.get(getDirection()), /*getCenter().add(getDirection().getVector().scl(getSize().scl(0.5f)))*/getInteractionRect().getCenter(new Vector2()), true);
 	}
 	
 	private void interact() {
@@ -255,12 +259,13 @@ public class Player extends Mob {
 	}
 	
 	@Override
-	public boolean hurtBy(WorldObject source, int dmg) {
-		if(super.hurtBy(source, dmg)) {
+	public boolean attackedBy(WorldObject source, @Nullable Item item, int dmg) {
+		if(super.attackedBy(source, item, dmg)) {
 			int health = stats.get(Stat.Health);
 			if (health == 0) return false;
 			stats.put(Stat.Health, Math.max(0, health - dmg));
 			// here is where I'd make a death chest, and show the death screen.
+			return true;
 		}
 		return false;
 	}

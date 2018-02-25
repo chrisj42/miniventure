@@ -9,7 +9,6 @@ import miniventure.game.world.ItemDrop;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ActionParticle;
 import miniventure.game.world.entity.TextParticle;
-import miniventure.game.world.entity.mob.Mob;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -73,12 +72,9 @@ public class DestructibleProperty implements TileProperty {
 		//	drops[0] = new ItemDrop(TileItem.get(type));
 	}
 	
-	boolean tileAttacked(@NotNull Tile tile, @NotNull Mob attacker, @NotNull Item attackItem) {
-		int damage = getDamage(tile, attackItem);
-		return tileAttacked(tile, attacker, damage);
-	}
-	
-	boolean tileAttacked(Tile tile, WorldObject attacker, int damage) {
+	boolean tileAttacked(@NotNull Tile tile, @NotNull WorldObject attacker, @Nullable Item item, int damage) {
+		damage = getDamage(item, damage);
+		
 		if(damage > 0) {
 			// add damage particle
 			tile.getLevel().addEntity(ActionParticle.ActionType.IMPACT.get(null), tile.getCenter(), true);
@@ -103,9 +99,7 @@ public class DestructibleProperty implements TileProperty {
 		return false;
 	}
 	
-	private int getDamage(@NotNull Tile attacked, @NotNull Item attackItem) {
-		int damage = attackItem.getDamage(attacked);
-		
+	private int getDamage(@Nullable Item attackItem, int damage) {
 		if(damageConditions.length > 0) {
 			// must satisfy at least one condition
 			boolean doDamage = true;

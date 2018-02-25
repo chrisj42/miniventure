@@ -2,7 +2,8 @@ package miniventure.game.world.entity.mob;
 
 import miniventure.game.item.Item;
 import miniventure.game.world.ItemDrop;
-import miniventure.game.world.entity.mob.PursuePattern.EntityFollower;
+import miniventure.game.world.WorldObject;
+import miniventure.game.world.entity.mob.PursuePattern.FollowBehavior;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -14,7 +15,7 @@ public enum AiType {
 	
 	Crocodile(18, new WanderingPattern(), HitReaction.CHASE),
 	
-	Zombie(15, new PursuePattern(EntityFollower.NEAREST_PLAYER), null);
+	Zombie(15, new PursuePattern(FollowBehavior.NEAREST_PLAYER), null);
 	
 	private final int health;
 	private final MovementPattern defaultPattern;
@@ -31,9 +32,9 @@ public enum AiType {
 	public MobAi makeMob() {
 		return new MobAi(name().toLowerCase(), health, defaultPattern, deathDrops) {
 			@Override
-			public boolean attackedBy(Mob mob, Item attackItem) {
-				if(onHit != null) onHit.onHit(this, mob, attackItem);
-				return super.attackedBy(mob, attackItem);
+			public boolean attackedBy(WorldObject obj, @Nullable Item attackItem, int damage) {
+				if(onHit != null) onHit.onHit(this, obj, attackItem);
+				return super.attackedBy(obj, attackItem, damage);
 			}
 		};
 	}

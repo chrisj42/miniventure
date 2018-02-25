@@ -1,7 +1,6 @@
 package miniventure.game.world.entity;
 
 import miniventure.game.item.Item;
-import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.entity.mob.Player;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -34,7 +33,4 @@ public class ItemEntity extends BounceEntity {
 	public void touching(Entity entity) {
 		touchedBy(entity);
 	}
-	
-	@Override
-	public boolean attackedBy(Mob mob, Item attackItem) { return false; }
 }

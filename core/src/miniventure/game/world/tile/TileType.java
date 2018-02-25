@@ -87,7 +87,7 @@ public enum TileType {
 		new CoveredTileProperty(SAND),
 		new DestructibleProperty(7, null, true),
 		new AnimationProperty(false, AnimationType.SINGLE_FRAME),
-		(TouchListener) (e, t) -> e.hurtBy(t, 1)
+		(TouchListener) (e, t) -> e.attackedBy(t, null, 1)
 	),
 	
 	TREE(
@@ -99,7 +99,7 @@ public enum TileType {
 	);
 	
 	/*LAVA(
-		(TouchListener) Entity::hurtBy,
+		(TouchListener) (e, t) -> e.attackedBy(t, null, 5),
 		new AnimationProperty.RandomFrame(0.1f)
 	);*/
 	

@@ -26,6 +26,7 @@ public class Hands {
 		@Override public Item copy() { return new HandItem(); }
 		
 		@Override public boolean interact(WorldObject obj, Player player) { return obj.interactWith(player, null); }
+		@Override public boolean attack(WorldObject obj, Player player) { return obj.attackedBy(player, null, 1); }
 		
 		@Override
 		public void drawItem(int stackSize, Batch batch, BitmapFont font, float x, float y) {}
@@ -91,25 +92,6 @@ public class Hands {
 	}
 	
 	public boolean hasUsableItem() { return !(item.isUsed() || count <= 0 || player.getStat(Stat.Stamina) < item.getStaminaUsage()); }
-	
-	// reflexive usage
-	/*public boolean interact() {
-		if(used()) return false;
-		if(item.interact(player) || player.interactWith(item)) used = true;
-		return used;
-	}*/
-	
-	/*public boolean interact(WorldObject obj) {
-		if(used()) return false;
-		if(item.interact(obj, player) || obj.interactWith(player, item)) used = true;
-		return used;
-	}
-	
-	public boolean attack(WorldObject obj) {
-		if(used()) return false;
-		if(item.attack(obj, player) || obj.attackedBy(player, item)) used = true;
-		return used;
-	}*/
 	
 	@NotNull
 	public Item getUsableItem() { return item; }

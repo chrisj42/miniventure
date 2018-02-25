@@ -53,13 +53,11 @@ public abstract class Item {
 	
 	// these three below are in case the item has anything to do with the events.
 	
-	boolean attack(WorldObject obj, Player player) { return false; }
+	public boolean attack(WorldObject obj, Player player) { return obj.attackedBy(player, this, 1); }
 	
 	public boolean interact(WorldObject obj, Player player) { return obj.interactWith(player, this); }
 	// this is called after all interaction attempts.
 	public void interact(Player player) {} // interact reflexively.
-	
-	public int getDamage(WorldObject target) { return 1; } // by default
 	
 	private float renderWidth;
 	private float renderHeight;

@@ -2,7 +2,6 @@ package miniventure.game.world;
 
 import miniventure.game.item.Item;
 import miniventure.game.world.entity.Entity;
-import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.tile.Tile;
 
@@ -47,10 +46,7 @@ public interface WorldObject {
 	boolean interactWith(Player player, @Nullable Item heldItem);
 	
 	// returns whether attack had any effect (should we look for other objects to attack?)
-	boolean attackedBy(Mob mob, Item attackItem);
-	
-	// mostly used for the player, but also could be mobs hurting other mobs, or tiles hurting mobs
-	boolean hurtBy(WorldObject obj, int dmg);
+	boolean attackedBy(WorldObject obj, @Nullable Item item, int dmg);
 	
 	boolean touchedBy(Entity entity);
 	

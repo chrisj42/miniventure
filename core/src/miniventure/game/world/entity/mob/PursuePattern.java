@@ -1,7 +1,7 @@
 package miniventure.game.world.entity.mob;
 
 import miniventure.game.world.Level;
-import miniventure.game.world.entity.Entity;
+import miniventure.game.world.WorldObject;
 
 import com.badlogic.gdx.math.Vector2;
 
@@ -11,10 +11,10 @@ import org.jetbrains.annotations.Nullable;
 public class PursuePattern implements MovementPattern {
 	
 	@FunctionalInterface
-	interface EntityFollower {
-		@Nullable Entity getEntityToFollow(MobAi self);
+	interface FollowBehavior {
+		@Nullable WorldObject getObjectToFollow(MobAi self);
 		
-		EntityFollower NEAREST_PLAYER = (self) -> {
+		FollowBehavior NEAREST_PLAYER = (self) -> {
 			Level level = self.getLevel();
 			if(level == null) return null;
 			
@@ -22,17 +22,17 @@ public class PursuePattern implements MovementPattern {
 		};
 	}
 	
-	@NotNull private EntityFollower followBehavior;
+	@NotNull private FollowBehavior followBehavior;
 	private float maxDist;
 	private float followSpeed;
 	
 	private WanderingPattern idlePattern;
 	private boolean wasFollowing = false;
 	
-	public PursuePattern() { this(EntityFollower.NEAREST_PLAYER); }
-	public PursuePattern(EntityFollower followBehavior) { this(followBehavior, 2.5f); }
-	public PursuePattern(EntityFollower followBehavior, float followSpeed) { this(followBehavior, 8, followSpeed); }
-	public PursuePattern(@NotNull EntityFollower behavior, float maxDist, float followSpeed) {
+	public PursuePattern() { this(FollowBehavior.NEAREST_PLAYER); }
+	public PursuePattern(FollowBehavior followBehavior) { this(followBehavior, 2.5f); }
+	public PursuePattern(FollowBehavior followBehavior, float followSpeed) { this(followBehavior, 8, followSpeed); }
+	public PursuePattern(@NotNull FollowBehavior behavior, float maxDist, float followSpeed) {
 		this.followBehavior = behavior;
 		this.maxDist = maxDist;
 		this.followSpeed = followSpeed;
@@ -42,7 +42,7 @@ public class PursuePattern implements MovementPattern {
 	
 	@Override
 	public Vector2 move(float delta, MobAi mob) {
-		Entity follow = followBehavior.getEntityToFollow(mob);
+		WorldObject follow = followBehavior.getObjectToFollow(mob);
 		if(follow == null) return new Vector2();
 		
 		Vector2 dist = follow.getCenter();
@@ -68,9 +68,9 @@ public class PursuePattern implements MovementPattern {
 	public static class FleePattern extends PursuePattern {
 		
 		public FleePattern() { super(); }
-		public FleePattern(EntityFollower followBehavior) { super(followBehavior); }
-		public FleePattern(EntityFollower followBehavior, float followSpeed) { super(followBehavior, followSpeed); }
-		public FleePattern(@NotNull EntityFollower followBehavior, float maxDist, float followSpeed) {
+		public FleePattern(FollowBehavior followBehavior) { super(followBehavior); }
+		public FleePattern(FollowBehavior followBehavior, float followSpeed) { super(followBehavior, followSpeed); }
+		public FleePattern(@NotNull FollowBehavior followBehavior, float maxDist, float followSpeed) {
 			super(followBehavior, maxDist, followSpeed);
 		}
 		

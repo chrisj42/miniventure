@@ -2,7 +2,7 @@ package miniventure.game.item;
 
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.WorldObject;
-import miniventure.game.world.entity.mob.Mob;
+import miniventure.game.world.entity.mob.Player;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -62,18 +62,13 @@ public class ToolItem extends Item {
 	@Override
 	public int getStaminaUsage() { return material.staminaUsage; }
 	
-	// note, the tool will not specify how much damage it does to a tile, generally. 
-	@Override
-	public int getDamage(WorldObject target) {
-		int damage = 1;
-		if(target instanceof Mob) {
-			if(toolType == ToolType.Sword)
-				damage = 3;
-			if(toolType == ToolType.Axe)
-				damage = 2;
+	@Override public boolean attack(WorldObject obj, Player player) {
+		if(obj.attackedBy(player, this, material.damageMultiplier)) {
+			use();
+			return true;
 		}
 		
-		return damage * material.damageMultiplier;
+		return false;
 	}
 	
 	@Override

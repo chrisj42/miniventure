@@ -5,7 +5,6 @@ import java.util.HashMap;
 import miniventure.game.item.Item;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
-import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.tile.Tile;
 
@@ -221,10 +220,7 @@ public class Entity implements WorldObject {
 	}
 	
 	@Override
-	public boolean attackedBy(Mob mob, Item attackItem) { return hurtBy(mob, attackItem.getDamage(this)); }
-	
-	@Override
-	public boolean hurtBy(WorldObject obj, int dmg) { return false; } // generally speaking, attacking an entity doesn't do anything; only for mobs, and maybe furniture...
+	public boolean attackedBy(WorldObject obj, @Nullable Item attackItem, int damage) { return false; }
 	
 	@Override
 	public boolean equals(Object other) { return other instanceof Entity && ((Entity)other).eid == eid; }

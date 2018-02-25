@@ -1,5 +1,8 @@
 package miniventure.game.world.entity.mob;
 
+import miniventure.game.item.Item;
+import miniventure.game.item.ToolItem;
+import miniventure.game.item.ToolType;
 import miniventure.game.util.FrameBlinker;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.ItemDrop;
@@ -18,6 +21,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * This class is necessary because it ought to nicely package up the functionality of a mob, that moves around, and has up/down/left/right walking animations. Though, I may move the directional + state driven animation to its own class...
@@ -111,8 +115,16 @@ public abstract class Mob extends Entity {
 	}
 	
 	@Override
-	public boolean hurtBy(WorldObject obj, int damage) {
+	public boolean attackedBy(WorldObject obj, @Nullable Item item, int damage) {
 		if(invulnerableTime > 0) return false; // this ought to return false because returning true would use up weapons and such, and that's not fair. Downside is, it'll then try to interact with other things...
+		
+		if(item instanceof ToolItem) {
+			ToolItem ti = (ToolItem) item;
+			if(ti.getType() == ToolType.Sword)
+				damage *= 3;
+			if(ti.getType() == ToolType.Axe)
+				damage *= 2;
+		}
 		
 		health -= Math.min(damage, health);
 		invulnerableTime = HURT_COOLDOWN;

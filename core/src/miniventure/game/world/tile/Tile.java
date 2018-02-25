@@ -11,7 +11,6 @@ import miniventure.game.world.Level;
 import miniventure.game.world.Point;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
-import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.entity.mob.Player;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -392,13 +391,8 @@ public class Tile implements WorldObject {
 	}
 	
 	@Override
-	public boolean attackedBy(Mob mob, Item attackItem) {
-		return getType().getProp(DestructibleProperty.class).tileAttacked(this, mob, attackItem);
-	}
-	
-	@Override
-	public boolean hurtBy(WorldObject obj, int damage) {
-		return getType().getProp(DestructibleProperty.class).tileAttacked(this, obj, damage);
+	public boolean attackedBy(WorldObject obj, @Nullable Item item, int damage) {
+		return getType().getProp(DestructibleProperty.class).tileAttacked(this, obj, item, damage);
 	}
 	
 	@Override
