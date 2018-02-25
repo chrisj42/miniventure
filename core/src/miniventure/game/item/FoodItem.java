@@ -28,9 +28,12 @@ public enum FoodItem {
 			
 			@Override public void interact(Player player) {
 				int gained = player.changeStat(Stat.Hunger, healthGained);
-				Level level = player.getLevel();
-				if(level != null)
-					level.addEntity(new TextParticle(gained+"", Color.CORAL), player.getCenter(), true);
+				if(gained > 0) {
+					use();
+					Level level = player.getLevel();
+					if (level != null)
+						level.addEntity(new TextParticle(gained + "", Color.CORAL), player.getCenter(), true);
+				}
 			}
 		};
 	}
