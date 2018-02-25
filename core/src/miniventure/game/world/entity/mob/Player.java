@@ -12,7 +12,7 @@ import miniventure.game.item.Item;
 import miniventure.game.item.Recipes;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
-import miniventure.game.world.entity.ActionParticle;
+import miniventure.game.world.entity.ActionParticle.ActionType;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.Gdx;
@@ -231,19 +231,23 @@ public class Player extends Mob {
 		Level level = getLevel();
 		Item heldItem = hands.getUsableItem();
 		
+		boolean success = false;
 		for(WorldObject obj: getInteractionQueue()) {
 			if (heldItem.attack(obj, this)) {
-				if(level != null)
-					level.addEntity(ActionParticle.ActionType.SLASH.get(getDirection()), getCenter().add(getDirection().getVector().scl(getSize().scl(0.5f)))/*getInteractionRect().getCenter(new Vector2())*/, true);
-				return;
+				success = true;
+				break;
 			}
 		}
 		
-		// didn't hit anything
 		if(!heldItem.isUsed())
 			changeStat(Stat.Stamina, -1); // for trying...
-		if (level != null)
-			level.addEntity(ActionParticle.ActionType.PUNCH.get(getDirection()), /*getCenter().add(getDirection().getVector().scl(getSize().scl(0.5f)))*/getInteractionRect().getCenter(new Vector2()), true);
+		
+		if (level != null) {
+			if(success)
+				level.addEntity(ActionType.SLASH.get(getDirection()), getCenter().add(getDirection().getVector().scl(getSize().scl(0.5f))), true);
+			else
+				level.addEntity(ActionType.PUNCH.get(getDirection()), getInteractionRect().getCenter(new Vector2()), true);
+		}
 	}
 	
 	private void interact() {
@@ -251,13 +255,17 @@ public class Player extends Mob {
 		
 		Item heldItem = hands.getUsableItem();
 		
+		boolean success = false;
 		for(WorldObject obj: getInteractionQueue()) {
-			if (heldItem.interact(obj, this))
-				return;
+			if (heldItem.interact(obj, this)) {
+				success = true;
+				break;
+			}
 		}
 		
-		// none of the above interactions were successful, do the reflexive use.
-		heldItem.interact(this);
+		if(!success)
+			// none of the above interactions were successful, do the reflexive use.
+			heldItem.interact(this);
 		
 		if(!heldItem.isUsed())
 			changeStat(Stat.Stamina, -1); // for trying...

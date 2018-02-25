@@ -63,12 +63,9 @@ public class ToolItem extends Item {
 	public int getStaminaUsage() { return material.staminaUsage; }
 	
 	@Override public boolean attack(WorldObject obj, Player player) {
-		if(obj.attackedBy(player, this, material.damageMultiplier)) {
-			use();
-			return true;
-		}
-		
-		return false;
+		boolean success = obj.attackedBy(player, this, material.damageMultiplier);
+		if(success) use();
+		return success;
 	}
 	
 	@Override

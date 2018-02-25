@@ -69,7 +69,7 @@ public class TileItem extends Item {
 			}
 		}
 		
-		return false;
+		return obj.interactWith(player, this);
 	}
 	
 	@Override
