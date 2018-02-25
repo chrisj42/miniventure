@@ -52,7 +52,7 @@ public class ToolItem extends Item {
 	public Material getMaterial() { return material; }
 	
 	@Override
-	public ToolItem use() {
+	public ToolItem getUsedItem() {
 		if(durability > 1)
 			return new ToolItem(toolType, material, durability-1);
 		

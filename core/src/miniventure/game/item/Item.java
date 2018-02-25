@@ -22,26 +22,42 @@ public abstract class Item {
 	// NOTE: all data aspects should be final, because one item instance is used to represent a whole stack. Now, with this in mind, one can set a temp var to determine what sort of item to return from the use() method. It should be reset following that, however.
 	
 	@NotNull private final TextureRegion texture;
-	private final String name;
+	@NotNull private final String name;
 	
-	Item(String name, @NotNull TextureRegion texture) {
+	private boolean used = false;
+	
+	Item(@NotNull String name, @NotNull TextureRegion texture) {
 		this.texture = texture;
 		this.name = name;
 	}
 	
 	@NotNull public TextureRegion getTexture() { return texture; }
-	public String getName() { return name; }
+	@NotNull public String getName() { return name; }
 	public int getMaxStackSize() { return 64; } // by default
 	public int getStaminaUsage() { return 1; } // default; note that without a successful attack or interaction, no stamina is lost.
 	
+	// called to reset the item
+	@Nullable public final Item resetUsage() {
+		Item newItem = getUsedItem();
+		used = false;
+		return newItem;
+	}
+	
 	/// The item has been used. For most items, this means the item is now depleted, and can no longer be used. Note that there is a contract with this method; it should not modify the state of the current item, however it can return a slightly modified version to be used instead.
-	@Nullable public Item use() { return null; }
+	// overridden by subclasses to return a new item instance with any change in state that should happen when the item is used; usually though, using an item results in it disappearing.
+	@Nullable
+	protected Item getUsedItem() { return null; }
+	
+	public void use() { used = true; }
+	public boolean isUsed() { return used; }
 	
 	// these three below are in case the item has anything to do with the events.
 	
-	boolean interact(Player player) { return false; } // interact reflexively.
-	boolean interact(WorldObject obj, Player player) { return false; }
 	boolean attack(WorldObject obj, Player player) { return false; }
+	
+	public boolean interact(WorldObject obj, Player player) { return obj.interactWith(player, this); }
+	// this is called after all interaction attempts.
+	public void interact(Player player) {} // interact reflexively.
 	
 	public int getDamage(WorldObject target) { return 1; } // by default
 	

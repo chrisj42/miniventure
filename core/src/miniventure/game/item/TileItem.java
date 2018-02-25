@@ -38,7 +38,6 @@ public class TileItem extends Item {
 	
 	@NotNull private TileType result;
 	@Nullable private TileType[] canPlaceOn;
-	private boolean placed = false;
 	
 	private TileItem(@NotNull TileType type, @Nullable TileType... canPlaceOn) {
 		this(MyUtils.toTitleCase(type.name()), GameCore.tileAtlas.findRegion(type.name().toLowerCase()+"/00"), type, canPlaceOn); // so, if the placeOn is null, then...
@@ -52,7 +51,7 @@ public class TileItem extends Item {
 	
 	@Override
 	public boolean interact(WorldObject obj, Player player) {
-		if(!placed && obj instanceof Tile) {
+		if(!isUsed() && obj instanceof Tile) {
 			Tile tile = (Tile) obj;
 			boolean canPlace = canPlaceOn == null;
 			if(!canPlace) {
@@ -63,23 +62,14 @@ public class TileItem extends Item {
 					}
 				}
 			}
-			if (canPlace) {
-				placed = tile.addTile(result);
-				return placed;
+			
+			if(canPlace && tile.addTile(result)) {
+				use();
+				return true;
 			}
 		}
 		
 		return false;
-	}
-	
-	@Override
-	public TileItem use() {
-		if(placed) {
-			placed = false;
-			return null;
-		}
-		else
-			return this;
 	}
 	
 	@Override

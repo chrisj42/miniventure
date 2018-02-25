@@ -21,6 +21,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class Tile implements WorldObject {
 	
@@ -401,7 +402,7 @@ public class Tile implements WorldObject {
 	}
 	
 	@Override
-	public boolean interactWith(Player player, Item heldItem) { return getType().getProp(InteractableProperty.class).interact(player, heldItem, this); }
+	public boolean interactWith(Player player, @Nullable Item heldItem) { return getType().getProp(InteractableProperty.class).interact(player, heldItem, this); }
 	
 	@Override
 	public boolean touchedBy(Entity entity) { getType().getProp(TouchListener.class).touchedBy(entity, this); return true; }

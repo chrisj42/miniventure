@@ -58,6 +58,7 @@ public class Player extends Mob {
 		
 		private final int max, initial, iconCount;
 		private final String icon, outlineIcon;
+		private final int iconWidth, iconHeight;
 		
 		Stat(String icon, int iconCount, int max) { this(icon, iconCount, max, max); }
 		Stat(String icon, int iconCount, int max, int initial) {
@@ -66,6 +67,11 @@ public class Player extends Mob {
 			this.icon = icon;
 			this.outlineIcon = icon+"-outline";
 			this.iconCount = iconCount;
+			
+			TextureRegion fullIcon = GameCore.icons.get(icon);
+			TextureRegion emptyIcon = GameCore.icons.get(outlineIcon);
+			iconWidth = Math.max(fullIcon.getRegionWidth(), emptyIcon.getRegionWidth());
+			iconHeight = Math.max(fullIcon.getRegionHeight(), emptyIcon.getRegionHeight());
 		}
 		
 		public static final Stat[] values = Stat.values();
@@ -134,20 +140,24 @@ public class Player extends Mob {
 	
 	public void drawGui(Rectangle canvas, SpriteBatch batch, BitmapFont font) {
 		hands.getUsableItem().drawItem(hands.getCount(), batch, font, canvas.width/2, 20);
+		float y = canvas.y + 3;
 		
-		renderBar(Stat.Health, canvas.x, canvas.y+3, batch);
-		renderBar(Stat.Stamina, canvas.x, canvas.y+6+GameCore.icons.get(Stat.Health.icon).getRegionHeight(), batch);
-		//renderBar(Stat.Hunger, canvas.x + canvas.width - GameCore.icons.get(Stat.Hunger.icon).getRegionWidth()*Stat.Hunger.iconCount, canvas.y+3, batch);
+		renderBar(Stat.Health, canvas.x, y, batch);
+		renderBar(Stat.Stamina, canvas.x, y+Stat.Health.iconHeight+3, batch);
+		renderBar(Stat.Hunger, canvas.x + canvas.width, y, batch, 0, false);
 	}
 	
 	private void renderBar(Stat stat, float x, float y, SpriteBatch batch) { renderBar(stat, x, y, batch, 0); }
-	private void renderBar(Stat stat, float x, float y, SpriteBatch batch, int spacing) {
+	/** @noinspection SameParameterValue*/
+	private void renderBar(Stat stat, float x, float y, SpriteBatch batch, int spacing) { renderBar(stat, x, y, batch, spacing, true); }
+	private void renderBar(Stat stat, float x, float y, SpriteBatch batch, int spacing, boolean rightSide) {
 		float pointsPerIcon = stat.max*1f / stat.iconCount;
 		TextureRegion fullIcon = GameCore.icons.get(stat.icon);
 		TextureRegion emptyIcon = GameCore.icons.get(stat.outlineIcon);
 		
-		int iconWidth = Math.max(fullIcon.getRegionWidth(), emptyIcon.getRegionWidth()) + spacing;
-		int iconHeight = Math.max(fullIcon.getRegionHeight(), emptyIcon.getRegionHeight());
+		int iconWidth = stat.iconWidth + spacing;
+		
+		if(!rightSide) x -= stat.iconCount * iconWidth;
 		
 		// for each icon...
 		for(int i = 0; i < stat.iconCount; i++) {
@@ -231,14 +241,18 @@ public class Player extends Mob {
 	}
 	
 	private void interact() {
-		if(hands.interact()) return;
+		if(!hands.hasUsableItem()) return;
 		
-		for(WorldObject obj: getInteractionQueue())
-			if(hands.interact(obj))
+		Item heldItem = hands.getUsableItem();
+		
+		for(WorldObject obj: getInteractionQueue()) {
+			if (heldItem.interact(obj, this))
 				return;
+		}
+		
+		// none of the above interactions were successful, do the reflexive use.
+		heldItem.interact(this);
 	}
-	
-	public boolean interactWith(Item item) { return false; }
 	
 	@Override
 	public boolean hurtBy(WorldObject source, int dmg) {

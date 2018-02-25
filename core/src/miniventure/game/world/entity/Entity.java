@@ -86,7 +86,7 @@ public class Entity implements WorldObject {
 	
 	public void addedToLevel(Level level) {}
 	
-	public boolean interactWith(Player player, Item item) { return false; }
+	public boolean interactWith(Player player, @Nullable Item item) { return false; }
 	
 	public boolean move(Vector2 v) { return move(v.x, v.y); }
 	public boolean move(float xd, float yd) { return move(xd, yd, 0); }

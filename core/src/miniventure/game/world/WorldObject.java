@@ -44,7 +44,7 @@ public interface WorldObject {
 	boolean isPermeableBy(Entity entity);
 	
 	// returns whether interaction had any effect (should we look for other objects to interact with?)
-	boolean interactWith(Player player, Item heldItem);
+	boolean interactWith(Player player, @Nullable Item heldItem);
 	
 	// returns whether attack had any effect (should we look for other objects to attack?)
 	boolean attackedBy(Mob mob, Item attackItem);
