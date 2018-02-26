@@ -293,7 +293,7 @@ public class Player extends Mob {
 	
 	private class StaminaSystem implements StatEvolver {
 		
-		private static final float STAMINA_REGEN_RATE = 0.25f; // time taken to regen 1 stamina point.
+		private static final float STAMINA_REGEN_RATE = 0.35f; // time taken to regen 1 stamina point.
 		
 		private boolean isMoving = false;
 		private float regenTime;
@@ -305,8 +305,8 @@ public class Player extends Mob {
 			regenTime += delta;
 			float regenRate = STAMINA_REGEN_RATE;
 			if(isMoving) regenRate *= 0.75f;
-			if(getStat(Stat.Health) != Stat.Health.max)
-				regenRate *= 1 - (0.5f * getStat(Stat.Hunger) / Stat.Hunger.max); // slow the stamina gen based on how fast you're regen-ing health; if you have very little hunger, then you aren't regen-ing much, so your stamina isn't affected as much.
+			//if(getStat(Stat.Health) != Stat.Health.max)
+				//regenRate *= 1 - (0.5f * getStat(Stat.Hunger) / Stat.Hunger.max); // slow the stamina gen based on how fast you're regen-ing health; if you have very little hunger, then you aren't regen-ing much, so your stamina isn't affected as much.
 			
 			int staminaGained = MathUtils.floor(regenTime / regenRate);
 			if(staminaGained > 0) {
@@ -328,6 +328,7 @@ public class Player extends Mob {
 			if(getStat(Stat.Health) != Stat.Health.max) {
 				float hungerRatio = getStat(Stat.Hunger)*1f / Stat.Hunger.max;
 				regenTime += delta * hungerRatio;
+				getStatEvo(HungerSystem.class).addHunger(delta);
 				if(regenTime >= REGEN_RATE) {
 					int healthGained = MathUtils.floor(regenTime / REGEN_RATE);
 					changeStat(Stat.Health, healthGained);
@@ -347,7 +348,7 @@ public class Player extends Mob {
 		 */
 		
 		private static final float HUNGER_RATE = 60f; // whenever the hunger count reaches this value, a hunger point is taken off.
-		private static final float MAX_STAMINA_MULTIPLIER = 8; // you will lose hunger this many times as fast if you have absolutely no stamina.
+		private static final float MAX_STAMINA_MULTIPLIER = 6; // you will lose hunger this many times as fast if you have absolutely no stamina.
 		
 		private float hunger = 0;
 		
