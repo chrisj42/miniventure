@@ -43,6 +43,8 @@ public class TransitionProperty implements TileProperty {
 		this.tileType = type;
 		if(animations.length == 0) return;
 		
+		if(GameCore.tileAtlas == null) return;
+		
 		allAnimations.putIfAbsent(tileType, new HashMap<>());
 		HashMap<String, Array<AtlasRegion>> animationMap = allAnimations.get(tileType);
 		for(TransitionAnimation anim: animations) {
