@@ -2,6 +2,8 @@ package miniventure.game;
 
 import java.util.HashSet;
 
+import miniventure.game.network.GameClient;
+import miniventure.game.network.GameServer;
 import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
@@ -38,6 +40,8 @@ public class LevelManager {
 	private boolean worldLoaded = false;
 	
 	private LevelGenerator levelGenerator;
+	private GameServer server;
+	private GameClient client;
 	
 	private Player mainPlayer;
 	private float gameTime;
@@ -86,6 +90,10 @@ public class LevelManager {
 	
 	public void createWorld(int width, int height) {
 		worldLoaded = false;
+		
+		server = new GameServer();
+		client = new GameClient("localhost");
+		
 		LoadingScreen loadingScreen = new LoadingScreen();
 		GameCore.setScreen(loadingScreen);
 		gameTime = 0;
