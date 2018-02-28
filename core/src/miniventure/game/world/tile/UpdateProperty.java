@@ -5,8 +5,4 @@ public interface UpdateProperty extends TileProperty {
 	
 	void update(float delta, Tile tile);
 	
-	@Override
-	default Integer[] getInitData() {
-		return new Integer[0];
-	}
 }

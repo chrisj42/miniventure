@@ -1,0 +1,17 @@
+I'm noticing a LOT of basic functionality similarities between entities and tiles, and I'm really starting to believe it's worth it to make a WorldObject class, or interface. The question now is, what to put in it?
+
+Here are the similarities I've found so far:
+- can have items used on them to change them
+- collision with entities
+- hurtability - health, or no health but removal condition
+- drops items
+- has a bounding box, a place where it exists, and a level
+- has a sprite that may be rendered and animated (though the animation may remain local to entities vs tiles)
+- can be updated in terms of game logic
+- has tiles surrounding it and in its position
+- 
+
+
+- some entities and tiles have health, but some instead require a specific item.
+	for example, a dirt tile won't be removed unless you use a shovel on it, but everything does one damage to stone or a tree until it breaks.
+	Most entities (most notably mobs) have health, but furniture doesn't; hitting it does nothing (generally), unless you use the carry gloves to pick them up.

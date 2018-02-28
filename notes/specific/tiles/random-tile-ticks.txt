@@ -1,0 +1,23 @@
+only tiles around the player will participate in random tick runs.
+
+The radius is a about 5 or so tiles outside a square formed with the larger of the default screen width vs height. The default screen size is actually already in world coordinates, so we can get the radius from there pretty easily.
+
+The purpose of this is to make things like water flow look nicer prevent any lag that might occur on big worlds. I'm not sure how many updates per frame is too many
+
+
+
+Actually... why should I even use that system, anyway? What if I could make a system where each tileType had a "priority" for random ticks, 0 to 1; the higher priority tiles would have a higher probability of being ticked than the lower priority ones. After all, I want water to flow fast, but lava to flow slow.
+
+These ticking tile types get to specify about how often they should be ticked, in ticks / second. Then, during the level update, the total ticks requested are sort of metaphorically set up in a row, and a spots are picked randomly until enough spots are picked to satisfy the number of ticks that were requested, for the current fraction of a second since the last update.
+In terms of implementation, the level tracks from the beginning which tiles want to be ticked. It then goes through them along with an array, and sets the value of the matching array index to the ticks per second of this tile, plus the previous value. Then it randomly comes up with a number between 0 and the last value, which ends up being the sum of all the tick/second values. The number is then used to figure out which 
+
+What's kept constant is the number of random ticks per average tile per second. When tiles are reset to a type that uses random ticks, or reset when it previously was one, a varible in the level tracking total tile tick weight is updated.
+
+To keep the value constant, one has to know the update speed (which is given) and the total tile weight to be ticked. if there is a lot of 
+
+
+
+
+Nah, that whole system is totally overcomplicated. Instead, let's still track which tiles care to be updated at all, but just control the rate at which random ticks are given, and also have updating tiles wait for a certain number of ticks before going. Water can go immedieately
+
+Oh wait, I got another idea: how about, you start with a list of all the tiles that want to be ticked. instead of randomly selecting a tile, go to each tile and randomly decide if it should be ticked, using a threshold obtained from the UpdateProperty. And to ensure I can still use the lambda expression, I can make an interface TileUpdate in the new UpdateProperty class, whose method is called to update the tile. Then, I can just have a constructor and a parameter.

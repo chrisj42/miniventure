@@ -1,0 +1,34 @@
+alright, so, items. Let's start with how items are represented in-game.
+
+- Items can be dropped as item entities (are there any that won't?)
+- Items can be stored in an inventory, and held by the player
+- items may or may not be stackable in the inventory
+- items can be used on tiles to change them<1> (tile-items into tiles)
+- items can be used on entities to change them (keys into locked chests)
+- items can be used to change the player who is using them, rather than interacting with an entity or tile
+- items can be used to attack any tile or entity (though for entities
+- items have their own sprite, display name, and usage/attack animation<2>, of which the player is a part of
+- items may have metadata of their own, storing info about its state or something. For tools, wear, for chests, the contents. This will be handled locally though, i think. Perhaps, i make a method for the item to say that it is used (once), and then when a "consume" method is called, at the end of the "move", it does whatever it needs to register the use, such as reducing durability, or ceasing to exist.
+- 
+
+
+A lot of things point to items being told first about an event involving them, and then allowing that to propagate to whatever WorldObject it's being concerned with. This could allow the item to use itself on the player, since the player will be passed in.
+
+
+future things to think about:
+<1> maybe have a tile that is only modified, not replaced, by using an item
+
+<2> maybe later, should the animation differ by what the item is used on?
+
+* The Item class ought to be final, just because there's so many issues every other way. Or maybe not... depends on my coding skill.
+
+Item idea: Carry Gloves. These are craftable POW Gloves. They are required to move around furniture easily.
+
+
+
+So, these are the functions that items will need to have:
+- sprite and name determination
+- way to deal with being stackable, preferrably through an interface rather than a class to extend
+- method to deal with player interaction; check if it is reflexive, and if so use it on the player rather than the outside world
+- method to deal with being used to attack. Doesn't really do anything, since all items should deal at least one damage I think. But maybe this can be used for animation later or something.
+- 

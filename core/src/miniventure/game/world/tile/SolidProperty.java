@@ -9,7 +9,4 @@ public interface SolidProperty extends TileProperty {
 	SolidProperty WALKABLE = (e) -> true;
 	
 	boolean isPermeableBy(Entity entity);
-	
-	@Override
-	default Integer[] getInitData() { return new Integer[0]; }
 }

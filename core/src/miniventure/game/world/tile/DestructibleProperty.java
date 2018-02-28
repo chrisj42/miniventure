@@ -1,9 +1,14 @@
 package miniventure.game.world.tile;
 
 import miniventure.game.item.Item;
+import miniventure.game.item.TileItem;
 import miniventure.game.item.ToolItem;
+import miniventure.game.item.ToolItem.Material;
 import miniventure.game.item.ToolType;
 import miniventure.game.world.ItemDrop;
+import miniventure.game.world.WorldObject;
+import miniventure.game.world.entity.ActionParticle;
+import miniventure.game.world.entity.TextParticle;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,17 +19,18 @@ public class DestructibleProperty implements TileProperty {
 	
 	private static final int HEALTH_IDX = 0;
 	
-	private final TileType coveredTile;
 	private final int totalHealth;
 	
-	//private final EnumMap<ToolType, Float> toolTypeDamageMultipliers = new EnumMap<>(ToolType.class);
 	private final PreferredTool preferredTool;
 	
 	private final DamageConditionCheck[] damageConditions;
-	private final ItemDrop[] drops;
+	private ItemDrop[] drops;
+	private boolean dropsTileItem = false;
 	
+	private TileType tileType;
+	
+	// indestructible constructor :3
 	private DestructibleProperty() {
-		coveredTile = null;
 		totalHealth = -1;
 		preferredTool = null;
 		damageConditions = new DamageConditionCheck[] {(item) -> false};
@@ -32,55 +38,73 @@ public class DestructibleProperty implements TileProperty {
 	}
 	
 	// this is for tiles with health
-	DestructibleProperty(int totalHealth, TileType coveredTile, @Nullable PreferredTool preferredTool, ItemDrop... drops) {
-		this.coveredTile = coveredTile;
+	DestructibleProperty(int totalHealth, @Nullable PreferredTool preferredTool, boolean dropsTileItem) {
+		this(totalHealth, preferredTool, new ItemDrop[1]);
+		this.dropsTileItem = dropsTileItem;
+	}
+	DestructibleProperty(int totalHealth, @Nullable PreferredTool preferredTool, ItemDrop... drops) {
 		this.totalHealth = totalHealth;
 		this.damageConditions = new DamageConditionCheck[0];
 		this.drops = drops;
 		
 		this.preferredTool = preferredTool;
-		//for(PreferredTool tool: preferredTools)
-		//	toolTypeDamageMultipliers.put(tool.toolType, tool.damageMultiplier);
 	}
 	
-	// this is for tiles that are destroyed in one hit 
-	DestructibleProperty(TileType coveredTile, ItemDrop drop, DamageConditionCheck... damageConditions) {
-		this.coveredTile = coveredTile;
+	
+	/// this is for tiles that are destroyed in one hit
+	// NOTE, required tools count as damage conditions.
+	DestructibleProperty(ItemDrop drop, DamageConditionCheck... damageConditions) {
 		totalHealth = 1;
 		preferredTool = null;
 		this.damageConditions = damageConditions;
 		this.drops = new ItemDrop[] {drop};
 	}
 	
-	
-	void tileAttacked(Tile tile, Item attackItem) {
-		int damage = getDamage(attackItem);
-		//System.out.println("attacked tile " + tile + " with " + attackItem + "; damage = " + damage);
-		if(damage > 0) {
-			int health = totalHealth > 1 ? tile.getData(this, HEALTH_IDX) : 1;
-			health -= damage;
-			if(health <= 0) // TODO here is where we need to drop the items.
-				tile.resetTile(coveredTile);
-			else
-				tile.setData(this, HEALTH_IDX, health);
-		}
+	DestructibleProperty(boolean dropsTileItem, DamageConditionCheck... damageConditions) {
+		this(null, damageConditions);
+		this.dropsTileItem = dropsTileItem;
 	}
 	
-	
-	private int getDamage(@Nullable Item attackItem) {
-		int damage = 1;
-		if(attackItem != null)
-			damage = attackItem.getDamage();
+	public void init(@NotNull TileType type) {
+		this.tileType = type;
 		
+		//if(dropsTileItem)
+		//	drops[0] = new ItemDrop(TileItem.get(type));
+	}
+	
+	boolean tileAttacked(@NotNull Tile tile, @NotNull WorldObject attacker, @Nullable Item item, int damage) {
+		damage = getDamage(item, damage);
+		
+		if(damage > 0) {
+			// add damage particle
+			tile.getLevel().addEntity(ActionParticle.ActionType.IMPACT.get(null), tile.getCenter(), true);
+			
+			int health = totalHealth > 1 ? new Integer(tile.getData(getClass(), tileType, HEALTH_IDX)) : 1;
+			health -= damage;
+			if(totalHealth > 1)
+				tile.getLevel().addEntity(new TextParticle(damage+""), tile.getCenter(), true);
+			if(health <= 0) {
+				tile.breakTile();
+				if(drops.length > 0 && drops[0] == null && dropsTileItem)
+					drops[0] = new ItemDrop(TileItem.get(tileType));
+				for(ItemDrop drop: drops)
+					if(drop != null)
+						drop.dropItems(tile.getLevel(), tile, attacker);
+			} else
+				tile.setData(getClass(), tileType, HEALTH_IDX, health+"");
+			
+			return true;
+		}
+		
+		return false;
+	}
+	
+	private int getDamage(@Nullable Item attackItem, int damage) {
 		if(damageConditions.length > 0) {
 			// must satisfy at least one condition
-			boolean doDamage = false;
-			for(DamageConditionCheck condition: damageConditions) {
-				if(condition.isDamagedBy(attackItem)) {
-					doDamage = true;
-					break;
-				}
-			}
+			boolean doDamage = true;
+			for(DamageConditionCheck condition: damageConditions)
+				doDamage = doDamage && condition.isDamagedBy(attackItem);
 			
 			if(!doDamage) return 0;
 			// otherwise, continue.
@@ -90,20 +114,16 @@ public class DestructibleProperty implements TileProperty {
 			ToolType type = ((ToolItem)attackItem).getType();
 			if(type == preferredTool.toolType)
 				damage = (int) Math.ceil(damage * preferredTool.damageMultiplier);
-			//if(toolTypeDamageMultipliers.containsKey(type))
-			//	damage = (int) (damage * toolTypeDamageMultipliers.get(type));
 		}
 		
 		return damage;
 	}
 	
 	@Override
-	public Integer[] getInitData() {
-		if(totalHealth > 1) return new Integer[] {totalHealth};
-		return new Integer[0]; // for a health of one or below, the tile will always be at max health, or destroyed.
+	public String[] getInitData() {
+		if(totalHealth > 1) return new String[] {totalHealth+""};
+		return new String[0]; // for a health of one or below, the tile will always be at max health, or destroyed.
 	}
-	
-	//public TileType getCoveredTile() { return coveredTile; }
 	
 	
 	
@@ -126,15 +146,24 @@ public class DestructibleProperty implements TileProperty {
 	
 	static class RequiredTool implements DamageConditionCheck {
 		
-		private final ToolType toolType;
+		@Nullable private final ToolType toolType;
+		@Nullable private final Material material;
 		
-		public RequiredTool(ToolType toolType) {
+		public RequiredTool(@Nullable ToolType toolType) {
+			this(toolType, null);
+		}
+		public RequiredTool(@Nullable ToolType toolType, @Nullable Material material) {
 			this.toolType = toolType;
+			this.material = material;
 		}
 		
 		@Override
 		public boolean isDamagedBy(@Nullable Item attackItem) {
-			return attackItem instanceof ToolItem && ((ToolItem)attackItem).getType() == toolType;
+			if(attackItem == null || !(attackItem instanceof ToolItem))
+				return false;
+			
+			ToolItem tool = (ToolItem) attackItem;
+			return (toolType == null || tool.getType() == toolType) && (material == null || tool.getMaterial() == material);
 		}
 	}
 	

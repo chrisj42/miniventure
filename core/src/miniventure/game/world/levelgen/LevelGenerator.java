@@ -1,175 +1,89 @@
 package miniventure.game.world.levelgen;
 
-import java.util.EnumMap;
 import java.util.Random;
 
+import miniventure.game.world.Chunk;
 import miniventure.game.world.tile.TileType;
 
 public class LevelGenerator {
 	
-	
-	
-	/*
-		So, each level is going to be built like this:
-		
-			First, a base noise map is generated. This usually distinguishes between 2 different tiles, but it might be three, or something.
-				To specify the range, an array of tile types is given, followed by an array of floats, one less in length. the floats are the separations between each pair of tiles.
-			
-			On top of the base noise map, another 
-	 */
-	
-	private static final TileNoiseLayer landGen = new TileNoiseLayer(
-		new int[] {50, 40, 30, 25, 20, 10},
-		new int[] {20, 4, 3, 3, 2, 2, 1, 1},
-		TileType.WATER, TileType.WATER, TileType.WATER, TileType.WATER, TileType.WATER,
-		TileType.SAND,
-		TileType.GRASS, TileType.GRASS, TileType.GRASS, TileType.GRASS, TileType.GRASS, TileType.GRASS,
-		TileType.ROCK, TileType.ROCK, TileType.ROCK, TileType.ROCK
+	private static final BiomeSelector biomeSelector = new BiomeSelector(
+		/*Biome.PLAINS+"_1",
+		Biome.FOREST+"_4",
+		Biome.PLAINS+"_6",
+		Biome.DESERT+"_2",
+		Biome.MOUNTAIN+"_3",
+		Biome.PLAINS+"_1"*/
+		BiomeCategory.WET+"_2",
+		BiomeCategory.DRY+"_5",
+		BiomeCategory.ROCKY+"_3"
 	);
 	
-	private static final int[] biomeSample = {20, 10};
-	private static final int[] biomeSmooth = {3, 2, 1};
-	private static final Biome[] biomeGen = {
-		Biome.PLAINS,
-		Biome.FOREST, Biome.FOREST, Biome.FOREST, Biome.FOREST,
-		Biome.PLAINS, Biome.PLAINS, Biome.PLAINS, Biome.PLAINS, Biome.PLAINS, Biome.PLAINS,
-		Biome.DESERT, Biome.DESERT,
-		Biome.MOUNTAIN, Biome.MOUNTAIN, Biome.MOUNTAIN,
-		Biome.PLAINS
-	};
+	// TO-DO I don't really know why, but things get messed up when you go really far out, and have big numbers for your coordinates, even though it's nowhere near the number limit. I want to fix this, but I have no idea how, and I have a feeling that it is going to be more complicated than I think, and I really don't want to deal with it. So, for now, I'm just going to use a considerably smaller value, in the range of 10,000s. It's plenty big, honestly, so it'll just have to do for now until whenever I decide to try and figure out the issue.
+	private static final int MAX_WORLD_SIZE = (int) (Math.sqrt(Math.min(Integer.MAX_VALUE, Float.MAX_VALUE)));
 	
-	enum Biome {
-		//OCEAN(TileType.WATER),
+	private final Coherent2DNoiseFunction categoryNoise, biomeNoise, detailNoise;
+	public final int worldWidth, worldHeight;
+	
+	public LevelGenerator(long seed, int biomeSize, int detailSize) { this(seed, 0, 0, biomeSize, detailSize); }
+	public LevelGenerator(long seed, int width, int height, int biomeSize, int detailSize) {
+		Random seedPicker = new Random(seed); // I wonder what would happen if I used a hash function for this, and just used the seed to get another long, and then use that, and so forth...
+		categoryNoise = new Coherent2DNoiseFunction(seedPicker.nextLong(), 48);
+		biomeNoise = new Coherent2DNoiseFunction(seedPicker.nextLong(), biomeSize);
+		detailNoise = new Coherent2DNoiseFunction(seedPicker.nextLong(), detailSize);
 		
-		FOREST(new TileNoiseLayer(
-			new int[] {10, 1, 2},
-			new int[] {5, 2},
-			TileType.GRASS, TileType.TREE, TileType.GRASS
-		)),
+		if(width < 0 || width > MAX_WORLD_SIZE || height < 0 || height > MAX_WORLD_SIZE)
+			throw new IllegalArgumentException("illegal world size; dimensions of world must be non-negative and not greater than " + MAX_WORLD_SIZE + "; given dimensions: " + width+","+height);
 		
-		PLAINS(new TileNoiseLayer(// maybe flowers later
-			new int[] {1},
-			new int[] {1},
-			TileType.GRASS, TileType.GRASS, TileType.GRASS, TileType.GRASS, TileType.GRASS, TileType.GRASS,
-			TileType.GRASS, TileType.GRASS, TileType.GRASS, TileType.GRASS, TileType.GRASS, TileType.GRASS,
-			TileType.TREE, TileType.GRASS, TileType.GRASS
-		)),
+		if(width == 0) width = MAX_WORLD_SIZE;
+		if(height == 0) height = MAX_WORLD_SIZE;
 		
-		DESERT(new TileNoiseLayer(
-			new int[] {1},
-			new int[] {1},
-			TileType.SAND, TileType.SAND, TileType.SAND, TileType.SAND, TileType.SAND, TileType.SAND,
-			TileType.SAND, TileType.SAND, TileType.SAND, TileType.SAND, TileType.SAND, TileType.SAND,
-			TileType.SAND, TileType.SAND, TileType.SAND, TileType.CACTUS, TileType.SAND, TileType.SAND,  
-			TileType.SAND, TileType.SAND, TileType.SAND
-		)),
-		
-		MOUNTAIN(new TileNoiseLayer(
-			new int[] {},
-			new int[] {},
-			TileType.ROCK
-		));
-		
-		private final TileNoiseLayer noiseMap;
-		
-		Biome(TileNoiseLayer noiseMap) {
-			this.noiseMap = noiseMap;
-		}
-		
-		public float[][] generateTerrain(long seed, int width, int height) {
-			return LevelGenerator.generateTerrain(seed, width, height, noiseMap.samplePeriods, noiseMap.postSmoothing);
-		}
-		
-		public TileType getTile(float val) {
-			return noiseMap.getTile(val);
-		}
-		
-		public static final Biome[] values = Biome.values();
+		worldWidth = width;
+		worldHeight = height;
 	}
 	
-	public static TileType[][] generateLevel(int width, int height) {
-		return generateLevel(new Random().nextLong(), width, height);
-	}
-	public static TileType[][] generateLevel(long seed, int width, int height) {
-		Random seedGen = new Random(seed);
+	public boolean chunkExists(int x, int y) {
+		if(x < 0 || y < 0) return false;
 		
-		TileType[][] tiles;
-		do tiles = generateLevel(seedGen, width, height);
-		while(!validateLevel(tiles));
-		
-		return tiles;
-	}
-	
-	private static TileType[][] generateLevel(Random seedPicker, int width, int height) {
-		TileType[][] tiles = new TileType[width][height];
-		
-		float[][] landData = generateTerrain(seedPicker.nextLong(), width, height, landGen.samplePeriods, landGen.postSmoothing);
-		float[][] biomeData = generateTerrain(seedPicker.nextLong(), width, height, biomeSample, biomeSmooth);
-		
-		EnumMap<Biome, float[][]> biomeTerrain = new EnumMap<>(Biome.class);
-		for(Biome b: Biome.values)
-			biomeTerrain.put(b, b.generateTerrain(seedPicker.nextLong(), width, height));
-		
-		for (int x = 0; x < tiles.length; x++) {
-			for (int y = 0; y < tiles[x].length; y++) {
-				tiles[x][y] = landGen.getTile(landData[x][y]);
-				if(tiles[x][y] == TileType.GRASS) {
-					Biome biome = biomeGen[getIndex(biomeGen.length, biomeData[x][y])];
-					tiles[x][y] = biome.getTile(biomeTerrain.get(biome)[x][y]);
-				}
-			}
-		}
-		
-		return tiles;
-	}
-	
-	private static boolean validateLevel(TileType[][] tiles) {
-		int[] tileCounts = new int[TileType.values.length];
-		int total = 0;
-		
-		for(int x = 0; x < tiles.length; x++) {
-			for (int y = 0; y < tiles[x].length; y++) {
-				tileCounts[tiles[x][y].ordinal()]++;
-				total++;
-			}
-		}
-		
-		for(TileType type: TileType.values) {
-			tileCounts[type.ordinal()] = tileCounts[type.ordinal()] * 100 / total; // converts it to a percent, 0 to 100
-			//System.out.println(type + " percent: " + tileCounts[type.ordinal()]);
-		}
-		
-		if(tileCounts[TileType.ROCK.ordinal()] < 10) return false; // this is stone
-		if(tileCounts[TileType.TREE.ordinal()] < 2) return false;
-		if(tileCounts[TileType.WATER.ordinal()] < 15) return false;
-		if(tileCounts[TileType.GRASS.ordinal()] < 20) return false;
-		if(tileCounts[TileType.SAND.ordinal()] < 8) return false;
-		if(tileCounts[TileType.GRASS.ordinal()] + tileCounts[TileType.SAND.ordinal()] < 40) return false;
-		
-		if(tileCounts[TileType.GRASS.ordinal()] < tileCounts[TileType.SAND.ordinal()]) return false;
-		if(tileCounts[TileType.GRASS.ordinal()] + tileCounts[TileType.SAND.ordinal()] < tileCounts[TileType.ROCK.ordinal()]) return false;
-		
-		//System.out.println("Map validated!");
+		if(x * Chunk.SIZE >= worldWidth || y * Chunk.SIZE >= worldHeight)
+			return false;
 		
 		return true;
 	}
 	
-	
-	static float[][] generateTerrain(long seed, int width, int height, int[] samplePeriods, int[] postSmoothing) {
-		float[] noise = Noise.getWhiteNoise(seed, width*height);
-		float[][] noises = Noise.smoothNoise2D(noise, width, height, samplePeriods);
-		float[] smoothNoise = Noise.addNoiseWeighted(noises);
-		smoothNoise = Noise.smoothNoise2DProgressive(smoothNoise, width, height, postSmoothing);
-		smoothNoise = Noise.map(smoothNoise, 0, 1);
+	public TileType[][] generateChunk(final int x, final int y) {
+		int width = Chunk.SIZE, height = Chunk.SIZE;
+		if(x * width + width >= worldWidth)
+			width = worldWidth - x*width;
+		if(y * height + height >= worldHeight)
+			height = worldHeight - y*height;
 		
-		float[][] smooth2D = new float[width][height];
-		for(int i = 0; i < smoothNoise.length; i++)
-			smooth2D[i/height][i%height] = smoothNoise[i];
+		if(width <= 0 || height <= 0)
+			throw new IndexOutOfBoundsException("Requested chunk is outside world bounds; chunkX="+x+", chunkY="+y+". Max x requested: "+((x+1)*Chunk.SIZE-1)+", max y requested: "+((y+1)*Chunk.SIZE-1)+". Actual world size: ("+worldWidth+","+worldHeight+")");
 		
-		return smooth2D;
+		return generateTiles(x, y, width, height);
 	}
 	
-	static int getIndex(int arrayLength, float val) {
-		return Math.min(arrayLength-1, (int) (val*arrayLength));
+	TileType[][] generateTiles(int x, int y, int width, int height) {
+		TileType[][] tiles = new TileType[width][height];
+		int xt = x * Chunk.SIZE;
+		int yt = y * Chunk.SIZE;
+		
+		for(int xo = 0; xo < tiles.length; xo++) {
+			for(int yo = 0; yo < tiles[xo].length; yo++) {
+				int xp = xt+xo, yp = yt+yo;
+				tiles[xo][yo] = generateTile(xp, yp);
+			}
+		}
+		
+		return tiles;
+	}
+	
+	public TileType generateTile(int x, int y) {
+		if(x < 0 || y < 0 || x >= worldWidth || y >= worldHeight)
+			throw new IllegalArgumentException("Requested tile is outside world bounds; x="+x+", y="+y+". Actual world size: ("+worldWidth+","+worldHeight+")");
+		
+		Biome biome = biomeSelector.getBiome(categoryNoise.getValue(x, y)).getBiome(biomeNoise.getValue(x, y));
+		return biome.getTile(detailNoise.getValue(x, y));
 	}
 }
