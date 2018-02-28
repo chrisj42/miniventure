@@ -1,0 +1,29 @@
+Alright, I've figured out a system for item interactions, and sort of attacks.
+
+When you interact, it goes through each object in the interaction rect, from closest to farthest, and ending with the tile.
+For each object, you can ask the item for a behavior based on the object, and you can ask the object for a behavior based on the item.
+
+It's been up in the air whether I should ask the item first, or the object first... But I think I'll start with the item, so that the object can do its "item independent" behaviors in the same method as behaviors that use the item.
+I'll have the item interact defer to the object by default. Though, perhaps another possibility is to have the item and object specify if they think they should be done first... Probably won't do that though. Interact returns a boolean for if the interaction should continue, as does interact for the object. The item also has a "used" state which can be set to true from the object interact if desired, and obviously also from the item interact.
+What happens when the item is used is determined by the item.
+After attempting to interact with all objects, if none were successful, hands calls the reflexive interact for the item, which doesn't return anything because it doesn't need to (it'll always be the last action).
+
+After all the interaction, hands checks if the item was used, and if so replaces it with the item returned by item.use(), as is the current system. This method resets the used state of the item. Perhaps I should make that a separate final method, and provide onUse() or something to be overridden...
+Anyway, that sums up the interact system. It should work great.
+
+Just a note, it may result in having to change held item in order to do certain things.
+
+
+Now, for item attacks. Basically, the current system is pretty good; it's just going to be difficult to get the health and damage multiplier values right.
+So, when you attack something, you get the base damage from the item, based on each object...
+
+Or maybe... Maybe I should come up with a system of damage-dealing properties, different props that an item can have..? Here, let's think of the damage different things would get:
+- mobs get hurt a lot by a sword, and even more for better swords
+- ‎trees take more damage from axes
+- ‎mobs also take a decent amount of damage from axes
+- ‎sand, grass, and dirt require a shovel to dig at all
+
+So, it seems like perhaps items have no need to specify damage dealt.
+They do need to know that they are being used, however.
+
+Actually, I have a new idea. Items get to specify a base damage they give to an object, and then they have the responsibility to tell the object, which will deal with it, passed the item and damage.

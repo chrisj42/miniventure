@@ -10,6 +10,7 @@ import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ItemEntity;
 import miniventure.game.world.entity.mob.AiType;
 import miniventure.game.world.entity.mob.Mob;
+import miniventure.game.world.entity.mob.MobAi;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.levelgen.LevelGenerator;
 import miniventure.game.world.tile.Tile;
@@ -70,7 +71,7 @@ public class ServerLevel extends Level {
 			e.update(delta);
 		
 		if(this.entities.size() < getEntityCap() && MathUtils.randomBoolean(0.01f))
-			spawnMob(AiType.values[MathUtils.random(AiType.values.length-1)].makeMob());
+			spawnMob(new MobAi(AiType.values[MathUtils.random(AiType.values.length-1)]));
 	}
 	
 	@Override

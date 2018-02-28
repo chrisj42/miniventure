@@ -405,6 +405,16 @@ public class Tile implements WorldObject {
 	public void touching(Entity entity) {}
 	
 	@Override
+	public String save() {
+		return null;
+	}
+	
+	@Override
+	public void load(String data) {
+		
+	}
+	
+	@Override
 	public String toString() { return getType().getName()/* + " Tile (all:"+tileTypes+")"*/; }
 	
 	public String toLocString() { return (x-level.getWidth()/2)+","+(y-level.getHeight()/2)+" ("+toString()+")"; }

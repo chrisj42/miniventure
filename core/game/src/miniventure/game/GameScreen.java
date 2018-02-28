@@ -236,6 +236,6 @@ public class GameScreen {
 		
 		if(lightingBuffer != null)
 			lightingBuffer.dispose();
-		lightingBuffer = FrameBuffer.createFrameBuffer(Format.RGBA8888, width, height, false);
+		lightingBuffer = new FrameBuffer(Format.RGBA8888, width, height, false);
 	}
 }

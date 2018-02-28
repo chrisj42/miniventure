@@ -176,8 +176,7 @@ public enum TileType {
 	
 	String[] getInitialData() {
 		String[] data = new String[initialData.length];
-		for(int i = 0; i < data.length; i++)
-			data[i] = initialData[i];
+		System.arraycopy(initialData, 0, data, 0, data.length);
 		
 		return data;
 	}

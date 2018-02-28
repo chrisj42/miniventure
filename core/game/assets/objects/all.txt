@@ -1,0 +1,50 @@
+health: int
+icon: path // icon to use for misc things, can replace animator if not specified
+
+death {
+	drop {
+		
+	}
+}
+
+attack { // when another objects hits this
+	
+},
+
+interact { // when another object interacts with this
+	// specify property for interation
+	place: object // a string, with no formatting or anything, placed after a colon, will be interpreted as an object reference.
+	
+}
+
+touch {
+	attack: int
+	
+}
+
+update: @Updater // this should just call something, and have it deal with the stuff
+
+render {
+	light: decimal // light radius in tiles
+	@SingleFrame
+	animator: @SingleFrame(path) // "@" means you are referencing a class of the modpack.
+	// OR animator: @MobAnimation() // used to animate mobs when moving around
+}
+
+
+
+item {
+	stack: int // idk if I will actually make items stackable
+	weight: decimal // a new player will no longer be able to move when the weight of his items reaches 20
+	uses: int // durability
+	
+	attack { // when used as an item to attack
+		
+	}
+	
+	interact { // when used as an item to interact
+		@PoisonEffect // references 
+	}
+	
+	
+}

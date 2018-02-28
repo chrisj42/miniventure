@@ -1,0 +1,13 @@
+
+
+attack {
+	@default.RequireItem(shovel)
+}
+
+
+item {
+	stack: 64 // should I actually implement this?
+	
+	// usage properties?
+	
+}
