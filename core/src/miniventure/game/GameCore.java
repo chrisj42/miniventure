@@ -41,7 +41,7 @@ public class GameCore extends ApplicationAdapter {
 	
 	private static boolean hasMenu = false;
 	private static MenuScreen menuScreen;
-	private static LevelManager world;
+	private static ClientWorld world;
 	private static GameScreen gameScreen;
 	
 	public static final InputHandler input = new InputHandler();
@@ -69,7 +69,7 @@ public class GameCore extends ApplicationAdapter {
 		for(AtlasRegion region: iconAtlas.getRegions())
 			icons.put(region.name, region);
 		
-		world = new LevelManager();
+		world = new ClientWorld();
 		gameScreen = new GameScreen();
 		setScreen(new MainMenu());
 	}
@@ -149,7 +149,7 @@ public class GameCore extends ApplicationAdapter {
 	
 	public static Skin getSkin() { return skin; }
 	
-	public static LevelManager getWorld() { return world; }
+	public static ClientWorld getWorld() { return world; }
 	
 	public static SpriteBatch getBatch() { return batch; }
 	

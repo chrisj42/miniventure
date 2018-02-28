@@ -6,6 +6,7 @@ import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolItem.Material;
 import miniventure.game.item.ToolType;
 import miniventure.game.world.ItemDrop;
+import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ActionParticle;
 import miniventure.game.world.entity.TextParticle;
@@ -87,9 +88,10 @@ public class DestructibleProperty implements TileProperty {
 				tile.breakTile();
 				if(drops.length > 0 && drops[0] == null && dropsTileItem)
 					drops[0] = new ItemDrop(TileItem.get(tileType));
-				for(ItemDrop drop: drops)
-					if(drop != null)
-						drop.dropItems(tile.getLevel(), tile, attacker);
+				if(tile.getLevel() instanceof ServerLevel)
+					for(ItemDrop drop: drops)
+						if(drop != null)
+							drop.dropItems((ServerLevel)tile.getLevel(), tile, attacker);
 			} else
 				tile.setData(getClass(), tileType, HEALTH_IDX, health+"");
 			

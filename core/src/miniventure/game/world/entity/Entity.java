@@ -18,7 +18,7 @@ import com.badlogic.gdx.utils.Array;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class Entity implements WorldObject {
+public abstract class Entity implements WorldObject {
 	
 	private static final HashMap<Integer, Entity> takenIDs = new HashMap<>();
 	
@@ -188,8 +188,7 @@ public class Entity implements WorldObject {
 		this.x = x;
 		this.y = y;
 		
-		// if(changedChunk)
-			level.entityMoved(this);
+		level.entityMoved(this);
 	}
 	public void moveTo(@NotNull Tile tile) {
 		Vector2 pos = tile.getCenter();
@@ -227,4 +226,17 @@ public class Entity implements WorldObject {
 	
 	@Override
 	public int hashCode() { return eid; }
+	
+	@Override
+	public String save() {
+		return x+","+y+","+z;
+	}
+	
+	@Override
+	public void load(String data) {
+		String[] vars = data.split(",");
+		x = Integer.parseInt(vars[0]);
+		y = Integer.parseInt(vars[1]);
+		z = Integer.parseInt(vars[2]);
+	}
 }

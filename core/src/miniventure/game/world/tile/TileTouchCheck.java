@@ -17,6 +17,8 @@ class TileTouchCheck {
 	static final TileTouchCheck[] connectionChecks = getTileChecks(GameCore.tileConnectionAtlas);
 	
 	private static TileTouchCheck[] getTileChecks(TextureAtlas atlas) {
+		if(atlas == null) return new TileTouchCheck[0];
+		
 		Texture texture = atlas.getTextures().first();
 		if (!texture.getTextureData().isPrepared())
 			texture.getTextureData().prepare();

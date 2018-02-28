@@ -62,8 +62,8 @@ public class GameScreen {
 		if(Gdx.input.isKeyJustPressed(Keys.EQUALS) || Gdx.input.isKeyJustPressed(Keys.PLUS))
 			zoom(1);
 		
-		if(Gdx.input.isKeyJustPressed(Keys.R) && Gdx.input.isKeyPressed(Keys.SHIFT_LEFT))
-			GameCore.getWorld().createWorld(0, 0);
+		//if(Gdx.input.isKeyJustPressed(Keys.R) && Gdx.input.isKeyPressed(Keys.SHIFT_LEFT))
+		//	GameCore.getWorld().createWorld(0, 0);
 		
 		if(Gdx.input.isKeyJustPressed(Keys.B))
 			debug = !debug;

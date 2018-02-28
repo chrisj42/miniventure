@@ -2,6 +2,7 @@ package miniventure.game.item;
 
 import miniventure.game.GameCore;
 import miniventure.game.world.Level;
+import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.mob.Player.Stat;
@@ -91,7 +92,7 @@ public class Hands {
 			count--;
 			if(newItem != null && !player.takeItem(newItem)) {// will add it to hand, or inventory, whichever fits.
 				// this happens if the inventory is full; in such a case, drop the new item on the ground.
-				Level level = player.getLevel();
+				ServerLevel level = player.getServerLevel();
 				if(level != null)
 					level.dropItem(newItem, player.getCenter(), null);//count++; // if there was a new item, and it couldn't be picked up, then the count is not decreased.
 			}

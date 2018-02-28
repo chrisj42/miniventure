@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 
 import org.jetbrains.annotations.NotNull;
 
-enum TimeOfDay {
+public enum TimeOfDay {
 	
 	Dawn(0.08f, 0.035f, new Color(1, 0.980f, 0, 0.478f)),
 	

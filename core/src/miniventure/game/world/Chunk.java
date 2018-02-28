@@ -4,6 +4,7 @@ import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileType;
 
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,10 +15,13 @@ public class Chunk {
 	
 	@NotNull private Tile[][] tiles;
 	public final int width, height;
+	public final int chunkX, chunkY;
 	
 	public Chunk(int chunkX, int chunkY, @NotNull Level level, @NotNull TileType[][] tileTypes) {
 		tiles = new Tile[tileTypes.length][];
 		width = tiles.length;
+		this.chunkX = chunkX;
+		this.chunkY = chunkY;
 		int height = 0;
 		for(int x = 0; x < tiles.length; x++) {
 			tiles[x] = new Tile[tileTypes[x].length];
@@ -41,4 +45,6 @@ public class Chunk {
 		int worldCoord = MathUtils.floor(pos);
 		return worldCoord / SIZE;
 	}
+	
+	public Rectangle getBounds() { return new Rectangle(chunkX*SIZE, chunkY*SIZE, SIZE, SIZE); }
 }

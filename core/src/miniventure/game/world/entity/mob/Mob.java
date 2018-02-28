@@ -1,5 +1,6 @@
 package miniventure.game.world.entity.mob;
 
+import miniventure.game.GameProtocol;
 import miniventure.game.item.Item;
 import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolType;
@@ -7,6 +8,7 @@ import miniventure.game.util.FrameBlinker;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.Level;
+import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.Entity;
@@ -152,8 +154,9 @@ public abstract class Mob extends Entity {
 			level.addEntity(new TextParticle(damage+"", this instanceof Player ? Color.PINK : Color.RED), getCenter(), true);
 			
 			if (health == 0) {
-				for (ItemDrop drop : itemDrops)
-					drop.dropItems(level, this, obj);
+				if(level instanceof ServerLevel)
+					for (ItemDrop drop : itemDrops)
+						drop.dropItems((ServerLevel)level, this, obj);
 				
 				remove();
 			}
@@ -167,5 +170,10 @@ public abstract class Mob extends Entity {
 	
 	public boolean maySpawn(TileType type) {
 		return type == TileType.GRASS || type == TileType.DIRT || type == TileType.SAND;
+	}
+	
+	@Override
+	public String save() {
+		return health+"";
 	}
 }

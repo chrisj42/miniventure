@@ -17,26 +17,16 @@ public enum AiType {
 	
 	Zombie(15, new PursuePattern(FollowBehavior.NEAREST_PLAYER), null);
 	
-	private final int health;
-	private final MovementPattern defaultPattern;
-	private final HitReaction onHit;
-	private final ItemDrop[] deathDrops;
+	final int health;
+	final MovementPattern defaultPattern;
+	final HitReaction onHit;
+	final ItemDrop[] deathDrops;
 	
 	AiType(int health, MovementPattern defaultPattern, @Nullable HitReaction onHit, ItemDrop... deathDrops) {
 		this.health = health;
 		this.defaultPattern = defaultPattern;
 		this.onHit = onHit;
 		this.deathDrops = deathDrops;
-	}
-	
-	public MobAi makeMob() {
-		return new MobAi(name().toLowerCase(), health, defaultPattern, deathDrops) {
-			@Override
-			public boolean attackedBy(WorldObject obj, @Nullable Item attackItem, int damage) {
-				if(onHit != null) onHit.onHit(this, obj, attackItem);
-				return super.attackedBy(obj, attackItem, damage);
-			}
-		};
 	}
 	
 	

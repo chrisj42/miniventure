@@ -42,15 +42,6 @@ public class LevelGenerator {
 		worldHeight = height;
 	}
 	
-	public boolean chunkExists(int x, int y) {
-		if(x < 0 || y < 0) return false;
-		
-		if(x * Chunk.SIZE >= worldWidth || y * Chunk.SIZE >= worldHeight)
-			return false;
-		
-		return true;
-	}
-	
 	public TileType[][] generateChunk(final int x, final int y) {
 		int width = Chunk.SIZE, height = Chunk.SIZE;
 		if(x * width + width >= worldWidth)

@@ -115,10 +115,10 @@ public class ItemDrop {
 		return count;
 	}
 	
-	public void dropItems(Level level, @NotNull WorldObject source, @Nullable WorldObject target) {
+	public void dropItems(ServerLevel level, @NotNull WorldObject source, @Nullable WorldObject target) {
 		dropItems(level, source.getCenter(), target == null ? null : target.getCenter());
 	}
-	public void dropItems(Level level, Vector2 dropPos, @Nullable Vector2 targetPos) {
+	public void dropItems(ServerLevel level, Vector2 dropPos, @Nullable Vector2 targetPos) {
 		for(int i = 0; i < getItemsDropped(); i++)
 			level.dropItem(item.copy(), dropPos, targetPos);
 	}

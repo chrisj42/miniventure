@@ -7,6 +7,7 @@ import miniventure.game.world.entity.mob.Player;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class ToolItem extends Item {
 	
@@ -40,7 +41,7 @@ public class ToolItem extends Item {
 	
 	public ToolItem(ToolType type, Material material) { this(type, material, material.maxDurability); }
 	public ToolItem(ToolType type, Material material, int durability) {
-		super(material.name() + " " + type.name(), type.texture);
+		super(material.name() + " " + type.name(), type.texture==null?new TextureRegion():type.texture);
 		this.toolType = type;
 		this.material = material;
 		this.durability = durability;

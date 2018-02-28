@@ -1,5 +1,7 @@
 package miniventure.game.screen;
 
+import java.io.IOException;
+
 import miniventure.game.GameCore;
 
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -27,7 +29,11 @@ public class MainMenu extends MenuScreen {
 		button.addListener(new ClickListener() {
 			@Override
 			public void clicked(InputEvent e, float x, float y) {
-				GameCore.getWorld().createWorld(0, 0);
+				try {
+					GameCore.getWorld().createWorld(0, 0);
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
 			}
 		});
 		

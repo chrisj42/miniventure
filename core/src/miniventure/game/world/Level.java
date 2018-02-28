@@ -29,22 +29,21 @@ import org.jetbrains.annotations.Nullable;
 
 public class Level {
 	
-	private static final float percentTilesUpdatedPerSecond = 2f; // this represents the percent of the total number of tiles in the map that are updated per second.
+	private final int depth, width, height;
 	
-	private final int depth;
+	final HashMap<Point, Chunk> loadedChunks = new HashMap<>();
+	int tileCount;
 	
-	private final LevelGenerator levelGenerator;
-	private final HashMap<Point, Chunk> loadedChunks = new HashMap<>();
-	private int tileCount;
-	
-	private final HashSet<Entity> entities = new HashSet<>();
+	final HashSet<Entity> entities = new HashSet<>();
 	
 	/** @noinspection FieldCanBeLocal*/
 	private int entityCap = 8; // per chunk
 	
-	public Level(int depth, LevelGenerator levelGenerator) {
-		this.levelGenerator = levelGenerator;
+	Level() { this(0, 0, 0); }
+	public Level(int depth, int width, int height) {
 		this.depth = depth;
+		this.width = width;
+		this.height = height;
 		/*
 			At any given time, I will load a chunk, and all the chunks in a 2 chunk radius.
 			
@@ -55,8 +54,8 @@ public class Level {
 		 */
 	}
 	
-	public int getWidth() { return levelGenerator.worldWidth; }
-	public int getHeight() { return levelGenerator.worldHeight; }
+	public int getWidth() { return width; }
+	public int getHeight() { return height; }
 	public int getDepth() { return depth; }
 	public int getEntityCap() { return entityCap*loadedChunks.size(); }
 	public int getEntityCount() { return entities.size(); }
@@ -70,16 +69,7 @@ public class Level {
 			return;
 		}
 		
-		if(entity.getLevel() == this) {
-			// load all surrounding chunks
-			for (Point p : getAreaChunks(entity.getCenter(), 1, false, true)) {
-				Chunk newChunk = new Chunk(p.x, p.y, this, levelGenerator.generateChunk(p.x, p.y));
-				tileCount += newChunk.width * newChunk.height;
-				loadedChunks.put(p, newChunk);
-			}
-		}
-		
-		// now check for any chunks that no longer need to be loaded
+		// check for any chunks that no longer need to be loaded
 		Array<Point> chunkCoords = new Array<>(loadedChunks.keySet().toArray(new Point[loadedChunks.size()]));
 		for(WorldObject obj: GameCore.getWorld().getKeepAlives(this)) // remove loaded chunks in radius
 			chunkCoords.removeAll(getAreaChunks(obj.getCenter(), 2, true, false), false);
@@ -129,76 +119,6 @@ public class Level {
 		entityMoved(e);
 	}
 	
-	public void update(float delta) {
-		int tilesToUpdate = (int) (percentTilesUpdatedPerSecond * tileCount * delta);
-		
-		Object[] chunks = loadedChunks.values().toArray();
-		for(int i = 0; i < tilesToUpdate; i++) {
-			Chunk chunk = (Chunk) chunks[MathUtils.random(chunks.length-1)];
-			int x = MathUtils.random(chunk.width-1);
-			int y = MathUtils.random(chunk.height-1);
-			Tile t = chunk.getTile(x, y);
-			if(t != null) t.update(delta);
-		}
-		
-		// update entities
-		Entity[] entities = this.entities.toArray(new Entity[this.entities.size()]);
-		for(Entity e: entities)
-			e.update(delta);
-		
-		if(this.entities.size() < getEntityCap() && MathUtils.randomBoolean(0.01f))
-			spawnMob(AiType.values[MathUtils.random(AiType.values.length-1)].makeMob());
-	}
-	
-	private void spawnMob(Mob mob, Tile[] tiles) {
-		if(tiles.length == 0) throw new IllegalArgumentException("Tile array for spawning mobs must have at least one tile in it. (tried to spawn mob "+mob+")");
-		
-		Tile spawnTile;
-		if(tiles.length == 1)
-			spawnTile = tiles[0];
-		else {
-			do spawnTile = tiles[MathUtils.random(tiles.length - 1)];
-			while (spawnTile == null || !mob.maySpawn(spawnTile.getType()));
-		}
-		
-		mob.moveTo(spawnTile);
-		addEntity(mob);
-	}
-	
-	public void spawnMob(Mob mob) {
-		// only spawns on loaded chunks
-		Array<Tile> tiles = new Array<>(false, loadedChunks.size() * Chunk.SIZE * Chunk.SIZE, Tile.class);
-		for(Chunk chunk: loadedChunks.values())
-			for(Tile[] chunkTiles: chunk.getTiles())
-				tiles.addAll(chunkTiles);
-		
-		tiles.shrink();
-		
-		spawnMob(mob, tiles.toArray(Tile.class));
-	}
-	
-	// only spawns within the given area
-	public void spawnMob(Mob mob, Rectangle spawnArea) {
-		// if the mob is a keepAlive mob, then unloaded tiles are considered; otherwise, they are not.
-		if(!GameCore.getWorld().isKeepAlive(mob))
-			spawnMob(mob, getOverlappingTiles(spawnArea).toArray(Tile.class));
-		else {
-			int x, y;
-			TileType type;
-			do {
-				x = MathUtils.random((int)spawnArea.x, (int) (spawnArea.x+spawnArea.width));
-				y = MathUtils.random((int)spawnArea.y, (int) (spawnArea.y+spawnArea.height));
-				Tile tile = getTile(x, y);
-				if(tile == null)
-					type = levelGenerator.generateTile(x, y);
-				else
-					type = tile.getType();
-			} while(!mob.maySpawn(type));
-			
-			spawnMob(mob, new Tile[] {new Tile(this, x, y, type)});
-		}
-	}
-	
 	public void render(Rectangle renderSpace, SpriteBatch batch, float delta, Vector2 posOffset) {
 		renderSpace = new Rectangle(Math.max(0, renderSpace.x), Math.max(0, renderSpace.y), Math.min(getWidth()-renderSpace.x, renderSpace.width), Math.min(getHeight()-renderSpace.y, renderSpace.height));
 		//System.out.println("render space: " + renderSpace);
@@ -237,56 +157,6 @@ public class Level {
 		return lighting;
 	}
 	
-	public void dropItem(@NotNull Item item, @NotNull Vector2 dropPos, @Nullable Vector2 targetPos) {
-		
-		/* this drops the itemEntity at the given coordinates, with the given direction (random if null).
-		 	However, if the given coordinates reside within a solid tile, the adjacent tiles are checked.
-		 		If all surrounding tiles are solid, then it just uses the given coordinates.
-		 		But if it finds a non-solid tile, it drops it towards the non-solid tile.
-		  */
-		
-		ItemEntity ie = new ItemEntity(item, Vector2.Zero.cpy()); // this is a dummy variable.
-		
-		Tile closest = getTile(dropPos.x, dropPos.y);
-		
-		Rectangle itemBounds = ie.getBounds();
-		itemBounds.setPosition(dropPos);
-		
-		if(closest == null) {
-			System.err.println("ERROR dropping item, closest tile is null");
-			return;
-		}
-		
-		if(!closest.isPermeableBy(ie)) {
-			// we need to look around for a tile that the item *can* be placed on.
-			Array<Tile> adjacent = closest.getAdjacentTiles(true);
-			WorldObject.sortByDistance(adjacent, targetPos == null ? dropPos : targetPos);
-			for(Tile adj: adjacent) {
-				if(adj.isPermeableBy(ie)) {
-					closest = adj;
-					break;
-				}
-			}
-		}
-		
-		// make sure the item will be fully inside the "closest" tile when dropped.
-		MyUtils.moveRectInside(itemBounds, closest.getBounds(), 0.05f);
-		
-		dropPos.x = itemBounds.x;
-		dropPos.y = itemBounds.y;
-		
-		Vector2 dropDir;
-		if(targetPos == null)
-			dropDir = new Vector2().setToRandomDirection();
-		else
-			dropDir = targetPos.sub(dropPos);
-		
-		ie = new ItemEntity(item, dropDir);
-		
-		ie.moveTo(this, dropPos);
-		addEntity(ie);
-	}
-	
 	@Nullable
 	public Tile getTile(float x, float y) {
 		if(x < 0 || y < 0 || x > getWidth() || y > getHeight())
@@ -302,9 +172,6 @@ public class Level {
 		Chunk chunk = loadedChunks.get(new Point(chunkX, chunkY));
 		if(chunk != null)
 			return chunk.getTile(xt, yt);
-		
-		//if(load)
-		//	return new Tile(levelGenerator.generateTile((int)x, (int)y));
 		
 		return null;
 	}
@@ -338,7 +205,7 @@ public class Level {
 		return overlappingTiles;
 	}
 	
-	private Array<Point> getOverlappingChunks(Rectangle rect) {
+	Array<Point> getOverlappingChunks(Rectangle rect) {
 		Array<Point> overlappingChunks = new Array<>();
 		Array<Point> points = getOverlappingTileCoords(rect);
 		
@@ -381,17 +248,17 @@ public class Level {
 		return tiles;
 	}
 	
-	private Array<Point> getAreaChunks(Vector2 tilePos, int radius, boolean loaded, boolean unloaded) {
+	Array<Point> getAreaChunks(Vector2 tilePos, int radius, boolean loaded, boolean unloaded) {
 		return getAreaChunks(tilePos.x, tilePos.y, radius, loaded, unloaded);
 	}
-	private Array<Point> getAreaChunks(float x, float y, int radius, boolean loaded, boolean unloaded) {
+	Array<Point> getAreaChunks(float x, float y, int radius, boolean loaded, boolean unloaded) {
 		return getAreaChunks(Chunk.getCoord(x), Chunk.getCoord(y), radius, loaded, unloaded);
 	}
-	private Array<Point> getAreaChunks(int chunkX, int chunkY, int radius, boolean loaded, boolean unloaded) {
+	Array<Point> getAreaChunks(int chunkX, int chunkY, int radius, boolean loaded, boolean unloaded) {
 		Array<Point> chunkCoords = new Array<>();
 		for(int x = chunkX - radius; x <= chunkX + radius; x++) {
 			for (int y = chunkY - radius; y <= chunkY + radius; y++) {
-				if (levelGenerator.chunkExists(x, y)) {
+				if (chunkExists(x, y)) {
 					Point p = new Point(x, y);
 					boolean isLoaded = loadedChunks.containsKey(p);
 					if(loaded && isLoaded || unloaded && !isLoaded)
@@ -423,6 +290,15 @@ public class Level {
 		return players.get(0);
 	}
 	
+	public boolean chunkExists(int x, int y) {
+		if(x < 0 || y < 0) return false;
+		
+		if(x * Chunk.SIZE >= getWidth() || y * Chunk.SIZE >= getHeight())
+			return false;
+		
+		return true;
+	}
+	
 	
 	@Override
 	public boolean equals(Object other) { return other instanceof Level && ((Level)other).depth == depth; }
@@ -431,10 +307,12 @@ public class Level {
 	
 	
 	
-	private static final String[] levelNames = {"Surface"};
-	private static final int minDepth = 0;
 	
-	private static Level[] levels = new Level[0];
+	
+	static final String[] levelNames = {"Surface"};
+	static final int minDepth = 0;
+	
+	static Level[] levels = new Level[0];
 	private static final HashMap<Entity, Level> entityLevels = new HashMap<>();
 	
 	public static void clearLevels() {
@@ -444,15 +322,9 @@ public class Level {
 		levels = new Level[0];
 	}
 	
-	public static void resetLevels(LoadingScreen display, LevelGenerator levelGenerator) {
+	public static void resetLevels(Level... levels) {
 		clearLevels();
-		levels = new Level[levelNames.length];
-		display.pushMessage("Loading level 0/"+levels.length+"...");
-		for(int i = 0; i < levels.length; i++) {
-			display.editMessage("Loading level "+(i+1)+"/"+levels.length+"...");
-			levels[i] = new Level(i + minDepth, levelGenerator);
-		}
-		display.popMessage();
+		Level.levels = levels;
 	}
 	
 	@Nullable

@@ -1,6 +1,8 @@
 package miniventure.game.world.entity.mob;
 
+import miniventure.game.item.Item;
 import miniventure.game.world.ItemDrop;
+import miniventure.game.world.WorldObject;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,16 +23,16 @@ public class MobAi extends Mob {
 			and... that's about it, really...
 	 */
 	
+	@NotNull private AiType aiType;
+	
 	@NotNull private MovementPattern movePattern;
 	@Nullable private MovementPattern tempMovePattern = null;
 	private float tempTimeLeft = 0;
 	
-	public MobAi(@NotNull String spriteName, int health, @NotNull ItemDrop... deathDrops) {
-		this(spriteName, health, new WanderingPattern(), deathDrops);
-	}
-	public MobAi(@NotNull String spriteName, int health, @NotNull MovementPattern movePattern, @NotNull ItemDrop... deathDrops) {
-		super("player", health, deathDrops);
-		this.movePattern = movePattern.copy();
+	public MobAi(@NotNull AiType aiType) {
+		super("player", aiType.health, aiType.deathDrops);
+		this.aiType = aiType;
+		this.movePattern = aiType.defaultPattern.copy();
 	}
 	
 	protected void setMovePattern(@NotNull MovementPattern pattern) { movePattern = pattern; }
@@ -51,4 +53,19 @@ public class MobAi extends Mob {
 		move((tempMovePattern == null ? movePattern : tempMovePattern).move(delta, this));
 	}
 	
+	@Override
+	public boolean attackedBy(WorldObject obj, @Nullable Item attackItem, int damage) {
+		if(aiType.onHit != null) aiType.onHit.onHit(this, obj, attackItem);
+		return super.attackedBy(obj, attackItem, damage);
+	}
+	
+	@Override
+	public String save() {
+		return super.save()+aiType.name();
+	}
+	
+	@Override
+	public void load(String data) {
+		
+	}
 }

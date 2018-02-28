@@ -15,7 +15,13 @@ import org.jetbrains.annotations.Nullable;
 
 public interface WorldObject {
 	
-	Level getLevel();
+	@Nullable Level getLevel();
+	@Nullable default ServerLevel getServerLevel() {
+		Level level = getLevel();
+		if(level instanceof ServerLevel)
+			return (ServerLevel) level;
+		return null;
+	}
 	
 	Rectangle getBounds();
 	default Vector2 getCenter() { return getBounds().getCenter(new Vector2()); }
@@ -51,6 +57,9 @@ public interface WorldObject {
 	boolean touchedBy(Entity entity);
 	
 	void touching(Entity entity);
+	
+	String save();
+	void load(String data);
 	
 	// returns the closest tile to the center of this object, given an array of tiles.
 	@Nullable
