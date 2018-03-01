@@ -66,7 +66,7 @@ public class Hands {
 	}
 	
 	public void clearItem(Inventory inv) {
-		if(count > 0 && !(item instanceof HandItem))
+		if(inv != null && count > 0 && !(item instanceof HandItem))
 			inv.addItem(item, count);
 		
 		item = new HandItem();

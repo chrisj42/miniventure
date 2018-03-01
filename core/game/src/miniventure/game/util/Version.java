@@ -10,8 +10,9 @@ public class Version implements Comparable<Version> {
 		}
 	}
 	
-	private int make, major, minor;
+	private final int make, major, minor;
 	
+	private Version() {make = 0; major = 0; minor = 0;}
 	public Version(String version) {
 		String[] nums = version.split("\\.");
 		if(nums.length > 3 || nums.length < 2)

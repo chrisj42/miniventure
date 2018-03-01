@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Align;
 
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +19,7 @@ public class TextParticle extends BounceEntity implements Particle {
 	public TextParticle(@NotNull String text) { this(text, Color.RED); }
 	public TextParticle(@NotNull String text, @NotNull Color main) { this(text, main, Color.BLACK); }
 	public TextParticle(@NotNull String text, @NotNull Color main, @NotNull Color shadow) {
-		super(new Sprite(), 2f);
+		super(new TextureRegion(), 2f);
 		this.text = text;
 		this.main = main;
 		this.shadow = shadow;

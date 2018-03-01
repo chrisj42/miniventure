@@ -1,5 +1,7 @@
-package miniventure.game;
+package miniventure.client;
 
+import miniventure.game.GameCore;
+import miniventure.game.TimeOfDay;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.Level;
@@ -199,7 +201,7 @@ public class GameScreen {
 		
 		debugInfo.add("Entities in level: " + level.getEntityCount()+"/"+level.getEntityCap());
 		
-		debugInfo.add("Time: " + GameCore.getWorld().getTimeOfDayString());
+		debugInfo.add("Time: " + TimeOfDay.getTimeString(ClientCore.getWorld().getGameTime()));
 		
 		for(int i = 0; i < debugInfo.size; i++)
 			MyUtils.writeOutlinedText(font, batch, debugInfo.get(i), 0, uiCamera.viewportHeight-5-15*i);

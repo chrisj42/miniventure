@@ -3,6 +3,7 @@ package miniventure.game.screen;
 import java.io.IOException;
 
 import miniventure.game.GameCore;
+import miniventure.game.WorldManager;
 
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -11,7 +12,7 @@ import com.kotcrab.vis.ui.widget.VisTextButton;
 
 public class MainMenu extends MenuScreen {
 	
-	public MainMenu() {
+	public MainMenu(WorldManager world) {
 		super();
 		
 		addLabel("Miniventure", 20);
@@ -29,11 +30,7 @@ public class MainMenu extends MenuScreen {
 		button.addListener(new ClickListener() {
 			@Override
 			public void clicked(InputEvent e, float x, float y) {
-				try {
-					GameCore.getWorld().createWorld(0, 0);
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
+				world.createWorld(0, 0);
 			}
 		});
 		

@@ -1,11 +1,15 @@
 package miniventure.game.world;
 
-import java.util.Arrays;
+import java.util.HashMap;
 
 import miniventure.game.GameCore;
+import miniventure.game.GameProtocol.LevelData;
+import miniventure.game.WorldManager;
 import miniventure.game.item.Item;
 import miniventure.game.screen.LoadingScreen;
+import miniventure.game.screen.MenuScreen;
 import miniventure.game.util.MyUtils;
+import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ItemEntity;
 import miniventure.game.world.entity.mob.AiType;
@@ -32,14 +36,14 @@ public class ServerLevel extends Level {
 	
 	private final LevelGenerator levelGenerator;
 	
-	public ServerLevel(int depth, LevelGenerator levelGenerator) {
-		super(depth, levelGenerator.worldWidth, levelGenerator.worldHeight);
+	public ServerLevel(WorldManager world, int depth, LevelGenerator levelGenerator) {
+		super(world, depth, levelGenerator.worldWidth, levelGenerator.worldHeight);
 		this.levelGenerator = levelGenerator;
 	}
 	
 	@Override
 	public void entityMoved(Entity entity) {
-		if(GameCore.getWorld().isKeepAlive(entity)) {
+		if(getWorld().isKeepAlive(entity)) {
 			if(entity.getLevel() == this) {
 				// load all surrounding chunks
 				for (Point p : getAreaChunks(entity.getCenter(), 1, false, true)) {
@@ -181,40 +185,70 @@ public class ServerLevel extends Level {
 		}
 	}
 	
-	public Level createClientLevel(Player client) {
+	public LevelData createClientLevel(Player client) {
 		// creates a new level instance to send to the new client
-		Level level = new Level();
 		
-		Rectangle bounds = null;
+		Array<Point> points = getAreaChunks(client.getCenter(), 1, true, true);
 		
-		for (Point p : getAreaChunks(client.getCenter(), 1, true, true)) {
+		ChunkData[] chunks = new ChunkData[points.size];
+		//Array<EntityData> entities = new Array<>(EntityData.class);
+		
+		for (int i = 0; i < points.size; i++) {
+			Point p = points.get(i);
 			Chunk chunk = loadedChunks.containsKey(p) ? loadedChunks.get(p) : new Chunk(p.x, p.y, this, levelGenerator.generateChunk(p.x, p.y));
-			level.tileCount += chunk.width * chunk.height;
-			level.loadedChunks.put(p, chunk);
-			Rectangle chunkBounds = chunk.getBounds();
-			if(bounds == null) bounds = chunkBounds;
-			else bounds.merge(chunkBounds);
+			chunks[i] = new ChunkData(chunk);
 		}
 		
-		level.entities.addAll(Arrays.asList(getOverlappingEntities(bounds, client).shrink()));
-		
-		return level;
+		return new LevelData(getWidth(), getHeight(), chunks);
+	}
+	
+	@Override
+	public boolean equals(Object other) { return other instanceof ServerLevel && super.equals(other); }
+	
+	
+	
+	private static final String[] levelNames = {"Surface"};
+	private static final int minDepth = 0;
+	
+	private static ServerLevel[] levels = new ServerLevel[0];
+	private static final HashMap<Entity, ServerLevel> entityLevels = new HashMap<>();
+	
+	public static void clearLevels() {
+		entityLevels.clear();
+		for(ServerLevel level: levels)
+			level.entities.clear();
+		levels = new ServerLevel[0];
 	}
 	
 	@Nullable
 	public static ServerLevel getLevel(int depth) {
-		return (ServerLevel) Level.getLevel(depth);
+		int idx = depth-minDepth;
+		return idx >= 0 && idx < levels.length ? levels[idx] : null;
 	}
 	
-	public static void resetLevels(LevelGenerator levelGenerator) { resetLevels(null, levelGenerator); }
-	public static void resetLevels(@Nullable LoadingScreen display, LevelGenerator levelGenerator) {
+	public static void resetLevels(WorldManager world, LevelGenerator levelGenerator) {
+		MenuScreen menu = GameCore.getScreen();
+		LoadingScreen display = null;
+		if(menu != null && menu instanceof LoadingScreen) {
+			display = (LoadingScreen) menu;
+			display.pushMessage("");
+		}
+		
 		clearLevels();
 		levels = new ServerLevel[levelNames.length];
-		if(display != null) display.pushMessage("Loading level 0/"+levels.length+"...");
 		for(int i = 0; i < levels.length; i++) {
-			if(display != null) display.editMessage("Loading level "+(i+1)+"/"+levels.length+"...");
-			levels[i] = new ServerLevel(i + minDepth, levelGenerator);
+			log(display, "Loading level "+(i+1)+"/"+levels.length+"...");
+			levels[i] = new ServerLevel(world, i + minDepth, levelGenerator);
 		}
 		if(display != null) display.popMessage();
 	}
+	private static void log(@Nullable LoadingScreen display, String text) {
+		if(display == null)
+			System.out.println(text);
+		else
+			display.editMessage(text);
+	}
+	
+	@Nullable
+	public static Level getEntityLevel(Entity entity) { return entityLevels.get(entity); }
 }

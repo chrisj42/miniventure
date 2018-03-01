@@ -23,7 +23,7 @@ public enum FoodItem {
 	
 	@NotNull
 	public Item get() {
-		return new Item(name(), GameCore.icons.size() > 0 ? GameCore.icons.get(name().toLowerCase()) : new TextureRegion()) {
+		return new Item(name(), GameCore.icons.get(name().toLowerCase())) {
 			@Override public Item copy() { return this; }
 			
 			@Override public void interact(Player player) {

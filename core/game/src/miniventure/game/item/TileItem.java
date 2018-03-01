@@ -25,7 +25,7 @@ public class TileItem extends Item {
 		// for example, acorns.
 		// one improvement, btw, could be that in the current system, there can only be one item per tile. You can't have two items that end up producing the same tile. You even search by TileType.
 		items.put(TileType.TORCH, new TileItem(TileType.TORCH, TileType.GRASS, TileType.SAND, TileType.DIRT));
-		items.put(TileType.DOOR_CLOSED, new TileItem("Door", GameCore.tileAtlas == null ? new TextureRegion() : GameCore.tileAtlas.findRegion("door_closed/00"), TileType.DOOR_CLOSED, (TileType[])null));
+		items.put(TileType.DOOR_CLOSED, new TileItem("Door", GameCore.tileAtlas.findRegion("door_closed/00"), TileType.DOOR_CLOSED, (TileType[])null));
 		items.put(TileType.DOOR_OPEN, items.get(TileType.DOOR_CLOSED));
 	}
 	
@@ -40,10 +40,10 @@ public class TileItem extends Item {
 	@Nullable private TileType[] canPlaceOn;
 	
 	private TileItem(@NotNull TileType type, @Nullable TileType... canPlaceOn) {
-		this(MyUtils.toTitleCase(type.name()), GameCore.tileAtlas == null ? new TextureRegion() : GameCore.tileAtlas.findRegion(type.name().toLowerCase()+"/00"), type, canPlaceOn); // so, if the placeOn is null, then...
+		this(MyUtils.toTitleCase(type.name()), GameCore.tileAtlas.findRegion(type.name().toLowerCase()+"/00"), type, canPlaceOn); // so, if the placeOn is null, then...
 	}
 	
-	private TileItem(String name, @NotNull TextureRegion texture, @NotNull TileType result, @Nullable TileType... placeOn) {
+	private TileItem(String name, TextureRegion texture, @NotNull TileType result, @Nullable TileType... placeOn) {
 		super(name, texture);
 		this.canPlaceOn = placeOn;
 		this.result = result;

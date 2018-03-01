@@ -26,8 +26,8 @@ public abstract class Item {
 	
 	private boolean used = false;
 	
-	Item(@NotNull String name, @NotNull TextureRegion texture) {
-		this.texture = texture;
+	Item(@NotNull String name, TextureRegion texture) {
+		this.texture = texture == null ? new TextureRegion() : texture;
 		this.name = name;
 	}
 	

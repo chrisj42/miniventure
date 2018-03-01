@@ -4,9 +4,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import miniventure.game.GameCore;
+import miniventure.game.GameProtocol.LevelData;
+import miniventure.game.WorldManager;
 import miniventure.game.item.Item;
 import miniventure.game.screen.LoadingScreen;
 import miniventure.game.util.MyUtils;
+import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ItemEntity;
 import miniventure.game.world.entity.Particle;
@@ -31,16 +34,18 @@ public class Level {
 	
 	private final int depth, width, height;
 	
-	final HashMap<Point, Chunk> loadedChunks = new HashMap<>();
-	int tileCount;
+	@NotNull private final WorldManager world;
+	protected final HashMap<Point, Chunk> loadedChunks = new HashMap<>();
+	protected int tileCount;
 	
-	final HashSet<Entity> entities = new HashSet<>();
+	protected final HashSet<Entity> entities = new HashSet<>();
 	
 	/** @noinspection FieldCanBeLocal*/
 	private int entityCap = 8; // per chunk
 	
-	Level() { this(0, 0, 0); }
-	public Level(int depth, int width, int height) {
+	protected Level(@NotNull WorldManager world) { this(world, 0, 0, 0); }
+	public Level(@NotNull WorldManager world, int depth, int width, int height) {
+		this.world = world;
 		this.depth = depth;
 		this.width = width;
 		this.height = height;
@@ -57,11 +62,12 @@ public class Level {
 	public int getWidth() { return width; }
 	public int getHeight() { return height; }
 	public int getDepth() { return depth; }
+	@NotNull public WorldManager getWorld() { return world; }
 	public int getEntityCap() { return entityCap*loadedChunks.size(); }
 	public int getEntityCount() { return entities.size(); }
 	
 	public void entityMoved(Entity entity) {
-		if(!GameCore.getWorld().isKeepAlive(entity)) {
+		if(!world.isKeepAlive(entity)) {
 			// check if they've gone (mostly?) out of bounds, if so, remove them
 			Vector2 pos = entity.getCenter();
 			if(!loadedChunks.containsKey(new Point(Chunk.getCoord(pos.x), Chunk.getCoord(pos.y))))
@@ -71,7 +77,7 @@ public class Level {
 		
 		// check for any chunks that no longer need to be loaded
 		Array<Point> chunkCoords = new Array<>(loadedChunks.keySet().toArray(new Point[loadedChunks.size()]));
-		for(WorldObject obj: GameCore.getWorld().getKeepAlives(this)) // remove loaded chunks in radius
+		for(WorldObject obj: world.getKeepAlives(this)) // remove loaded chunks in radius
 			chunkCoords.removeAll(getAreaChunks(obj.getCenter(), 2, true, false), false);
 		
 		// chunkCoords now contains all chunks which have no nearby keepAlive object, so they should be unloaded.
@@ -205,7 +211,7 @@ public class Level {
 		return overlappingTiles;
 	}
 	
-	Array<Point> getOverlappingChunks(Rectangle rect) {
+	protected Array<Point> getOverlappingChunks(Rectangle rect) {
 		Array<Point> overlappingChunks = new Array<>();
 		Array<Point> points = getOverlappingTileCoords(rect);
 		
@@ -248,13 +254,13 @@ public class Level {
 		return tiles;
 	}
 	
-	Array<Point> getAreaChunks(Vector2 tilePos, int radius, boolean loaded, boolean unloaded) {
+	protected Array<Point> getAreaChunks(Vector2 tilePos, int radius, boolean loaded, boolean unloaded) {
 		return getAreaChunks(tilePos.x, tilePos.y, radius, loaded, unloaded);
 	}
-	Array<Point> getAreaChunks(float x, float y, int radius, boolean loaded, boolean unloaded) {
+	protected Array<Point> getAreaChunks(float x, float y, int radius, boolean loaded, boolean unloaded) {
 		return getAreaChunks(Chunk.getCoord(x), Chunk.getCoord(y), radius, loaded, unloaded);
 	}
-	Array<Point> getAreaChunks(int chunkX, int chunkY, int radius, boolean loaded, boolean unloaded) {
+	protected Array<Point> getAreaChunks(int chunkX, int chunkY, int radius, boolean loaded, boolean unloaded) {
 		Array<Point> chunkCoords = new Array<>();
 		for(int x = chunkX - radius; x <= chunkX + radius; x++) {
 			for (int y = chunkY - radius; y <= chunkY + radius; y++) {
@@ -309,10 +315,10 @@ public class Level {
 	
 	
 	
-	static final String[] levelNames = {"Surface"};
-	static final int minDepth = 0;
+	private static final String[] levelNames = {"Surface"};
+	private static final int minDepth = 0;
 	
-	static Level[] levels = new Level[0];
+	private static Level[] levels = new Level[0];
 	private static final HashMap<Entity, Level> entityLevels = new HashMap<>();
 	
 	public static void clearLevels() {
@@ -322,9 +328,17 @@ public class Level {
 		levels = new Level[0];
 	}
 	
-	public static void resetLevels(Level... levels) {
+	public static void resetLevels(WorldManager world, LevelData... levelData) {
 		clearLevels();
-		Level.levels = levels;
+		levels = new Level[levelData.length];
+		for(int i = 0; i < levels.length; i++) {
+			LevelData data = levelData[i];
+			levels[i] = new Level(world, i, data.width, data.height);
+			for(ChunkData chunk: data.chunkData) {
+				Chunk newChunk = new Chunk(levels[i], chunk);
+				levels[i].loadedChunks.put(new Point(chunk.chunkX, chunk.chunkY), newChunk);
+			}
+		}
 	}
 	
 	@Nullable

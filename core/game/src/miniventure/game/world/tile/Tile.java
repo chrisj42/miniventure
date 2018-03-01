@@ -24,56 +24,6 @@ import org.jetbrains.annotations.Nullable;
 
 public class Tile implements WorldObject {
 	
-	/*
-		So, tiles can have any of the following properties/features:
-			- walkable or solid
-			- replacement tile (tile that appears underneath when this one is broken; can vary?; defaults to a Hole).
-			- special rendering
-				- animation
-				- lighting
-				- different colors? maybe a Recolorable interface, and those can have their hues messed with.
-				- over-entity animation/rendering? for liquids, certainly
-			- health, or one-hit, or impermeable, or conditionally permeable
-			- preferred tool
-			- event handling
-			- knockback (preset touch event)
-			- item drops (preset destroy event)
-			- experience drops? (preset destroy event)
-			- achievement trigger? (custom)
-		 
-		Tile data:
-			- sprite
-			- animation state
-		
-		
-		Events:
-			- destroy
-			- touch
-			- attacked (has default to do damage, can override to check a condition before dealing damage)
-			- touch per second
-		
-		
-		Now, how to implement such a system...
-		
-		
-	 */
-	
-	// attack behavior
-	// health property - invincible, normal health, conditionally invincible (will generate attack particle of 0 damage if can't hurt yet)
-	
-	/* NOTE: for tiles that drop something, they will drop them progressively; the last hit will drop the last one. Though, you can bias it so that the last drops all the items, or the last drops half the items, etc.
-		lastDropBias:
-			1 = all items are dropped when the tile is destroyed; none before.
-			0 = items are dropped at equal intervals so that the last hit drops the last item.
-			0.5 = half the items are dropped when the tile is destroyed; the other half is equally distributed.
-			i.e. lastDropBias = part of items that are dropped when the tile is destroyed. The rest are equally distributed.
-	 */
-	
-	
-	/*
-		Perhaps I can manage to only object-ify the nearby tiles. The way it will 
-	 */
-	
 	public static final int SIZE = 32;
 	private static final TileType baseType = TileType.values[0];
 	
@@ -140,7 +90,7 @@ public class Tile implements WorldObject {
 	}
 	
 	public TileType getType() { return tileTypes.peek(); }
-	private TileType[] getTypes() { return tileTypes.toArray(new TileType[tileTypes.size()]); }
+	TileType[] getTypes() { return tileTypes.toArray(new TileType[tileTypes.size()]); }
 	boolean hasType(TileType type) { return tileTypes.contains(type); }
 	
 	@NotNull @Override public Level getLevel() { return level; }
@@ -430,4 +380,23 @@ public class Tile implements WorldObject {
 	public int hashCode() { return new Point(x, y).hashCode() + level.getDepth() * 17; }
 	
 	// I can use the string encoder and string parser in MyUtils to encode the tile data in a way so that I can always re-parse the encoded array. I can use this internally to, with other things, whenever I need to encode a list of objects and don't want to worry about finding the delimiter symbol in string somewhere I don't expect.
+	
+	
+	public static class TileData {
+		public final int[] typeOrdinals;
+		public final String[] data;
+		
+		public TileData(int[] typeOrdinals, String[] data) {
+			this.typeOrdinals = typeOrdinals;
+			this.data = data;
+		}
+		public TileData(Tile tile) {
+			this.data = tile.data;
+			
+			TileType[] tileTypes = tile.getTypes();
+			typeOrdinals = new int[tileTypes.length];
+			for(int i = 0; i < tileTypes.length; i++)
+				typeOrdinals[i] = tileTypes[i].ordinal();
+		}
+	}
 }

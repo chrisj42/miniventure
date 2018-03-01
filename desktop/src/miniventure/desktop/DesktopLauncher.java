@@ -1,21 +1,27 @@
-package miniventure.game.desktop;
+package miniventure.desktop;
 
+import miniventure.client.ClientCore;
 import miniventure.game.GameCore;
-import miniventure.server.ServerWorld;
+import miniventure.server.ServerCore;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 
 public class DesktopLauncher {
-	public static void main (String[] arg) {
-		if(arg.length > 0 && arg[0].equalsIgnoreCase("--server")) {
-			new ServerWorld(Integer.parseInt(arg[1]), Integer.parseInt(arg[2])).run();
+	public static void main (String[] args) {
+		boolean server = false;
+		for(String arg: args)
+			if(arg.equalsIgnoreCase("--server"))
+				server = true;
+		
+		if(server) {
+			ServerCore.main(args);
 		} else {
 			LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 			config.title = "Miniventure " + GameCore.VERSION;
 			config.width = GameCore.DEFAULT_SCREEN_WIDTH;
 			config.height = GameCore.DEFAULT_SCREEN_HEIGHT;
-			new LwjglApplication(new GameCore(), config);
+			new LwjglApplication(new ClientCore(), config);
 		}
 	}
 }

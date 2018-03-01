@@ -1,6 +1,7 @@
 package miniventure.game.world;
 
 import miniventure.game.world.tile.Tile;
+import miniventure.game.world.tile.Tile.TileData;
 import miniventure.game.world.tile.TileType;
 
 import com.badlogic.gdx.math.MathUtils;
@@ -31,6 +32,27 @@ public class Chunk {
 		}
 		this.height = height;
 	}
+	public Chunk(@NotNull Level level, @NotNull ChunkData data) {
+		this.chunkX = data.chunkX;
+		this.chunkY = data.chunkY;
+		
+		width = data.tileData.length;
+		this.tiles = new Tile[width][];
+		int height = 0;
+		for(int x = 0; x < tiles.length; x++) {
+			tiles[x] = new Tile[tiles[x].length];
+			height = Math.max(height, tiles[x].length);
+			for(int y = 0; y < tiles[x].length; y++) {
+				TileData tileData = data.tileData[x][y];
+				TileType[] types = new TileType[tileData.typeOrdinals.length];
+				for(int i = 0; i < types.length; i++)
+					types[i] = TileType.values[tileData.typeOrdinals[i]];
+				
+				tiles[x][y] = new Tile(level, chunkX * SIZE + x, chunkY * SIZE + y, types, tileData.data);
+			}
+		}
+		this.height = height;
+	}
 	
 	@Nullable
 	public Tile getTile(int x, int y) {
@@ -39,7 +61,8 @@ public class Chunk {
 		return tiles[x][y];
 	}
 	
-	@NotNull Tile[][] getTiles() { return tiles; }
+	@NotNull
+	Tile[][] getTiles() { return tiles; }
 	
 	public static int getCoord(float pos) {
 		int worldCoord = MathUtils.floor(pos);
@@ -47,4 +70,28 @@ public class Chunk {
 	}
 	
 	public Rectangle getBounds() { return new Rectangle(chunkX*SIZE, chunkY*SIZE, SIZE, SIZE); }
+	
+	
+	public static class ChunkData {
+		public final int chunkX, chunkY;
+		public final TileData[][] tileData;
+		
+		public ChunkData(int chunkX, int chunkY, TileData[][] data) {
+			this.chunkX = chunkX;
+			this.chunkY = chunkY;
+			this.tileData = data;
+		}
+		public ChunkData(Chunk chunk) {
+			chunkX = chunk.chunkX;
+			chunkY = chunk.chunkY;
+			
+			Tile[][] tiles = chunk.getTiles();
+			tileData = new TileData[tiles.length][];
+			for(int i = 0; i < tiles.length; i++) {
+				tileData[i] = new TileData[tiles[i].length];
+				for(int j = 0; j < tiles[i].length; j++)
+					tileData[i][j] = new TileData(tiles[i][j]);
+			}
+		}
+	}
 }

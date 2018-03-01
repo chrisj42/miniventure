@@ -89,10 +89,19 @@ public class Player extends Mob {
 	
 	public Player() {
 		super("player", Stat.Health.initial);
+		
+		hands = new Hands(this);
+		reset();
+	}
+	
+	// use this instead of creating a new player.
+	public void reset() {
 		for(Stat stat: Stat.values)
 			stats.put(stat, stat.initial);
 		
-		hands = new Hands(this);
+		super.reset();
+		
+		hands.clearItem(inventory);
 		inventory = new Inventory(20, hands);
 	}
 	

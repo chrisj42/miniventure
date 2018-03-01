@@ -1,13 +1,11 @@
 package miniventure.game;
 
 import java.io.File;
-import java.util.HashMap;
 
 import miniventure.game.util.Version;
-import miniventure.game.world.entity.mob.PursuePattern.FleePattern;
+import miniventure.game.world.Chunk.ChunkData;
+import miniventure.game.world.tile.Tile.TileData;
 
-import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.esotericsoftware.kryo.Kryo;
 
 public interface GameProtocol {
@@ -15,16 +13,67 @@ public interface GameProtocol {
 	int PORT = 8405;
 	
 	static void registerClasses(Kryo kryo) {
-		kryo.register(Login.class);
-		registerClassesInPackage(kryo, "miniventure.game.world", true);
-		registerClassesInPackage(kryo, "miniventure.game.util", true);
-		registerClassesInPackage(kryo, "miniventure.game.item", true);
-		kryo.register(FleePattern.class);
-		kryo.register(String.class);
-		kryo.register(HashMap.class);
-		kryo.register(TextureRegion.class);
-		kryo.register(Animation.class);
+		Class<?>[] classes = GameProtocol.class.getDeclaredClasses();
+		for(Class<?> clazz: classes)
+			kryo.register(clazz);
+		
+		kryo.register(TileData.class);
+		kryo.register(TileData[].class);
+		kryo.register(TileData[][].class);
+		kryo.register(ChunkData.class);
+		kryo.register(ChunkData[].class);
+		kryo.register(Version.class);
+		
+		kryo.register(String[].class);
+		kryo.register(int[].class);
 	}
+	
+	enum DatalessRequest {
+		Respawn
+	}
+	
+	class Login {
+		public final String username;
+		public final Version version;
+		
+		public Login() { this(null, null); }
+		public Login(String username, Version version) {
+			this.username = username;
+			this.version = version;
+		}
+	}
+	
+	class LevelData {
+		public final int width;
+		public final int height;
+		public final ChunkData[] chunkData;
+		
+		public LevelData(int width, int height, ChunkData[] data) {
+			this.width = width;
+			this.height = height;
+			chunkData = data;
+		}
+	}
+	
+	class SpawnData {
+		public final float x, y;
+		
+		public SpawnData(float x, float y) {
+			this.x = x;
+			this.y = y;
+		}
+	}
+	
+	// level and player are already existing types
+	
+	class Move {
+		// entity movement... though maybe RMI again!
+	}
+	
+	class Request {
+		// interact/attack request... or maybe I can do this through RMI.
+	}
+	
 	
 	static void registerClassesInPackage(Kryo kryo, String packageName, boolean recursive) {
 		String sep = File.separator;
@@ -52,30 +101,5 @@ public interface GameProtocol {
 		if(recursive && subpackages != null)
 			for(File subpack: subpackages)
 				registerClassesInPackage(kryo, packageName+"."+subpack.getName(), subpack, true);
-	}
-	
-	class Login {
-		public final String username;
-		public final Version version;
-		
-		public Login() { this(null, null); }
-		public Login(String username, Version version) {
-			this.username = username;
-			this.version = version;
-		}
-	}
-	
-	class LevelData {
-		
-	}
-	
-	// level and player are already existing types
-	
-	class Move {
-		// entity movement... though maybe RMI again!
-	}
-	
-	class Request {
-		// interact/attack request... or maybe I can do this through RMI.
 	}
 }

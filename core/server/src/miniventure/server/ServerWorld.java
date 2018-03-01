@@ -2,7 +2,9 @@ package miniventure.server;
 
 import java.util.HashSet;
 
+import miniventure.game.GameCore;
 import miniventure.game.TimeOfDay;
+import miniventure.game.WorldManager;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
@@ -10,6 +12,7 @@ import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.levelgen.LevelGenerator;
 
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
@@ -17,7 +20,7 @@ import com.esotericsoftware.kryonet.Connection;
 
 import org.jetbrains.annotations.NotNull;
 
-public class ServerWorld {
+public class ServerWorld implements WorldManager {
 	
 	/*
 		This is what contains the world. GameCore will check if the world is loaded here, and if not it won't render the game screen. Though... perhaps this class should hold a reference to the game screen instead...? Because, if you don't have a world, you don't need a game screen...
@@ -32,53 +35,31 @@ public class ServerWorld {
 		GameScreen... game screen won't do much, just do the rendering. 
 	 */
 	
-	public static final String doneMsg = "server ready";
-	
 	private LevelGenerator levelGenerator;
 	private GameServer server;
 	
-	private float gameTime;
+	private float gameTime = 0;
+	private boolean worldLoaded = false;
 	
 	private final HashSet<WorldObject> keepAlives = new HashSet<>(); // always keep chunks around these objects loaded.
 	
-	private static final long START_TIME = System.nanoTime();
+	public ServerWorld() {
+		server = new GameServer();
+		server.startServer();
+	}
 	
-	public ServerWorld() { this(0, 0); }
-	public ServerWorld(int width, int height) {
-		System.out.println("loading server world...");
-		
-		gameTime = 0;
-		
+	@Override
+	public boolean worldLoaded() { return worldLoaded; }
+	
+	@Override
+	public void createWorld(int width, int height) {
+		worldLoaded = false;
 		levelGenerator = new LevelGenerator(MathUtils.random.nextLong(), width, height, 32, 6);
-		System.out.println("loading levels...");
-		ServerLevel.resetLevels(levelGenerator);
-		
-		System.out.println("done!");
-		
-		System.out.println("starting server...");
-		server = new GameServer(this);
-		
-		System.out.println("done!");
-		
-		System.out.println(doneMsg);
+		ServerLevel.resetLevels(this, levelGenerator);
 	}
 	
-	public void run() {
-		long lastNow = System.nanoTime();
-		
-		//noinspection InfiniteLoopStatement
-		while(true) {
-			long now = System.nanoTime();
-			update((now-lastNow)/1E9f);
-			lastNow = now;
-			
-			try {
-				Thread.sleep(10);
-			} catch(InterruptedException ignored) {}
-		}
-	}
-	
-	private void update(float delta) {
+	@Override
+	public void update(float delta) {
 		
 		HashSet<ServerLevel> loadedLevels = new HashSet<>();
 		for(WorldObject obj: keepAlives) {
@@ -93,15 +74,12 @@ public class ServerWorld {
 		gameTime += delta;
 	}
 	
-	String getTimeOfDayString() {
-		return TimeOfDay.getTimeOfDay(gameTime).getTimeString(gameTime);
-	}
-	
 	// load world method here, param worldname
 	
 	// save world method here, param worldname
 	
-	public void exit() {
+	@Override
+	public void exitWorld(boolean save) {
 		// dispose of level/world resources
 		keepAlives.clear();
 		Level.clearLevels();
@@ -109,9 +87,17 @@ public class ServerWorld {
 		//spawnTile = null;
 	}
 	
-	public Player spawnPlayer(Connection connection) {
+	public Player addPlayer() {
 		Player player = new Player();
 		keepAlives.add(player);
+		
+		respawnPlayer(player);
+		
+		return player;
+	}
+	
+	public void respawnPlayer(Player player) {
+		player.reset();
 		
 		ServerLevel level = ServerLevel.getLevel(0);
 		
@@ -124,7 +110,6 @@ public class ServerWorld {
 		spawnBounds.setCenter(level.getWidth()/2, level.getHeight()/2);
 		
 		level.spawnMob(player, spawnBounds, false);
-		return player;
 	}
 	
 	public boolean isKeepAlive(WorldObject obj) {
@@ -140,5 +125,6 @@ public class ServerWorld {
 		return keepAlives;
 	}
 	
-	public static float getElapsedProgramTime() { return (System.nanoTime() - START_TIME)/1E9f; }
+	@Override
+	public float getGameTime() { return gameTime; }
 }

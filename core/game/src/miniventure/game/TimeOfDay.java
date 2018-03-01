@@ -34,22 +34,25 @@ public enum TimeOfDay {
 		return endTime - (ordinal() == 0 ? 0 : values()[ordinal() - 1].endTime);
 	}
 	
-	public Color[] getSkyColors(float gameTime) {
-		float timeOfDay = (gameTime % LENGTH_OF_DAY) / LENGTH_OF_DAY; // now from 0 to 1.
+	public static final TimeOfDay[] values = TimeOfDay.values();
+	
+	public static Color[] getSkyColors(float gameTime) {
+		TimeOfDay tod = getTimeOfDay(gameTime);
+		float time = (gameTime % LENGTH_OF_DAY) / LENGTH_OF_DAY; // now from 0 to 1.
 		
-		float timeLeft = endTime - timeOfDay;
+		float timeLeft = tod.endTime - time;
 		//System.out.println("getting sky colors for time " + timeOfDay + ", time left = " + timeLeft);
-		if(timeLeft >= transitionDuration)
-			return new Color[] {mainColor.cpy()};
+		if(timeLeft >= tod.transitionDuration)
+			return new Color[] {tod.mainColor.cpy()};
 		
 		// there are multiple colors to blend
-		float timeThroughTransition = (transitionDuration - timeLeft) / transitionDuration;
+		float timeThroughTransition = (tod.transitionDuration - timeLeft) / tod.transitionDuration;
 		//System.out.println("transitioning, time through = " + timeThroughTransition);
-		Color mainTrans = mainColor.cpy();
+		Color mainTrans = tod.mainColor.cpy();
 		if(timeThroughTransition > 0.5f)
 			mainTrans.a *= (1 - timeThroughTransition)*2;
 		
-		Color secondTrans = values[(ordinal()+1)%values.length].mainColor.cpy();
+		Color secondTrans = values[(tod.ordinal()+1)%values.length].mainColor.cpy();
 		//if(timeThroughTransition < 0.5f)
 		secondTrans.a *= timeThroughTransition;// * 2;
 		
@@ -57,22 +60,19 @@ public enum TimeOfDay {
 	}
 	
 	
-	public String getTimeString(float gameTime) {
-		float timeOfDay = (gameTime % LENGTH_OF_DAY) / LENGTH_OF_DAY; // now from 0 to 1.
+	public static String getTimeString(float gameTime) {
+		TimeOfDay tod = getTimeOfDay(gameTime);
+		float time = (gameTime % LENGTH_OF_DAY) / LENGTH_OF_DAY; // now from 0 to 1.
 		
-		String str = name()+", ";
+		String str = tod.name()+", ";
 		
-		float timePast = timeOfDay - (endTime - getDuration());
-		int percentPast = Math.round(timePast / getDuration() * 100);
+		float timePast = time - (tod.endTime - tod.getDuration());
+		int percentPast = Math.round(timePast / tod.getDuration() * 100);
 		
-		str += percentPast+"% past ("+Math.round(timeOfDay*100)+"% through day)";
+		str += percentPast+"% past ("+Math.round(time*100)+"% through day)";
 		
 		return str;
 	}
-	
-	
-	
-	public static final TimeOfDay[] values = TimeOfDay.values();
 	
 	@NotNull
 	public static TimeOfDay getTimeOfDay(float gameTime) {

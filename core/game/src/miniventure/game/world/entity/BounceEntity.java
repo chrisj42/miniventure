@@ -3,8 +3,8 @@ package miniventure.game.world.entity;
 import miniventure.game.util.FrameBlinker;
 import miniventure.game.world.Level;
 
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -25,11 +25,11 @@ public class BounceEntity extends Entity {
 	private float lastBounceTime; // used to halt the entity once it starts bouncing a lot really quickly.
 	
 	
-	public BounceEntity(Sprite sprite, float lifetime) {
-		this(sprite, new Vector2().setToRandomDirection(), lifetime);
+	public BounceEntity(TextureRegion texture, float lifetime) {
+		this(texture, new Vector2().setToRandomDirection(), lifetime);
 	}
-	public BounceEntity(Sprite sprite, Vector2 goalDir, float lifetime) {
-		super(sprite);
+	public BounceEntity(TextureRegion texture, Vector2 goalDir, float lifetime) {
+		super(texture);
 		this.lifetime = lifetime;
 		
 		blinker = new FrameBlinker(1, 1, false);

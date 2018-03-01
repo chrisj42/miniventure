@@ -47,7 +47,7 @@ public abstract class Mob extends Entity {
 	@NotNull private ItemDrop[] itemDrops;
 	
 	private float knockbackTimeLeft = 0;
-	private Vector2 knockbackVelocity = new Vector2(); // knockback is applied once, at the start, as a velocity. The mob is moved with this velocity constantly, slowing down at a fixed rate, until the knockback is gone.
+	@NotNull private Vector2 knockbackVelocity = new Vector2(); // knockback is applied once, at the start, as a velocity. The mob is moved with this velocity constantly, slowing down at a fixed rate, until the knockback is gone.
 	
 	private float invulnerableTime = 0;
 	private FrameBlinker blinker;
@@ -62,6 +62,15 @@ public abstract class Mob extends Entity {
 		blinker = new FrameBlinker(5, 1, false);
 		
 		animator = new MobAnimationController(this, spriteName);
+		setSprite(animator.pollAnimation(0));
+	}
+	
+	public void reset() {
+		dir = Direction.DOWN;
+		this.health = maxHealth;
+		knockbackTimeLeft = 0;
+		knockbackVelocity.setZero();
+		invulnerableTime = 0;
 		setSprite(animator.pollAnimation(0));
 	}
 	
