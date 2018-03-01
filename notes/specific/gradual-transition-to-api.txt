@@ -1,0 +1,13 @@
+Later, I'm going to have a mod API, and this is no small task. So I thought of a few steps I could take to have ease in the system:
+
+1. ensure the core module does not depend on any other modules.
+
+2. limit the places that the soon-to-be-external classes are accessed where possible, for example, perhaps make it mainly in the Item, Entity, and Tile classes, or something like that.
+
+3. for any classes that need to be accessed by the code, make interfaces or abstract classes that can be extended externally. (these are the API classes.)
+
+4. separate the soon-to-be-external classes into an entirely separate module, extending the API classes. Ensure that they are not accessed anywhere except a few choice places, such as level gen and definitions.
+
+5. Rewrite the main code to load the now-external classes through reflection.
+
+And we're done!

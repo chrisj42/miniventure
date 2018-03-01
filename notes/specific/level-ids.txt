@@ -1,0 +1,3 @@
+Levels won't be associated with depth, necessarily... Well, some will, some won't. I think I'll make a couple classes to help do the organizing.
+
+The idea is that there will be a system to get level by depth; but there will also be a system to get level by tile... or something else, perhaps. The key is just that it's not related to depth. But I guess I'll have to figure that out when I fully come up with other ways to make levels.
