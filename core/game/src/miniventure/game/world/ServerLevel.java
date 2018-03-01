@@ -3,7 +3,6 @@ package miniventure.game.world;
 import java.util.HashMap;
 
 import miniventure.game.GameCore;
-import miniventure.game.GameProtocol.LevelData;
 import miniventure.game.WorldManager;
 import miniventure.game.item.Item;
 import miniventure.game.screen.LoadingScreen;
@@ -58,6 +57,8 @@ public class ServerLevel extends Level {
 	}
 	
 	public void update(float delta) {
+		if(loadedChunks.size() == 0) return;
+		
 		int tilesToUpdate = (int) (percentTilesUpdatedPerSecond * tileCount * delta);
 		
 		Object[] chunks = loadedChunks.values().toArray();
@@ -185,7 +186,7 @@ public class ServerLevel extends Level {
 		}
 	}
 	
-	public LevelData createClientLevel(Player client) {
+	public ChunkData[] createClientLevel(Player client) {
 		// creates a new level instance to send to the new client
 		
 		Array<Point> points = getAreaChunks(client.getCenter(), 1, true, true);
@@ -196,10 +197,10 @@ public class ServerLevel extends Level {
 		for (int i = 0; i < points.size; i++) {
 			Point p = points.get(i);
 			Chunk chunk = loadedChunks.containsKey(p) ? loadedChunks.get(p) : new Chunk(p.x, p.y, this, levelGenerator.generateChunk(p.x, p.y));
-			chunks[i] = new ChunkData(chunk);
+			chunks[i] = new ChunkData(chunk, this);
 		}
 		
-		return new LevelData(getWidth(), getHeight(), chunks);
+		return chunks;
 	}
 	
 	@Override
@@ -226,7 +227,7 @@ public class ServerLevel extends Level {
 		return idx >= 0 && idx < levels.length ? levels[idx] : null;
 	}
 	
-	public static void resetLevels(WorldManager world, LevelGenerator levelGenerator) {
+	public static void generateLevels(WorldManager world, LevelGenerator levelGenerator) {
 		MenuScreen menu = GameCore.getScreen();
 		LoadingScreen display = null;
 		if(menu != null && menu instanceof LoadingScreen) {

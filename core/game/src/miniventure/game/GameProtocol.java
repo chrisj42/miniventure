@@ -4,6 +4,7 @@ import java.io.File;
 
 import miniventure.game.util.Version;
 import miniventure.game.world.Chunk.ChunkData;
+import miniventure.game.world.Level;
 import miniventure.game.world.tile.Tile.TileData;
 
 import com.esotericsoftware.kryo.Kryo;
@@ -36,7 +37,7 @@ public interface GameProtocol {
 		public final String username;
 		public final Version version;
 		
-		public Login() { this(null, null); }
+		private Login() { this(null, null); }
 		public Login(String username, Version version) {
 			this.username = username;
 			this.version = version;
@@ -46,18 +47,21 @@ public interface GameProtocol {
 	class LevelData {
 		public final int width;
 		public final int height;
-		public final ChunkData[] chunkData;
+		public final int depth;
 		
-		public LevelData(int width, int height, ChunkData[] data) {
+		private LevelData() { this(0, 0, 0); }
+		public LevelData(Level level) { this(level.getWidth(), level.getHeight(), level.getDepth()); }
+		public LevelData(int width, int height, int depth) {
 			this.width = width;
 			this.height = height;
-			chunkData = data;
+			this.depth = depth;
 		}
 	}
 	
 	class SpawnData {
 		public final float x, y;
 		
+		private SpawnData() { this(0, 0); }
 		public SpawnData(float x, float y) {
 			this.x = x;
 			this.y = y;

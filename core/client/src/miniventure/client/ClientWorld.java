@@ -34,8 +34,6 @@ public class ClientWorld implements WorldManager {
 	
 	private final GameScreen gameScreen;
 	
-	private boolean worldLoaded = false;
-	
 	private GameClient client;
 	
 	private Player mainPlayer;
@@ -43,23 +41,21 @@ public class ClientWorld implements WorldManager {
 	
 	ClientWorld(GameScreen gameScreen) {
 		this.gameScreen = gameScreen;
-		worldLoaded = false;
 		
 		client = new GameClient(); // doesn't automatically connect
 	}
 	
 	@Override
-	public boolean worldLoaded() { return worldLoaded; }
+	public boolean worldLoaded() { return Level.hasLevels(); }
 	
 	@Override
 	public void createWorld(int width, int height) {
-		worldLoaded = false;
-		
 		LoadingScreen loadingScreen = new LoadingScreen();
 		GameCore.setScreen(loadingScreen);
-		gameTime = 0;
 		
+		gameTime = 0;
 		Level.clearLevels();
+		
 		new Thread(() -> {
 			ServerCore.initServer(width, height);
 			
@@ -73,7 +69,7 @@ public class ClientWorld implements WorldManager {
 	
 	@Override
 	public void update(float delta) {
-		if(!worldLoaded || mainPlayer == null) return;
+		if(!worldLoaded() || mainPlayer == null) return;
 		
 		MenuScreen menu = GameCore.getScreen();
 		
@@ -95,14 +91,13 @@ public class ClientWorld implements WorldManager {
 	@Override
 	public void exitWorld(boolean save) { // returns to title screen
 		// set menu to main menu, and dispose of level/world resources
-		worldLoaded = false;
 		mainPlayer = null;
 		Level.clearLevels();
 		GameCore.setScreen(new MainMenu(this));
 	}
 	
 	public void spawnPlayer(float x, float y) {
-		Level level = mainPlayer == null ? Level.getLevel(0) : mainPlayer.getLevel();
+		Level level = Level.getLevel(0);//mainPlayer == null ?  : mainPlayer.getLevel();
 		if(mainPlayer != null)
 			mainPlayer.remove();
 		

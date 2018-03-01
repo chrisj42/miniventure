@@ -3,12 +3,11 @@ package miniventure.server;
 import java.io.IOException;
 import java.util.HashMap;
 
-import miniventure.game.GameCore;
 import miniventure.game.GameProtocol;
 import miniventure.game.GameProtocol.LevelData;
 import miniventure.game.GameProtocol.Login;
 import miniventure.game.GameProtocol.SpawnData;
-import miniventure.game.world.Level;
+import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.entity.mob.Player;
 
@@ -24,7 +23,7 @@ public class GameServer {
 	private Server server;
 	
 	public GameServer() {
-		server = new Server();
+		server = new Server(16384*2, 16384);
 		GameProtocol.registerClasses(server.getKryo());
 		
 		addListener(new Listener() {
@@ -38,8 +37,10 @@ public class GameServer {
 					if(level != null) {
 						Player player = ServerCore.getWorld().addPlayer();
 						playerConnections.put(connection, player);
-						LevelData playerLevel = level.createClientLevel(player);
-						connection.sendTCP(playerLevel);
+						ChunkData[] playerChunks = level.createClientLevel(player);
+						connection.sendTCP(new LevelData(level));
+						for(ChunkData chunk: playerChunks)
+							connection.sendTCP(chunk);
 						Vector2 pos = player.getPosition();
 						connection.sendTCP(new SpawnData(pos.x, pos.y));
 					}

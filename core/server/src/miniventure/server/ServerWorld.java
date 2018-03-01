@@ -2,8 +2,6 @@ package miniventure.server;
 
 import java.util.HashSet;
 
-import miniventure.game.GameCore;
-import miniventure.game.TimeOfDay;
 import miniventure.game.WorldManager;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.Level;
@@ -12,11 +10,9 @@ import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.levelgen.LevelGenerator;
 
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
-import com.esotericsoftware.kryonet.Connection;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -55,7 +51,7 @@ public class ServerWorld implements WorldManager {
 	public void createWorld(int width, int height) {
 		worldLoaded = false;
 		levelGenerator = new LevelGenerator(MathUtils.random.nextLong(), width, height, 32, 6);
-		ServerLevel.resetLevels(this, levelGenerator);
+		ServerLevel.generateLevels(this, levelGenerator);
 	}
 	
 	@Override

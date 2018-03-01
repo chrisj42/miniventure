@@ -386,6 +386,7 @@ public class Tile implements WorldObject {
 		public final int[] typeOrdinals;
 		public final String[] data;
 		
+		private TileData() { this(null, null); }
 		public TileData(int[] typeOrdinals, String[] data) {
 			this.typeOrdinals = typeOrdinals;
 			this.data = data;

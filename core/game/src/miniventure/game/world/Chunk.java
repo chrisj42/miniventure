@@ -40,7 +40,7 @@ public class Chunk {
 		this.tiles = new Tile[width][];
 		int height = 0;
 		for(int x = 0; x < tiles.length; x++) {
-			tiles[x] = new Tile[tiles[x].length];
+			tiles[x] = new Tile[data.tileData[x].length];
 			height = Math.max(height, tiles[x].length);
 			for(int y = 0; y < tiles[x].length; y++) {
 				TileData tileData = data.tileData[x][y];
@@ -69,21 +69,25 @@ public class Chunk {
 		return worldCoord / SIZE;
 	}
 	
-	public Rectangle getBounds() { return new Rectangle(chunkX*SIZE, chunkY*SIZE, SIZE, SIZE); }
+	public Rectangle getBounds() { return new Rectangle(chunkX*SIZE, chunkY*SIZE, width, height); }
 	
 	
 	public static class ChunkData {
-		public final int chunkX, chunkY;
+		public final int chunkX, chunkY, levelDepth;
 		public final TileData[][] tileData;
 		
-		public ChunkData(int chunkX, int chunkY, TileData[][] data) {
+		private ChunkData() { this(0, 0, 0, null); }
+		public ChunkData(int chunkX, int chunkY, int depth, TileData[][] data) {
 			this.chunkX = chunkX;
 			this.chunkY = chunkY;
+			this.levelDepth = depth;
 			this.tileData = data;
 		}
-		public ChunkData(Chunk chunk) {
+		public ChunkData(Chunk chunk, Level level) { this(chunk, level.getDepth()); }
+		public ChunkData(Chunk chunk, int levelDepth) {
 			chunkX = chunk.chunkX;
 			chunkY = chunk.chunkY;
+			this.levelDepth = levelDepth;
 			
 			Tile[][] tiles = chunk.getTiles();
 			tileData = new TileData[tiles.length][];

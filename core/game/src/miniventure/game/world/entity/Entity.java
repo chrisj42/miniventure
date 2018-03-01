@@ -173,6 +173,8 @@ public abstract class Entity implements WorldObject {
 	
 	public void moveTo(@NotNull Level level, @NotNull Vector2 pos) { moveTo(level, pos.x, pos.y); }
 	public void moveTo(@NotNull Level level, float x, float y) {
+		if(level == getLevel() && x == this.x && y == this.y) return; // no action or updating required.
+		
 		// this method doesn't care where you end up.
 		x = Math.max(x, 0);
 		y = Math.max(y, 0);
@@ -188,7 +190,10 @@ public abstract class Entity implements WorldObject {
 		this.x = x;
 		this.y = y;
 		
-		level.entityMoved(this);
+		if(level == getLevel())
+			level.entityMoved(this);
+		else
+			level.addEntity(this);
 	}
 	public void moveTo(@NotNull Tile tile) {
 		Vector2 pos = tile.getCenter();

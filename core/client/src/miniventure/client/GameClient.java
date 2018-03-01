@@ -8,6 +8,7 @@ import miniventure.game.GameProtocol.LevelData;
 import miniventure.game.GameProtocol.Login;
 import miniventure.game.GameProtocol.SpawnData;
 import miniventure.game.screen.LoadingScreen;
+import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.Level;
 
 import com.esotericsoftware.kryonet.Client;
@@ -21,7 +22,7 @@ public class GameClient {
 	private Client client;
 	
 	public GameClient() {
-		client = new Client();
+		client = new Client(16384*2, 16384);
 		
 		GameProtocol.registerClasses(client.getKryo());
 		
@@ -30,7 +31,12 @@ public class GameClient {
 			public void received (Connection connection, Object object) {
 				if(object instanceof LevelData) {
 					System.out.println("client received level");
-					Level.resetLevels(ClientCore.getWorld(), (LevelData)object);
+					Level.addLevel(ClientCore.getWorld(), (LevelData)object);
+				}
+				
+				if(object instanceof ChunkData) {
+					//System.out.println("client received chunk");
+					Level.loadChunk((ChunkData)object);
 				}
 				
 				if(object instanceof SpawnData) {

@@ -3,25 +3,15 @@ package miniventure.game.world;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.LevelData;
 import miniventure.game.WorldManager;
-import miniventure.game.item.Item;
-import miniventure.game.screen.LoadingScreen;
-import miniventure.game.util.MyUtils;
 import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.entity.Entity;
-import miniventure.game.world.entity.ItemEntity;
 import miniventure.game.world.entity.Particle;
-import miniventure.game.world.entity.mob.AiType;
-import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.entity.mob.Player;
-import miniventure.game.world.levelgen.LevelGenerator;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.TileType;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -106,7 +96,6 @@ public class Level {
 			y -= size.y/2;
 		}
 		e.moveTo(this, x, y);
-		addEntity(e);
 	}
 	public void addEntity(Entity e) {
 		entities.add(e);
@@ -315,37 +304,35 @@ public class Level {
 	
 	
 	
-	private static final String[] levelNames = {"Surface"};
-	private static final int minDepth = 0;
-	
-	private static Level[] levels = new Level[0];
+	private static final HashMap<Integer, Level> levels = new HashMap<>();
 	private static final HashMap<Entity, Level> entityLevels = new HashMap<>();
+	
+	public static boolean hasLevels() { return levels.size() > 0; }
 	
 	public static void clearLevels() {
 		entityLevels.clear();
-		for(Level level: levels)
+		for(Level level: levels.values())
 			level.entities.clear();
-		levels = new Level[0];
+		levels.clear();
 	}
 	
-	public static void resetLevels(WorldManager world, LevelData... levelData) {
-		clearLevels();
-		levels = new Level[levelData.length];
-		for(int i = 0; i < levels.length; i++) {
-			LevelData data = levelData[i];
-			levels[i] = new Level(world, i, data.width, data.height);
-			for(ChunkData chunk: data.chunkData) {
-				Chunk newChunk = new Chunk(levels[i], chunk);
-				levels[i].loadedChunks.put(new Point(chunk.chunkX, chunk.chunkY), newChunk);
-			}
+	public static void addLevel(WorldManager world, LevelData data) {
+		levels.put(data.depth, new Level(world, data.depth, data.width, data.height));
+	}
+	
+	public static void loadChunk(ChunkData data) {
+		Level level = levels.get(data.levelDepth);
+		if(level == null) {
+			System.err.println("client could not load chunk because level is null");
+			return;
 		}
+		Chunk newChunk = new Chunk(level, data);
+		level.tileCount += newChunk.width * newChunk.height;
+		level.loadedChunks.put(new Point(data.chunkX, data.chunkY), newChunk);
 	}
 	
 	@Nullable
-	public static Level getLevel(int depth) {
-		int idx = depth-minDepth;
-		return idx >= 0 && idx < levels.length ? levels[idx] : null;
-	}
+	public static Level getLevel(int depth) { return levels.get(depth); }
 	
 	@Nullable
 	public static Level getEntityLevel(Entity entity) { return entityLevels.get(entity); }
