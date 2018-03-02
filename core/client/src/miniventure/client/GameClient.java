@@ -8,6 +8,7 @@ import miniventure.game.GameProtocol.LevelData;
 import miniventure.game.GameProtocol.Login;
 import miniventure.game.GameProtocol.SpawnData;
 import miniventure.game.screen.LoadingScreen;
+import miniventure.game.screen.MainMenu;
 import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.Level;
 
@@ -51,6 +52,7 @@ public class GameClient {
 			public void disconnected(Connection connection) {
 				System.err.println("client disconnected from server.");
 				// TODO make ErrorScreen, which accepts a string to display and has a "back to title screen" button.
+				GameCore.setScreen(new MainMenu(ClientCore.getWorld()));
 				//GameCore.setScreen(new ErrorScreen("Lost connection with server."));
 			}
 		});
