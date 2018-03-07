@@ -63,4 +63,7 @@ public class ConnectionProperty implements TileProperty {
 		
 		return tileType.getProp(AnimationProperty.class).getSprite(spriteIdx, false, tile);
 	}
+	
+	@Override
+	public Class<? extends TileProperty> getUniquePropertyClass() { return ConnectionProperty.class; }
 }

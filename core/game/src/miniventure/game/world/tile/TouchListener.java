@@ -10,4 +10,7 @@ public interface TouchListener extends TileProperty {
 	void touchedBy(Entity entity, Tile tile);
 	//void stillTouchedBy(Entity entity);
 	//void steppedOff(Entity entity); // idk, this will be much later.
+	
+	@Override
+	default Class<? extends TileProperty> getUniquePropertyClass() { return TouchListener.class; }
 }

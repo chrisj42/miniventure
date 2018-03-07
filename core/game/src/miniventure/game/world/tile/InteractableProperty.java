@@ -10,4 +10,6 @@ public interface InteractableProperty extends TileProperty {
 	
 	boolean interact(Player player, @Nullable Item heldItem, Tile tile);
 	
+	@Override
+	default Class<? extends TileProperty> getUniquePropertyClass() { return InteractableProperty.class; }
 }

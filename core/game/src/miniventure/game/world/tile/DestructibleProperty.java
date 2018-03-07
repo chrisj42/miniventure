@@ -122,7 +122,7 @@ public class DestructibleProperty implements TileProperty {
 	}
 	
 	@Override
-	public String[] getInitData() {
+	public String[] getInitialData() {
 		if(totalHealth > 1) return new String[] {totalHealth+""};
 		return new String[0]; // for a health of one or below, the tile will always be at max health, or destroyed.
 	}
@@ -169,7 +169,8 @@ public class DestructibleProperty implements TileProperty {
 		}
 	}
 	
-	
+	@Override
+	public Class<? extends TileProperty> getUniquePropertyClass() { return DestructibleProperty.class; }
 	
 	@Override
 	public String toString() { return "DestructibleProperty[conditions="+damageConditions.length+"]"; }

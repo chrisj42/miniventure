@@ -9,8 +9,9 @@ import miniventure.game.item.Item;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Level;
 import miniventure.game.world.Point;
+import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
-import miniventure.game.world.entity.Entity;
+import miniventure.game.world.entitynew.Entity;
 import miniventure.game.world.entity.mob.Player;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -39,26 +40,13 @@ public class Tile implements WorldObject {
 		this.y = y;
 	}
 	
-	// the TileType array is expected in order of top to bottom. If it does not end with the a HOLE, then methods will be called in an attempt to get there.
+	// the TileType array is expected in order of bottom to top.
 	// used most when creating new tiles for new levels
 	public Tile(@NotNull Level level, int x, int y, @NotNull TileType... types) {
 		this(level, x, y);
 		
-		Stack<TileType> typeStack = new Stack<>(); // top is first to go in.
 		for(TileType type: types)
-			typeStack.push(type);
-		
-		if(typeStack.empty())
-			typeStack.push(baseType);
-		
-		while(typeStack.peek() != baseType) {
-			TileType[] next = typeStack.peek().getProp(CoveredTileProperty.class).getCoverableTiles();
-			typeStack.push(next == null || next.length == 0 || next[0] == null ? baseType : next[0]);
-		}
-		
-		// now, pop all the tile types out of the temp stack and into the real stack.
-		while(!typeStack.empty())
-			tileTypes.push(typeStack.pop());
+			tileTypes.push(type);
 		
 		/// now it's time to initialize the tile data.
 		
@@ -94,6 +82,11 @@ public class Tile implements WorldObject {
 	boolean hasType(TileType type) { return tileTypes.contains(type); }
 	
 	@NotNull @Override public Level getLevel() { return level; }
+	@Nullable @Override public ServerLevel getServerLevel() {
+		if(level instanceof ServerLevel)
+			return (ServerLevel) level;
+		return null;
+	}
 	
 	@Override public Rectangle getBounds() { return new Rectangle(x, y, 1, 1); }
 	@Override public Vector2 getCenter() { return new Vector2(x+0.5f, y+0.5f); }
@@ -353,16 +346,6 @@ public class Tile implements WorldObject {
 	
 	@Override
 	public void touching(Entity entity) {}
-	
-	@Override
-	public String save() {
-		return null;
-	}
-	
-	@Override
-	public void load(String data) {
-		
-	}
 	
 	@Override
 	public String toString() { return getType().getName()/* + " Tile (all:"+tileTypes+")"*/; }

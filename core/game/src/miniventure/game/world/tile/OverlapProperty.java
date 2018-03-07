@@ -52,4 +52,7 @@ public class OverlapProperty implements TileProperty {
 		
 		return sprites;
 	}
+	
+	@Override
+	public Class<? extends TileProperty> getUniquePropertyClass() { return OverlapProperty.class; }
 }

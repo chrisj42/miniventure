@@ -9,4 +9,7 @@ public interface SolidProperty extends TileProperty {
 	SolidProperty WALKABLE = (e) -> true;
 	
 	boolean isPermeableBy(Entity entity);
+	
+	@Override
+	default Class<? extends TileProperty> getUniquePropertyClass() { return SolidProperty.class; }
 }

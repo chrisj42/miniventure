@@ -126,9 +126,12 @@ public class TransitionProperty implements TileProperty {
 	
 	@Override
 	// first string is index of animation being played, second is name of tiletype that will be placed (assuming this is an exit animation), and third is the duration that the animation has been going so far.
-	public String[] getInitData() {
+	public String[] getInitialData() {
 		String[] data = new String[animations.length == 0?0:3];
 		Arrays.fill(data, "");
 		return data;
 	}
+	
+	@Override
+	public Class<? extends TileProperty> getUniquePropertyClass() { return TransitionProperty.class; }
 }

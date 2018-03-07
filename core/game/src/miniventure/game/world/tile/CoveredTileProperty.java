@@ -22,4 +22,7 @@ public class CoveredTileProperty implements TileProperty {
 	}
 	
 	public TileType[] getCoverableTiles() { return coveredTiles == null ? null : coveredTiles.toArray(new TileType[coveredTiles.size()]); }
+	
+	@Override
+	public Class<? extends TileProperty> getUniquePropertyClass() { return CoveredTileProperty.class; }
 }
