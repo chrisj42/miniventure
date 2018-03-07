@@ -2,7 +2,7 @@ package miniventure.game.api;
 
 import com.badlogic.gdx.utils.Array;
 
-public class TypeInstance<T extends Enum<T> & APIObject<T, P>, P extends Property<P>> {
+public class TypeInstance<T extends Enum<T> & APIObjectType<T, P>, P extends Property<P>> {
 	
 	private final ObjectType<T, P> typeInstance;
 	private final T instance;

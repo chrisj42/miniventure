@@ -4,15 +4,15 @@ import java.util.HashMap;
 
 public class TypeLoader {
 	
-	private static final HashMap<Class<? extends APIObject>, ObjectType> registeredTypes = new HashMap<>();
+	private static final HashMap<Class<? extends APIObjectType>, ObjectType> registeredTypes = new HashMap<>();
 	
-	public static <T extends Enum<T> & APIObject<T, P>, P extends Property<P>> void loadType(Class<T> clazz, PropertyFetcher<P> defaultProperties) {
+	public static <T extends Enum<T> & APIObjectType<T, P>, P extends Property<P>> void loadType(Class<T> clazz, PropertyFetcher<P> defaultProperties) {
 		ObjectType<T, P> type = new ObjectType<>(clazz);
 		registeredTypes.put(clazz, type);
 		type.initialize(defaultProperties);
 	}
 	
-	static <T extends Enum<T> & APIObject<T, P>, P extends Property<P>> ObjectType<T, P> getType(Class<T> typeClass) {
+	static <T extends Enum<T> & APIObjectType<T, P>, P extends Property<P>> ObjectType<T, P> getType(Class<T> typeClass) {
 		//noinspection unchecked
 		return registeredTypes.get(typeClass);
 	}

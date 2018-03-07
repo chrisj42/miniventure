@@ -1,5 +1,6 @@
 package miniventure.game.world.entitynew;
 
+import miniventure.game.api.APIObject;
 import miniventure.game.item.Item;
 import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
@@ -15,7 +16,7 @@ import com.badlogic.gdx.utils.Array;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class Entity implements WorldObject {
+public class Entity extends APIObject<EntityType, EntityProperty> implements WorldObject {
 	
 	@NotNull private final EntityType type;
 	@NotNull private final String[] data;
@@ -42,8 +43,11 @@ public class Entity implements WorldObject {
 		return data;
 	}
 	
-	@NotNull
+	@Override @NotNull
 	public EntityType getType() { return type; }
+	
+	@Override @NotNull
+	public String[] getDataArray() { return getData(false); }
 	
 	@NotNull
 	public String[] getData(boolean includeCoords) {

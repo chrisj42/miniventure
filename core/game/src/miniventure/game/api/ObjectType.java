@@ -2,7 +2,7 @@ package miniventure.game.api;
 
 import java.util.EnumMap;
 
-public class ObjectType<T extends Enum<T> & APIObject<T, P>, P extends Property<P>> {
+public class ObjectType<T extends Enum<T> & APIObjectType<T, P>, P extends Property<P>> {
 	
 	private final Class<T> typeClass;
 	

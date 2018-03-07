@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.Stack;
 import java.util.TreeMap;
 
+import miniventure.game.api.APIObject;
 import miniventure.game.item.Item;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Level;
@@ -23,7 +24,7 @@ import com.badlogic.gdx.utils.Array;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class Tile implements WorldObject {
+public class Tile extends APIObject<TileType, TileProperty> implements WorldObject {
 	
 	public static final int SIZE = 32;
 	private static final TileType baseType = TileType.values[0];
@@ -80,6 +81,21 @@ public class Tile implements WorldObject {
 	public TileType getType() { return tileTypes.peek(); }
 	TileType[] getTypes() { return tileTypes.toArray(new TileType[tileTypes.size()]); }
 	boolean hasType(TileType type) { return tileTypes.contains(type); }
+	
+	@Override
+	protected String[] getDataArray() { return data; }
+	
+	@Override
+	protected int getIndex(TileType type, Class<? extends TileProperty> property, int propDataIndex) {
+		if(!tileTypes.contains(type))
+			throw new IllegalArgumentException("Tile " + this + " does not have a " + type + " type, cannot fetch the data index.");
+		
+		type.checkDataAccess(property, propDataIndex);
+		
+		int offset = 0;
+		return type.getPropDataIndex(property) + propDataIndex + offset;
+	}
+	
 	
 	@NotNull @Override public Level getLevel() { return level; }
 	@Nullable @Override public ServerLevel getServerLevel() {
@@ -297,27 +313,6 @@ public class Tile implements WorldObject {
 				type.getProp(UpdateProperty.class).update(delta, this);
 		}
 	}
-	
-	private int getIndex(TileType type, Class<? extends TileProperty> property, int propDataIndex) {
-		if(!tileTypes.contains(type))
-			throw new IllegalArgumentException("Tile " + this + " does not have a " + type + " type, cannot fetch the data index.");
-		
-		type.checkDataAccess(property, propDataIndex);
-		
-		int offset = 0;
-		
-		
-		return type.getPropDataIndex(property) + propDataIndex + offset;
-	}
-	
-	String getData(Class<? extends TileProperty> property, TileType type, int propDataIndex) {
-		return this.data[getIndex(type, property, propDataIndex)];
-	}
-	
-	void setData(Class<? extends TileProperty> property, TileType type, int propDataIndex, String data) {
-		this.data[getIndex(type, property, propDataIndex)] = data;
-	}
-	
 	
 	@Override
 	public float getLightRadius() {

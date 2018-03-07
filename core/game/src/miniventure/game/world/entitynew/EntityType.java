@@ -1,11 +1,11 @@
 package miniventure.game.world.entitynew;
 
-import miniventure.game.api.APIObject;
+import miniventure.game.api.APIObjectType;
 import miniventure.game.api.PropertyFetcher;
 
 import org.jetbrains.annotations.NotNull;
 
-public enum EntityType implements APIObject<EntityType, EntityProperty> {
+public enum EntityType implements APIObjectType<EntityType, EntityProperty> {
 	
 	;
 	

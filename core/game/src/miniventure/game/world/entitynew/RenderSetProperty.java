@@ -1,10 +1,14 @@
 package miniventure.game.world.entitynew;
 
-public class RenderSetProperty extends RenderProperty {
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+
+import org.jetbrains.annotations.NotNull;
+
+public class RenderSetProperty implements RenderProperty {
 	
 	@FunctionalInterface
 	interface AnimationChooser {
-		RenderProperty getAnimation(Entity e);
+		@NotNull RenderProperty getAnimation(Entity e);
 	}
 	
 	private final AnimationChooser animationChooser;
@@ -14,5 +18,9 @@ public class RenderSetProperty extends RenderProperty {
 	}
 	
 	
+	@Override
+	public void render(Entity e, SpriteBatch batch, float x, float y) {
+		animationChooser.getAnimation(e).render(e, batch, x, y);
+	}
 	
 }

@@ -1,26 +1,26 @@
 package miniventure.game.api;
 
-public interface APIObject<T extends Enum<T> & APIObject<T, P>, P extends Property<P>> {
+public abstract class APIObject<T extends Enum<T> & APIObjectType<T, P>, P extends Property<P>> {
 	
-	P[] getProperties();
 	
-	Class<T> getTypeClass();
-	T getInstance();
+	protected abstract String[] getDataArray();
+	protected abstract T getType();
 	
-	default TypeInstance<T, P> getTypeInstance() {
-		return TypeLoader.getType(getTypeClass()).getTypeInstance(getInstance());
+	protected int getIndex(T type, Class<? extends P> property, int propDataIndex) {
+		if(!getType().equals(type))
+			throw new IllegalArgumentException("APIObject " + this + " is not of the type " + type + ", cannot fetch the data index.");
+		
+		type.checkDataAccess(property, propDataIndex);
+		
+		return type.getPropDataIndex(property) + propDataIndex;
 	}
 	
-	default <Q extends P> Q getProp(Class<Q> clazz) { return getTypeInstance().getProp(clazz); }
-	
-	default int getDataLength() { return getTypeInstance().getDataLength(); }
-	default String[] getInitialData() { return getTypeInstance().getInitialData(); }
-	
-	default void checkDataAccess(Class<? extends P> property, int propDataIndex) {
-		getTypeInstance().checkDataAccess(property, propDataIndex);
+	public String getData(Class<? extends P> property, T type, int propDataIndex) {
+		return getDataArray()[getIndex(type, property, propDataIndex)];
 	}
 	
-	default int getPropDataIndex(Class<? extends P> prop) { return getTypeInstance().getPropDataIndex(prop); }
-	default int getPropDataLength(Class<? extends P> prop) { return getTypeInstance().getPropDataLength(prop); }
+	public void setData(Class<? extends P> property, T type, int propDataIndex, String data) {
+		getDataArray()[getIndex(type, property, propDataIndex)] = data;
+	}
 	
 }

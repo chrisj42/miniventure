@@ -1,6 +1,6 @@
 package miniventure.game.world.tile;
 
-import miniventure.game.api.APIObject;
+import miniventure.game.api.APIObjectType;
 import miniventure.game.api.PropertyFetcher;
 import miniventure.game.api.TypeLoader;
 import miniventure.game.item.FoodItem;
@@ -15,7 +15,7 @@ import miniventure.game.world.tile.DestructibleProperty.RequiredTool;
 
 import org.jetbrains.annotations.NotNull;
 
-public enum TileType implements APIObject<TileType, TileProperty> {
+public enum TileType implements APIObjectType<TileType, TileProperty> {
 	
 	HOLE(() -> new TileProperty[] {
 			SolidProperty.SOLID,

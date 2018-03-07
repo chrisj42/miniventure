@@ -1,8 +1,9 @@
 package miniventure.game.world.entitynew;
 
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
-public class RenderProperty implements EntityProperty {
+@FunctionalInterface
+public interface RenderProperty extends EntityProperty {
 	
 	/*/
 		sprite properties:
@@ -11,14 +12,22 @@ public class RenderProperty implements EntityProperty {
 			- single textures
 	 */
 	
-	public RenderProperty() {
+	RenderProperty textSprite = (e, batch, x, y) -> new RenderProperty() {
+		@Override
+		public String[] getInitialData() {
+			return new String[1];
+		}
 		
-	}
+		@Override
+		public void render(Entity e, SpriteBatch batch, float x, float y) {
+			e.getData(RenderProperty.class, e.getType(), 1);
+		}
+	};
 	
-	public TextureRegion getSprite() {
-		return null;
-	}
+	
+	
+	void render(Entity e, SpriteBatch batch, float x, float y);
 	
 	@Override
-	public Class<? extends EntityProperty> getUniquePropertyClass() { return RenderProperty.class; }
+	default Class<? extends EntityProperty> getUniquePropertyClass() { return RenderProperty.class; }
 }
