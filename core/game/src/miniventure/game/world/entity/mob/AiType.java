@@ -1,8 +1,6 @@
 package miniventure.game.world.entity.mob;
 
-import miniventure.game.item.Item;
 import miniventure.game.world.ItemDrop;
-import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.PursuePattern.FollowBehavior;
 
 import org.jetbrains.annotations.Nullable;

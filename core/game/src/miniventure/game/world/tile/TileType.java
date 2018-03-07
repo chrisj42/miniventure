@@ -109,14 +109,16 @@ public enum TileType implements APIObject<TileType, TileProperty> {
 	private final PropertyFetcher<TileProperty> propertyFetcher;
 	TileType(@NotNull PropertyFetcher<TileProperty> fetcher) { this.propertyFetcher = fetcher; }
 	
-	@Override
-	public TileType getInstance() { return this; }
+	@Override public TileType getInstance() { return this; }
+	@Override public Class<TileType> getTypeClass() { return TileType.class; }
 	
-	@Override
-	public Class<TileType> getTypeClass() { return TileType.class; }
-	
-	@Override
-	public PropertyFetcher<TileProperty> getProperties() { return propertyFetcher; }
+	@Override public TileProperty[] getProperties() {
+		TileProperty[] props = propertyFetcher.getProperties();
+		for(TileProperty p: props)
+			p.init(this);
+		
+		return props;
+	}
 	
 	/* What I've learned:
 		Casting with parenthesis works because the generic type is replaced by Object during runtime, or, if you've specified bounds, as specific a class as you can get with the specified bounds.

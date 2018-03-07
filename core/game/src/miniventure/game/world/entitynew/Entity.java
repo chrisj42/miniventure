@@ -1,6 +1,4 @@
-package miniventure.game.world.entity;
-
-import java.util.HashMap;
+package miniventure.game.world.entitynew;
 
 import miniventure.game.item.Item;
 import miniventure.game.world.Level;
@@ -10,8 +8,6 @@ import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
@@ -19,27 +15,53 @@ import com.badlogic.gdx.utils.Array;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class Entity implements WorldObject {
+public class Entity implements WorldObject {
 	
-	private static final HashMap<Integer, Entity> takenIDs = new HashMap<>();
+	@NotNull private final EntityType type;
+	@NotNull private final String[] data;
 	
-	private TextureRegion texture;
-	private final int eid;
-	private float x, y, z = 0;
+	private float x, y, z;
 	
-	public Entity(TextureRegion texture) {
-		this.texture = texture;
-		
-		int eid;
-		do {
-			eid = MathUtils.random.nextInt();
-		} while(takenIDs.containsKey(eid));
-		this.eid = eid;
-		takenIDs.put(eid, this);
+	public Entity(@NotNull EntityType type) {
+		this.type = type;
+		this.data = type.getInitialData();
 	}
+	public Entity(@NotNull EntityType type, @NotNull String[] data) {
+		this.type = type;
+		this.data = parseCoords(data);
+	}
+	
+	@NotNull
+	// this method assumes the coordinates are in the first three indexes. There then must be at least 3 spots in the array, however no more are required; the returned array will simply be of length 0.
+	private String[] parseCoords(@NotNull String[] allData) {
+		String[] data = new String[allData.length-3];
+		System.arraycopy(allData, 3, data, 0, data.length);
+		x = Integer.parseInt(allData[0]);
+		y = Integer.parseInt(allData[1]);
+		z = Integer.parseInt(allData[2]);
+		return data;
+	}
+	
+	@NotNull
+	public EntityType getType() { return type; }
+	
+	@NotNull
+	public String[] getData(boolean includeCoords) {
+		String[] data = new String[this.data.length+(includeCoords?3:0)];
+		System.arraycopy(this.data, 0, data, includeCoords?3:0, this.data.length);
+		if(includeCoords) {
+			data[0] = x+"";
+			data[1] = y+"";
+			data[2] = z+"";
+		}
+		
+		return data;
+	}
+	
 	
 	@Override @Nullable
 	public Level getLevel() { return Level.getEntityLevel(this); }
+	
 	@Override @Nullable
 	public ServerLevel getServerLevel() { return ServerLevel.getEntityLevel(this); }
 	
@@ -51,45 +73,17 @@ public abstract class Entity implements WorldObject {
 	}
 	
 	@Override
+	public Rectangle getBounds() { return null; }
+	
+	@Override
 	public void update(float delta) {
-		Level level = getLevel();
-		if(level == null) return;
-		Array<WorldObject> objects = new Array<>();
-		objects.addAll(level.getOverlappingEntities(getBounds(), this));
-		Tile tile = level.getClosestTile(getBounds());
-		if(tile != null) objects.add(tile);
-		
-		for(WorldObject obj: objects)
-			obj.touching(this);
+		type.getProp(UpdateProperty.class).update(this, delta);
 	}
 	
 	@Override
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
-		drawSprite(batch, (x-posOffset.x) * Tile.SIZE, (y+z - posOffset.y) * Tile.SIZE);
+		
 	}
-	
-	protected void drawSprite(SpriteBatch batch, float x, float y) {
-		batch.draw(texture, x, y);
-	}
-	
-	protected void setSprite(TextureRegion texture) {
-		this.texture = texture;
-		moveIfLevel(x, y);
-		//z = 0;
-	}
-	
-	protected float getZ() { return z; }
-	protected void setZ(float z) { this.z = z; }
-	
-	@Override
-	public Rectangle getBounds() {
-		return new Rectangle(x, y, texture.getRegionWidth()*1f/Tile.SIZE, texture.getRegionHeight()*1f/Tile.SIZE);
-	}
-	
-	public void addedToLevel(Level level) {}
-	
-	@Override
-	public boolean interactWith(Player player, @Nullable Item item) { return false; }
 	
 	public boolean move(Vector2 v) { return move(v.x, v.y); }
 	public boolean move(float xd, float yd) { return move(xd, yd, 0); }
@@ -211,28 +205,32 @@ public abstract class Entity implements WorldObject {
 			moveTo(level, x, y);
 	}
 	
-	// returns whether anything meaningful happened; if false, then other.touchedBy(this) will be called.
-	@Override
-	public boolean touchedBy(Entity other) { return false; }
-	
-	@Override
-	public void touching(Entity entity) {}
-	
 	@Override
 	public final boolean isPermeableBy(Entity entity) { return isPermeableBy(entity, true); }
-	
 	public boolean isPermeableBy(Entity entity, boolean delegate) {
 		if(delegate)
 			return entity.isPermeableBy(this, false);
+		// regular behavior below
 		return false;
 	}
 	
 	@Override
-	public boolean attackedBy(WorldObject obj, @Nullable Item attackItem, int damage) { return false; }
+	public boolean interactWith(Player player, @Nullable Item heldItem) {
+		return false;
+	}
 	
 	@Override
-	public boolean equals(Object other) { return other instanceof Entity && ((Entity)other).eid == eid; }
+	public boolean attackedBy(WorldObject obj, @Nullable Item item, int dmg) {
+		return false;
+	}
 	
 	@Override
-	public int hashCode() { return eid; }
+	public boolean touchedBy(Entity entity) {
+		return false;
+	}
+	
+	@Override
+	public void touching(Entity entity) {
+		
+	}
 }

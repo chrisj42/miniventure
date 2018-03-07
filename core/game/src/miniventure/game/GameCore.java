@@ -1,5 +1,6 @@
 package miniventure.game;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 
 import miniventure.game.screen.MenuScreen;
@@ -13,6 +14,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
 import org.jetbrains.annotations.Nullable;
@@ -37,7 +40,7 @@ public class GameCore {
 	public static final InputHandler input = new InputHandler();
 	
 	private static SpriteBatch batch;
-	private static BitmapFont font; // this is stored here because it is a really good idea to reuse objects where ever possible; and don't repeat instantiations, aka make a font instance in two classes when the fonts are the same.
+	private static FreeTypeFontGenerator fontGenerator;
 	private static GlyphLayout layout;
 	private static Skin skin;
 	
@@ -48,9 +51,9 @@ public class GameCore {
 		iconAtlas = new TextureAtlas("sprites/icons.txt");
 		
 		batch = new SpriteBatch();
-		font = new BitmapFont(); // uses libGDX's default Arial font
-		font.setColor(Color.WHITE);
-		layout = new GlyphLayout(font, "");
+		//font = new BitmapFont(); // uses libGDX's default Arial font
+		fontGenerator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/arial.ttf"));
+		layout = new GlyphLayout();
 		skin = new Skin(Gdx.files.internal("skins/visui/uiskin.json"));
 		
 		for(AtlasRegion region: iconAtlas.getRegions())
@@ -87,8 +90,10 @@ public class GameCore {
 	
 	public static void dispose () {
 		batch.dispose();
-		font.dispose();
 		skin.dispose();
+		fontGenerator.dispose();
+		for(BitmapFont font: generatedFonts.values())
+			font.dispose();
 		
 		if(menuScreen != null)
 			menuScreen.dispose();
@@ -101,7 +106,7 @@ public class GameCore {
 	
 	
 	public static GlyphLayout getTextLayout(String text) {
-		layout.setText(font, text);
+		layout.setText(getFont(), text);
 		return layout;
 	}
 	
@@ -112,7 +117,73 @@ public class GameCore {
 	
 	public static SpriteBatch getBatch() { return batch; }
 	
-	public static BitmapFont getFont() { return font; }
+	private static class HashableFontParameter {
+		private final FreeTypeFontParameter param;
+		public HashableFontParameter(FreeTypeFontParameter param) {
+			this.param = param;
+		}
+		
+		@Override
+		public boolean equals(Object other) {
+			if(param == null && other == null) return true;
+			if(!(other instanceof FreeTypeFontParameter)) return false;
+			
+			FreeTypeFontParameter param = (FreeTypeFontParameter) other;
+			try {
+				for(Field field: FreeTypeFontParameter.class.getDeclaredFields()) {
+					Object obj1 = field.get(this.param);
+					Object obj2 = field.get(param);
+					if((obj1 == null) != (obj2 == null)) return false;
+					if(obj1 == null) continue;
+					if(!obj1.equals(obj2))
+						return false;
+				}
+			} catch(IllegalAccessException e) {
+				e.printStackTrace();
+				return param.equals(this.param);
+			}
+			
+			return true;
+		}
+		
+		@Override
+		public int hashCode() {
+			int hash = 1;
+			try {
+				Field[] fields = FreeTypeFontParameter.class.getDeclaredFields();
+				for(int i = 0; i < fields.length; i++) {
+					Object obj = fields[i].get(param);
+					hash += 17 * i + 31 * (obj==null?1:obj.hashCode());
+				}
+			} catch(IllegalAccessException e) {
+				e.printStackTrace();
+				return param.hashCode();
+			}
+			
+			return hash;
+		}
+	}
+	
+	private static final HashMap<HashableFontParameter, BitmapFont> generatedFonts = new HashMap<>();
+	private static final FreeTypeFontParameter defaultFont = getDefaultFontConfig();
+	
+	public static FreeTypeFontParameter getDefaultFontConfig() {
+		FreeTypeFontParameter params = new FreeTypeFontParameter();
+		params.size = 15;
+		params.color = Color.WHITE;
+		params.borderColor = Color.BLACK;
+		params.borderWidth = 1;
+		return params;
+	}
+	
+	public static BitmapFont getFont() { return getFont(defaultFont); }
+	public static BitmapFont getFont(FreeTypeFontParameter params) {
+		HashableFontParameter hashed = new HashableFontParameter(params);
+		if(!generatedFonts.containsKey(hashed))
+			generatedFonts.put(hashed, fontGenerator.generateFont(params));
+		
+		return generatedFonts.get(hashed);
+	}
 	
 	public static float getElapsedProgramTime() { return (System.nanoTime() - START_TIME)/1E9f; }
 }

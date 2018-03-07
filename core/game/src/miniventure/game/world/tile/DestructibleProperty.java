@@ -40,7 +40,7 @@ public class DestructibleProperty implements TileProperty {
 	
 	// this is for tiles with health
 	DestructibleProperty(int totalHealth, @Nullable PreferredTool preferredTool, boolean dropsTileItem) {
-		this(totalHealth, preferredTool, new ItemDrop[1]);
+		this(totalHealth, preferredTool, new ItemDrop[dropsTileItem?1:0]);
 		this.dropsTileItem = dropsTileItem;
 	}
 	DestructibleProperty(int totalHealth, @Nullable PreferredTool preferredTool, ItemDrop... drops) {
@@ -66,11 +66,12 @@ public class DestructibleProperty implements TileProperty {
 		this.dropsTileItem = dropsTileItem;
 	}
 	
+	@Override
 	public void init(@NotNull TileType type) {
 		this.tileType = type;
 		
-		//if(dropsTileItem)
-		//	drops[0] = new ItemDrop(TileItem.get(type));
+		if(dropsTileItem)
+			drops[0] = new ItemDrop(TileItem.get(type));
 	}
 	
 	boolean tileAttacked(@NotNull Tile tile, @NotNull WorldObject attacker, @Nullable Item item, int damage) {
@@ -86,8 +87,6 @@ public class DestructibleProperty implements TileProperty {
 				tile.getLevel().addEntity(new TextParticle(damage+""), tile.getCenter(), true);
 			if(health <= 0) {
 				tile.breakTile();
-				if(drops.length > 0 && drops[0] == null && dropsTileItem)
-					drops[0] = new ItemDrop(TileItem.get(tileType));
 				if(tile.getLevel() instanceof ServerLevel)
 					for(ItemDrop drop: drops)
 						if(drop != null)

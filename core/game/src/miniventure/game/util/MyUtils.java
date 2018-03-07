@@ -106,10 +106,6 @@ public class MyUtils {
 		font.setColor(prev);
 	}
 	
-	public static void drawTextCentered(BitmapFont font, Batch batch, String text, float width, float height) {
-		font.draw(batch, text, width/2, height/2, 0, Align.center, true);
-	}
-	
 	// this method moves a rectangle *just* enough so that it fits inside another rectangle. In the event that the "outer" rect is smaller than the rect being moved, the rect being moved will be centered onto the outer rect. The padding is only used if the moving rect isn't already inside the outer one.
 	public static Rectangle moveRectInside(Rectangle toMove, Rectangle outer, float padding) {
 		if(toMove.width+padding*2 >= outer.width)

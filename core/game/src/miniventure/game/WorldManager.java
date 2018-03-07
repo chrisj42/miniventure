@@ -2,10 +2,8 @@ package miniventure.game;
 
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
-import miniventure.game.world.entity.mob.Player;
 
 import com.badlogic.gdx.utils.Array;
-import com.esotericsoftware.kryonet.Connection;
 
 public interface WorldManager {
 	

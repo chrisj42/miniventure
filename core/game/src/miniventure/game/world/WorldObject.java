@@ -1,7 +1,7 @@
 package miniventure.game.world;
 
 import miniventure.game.item.Item;
-import miniventure.game.world.entity.Entity;
+import miniventure.game.world.entitynew.Entity;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.tile.Tile;
 
@@ -16,12 +16,7 @@ import org.jetbrains.annotations.Nullable;
 public interface WorldObject {
 	
 	@Nullable Level getLevel();
-	@Nullable default ServerLevel getServerLevel() {
-		Level level = getLevel();
-		if(level instanceof ServerLevel)
-			return (ServerLevel) level;
-		return null;
-	}
+	@Nullable ServerLevel getServerLevel();
 	
 	Rectangle getBounds();
 	default Vector2 getCenter() { return getBounds().getCenter(new Vector2()); }
@@ -57,9 +52,6 @@ public interface WorldObject {
 	boolean touchedBy(Entity entity);
 	
 	void touching(Entity entity);
-	
-	String save();
-	void load(String data);
 	
 	// returns the closest tile to the center of this object, given an array of tiles.
 	@Nullable

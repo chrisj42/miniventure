@@ -1,6 +1,5 @@
 package miniventure.game.world.entity.mob;
 
-import miniventure.game.GameProtocol;
 import miniventure.game.item.Item;
 import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolType;
@@ -179,10 +178,5 @@ public abstract class Mob extends Entity {
 	
 	public boolean maySpawn(TileType type) {
 		return type == TileType.GRASS || type == TileType.DIRT || type == TileType.SAND;
-	}
-	
-	@Override
-	public String save() {
-		return health+"";
 	}
 }

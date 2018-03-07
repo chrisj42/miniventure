@@ -3,7 +3,6 @@ package miniventure.game.world.entity;
 import miniventure.game.item.Item;
 import miniventure.game.world.entity.mob.Player;
 
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
 
 import org.jetbrains.annotations.NotNull;

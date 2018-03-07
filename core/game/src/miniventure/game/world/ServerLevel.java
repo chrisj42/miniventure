@@ -9,7 +9,7 @@ import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Chunk.ChunkData;
-import miniventure.game.world.entity.Entity;
+import miniventure.game.world.entitynew.Entity;
 import miniventure.game.world.entity.ItemEntity;
 import miniventure.game.world.entity.mob.AiType;
 import miniventure.game.world.entity.mob.Mob;
@@ -43,7 +43,7 @@ public class ServerLevel extends Level {
 	@Override
 	public void entityMoved(Entity entity) {
 		if(getWorld().isKeepAlive(entity)) {
-			if(entity.getLevel() == this) {
+			if(entity.getServerLevel() == this) {
 				// load all surrounding chunks
 				for (Point p : getAreaChunks(entity.getCenter(), 1, false, true)) {
 					Chunk newChunk = new Chunk(p.x, p.y, this, levelGenerator.generateChunk(p.x, p.y));
@@ -251,5 +251,5 @@ public class ServerLevel extends Level {
 	}
 	
 	@Nullable
-	public static Level getEntityLevel(Entity entity) { return entityLevels.get(entity); }
+	public static ServerLevel getEntityLevel(Entity entity) { return entityLevels.get(entity); }
 }

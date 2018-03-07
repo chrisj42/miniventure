@@ -1,7 +1,6 @@
 package miniventure.game.world.entity.mob;
 
 import miniventure.game.item.Item;
-import miniventure.game.world.ItemDrop;
 import miniventure.game.world.WorldObject;
 
 import org.jetbrains.annotations.NotNull;
@@ -57,15 +56,5 @@ public class MobAi extends Mob {
 	public boolean attackedBy(WorldObject obj, @Nullable Item attackItem, int damage) {
 		if(aiType.onHit != null) aiType.onHit.onHit(this, obj, attackItem);
 		return super.attackedBy(obj, attackItem, damage);
-	}
-	
-	@Override
-	public String save() {
-		return super.save()+aiType.name();
-	}
-	
-	@Override
-	public void load(String data) {
-		
 	}
 }

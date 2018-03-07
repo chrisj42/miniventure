@@ -2,7 +2,7 @@ package miniventure.game.api;
 
 public interface APIObject<T extends Enum<T> & APIObject<T, P>, P extends Property<P>> {
 	
-	PropertyFetcher<P> getProperties();
+	P[] getProperties();
 	
 	Class<T> getTypeClass();
 	T getInstance();
