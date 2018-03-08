@@ -1,7 +1,6 @@
 package miniventure.game.item;
 
 import miniventure.game.GameCore;
-import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;

@@ -1,6 +1,6 @@
 package miniventure.game.world.tile;
 
-import miniventure.game.world.entity.Entity;
+import miniventure.game.world.entitynew.Entity;
 
 @FunctionalInterface
 public interface SolidProperty extends TileProperty {

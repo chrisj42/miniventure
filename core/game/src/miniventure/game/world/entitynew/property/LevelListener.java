@@ -11,6 +11,13 @@ public interface LevelListener extends EntityProperty {
 	// you can get the new level through the entity itself, so it doesn't need to be a parameter.
 	void levelChanged(@NotNull Entity e, @Nullable Level oldLevel);
 	
+	default LevelListener combineProperty(LevelListener other) {
+		return (e, oldLevel) -> {
+			other.levelChanged(e, oldLevel);
+			levelChanged(e, oldLevel);
+		};
+	}
+	
 	@Override
 	default Class<? extends EntityProperty> getUniquePropertyClass() { return LevelListener.class; }
 }

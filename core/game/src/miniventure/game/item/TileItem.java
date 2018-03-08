@@ -32,7 +32,7 @@ public class TileItem extends Item {
 	@NotNull
 	public static TileItem get(@NotNull TileType tile) {
 		if(!items.containsKey(tile))
-			items.put(tile, new TileItem(tile, tile.getProp(CoveredTileProperty.class).getCoverableTiles()));
+			items.put(tile, new TileItem(tile, /* here, it will be in the item type. */));
 		return items.get(tile).copy();
 	}
 	

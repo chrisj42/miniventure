@@ -9,6 +9,13 @@ public interface MovementListener extends EntityProperty {
 	
 	void entityMoved(Entity e, Vector2 delta);
 	
+	default MovementListener combineProperty(MovementListener other) {
+		return (e, delta) -> {
+			other.entityMoved(e, delta);
+			entityMoved(e, delta);
+		};
+	}
+	
 	@Override
 	default Class<? extends EntityProperty> getUniquePropertyClass() { return MovementListener.class; }
 }

@@ -7,7 +7,6 @@ import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.mob.Player.Stat;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 import org.jetbrains.annotations.NotNull;
 

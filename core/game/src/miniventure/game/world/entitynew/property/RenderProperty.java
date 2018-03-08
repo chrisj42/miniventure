@@ -29,6 +29,15 @@ public abstract class RenderProperty implements EntityProperty {
 	
 	public abstract void render(Entity e, float delta, SpriteBatch batch, float x, float y);
 	
+	public RenderProperty combineProperty(RenderProperty other) {
+		return new RenderProperty() {
+			@Override
+			public void render(Entity e, float delta, SpriteBatch batch, float x, float y) {
+				RenderProperty.this.render(e, delta, batch, x, y);
+				other.render(e, delta, batch, x, y);
+			}
+		};
+	}
 	
 	public static class TextSprite extends RenderProperty implements DataCarrier<TextSpriteData> {
 		@Override

@@ -37,7 +37,7 @@ public interface EntityProperty extends Property<EntityProperty> {
 	 */
 	
 	static PropertyFetcher<EntityProperty> getDefaultPropertyFetcher() {
-		//noinspection Convert2MethodRef
+		//noinspection Convert2MethodRef, unchecked
 		return () -> new EntityProperty[] {
 				(SizeProperty) () -> new Vector2(),
 				RenderProperty.DEFAULT,
@@ -51,13 +51,11 @@ public interface EntityProperty extends Property<EntityProperty> {
 		};
 	}
 	
+	// this will be used only to replace types that there are multiple of, for an entry for a certain class; it won't be used to entirely replace properties, unless this type is the base type of the property.
+	default EntityProperty combineProperty(EntityProperty other) { return other; }
+	
 	default InstanceData getInitialDataObject() { return InstanceData.NO_DATA; }
 	
 	@Override
 	default String[] getInitialData() { return new String[0]; }
-	
-	// This interface is for when you want to define multiple properties of the same type, but want to select only one.
-	interface PropertyChooser<T extends EntityProperty> {
-		T chooseProperty();
-	}
 }

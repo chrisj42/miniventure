@@ -8,6 +8,14 @@ import miniventure.game.world.entitynew.Entity;
 public interface InteractionListener extends EntityProperty {
 	boolean interact(Player player, Item heldItem, Entity e);
 	
+	default InteractionListener combineProperty(InteractionListener other) {
+		return (player, heldItem, e) -> {
+			boolean val = other.interact(player, heldItem, e);
+			val = interact(player, heldItem, e) || val;
+			return val;
+		};
+	}
+	
 	@Override
 	default Class<? extends EntityProperty> getUniquePropertyClass() { return InteractionListener.class; }
 }
