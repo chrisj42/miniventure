@@ -1,10 +1,12 @@
-package miniventure.game.world.entitynew;
+package miniventure.game.world.entitynew.property;
+
+import miniventure.game.world.entitynew.Entity;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 import org.jetbrains.annotations.NotNull;
 
-public class RenderSetProperty implements RenderProperty {
+public class RenderSetProperty extends RenderProperty {
 	
 	@FunctionalInterface
 	interface AnimationChooser {
@@ -19,8 +21,8 @@ public class RenderSetProperty implements RenderProperty {
 	
 	
 	@Override
-	public void render(Entity e, SpriteBatch batch, float x, float y) {
-		animationChooser.getAnimation(e).render(e, batch, x, y);
+	public void render(Entity e, float delta, SpriteBatch batch, float x, float y) {
+		animationChooser.getAnimation(e).render(e, delta, batch, x, y);
 	}
 	
 }

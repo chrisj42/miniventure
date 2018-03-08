@@ -1,9 +1,8 @@
-package miniventure.game.world.entitynew;
-
-import java.util.HashMap;
+package miniventure.game.world.entitynew.property;
 
 import miniventure.game.api.Property;
 import miniventure.game.api.PropertyFetcher;
+import miniventure.game.world.entitynew.InstanceData;
 
 import com.badlogic.gdx.math.Vector2;
 
@@ -37,14 +36,22 @@ public interface EntityProperty extends Property<EntityProperty> {
 			- on attempted interaction
 	 */
 	
-	static PropertyFetcher<EntityProperty> getDefaultPropertyMap() {
+	static PropertyFetcher<EntityProperty> getDefaultPropertyFetcher() {
 		//noinspection Convert2MethodRef
 		return () -> new EntityProperty[] {
 				(SizeProperty) () -> new Vector2(),
-				(LevelListener) (e, lvl) -> {},
-				(UpdateProperty) (e, delta) -> {}
+				RenderProperty.DEFAULT,
+				PermeableProperty.DEFAULT,
+				(UpdateProperty) (e, delta) -> {},
+				(InteractionListener) (p, i, e) -> false,
+				(AttackListener) (obj, i, dmg, e) -> false,
+				(TouchListener) (e, toucher, initial) -> false,
+				(MovementListener) (e, delta) -> {},
+				(LevelListener) (e, lvl) -> {}
 		};
 	}
+	
+	default InstanceData getInitialDataObject() { return InstanceData.NO_DATA; }
 	
 	@Override
 	default String[] getInitialData() { return new String[0]; }

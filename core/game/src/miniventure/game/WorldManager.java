@@ -2,6 +2,7 @@ package miniventure.game;
 
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
+import miniventure.game.world.entitynew.Entity;
 
 import com.badlogic.gdx.utils.Array;
 
@@ -33,6 +34,9 @@ public interface WorldManager {
 	
 	/** fetches time since the world was originally created (while the world is loaded and running) */
 	float getGameTime(); 
+	
+	/** generates a entity id that is unique for this game. */
+	int generateEntityID(Entity entity);
 	
 	default String getTimeString() { return TimeOfDay.getTimeString(getGameTime()); }
 }

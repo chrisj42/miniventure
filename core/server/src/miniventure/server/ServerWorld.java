@@ -1,5 +1,6 @@
 package miniventure.server;
 
+import java.util.HashMap;
 import java.util.HashSet;
 
 import miniventure.game.WorldManager;
@@ -8,6 +9,7 @@ import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;
+import miniventure.game.world.entitynew.Entity;
 import miniventure.game.world.levelgen.LevelGenerator;
 
 import com.badlogic.gdx.math.MathUtils;
@@ -30,6 +32,8 @@ public class ServerWorld implements WorldManager {
 		
 		GameScreen... game screen won't do much, just do the rendering. 
 	 */
+	
+	private final HashMap<Integer, Entity> entityIDMap = new HashMap<>();
 	
 	private LevelGenerator levelGenerator;
 	private GameServer server;
@@ -123,4 +127,14 @@ public class ServerWorld implements WorldManager {
 	
 	@Override
 	public float getGameTime() { return gameTime; }
+	
+	@Override
+	public int generateEntityID(Entity entity) {
+		int eid;
+		do {
+			eid = MathUtils.random.nextInt();
+		} while(entityIDMap.containsKey(eid));
+		entityIDMap.put(eid, entity);
+		return eid;
+	}
 }

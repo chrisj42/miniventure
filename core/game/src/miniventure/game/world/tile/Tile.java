@@ -83,7 +83,13 @@ public class Tile extends APIObject<TileType, TileProperty> implements WorldObje
 	boolean hasType(TileType type) { return tileTypes.contains(type); }
 	
 	@Override
-	protected String[] getDataArray() { return data; }
+	public String getData(Class<? extends TileProperty> property, TileType type, int propDataIndex) {
+		return data[getIndex(type, property, propDataIndex)];
+	}
+	
+	public void setData(Class<? extends TileProperty> property, TileType type, int propDataIndex, String data) {
+		this.data[getIndex(type, property, propDataIndex)] = data;
+	}
 	
 	@Override
 	protected int getIndex(TileType type, Class<? extends TileProperty> property, int propDataIndex) {
@@ -93,6 +99,15 @@ public class Tile extends APIObject<TileType, TileProperty> implements WorldObje
 		type.checkDataAccess(property, propDataIndex);
 		
 		int offset = 0;
+		
+		for(int i = tileTypes.size()-1; i >= 0; i--) {
+			TileType cur = tileTypes.get(i);
+			if(!type.equals(cur))
+				offset += cur.getDataLength();
+			else
+				break;
+		}
+		
 		return type.getPropDataIndex(property) + propDataIndex + offset;
 	}
 	

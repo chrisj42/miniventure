@@ -1,4 +1,4 @@
-package miniventure.game.world.entitynew;
+package miniventure.game.world.entitynew.property;
 
 import com.badlogic.gdx.math.Vector2;
 

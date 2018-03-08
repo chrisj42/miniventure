@@ -58,7 +58,8 @@ public class Player extends Mob {
 		
 		Armor("", 10, 10, 0);
 		
-		private final int max, initial, iconCount;
+		public final int max, initial;
+		private final int iconCount;
 		private final String icon, outlineIcon;
 		private final int iconWidth, iconHeight;
 		

@@ -1,5 +1,9 @@
 package miniventure.game.api;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
 import com.badlogic.gdx.utils.Array;
 
 public class TypeInstance<T extends Enum<T> & APIObjectType<T, P>, P extends Property<P>> {
@@ -18,9 +22,20 @@ public class TypeInstance<T extends Enum<T> & APIObjectType<T, P>, P extends Pro
 		
 		propertyMap = new PropertyInstanceMap<>(defaultProperties);
 		
+		PropertyInstanceMap<P> givenProps = new PropertyInstanceMap<>(instance.getProperties());
+		
+		HashSet<Class<? extends P>> allClasses = new HashSet<>();
+		allClasses.addAll(propertyMap.getPropertyClasses());
+		allClasses.addAll(givenProps.getPropertyClasses());
+		
+		// replace all defaults with the values in the given property map, while also adding any classes that were not already present.
+		for(Class<? extends P> clazz: allClasses) {
+			propertyMap.putFromMap(clazz, givenProps);
+		}
+		
 		Array<String> initData = new Array<>();
 		
-		for(P prop: instance.getProperties()) {
+		for(P prop: getPropertyObjects()) {
 			propertyDataIndexes.put(prop, initData.size);
 			String[] propData = prop.getInitialData();
 			propertyDataLengths.put(prop, propData.length);
@@ -33,6 +48,8 @@ public class TypeInstance<T extends Enum<T> & APIObjectType<T, P>, P extends Pro
 	}
 	
 	public <Q extends P> Q getProp(Class<Q> clazz) { return propertyMap.get(clazz); }
+	
+	public Set<P> getPropertyObjects() { return new HashSet<>(propertyMap.getProperties()); }
 	
 	int getDataLength() { return initialData.length; }
 	

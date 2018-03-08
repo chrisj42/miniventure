@@ -1,6 +1,7 @@
 package miniventure.game.api;
 
-import java.util.HashMap;
+import java.util.Collection;
+import java.util.Set;
 
 public class PropertyInstanceMap<P extends Property<P>> {
 	
@@ -15,15 +16,16 @@ public class PropertyInstanceMap<P extends Property<P>> {
 	}
 	
 	public PropertyInstanceMap(PropertyFetcher<P> fetcher) {
+		this(fetcher.getProperties());
+	}
+	public PropertyInstanceMap(P[] properties) {
 		this();
-		for(P prop: fetcher.getProperties())
+		for(P prop: properties)
 			put(prop);
 	}
 	
 	public <T extends P> void put(T instance) {
-		//noinspection unchecked
-		map.put((Class<? extends P>)instance.getClass(), instance);
-		map.put(instance.getUniquePropertyClass(), instance);
+		map.put(instance, instance); // this looks weird, I know, but it does actually accomplish something. :P
 	}
 	
 	// can be null; should specify the unique property class
@@ -31,4 +33,15 @@ public class PropertyInstanceMap<P extends Property<P>> {
 		//noinspection unchecked
 		return (T) map.get(clazz);
 	}
+	
+	public <T extends P> void putFromMap(Class<T> clazz, PropertyInstanceMap<P> map) {
+		T prop = map.get(clazz);
+		if(prop != null) {
+			put(prop);
+			this.map.put(clazz, prop);
+		}
+	}
+	
+	public Set<Class<? extends P>> getPropertyClasses() { return map.keySet(); }
+	public Collection<P> getProperties() { return map.values(); }
 }
