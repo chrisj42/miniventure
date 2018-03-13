@@ -1,6 +1,5 @@
 package miniventure.game;
 
-import java.lang.reflect.Field;
 import java.util.HashMap;
 
 import miniventure.game.screen.MenuScreen;
@@ -8,6 +7,7 @@ import miniventure.game.util.Version;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -92,8 +92,8 @@ public class GameCore {
 		batch.dispose();
 		skin.dispose();
 		fontGenerator.dispose();
-		for(BitmapFont font: generatedFonts.values())
-			font.dispose();
+		if(defaultFont != null)
+			defaultFont.dispose();
 		
 		if(menuScreen != null)
 			menuScreen.dispose();
@@ -117,72 +117,28 @@ public class GameCore {
 	
 	public static SpriteBatch getBatch() { return batch; }
 	
-	private static class HashableFontParameter {
-		private final FreeTypeFontParameter param;
-		public HashableFontParameter(FreeTypeFontParameter param) {
-			this.param = param;
-		}
-		
-		@Override
-		public boolean equals(Object other) {
-			if(param == null && other == null) return true;
-			if(!(other instanceof FreeTypeFontParameter)) return false;
-			
-			FreeTypeFontParameter param = (FreeTypeFontParameter) other;
-			try {
-				for(Field field: FreeTypeFontParameter.class.getDeclaredFields()) {
-					Object obj1 = field.get(this.param);
-					Object obj2 = field.get(param);
-					if((obj1 == null) != (obj2 == null)) return false;
-					if(obj1 == null) continue;
-					if(!obj1.equals(obj2))
-						return false;
-				}
-			} catch(IllegalAccessException e) {
-				e.printStackTrace();
-				return param.equals(this.param);
-			}
-			
-			return true;
-		}
-		
-		@Override
-		public int hashCode() {
-			int hash = 1;
-			try {
-				Field[] fields = FreeTypeFontParameter.class.getDeclaredFields();
-				for(int i = 0; i < fields.length; i++) {
-					Object obj = fields[i].get(param);
-					hash += 17 * i + 31 * (obj==null?1:obj.hashCode());
-				}
-			} catch(IllegalAccessException e) {
-				e.printStackTrace();
-				return param.hashCode();
-			}
-			
-			return hash;
-		}
-	}
+	private static BitmapFont defaultFont;
 	
-	private static final HashMap<HashableFontParameter, BitmapFont> generatedFonts = new HashMap<>();
-	private static final FreeTypeFontParameter defaultFont = getDefaultFontConfig();
-	
-	public static FreeTypeFontParameter getDefaultFontConfig() {
+	private static FreeTypeFontParameter getDefaultFontConfig() {
 		FreeTypeFontParameter params = new FreeTypeFontParameter();
 		params.size = 15;
 		params.color = Color.WHITE;
 		params.borderColor = Color.BLACK;
 		params.borderWidth = 1;
+		params.spaceX = -1;
+		//params.magFilter = TextureFilter.Linear;
+		params.shadowOffsetX = 1;
+		params.shadowOffsetY = 1;
+		params.shadowColor = Color.BLACK;
 		return params;
 	}
 	
-	public static BitmapFont getFont() { return getFont(defaultFont); }
-	public static BitmapFont getFont(FreeTypeFontParameter params) {
-		HashableFontParameter hashed = new HashableFontParameter(params);
-		if(!generatedFonts.containsKey(hashed))
-			generatedFonts.put(hashed, fontGenerator.generateFont(params));
+	public static BitmapFont getFont() {
+		if(defaultFont == null)
+			defaultFont = fontGenerator.generateFont(getDefaultFontConfig());
 		
-		return generatedFonts.get(hashed);
+		defaultFont.setColor(Color.WHITE);
+		return defaultFont;
 	}
 	
 	public static float getElapsedProgramTime() { return (System.nanoTime() - START_TIME)/1E9f; }

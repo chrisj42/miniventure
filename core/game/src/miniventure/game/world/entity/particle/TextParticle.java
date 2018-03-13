@@ -49,7 +49,6 @@ public class TextParticle extends BounceEntity implements Particle {
 	
 	@Override
 	protected void drawSprite(SpriteBatch batch, float x, float y) {
-		BitmapFont font = GameCore.getFont();
 		font.setColor(shadow);
 		font.draw(batch, text, x-1, y+1, 0, Align.center, false);
 		font.setColor(main);

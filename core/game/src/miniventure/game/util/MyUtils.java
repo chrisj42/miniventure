@@ -1,5 +1,9 @@
 package miniventure.game.util;
 
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Stack;
+
 import miniventure.game.GameCore;
 
 import com.badlogic.gdx.graphics.Color;
@@ -153,5 +157,12 @@ public class MyUtils {
 		batch.setColor(r, g, b, a);
 		batch.draw(GameCore.icons.get("white"), x, y);
 		batch.setColor(c);
+	}
+	
+	public static <T> void reverseStack(Stack<T> stack) {
+		LinkedList<T> list = new LinkedList<>(stack);
+		stack.clear();
+		while(list.size() > 0)
+			stack.push(list.remove(list.size()-1));
 	}
 }

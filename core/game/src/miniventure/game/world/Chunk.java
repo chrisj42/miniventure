@@ -18,7 +18,7 @@ public class Chunk {
 	public final int width, height;
 	public final int chunkX, chunkY;
 	
-	public Chunk(int chunkX, int chunkY, @NotNull Level level, @NotNull TileType[][] tileTypes) {
+	public Chunk(int chunkX, int chunkY, @NotNull Level level, @NotNull TileType[][][] tileTypes) {
 		tiles = new Tile[tileTypes.length][];
 		width = tiles.length;
 		this.chunkX = chunkX;

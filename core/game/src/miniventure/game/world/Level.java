@@ -7,11 +7,10 @@ import miniventure.game.GameProtocol.LevelData;
 import miniventure.game.WorldManager;
 import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.entity.Entity;
-import miniventure.game.world.entity.particle.Particle;
 import miniventure.game.world.entity.mob.Player;
+import miniventure.game.world.entity.particle.Particle;
 import miniventure.game.world.tile.Tile;
 
-import com.badlogic.ashley.core.Engine;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -31,8 +30,6 @@ public class Level {
 	
 	protected final HashSet<Entity> entities = new HashSet<>();
 	
-	final Engine entityEngine;
-	
 	/** @noinspection FieldCanBeLocal*/
 	private int entityCap = 8; // per chunk
 	
@@ -43,7 +40,6 @@ public class Level {
 		this.width = width;
 		this.height = height;
 		
-		entityEngine = new Engine();
 		/*
 			At any given time, I will load a chunk, and all the chunks in a 2 chunk radius.
 			

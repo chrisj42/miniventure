@@ -82,6 +82,7 @@ public abstract class Mob extends Entity {
 	@Override
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
 		blinker.update(delta);
+		animator.pollAnimation(delta);
 		
 		if(invulnerableTime <= 0 || blinker.shouldRender())
 			super.render(batch, delta, posOffset);

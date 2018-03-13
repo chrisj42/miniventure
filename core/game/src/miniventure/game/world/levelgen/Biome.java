@@ -1,15 +1,15 @@
 package miniventure.game.world.levelgen;
 
+import java.util.ArrayList;
+import java.util.EnumMap;
+
 import miniventure.game.world.tile.TileType;
+
+import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
 
-import static miniventure.game.world.tile.TileType.CACTUS;
-import static miniventure.game.world.tile.TileType.GRASS;
-import static miniventure.game.world.tile.TileType.SAND;
-import static miniventure.game.world.tile.TileType.STONE;
-import static miniventure.game.world.tile.TileType.TREE;
-import static miniventure.game.world.tile.TileType.WATER;
+import static miniventure.game.world.tile.TileType.*;
 
 enum Biome {
 	
@@ -23,12 +23,30 @@ enum Biome {
 	
 	FOREST(GRASS+"_2", TREE+"_1", GRASS+"_2");
 	
-	
 	@NotNull private final EnumFetcher<TileType> tileFetcher;
+	
+	private static final EnumMap<TileType, TileType> underTiles = new EnumMap<TileType, TileType>(TileType.class) {{
+		put(WATER, HOLE);
+		put(SAND, DIRT);
+		put(CACTUS, SAND);
+		put(TREE, GRASS);
+		put(GRASS, DIRT);
+		put(DIRT, HOLE);
+		put(STONE, DIRT);
+	}};
 	
 	Biome(@NotNull String... tilesWithOccurrences) {
 		tileFetcher = new EnumFetcher<>(TileType.class, tilesWithOccurrences);
 	}
 	
-	public TileType getTile(float noise) { return tileFetcher.getType(noise); }
+	public TileType[] getTile(float noise) {
+		ArrayList<TileType> types = new ArrayList<>();
+		TileType curType = tileFetcher.getType(noise);
+		while(curType != null) {
+			types.add(curType);
+			curType = underTiles.get(curType);
+		}
+		
+		return types.toArray(new TileType[types.size()]);
+	}
 }

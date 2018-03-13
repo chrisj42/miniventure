@@ -40,19 +40,19 @@ public class Tile implements WorldObject {
 		this.y = y;
 	}
 	
-	// the TileType array is expected in order of bottom to top.
+	// the TileType array is expected in order of top to bottom.
 	// used most when creating new tiles for new levels
 	public Tile(@NotNull Level level, int x, int y, @NotNull TileType... types) {
 		this(level, x, y);
 		
-		for(TileType type: types)
-			tileTypes.push(type);
+		// reverse the stack order, so it's bottom to top.
+		for(int i = types.length-1; i >= 0; i--)
+			tileTypes.push(types[i]);
 		
 		/// now it's time to initialize the tile data.
 		
 		int len = 0;
 		Stack<String[]> eachData = new Stack<>();
-		// I need to make sure the data for the top tile is first, and the bottom tile data is last. So, I need to reverse the order. 
 		
 		for(TileType type: tileTypes) { // goes through starting from bottom of stack, at bottom tile.
 			eachData.push(type.getInitialData());

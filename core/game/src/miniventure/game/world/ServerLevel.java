@@ -177,7 +177,7 @@ public class ServerLevel extends Level {
 				y = MathUtils.random((int)spawnArea.y, (int) (spawnArea.y+spawnArea.height));
 				Tile tile = getTile(x, y);
 				if(tile == null)
-					type = levelGenerator.generateTile(x, y);
+					type = levelGenerator.generateTile(x, y)[0];
 				else
 					type = tile.getType();
 			} while(!mob.maySpawn(type));

@@ -111,7 +111,7 @@ public enum TileType {
 	 */
 	
 	
-	private final TilePropertyMap propertyMap = new TilePropertyMap();
+	private final HashMap<Class<? extends TileProperty>, TileProperty> propertyMap = new HashMap<>();
 	
 	private final HashMap<Class<? extends TileProperty>, Integer> propertyDataIndexes = new HashMap<>();
 	private final HashMap<Class<? extends TileProperty>, Integer> propertyDataLengths = new HashMap<>();
@@ -127,6 +127,8 @@ public enum TileType {
 		this.fetcher = fetcher;
 	}
 	
+	public static final TileType[] values = TileType.values();
+	
 	static {
 		for(TileType type: TileType.values)
 			type.init();
@@ -134,22 +136,22 @@ public enum TileType {
 	
 	private void init() {
 		// add the default properties
-		propertyMap.putAll(TileProperty.getDefaultProperties());
+		for(TileProperty prop: TileProperty.getDefaultProperties())
+			propertyMap.put(castProp(prop), prop);
 		
 		// replace the defaults with specified properties
-		propertyMap.putAll(fetcher.getProperties());
+		for(TileProperty prop: fetcher.getProperties())
+			propertyMap.put(castProp(prop), prop);
 		
-		TileProperty[] props = propertyMap.values();
-		
-		for(TileProperty prop: props)
+		for(TileProperty prop: propertyMap.values())
 			prop.init(this);
 		
 		Array<String> initData = new Array<>();
 		
-		for(TileProperty prop: props) {
-			propertyDataIndexes.put(prop.getClass(), initData.size);
+		for(TileProperty prop: propertyMap.values()) {
+			propertyDataIndexes.put(castProp(prop), initData.size);
 			String[] propData = prop.getInitialData();
-			propertyDataLengths.put(prop.getClass(), propData.length);
+			propertyDataLengths.put(castProp(prop), propData.length);
 			initData.addAll(propData);
 		}
 		
@@ -158,25 +160,26 @@ public enum TileType {
 			initialData[i] = initData.get(i);
 	}
 	
-	private Class<? extends TileProperty> castProp(Class<? extends TileProperty> clazz) {
-		// to make for less typing and clutter. :)
-		return getProp(clazz).getClass();
-	}
-	
 	/* What I've learned:
 		Casting with parenthesis works because the generic type is replaced by Object during runtime, or, if you've specified bounds, as specific a class as you can get with the specified bounds.
 		But calling (T var).getClass().cast(Tile t) doesn't always work because getClass() returns the actual class of the generic variable, and that may not be compatible with whatever you're trying to cast.
 	 */
 	
+	private static Class<? extends TileProperty> castProp(TileProperty prop) { return castProp(prop.getClass()); }
+	private static Class<? extends TileProperty> castProp(Class<? extends TileProperty> clazz) {
+		return MyUtils.getDirectSubclass(TileProperty.class, clazz);
+	}
+	
 	public <T extends TileProperty> T getProp(Class<T> clazz) {
-		return propertyMap.get(clazz);
+		//noinspection unchecked
+		return (T) propertyMap.get(castProp(clazz));
 	}
 	
 	int getDataLength() { return initialData.length; }
 	String[] getInitialData() { return Arrays.copyOf(initialData, initialData.length); }
 	
 	void checkDataAccess(Class<? extends TileProperty> prop, int propDataIndex) {
-		Class<? extends TileProperty> property = getProp(prop).getClass();
+		Class<? extends TileProperty> property = castProp(prop);
 		// technically, the below should never happen, unless it's passed the TileProperty class or a dynamically generated class, or something, because the propertyMap should have an instance of each implementer of the TileProperty interface.
 		if(!propertyDataIndexes.containsKey(property))
 			throw new IllegalArgumentException("The specified property class, " + property + ", is not part of the list of property classes for the "+this+" tile type.");
@@ -187,9 +190,6 @@ public enum TileType {
 	
 	int getPropDataIndex(Class<? extends TileProperty> prop) { return propertyDataIndexes.get(castProp(prop)); }
 	int getPropDataLength(Class<? extends TileProperty> prop) { return propertyDataLengths.get(castProp(prop)); }
-	
-	
-	public static final TileType[] values = TileType.values();
 	
 	public String getName() { return MyUtils.toTitleCase(name()); }
 }

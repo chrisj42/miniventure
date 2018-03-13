@@ -87,11 +87,8 @@ public abstract class Item {
 		batch.setColor(prev);
 		batch.draw(texture, tx, y);
 		
-		FreeTypeFontParameter params = GameCore.getDefaultFontConfig();
-		params.color = textColor;
-		params.borderWidth = 1;
-		
-		BitmapFont font = GameCore.getFont(params);
+		BitmapFont font = GameCore.getFont();
+		font.setColor(textColor);
 		
 		float textOff = font.getCapHeight() + font.getAscent();
 		font.draw(batch, stackSize+"", x+1, y+textOff-font.getDescent());
