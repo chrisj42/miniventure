@@ -22,8 +22,13 @@ public enum FoodItem {
 	
 	@NotNull
 	public Item get() {
-		return new Item(name(), GameCore.icons.get(name().toLowerCase())) {
+		return new Item(ItemType.Food, name()) {
 			@Override public Item copy() { return this; }
+			
+			@Override
+			public String[] save() {
+				return new String[] {getType().name(), FoodItem.this.name()};
+			}
 			
 			@Override public void interact(Player player) {
 				int gained = player.changeStat(Stat.Hunger, healthGained);

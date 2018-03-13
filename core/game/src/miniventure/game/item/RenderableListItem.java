@@ -82,7 +82,7 @@ abstract class RenderableListItem extends Button {
 		if(getStage().getKeyboardFocus() == this)
 			MyUtils.fillRect(getX(), getY(), getPrefWidth(), getPrefHeight(), .8f, .8f, .8f, 0.5f*parentAlpha, batch);
 		
-		item.drawItem(getStackSize(idx), batch, GameCore.getFont(), getX()+5, getY()+5, getItemTextColor());
+		item.drawItem(getStackSize(idx), batch, getX()+5, getY()+5, getItemTextColor());
 	}
 	
 	protected Color getItemTextColor() { return Color.WHITE; }

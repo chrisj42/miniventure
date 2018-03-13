@@ -160,8 +160,8 @@ public class Player extends Mob {
 			GameCore.setScreen(new CraftingScreen(Recipes.recipes, inventory));
 	}
 	
-	public void drawGui(Rectangle canvas, SpriteBatch batch, BitmapFont font) {
-		hands.getUsableItem().drawItem(hands.getCount(), batch, font, canvas.width/2, 20);
+	public void drawGui(Rectangle canvas, SpriteBatch batch) {
+		hands.getUsableItem().drawItem(hands.getCount(), batch, canvas.width/2, 20);
 		float y = canvas.y + 3;
 		
 		renderBar(Stat.Health, canvas.x, y, batch);

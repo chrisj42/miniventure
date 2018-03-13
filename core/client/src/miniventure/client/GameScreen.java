@@ -182,7 +182,7 @@ public class GameScreen {
 		batch.setProjectionMatrix(uiCamera.combined);
 		
 		// draw UI for current item, and stats
-		mainPlayer.drawGui(new Rectangle(0, 0, uiCamera.viewportWidth, uiCamera.viewportHeight), batch, font);
+		mainPlayer.drawGui(new Rectangle(0, 0, uiCamera.viewportWidth, uiCamera.viewportHeight), batch);
 		
 		
 		// a list of text to display in the upper left, for debug purposes

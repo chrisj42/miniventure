@@ -16,10 +16,15 @@ public class Hands {
 	
 	/// This is a wrapper class for items, when being currently held by the player. Perhaps *this* should be extended..?
 	
-	private class HandItem extends Item {
+	private static class HandItem extends Item {
 		HandItem() {
-			super("Hand", GameCore.icons.get("blank"));
+			super(ItemType.Misc, "Hand", GameCore.icons.get("blank"));
 		}
+		
+		@Override
+		public String[] save() { return new String[] {"Hands.HandItem"}; }
+		
+		public static Item load(String[] data) { return new HandItem(); }
 		
 		@Override public Item getUsedItem() { return this; }
 		@Override public Item copy() { return new HandItem(); }
@@ -36,7 +41,7 @@ public class Hands {
 		}
 		
 		@Override
-		public void drawItem(int stackSize, Batch batch, BitmapFont font, float x, float y) {}
+		public void drawItem(int stackSize, Batch batch, float x, float y) {}
 	}
 	
 	@NotNull private Item item;

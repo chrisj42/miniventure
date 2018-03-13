@@ -185,7 +185,7 @@ public class CraftingScreen extends MenuScreen {
 		public void draw(Batch batch, float parentAlpha) {
 			if(backgroundColor != null)
 				MyUtils.fillRect(getX(), getY(), getWidth(), getHeight(), backgroundColor, batch);
-			item.item.drawItem(item.count, batch, GameCore.getFont(), getX()+5, getY()+5);
+			item.item.drawItem(item.count, batch, getX()+5, getY()+5);
 		}
 	}
 }

@@ -20,19 +20,32 @@ public class TileItem extends Item {
 	
 	private static final HashMap<TileType, TileItem> items = new HashMap<>();
 	
+	private static final TileType[] groundTypes = new TileType[] {
+		TileType.GRASS, TileType.DIRT, TileType.SAND
+	};
+	
+	private static void addItem(TileType result, TileType... canPlaceOn) {
+		items.put(result, new TileItem(result, canPlaceOn));
+	}
+	
 	static {
-		// TODO here, I should put all the tile items that I want to have custom info, not directly fetched from the tile.
 		// for example, acorns.
-		// one improvement, btw, could be that in the current system, there can only be one item per tile. You can't have two items that end up producing the same tile. You even search by TileType.
-		items.put(TileType.TORCH, new TileItem(TileType.TORCH, TileType.GRASS, TileType.SAND, TileType.DIRT));
-		items.put(TileType.DOOR_CLOSED, new TileItem("Door", GameCore.tileAtlas.findRegion("door_closed/00"), TileType.DOOR_CLOSED, (TileType[])null));
+		// one improvement, btw, could be that in the current system, there can only be one item per tile. You can't have two items that end up producing the same tile. You even search by TileType. I don't necessarily like this...
+		addItem(TileType.TORCH, groundTypes);
+		
+		addItem(TileType.DIRT, TileType.HOLE);
+		addItem(TileType.SAND, TileType.DIRT);
+		addItem(TileType.GRASS, TileType.DIRT);
+		addItem(TileType.STONE, TileType.DIRT);
+		
+		items.put(TileType.DOOR_CLOSED, new TileItem("Door", GameCore.tileAtlas.findRegion("door_closed/00"), TileType.DOOR_CLOSED, groundTypes));
 		items.put(TileType.DOOR_OPEN, items.get(TileType.DOOR_CLOSED));
 	}
 	
 	@NotNull
 	public static TileItem get(@NotNull TileType tile) {
 		if(!items.containsKey(tile))
-			items.put(tile, new TileItem(tile, /* here, it will be in the item type. */));
+			items.put(tile, new TileItem(tile, groundTypes));
 		return items.get(tile).copy();
 	}
 	
@@ -44,7 +57,7 @@ public class TileItem extends Item {
 	}
 	
 	private TileItem(String name, TextureRegion texture, @NotNull TileType result, @Nullable TileType... placeOn) {
-		super(name, texture);
+		super(ItemType.Tile, name, texture);
 		this.canPlaceOn = placeOn;
 		this.result = result;
 	}
@@ -87,5 +100,10 @@ public class TileItem extends Item {
 	@Override
 	public TileItem copy() {
 		return new TileItem(getName(), getTexture(), result, canPlaceOn);
+	}
+	
+	@Override
+	public String[] save() {
+		return new String[] {getType().name(), result.name()};
 	}
 }

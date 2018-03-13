@@ -41,7 +41,7 @@ public class ToolItem extends Item {
 	
 	public ToolItem(ToolType type, Material material) { this(type, material, material.maxDurability); }
 	public ToolItem(ToolType type, Material material, int durability) {
-		super(material.name() + " " + type.name(), type.texture==null?new TextureRegion():type.texture);
+		super(ItemType.Tool, material.name() + " " + type.name(), type.texture==null?new TextureRegion():type.texture);
 		this.toolType = type;
 		this.material = material;
 		this.durability = durability;
@@ -49,7 +49,7 @@ public class ToolItem extends Item {
 	
 	@Override public int getMaxStackSize() { return 1; }
 	
-	public ToolType getType() { return toolType; }
+	public ToolType getToolType() { return toolType; }
 	public Material getMaterial() { return material; }
 	
 	@Override
@@ -70,8 +70,8 @@ public class ToolItem extends Item {
 	}
 	
 	@Override
-	public void drawItem(int stackSize, Batch batch, BitmapFont font, float x, float y, Color textColor) {
-		super.drawItem(stackSize, batch, font, x, y, textColor);
+	public void drawItem(int stackSize, Batch batch, float x, float y, Color textColor) {
+		super.drawItem(stackSize, batch, x, y, textColor);
 		
 		if(durability == material.maxDurability) return; // no bar
 		
@@ -92,4 +92,9 @@ public class ToolItem extends Item {
 	
 	@Override
 	public ToolItem copy() { return new ToolItem(toolType, material, durability); }
+	
+	@Override
+	public String[] save() {
+		return new String[] {getType().name(), toolType.name(), material.name(), durability+""};
+	}
 }

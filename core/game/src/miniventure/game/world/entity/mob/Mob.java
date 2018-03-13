@@ -131,9 +131,9 @@ public abstract class Mob extends Entity {
 		
 		if(item instanceof ToolItem) {
 			ToolItem ti = (ToolItem) item;
-			if(ti.getType() == ToolType.Sword)
+			if(ti.getToolType() == ToolType.Sword)
 				damage *= 3;
-			if(ti.getType() == ToolType.Axe)
+			if(ti.getToolType() == ToolType.Axe)
 				damage *= 2;
 		}
 		

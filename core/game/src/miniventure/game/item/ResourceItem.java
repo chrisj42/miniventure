@@ -12,7 +12,12 @@ public enum ResourceItem {
 	
 	@NotNull
 	public Item get() {
-		return new Item(name(), GameCore.icons.size() > 0 ? GameCore.icons.get(name().toLowerCase()) : new TextureRegion()) {
+		return new Item(ItemType.Resource, name()) {
+			@Override
+			public String[] save() {
+				return new String[] {getType().name(), ResourceItem.this.name()};
+			}
+			
 			@Override public Item copy() { return this; }
 		};
 	}

@@ -112,7 +112,7 @@ public class DestructibleProperty implements TileProperty {
 		}
 		
 		if(preferredTool != null && attackItem instanceof ToolItem) {
-			ToolType type = ((ToolItem)attackItem).getType();
+			ToolType type = ((ToolItem)attackItem).getToolType();
 			if(type == preferredTool.toolType)
 				damage = (int) Math.ceil(damage * preferredTool.damageMultiplier);
 		}
@@ -164,7 +164,7 @@ public class DestructibleProperty implements TileProperty {
 				return false;
 			
 			ToolItem tool = (ToolItem) attackItem;
-			return (toolType == null || tool.getType() == toolType) && (material == null || tool.getMaterial() == material);
+			return (toolType == null || tool.getToolType() == toolType) && (material == null || tool.getMaterial() == material);
 		}
 	}
 	
