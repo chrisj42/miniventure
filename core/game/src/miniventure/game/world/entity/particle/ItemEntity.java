@@ -1,6 +1,7 @@
-package miniventure.game.world.entity;
+package miniventure.game.world.entity.particle;
 
 import miniventure.game.item.Item;
+import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Player;
 
 import com.badlogic.gdx.math.Vector2;

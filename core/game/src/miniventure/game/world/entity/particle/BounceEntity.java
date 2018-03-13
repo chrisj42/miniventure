@@ -1,7 +1,8 @@
-package miniventure.game.world.entity;
+package miniventure.game.world.entity.particle;
 
 import miniventure.game.util.FrameBlinker;
 import miniventure.game.world.Level;
+import miniventure.game.world.entity.Entity;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;

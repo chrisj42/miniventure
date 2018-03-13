@@ -11,7 +11,7 @@ import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.Entity;
-import miniventure.game.world.entity.TextParticle;
+import miniventure.game.world.entity.particle.TextParticle;
 import miniventure.game.world.entity.mob.MobAnimationController.AnimationState;
 import miniventure.game.world.tile.TileType;
 

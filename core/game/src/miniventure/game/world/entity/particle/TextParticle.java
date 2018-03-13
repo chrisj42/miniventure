@@ -1,4 +1,4 @@
-package miniventure.game.world.entity;
+package miniventure.game.world.entity.particle;
 
 import miniventure.game.GameCore;
 

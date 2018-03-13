@@ -1,6 +1,8 @@
-package miniventure.game.world.entity;
+package miniventure.game.world.entity.particle;
 
 import miniventure.game.GameCore;
+import miniventure.game.world.entity.Direction;
+import miniventure.game.world.entity.Entity;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Animation;

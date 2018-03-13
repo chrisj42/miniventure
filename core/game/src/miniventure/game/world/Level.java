@@ -6,10 +6,9 @@ import java.util.HashSet;
 import miniventure.game.GameProtocol.LevelData;
 import miniventure.game.WorldManager;
 import miniventure.game.world.Chunk.ChunkData;
-import miniventure.game.world.entitynew.Entity;
-import miniventure.game.world.entity.Particle;
+import miniventure.game.world.entity.Entity;
+import miniventure.game.world.entity.particle.Particle;
 import miniventure.game.world.entity.mob.Player;
-import miniventure.game.world.entitynew.property.LevelListener;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.ashley.core.Engine;
@@ -111,7 +110,7 @@ public class Level {
 		
 		entityMoved(e);
 		
-		e.getType().getProp(LevelListener.class).levelChanged(e, oldLevel);
+		//e.getType().getProp(LevelListener.class).levelChanged(e, oldLevel);
 	}
 	
 	public void removeEntity(Entity e) {

@@ -12,7 +12,7 @@ import miniventure.game.world.Level;
 import miniventure.game.world.Point;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
-import miniventure.game.world.entitynew.Entity;
+import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Player;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;

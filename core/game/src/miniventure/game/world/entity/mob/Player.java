@@ -13,7 +13,7 @@ import miniventure.game.item.Recipes;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
-import miniventure.game.world.entity.ActionParticle.ActionType;
+import miniventure.game.world.entity.particle.ActionParticle.ActionType;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.Gdx;

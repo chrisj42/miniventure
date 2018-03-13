@@ -8,8 +8,8 @@ import miniventure.game.item.ToolType;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
-import miniventure.game.world.entity.ActionParticle;
-import miniventure.game.world.entity.TextParticle;
+import miniventure.game.world.entity.particle.ActionParticle;
+import miniventure.game.world.entity.particle.TextParticle;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

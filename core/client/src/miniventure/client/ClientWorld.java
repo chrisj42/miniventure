@@ -1,7 +1,6 @@
 package miniventure.client;
 
 import java.util.HashMap;
-import java.util.HashSet;
 
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.DatalessRequest;
@@ -13,8 +12,8 @@ import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.RespawnScreen;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
+import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Player;
-import miniventure.game.world.entitynew.Entity;
 import miniventure.server.ServerCore;
 
 import com.badlogic.gdx.math.MathUtils;

@@ -1,6 +1,6 @@
 package miniventure.game.world.tile;
 
-import miniventure.game.world.entitynew.Entity;
+import miniventure.game.world.entity.Entity;
 
 @FunctionalInterface
 public interface TouchListener extends TileProperty {

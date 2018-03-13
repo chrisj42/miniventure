@@ -2,7 +2,7 @@ package miniventure.game;
 
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
-import miniventure.game.world.entitynew.Entity;
+import miniventure.game.world.entity.Entity;
 
 import com.badlogic.gdx.utils.Array;
 
