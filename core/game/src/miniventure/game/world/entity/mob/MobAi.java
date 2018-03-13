@@ -1,6 +1,6 @@
 package miniventure.game.world.entity.mob;
 
-import miniventure.game.item.Item;
+import miniventure.game.item.type.Item;
 import miniventure.game.world.WorldObject;
 
 import org.jetbrains.annotations.NotNull;

@@ -1,6 +1,6 @@
 package miniventure.game.world.entity;
 
-import miniventure.game.item.Item;
+import miniventure.game.item.type.Item;
 import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;

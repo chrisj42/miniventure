@@ -1,6 +1,6 @@
 package miniventure.game.world;
 
-import miniventure.game.item.Item;
+import miniventure.game.item.type.Item;
 
 import com.badlogic.gdx.math.Vector2;
 

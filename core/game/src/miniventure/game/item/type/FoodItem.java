@@ -1,40 +1,31 @@
 package miniventure.game.item.type;
 
-import miniventure.game.GameCore;
-import miniventure.game.item.Item;
 import miniventure.game.world.Level;
-import miniventure.game.world.entity.particle.TextParticle;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.mob.Player.Stat;
+import miniventure.game.world.entity.particle.TextParticle;
 
 import com.badlogic.gdx.graphics.Color;
 
-import org.jetbrains.annotations.NotNull;
-
-public enum FoodItem {
-	
-	Apple(2);
+public class FoodItem extends Item {
 	
 	private final int healthGained;
 	
-	FoodItem(int healthGained) {
+	FoodItem(String name, int healthGained) {
+		super(name);
 		this.healthGained = healthGained;
 	}
 	
-	@NotNull
-	public Item get() {
-		return new Item(name(), GameCore.icons.get(name().toLowerCase())) {
-			@Override public Item copy() { return this; }
-			
-			@Override public void interact(Player player) {
-				int gained = player.changeStat(Stat.Hunger, healthGained);
-				if(gained > 0) {
-					use();
-					Level level = player.getLevel();
-					if (level != null)
-						level.addEntity(new TextParticle(gained + "", Color.CORAL), player.getCenter(), true);
-				}
-			}
-		};
+	@Override public void interact(Player player) {
+		int gained = player.changeStat(Stat.Hunger, healthGained);
+		if(gained > 0) {
+			use();
+			Level level = player.getLevel();
+			if (level != null)
+				level.addEntity(new TextParticle(gained + "", Color.CORAL), player.getCenter(), true);
+		}
 	}
+	
+	@Override
+	public Item copy() { return new FoodItem(getName(), healthGained); }
 }

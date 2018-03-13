@@ -1,6 +1,7 @@
-package miniventure.game.item.type;
+package miniventure.game.item.typeold;
 
 import miniventure.game.GameCore;
+import miniventure.game.item.type.Item;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;
@@ -31,12 +32,27 @@ public class TileItem extends Item {
 		}
 	}
 	
+	/*private static final HashMap<TileType, TileItem> items = new HashMap<>();
+	
+	static {
+		// TO-DO here, I should put all the tile items that I want to have custom info, not directly fetched from the tile.
+		// for example, acorns.
+		// one improvement, btw, could be that in the current system, there can only be one item per tile. You can't have two items that end up producing the same tile. You even search by TileType.
+		
+		items.put(TileType.DOOR_CLOSED, new TileItem("Door", GameCore.tileAtlas.findRegion("door_closed/00"), TileType.DOOR_CLOSED, PlacementFunction.LAND));
+		items.put(TileType.DOOR_OPEN, items.get(TileType.DOOR_CLOSED));
+	}
+	
+	@NotNull
+	public static TileItem get(@NotNull TileType tile) {
+		if(!items.containsKey(tile))
+			items.put(tile, new TileItem(tile, *//* here, it will be in the item type. *//*));
+		return items.get(tile).copy();
+	}*/
+	
 	@NotNull private TileType result;
 	@NotNull private PlacementFunction placer;
 	
-	public TileItem(@NotNull TileType type, @NotNull TileType... canPlaceOn) {
-		this(type, PlacementFunction.oneOf(canPlaceOn));
-	}
 	public TileItem(@NotNull TileType type, @NotNull PlacementFunction placer) {
 		this(MyUtils.toTitleCase(type.name()), GameCore.tileAtlas.findRegion(type.name().toLowerCase()+"/00"), type, placer); // so, if the placeOn is null, then...
 	}

@@ -1,10 +1,9 @@
 package miniventure.game.world.tile;
 
-import miniventure.game.item.Item;
-import miniventure.game.item.type.TileItem;
+import miniventure.game.item.type.Item;
+import miniventure.game.item.type.ItemType;
 import miniventure.game.item.type.ToolItem;
-import miniventure.game.item.type.ToolItem.Material;
-import miniventure.game.item.type.ToolType;
+import miniventure.game.item.typeold.ToolType;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
@@ -69,9 +68,6 @@ public class DestructibleProperty implements TileProperty {
 	@Override
 	public void init(@NotNull TileType type) {
 		this.tileType = type;
-		
-		if(dropsTileItem)
-			drops[0] = new ItemDrop(TileItem.get(type));
 	}
 	
 	boolean tileAttacked(@NotNull Tile tile, @NotNull WorldObject attacker, @Nullable Item item, int damage) {
@@ -145,26 +141,18 @@ public class DestructibleProperty implements TileProperty {
 		boolean isDamagedBy(@Nullable Item attackItem);
 	}
 	
-	static class RequiredTool implements DamageConditionCheck {
+	static class RequiredItem implements DamageConditionCheck {
 		
-		@Nullable private final ToolType toolType;
-		@Nullable private final Material material;
+		@NotNull private final ItemType type;
 		
-		public RequiredTool(@Nullable ToolType toolType) {
-			this(toolType, null);
-		}
-		public RequiredTool(@Nullable ToolType toolType, @Nullable Material material) {
-			this.toolType = toolType;
-			this.material = material;
+		public RequiredItem(@NotNull ItemType type) {
+			this.type = type;
 		}
 		
 		@Override
 		public boolean isDamagedBy(@Nullable Item attackItem) {
-			if(attackItem == null || !(attackItem instanceof ToolItem))
-				return false;
-			
-			ToolItem tool = (ToolItem) attackItem;
-			return (toolType == null || tool.getType() == toolType) && (material == null || tool.getMaterial() == material);
+			if(attackItem == null) return false;
+			return type == attackItem.getType();
 		}
 	}
 	

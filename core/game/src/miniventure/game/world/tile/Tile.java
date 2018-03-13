@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.Stack;
 import java.util.TreeMap;
 
-import miniventure.game.item.Item;
+import miniventure.game.item.type.Item;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Level;
 import miniventure.game.world.Point;
@@ -123,7 +123,6 @@ public class Tile implements WorldObject {
 	private boolean addTile(@NotNull TileType newType, @NotNull TileType prevType) {
 		// first, check to see if the newType can validly be placed on the current type.
 		if(newType == getType()
-			|| !newType.getProp(CoveredTileProperty.class).canCover(getType())
 			|| newType.compareTo(getType()) <= 0)
 			return false;
 		

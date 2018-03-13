@@ -1,7 +1,6 @@
-package miniventure.game.item;
+package miniventure.game.item.type;
 
 import miniventure.game.GameCore;
-import miniventure.game.util.MyUtils;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;
 
@@ -27,6 +26,7 @@ public abstract class Item {
 	
 	private boolean used = false;
 	
+	protected Item(@NotNull String name) { this(name, GameCore.icons.get(name.toLowerCase())); }
 	protected Item(@NotNull String name, TextureRegion texture) {
 		this.texture = texture == null ? new TextureRegion() : texture;
 		this.name = name;
@@ -39,6 +39,7 @@ public abstract class Item {
 	
 	// called to reset the item
 	@Nullable public final Item resetUsage() {
+		if(!used) return this;
 		Item newItem = getUsedItem();
 		used = false;
 		return newItem;
