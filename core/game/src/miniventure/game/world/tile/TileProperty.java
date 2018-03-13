@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 public interface TileProperty extends Property<TileProperty> {
 	
-	static PropertyFetcher<TileProperty> getDefaultPropertyMap() {
+	static PropertyFetcher<TileProperty> getDefaultPropertyFetcher() {
 		return () -> new TileProperty[] {
 			SolidProperty.WALKABLE,
 			DestructibleProperty.INDESTRUCTIBLE,

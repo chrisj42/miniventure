@@ -26,7 +26,7 @@ public abstract class Item {
 	
 	private boolean used = false;
 	
-	Item(@NotNull String name, TextureRegion texture) {
+	protected Item(@NotNull String name, TextureRegion texture) {
 		this.texture = texture == null ? new TextureRegion() : texture;
 		this.name = name;
 	}
@@ -79,8 +79,8 @@ public abstract class Item {
 		batch.draw(texture, tx, y);
 		
 		float textOff = font.getCapHeight() + font.getAscent();
-		MyUtils.writeOutlinedText(font, batch, stackSize+"", x+1, y+textOff-font.getDescent(), textColor);
-		MyUtils.writeOutlinedText(font, batch, name, x+width+10, y+(getRenderHeight()+textOff)/2, textColor);
+		//MyUtils.writeOutlinedText(batch, stackSize+"", x+1, y+textOff-font.getDescent(), textColor);
+		//MyUtils.writeOutlinedText(batch, name, x+width+10, y+(getRenderHeight()+textOff)/2, textColor);
 	}
 	
 	public float getRenderHeight() {

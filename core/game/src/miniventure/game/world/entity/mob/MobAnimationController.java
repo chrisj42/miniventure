@@ -55,6 +55,8 @@ public class MobAnimationController {
 	
 	private PriorityQueue<AnimationState> requestedAnimations;
 	
+	private TextureRegion curTexture;
+	
 	public MobAnimationController(Mob mob, String spriteName) {
 		state = AnimationState.IDLE;
 		this.mob = mob;
@@ -62,10 +64,14 @@ public class MobAnimationController {
 		requestedAnimations = new PriorityQueue<>();
 		
 		animations = getMobAnimation(spriteName);
+		
+		pollAnimation(0);
 	}
 	
 	// the animation time is reset in getFrame, so this will never overflow.
 	void requestState(AnimationState rState) { requestedAnimations.add(rState); }
+	
+	TextureRegion getSprite() { return curTexture; }
 	
 	TextureRegion pollAnimation(float delta) {
 		// update the animation
@@ -84,6 +90,7 @@ public class MobAnimationController {
 			animationTime = 0; // if we're going to render a new animation, we should start it from the beginning, I think. Though, I could see this not ending up being a good idea... NOTE: this is not just set to zero because it seems this causes a divide by zero error when fetching the keyframe.
 		requestedAnimations.clear();
 		
-		return frame;
+		curTexture = frame;
+		return curTexture;
 	}
 }

@@ -5,6 +5,7 @@ import miniventure.game.GameCore;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
@@ -92,19 +93,18 @@ public class MyUtils {
 		}
 	}
 	
-	public static void writeOutlinedText(BitmapFont font, Batch batch, String text, float x, float y) { writeOutlinedText(font, batch, text, x, y, Color.WHITE); }
-	public static void writeOutlinedText(BitmapFont font, Batch batch, String text, float x, float y, Color center) { writeOutlinedText(font, batch, text, x, y, center, Color.BLACK); }
-	public static void writeOutlinedText(BitmapFont font, Batch batch, String text, float x, float y, Color center, Color outline) {
-		Color prev = font.getColor();
-		font.setColor(outline);
-		font.draw(batch, text, x-1, y-1);
-		font.draw(batch, text, x-1, y+1);
-		font.draw(batch, text, x+1, y-1);
-		font.draw(batch, text, x+1, y+1);
-		font.setColor(center);
+	/*public static void writeOutlinedText(Batch batch, String text, float x, float y) { writeOutlinedText(batch, text, x, y, Color.WHITE); }
+	public static void writeOutlinedText(Batch batch, String text, float x, float y, Color center) { writeOutlinedText(batch, text, x, y, center, Color.BLACK); }
+	public static void writeOutlinedText(Batch batch, String text, float x, float y, Color center, Color outline) {
+		FreeTypeFontParameter params = GameCore.getDefaultFontConfig();
+		params.color = center;
+		params.borderColor = outline;
+		params.borderWidth = 1;
+		
+		BitmapFont font = GameCore.getFont(params);
+		
 		font.draw(batch, text, x, y);
-		font.setColor(prev);
-	}
+	}*/
 	
 	// this method moves a rectangle *just* enough so that it fits inside another rectangle. In the event that the "outer" rect is smaller than the rect being moved, the rect being moved will be centered onto the outer rect. The padding is only used if the moving rect isn't already inside the outer one.
 	public static Rectangle moveRectInside(Rectangle toMove, Rectangle outer, float padding) {

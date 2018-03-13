@@ -1,4 +1,4 @@
-package miniventure.game.item;
+package miniventure.game.item.type;
 
 import miniventure.game.GameCore;
 

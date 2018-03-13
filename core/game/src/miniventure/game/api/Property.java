@@ -1,5 +1,6 @@
 package miniventure.game.api;
 
+// TODO add data type parameter?
 public interface Property<T extends Property<T>> {
 	String[] getInitialData();
 	

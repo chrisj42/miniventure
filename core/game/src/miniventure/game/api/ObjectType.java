@@ -4,7 +4,7 @@ import java.util.EnumMap;
 
 public class ObjectType<T extends Enum<T> & APIObjectType<T, P>, P extends Property<P>> {
 	
-	private final Class<T> typeClass;
+	final Class<T> typeClass;
 	
 	// has a map of instances of the class to property lists
 	private final EnumMap<T, TypeInstance<T, P>> instances;

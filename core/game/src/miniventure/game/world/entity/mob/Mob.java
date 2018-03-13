@@ -1,8 +1,8 @@
 package miniventure.game.world.entity.mob;
 
 import miniventure.game.item.Item;
-import miniventure.game.item.ToolItem;
-import miniventure.game.item.ToolType;
+import miniventure.game.item.type.ToolItem;
+import miniventure.game.item.type.ToolType;
 import miniventure.game.util.FrameBlinker;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.ItemDrop;
@@ -39,7 +39,7 @@ public abstract class Mob extends Entity {
 	private static final float HURT_COOLDOWN = 0.5f; // minimum time between taking damage, in seconds; prevents a mob from getting hurt multiple times in quick succession. 
 	
 	@NotNull private Direction dir;
-	@NotNull protected MobAnimationController animator;
+	@NotNull private MobAnimationController animator;
 	
 	private final int maxHealth;
 	private int health;
@@ -52,7 +52,7 @@ public abstract class Mob extends Entity {
 	private FrameBlinker blinker;
 	
 	public Mob(@NotNull String spriteName, int health, @NotNull ItemDrop... deathDrops) {
-		super(new TextureRegion());
+		super();
 		dir = Direction.DOWN;
 		this.maxHealth = health;
 		this.health = health;
@@ -61,7 +61,6 @@ public abstract class Mob extends Entity {
 		blinker = new FrameBlinker(5, 1, false);
 		
 		animator = new MobAnimationController(this, spriteName);
-		setSprite(animator.pollAnimation(0));
 	}
 	
 	public void reset() {
@@ -70,18 +69,20 @@ public abstract class Mob extends Entity {
 		knockbackTimeLeft = 0;
 		knockbackVelocity.setZero();
 		invulnerableTime = 0;
-		setSprite(animator.pollAnimation(0));
+		animator.pollAnimation(0);
 	}
 	
 	public Direction getDirection() { return dir; }
 	
-	public boolean isKnockedBack() { return knockbackTimeLeft > 0 && knockbackVelocity.len() > 0; }
+	boolean isKnockedBack() { return knockbackTimeLeft > 0 && knockbackVelocity.len() > 0; }
+	
+	@Override
+	protected TextureRegion getSprite() { return animator.getSprite(); }
 	
 	@Override
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
 		blinker.update(delta);
 		
-		setSprite(animator.pollAnimation(delta));
 		if(invulnerableTime <= 0 || blinker.shouldRender())
 			super.render(batch, delta, posOffset);
 	}

@@ -1,10 +1,10 @@
 package miniventure.game.world.tile;
 
 import miniventure.game.item.Item;
-import miniventure.game.item.TileItem;
-import miniventure.game.item.ToolItem;
-import miniventure.game.item.ToolItem.Material;
-import miniventure.game.item.ToolType;
+import miniventure.game.item.type.TileItem;
+import miniventure.game.item.type.ToolItem;
+import miniventure.game.item.type.ToolItem.Material;
+import miniventure.game.item.type.ToolType;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;

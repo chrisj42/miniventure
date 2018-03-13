@@ -10,7 +10,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
-public class BounceEntity extends Entity {
+public abstract class BounceEntity extends Entity {
 	
 	private static final float GRAVITY = -50;
 	private static final float REBOUND_SPEED_FACTOR = 0.5f;
@@ -25,12 +25,11 @@ public class BounceEntity extends Entity {
 	
 	private float lastBounceTime; // used to halt the entity once it starts bouncing a lot really quickly.
 	
-	
-	public BounceEntity(TextureRegion texture, float lifetime) {
-		this(texture, new Vector2().setToRandomDirection(), lifetime);
+	public BounceEntity(float lifetime) {
+		this(new Vector2().setToRandomDirection(), lifetime);
 	}
-	public BounceEntity(TextureRegion texture, Vector2 goalDir, float lifetime) {
-		super(texture);
+	public BounceEntity(Vector2 goalDir, float lifetime) {
+		super();
 		this.lifetime = lifetime;
 		
 		blinker = new FrameBlinker(1, 1, false);

@@ -1,6 +1,7 @@
-package miniventure.game.item;
+package miniventure.game.item.type;
 
 import miniventure.game.GameCore;
+import miniventure.game.item.Item;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 

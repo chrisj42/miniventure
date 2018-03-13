@@ -203,8 +203,9 @@ public class GameScreen {
 		
 		debugInfo.add("Time: " + TimeOfDay.getTimeString(ClientCore.getWorld().getGameTime()));
 		
+		BitmapFont font = GameCore.getFont();
 		for(int i = 0; i < debugInfo.size; i++)
-			MyUtils.writeOutlinedText(font, batch, debugInfo.get(i), 0, uiCamera.viewportHeight-5-15*i);
+			font.draw(batch, debugInfo.get(i), 0, uiCamera.viewportHeight-5-15*i);
 	}
 	
 	private void zoom(int dir) {

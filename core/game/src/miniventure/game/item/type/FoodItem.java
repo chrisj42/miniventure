@@ -1,6 +1,7 @@
-package miniventure.game.item;
+package miniventure.game.item.type;
 
 import miniventure.game.GameCore;
+import miniventure.game.item.Item;
 import miniventure.game.world.Level;
 import miniventure.game.world.entity.particle.TextParticle;
 import miniventure.game.world.entity.mob.Player;

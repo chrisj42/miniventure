@@ -1,5 +1,6 @@
-package miniventure.game.item;
+package miniventure.game.item.type;
 
+import miniventure.game.item.Item;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;

@@ -1,7 +1,5 @@
 package miniventure.game.world.entity;
 
-import java.util.HashMap;
-
 import miniventure.game.item.Item;
 import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
@@ -11,7 +9,6 @@ import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
@@ -21,21 +18,13 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class Entity implements WorldObject {
 	
-	private static final HashMap<Integer, Entity> takenIDs = new HashMap<>();
+	private int eid;
+	private boolean hasID = false;
 	
-	private TextureRegion texture;
-	private final int eid;
 	private float x, y, z = 0;
 	
-	public Entity(TextureRegion texture) {
-		this.texture = texture;
+	public Entity() {
 		
-		int eid;
-		do {
-			eid = MathUtils.random.nextInt();
-		} while(takenIDs.containsKey(eid));
-		this.eid = eid;
-		takenIDs.put(eid, this);
 	}
 	
 	@Override @Nullable
@@ -63,27 +52,31 @@ public abstract class Entity implements WorldObject {
 			obj.touching(this);
 	}
 	
+	protected abstract TextureRegion getSprite();
+	
 	@Override
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
 		drawSprite(batch, (x-posOffset.x) * Tile.SIZE, (y+z - posOffset.y) * Tile.SIZE);
 	}
 	
 	protected void drawSprite(SpriteBatch batch, float x, float y) {
-		batch.draw(texture, x, y);
-	}
-	
-	protected void setSprite(TextureRegion texture) {
-		this.texture = texture;
-		moveIfLevel(x, y);
-		//z = 0;
+		batch.draw(getSprite(), x, y);
 	}
 	
 	protected float getZ() { return z; }
 	protected void setZ(float z) { this.z = z; }
 	
+	protected Rectangle getUnscaledBounds() {
+		TextureRegion texture = getSprite();
+		return new Rectangle(x, y, texture.getRegionWidth(), texture.getRegionHeight());
+	}
+	
 	@Override
 	public Rectangle getBounds() {
-		return new Rectangle(x, y, texture.getRegionWidth()*1f/Tile.SIZE, texture.getRegionHeight()*1f/Tile.SIZE);
+		Rectangle bounds = getUnscaledBounds();
+		bounds.width /= Tile.SIZE;
+		bounds.height /= Tile.SIZE;
+		return bounds;
 	}
 	
 	public void addedToLevel(Level level) {}
@@ -177,6 +170,11 @@ public abstract class Entity implements WorldObject {
 	
 	public void moveTo(@NotNull Level level, @NotNull Vector2 pos) { moveTo(level, pos.x, pos.y); }
 	public void moveTo(@NotNull Level level, float x, float y) {
+		if(!hasID) {
+			eid = level.getWorld().generateEntityID(this);
+			hasID = true;
+		}
+		
 		if(level == getLevel() && x == this.x && y == this.y) return; // no action or updating required.
 		
 		// this method doesn't care where you end up.

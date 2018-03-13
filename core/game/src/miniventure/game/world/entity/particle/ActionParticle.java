@@ -38,17 +38,15 @@ public class ActionParticle extends Entity implements Particle {
 	private float timeElapsed;
 	
 	public ActionParticle(String spriteName, float animationTime) {
-		super(new TextureRegion());
+		super();
 		this.animationTime = animationTime;
 		Array<AtlasRegion> frames = GameCore.entityAtlas.findRegions(spriteName);
 		animation = new Animation<>(animationTime / frames.size, frames);
-		
-		setSprite(animation.getKeyFrame(0));
 	}
 	
 	@Override
-	public void drawSprite(SpriteBatch batch, float x, float y) {
-		batch.draw(animation.getKeyFrame(timeElapsed, true), x, y);
+	protected TextureRegion getSprite() {
+		return animation.getKeyFrame(timeElapsed, true);
 	}
 	
 	@Override

@@ -62,11 +62,13 @@ public class TypeInstance<T extends Enum<T> & APIObjectType<T, P>, P extends Pro
 	
 	void checkDataAccess(Class<? extends P> property, int propDataIndex) {
 		// technically, the below should never happen, unless it's passed the TileProperty class or a dynamically generated class, or something, because the propertyMap should have an instance of each implementer of the TileProperty interface.
+		String identifier = typeInstance.typeClass.getSimpleName()+" "+instance;
+		
 		if(!propertyDataIndexes.containsKey(property))
-			throw new IllegalArgumentException("The specified property class, " + property + ", is not part of the list of TileType property classes.");
+			throw new IllegalArgumentException("The specified property class, " + property + ", is not part of the list of property classes for "+identifier);
 		
 		if(propDataIndex >= propertyDataLengths.get(property))
-			throw new IllegalArgumentException("Tile property " + property + " tried to access index past stated length; length="+propertyDataLengths.get(property)+", index="+propDataIndex);
+			throw new IllegalArgumentException("A property of "+identifier+", " + property + ", tried to access index past stated length; length="+propertyDataLengths.get(property)+", index="+propDataIndex);
 	}
 	
 	int getPropDataIndex(Class<? extends P> prop) { return propertyDataIndexes.get(prop); }
