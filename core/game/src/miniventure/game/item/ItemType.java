@@ -1,4 +1,4 @@
-package miniventure.game.item.typeold;
+package miniventure.game.item;
 
 public enum ItemType {
 	

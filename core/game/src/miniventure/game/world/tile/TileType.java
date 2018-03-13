@@ -3,16 +3,15 @@ package miniventure.game.world.tile;
 import miniventure.game.api.APIObjectType;
 import miniventure.game.api.PropertyFetcher;
 import miniventure.game.api.TypeLoader;
-import miniventure.game.item.type.ItemType;
-import miniventure.game.item.type.FoodItem;
-import miniventure.game.item.type.ResourceItem;
-import miniventure.game.item.type.TileItem;
-import miniventure.game.item.type.ToolType;
+import miniventure.game.item.FoodItem;
+import miniventure.game.item.ResourceItem;
+import miniventure.game.item.TileItem;
+import miniventure.game.item.ToolType;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.tile.AnimationProperty.AnimationType;
 import miniventure.game.world.tile.DestructibleProperty.PreferredTool;
-import miniventure.game.world.tile.DestructibleProperty.RequiredItem;
+import miniventure.game.world.tile.DestructibleProperty.RequiredTool;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -25,18 +24,18 @@ public enum TileType implements APIObjectType<TileType, TileProperty> {
 	
 	DIRT(() -> new TileProperty[] {
 		SolidProperty.WALKABLE,
-		new DestructibleProperty(new ItemDrop(ItemType.Dirt.getItem()), new RequiredItem(ItemType.Axe)))
+		new DestructibleProperty(true, new RequiredTool(ToolType.Shovel))
 	}),
 	
 	SAND(() -> new TileProperty[] {
 		SolidProperty.WALKABLE,
-		new DestructibleProperty(true, new RequiredItem(ToolType.Shovel)),
+		new DestructibleProperty(true, new RequiredTool(ToolType.Shovel)),
 		new OverlapProperty(true)
 	}),
 	
 	GRASS(() -> new TileProperty[] {
 		SolidProperty.WALKABLE,
-		new DestructibleProperty(true, new RequiredItem(ToolType.Shovel)),
+		new DestructibleProperty(true, new RequiredTool(ToolType.Shovel)),
 		new OverlapProperty(true)
 	}),
 	
@@ -53,7 +52,7 @@ public enum TileType implements APIObjectType<TileType, TileProperty> {
 	
 	DOOR_CLOSED(() -> new TileProperty[] {
 		SolidProperty.SOLID,
-		new DestructibleProperty(true, new RequiredItem(ToolType.Axe)),
+		new DestructibleProperty(true, new RequiredTool(ToolType.Axe)),
 		new AnimationProperty(true, AnimationType.SINGLE_FRAME),
 		(InteractableProperty) (p, i, t) -> {
 			t.replaceTile(TileType.DOOR_OPEN);
@@ -72,7 +71,7 @@ public enum TileType implements APIObjectType<TileType, TileProperty> {
 			t.replaceTile(DOOR_CLOSED);
 			return true;
 		},
-		new DestructibleProperty(new ItemDrop(TileItem.get(TileType.DOOR_CLOSED)), new RequiredItem(ToolType.Axe))
+		new DestructibleProperty(new ItemDrop(TileItem.get(TileType.DOOR_CLOSED)), new RequiredTool(ToolType.Axe))
 	}),
 	
 	TORCH(() -> new TileProperty[] {
@@ -131,6 +130,6 @@ public enum TileType implements APIObjectType<TileType, TileProperty> {
 	public String getName() { return MyUtils.toTitleCase(name()); }
 	
 	static {
-		TypeLoader.loadType(TileType.class, TileProperty.getDefaultPropertyFetcher());
+		TypeLoader.loadType(TileType.class, TileProperty.getDefaultPropertyMap());
 	}
 }

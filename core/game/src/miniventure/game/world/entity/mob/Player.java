@@ -8,7 +8,7 @@ import miniventure.game.item.CraftingScreen;
 import miniventure.game.item.Hands;
 import miniventure.game.item.Inventory;
 import miniventure.game.item.InventoryScreen;
-import miniventure.game.item.type.Item;
+import miniventure.game.item.Item;
 import miniventure.game.item.Recipes;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Level;

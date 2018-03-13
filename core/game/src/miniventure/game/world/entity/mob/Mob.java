@@ -1,8 +1,8 @@
 package miniventure.game.world.entity.mob;
 
-import miniventure.game.item.type.Item;
-import miniventure.game.item.type.ToolItem;
-import miniventure.game.item.type.ToolType;
+import miniventure.game.item.Item;
+import miniventure.game.item.ToolItem;
+import miniventure.game.item.ToolType;
 import miniventure.game.util.FrameBlinker;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.ItemDrop;

@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import miniventure.game.GameCore;
 import miniventure.game.WorldManager;
-import miniventure.game.item.type.Item;
+import miniventure.game.item.Item;
 import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.util.MyUtils;

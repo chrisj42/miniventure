@@ -5,7 +5,8 @@ import java.util.Iterator;
 import java.util.Stack;
 import java.util.TreeMap;
 
-import miniventure.game.item.type.Item;
+import miniventure.game.api.APIObject;
+import miniventure.game.item.Item;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Level;
 import miniventure.game.world.Point;
@@ -23,7 +24,7 @@ import com.badlogic.gdx.utils.Array;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class Tile implements WorldObject {
+public class Tile extends APIObject<TileType, TileProperty> implements WorldObject {
 	
 	public static final int SIZE = 32;
 	private static final TileType baseType = TileType.values[0];
@@ -81,15 +82,17 @@ public class Tile implements WorldObject {
 	TileType[] getTypes() { return tileTypes.toArray(new TileType[tileTypes.size()]); }
 	boolean hasType(TileType type) { return tileTypes.contains(type); }
 	
-	String getData(Class<? extends TileProperty> property, TileType type, int propDataIndex) {
+	@Override
+	public String getData(Class<? extends TileProperty> property, TileType type, int propDataIndex) {
 		return data[getIndex(type, property, propDataIndex)];
 	}
 	
-	void setData(Class<? extends TileProperty> property, TileType type, int propDataIndex, String data) {
+	public void setData(Class<? extends TileProperty> property, TileType type, int propDataIndex, String data) {
 		this.data[getIndex(type, property, propDataIndex)] = data;
 	}
 	
-	private int getIndex(TileType type, Class<? extends TileProperty> property, int propDataIndex) {
+	@Override
+	protected int getIndex(TileType type, Class<? extends TileProperty> property, int propDataIndex) {
 		if(!tileTypes.contains(type))
 			throw new IllegalArgumentException("Tile " + this + " does not have a " + type + " type, cannot fetch the data index.");
 		
@@ -123,6 +126,7 @@ public class Tile implements WorldObject {
 	private boolean addTile(@NotNull TileType newType, @NotNull TileType prevType) {
 		// first, check to see if the newType can validly be placed on the current type.
 		if(newType == getType()
+			|| !newType.getProp(CoveredTileProperty.class).canCover(getType())
 			|| newType.compareTo(getType()) <= 0)
 			return false;
 		

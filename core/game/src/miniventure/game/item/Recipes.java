@@ -1,10 +1,6 @@
 package miniventure.game.item;
 
-import miniventure.game.item.type.ResourceItem;
-import miniventure.game.item.type.TileItem;
-import miniventure.game.item.type.ToolItem;
-import miniventure.game.item.type.ToolItem.Material;
-import miniventure.game.item.type.ToolType;
+import miniventure.game.item.ToolItem.Material;
 import miniventure.game.world.tile.TileType;
 
 public class Recipes {
