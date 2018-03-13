@@ -1,15 +1,13 @@
 package miniventure.game.world.tile;
 
-import miniventure.game.api.Property;
-import miniventure.game.api.PropertyFetcher;
 import miniventure.game.world.tile.AnimationProperty.AnimationType;
 
 import org.jetbrains.annotations.NotNull;
 
-public interface TileProperty extends Property<TileProperty> {
+public interface TileProperty {
 	
-	static PropertyFetcher<TileProperty> getDefaultPropertyMap() {
-		return () -> new TileProperty[] {
+	static TileProperty[] getDefaultProperties() {
+		return new TileProperty[] {
 			SolidProperty.WALKABLE,
 			DestructibleProperty.INDESTRUCTIBLE,
 			(InteractableProperty) ((p, i, t) -> false),
@@ -18,7 +16,6 @@ public interface TileProperty extends Property<TileProperty> {
 			new ConnectionProperty(false),
 			new OverlapProperty(false),
 			(UpdateProperty) (delta, tile) -> {},
-			new CoveredTileProperty((TileType[]) null),
 			(LightProperty) () -> 0,
 			new TransitionProperty()
 		};
@@ -27,4 +24,8 @@ public interface TileProperty extends Property<TileProperty> {
 	default String[] getInitialData() { return new String[0]; }
 	
 	default void init(@NotNull TileType type) {}
+	
+	// return the class right below the one that signifies the common class for the properties.
+	// essentially, this will be used for sorting and such; property classes that are specific to a certain set should return themselves, while any that extend them should do nothing.
+	Class<? extends TileProperty> getUniquePropertyClass();
 }
