@@ -1,5 +1,9 @@
 package miniventure.game.item;
 
+import java.util.Arrays;
+
+import miniventure.game.util.MyUtils;
+
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.Nullable;
@@ -166,6 +170,27 @@ public class Inventory {
 	private void checkIndex(int idx) {
 		if(idx >= slots) throw new IndexOutOfBoundsException("cannot access index " + idx + " of "+slots+"-slot inventory.");
 		if(idx >= items.size) throw new IndexOutOfBoundsException("cannot access inventory index " + idx + "; inventory only contains " + items.size + " items.");
+	}
+	
+	
+	public String[] save() {
+		String[] data = new String[getFilledSlots()];
+		for(int i = 0; i < data.length; i++) {
+			int count = getStackSizeAt(i);
+			Item item = getItemAt(i);
+			
+			data[i] = MyUtils.encodeStringArray(ItemStack.save(item, count));
+		}
+		
+		return data;
+	}
+	
+	public void loadItems(String[] allData) {
+		for(String str: allData) {
+			String[] data = MyUtils.parseLayeredString(str);
+			ItemStack stack = ItemStack.load(data);
+			addItem(stack.item, stack.count);
+		}
 	}
 	
 }

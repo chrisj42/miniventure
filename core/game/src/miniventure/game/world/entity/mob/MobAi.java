@@ -1,7 +1,15 @@
 package miniventure.game.world.entity.mob;
 
+import java.util.Arrays;
+
 import miniventure.game.item.Item;
+import miniventure.game.util.Version;
+import miniventure.game.world.ItemDrop;
+import miniventure.game.world.Level;
+import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
+
+import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -24,14 +32,36 @@ public class MobAi extends Mob {
 	
 	@NotNull private AiType aiType;
 	
+	@NotNull private ItemDrop[] itemDrops;
+	
 	@NotNull private MovementPattern movePattern;
 	@Nullable private MovementPattern tempMovePattern = null;
 	private float tempTimeLeft = 0;
 	
 	public MobAi(@NotNull AiType aiType) {
-		super("player", aiType.health, aiType.deathDrops);
+		super("player", aiType.health);
 		this.aiType = aiType;
+		this.itemDrops = aiType.deathDrops;
 		this.movePattern = aiType.defaultPattern.copy();
+	}
+	
+	public MobAi(String[][] allData, Version version) {
+		super(Arrays.copyOfRange(allData, 0, allData.length-1), version);
+		String[] data = allData[allData.length-1];
+		aiType = AiType.valueOf(data[0]);
+		this.itemDrops = aiType.deathDrops;
+		this.movePattern = aiType.defaultPattern.copy();
+	}
+	
+	@Override
+	public Array<String[]> save() {
+		Array<String[]> data = super.save();
+		
+		data.add(new String[] {
+			aiType.name()
+		});
+		
+		return data;
 	}
 	
 	protected void setMovePattern(@NotNull MovementPattern pattern) { movePattern = pattern; }
@@ -56,5 +86,15 @@ public class MobAi extends Mob {
 	public boolean attackedBy(WorldObject obj, @Nullable Item attackItem, int damage) {
 		if(aiType.onHit != null) aiType.onHit.onHit(this, obj, attackItem);
 		return super.attackedBy(obj, attackItem, damage);
+	}
+	
+	@Override
+	public void remove() {
+		Level level = getLevel();
+		if(level instanceof ServerLevel)
+			for (ItemDrop drop: itemDrops)
+				drop.dropItems((ServerLevel)level, this, null);
+		
+		super.remove();
 	}
 }

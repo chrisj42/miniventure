@@ -1,6 +1,7 @@
 package miniventure.game.world.entity;
 
 import miniventure.game.item.Item;
+import miniventure.game.util.Version;
 import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
@@ -27,13 +28,25 @@ public abstract class Entity implements WorldObject {
 		
 	}
 	
+	public Entity(String[][] data, Version version) {
+		x = Integer.parseInt(data[0][0]);
+		y = Integer.parseInt(data[0][1]);
+		z = Integer.parseInt(data[0][2]);
+	}
+	
+	public Array<String[]> save() {
+		Array<String[]> data = new Array<>(String[].class);
+		data.add(new String[] {x+"", y+"", z+""});
+		return data;
+	}
+	
 	@Override @Nullable
 	public Level getLevel() { return Level.getEntityLevel(this); }
 	@Override @Nullable
 	public ServerLevel getServerLevel() { return ServerLevel.getEntityLevel(this); }
 	
 	/// this is called only to remove an entity completely from the game, not to change levels.
-	public final void remove() {
+	public void remove() {
 		Level level = Level.getEntityLevel(this);
 		if(level != null)
 			level.removeEntity(this);

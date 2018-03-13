@@ -30,6 +30,7 @@ public class MyUtils {
 		return String.join(" ", words);
 	}
 	
+	public static String encodeStringArray(String[] strings) { return encodeStringArray(strings, '(', ')',','); }
 	public static String encodeStringArray(String[] strings, char elementStart, char elementEnd, char delimiter) {
 		StringBuilder str = new StringBuilder();
 		for(int i = 0; i < strings.length; i++) {
@@ -43,6 +44,7 @@ public class MyUtils {
 		return str.toString();
 	}
 	
+	public static String[] parseLayeredString(String str) { return parseLayeredString(str, '(', ')', ','); }
 	public static String[] parseLayeredString(String str, char layerStart, char layerEnd, char delimiter) {
 		Array<String> result = new Array<>();
 		char[] chars = str.toCharArray();

@@ -1,5 +1,7 @@
 package miniventure.game.item;
 
+import java.util.Arrays;
+
 import miniventure.game.GameCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.WorldObject;
@@ -128,5 +130,10 @@ public abstract class Item {
 	@Override
 	public String toString() {
 		return name + " Item";
+	}
+	
+	public static Item load(String[] data) {
+		ItemType type = ItemType.valueOf(data[0]);
+		return type.load(Arrays.copyOfRange(data, 1, data.length));
 	}
 }

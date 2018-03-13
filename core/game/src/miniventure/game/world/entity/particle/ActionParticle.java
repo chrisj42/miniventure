@@ -1,6 +1,9 @@
 package miniventure.game.world.entity.particle;
 
+import java.util.Arrays;
+
 import miniventure.game.GameCore;
+import miniventure.game.util.Version;
 import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.Entity;
 
@@ -33,15 +36,42 @@ public class ActionParticle extends Entity implements Particle {
 		}
 	}
 	
+	private final String spriteName;
+	
 	private Animation<TextureRegion> animation;
 	private final float animationTime;
 	private float timeElapsed;
 	
-	public ActionParticle(String spriteName, float animationTime) {
+	private ActionParticle(String spriteName, float animationTime) {
 		super();
+		this.spriteName = spriteName;
 		this.animationTime = animationTime;
 		Array<AtlasRegion> frames = GameCore.entityAtlas.findRegions(spriteName);
 		animation = new Animation<>(animationTime / frames.size, frames);
+	}
+	
+	public ActionParticle(String[][] allData, Version version) {
+		super(Arrays.copyOfRange(allData, 0, allData.length-1), version);
+		String[] data = allData[allData.length-1];
+		spriteName = data[0];
+		animationTime = Float.parseFloat(data[1]);
+		timeElapsed = Float.parseFloat(data[2]);
+		
+		Array<AtlasRegion> frames = GameCore.entityAtlas.findRegions(spriteName);
+		animation = new Animation<>(animationTime / frames.size, frames);
+	}
+	
+	@Override
+	public Array<String[]> save() {
+		Array<String[]> data = super.save();
+		
+		data.add(new String[] {
+			spriteName,
+			animationTime+"",
+			timeElapsed+""
+		});
+		
+		return data;
 	}
 	
 	@Override

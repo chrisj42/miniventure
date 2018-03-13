@@ -111,4 +111,14 @@ public class Hands {
 	public Item getEffectiveItem() { return item instanceof HandItem ? null : item; }
 	
 	public int getCount() { return count; }
+	
+	public String[] save() {
+		return ItemStack.save(getUsableItem(), getCount());
+	}
+	
+	public void loadItem(String[] data) {
+		ItemStack stack = ItemStack.load(data);
+		count = stack.count;
+		item = stack.item;
+	}
 }

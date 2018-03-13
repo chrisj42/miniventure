@@ -1,10 +1,13 @@
 package miniventure.game.world.entity.mob;
 
+import java.util.Arrays;
+
 import miniventure.game.item.Item;
 import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolType;
 import miniventure.game.util.FrameBlinker;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.Version;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
@@ -20,6 +23,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -43,7 +47,6 @@ public abstract class Mob extends Entity {
 	
 	private final int maxHealth;
 	private int health;
-	@NotNull private ItemDrop[] itemDrops;
 	
 	private float knockbackTimeLeft = 0;
 	@NotNull private Vector2 knockbackVelocity = new Vector2(); // knockback is applied once, at the start, as a velocity. The mob is moved with this velocity constantly, slowing down at a fixed rate, until the knockback is gone.
@@ -51,16 +54,57 @@ public abstract class Mob extends Entity {
 	private float invulnerableTime = 0;
 	private FrameBlinker blinker;
 	
-	public Mob(@NotNull String spriteName, int health, @NotNull ItemDrop... deathDrops) {
+	private final String spriteName;
+	
+	public Mob(@NotNull String spriteName, int health) {
 		super();
 		dir = Direction.DOWN;
 		this.maxHealth = health;
 		this.health = health;
-		this.itemDrops = deathDrops;
+		
+		this.spriteName = spriteName;
 		
 		blinker = new FrameBlinker(5, 1, false);
 		
 		animator = new MobAnimationController(this, spriteName);
+	}
+	
+	public Mob(String[][] allData, Version version) {
+		super(Arrays.copyOfRange(allData, 0, allData.length-1), version);
+		String[] data = allData[allData.length-1];
+		
+		this.spriteName = data[0];
+		dir = Direction.valueOf(data[1]);
+		maxHealth = Integer.parseInt(data[2]);
+		health = Integer.parseInt(data[3]);
+		invulnerableTime = Float.parseFloat(data[4]);
+		
+		knockbackTimeLeft = Float.parseFloat(data[5]);
+		float kx = Float.parseFloat(data[6]);
+		float ky = Float.parseFloat(data[7]);
+		knockbackVelocity = new Vector2(kx, ky);
+		
+		blinker = new FrameBlinker(5, 1, false);
+		
+		animator = new MobAnimationController(this, spriteName);
+	}
+	
+	@Override
+	public Array<String[]> save() {
+		Array<String[]> data = super.save();
+		
+		data.add(new String[] {
+			spriteName,
+			dir.name(),
+			maxHealth+"",
+			health+"",
+			invulnerableTime+"",
+			knockbackTimeLeft+"",
+			knockbackVelocity.x+"",
+			knockbackVelocity.y+""
+		});
+		
+		return data;
 	}
 	
 	public void reset() {
@@ -71,6 +115,8 @@ public abstract class Mob extends Entity {
 		invulnerableTime = 0;
 		animator.pollAnimation(0);
 	}
+	
+	protected int getHealth() { return health; }
 	
 	public Direction getDirection() { return dir; }
 	
@@ -163,13 +209,8 @@ public abstract class Mob extends Entity {
 		if(level != null) {
 			level.addEntity(new TextParticle(damage+"", this instanceof Player ? Color.PINK : Color.RED), getCenter(), true);
 			
-			if (health == 0) {
-				if(level instanceof ServerLevel)
-					for (ItemDrop drop : itemDrops)
-						drop.dropItems((ServerLevel)level, this, obj);
-				
+			if (health == 0)
 				remove();
-			}
 		} else
 			System.out.println("level is null for mob " + this);
 		

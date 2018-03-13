@@ -1,5 +1,6 @@
 package miniventure.game.world.entity.mob;
 
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashMap;
 
@@ -11,6 +12,7 @@ import miniventure.game.item.InventoryScreen;
 import miniventure.game.item.Item;
 import miniventure.game.item.Recipes;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.Version;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.particle.ActionParticle.ActionType;
@@ -93,6 +95,36 @@ public class Player extends Mob {
 		
 		hands = new Hands(this);
 		reset();
+	}
+	
+	public Player(String[][] allData, Version version) {
+		super(Arrays.copyOfRange(allData, 0, allData.length-1), version);
+		String[] data = allData[allData.length-1];
+		
+		hands = new Hands(this);
+		reset();
+		
+		stats.put(Stat.Health, getHealth());
+		stats.put(Stat.Hunger, Integer.parseInt(data[0]));
+		stats.put(Stat.Stamina, Integer.parseInt(data[1]));
+		//stats.put(Stat.Armor, Integer.parseInt(data[2]));
+		
+		inventory.loadItems(MyUtils.parseLayeredString(data[2]));
+		hands.loadItem(MyUtils.parseLayeredString(data[3]));
+	}
+	
+	@Override
+	public Array<String[]> save() {
+		Array<String[]> data = super.save();
+		
+		data.add(new String[] {
+			getStat(Stat.Hunger)+"",
+			getStat(Stat.Stamina)+"",
+			MyUtils.encodeStringArray(inventory.save()),
+			MyUtils.encodeStringArray(hands.save())
+		});
+		
+		return data;
 	}
 	
 	// use this instead of creating a new player.

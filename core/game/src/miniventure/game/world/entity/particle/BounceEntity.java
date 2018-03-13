@@ -1,6 +1,9 @@
 package miniventure.game.world.entity.particle;
 
+import java.util.Arrays;
+
 import miniventure.game.util.FrameBlinker;
+import miniventure.game.util.Version;
 import miniventure.game.world.Level;
 import miniventure.game.world.entity.Entity;
 
@@ -9,6 +12,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
 
 public abstract class BounceEntity extends Entity {
 	
@@ -35,6 +39,36 @@ public abstract class BounceEntity extends Entity {
 		blinker = new FrameBlinker(1, 1, false);
 		
 		velocity = new Vector3(goalDir.cpy().nor().scl(MathUtils.random(0.5f, 2.5f)), MathUtils.random(8f, 12f));
+	}
+	
+	public BounceEntity(String[][] allData, Version version) {
+		super(Arrays.copyOfRange(allData, 0, allData.length-1), version);
+		String[] data = allData[allData.length-1];
+		lifetime = Float.parseFloat(data[0]);
+		float x = Float.parseFloat(data[1]);
+		float y = Float.parseFloat(data[2]);
+		float z = Float.parseFloat(data[3]);
+		velocity = new Vector3(x, y, z);
+		time = Float.parseFloat(data[4]);
+		lastBounceTime = Float.parseFloat(data[5]);
+		
+		blinker = new FrameBlinker(1, 1, false);
+	}
+	
+	@Override
+	public Array<String[]> save() {
+		Array<String[]> data = super.save();
+		
+		data.add(new String[] {
+			lifetime+"",
+			velocity.x+"",
+			velocity.y+"",
+			velocity.z+"",
+			time+"",
+			lastBounceTime+""
+		});
+		
+		return data;
 	}
 	
 	float getTime() { return time; }
