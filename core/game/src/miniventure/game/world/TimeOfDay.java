@@ -1,4 +1,4 @@
-package miniventure.game;
+package miniventure.game.world;
 
 import com.badlogic.gdx.graphics.Color;
 

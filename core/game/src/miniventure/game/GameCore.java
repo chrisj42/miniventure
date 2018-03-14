@@ -2,12 +2,10 @@ package miniventure.game;
 
 import java.util.HashMap;
 
-import miniventure.game.screen.MenuScreen;
 import miniventure.game.util.Version;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -17,8 +15,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-
-import org.jetbrains.annotations.Nullable;
 
 public class GameCore {
 	
@@ -33,11 +29,6 @@ public class GameCore {
 	
 	private static TextureAtlas iconAtlas;
 	public static final HashMap<String, TextureRegion> icons = new HashMap<>();
-	
-	private static boolean hasMenu = false;
-	private static MenuScreen menuScreen;
-	
-	public static final InputHandler input = new InputHandler();
 	
 	private static SpriteBatch batch;
 	private static FreeTypeFontGenerator fontGenerator;
@@ -60,43 +51,12 @@ public class GameCore {
 			icons.put(region.name, region);
 	}
 	
-	public static void updateAndRender(WorldManager world) {
-		input.update();
-		
-		if (world.worldLoaded())
-			world.update(Gdx.graphics.getDeltaTime());
-		
-		hasMenu = menuScreen != null;
-		if (menuScreen != null) {
-			menuScreen.act();
-			menuScreen.draw();
-		}
-	}
-	
-	public static boolean hasMenu() { return hasMenu; }
-	
-	public static void setScreen(@Nullable MenuScreen screen) {
-		if(screen == null && menuScreen != null)
-			menuScreen.dispose();
-		else if(screen != null)
-			screen.setParent(menuScreen);
-		
-		System.out.println("setting screen to " + screen);
-		
-		menuScreen = screen;
-		Gdx.input.setInputProcessor(menuScreen == null ? input : menuScreen);
-		input.reset();
-	}
-	
 	public static void dispose () {
 		batch.dispose();
 		skin.dispose();
 		fontGenerator.dispose();
 		if(defaultFont != null)
 			defaultFont.dispose();
-		
-		if(menuScreen != null)
-			menuScreen.dispose();
 		
 		entityAtlas.dispose();
 		tileAtlas.dispose();
@@ -109,9 +69,6 @@ public class GameCore {
 		layout.setText(getFont(), text);
 		return layout;
 	}
-	
-	@Nullable
-	public static MenuScreen getScreen() { return menuScreen; }
 	
 	public static Skin getSkin() { return skin; }
 	

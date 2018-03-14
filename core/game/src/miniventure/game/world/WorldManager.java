@@ -1,7 +1,5 @@
-package miniventure.game;
+package miniventure.game.world;
 
-import miniventure.game.world.Level;
-import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 
 import com.badlogic.gdx.utils.Array;
@@ -12,9 +10,6 @@ public interface WorldManager {
 	
 	/** creates the world */
 	void createWorld(int width, int height);
-	
-	/* load world from file */
-	//void createWorld(File worldPath);
 	
 	/** unload and close the world, possibly saving to file */
 	default void exitWorld() { exitWorld(true); }
@@ -39,4 +34,15 @@ public interface WorldManager {
 	int generateEntityID(Entity entity);
 	
 	default String getTimeString() { return TimeOfDay.getTimeString(getGameTime()); }
+	
+	
+	/* load world from file */
+	/*default void createWorld(File worldPath) {
+		
+	}*/
+	
+	default Entity loadEntity(String data) { return Entity.deserialize(data); }
+	
+	//Tile loadTile(String data);
+	
 }

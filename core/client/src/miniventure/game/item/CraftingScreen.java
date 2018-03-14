@@ -3,6 +3,7 @@ package miniventure.game.item;
 import java.util.Arrays;
 
 import miniventure.game.GameCore;
+import miniventure.game.client.ClientCore;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.util.MyUtils;
 
@@ -69,7 +70,7 @@ public class CraftingScreen extends MenuScreen {
 			@Override
 			public boolean keyDown (InputEvent event, int keycode) {
 				if(keycode == Keys.Z)
-					GameCore.setScreen(null);
+					ClientCore.setScreen(null);
 				return true;
 			}
 		});
@@ -137,7 +138,7 @@ public class CraftingScreen extends MenuScreen {
 		@Override
 		void keyDown(InputEvent event, int keycode) {
 			if(keycode == Keys.ESCAPE || keycode == Keys.Z)
-				GameCore.setScreen(null);
+				ClientCore.setScreen(null);
 		}
 		
 		@Override

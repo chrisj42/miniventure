@@ -1,7 +1,7 @@
-package miniventure.client;
+package miniventure.game.client;
 
 import miniventure.game.GameCore;
-import miniventure.game.TimeOfDay;
+import miniventure.game.world.TimeOfDay;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.Level;

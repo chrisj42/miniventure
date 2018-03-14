@@ -1,7 +1,9 @@
-package miniventure.game;
+package miniventure.game.client;
 
 import java.util.HashMap;
 import java.util.HashSet;
+
+import miniventure.game.GameCore;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
@@ -43,7 +45,7 @@ public class InputHandler implements InputProcessor {
 	}
 	
 	public boolean pressingKey(int keycode) {
-		return !GameCore.hasMenu() && (Gdx.input.isKeyJustPressed(keycode) || pressedKeys.contains(keycode));
+		return !ClientCore.hasMenu() && (Gdx.input.isKeyJustPressed(keycode) || pressedKeys.contains(keycode));
 	}
 	
 	

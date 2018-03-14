@@ -1,9 +1,10 @@
-package miniventure.server;
+package miniventure.game.server;
 
 import java.util.HashMap;
 import java.util.HashSet;
 
-import miniventure.game.WorldManager;
+import miniventure.game.ProgressPrinter;
+import miniventure.game.world.WorldManager;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
@@ -55,7 +56,7 @@ public class ServerWorld implements WorldManager {
 	public void createWorld(int width, int height) {
 		worldLoaded = false;
 		levelGenerator = new LevelGenerator(MathUtils.random.nextLong(), width, height, 32, 6);
-		ServerLevel.generateLevels(this, levelGenerator);
+		ServerLevel.generateLevels(this, levelGenerator, new ProgressPrinter());
 	}
 	
 	@Override

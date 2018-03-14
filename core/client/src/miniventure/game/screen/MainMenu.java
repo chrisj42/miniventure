@@ -1,9 +1,7 @@
 package miniventure.game.screen;
 
-import java.io.IOException;
-
 import miniventure.game.GameCore;
-import miniventure.game.WorldManager;
+import miniventure.game.world.WorldManager;
 
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;

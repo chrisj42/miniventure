@@ -1,17 +1,13 @@
 package miniventure.game.util;
 
 import java.util.LinkedList;
-import java.util.Queue;
 import java.util.Stack;
 
 import miniventure.game.GameCore;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;

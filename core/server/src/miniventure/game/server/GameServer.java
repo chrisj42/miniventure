@@ -1,12 +1,9 @@
-package miniventure.server;
+package miniventure.game.server;
 
 import java.io.IOException;
 import java.util.HashMap;
 
 import miniventure.game.GameProtocol;
-import miniventure.game.GameProtocol.LevelData;
-import miniventure.game.GameProtocol.Login;
-import miniventure.game.GameProtocol.SpawnData;
 import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.entity.mob.Player;
@@ -16,6 +13,8 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 
+import static miniventure.game.GameProtocol.*;
+
 public class GameServer {
 	
 	private final HashMap<Connection, Player> playerConnections = new HashMap<>();
@@ -23,7 +22,7 @@ public class GameServer {
 	private Server server;
 	
 	public GameServer() {
-		server = new Server(16384*2, 16384);
+		server = new Server(writeBufferSize, objectBufferSize);
 		GameProtocol.registerClasses(server.getKryo());
 		
 		addListener(new Listener() {

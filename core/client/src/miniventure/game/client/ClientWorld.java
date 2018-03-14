@@ -1,11 +1,12 @@
-package miniventure.client;
+package miniventure.game.client;
 
 import java.util.HashMap;
 
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.DatalessRequest;
-import miniventure.game.TimeOfDay;
-import miniventure.game.WorldManager;
+import miniventure.game.util.MyUtils;
+import miniventure.game.world.TimeOfDay;
+import miniventure.game.world.WorldManager;
 import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
@@ -13,8 +14,9 @@ import miniventure.game.screen.RespawnScreen;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
+import miniventure.game.world.entity.mob.ClientPlayer;
 import miniventure.game.world.entity.mob.Player;
-import miniventure.server.ServerCore;
+import miniventure.game.server.ServerCore;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
@@ -57,7 +59,7 @@ public class ClientWorld implements WorldManager {
 	@Override
 	public void createWorld(int width, int height) {
 		LoadingScreen loadingScreen = new LoadingScreen();
-		GameCore.setScreen(loadingScreen);
+		ClientCore.setScreen(loadingScreen);
 		
 		gameTime = 0;
 		Level.clearLevels();
@@ -77,12 +79,12 @@ public class ClientWorld implements WorldManager {
 	public void update(float delta) {
 		if(!worldLoaded() || mainPlayer == null) return;
 		
-		MenuScreen menu = GameCore.getScreen();
+		MenuScreen menu = ClientCore.getScreen();
 		
 		Level level = mainPlayer.getLevel();
 		if(level == null) {
 			if(!(menu instanceof RespawnScreen))
-				GameCore.setScreen(new RespawnScreen());
+				ClientCore.setScreen(new RespawnScreen());
 			return;
 		}
 		
@@ -99,7 +101,7 @@ public class ClientWorld implements WorldManager {
 		// set menu to main menu, and dispose of level/world resources
 		mainPlayer = null;
 		Level.clearLevels();
-		GameCore.setScreen(new MainMenu(this));
+		ClientCore.setScreen(new MainMenu(this));
 	}
 	
 	public void spawnPlayer(float x, float y) {
@@ -115,7 +117,7 @@ public class ClientWorld implements WorldManager {
 	
 	public void respawnPlayer() {
 		LoadingScreen loader = new LoadingScreen();
-		GameCore.setScreen(loader);
+		ClientCore.setScreen(loader);
 		loader.pushMessage("respawning...");
 		client.send(DatalessRequest.Respawn);
 	}
@@ -137,11 +139,26 @@ public class ClientWorld implements WorldManager {
 	
 	@Override
 	public int generateEntityID(Entity entity) {
+		assert false: "ClientWorld should never be generating an entity id";
 		int eid;
 		do {
 			eid = MathUtils.random.nextInt();
 		} while(entityIDMap.containsKey(eid));
 		entityIDMap.put(eid, entity);
 		return eid;
+	}
+	
+	
+	@Override
+	public Entity loadEntity(String data) {
+		String[] partData = MyUtils.parseLayeredString(data);
+		String[][] sepData = new String[partData.length-1][];
+		for(int i = 0; i < sepData.length; i++)
+			sepData[i] = MyUtils.parseLayeredString(partData[i+1]);
+		
+		if(partData[0].equals(Player.class.getCanonicalName().replace(Entity.class.getPackage().getName()+".", "")))
+			return new ClientPlayer(sepData, GameCore.VERSION);
+		else
+			return WorldManager.super.loadEntity(data);
 	}
 }

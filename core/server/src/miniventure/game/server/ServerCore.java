@@ -1,4 +1,4 @@
-package miniventure.server;
+package miniventure.game.server;
 
 public class ServerCore {
 	

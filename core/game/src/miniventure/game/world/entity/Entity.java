@@ -1,6 +1,10 @@
 package miniventure.game.world.entity;
 
+import java.lang.reflect.InvocationTargetException;
+
+import miniventure.game.GameCore;
 import miniventure.game.item.Item;
+import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
 import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
@@ -246,4 +250,52 @@ public abstract class Entity implements WorldObject {
 	
 	@Override
 	public int hashCode() { return eid; }
+	
+	
+	public Class<? extends Entity> getLoadingClass() { return getClass(); }
+	
+	public static String serialize(Entity e) {
+		Array<String[]> data = e.save();
+		String[][] doubleDataArray = data.shrink();
+		
+		String[] partEncodedData = new String[doubleDataArray.length+1];
+		for(int i = 0; i < doubleDataArray.length; i++) {
+			partEncodedData[i+1] = MyUtils.encodeStringArray(doubleDataArray[i]);
+		}
+		
+		partEncodedData[0] = e.getLoadingClass().getCanonicalName().replace(Entity.class.getPackage().getName()+".", "");
+		
+		return MyUtils.encodeStringArray(partEncodedData);
+	}
+	
+	public static Entity deserialize(String data) {
+		String[] partData = MyUtils.parseLayeredString(data);
+		
+		String[][] sepData = new String[partData.length-1][];
+		for(int i = 0; i < sepData.length; i++) {
+			sepData[i] = MyUtils.parseLayeredString(partData[i+1]);
+		}
+		
+		try {
+			Class<?> clazz = Class.forName(Entity.class.getPackage().getName()+"."+partData[0]);
+			
+			Class<? extends Entity> entityClass = clazz.asSubclass(Entity.class);
+			
+			return deserialize(entityClass, sepData);
+			
+		} catch(ClassNotFoundException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	public static Entity deserialize(Class<? extends Entity> clazz, String[][] data) {
+		Entity newEntity = null;
+		try {
+			newEntity = clazz.getConstructor(String[][].class, Version.class).newInstance(data, GameCore.VERSION);
+		} catch(NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+			e.printStackTrace();
+		}
+		
+		return newEntity;
+	}
 }

@@ -7,7 +7,6 @@ import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.mob.Player.Stat;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

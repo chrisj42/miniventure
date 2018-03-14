@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import miniventure.game.GameProtocol.LevelData;
-import miniventure.game.WorldManager;
 import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Player;

@@ -1,6 +1,6 @@
 package miniventure.game.item;
 
-import miniventure.game.GameCore;
+import miniventure.game.client.ClientCore;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.util.MyUtils;
 
@@ -32,7 +32,7 @@ public class InventoryScreen extends MenuScreen {
 			@Override
 			public boolean keyDown (InputEvent event, int keycode) {
 				if(keycode == Keys.E)
-					GameCore.setScreen(null);
+					ClientCore.setScreen(null);
 				return true;
 			}
 		});
@@ -57,7 +57,7 @@ public class InventoryScreen extends MenuScreen {
 		@Override
 		void keyDown(InputEvent event, int keycode) {
 			if(keycode == Keys.E || keycode == Keys.ESCAPE)
-				GameCore.setScreen(null);
+				ClientCore.setScreen(null);
 		} 
 		
 		@Override
@@ -65,7 +65,7 @@ public class InventoryScreen extends MenuScreen {
 			ItemStack stack = inventory.removeItemAt(idx);
 			hands.clearItem(inventory); // just in case.
 			hands.setItem(stack.item, stack.count);
-			GameCore.setScreen(null);
+			ClientCore.setScreen(null);
 		}
 		
 		@Override

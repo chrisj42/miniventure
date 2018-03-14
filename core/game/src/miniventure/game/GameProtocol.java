@@ -12,6 +12,8 @@ import com.esotericsoftware.kryo.Kryo;
 public interface GameProtocol {
 	
 	int PORT = 8405;
+	int writeBufferSize = 16384*2;
+	int objectBufferSize = 16384;
 	
 	static void registerClasses(Kryo kryo) {
 		Class<?>[] classes = GameProtocol.class.getDeclaredClasses();

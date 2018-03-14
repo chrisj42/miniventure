@@ -5,12 +5,9 @@ import java.util.EnumMap;
 import java.util.HashMap;
 
 import miniventure.game.GameCore;
-import miniventure.game.item.CraftingScreen;
 import miniventure.game.item.Hands;
 import miniventure.game.item.Inventory;
-import miniventure.game.item.InventoryScreen;
 import miniventure.game.item.Item;
-import miniventure.game.item.Recipes;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
 import miniventure.game.world.Level;
@@ -18,9 +15,6 @@ import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.particle.ActionParticle.ActionType;
 import miniventure.game.world.tile.Tile;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
@@ -41,7 +35,7 @@ public class Player extends Mob {
 	private <T extends StatEvolver> void addStatEvo(T evolver) {
 		statEvoMap.put(evolver.getClass(), evolver);
 	}
-	private <T extends StatEvolver> T getStatEvo(Class<T> clazz) {
+	<T extends StatEvolver> T getStatEvo(Class<T> clazz) {
 		//noinspection unchecked
 		return (T) statEvoMap.get(clazz);
 	}
@@ -150,47 +144,9 @@ public class Player extends Mob {
 		return stats.get(stat) - prevVal;
 	}
 	
-	public void checkInput(@NotNull Vector2 mouseInput) {
-		// checks for keyboard input to move the player.
-		// getDeltaTime() returns the time passed between the last and the current frame in seconds.
-		Vector2 movement = new Vector2();
-		if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) movement.x--;
-		if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) movement.x++;
-		if(Gdx.input.isKeyPressed(Input.Keys.UP)) movement.y++;
-		if(Gdx.input.isKeyPressed(Input.Keys.DOWN)) movement.y--;
-		
-		movement.nor();
-		
-		movement.add(mouseInput);
-		movement.nor();
-		
-		movement.scl(MOVE_SPEED * Gdx.graphics.getDeltaTime());
-		
-		move(movement.x, movement.y);
-		
-		getStatEvo(StaminaSystem.class).isMoving = !movement.isZero();
-		if(!movement.isZero())
-			getStatEvo(HungerSystem.class).addHunger(Gdx.graphics.getDeltaTime() * 0.35f);
-		
-		if(!isKnockedBack()) {
-			if (GameCore.input.pressingKey(Input.Keys.C))
-				attack();
-			else if (GameCore.input.pressingKey(Input.Keys.V))
-				interact();
-			
-			//if(Gdx.input.isKeyPressed(Input.Keys.C) || Gdx.input.isKeyPressed(Input.Keys.V))
-			//	animator.requestState(AnimationState.ATTACK);
-		}
-		
-		hands.resetItemUsage();
-		
-		if(GameCore.input.pressingKey(Input.Keys.E)) {
-			hands.clearItem(inventory);
-			GameCore.setScreen(new InventoryScreen(inventory, hands));
-		}
-		else if(GameCore.input.pressingKey(Input.Keys.Z))
-			GameCore.setScreen(new CraftingScreen(Recipes.recipes, inventory));
-	}
+	@NotNull
+	protected Hands getHands() { return hands; }
+	protected Inventory getInventory() { return inventory; }
 	
 	public void drawGui(Rectangle canvas, SpriteBatch batch) {
 		hands.getUsableItem().drawItem(hands.getCount(), batch, canvas.width/2, 20);
@@ -274,7 +230,7 @@ public class Player extends Mob {
 		return objects;
 	}
 	
-	private void attack() {
+	protected void attack() {
 		if(!hands.hasUsableItem()) return;
 		
 		Level level = getLevel();
@@ -299,7 +255,7 @@ public class Player extends Mob {
 		}
 	}
 	
-	private void interact() {
+	protected void interact() {
 		if(!hands.hasUsableItem()) return;
 		
 		Item heldItem = hands.getUsableItem();
@@ -333,11 +289,11 @@ public class Player extends Mob {
 	}
 	
 	
-	private class StaminaSystem implements StatEvolver {
+	protected class StaminaSystem implements StatEvolver {
 		
 		private static final float STAMINA_REGEN_RATE = 0.35f; // time taken to regen 1 stamina point.
 		
-		private boolean isMoving = false;
+		boolean isMoving = false;
 		private float regenTime;
 		
 		StaminaSystem() {}
@@ -358,7 +314,7 @@ public class Player extends Mob {
 		}
 	}
 	
-	private class HealthSystem implements StatEvolver {
+	protected class HealthSystem implements StatEvolver {
 		
 		private static final float REGEN_RATE = 2f; // whenever the regenTime reaches this value, a health point is added.
 		private float regenTime;
@@ -381,7 +337,7 @@ public class Player extends Mob {
 		}
 	}
 	
-	private class HungerSystem implements StatEvolver {
+	protected class HungerSystem implements StatEvolver {
 		/*
 			Hunger... you get it:
 				- over time

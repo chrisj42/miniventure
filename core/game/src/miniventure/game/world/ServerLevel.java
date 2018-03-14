@@ -2,19 +2,16 @@ package miniventure.game.world;
 
 import java.util.HashMap;
 
-import miniventure.game.GameCore;
-import miniventure.game.WorldManager;
+import miniventure.game.util.ProgressLogger;
 import miniventure.game.item.Item;
-import miniventure.game.screen.LoadingScreen;
-import miniventure.game.screen.MenuScreen;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.entity.Entity;
-import miniventure.game.world.entity.particle.ItemEntity;
 import miniventure.game.world.entity.mob.AiType;
 import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.entity.mob.MobAi;
 import miniventure.game.world.entity.mob.Player;
+import miniventure.game.world.entity.particle.ItemEntity;
 import miniventure.game.world.levelgen.LevelGenerator;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileType;
@@ -54,6 +51,12 @@ public class ServerLevel extends Level {
 		}
 		
 		super.entityMoved(entity);
+	}
+	
+	@Override
+	public void addEntity(Entity e) {
+		super.addEntity(e);
+		// somehow send notification to the clients..?
 	}
 	
 	public void update(float delta) {
@@ -227,27 +230,15 @@ public class ServerLevel extends Level {
 		return idx >= 0 && idx < levels.length ? levels[idx] : null;
 	}
 	
-	public static void generateLevels(WorldManager world, LevelGenerator levelGenerator) {
-		MenuScreen menu = GameCore.getScreen();
-		LoadingScreen display = null;
-		if(menu != null && menu instanceof LoadingScreen) {
-			display = (LoadingScreen) menu;
-			display.pushMessage("");
-		}
-		
+	public static void generateLevels(WorldManager world, LevelGenerator levelGenerator, ProgressLogger logger) {
+		logger.pushMessage("");
 		clearLevels();
 		levels = new ServerLevel[levelNames.length];
 		for(int i = 0; i < levels.length; i++) {
-			log(display, "Loading level "+(i+1)+"/"+levels.length+"...");
+			logger.editMessage("Loading level "+(i+1)+"/"+levels.length+"...");
 			levels[i] = new ServerLevel(world, i + minDepth, levelGenerator);
 		}
-		if(display != null) display.popMessage();
-	}
-	private static void log(@Nullable LoadingScreen display, String text) {
-		if(display == null)
-			System.out.println(text);
-		else
-			display.editMessage(text);
+		logger.popMessage();
 	}
 	
 	@Nullable

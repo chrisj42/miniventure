@@ -1,6 +1,6 @@
 package miniventure.game.screen;
 
-import miniventure.game.GameCore;
+import miniventure.game.client.ClientCore;
 
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
@@ -18,7 +18,7 @@ public class RespawnScreen extends MenuScreen {
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
 				//GameCore.getWorld().respawn();
-				GameCore.setScreen(null);
+				ClientCore.setScreen(null);
 			}
 		}));
 	}
