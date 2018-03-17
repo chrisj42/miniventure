@@ -89,7 +89,7 @@ public enum TileType {
 		SolidProperty.SOLID,
 		new DestructibleProperty(7, null, true),
 		new AnimationProperty(false, AnimationType.SINGLE_FRAME),
-		(TouchListener) (e, t) -> e.attackedBy(t, null, 1)
+		(TouchListener) (e, t, initial) -> e.attackedBy(t, null, 1)
 	}),
 	
 	TREE(() -> new TileProperty[] {

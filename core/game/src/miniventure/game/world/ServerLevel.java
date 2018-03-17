@@ -70,13 +70,11 @@ public class ServerLevel extends Level {
 			int x = MathUtils.random(chunk.width-1);
 			int y = MathUtils.random(chunk.height-1);
 			Tile t = chunk.getTile(x, y);
-			if(t != null) t.update(delta);
+			if(t != null) t.update(delta, true);
 		}
 		
 		// update entities
-		Entity[] entities = this.entities.toArray(new Entity[this.entities.size()]);
-		for(Entity e: entities)
-			e.update(delta);
+		updateEntities(delta, true);
 		
 		if(this.entities.size() < getEntityCap() && MathUtils.randomBoolean(0.01f))
 			spawnMob(new MobAi(AiType.values[MathUtils.random(AiType.values.length-1)]));

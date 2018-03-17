@@ -7,6 +7,8 @@ import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.Level;
 import miniventure.game.world.tile.Tile.TileData;
 
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.esotericsoftware.kryo.Kryo;
 
 public interface GameProtocol {
@@ -62,22 +64,41 @@ public interface GameProtocol {
 	
 	class SpawnData {
 		public final float x, y;
+		public final int eid;
 		
-		private SpawnData() { this(0, 0); }
-		public SpawnData(float x, float y) {
+		private SpawnData() { this(0, 0, 0); }
+		public SpawnData(float x, float y, int eid) {
 			this.x = x;
 			this.y = y;
+			this.eid = eid;
 		}
 	}
 	
 	// level and player are already existing types
 	
-	class Move {
-		// entity movement... though maybe RMI again!
+	class Ping {
+		// this is the occasional ping sent by each client, to make sure things like position are still accurate.
+	}
+	
+	class Movement {
+		public final float xd, yd;
+		
+		private Movement() { this(0, 0); }
+		public Movement(Vector3 pos) { this(pos.x, pos.y); }
+		public Movement(Vector2 pos) { this(pos.x, pos.y); }
+		public Movement(float xd, float yd) {
+			this.xd = xd;
+			this.yd = yd;
+		}
 	}
 	
 	class Request {
-		// interact/attack request... or maybe I can do this through RMI.
+		public final boolean attack;
+		
+		private Request() { this(false); }
+		public Request(boolean attack) {
+			this.attack = attack;
+		}
 	}
 	
 	

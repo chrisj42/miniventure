@@ -41,8 +41,14 @@ public class GameServer {
 						for(ChunkData chunk: playerChunks)
 							connection.sendTCP(chunk);
 						Vector2 pos = player.getPosition();
-						connection.sendTCP(new SpawnData(pos.x, pos.y));
+						connection.sendTCP(new SpawnData(pos.x, pos.y, player.getId()));
 					}
+				}
+				
+				if(object instanceof Movement) {
+					Movement m = (Movement) object;
+					Player p = playerConnections.get(connection);
+					p.move(m.xd, m.yd);
 				}
 			}
 			

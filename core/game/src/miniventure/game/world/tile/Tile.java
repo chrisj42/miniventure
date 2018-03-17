@@ -317,7 +317,8 @@ public class Tile implements WorldObject {
 	
 	
 	@Override
-	public void update(float delta) {
+	public void update(float delta, boolean server) {
+		if(!server) return;
 		for(TileType type: tileTypes) {// goes from bottom to top
 			if(!(type == getType() && type.getProp(TransitionProperty.class).playingAnimation(this))) // only update main tile if not transitioning.
 				type.getProp(UpdateProperty.class).update(delta, this);
@@ -347,10 +348,10 @@ public class Tile implements WorldObject {
 	public boolean interactWith(Player player, @Nullable Item heldItem) { return getType().getProp(InteractableProperty.class).interact(player, heldItem, this); }
 	
 	@Override
-	public boolean touchedBy(Entity entity) { getType().getProp(TouchListener.class).touchedBy(entity, this); return true; }
+	public boolean touchedBy(Entity entity) { getType().getProp(TouchListener.class).touchedBy(entity, this, true); return true; }
 	
 	@Override
-	public void touching(Entity entity) {}
+	public void touching(Entity entity) { getType().getProp(TouchListener.class).touchedBy(entity, this, false); }
 	
 	@Override
 	public String toString() { return getType().getName()/* + " Tile (all:"+tileTypes+")"*/; }

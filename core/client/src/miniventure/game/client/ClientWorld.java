@@ -44,7 +44,7 @@ public class ClientWorld implements WorldManager {
 	
 	private GameClient client;
 	
-	private Player mainPlayer;
+	private ClientPlayer mainPlayer;
 	private float gameTime;
 	
 	ClientWorld(GameScreen gameScreen) {
@@ -55,6 +55,8 @@ public class ClientWorld implements WorldManager {
 	
 	@Override
 	public boolean worldLoaded() { return Level.hasLevels(); }
+	
+	public GameClient getClient() { return client; }
 	
 	@Override
 	public void createWorld(int width, int height) {
@@ -90,6 +92,8 @@ public class ClientWorld implements WorldManager {
 		
 		gameScreen.handleInput(mainPlayer);
 		
+		level.updateEntities(delta, false);
+		
 		if(menu == null || !menu.usesWholeScreen())
 			gameScreen.render(mainPlayer, TimeOfDay.getSkyColors(gameTime), level);
 		
@@ -104,12 +108,12 @@ public class ClientWorld implements WorldManager {
 		ClientCore.setScreen(new MainMenu(this));
 	}
 	
-	public void spawnPlayer(float x, float y) {
+	public void spawnPlayer(float x, float y, int eid) {
 		Level level = Level.getLevel(0);//mainPlayer == null ?  : mainPlayer.getLevel();
 		if(mainPlayer != null)
 			mainPlayer.remove();
 		
-		mainPlayer = new Player();
+		mainPlayer = new ClientPlayer(eid);
 		
 		if(level != null)
 			level.addEntity(mainPlayer, x, y, false);

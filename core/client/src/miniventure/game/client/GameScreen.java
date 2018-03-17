@@ -5,6 +5,7 @@ import miniventure.game.world.TimeOfDay;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.Level;
+import miniventure.game.world.entity.mob.ClientPlayer;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.tile.Tile;
 
@@ -56,7 +57,7 @@ public class GameScreen {
 			lightingBuffer.dispose();
 	}
 	
-	public void handleInput(@NotNull Player player) {
+	public void handleInput(@NotNull ClientPlayer player) {
 		player.checkInput(getMouseInput());
 		
 		if(Gdx.input.isKeyJustPressed(Keys.MINUS))

@@ -8,11 +8,12 @@ import miniventure.game.world.Level;
 import miniventure.game.world.entity.Entity;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+
+import org.jetbrains.annotations.Nullable;
 
 public abstract class BounceEntity extends Entity {
 	
@@ -29,12 +30,11 @@ public abstract class BounceEntity extends Entity {
 	
 	private float lastBounceTime; // used to halt the entity once it starts bouncing a lot really quickly.
 	
-	public BounceEntity(float lifetime) {
-		this(new Vector2().setToRandomDirection(), lifetime);
-	}
-	public BounceEntity(Vector2 goalDir, float lifetime) {
+	public BounceEntity(@Nullable Vector2 goalDir, float lifetime) {
 		super();
 		this.lifetime = lifetime;
+		if(goalDir == null)
+			goalDir = new Vector2().setToRandomDirection();
 		
 		blinker = new FrameBlinker(1, 1, false);
 		
@@ -75,7 +75,7 @@ public abstract class BounceEntity extends Entity {
 	
 	private boolean moving = true;
 	@Override
-	public void update(float delta) {
+	public void update(float delta, boolean server) {
 		//super.update(delta);
 		/*
 			Movement will work like this:

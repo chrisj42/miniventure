@@ -13,6 +13,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class ItemEntity extends BounceEntity {
 	
@@ -21,7 +22,7 @@ public class ItemEntity extends BounceEntity {
 	private final Item item;
 	private final TextureRegion texture;
 	
-	public ItemEntity(Item item, @NotNull Vector2 goalDir) {
+	public ItemEntity(Item item, @Nullable Vector2 goalDir) {
 		super(goalDir, 8f);
 		this.item = item;
 		texture = item.getTexture();

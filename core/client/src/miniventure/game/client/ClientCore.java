@@ -110,4 +110,5 @@ public class ClientCore extends ApplicationAdapter {
 	public static MenuScreen getScreen() { return menuScreen; }
 	
 	public static ClientWorld getWorld() { return clientWorld; }
+	public static GameClient getClient() { return clientWorld.getClient(); }
 }

@@ -8,9 +8,7 @@ import miniventure.game.item.ToolType;
 import miniventure.game.util.FrameBlinker;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
-import miniventure.game.world.ItemDrop;
 import miniventure.game.world.Level;
-import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.Entity;
@@ -135,8 +133,8 @@ public abstract class Mob extends Entity {
 	}
 	
 	@Override
-	public void update(float delta) {
-		super.update(delta);
+	public void update(float delta, boolean server) {
+		super.update(delta, server);
 		
 		if(knockbackTimeLeft > 0) {
 			super.move(new Vector2(knockbackVelocity).scl(delta));

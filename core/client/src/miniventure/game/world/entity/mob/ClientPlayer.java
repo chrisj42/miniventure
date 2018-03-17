@@ -1,7 +1,7 @@
 package miniventure.game.world.entity.mob;
 
-import java.util.Arrays;
-
+import miniventure.game.GameProtocol.Movement;
+import miniventure.game.GameProtocol.Request;
 import miniventure.game.client.ClientCore;
 import miniventure.game.item.CraftingScreen;
 import miniventure.game.item.Hands;
@@ -14,14 +14,16 @@ import miniventure.game.world.entity.Entity;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
 
 public class ClientPlayer extends Player {
 	
 	
-	public ClientPlayer() { super(); }
+	public ClientPlayer(int eid) {
+		super();
+		setId(eid, false);
+	}
 	
 	public ClientPlayer(String[][] allData, Version version) {
 		super(allData, version);
@@ -46,7 +48,10 @@ public class ClientPlayer extends Player {
 		
 		movement.scl(MOVE_SPEED * Gdx.graphics.getDeltaTime());
 		
-		move(movement.x, movement.y);
+		boolean moved = move(movement.x, movement.y);
+		
+		if(moved)
+			ClientCore.getClient().send(new Movement(movement));
 		
 		getStatEvo(StaminaSystem.class).isMoving = !movement.isZero();
 		if(!movement.isZero())
@@ -54,9 +59,9 @@ public class ClientPlayer extends Player {
 		
 		if(!isKnockedBack()) {
 			if (ClientCore.input.pressingKey(Input.Keys.C))
-				attack();
+				ClientCore.getClient().send(new Request(true));
 			else if (ClientCore.input.pressingKey(Input.Keys.V))
-				interact();
+				ClientCore.getClient().send(new Request(false));
 			
 			//if(Gdx.input.isKeyPressed(Input.Keys.C) || Gdx.input.isKeyPressed(Input.Keys.V))
 			//	animator.requestState(AnimationState.ATTACK);
@@ -74,5 +79,4 @@ public class ClientPlayer extends Player {
 		else if(ClientCore.input.pressingKey(Input.Keys.Z))
 			ClientCore.setScreen(new CraftingScreen(Recipes.recipes, inventory));
 	}
-	
 }

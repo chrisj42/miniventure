@@ -79,7 +79,7 @@ public class ActionParticle extends Entity implements Particle {
 	}
 	
 	@Override
-	public void update(float delta) {
+	public void update(float delta, boolean server) {
 		timeElapsed += Gdx.graphics.getDeltaTime();
 		
 		if(timeElapsed >= animationTime)

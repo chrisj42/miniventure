@@ -187,8 +187,8 @@ public class Player extends Mob {
 	}
 	
 	@Override
-	public void update(float delta) {
-		super.update(delta);
+	public void update(float delta, boolean server) {
+		super.update(delta, server);
 		
 		// update things like hunger, stamina, etc.
 		for(StatEvolver evo: statEvoMap.values())

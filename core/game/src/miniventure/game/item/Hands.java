@@ -5,6 +5,7 @@ import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.mob.Player.Stat;
+import miniventure.game.world.entity.particle.ItemEntity;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 
@@ -69,8 +70,15 @@ public class Hands {
 	}
 	
 	public void clearItem(Inventory inv) {
-		if(inv != null && count > 0 && !(item instanceof HandItem))
-			inv.addItem(item, count);
+		if(inv != null && count > 0 && !(item instanceof HandItem)) {
+			int added = inv.addItem(item, count);
+			if(added != count) {
+				ServerLevel level = player.getServerLevel();
+				if(level != null)
+					for(int i = 0; i < count-added; i++)
+						level.addEntity(new ItemEntity(item, null), player.getPosition(), true);
+			}
+		}
 		
 		item = new HandItem();
 		count = 1;

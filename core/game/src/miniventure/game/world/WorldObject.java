@@ -34,7 +34,7 @@ public interface WorldObject {
 	default Vector2 getCenter(boolean worldOriginCenter) { return getBounds(worldOriginCenter).getCenter(new Vector2()); }
 	default Vector2 getPosition(boolean worldOriginCenter) { return getBounds(worldOriginCenter).getPosition(new Vector2()); }
 	
-	void update(float delta);
+	void update(float delta, boolean server);
 	
 	void render(SpriteBatch batch, float delta, Vector2 posOffset);
 	

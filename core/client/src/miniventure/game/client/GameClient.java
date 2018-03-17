@@ -46,7 +46,7 @@ public class GameClient {
 				if(object instanceof SpawnData) {
 					System.out.println("client received player");
 					SpawnData data = (SpawnData) object; 
-					ClientCore.getWorld().spawnPlayer(data.x, data.y);
+					ClientCore.getWorld().spawnPlayer(data.x, data.y, data.eid);
 					ClientCore.setScreen(null);
 				}
 			}

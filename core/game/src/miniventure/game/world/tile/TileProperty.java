@@ -11,7 +11,7 @@ public interface TileProperty {
 			SolidProperty.WALKABLE,
 			DestructibleProperty.INDESTRUCTIBLE,
 			(InteractableProperty) ((p, i, t) -> false),
-			(TouchListener) ((entity, tile) -> {}),
+			(TouchListener) ((entity, tile, initial) -> {}),
 			new AnimationProperty(true, AnimationType.SINGLE_FRAME),
 			new ConnectionProperty(false),
 			new OverlapProperty(false),

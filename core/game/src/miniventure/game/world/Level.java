@@ -116,6 +116,12 @@ public class Level {
 		entityMoved(e);
 	}
 	
+	public void updateEntities(float delta, boolean server) {
+		Entity[] entities = this.entities.toArray(new Entity[this.entities.size()]);
+		for(Entity e: entities)
+			e.update(delta, server);
+	}
+	
 	public void render(Rectangle renderSpace, SpriteBatch batch, float delta, Vector2 posOffset) {
 		renderSpace = new Rectangle(Math.max(0, renderSpace.x), Math.max(0, renderSpace.y), Math.min(getWidth()-renderSpace.x, renderSpace.width), Math.min(getHeight()-renderSpace.y, renderSpace.height));
 		//System.out.println("render space: " + renderSpace);

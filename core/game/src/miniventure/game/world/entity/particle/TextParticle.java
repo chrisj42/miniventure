@@ -27,7 +27,7 @@ public class TextParticle extends BounceEntity implements Particle {
 	public TextParticle(@NotNull String text) { this(text, Color.RED); }
 	public TextParticle(@NotNull String text, @NotNull Color main) { this(text, main, Color.BLACK); }
 	public TextParticle(@NotNull String text, @NotNull Color main, @NotNull Color shadow) {
-		super(2f);
+		super(null, 2f);
 		this.text = text;
 		this.main = main;
 		this.shadow = shadow;

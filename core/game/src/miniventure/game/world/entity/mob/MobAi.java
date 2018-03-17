@@ -71,8 +71,10 @@ public class MobAi extends Mob {
 	}
 	
 	@Override
-	public void update(float delta) {
-		super.update(delta);
+	public void update(float delta, boolean server) {
+		super.update(delta, server);
+		
+		if(!server) return;
 		
 		if(tempTimeLeft > 0) tempTimeLeft -= delta;
 		

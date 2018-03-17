@@ -23,6 +23,8 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class Entity implements WorldObject {
 	
+	private boolean serverEntity;
+	
 	private int eid;
 	private boolean hasID = false;
 	
@@ -44,20 +46,30 @@ public abstract class Entity implements WorldObject {
 		return data;
 	}
 	
+	public int getId() { return eid; }
+	public void setId(int eid, boolean serverEntity) {
+		if(hasID) throw new IllegalStateException("Entity "+this+" already has id, cannot reset");
+		this.eid = eid;
+		this.serverEntity = serverEntity;
+		hasID = true;
+	}
+	
 	@Override @Nullable
-	public Level getLevel() { return Level.getEntityLevel(this); }
+	public Level getLevel() { return hasID ? serverEntity ? ServerLevel.getEntityLevel(this) : Level.getEntityLevel(this) : null; }
 	@Override @Nullable
-	public ServerLevel getServerLevel() { return ServerLevel.getEntityLevel(this); }
+	public ServerLevel getServerLevel() { return hasID && serverEntity ? ServerLevel.getEntityLevel(this) : null; }
 	
 	/// this is called only to remove an entity completely from the game, not to change levels.
 	public void remove() {
-		Level level = Level.getEntityLevel(this);
+		Level level = getLevel();
 		if(level != null)
 			level.removeEntity(this);
 	}
 	
 	@Override
-	public void update(float delta) {
+	public void update(float delta, boolean server) {
+		if(!server) return;
+		
 		Level level = getLevel();
 		if(level == null) return;
 		Array<WorldObject> objects = new Array<>();
@@ -95,8 +107,6 @@ public abstract class Entity implements WorldObject {
 		bounds.height /= Tile.SIZE;
 		return bounds;
 	}
-	
-	public void addedToLevel(Level level) {}
 	
 	@Override
 	public boolean interactWith(Player player, @Nullable Item item) { return false; }
@@ -188,6 +198,7 @@ public abstract class Entity implements WorldObject {
 	public void moveTo(@NotNull Level level, @NotNull Vector2 pos) { moveTo(level, pos.x, pos.y); }
 	public void moveTo(@NotNull Level level, float x, float y) {
 		if(!hasID) {
+			serverEntity = level instanceof ServerLevel;
 			eid = level.getWorld().generateEntityID(this);
 			hasID = true;
 		}
