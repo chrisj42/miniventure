@@ -186,6 +186,8 @@ public class Inventory {
 	}
 	
 	public void loadItems(String[] allData) {
+		stackSizes.clear();
+		items.clear();
 		for(String str: allData) {
 			String[] data = MyUtils.parseLayeredString(str);
 			ItemStack stack = ItemStack.load(data);

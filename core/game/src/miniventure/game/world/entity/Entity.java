@@ -3,11 +3,13 @@ package miniventure.game.world.entity;
 import java.lang.reflect.InvocationTargetException;
 
 import miniventure.game.GameCore;
+import miniventure.game.GameProtocol.Movement;
 import miniventure.game.item.Item;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
 import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
+import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.tile.Tile;
@@ -16,6 +18,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
@@ -23,18 +26,20 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class Entity implements WorldObject {
 	
-	private boolean serverEntity;
+	@NotNull private final WorldManager world;
 	
 	private int eid;
-	private boolean hasID = false;
 	
 	private float x, y, z = 0;
 	
-	public Entity() {
+	public Entity(@NotNull WorldManager world) {
+		this.world = world;
 		
+		eid = world.registerEntity(this);
 	}
 	
-	public Entity(String[][] data, Version version) {
+	protected Entity(@NotNull WorldManager world, String[][] data, Version version) {
+		this(world);
 		x = Integer.parseInt(data[0][0]);
 		y = Integer.parseInt(data[0][1]);
 		z = Integer.parseInt(data[0][2]);
@@ -47,23 +52,21 @@ public abstract class Entity implements WorldObject {
 	}
 	
 	public int getId() { return eid; }
-	public void setId(int eid, boolean serverEntity) {
-		if(hasID) throw new IllegalStateException("Entity "+this+" already has id, cannot reset");
-		this.eid = eid;
-		this.serverEntity = serverEntity;
-		hasID = true;
-	}
+	
+	@NotNull @Override
+	public WorldManager getWorld() { return world; }
 	
 	@Override @Nullable
-	public Level getLevel() { return hasID ? serverEntity ? ServerLevel.getEntityLevel(this) : Level.getEntityLevel(this) : null; }
+	public Level getLevel() { return world.getEntityLevel(this); }
 	@Override @Nullable
-	public ServerLevel getServerLevel() { return hasID && serverEntity ? ServerLevel.getEntityLevel(this) : null; }
+	public ServerLevel getServerLevel() {
+		Level level = getLevel();
+		return level instanceof ServerLevel ? (ServerLevel) level : null;
+	}
 	
 	/// this is called only to remove an entity completely from the game, not to change levels.
 	public void remove() {
-		Level level = getLevel();
-		if(level != null)
-			level.removeEntity(this);
+		world.deregisterEntity(eid);
 	}
 	
 	@Override
@@ -92,7 +95,7 @@ public abstract class Entity implements WorldObject {
 		batch.draw(getSprite(), x, y);
 	}
 	
-	protected float getZ() { return z; }
+	public float getZ() { return z; }
 	protected void setZ(float z) { this.z = z; }
 	
 	protected Rectangle getUnscaledBounds() {
@@ -112,6 +115,7 @@ public abstract class Entity implements WorldObject {
 	public boolean interactWith(Player player, @Nullable Item item) { return false; }
 	
 	public boolean move(Vector2 v) { return move(v.x, v.y); }
+	public boolean move(Vector3 v) { return move(v.x, v.y, v.z); }
 	public boolean move(float xd, float yd) { return move(xd, yd, 0); }
 	public boolean move(float xd, float yd, float zd) {
 		Level level = getLevel();
@@ -121,7 +125,11 @@ public abstract class Entity implements WorldObject {
 		movement.y = moveAxis(level, false, yd, movement.x);
 		z += zd;
 		boolean moved = !movement.isZero();
-		if(moved) moveTo(level, x+movement.x, y+movement.y);
+		if(moved) {
+			moveTo(level, x+movement.x, y+movement.y);
+			if(level instanceof ServerLevel)
+				level.getWorld().getSender().sendData(new Movement(getId(), level.getDepth(), new Vector3(getPosition(), getZ())));
+		}
 		return moved;
 	}
 	
@@ -197,12 +205,6 @@ public abstract class Entity implements WorldObject {
 	
 	public void moveTo(@NotNull Level level, @NotNull Vector2 pos) { moveTo(level, pos.x, pos.y); }
 	public void moveTo(@NotNull Level level, float x, float y) {
-		if(!hasID) {
-			serverEntity = level instanceof ServerLevel;
-			eid = level.getWorld().generateEntityID(this);
-			hasID = true;
-		}
-		
 		if(level == getLevel() && x == this.x && y == this.y) return; // no action or updating required.
 		
 		// this method doesn't care where you end up.
@@ -223,7 +225,11 @@ public abstract class Entity implements WorldObject {
 		if(level == getLevel())
 			level.entityMoved(this);
 		else
-			level.addEntity(this);
+			world.setEntityLevel(this, level);
+	}
+	public void moveTo(@NotNull Level level, float x, float y, float z) {
+		moveTo(level, x, y);
+		setZ(z);
 	}
 	public void moveTo(@NotNull Tile tile) {
 		Vector2 pos = tile.getCenter();
@@ -263,8 +269,6 @@ public abstract class Entity implements WorldObject {
 	public int hashCode() { return eid; }
 	
 	
-	public Class<? extends Entity> getLoadingClass() { return getClass(); }
-	
 	public static String serialize(Entity e) {
 		Array<String[]> data = e.save();
 		String[][] doubleDataArray = data.shrink();
@@ -274,12 +278,12 @@ public abstract class Entity implements WorldObject {
 			partEncodedData[i+1] = MyUtils.encodeStringArray(doubleDataArray[i]);
 		}
 		
-		partEncodedData[0] = e.getLoadingClass().getCanonicalName().replace(Entity.class.getPackage().getName()+".", "");
+		partEncodedData[0] = e.getClass().getCanonicalName().replace(Entity.class.getPackage().getName()+".", "");
 		
 		return MyUtils.encodeStringArray(partEncodedData);
 	}
 	
-	public static Entity deserialize(String data) {
+	public static Entity deserialize(String data, @NotNull WorldManager world, int eid) {
 		String[] partData = MyUtils.parseLayeredString(data);
 		
 		String[][] sepData = new String[partData.length-1][];
@@ -288,25 +292,42 @@ public abstract class Entity implements WorldObject {
 		}
 		
 		try {
-			Class<?> clazz = Class.forName(Entity.class.getPackage().getName()+"."+partData[0]);
+			Class<?> clazz = Class.forName(Entity.class.getPackage().getName()+"."+partData[0].replace("(", "").replace(")", ""));
 			
 			Class<? extends Entity> entityClass = clazz.asSubclass(Entity.class);
 			
-			return deserialize(entityClass, sepData);
+			return deserialize(world, eid, entityClass, sepData);
 			
 		} catch(ClassNotFoundException e) {
 			e.printStackTrace();
 			return null;
 		}
 	}
-	public static Entity deserialize(Class<? extends Entity> clazz, String[][] data) {
+	public static Entity deserialize(@NotNull WorldManager world, int eid, Class<? extends Entity> clazz, String[][] data) {
 		Entity newEntity = null;
 		try {
-			newEntity = clazz.getConstructor(String[][].class, Version.class).newInstance(data, GameCore.VERSION);
+			newEntity = clazz.getDeclaredConstructor(WorldManager.class, String[][].class, Version.class).newInstance(world, data, GameCore.VERSION);
+			newEntity.eid = eid;
+			world.registerEntity(newEntity, eid);
 		} catch(NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
 			e.printStackTrace();
 		}
 		
 		return newEntity;
 	}
+	
+	public static class EntityTag implements Tag {
+		public final int eid;
+		
+		private EntityTag() { this(0); }
+		public EntityTag(int eid) {
+			this.eid = eid;
+		}
+		
+		@Override
+		public WorldObject getObject(WorldManager world) { return world.getEntity(eid); }
+	}
+	
+	@Override
+	public Tag getTag() { return new EntityTag(eid); }
 }

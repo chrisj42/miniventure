@@ -2,13 +2,15 @@ package miniventure.game.world.entity.mob;
 
 import java.util.Arrays;
 
+import miniventure.game.GameProtocol.Hurt;
 import miniventure.game.item.Item;
 import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolType;
 import miniventure.game.util.FrameBlinker;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
-import miniventure.game.world.Level;
+import miniventure.game.world.ServerLevel;
+import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.Entity;
@@ -54,8 +56,8 @@ public abstract class Mob extends Entity {
 	
 	private final String spriteName;
 	
-	public Mob(@NotNull String spriteName, int health) {
-		super();
+	public Mob(@NotNull WorldManager world, @NotNull String spriteName, int health) {
+		super(world);
 		dir = Direction.DOWN;
 		this.maxHealth = health;
 		this.health = health;
@@ -67,8 +69,8 @@ public abstract class Mob extends Entity {
 		animator = new MobAnimationController(this, spriteName);
 	}
 	
-	public Mob(String[][] allData, Version version) {
-		super(Arrays.copyOfRange(allData, 0, allData.length-1), version);
+	protected Mob(@NotNull WorldManager world, String[][] allData, Version version) {
+		super(world, Arrays.copyOfRange(allData, 0, allData.length-1), version);
 		String[] data = allData[allData.length-1];
 		
 		this.spriteName = data[0];
@@ -118,7 +120,7 @@ public abstract class Mob extends Entity {
 	
 	public Direction getDirection() { return dir; }
 	
-	boolean isKnockedBack() { return knockbackTimeLeft > 0 && knockbackVelocity.len() > 0; }
+	public boolean isKnockedBack() { return knockbackTimeLeft > 0 && knockbackVelocity.len() > 0; }
 	
 	@Override
 	protected TextureRegion getSprite() { return animator.getSprite(); }
@@ -203,14 +205,15 @@ public abstract class Mob extends Entity {
 			knockbackTimeLeft = MyUtils.map(Math.min(healthPercent, DAMAGE_PERCENT_FOR_MAX_PUSH), 0, DAMAGE_PERCENT_FOR_MAX_PUSH, MIN_KNOCKBACK_TIME, MAX_KNOCKBACK_TIME);
 		}
 		
-		Level level = getLevel();
+		ServerLevel level = getServerLevel();
 		if(level != null) {
-			level.addEntity(new TextParticle(damage+"", this instanceof Player ? Color.PINK : Color.RED), getCenter(), true);
-			
-			if (health == 0)
-				remove();
-		} else
-			System.out.println("level is null for mob " + this);
+			// send to clients
+			level.getWorld().getSender().sendData(new Hurt(obj.getTag(), getTag(), damage, Item.save(item)));
+			level.addEntity(new TextParticle(getWorld(), damage + "", this instanceof Player ? Color.PINK : Color.RED), getCenter(), true);
+		}
+		
+		if (health == 0)
+			remove();
 		
 		return true;
 	}

@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import miniventure.game.GameCore;
 import miniventure.game.util.Version;
+import miniventure.game.world.WorldManager;
 import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.Entity;
 
@@ -12,6 +13,8 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
+
+import org.jetbrains.annotations.NotNull;
 
 public class ActionParticle extends Entity implements Particle {
 	
@@ -30,8 +33,8 @@ public class ActionParticle extends Entity implements Particle {
 			this.directional = directional;
 		}
 		
-		public ActionParticle get(Direction dir) {
-			return new ActionParticle("particle/"+name().toLowerCase()+(directional?"-"+dir.name().toLowerCase():""), animationTime);
+		public ActionParticle get(@NotNull WorldManager world, Direction dir) {
+			return new ActionParticle(world, "particle/"+name().toLowerCase()+(directional?"-"+dir.name().toLowerCase():""), animationTime);
 		}
 	}
 	
@@ -41,16 +44,16 @@ public class ActionParticle extends Entity implements Particle {
 	private final float animationTime;
 	private float timeElapsed;
 	
-	private ActionParticle(String spriteName, float animationTime) {
-		super();
+	private ActionParticle(@NotNull WorldManager world, String spriteName, float animationTime) {
+		super(world);
 		this.spriteName = spriteName;
 		this.animationTime = animationTime;
 		Array<AtlasRegion> frames = GameCore.entityAtlas.findRegions(spriteName);
 		animation = new Animation<>(animationTime / frames.size, frames);
 	}
 	
-	public ActionParticle(String[][] allData, Version version) {
-		super(Arrays.copyOfRange(allData, 0, allData.length-1), version);
+	protected ActionParticle(@NotNull WorldManager world, String[][] allData, Version version) {
+		super(world, Arrays.copyOfRange(allData, 0, allData.length-1), version);
 		String[] data = allData[allData.length-1];
 		spriteName = data[0];
 		animationTime = Float.parseFloat(data[1]);

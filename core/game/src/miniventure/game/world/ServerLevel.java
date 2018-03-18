@@ -2,6 +2,8 @@ package miniventure.game.world;
 
 import java.util.HashMap;
 
+import miniventure.game.GameProtocol.EntityAddition;
+import miniventure.game.GameProtocol.EntityRemoval;
 import miniventure.game.util.ProgressLogger;
 import miniventure.game.item.Item;
 import miniventure.game.util.MyUtils;
@@ -53,12 +55,6 @@ public class ServerLevel extends Level {
 		super.entityMoved(entity);
 	}
 	
-	@Override
-	public void addEntity(Entity e) {
-		super.addEntity(e);
-		// somehow send notification to the clients..?
-	}
-	
 	public void update(float delta) {
 		if(loadedChunks.size() == 0) return;
 		
@@ -77,7 +73,7 @@ public class ServerLevel extends Level {
 		updateEntities(delta, true);
 		
 		if(this.entities.size() < getEntityCap() && MathUtils.randomBoolean(0.01f))
-			spawnMob(new MobAi(AiType.values[MathUtils.random(AiType.values.length-1)]));
+			spawnMob(new MobAi(getWorld(), AiType.values[MathUtils.random(AiType.values.length-1)]));
 	}
 	
 	@Override
@@ -94,7 +90,7 @@ public class ServerLevel extends Level {
 		 		But if it finds a non-solid tile, it drops it towards the non-solid tile.
 		  */
 		
-		ItemEntity ie = new ItemEntity(item, Vector2.Zero.cpy()); // this is a dummy variable.
+		ItemEntity ie = new ItemEntity(getWorld(), item, Vector2.Zero.cpy()); // this is a dummy variable.
 		
 		Tile closest = getTile(dropPos.x, dropPos.y);
 		
@@ -130,10 +126,10 @@ public class ServerLevel extends Level {
 		else
 			dropDir = targetPos.sub(dropPos);
 		
-		ie = new ItemEntity(item, dropDir);
+		ie = new ItemEntity(getWorld(), item, dropDir);
 		
 		ie.moveTo(this, dropPos);
-		addEntity(ie);
+		getWorld().setEntityLevel(ie, this);
 	}
 	
 	
@@ -149,7 +145,6 @@ public class ServerLevel extends Level {
 		}
 		
 		mob.moveTo(spawnTile);
-		addEntity(mob);
 	}
 	
 	public void spawnMob(Mob mob) {
@@ -204,41 +199,18 @@ public class ServerLevel extends Level {
 		return chunks;
 	}
 	
+	@NotNull
+	public Chunk getChunk(int cx, int cy) {
+		Point p = new Point(cx, cy);
+		Chunk chunk = loadedChunks.get(p);
+		if(chunk == null) {
+			chunk = new Chunk(cx, cy, this, levelGenerator.generateChunk(cx, cy));
+			loadedChunks.put(p, chunk);
+		}
+		
+		return chunk;
+	}
+	
 	@Override
 	public boolean equals(Object other) { return other instanceof ServerLevel && super.equals(other); }
-	
-	
-	
-	private static final String[] levelNames = {"Surface"};
-	private static final int minDepth = 0;
-	
-	private static ServerLevel[] levels = new ServerLevel[0];
-	private static final HashMap<Entity, ServerLevel> entityLevels = new HashMap<>();
-	
-	public static void clearLevels() {
-		entityLevels.clear();
-		for(ServerLevel level: levels)
-			level.entities.clear();
-		levels = new ServerLevel[0];
-	}
-	
-	@Nullable
-	public static ServerLevel getLevel(int depth) {
-		int idx = depth-minDepth;
-		return idx >= 0 && idx < levels.length ? levels[idx] : null;
-	}
-	
-	public static void generateLevels(WorldManager world, LevelGenerator levelGenerator, ProgressLogger logger) {
-		logger.pushMessage("");
-		clearLevels();
-		levels = new ServerLevel[levelNames.length];
-		for(int i = 0; i < levels.length; i++) {
-			logger.editMessage("Loading level "+(i+1)+"/"+levels.length+"...");
-			levels[i] = new ServerLevel(world, i + minDepth, levelGenerator);
-		}
-		logger.popMessage();
-	}
-	
-	@Nullable
-	public static ServerLevel getEntityLevel(Entity entity) { return entityLevels.get(entity); }
 }

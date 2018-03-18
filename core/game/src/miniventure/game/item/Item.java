@@ -130,7 +130,13 @@ public abstract class Item {
 		return name + " Item";
 	}
 	
+	public static String[] save(Item item) {
+		if(item == null) return null;
+		return item.save();
+	}
+	
 	public static Item load(String[] data) {
+		if(data == null) return null;
 		ItemType type = ItemType.valueOf(data[0]);
 		return type.load(Arrays.copyOfRange(data, 1, data.length));
 	}

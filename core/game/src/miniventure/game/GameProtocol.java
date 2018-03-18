@@ -5,7 +5,15 @@ import java.io.File;
 import miniventure.game.util.Version;
 import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.Level;
+import miniventure.game.world.Point;
+import miniventure.game.world.WorldObject.Tag;
+import miniventure.game.world.entity.Entity;
+import miniventure.game.world.entity.Entity.EntityTag;
+import miniventure.game.world.entity.mob.Player;
+import miniventure.game.world.entity.mob.Player.PlayerUpdate;
+import miniventure.game.world.entity.mob.Player.Stat;
 import miniventure.game.world.tile.Tile.TileData;
+import miniventure.game.world.tile.Tile.TileTag;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -28,9 +36,15 @@ public interface GameProtocol {
 		kryo.register(ChunkData.class);
 		kryo.register(ChunkData[].class);
 		kryo.register(Version.class);
+		kryo.register(PlayerUpdate.class);
+		kryo.register(Tag.class);
+		kryo.register(EntityTag.class);
+		kryo.register(TileTag.class);
 		
 		kryo.register(String[].class);
 		kryo.register(int[].class);
+		kryo.register(Integer.class);
+		kryo.register(Integer[].class);
 	}
 	
 	enum DatalessRequest {
@@ -74,30 +88,104 @@ public interface GameProtocol {
 		}
 	}
 	
-	// level and player are already existing types
-	
-	class Ping {
-		// this is the occasional ping sent by each client, to make sure things like position are still accurate.
-	}
-	
-	class Movement {
-		public final float xd, yd;
+	class ChunkRequest {
+		public final int x;
+		public final int y;
 		
-		private Movement() { this(0, 0); }
-		public Movement(Vector3 pos) { this(pos.x, pos.y); }
-		public Movement(Vector2 pos) { this(pos.x, pos.y); }
-		public Movement(float xd, float yd) {
-			this.xd = xd;
-			this.yd = yd;
+		private ChunkRequest() { this(0, 0); }
+		public ChunkRequest(Point p) { this(p.x, p.y); }
+		public ChunkRequest(int x, int y) {
+			this.x = x;
+			this.y = y;
 		}
 	}
 	
-	class Request {
-		public final boolean attack;
+	class EntityAddition {
+		public final int eid;
+		public final String data;
 		
-		private Request() { this(false); }
-		public Request(boolean attack) {
+		private EntityAddition() { this(null, 0); }
+		public EntityAddition(Entity e) { this(Entity.serialize(e), e.getId()); }
+		public EntityAddition(String data, int eid) {
+			this.data = data;
+			this.eid = eid;
+		}
+	}
+	
+	class EntityRemoval {
+		public final int eid;
+		
+		private EntityRemoval() { this(0); }
+		public EntityRemoval(Entity e) { this(e.getId()); }
+		public EntityRemoval(int eid) {
+			this.eid = eid;
+		}
+	}
+	
+	class Ping {
+		// this is the occasional ping sent by each client, to make sure things like position are still accurate.
+		public final float x, y;
+		
+		private Ping() { this(0, 0); }
+		public Ping(Player player) { this(player.getPosition()); }
+		public Ping(Vector2 pos) { this(pos.x, pos.y); }
+		public Ping(float x, float y) {
+			this.x = x;
+			this.y = y;
+		}
+	}
+	
+	class Movement {
+		public final float x, y, z;
+		public final int eid;
+		public final Integer levelDepth;
+		
+		private Movement() { this(0, null, 0, 0, 0); }
+		public Movement(Entity e) { this(e, e.getLevel(), new Vector3(e.getPosition(), e.getZ())); }
+		private Movement(Entity e, Level level, Vector3 pos) { this(e.getId(), level==null?null:level.getDepth(), pos); }
+		public Movement(int eid, Integer depth, Vector3 pos) { this(eid, depth, pos.x, pos.y, pos.z); }
+		public Movement(int eid, Integer depth, float x, float y, float z) {
+			this.levelDepth = depth;
+			this.x = x;
+			this.y = y;
+			this.z = z;
+			this.eid = eid;
+		}
+	}
+	
+	class InteractRequest {
+		public final boolean attack;
+		public final PlayerUpdate update;
+		
+		private InteractRequest() { this(false, null); }
+		public InteractRequest(boolean attack, PlayerUpdate update) {
 			this.attack = attack;
+			this.update = update;
+		}
+	}
+	
+	class StatChange {
+		public final int stat, amt;
+		
+		private StatChange() { this(0, 0); }
+		public StatChange(Stat stat, int amt) { this(stat.ordinal(), amt); }
+		public StatChange(int statOrd, int amt) {
+			this.stat = statOrd;
+			this.amt = amt;
+		}
+	}
+	
+	class Hurt {
+		public final int damage;
+		public final String[] attackItem;
+		public final Tag source, target;
+		
+		private Hurt() { this(null, null, 0, null); }
+		public Hurt(Tag source, Tag target, int damage, String[] attackItem) {
+			this.source = source;
+			this.target = target;
+			this.damage = damage;
+			this.attackItem = attackItem;
 		}
 	}
 	
@@ -129,4 +217,8 @@ public interface GameProtocol {
 			for(File subpack: subpackages)
 				registerClassesInPackage(kryo, packageName+"."+subpack.getName(), subpack, true);
 	}
+	
+	
+	
+	void sendData(Object object);
 }

@@ -4,10 +4,14 @@ import java.io.IOException;
 
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol;
-import miniventure.game.util.ProgressLogger;
+import miniventure.game.item.Item;
 import miniventure.game.screen.MainMenu;
+import miniventure.game.util.ProgressLogger;
 import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.Level;
+import miniventure.game.world.WorldObject;
+import miniventure.game.world.entity.Entity;
+import miniventure.game.world.entity.mob.Player.PlayerUpdate;
 
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
@@ -15,13 +19,7 @@ import com.esotericsoftware.kryonet.Listener;
 
 import org.jetbrains.annotations.NotNull;
 
-import static miniventure.game.GameProtocol.LevelData;
-import static miniventure.game.GameProtocol.Login;
-import static miniventure.game.GameProtocol.SpawnData;
-import static miniventure.game.GameProtocol.objectBufferSize;
-import static miniventure.game.GameProtocol.writeBufferSize;
-
-public class GameClient {
+public class GameClient implements GameProtocol {
 	
 	private Client client;
 	
@@ -33,21 +31,60 @@ public class GameClient {
 		addListener(new Listener() {
 			@Override
 			public void received (Connection connection, Object object) {
+				ClientWorld world = ClientCore.getWorld();
+				
 				if(object instanceof LevelData) {
 					System.out.println("client received level");
-					Level.addLevel(ClientCore.getWorld(), (LevelData)object);
+					world.addLevel((LevelData)object);
 				}
 				
 				if(object instanceof ChunkData) {
 					//System.out.println("client received chunk");
-					Level.loadChunk((ChunkData)object);
+					world.loadChunk((ChunkData)object);
 				}
 				
 				if(object instanceof SpawnData) {
 					System.out.println("client received player");
 					SpawnData data = (SpawnData) object; 
-					ClientCore.getWorld().spawnPlayer(data.x, data.y, data.eid);
+					world.spawnPlayer(data.x, data.y, data.eid);
 					ClientCore.setScreen(null);
+				}
+				
+				if(object instanceof PlayerUpdate) {
+					System.out.println("client received update");
+					((PlayerUpdate)object).apply(world.getMainPlayer());
+				}
+				
+				if(object instanceof Hurt) {
+					System.out.println("client received object hurt");
+					Hurt hurt = (Hurt) object;
+					
+					WorldObject target = hurt.target.getObject(world);
+					WorldObject source = hurt.source.getObject(world);
+					Item attackItem = Item.load(hurt.attackItem);
+					target.attackedBy(source, attackItem, hurt.damage);
+				}
+				
+				if(object instanceof EntityAddition) {
+					System.out.println("client received entity addition");
+					EntityAddition addition = (EntityAddition) object;
+					Entity.deserialize(addition.data, world, addition.eid);
+				}
+				
+				if(object instanceof EntityRemoval) {
+					System.out.println("client received entity removal");
+					int eid = ((EntityRemoval)object).eid;
+					world.deregisterEntity(eid);
+				}
+				
+				if(object instanceof Movement) {
+					System.out.println("client received entity movement");
+					Movement move = (Movement) object;
+					if(move.eid == world.getMainPlayer().getId()) return;
+					Entity e = world.getEntity(move.eid);
+					Level level = move.levelDepth == null ? null : world.getLevel(move.levelDepth);
+					if(e != null && level != null)
+						e.moveTo(level, move.x, move.y, move.z);
 				}
 			}
 			
@@ -87,4 +124,7 @@ public class GameClient {
 		
 		return true;
 	}
+	
+	@Override
+	public void sendData(Object obj) { send(obj); }
 }

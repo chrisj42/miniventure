@@ -10,6 +10,7 @@ import miniventure.game.util.MyUtils;
 import miniventure.game.world.Level;
 import miniventure.game.world.Point;
 import miniventure.game.world.ServerLevel;
+import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Player;
@@ -109,6 +110,9 @@ public class Tile implements WorldObject {
 	}
 	
 	
+	@NotNull @Override
+	public WorldManager getWorld() { return level.getWorld(); }
+	
 	@NotNull @Override public Level getLevel() { return level; }
 	@Nullable @Override public ServerLevel getServerLevel() {
 		if(level instanceof ServerLevel)
@@ -140,6 +144,9 @@ public class Tile implements WorldObject {
 		newType.getProp(TransitionProperty.class).tryStartAnimation(this, prevType);
 		// we don't use the return value because transition or not, there's nothing we need to do. :P
 		
+		if(level instanceof ServerLevel)
+			level.getWorld().getSender().sendData(new TileData(this));
+		
 		return true;
 	}
 	
@@ -160,8 +167,11 @@ public class Tile implements WorldObject {
 		
 		if(tileTypes.size() == 0)
 			addTile(baseType);
-		else
+		else {
 			moveEntities(getType());
+			if(level instanceof ServerLevel)
+				level.getWorld().getSender().sendData(new TileData(this));
+		}
 	}
 	
 	/** @noinspection UnusedReturnValue*/
@@ -389,4 +399,24 @@ public class Tile implements WorldObject {
 				typeOrdinals[i] = tileTypes[i].ordinal();
 		}
 	}
+	
+	public static class TileTag implements Tag {
+		public final int x;
+		public final int y;
+		
+		private TileTag() { this(0, 0); }
+		public TileTag(Tile tile) { this(tile.x, tile.y); }
+		public TileTag(int x, int y) {
+			this.x = x;
+			this.y = y;
+		}
+		
+		@Override
+		public WorldObject getObject(WorldManager world) {
+			return world.getLevel(0).getTile(x, y);
+		}
+	}
+	
+	@Override
+	public Tag getTag() { return new TileTag(this); }
 }

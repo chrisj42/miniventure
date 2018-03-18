@@ -2,6 +2,7 @@ package miniventure.game.item;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.HashMap;
 
 import miniventure.game.item.ToolItem.Material;
 import miniventure.game.world.tile.TileType;
@@ -18,15 +19,19 @@ public enum ItemType {
 	
 	Misc(data -> {
 		try {
-			Class<?> clazz = Class.forName("miniventure.game.item."+data[0]);
+			//noinspection unchecked
+			Class<?> clazz = ((HashMap<String, Class<?>>)ItemType.class.getDeclaredField("miscClasses").get(null)).get(ItemType.class.getPackage().getName()+"."+data[0]);
+			if(clazz == null)
+				clazz = Class.forName(ItemType.class.getPackage().getName()+"."+data[0]);
 			return (Item) clazz.getMethod("load", String[].class).invoke(null, (Object)Arrays.copyOfRange(data, 1, data.length));
-		} catch(ClassNotFoundException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+		} catch(ClassNotFoundException | IllegalAccessException | InvocationTargetException | NoSuchMethodException | NoSuchFieldException e) {
 			e.printStackTrace();
 		}
 		
 		return null;
 	});
 	
+	static final HashMap<String, Class<?>> miscClasses = new HashMap<>();
 	
 	/*
 		This is mainly for saving and loading.

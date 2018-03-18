@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import miniventure.game.GameCore;
 import miniventure.game.util.Version;
+import miniventure.game.world.WorldManager;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -24,10 +25,10 @@ public class TextParticle extends BounceEntity implements Particle {
 	@NotNull private TextureRegion dummyTexture = new TextureRegion();
 	private final float width, height; 
 	
-	public TextParticle(@NotNull String text) { this(text, Color.RED); }
-	public TextParticle(@NotNull String text, @NotNull Color main) { this(text, main, Color.BLACK); }
-	public TextParticle(@NotNull String text, @NotNull Color main, @NotNull Color shadow) {
-		super(null, 2f);
+	public TextParticle(@NotNull WorldManager world, @NotNull String text) { this(world, text, Color.RED); }
+	public TextParticle(@NotNull WorldManager world, @NotNull String text, @NotNull Color main) { this(world, text, main, Color.BLACK); }
+	public TextParticle(@NotNull WorldManager world, @NotNull String text, @NotNull Color main, @NotNull Color shadow) {
+		super(world, null, 2f);
 		this.text = text;
 		this.main = main;
 		this.shadow = shadow;
@@ -37,8 +38,8 @@ public class TextParticle extends BounceEntity implements Particle {
 		this.height = layout.height;
 	}
 	
-	public TextParticle(String[][] allData, Version version) {
-		super(Arrays.copyOfRange(allData, 0, allData.length-1), version);
+	protected TextParticle(@NotNull WorldManager world, String[][] allData, Version version) {
+		super(world, Arrays.copyOfRange(allData, 0, allData.length-1), version);
 		String[] data = allData[allData.length-1];
 		this.text = data[0];
 		main = Color.valueOf(data[1]);

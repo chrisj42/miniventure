@@ -3,8 +3,7 @@ package miniventure.game.world;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import miniventure.game.GameProtocol.LevelData;
-import miniventure.game.world.Chunk.ChunkData;
+import miniventure.game.GameProtocol.ChunkRequest;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.particle.Particle;
@@ -86,6 +85,11 @@ public class Level {
 			// now, remove the chunk from the set of loaded chunks
 			loadedChunks.remove(chunkCoord);
 		}
+		
+		// load any new chunks surrounding the given entity
+		for (Point p : getAreaChunks(entity.getCenter(), 1, false, true)) {
+			getWorld().getSender().sendData(new ChunkRequest(p));
+		}
 	}
 	
 	public void addEntity(Entity e, Vector2 pos, boolean center) { addEntity(e, pos.x, pos.y, center); }
@@ -96,24 +100,6 @@ public class Level {
 			y -= size.y/2;
 		}
 		e.moveTo(this, x, y);
-	}
-	public void addEntity(Entity e) {
-		entities.add(e);
-		Level oldLevel = entityLevels.put(e, this); // replaces the level for the entity
-		if (oldLevel != null && oldLevel != this)
-			oldLevel.removeEntity(e); // remove it from the other level's entity set.
-		
-		entityMoved(e);
-		
-		//e.getType().getProp(LevelListener.class).levelChanged(e, oldLevel);
-	}
-	
-	public void removeEntity(Entity e) {
-		entities.remove(e);
-		if (entityLevels.get(e) == this)
-			entityLevels.remove(e);
-		
-		entityMoved(e);
 	}
 	
 	public void updateEntities(float delta, boolean server) {
@@ -160,6 +146,8 @@ public class Level {
 		return lighting;
 	}
 	
+	@Nullable
+	public Tile getTile(Vector2 pos) { return getTile(pos.x, pos.y); }
 	@Nullable
 	public Tile getTile(float x, float y) {
 		if(x < 0 || y < 0 || x > getWidth() || y > getHeight())
@@ -251,8 +239,9 @@ public class Level {
 		return tiles;
 	}
 	
-	protected Array<Point> getAreaChunks(Vector2 tilePos, int radius, boolean loaded, boolean unloaded) {
-		return getAreaChunks(tilePos.x, tilePos.y, radius, loaded, unloaded);
+	// chunkRadius is in chunks.
+	protected Array<Point> getAreaChunks(Vector2 tilePos, int chunkRadius, boolean loaded, boolean unloaded) {
+		return getAreaChunks(tilePos.x, tilePos.y, chunkRadius, loaded, unloaded);
 	}
 	protected Array<Point> getAreaChunks(float x, float y, int radius, boolean loaded, boolean unloaded) {
 		return getAreaChunks(Chunk.getCoord(x), Chunk.getCoord(y), radius, loaded, unloaded);
@@ -293,13 +282,23 @@ public class Level {
 		return players.get(0);
 	}
 	
-	public boolean chunkExists(int x, int y) {
-		if(x < 0 || y < 0) return false;
+	/*public boolean tileLoaded(int tx, int ty) {
+		return loadedChunks.containsKey(new Point(Chunk.getCoord(tx), Chunk.getCoord(ty)));
+	}*/
+	
+	public boolean chunkExists(int cx, int cy) { return tileExists(cx * Chunk.SIZE, cy * Chunk.SIZE); }
+	public boolean tileExists(int tx, int ty) {
+		if(tx < 0 || ty < 0) return false;
 		
-		if(x * Chunk.SIZE >= getWidth() || y * Chunk.SIZE >= getHeight())
+		if(tx >= getWidth() || ty >= getHeight())
 			return false;
 		
 		return true;
+	}
+	
+	public void loadChunk(Chunk newChunk) {
+		tileCount += newChunk.width * newChunk.height;
+		loadedChunks.put(new Point(newChunk.chunkX, newChunk.chunkY), newChunk);
 	}
 	
 	
@@ -307,41 +306,4 @@ public class Level {
 	public boolean equals(Object other) { return other instanceof Level && ((Level)other).depth == depth; }
 	@Override public int hashCode() { return depth; }
 	
-	
-	
-	
-	
-	
-	private static final HashMap<Integer, Level> levels = new HashMap<>();
-	private static final HashMap<Entity, Level> entityLevels = new HashMap<>();
-	
-	public static boolean hasLevels() { return levels.size() > 0; }
-	
-	public static void clearLevels() {
-		entityLevels.clear();
-		for(Level level: levels.values())
-			level.entities.clear();
-		levels.clear();
-	}
-	
-	public static void addLevel(WorldManager world, LevelData data) {
-		levels.put(data.depth, new Level(world, data.depth, data.width, data.height));
-	}
-	
-	public static void loadChunk(ChunkData data) {
-		Level level = levels.get(data.levelDepth);
-		if(level == null) {
-			System.err.println("client could not load chunk because level is null");
-			return;
-		}
-		Chunk newChunk = new Chunk(level, data);
-		level.tileCount += newChunk.width * newChunk.height;
-		level.loadedChunks.put(new Point(data.chunkX, data.chunkY), newChunk);
-	}
-	
-	@Nullable
-	public static Level getLevel(int depth) { return levels.get(depth); }
-	
-	@Nullable
-	public static Level getEntityLevel(Entity entity) { return entityLevels.get(entity); }
 }

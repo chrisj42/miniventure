@@ -17,8 +17,7 @@ public class RespawnScreen extends MenuScreen {
 		vGroup.addActor(new VisTextButton("Respawn", new ChangeListener() {
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
-				//GameCore.getWorld().respawn();
-				ClientCore.setScreen(null);
+				ClientCore.getWorld().respawnPlayer();
 			}
 		}));
 	}

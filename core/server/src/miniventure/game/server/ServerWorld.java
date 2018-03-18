@@ -1,16 +1,19 @@
 package miniventure.game.server;
 
-import java.util.HashMap;
 import java.util.HashSet;
 
+import miniventure.game.GameProtocol;
+import miniventure.game.GameProtocol.EntityAddition;
+import miniventure.game.GameProtocol.EntityRemoval;
+import miniventure.game.GameProtocol.StatChange;
 import miniventure.game.ProgressPrinter;
-import miniventure.game.world.WorldManager;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
+import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
-import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.Entity;
+import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.levelgen.LevelGenerator;
 
 import com.badlogic.gdx.math.MathUtils;
@@ -19,7 +22,7 @@ import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
 
-public class ServerWorld implements WorldManager {
+public class ServerWorld extends WorldManager {
 	
 	/*
 		This is what contains the world. GameCore will check if the world is loaded here, and if not it won't render the game screen. Though... perhaps this class should hold a reference to the game screen instead...? Because, if you don't have a world, you don't need a game screen...
@@ -34,12 +37,9 @@ public class ServerWorld implements WorldManager {
 		GameScreen... game screen won't do much, just do the rendering. 
 	 */
 	
-	private final HashMap<Integer, Entity> entityIDMap = new HashMap<>();
-	
 	private LevelGenerator levelGenerator;
 	private GameServer server;
 	
-	private float gameTime = 0;
 	private boolean worldLoaded = false;
 	
 	private final HashSet<WorldObject> keepAlives = new HashSet<>(); // always keep chunks around these objects loaded.
@@ -49,15 +49,7 @@ public class ServerWorld implements WorldManager {
 		server.startServer();
 	}
 	
-	@Override
-	public boolean worldLoaded() { return worldLoaded; }
-	
-	@Override
-	public void createWorld(int width, int height) {
-		worldLoaded = false;
-		levelGenerator = new LevelGenerator(MathUtils.random.nextLong(), width, height, 32, 6);
-		ServerLevel.generateLevels(this, levelGenerator, new ProgressPrinter());
-	}
+	// Update method
 	
 	@Override
 	public void update(float delta) {
@@ -75,6 +67,33 @@ public class ServerWorld implements WorldManager {
 		gameTime += delta;
 	}
 	
+	
+	/*  --- WORLD MANAGEMENT --- */
+	
+	
+	@Override
+	public boolean worldLoaded() { return worldLoaded; }
+	
+	@Override
+	public void createWorld(int width, int height) {
+		worldLoaded = false;
+		levelGenerator = new LevelGenerator(MathUtils.random.nextLong(), width, height, 32, 6);
+		
+		ProgressPrinter logger = new ProgressPrinter();
+		
+		logger.pushMessage("");
+		clearLevels();
+		int numLevels = 1;
+		int minDepth = 0;
+		for(int i = 0; i < numLevels; i++) {
+			logger.editMessage("Loading level "+(i+1)+"/"+numLevels+"...");
+			addLevel(new ServerLevel(this, i + minDepth, levelGenerator));
+		}
+		logger.popMessage();
+		
+		worldLoaded = true;
+	}
+	
 	// load world method here, param worldname
 	
 	// save world method here, param worldname
@@ -83,13 +102,50 @@ public class ServerWorld implements WorldManager {
 	public void exitWorld(boolean save) {
 		// dispose of level/world resources
 		keepAlives.clear();
-		Level.clearLevels();
+		clearLevels();
 		levelGenerator = null;
 		//spawnTile = null;
 	}
 	
+	
+	/*  --- LEVEL MANAGEMENT --- */
+	
+	
+	@Override
+	public ServerLevel getLevel(int depth) { return (ServerLevel) super.getLevel(depth); }
+	@Override
+	public ServerLevel getEntityLevel(Entity e) { return (ServerLevel) super.getEntityLevel(e); }
+	
+	
+	/*  --- ENTITY MANAGEMENT --- */
+	
+	
+	@Override
+	public void setEntityLevel(Entity e, Level level) {
+		Level previous = getEntityLevel(e);
+		super.setEntityLevel(e, level);
+		Level newLevel = getEntityLevel(e);
+		
+		if(previous != newLevel) {
+			// TODO remove entity from old level, add it to new... if this does not suffice.
+			server.broadcast(new EntityRemoval(e));
+			server.broadcast(new EntityAddition(e));
+		}
+	}
+	
+	@Override
+	public boolean isKeepAlive(WorldObject obj) {
+		return keepAlives.contains(obj);
+	}
+	
+	
+	/*  --- PLAYER MANAGEMENT --- */
+	
+	
 	public Player addPlayer() {
-		Player player = new Player();
+		Player player = new Player(this);
+		player.setStatListener(((stat, amt) -> server.sendToPlayer(player, new StatChange(stat, amt))));
+		
 		keepAlives.add(player);
 		
 		respawnPlayer(player);
@@ -100,7 +156,7 @@ public class ServerWorld implements WorldManager {
 	public void respawnPlayer(Player player) {
 		player.reset();
 		
-		ServerLevel level = ServerLevel.getLevel(0);
+		ServerLevel level = (ServerLevel) getLevel(0);
 		
 		if(level == null)
 			throw new NullPointerException("Surface level found to be null while attempting to spawn player.");
@@ -113,9 +169,9 @@ public class ServerWorld implements WorldManager {
 		level.spawnMob(player, spawnBounds, false);
 	}
 	
-	public boolean isKeepAlive(WorldObject obj) {
-		return keepAlives.contains(obj);
-	}
+	
+	/*  --- GET METHODS --- */
+	
 	
 	public Array<WorldObject> getKeepAlives(@NotNull Level level) {
 		Array<WorldObject> keepAlives = new Array<>();
@@ -127,15 +183,5 @@ public class ServerWorld implements WorldManager {
 	}
 	
 	@Override
-	public float getGameTime() { return gameTime; }
-	
-	@Override
-	public int generateEntityID(Entity entity) {
-		int eid;
-		do {
-			eid = MathUtils.random.nextInt();
-		} while(entityIDMap.containsKey(eid));
-		entityIDMap.put(eid, entity);
-		return eid;
-	}
+	public GameProtocol getSender() { return server; }
 }

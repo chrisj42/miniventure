@@ -5,12 +5,15 @@ import java.util.EnumMap;
 import java.util.HashMap;
 
 import miniventure.game.GameCore;
+import miniventure.game.GameProtocol.Hurt;
 import miniventure.game.item.Hands;
 import miniventure.game.item.Inventory;
 import miniventure.game.item.Item;
+import miniventure.game.item.ItemStack;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
 import miniventure.game.world.Level;
+import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.particle.ActionParticle.ActionType;
 import miniventure.game.world.tile.Tile;
@@ -21,6 +24,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.esotericsoftware.kryonet.Connection;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,6 +32,12 @@ import org.jetbrains.annotations.Nullable;
 public class Player extends Mob {
 	
 	static final float MOVE_SPEED = 5;
+	
+	@FunctionalInterface
+	public interface StatListener { void statChanged(Stat stat, int amt); }
+	
+	@Nullable private StatListener statListener = null;
+	public void setStatListener(@Nullable StatListener listener) { statListener = listener; }
 	
 	interface StatEvolver { void update(float delta); }
 	
@@ -77,6 +87,22 @@ public class Player extends Mob {
 		}
 		
 		public static final Stat[] values = Stat.values();
+		
+		private static Integer[] save(EnumMap<Stat, Integer> stats) {
+			Integer[] statValues = new Integer[Stat.values.length];
+			for(Stat stat: stats.keySet())
+				statValues[stat.ordinal()] = stats.get(stat);
+			
+			return statValues;
+		}
+		
+		private static void load(Integer[] data, EnumMap<Stat, Integer> stats) {
+			for(int i = 0; i < data.length; i++) {
+				if(data[i] == null) continue;
+				Stat stat = Stat.values[i];
+				stats.put(stat, data[i]);
+			}
+		}
 	}
 	
 	private final EnumMap<Stat, Integer> stats = new EnumMap<>(Stat.class);
@@ -84,15 +110,15 @@ public class Player extends Mob {
 	@NotNull private final Hands hands;
 	private Inventory inventory;
 	
-	public Player() {
-		super("player", Stat.Health.initial);
+	public Player(@NotNull WorldManager world) {
+		super(world, "player", Stat.Health.initial);
 		
 		hands = new Hands(this);
 		reset();
 	}
 	
-	public Player(String[][] allData, Version version) {
-		super(Arrays.copyOfRange(allData, 0, allData.length-1), version);
+	protected Player(@NotNull WorldManager world, String[][] allData, Version version) {
+		super(world, Arrays.copyOfRange(allData, 0, allData.length-1), version);
 		String[] data = allData[allData.length-1];
 		
 		hands = new Hands(this);
@@ -141,12 +167,30 @@ public class Player extends Mob {
 		if(stat == Stat.Health && amt > 0)
 			regenHealth(amt);
 		
-		return stats.get(stat) - prevVal;
+		int change = stats.get(stat) - prevVal;
+		
+		if(statListener != null && change != 0)
+			statListener.statChanged(stat, amt);
+		
+		return change;
 	}
 	
+	public boolean move(Vector2 direction, float delta) {
+		Vector2 movement = direction.cpy().scl(MOVE_SPEED * delta);
+		
+		boolean moved = super.move(movement);
+		
+		getStatEvo(StaminaSystem.class).isMoving = moved;
+		if(moved)
+			getStatEvo(HungerSystem.class).addHunger(delta * 0.35f);
+		
+		return moved;
+	}
+	
+	/// These two methods are ONLY to be accessed by GameScreen, so far.
 	@NotNull
-	protected Hands getHands() { return hands; }
-	protected Inventory getInventory() { return inventory; }
+	public Hands getHands() { return hands; }
+	public Inventory getInventory() { return inventory; }
 	
 	public void drawGui(Rectangle canvas, SpriteBatch batch) {
 		hands.getUsableItem().drawItem(hands.getCount(), batch, canvas.width/2, 20);
@@ -191,8 +235,9 @@ public class Player extends Mob {
 		super.update(delta, server);
 		
 		// update things like hunger, stamina, etc.
-		for(StatEvolver evo: statEvoMap.values())
-			evo.update(delta);
+		if(!server)
+			for(StatEvolver evo: statEvoMap.values())
+				evo.update(delta);
 	}
 	
 	public boolean takeItem(@NotNull Item item) {
@@ -215,7 +260,7 @@ public class Player extends Mob {
 		Array<WorldObject> objects = new Array<>();
 		
 		// get level, and don't interact if level is not found
-		Level level = Level.getEntityLevel(this);
+		Level level = getWorld().getEntityLevel(this);
 		if(level == null) return objects;
 		
 		Rectangle interactionBounds = getInteractionRect();
@@ -230,7 +275,7 @@ public class Player extends Mob {
 		return objects;
 	}
 	
-	protected void attack() {
+	public void attack() {
 		if(!hands.hasUsableItem()) return;
 		
 		Level level = getLevel();
@@ -249,13 +294,13 @@ public class Player extends Mob {
 		
 		if (level != null) {
 			if(success)
-				level.addEntity(ActionType.SLASH.get(getDirection()), getCenter().add(getDirection().getVector().scl(getSize().scl(0.5f))), true);
+				level.addEntity(ActionType.SLASH.get(getWorld(), getDirection()), getCenter().add(getDirection().getVector().scl(getSize().scl(0.5f))), true);
 			else
-				level.addEntity(ActionType.PUNCH.get(getDirection()), getInteractionRect().getCenter(new Vector2()), true);
+				level.addEntity(ActionType.PUNCH.get(getWorld(), getDirection()), getInteractionRect().getCenter(new Vector2()), true);
 		}
 	}
 	
-	protected void interact() {
+	public void interact() {
 		if(!hands.hasUsableItem()) return;
 		
 		Item heldItem = hands.getUsableItem();
@@ -288,6 +333,39 @@ public class Player extends Mob {
 		return false;
 	}
 	
+	public static class PlayerUpdate {
+		public final float x;
+		public final float y;
+		public final Integer levelDepth;
+		public final String[] inventory;
+		public final String[] handItem;
+		public final Integer[] stats;
+		
+		private PlayerUpdate() { this(0, 0, 0, null, null, null); }
+		
+		public PlayerUpdate(Player player) { this(player, player.getPosition(), player.getLevel()); }
+		
+		private PlayerUpdate(Player player, Vector2 position, Level level) { this(position.x, position.y, level == null ? null : level.getDepth(), player.inventory.save(), player.hands.save(), Stat.save(player.stats)); }
+		public PlayerUpdate(float x, float y, Integer depth, String[] inventory, String[] handItem, Integer[] stats) {
+			this.x = x;
+			this.y = y;
+			this.levelDepth = depth;
+			this.inventory = inventory;
+			this.handItem = handItem;
+			this.stats = stats;
+		}
+		
+		public void apply(Player player) {
+			if(levelDepth != null) {
+				Level level = player.getWorld().getLevel(levelDepth);
+				if(level != null)
+					player.moveTo(level, x, y);
+			}
+			player.inventory.loadItems(inventory);
+			player.hands.setItem(ItemStack.load(handItem));
+			Stat.load(stats, player.stats);
+		}
+	}
 	
 	protected class StaminaSystem implements StatEvolver {
 		

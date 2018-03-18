@@ -1,5 +1,6 @@
 package miniventure.game.world.tile;
 
+import miniventure.game.GameProtocol.Hurt;
 import miniventure.game.item.Item;
 import miniventure.game.item.TileItem;
 import miniventure.game.item.ToolItem;
@@ -78,13 +79,16 @@ public class DestructibleProperty implements TileProperty {
 		damage = getDamage(item, damage);
 		
 		if(damage > 0) {
+			//if(tile.getServerLevel() != null)
+			//	tile.getLevel().getWorld().getSender().sendData(new Hurt(attacker.getTag(), tile.getTag(), damage, Item.save(item)));
+			
 			// add damage particle
-			tile.getLevel().addEntity(ActionParticle.ActionType.IMPACT.get(null), tile.getCenter(), true);
+			tile.getLevel().addEntity(ActionParticle.ActionType.IMPACT.get(tile.getWorld(), null), tile.getCenter(), true);
 			
 			int health = totalHealth > 1 ? new Integer(tile.getData(getClass(), tileType, HEALTH_IDX)) : 1;
 			health -= damage;
 			if(totalHealth > 1)
-				tile.getLevel().addEntity(new TextParticle(damage+""), tile.getCenter(), true);
+				tile.getLevel().addEntity(new TextParticle(tile.getWorld(), damage+""), tile.getCenter(), true);
 			if(health <= 0) {
 				tile.breakTile();
 				if(tile.getLevel() instanceof ServerLevel)

@@ -35,7 +35,7 @@ public enum FoodItem {
 					use();
 					Level level = player.getLevel();
 					if (level != null)
-						level.addEntity(new TextParticle(gained + "", Color.CORAL), player.getCenter(), true);
+						level.addEntity(new TextParticle(level.getWorld(), gained + "", Color.CORAL), player.getCenter(), true);
 				}
 			}
 		};

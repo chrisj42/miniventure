@@ -1,29 +1,27 @@
 package miniventure.game.client;
 
-import java.util.HashMap;
-
-import miniventure.game.GameCore;
+import miniventure.game.GameProtocol;
 import miniventure.game.GameProtocol.DatalessRequest;
-import miniventure.game.util.MyUtils;
-import miniventure.game.world.TimeOfDay;
-import miniventure.game.world.WorldManager;
+import miniventure.game.GameProtocol.LevelData;
 import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.RespawnScreen;
+import miniventure.game.server.ServerCore;
+import miniventure.game.world.Chunk;
+import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.Level;
+import miniventure.game.world.TimeOfDay;
+import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
-import miniventure.game.world.entity.mob.ClientPlayer;
 import miniventure.game.world.entity.mob.Player;
-import miniventure.game.server.ServerCore;
 
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
 
-public class ClientWorld implements WorldManager {
+public class ClientWorld extends WorldManager {
 	
 	/*
 		This is what contains the world. GameCore will check if the world is loaded here, and if not it won't render the game screen. Though... perhaps this class should hold a reference to the game screen instead...? Because, if you don't have a world, you don't need a game screen...
@@ -38,14 +36,11 @@ public class ClientWorld implements WorldManager {
 		GameScreen... game screen won't do much, just do the rendering. 
 	 */
 	
-	private final HashMap<Integer, Entity> entityIDMap = new HashMap<>();
-	
 	private final GameScreen gameScreen;
 	
 	private GameClient client;
 	
-	private ClientPlayer mainPlayer;
-	private float gameTime;
+	private Player mainPlayer;
 	
 	ClientWorld(GameScreen gameScreen) {
 		this.gameScreen = gameScreen;
@@ -53,29 +48,7 @@ public class ClientWorld implements WorldManager {
 		client = new GameClient(); // doesn't automatically connect
 	}
 	
-	@Override
-	public boolean worldLoaded() { return Level.hasLevels(); }
-	
-	public GameClient getClient() { return client; }
-	
-	@Override
-	public void createWorld(int width, int height) {
-		LoadingScreen loadingScreen = new LoadingScreen();
-		ClientCore.setScreen(loadingScreen);
-		
-		gameTime = 0;
-		Level.clearLevels();
-		
-		new Thread(() -> {
-			ServerCore.initServer(width, height);
-			
-			// server running, and world loaded; now, get the server world updating
-			new Thread(ServerCore::run).start();
-			
-			// finally, attempt to connect the client. If successful, it will set the screen to null.
-			client.connectToServer(loadingScreen, "localhost");
-		}).start();
-	}
+	// Update method
 	
 	@Override
 	public void update(float delta) {
@@ -100,23 +73,83 @@ public class ClientWorld implements WorldManager {
 		gameTime += delta;
 	}
 	
+	
+	/*  --- WORLD MANAGEMENT --- */
+	
+	
+	@Override
+	public boolean worldLoaded() { return getLevelCount() > 0; }
+	
+	@Override
+	public void createWorld(int width, int height) {
+		LoadingScreen loadingScreen = new LoadingScreen();
+		ClientCore.setScreen(loadingScreen);
+		
+		gameTime = 0;
+		clearLevels();
+		
+		new Thread(() -> {
+			ServerCore.initServer(width, height);
+			
+			// server running, and world loaded; now, get the server world updating
+			new Thread(ServerCore::run).start();
+			
+			// finally, attempt to connect the client. If successful, it will set the screen to null.
+			client.connectToServer(loadingScreen, "localhost");
+		}).start();
+	}
+	
 	@Override
 	public void exitWorld(boolean save) { // returns to title screen
 		// set menu to main menu, and dispose of level/world resources
 		mainPlayer = null;
-		Level.clearLevels();
+		clearLevels();
 		ClientCore.setScreen(new MainMenu(this));
 	}
 	
+	
+	/*  --- LEVEL MANAGEMENT --- */
+	
+	
+	public void addLevel(LevelData data) {
+		addLevel(new Level(this, data.depth, data.width, data.height));
+	}
+	
+	public void loadChunk(ChunkData data) {
+		Level level = getLevel(data.levelDepth);
+		if(level == null) {
+			System.err.println("client could not load chunk because level is null");
+			return;
+		}
+		
+		level.loadChunk(new Chunk(level, data));
+	}
+	
+	
+	/*  --- ENTITY MANAGEMENT --- */
+	
+	
+	@Override
+	public boolean isKeepAlive(@NotNull WorldObject obj) { return obj.equals(mainPlayer); }
+	
+	
+	/*  --- PLAYER MANAGEMENT --- */
+	
+	
 	public void spawnPlayer(float x, float y, int eid) {
-		Level level = Level.getLevel(0);//mainPlayer == null ?  : mainPlayer.getLevel();
+		Level level = getLevel(0);//mainPlayer == null ?  : mainPlayer.getLevel();
 		if(mainPlayer != null)
 			mainPlayer.remove();
 		
-		mainPlayer = new ClientPlayer(eid);
+		Player mainPlayer = new Player(this);
+		registerEntity(mainPlayer, eid);
 		
 		if(level != null)
 			level.addEntity(mainPlayer, x, y, false);
+		else
+			System.err.println("could not add main player");
+		
+		this.mainPlayer = mainPlayer;
 	}
 	
 	public void respawnPlayer() {
@@ -126,8 +159,10 @@ public class ClientWorld implements WorldManager {
 		client.send(DatalessRequest.Respawn);
 	}
 	
-	@Override
-	public boolean isKeepAlive(@NotNull WorldObject obj) { return obj.equals(mainPlayer); }
+	
+	
+	/*  --- GET METHODS --- */
+	
 	
 	@Override
 	public Array<WorldObject> getKeepAlives(@NotNull Level level) {
@@ -139,30 +174,9 @@ public class ClientWorld implements WorldManager {
 	}
 	
 	@Override
-	public float getGameTime() { return gameTime; }
+	public GameProtocol getSender() { return client; }
 	
-	@Override
-	public int generateEntityID(Entity entity) {
-		assert false: "ClientWorld should never be generating an entity id";
-		int eid;
-		do {
-			eid = MathUtils.random.nextInt();
-		} while(entityIDMap.containsKey(eid));
-		entityIDMap.put(eid, entity);
-		return eid;
-	}
+	public GameClient getClient() { return client; }
 	
-	
-	@Override
-	public Entity loadEntity(String data) {
-		String[] partData = MyUtils.parseLayeredString(data);
-		String[][] sepData = new String[partData.length-1][];
-		for(int i = 0; i < sepData.length; i++)
-			sepData[i] = MyUtils.parseLayeredString(partData[i+1]);
-		
-		if(partData[0].equals(Player.class.getCanonicalName().replace(Entity.class.getPackage().getName()+".", "")))
-			return new ClientPlayer(sepData, GameCore.VERSION);
-		else
-			return WorldManager.super.loadEntity(data);
-	}
+	public Player getMainPlayer() { return mainPlayer; }
 }

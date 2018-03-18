@@ -16,13 +16,17 @@ public class Hands {
 	
 	/// This is a wrapper class for items, when being currently held by the player. Perhaps *this* should be extended..?
 	
-	private static class HandItem extends Item {
+	public static class HandItem extends Item {
 		HandItem() {
 			super(ItemType.Misc, "Hand", GameCore.icons.get("blank"));
 		}
 		
+		static {
+			ItemType.miscClasses.put(HandItem.class.getCanonicalName(), HandItem.class);
+		}
+		
 		@Override
-		public String[] save() { return new String[] {"Hands.HandItem"}; }
+		public String[] save() { return new String[] {ItemType.Misc.name(), HandItem.class.getCanonicalName().replace(Item.class.getPackage().getName()+".", "")}; }
 		
 		public static Item load(String[] data) { return new HandItem(); }
 		
@@ -53,6 +57,7 @@ public class Hands {
 		item = new HandItem();
 	}
 	
+	public void setItem(@NotNull ItemStack stack) { setItem(stack.item, stack.count); }
 	public void setItem(@NotNull Item item, int count) {
 		this.item = item;
 		this.count = count;
@@ -76,7 +81,7 @@ public class Hands {
 				ServerLevel level = player.getServerLevel();
 				if(level != null)
 					for(int i = 0; i < count-added; i++)
-						level.addEntity(new ItemEntity(item, null), player.getPosition(), true);
+						level.addEntity(new ItemEntity(player.getWorld(), item, null), player.getPosition(), true);
 			}
 		}
 		

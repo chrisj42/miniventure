@@ -5,6 +5,7 @@ import java.util.Arrays;
 import miniventure.game.util.FrameBlinker;
 import miniventure.game.util.Version;
 import miniventure.game.world.Level;
+import miniventure.game.world.WorldManager;
 import miniventure.game.world.entity.Entity;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -13,6 +14,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class BounceEntity extends Entity {
@@ -30,8 +32,8 @@ public abstract class BounceEntity extends Entity {
 	
 	private float lastBounceTime; // used to halt the entity once it starts bouncing a lot really quickly.
 	
-	public BounceEntity(@Nullable Vector2 goalDir, float lifetime) {
-		super();
+	public BounceEntity(@NotNull WorldManager world, @Nullable Vector2 goalDir, float lifetime) {
+		super(world);
 		this.lifetime = lifetime;
 		if(goalDir == null)
 			goalDir = new Vector2().setToRandomDirection();
@@ -41,8 +43,8 @@ public abstract class BounceEntity extends Entity {
 		velocity = new Vector3(goalDir.cpy().nor().scl(MathUtils.random(0.5f, 2.5f)), MathUtils.random(8f, 12f));
 	}
 	
-	public BounceEntity(String[][] allData, Version version) {
-		super(Arrays.copyOfRange(allData, 0, allData.length-1), version);
+	protected BounceEntity(@NotNull WorldManager world, String[][] allData, Version version) {
+		super(world, Arrays.copyOfRange(allData, 0, allData.length-1), version);
 		String[] data = allData[allData.length-1];
 		lifetime = Float.parseFloat(data[0]);
 		float x = Float.parseFloat(data[1]);
@@ -83,7 +85,7 @@ public abstract class BounceEntity extends Entity {
 				- b/c we don't know the current position, we will just have to assume the starting point is (0,0), and move the delta dist for this frame, based on the passed in delta and the total move time.
 		 */
 		
-		Level level = Level.getEntityLevel(this);
+		Level level = getWorld().getEntityLevel(this);
 		if(level == null) return;
 		
 		Vector2 pos = getPosition();

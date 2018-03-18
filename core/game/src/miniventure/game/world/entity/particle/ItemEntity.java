@@ -5,6 +5,7 @@ import java.util.Arrays;
 import miniventure.game.item.Item;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
+import miniventure.game.world.WorldManager;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Player;
 
@@ -22,14 +23,14 @@ public class ItemEntity extends BounceEntity {
 	private final Item item;
 	private final TextureRegion texture;
 	
-	public ItemEntity(Item item, @Nullable Vector2 goalDir) {
-		super(goalDir, 8f);
+	public ItemEntity(@NotNull WorldManager world, Item item, @Nullable Vector2 goalDir) {
+		super(world, goalDir, 8f);
 		this.item = item;
 		texture = item.getTexture();
 	}
 	
-	public ItemEntity(String[][] allData, Version version) {
-		super(Arrays.copyOfRange(allData, 0, allData.length-1), version);
+	protected ItemEntity(@NotNull WorldManager world, String[][] allData, Version version) {
+		super(world, Arrays.copyOfRange(allData, 0, allData.length-1), version);
 		String[] data = allData[allData.length-1];
 		item = Item.load(MyUtils.parseLayeredString(data[0]));
 		texture = item.getTexture();

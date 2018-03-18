@@ -7,6 +7,7 @@ import miniventure.game.util.Version;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
+import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
 
 import com.badlogic.gdx.utils.Array;
@@ -38,15 +39,15 @@ public class MobAi extends Mob {
 	@Nullable private MovementPattern tempMovePattern = null;
 	private float tempTimeLeft = 0;
 	
-	public MobAi(@NotNull AiType aiType) {
-		super("player", aiType.health);
+	public MobAi(@NotNull WorldManager world, @NotNull AiType aiType) {
+		super(world, "player", aiType.health);
 		this.aiType = aiType;
 		this.itemDrops = aiType.deathDrops;
 		this.movePattern = aiType.defaultPattern.copy();
 	}
 	
-	public MobAi(String[][] allData, Version version) {
-		super(Arrays.copyOfRange(allData, 0, allData.length-1), version);
+	protected MobAi(@NotNull WorldManager world, String[][] allData, Version version) {
+		super(world, Arrays.copyOfRange(allData, 0, allData.length-1), version);
 		String[] data = allData[allData.length-1];
 		aiType = AiType.valueOf(data[0]);
 		this.itemDrops = aiType.deathDrops;

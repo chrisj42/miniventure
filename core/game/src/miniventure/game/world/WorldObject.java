@@ -15,6 +15,8 @@ import org.jetbrains.annotations.Nullable;
 
 public interface WorldObject {
 	
+	@NotNull WorldManager getWorld();
+	
 	@Nullable Level getLevel();
 	@Nullable ServerLevel getServerLevel();
 	
@@ -26,8 +28,11 @@ public interface WorldObject {
 	default Rectangle getBounds(boolean worldOriginCenter) {
 		Rectangle bounds = getBounds();
 		if(worldOriginCenter) {
-			bounds.x -= getLevel().getWidth()/2;
-			bounds.y -= getLevel().getHeight()/2;
+			Level level = getLevel();
+			if(level != null) {
+				bounds.x -= level.getWidth() / 2;
+				bounds.y -= level.getHeight() / 2;
+			}
 		}
 		return bounds;
 	}
@@ -73,4 +78,10 @@ public interface WorldObject {
 		
 		return objects;
 	}
+	
+	interface Tag {
+		WorldObject getObject(WorldManager world);
+	}
+	
+	Tag getTag();
 }
