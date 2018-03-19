@@ -82,7 +82,8 @@ public class ClientWorld extends WorldManager {
 	public boolean worldLoaded() { return getLevelCount() > 0; }
 	
 	@Override
-	public void createWorld(int width, int height) {
+	public void createWorld(int width, int height) { createWorld(width, height, true); }
+	public void createWorld(int width, int height, boolean startServer) {
 		LoadingScreen loadingScreen = new LoadingScreen();
 		ClientCore.setScreen(loadingScreen);
 		
@@ -90,10 +91,12 @@ public class ClientWorld extends WorldManager {
 		clearLevels();
 		
 		new Thread(() -> {
-			ServerCore.initServer(width, height);
-			
-			// server running, and world loaded; now, get the server world updating
-			new Thread(ServerCore::run).start();
+			if(startServer) {
+				ServerCore.initServer(width, height);
+				
+				// server running, and world loaded; now, get the server world updating
+				new Thread(ServerCore::run).start();
+			}
 			
 			// finally, attempt to connect the client. If successful, it will set the screen to null.
 			client.connectToServer(loadingScreen, "localhost");

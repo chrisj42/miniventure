@@ -62,6 +62,7 @@ public class Level {
 			return;
 		}
 		
+		// TODO I really need to find a better way of handling server vs. client situations... technically, the below request for tile chunks should never be sent to a client, that doesn't make sense. But since the server level extends this and calls this, it probably will send it. Not to mention, things like the item entity touchedBy method could really use a reference to a server, so they can send a pickup request.
 		if(!changedChunk) return;
 		
 		// check for any chunks that no longer need to be loaded

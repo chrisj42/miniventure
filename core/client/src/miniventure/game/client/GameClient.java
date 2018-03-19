@@ -99,7 +99,7 @@ public class GameClient implements GameProtocol {
 				if(object instanceof Movement) {
 					//System.out.println("client received entity movement");
 					Movement move = (Movement) object;
-					if(move.eid == world.getMainPlayer().getId()) return; // no sense to have the server move the client... at least not at this point in development.
+					if(world.getMainPlayer() != null && move.eid == world.getMainPlayer().getId()) return; // no sense to have the server move the client... at least not at this point in development.
 					Entity e = world.getEntity(move.eid);
 					Level level = move.levelDepth == null ? null : world.getLevel(move.levelDepth);
 					if(e != null && level != null) {

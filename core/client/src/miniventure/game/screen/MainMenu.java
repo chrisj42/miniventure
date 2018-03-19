@@ -1,16 +1,18 @@
 package miniventure.game.screen;
 
 import miniventure.game.GameCore;
+import miniventure.game.client.ClientWorld;
 import miniventure.game.world.WorldManager;
 
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
 import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 
 public class MainMenu extends MenuScreen {
 	
-	public MainMenu(WorldManager world) {
+	public MainMenu(ClientWorld world) {
 		super();
 		
 		addLabel("Miniventure", 20);
@@ -35,6 +37,20 @@ public class MainMenu extends MenuScreen {
 		vGroup.remove();
 		addActor(table);
 		table.add(button);
+		
+		VisTextButton joinBtn = new VisTextButton("Join Local Server");
+		joinBtn.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent e, float x, float y) {
+				world.createWorld(0, 0, false);
+			}
+		});
+		
+		table.row();
+		table.add(joinBtn);
+		
+		table.setOrigin(Align.top);
+		table.setPosition(getWidth()/2, getHeight()/2);
 	}
 	
 	private void addLabel(String msg, int spacing) {
