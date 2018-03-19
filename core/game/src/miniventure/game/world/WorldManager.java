@@ -109,28 +109,31 @@ public abstract class WorldManager {
 	/*  --- ENTITY MANAGEMENT --- */
 	
 	
-	public void registerEntity(Entity e, int eid) {
+	public void registerEntity(Entity e) {
 		System.out.println(this+": registered entity "+e);
-		entityIDMap.put(eid, e);
+		entityIDMap.put(e.getId(), e);
 	}
 	
 	/** generates a entity id that is unique for this game. */
-	public int registerEntity(Entity e) {
+	public int registerEntityWithNewId(Entity e) {
 		int eid;
 		
 		do eid = MathUtils.random.nextInt();
 		while(entityIDMap.containsKey(eid));
 		
-		registerEntity(e, eid);
+		entityIDMap.put(eid, e);
 		return eid;
 	}
 	
 	public void deregisterEntity(int eid) {
 		Entity e = entityIDMap.get(eid);
-		Level level = entityLevels.remove(e);
+		Level level = entityLevels.get(e);
 		
-		actOnEntitySet(level, set -> set.remove(e));
-		entityIDMap.remove(eid);
+		actOnEntitySet(level, set -> {
+			entityLevels.remove(e);
+			set.remove(e);
+			entityIDMap.remove(eid);
+		});
 		System.out.println(this+": deregistered entity "+e);
 	}
 	

@@ -53,6 +53,7 @@ public class ItemEntity extends BounceEntity {
 	@Override
 	public boolean touchedBy(Entity other) {
 		if(other instanceof Player && getTime() > PICKUP_DELAY && ((Player)other).takeItem(item)) {
+			// TODO here, I need to somehow send an inventory update to the player, or otherwise say that it picked up an item. Perhaps, due to the nature of how the system is setup, I should instead just mark some sort of flag to say that the inventory needs to be updated..? Idk how that will work, though...
 			remove();
 			return true;
 		}
@@ -61,7 +62,5 @@ public class ItemEntity extends BounceEntity {
 	}
 	
 	@Override
-	public void touching(Entity entity) {
-		touchedBy(entity);
-	}
+	public void touching(Entity entity) { touchedBy(entity); }
 }

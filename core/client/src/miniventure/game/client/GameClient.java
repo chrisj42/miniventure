@@ -14,7 +14,6 @@ import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.mob.Player.PlayerUpdate;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.Tile.TileData;
 
 import com.badlogic.gdx.math.Vector3;
 import com.esotericsoftware.kryonet.Client;

@@ -37,7 +37,7 @@ public abstract class Entity implements WorldObject {
 	public Entity(@NotNull WorldManager world) {
 		this.world = world;
 		
-		eid = world.registerEntity(this);
+		eid = world.registerEntityWithNewId(this);
 	}
 	
 	protected Entity(@NotNull WorldManager world, String[][] data, Version version) {
@@ -163,7 +163,8 @@ public abstract class Entity implements WorldObject {
 		
 		boolean canMove = true;
 		for(Tile tile: newTiles) {
-			tile.touchedBy(this); // NOTE: I can see this causing an issue if you move too fast; it will "touch" tiles that could be far away, if the player will move there next frame.
+			if(getServerLevel() != null)
+				tile.touchedBy(this); // NOTE: I can see this causing an issue if you move too fast; it will "touch" tiles that could be far away, if the player will move there next frame.
 			canMove = canMove && (!canMoveCurrent || tile.isPermeableBy(this));
 		}
 		
@@ -192,8 +193,9 @@ public abstract class Entity implements WorldObject {
 		Array<Entity> newEntities = level.getOverlappingEntities(newRect);
 		newEntities.removeAll(level.getOverlappingEntities(oldRect), true); // because the "old rect" entities are never added in the first place, we don't need to worry about this entity being included in this list, and accidentally interacting with itself.
 		for(Entity entity: newEntities) {
-			if(!entity.touchedBy(this))
-				this.touchedBy(entity); // to make sure something has a chance to happen, but it doesn't happen twice.
+			if(getServerLevel() != null)
+				if(!entity.touchedBy(this))
+					this.touchedBy(entity); // to make sure something has a chance to happen, but it doesn't happen twice.
 			
 			canMove = canMove && entity.isPermeableBy(this);
 		}
@@ -316,7 +318,7 @@ public abstract class Entity implements WorldObject {
 			constructor.setAccessible(true);
 			newEntity = constructor.newInstance(world, data, GameCore.VERSION);
 			((Entity)newEntity).eid = eid;
-			world.registerEntity(newEntity, eid);
+			world.registerEntity(newEntity);
 		} catch(NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
 			e.printStackTrace();
 		}

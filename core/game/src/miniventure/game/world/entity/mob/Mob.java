@@ -14,8 +14,8 @@ import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.Entity;
-import miniventure.game.world.entity.particle.TextParticle;
 import miniventure.game.world.entity.mob.MobAnimationController.AnimationState;
+import miniventure.game.world.entity.particle.TextParticle;
 import miniventure.game.world.tile.TileType;
 
 import com.badlogic.gdx.graphics.Color;
@@ -159,9 +159,10 @@ public abstract class Mob extends Entity {
 	}
 	
 	@Override
-	public boolean move(float xd, float yd) {
-		boolean moved = super.move(xd, yd);
+	public boolean move(float xd, float yd, float zd) {
+		boolean moved = super.move(xd, yd, zd);
 		
+		// TODO I need to somehow fix the problem of mobs not animating properly. This is likely happening because the updates from the server do not come every frame, as they did when running in the same thread, so polling the animation every frame results in reverting the animation state to idle almost instantly after every attempt to make it walk. I need a way to somehow cache the previous state, or current state, which means that I'll have to make a way to tell it to stop the animation, as well.
 		if(xd != 0 || yd != 0) animator.requestState(AnimationState.WALK);
 		
 		Direction dir = Direction.getDirection(xd, yd);
