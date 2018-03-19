@@ -53,7 +53,7 @@ public class Level {
 	public int getEntityCap() { return entityCap*loadedChunks.size(); }
 	public int getEntityCount() { return world.getEntityCount(this); }
 	
-	public void entityMoved(Entity entity) {
+	public void entityMoved(Entity entity, boolean changedChunk) {
 		if(!world.isKeepAlive(entity)) {
 			// check if they've gone (mostly?) out of bounds, if so, remove them
 			Vector2 pos = entity.getCenter();
@@ -61,6 +61,8 @@ public class Level {
 				entity.remove();
 			return;
 		}
+		
+		if(!changedChunk) return;
 		
 		// check for any chunks that no longer need to be loaded
 		Array<Point> chunkCoords = new Array<>(loadedChunks.keySet().toArray(new Point[loadedChunks.size()]));
@@ -211,9 +213,11 @@ public class Level {
 	}
 	public Array<Entity> getOverlappingEntities(Rectangle rect, Entity... exclude) {
 		Array<Entity> overlapping = new Array<>();
-		for(Entity entity: world.getEntitySet(this))
-			if(entity.getBounds().overlaps(rect))
-				overlapping.add(entity);
+		world.actOnEntitySet(this, set -> {
+			for(Entity entity: set)
+				if(entity.getBounds().overlaps(rect))
+					overlapping.add(entity);
+		});
 		
 		overlapping.removeAll(new Array<>(exclude), true); // use ==, not .equals()
 		
@@ -268,9 +272,11 @@ public class Level {
 	@Nullable
 	public Player getClosestPlayer(final Vector2 pos) {
 		Array<Player> players = new Array<>();
-		for(Entity e: world.getEntitySet(this))
-			if(e instanceof Player)
-				players.add((Player)e);
+		world.actOnEntitySet(this, set -> {
+			for(Entity e: set)
+				if(e instanceof Player)
+					players.add((Player)e);
+		});
 		
 		if(players.size == 0) return null;
 		

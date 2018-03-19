@@ -8,6 +8,7 @@ import miniventure.game.GameProtocol.Movement;
 import miniventure.game.item.Item;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
+import miniventure.game.world.Chunk;
 import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldManager;
@@ -40,7 +41,7 @@ public abstract class Entity implements WorldObject {
 	}
 	
 	protected Entity(@NotNull WorldManager world, String[][] data, Version version) {
-		this(world);
+		this.world = world;
 		x = Float.parseFloat(data[0][0]);
 		y = Float.parseFloat(data[0][1]);
 		z = Float.parseFloat(data[0][2]);
@@ -216,15 +217,16 @@ public abstract class Entity implements WorldObject {
 		y = Math.min(y, level.getHeight() - size.y);
 		
 		// check and see if the entity is changing chunks from their current position.
-		// boolean changedChunk = Level.getEntityLevel(this) == level && (
-		// 	Chunk.getCoord(x) != Chunk.getCoord(this.x) ||
-		// 	Chunk.getCoord(y) != Chunk.getCoord(this.y) );
+		boolean changedChunk =
+			!level.equals(getLevel()) ||
+			Chunk.getCoord(x) != Chunk.getCoord(this.x) ||
+			Chunk.getCoord(y) != Chunk.getCoord(this.y);
 		
 		this.x = x;
 		this.y = y;
 		
 		if(level == getLevel())
-			level.entityMoved(this);
+			level.entityMoved(this, changedChunk);
 		else
 			world.setEntityLevel(this, level);
 	}
@@ -292,17 +294,20 @@ public abstract class Entity implements WorldObject {
 			sepData[i] = MyUtils.parseLayeredString(partData[i+1]);
 		}
 		
+		Entity entity = null;
+		
 		try {
 			Class<?> clazz = Class.forName(Entity.class.getPackage().getName()+"."+partData[0]);
 			
 			Class<? extends Entity> entityClass = clazz.asSubclass(Entity.class);
 			
-			return deserialize(world, eid, entityClass, sepData);
+			entity = deserialize(world, eid, entityClass, sepData);
 			
 		} catch(ClassNotFoundException e) {
 			e.printStackTrace();
-			return null;
 		}
+		
+		return entity;
 	}
 	public static <T extends Entity> T deserialize(@NotNull WorldManager world, int eid, Class<T> clazz, String[][] data) {
 		T newEntity = null;

@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.Stack;
 import java.util.TreeMap;
 
+import miniventure.game.GameProtocol.TileUpdate;
 import miniventure.game.item.Item;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Level;
@@ -123,6 +124,8 @@ public class Tile implements WorldObject {
 	@Override public Rectangle getBounds() { return new Rectangle(x, y, 1, 1); }
 	@Override public Vector2 getCenter() { return new Vector2(x+0.5f, y+0.5f); }
 	
+	public Point getLocation() { return new Point(x, y); }
+	
 	public boolean addTile(@NotNull TileType newType) { return addTile(newType, getType()); }
 	private boolean addTile(@NotNull TileType newType, @NotNull TileType prevType) {
 		// first, check to see if the newType can validly be placed on the current type.
@@ -145,7 +148,7 @@ public class Tile implements WorldObject {
 		// we don't use the return value because transition or not, there's nothing we need to do. :P
 		
 		if(level instanceof ServerLevel)
-			level.getWorld().getSender().sendData(new TileData(this));
+			level.getWorld().getSender().sendData(new TileUpdate(this));
 		
 		return true;
 	}
@@ -170,7 +173,7 @@ public class Tile implements WorldObject {
 		else {
 			moveEntities(getType());
 			if(level instanceof ServerLevel)
-				level.getWorld().getSender().sendData(new TileData(this));
+				level.getWorld().getSender().sendData(new TileUpdate(this));
 		}
 	}
 	
@@ -380,7 +383,6 @@ public class Tile implements WorldObject {
 	
 	// I can use the string encoder and string parser in MyUtils to encode the tile data in a way so that I can always re-parse the encoded array. I can use this internally to, with other things, whenever I need to encode a list of objects and don't want to worry about finding the delimiter symbol in string somewhere I don't expect.
 	
-	
 	public static class TileData {
 		public final int[] typeOrdinals;
 		public final String[] data;
@@ -397,6 +399,19 @@ public class Tile implements WorldObject {
 			typeOrdinals = new int[tileTypes.length];
 			for(int i = 0; i < tileTypes.length; i++)
 				typeOrdinals[i] = tileTypes[i].ordinal();
+		}
+		
+		public void apply(Tile tile) {
+			TileType[] types = new TileType[typeOrdinals.length];
+			for(int i = 0; i < types.length; i++)
+				types[i] = TileType.values[typeOrdinals[i]];
+			
+			Stack<TileType> typeStack = new Stack<>();
+			for(TileType type: types)
+				typeStack.push(type);
+			
+			tile.tileTypes = typeStack;
+			tile.data = data;
 		}
 	}
 	

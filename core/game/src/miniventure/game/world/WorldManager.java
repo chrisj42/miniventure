@@ -3,6 +3,7 @@ package miniventure.game.world;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 
 import miniventure.game.GameProtocol;
 import miniventure.game.world.entity.Entity;
@@ -18,8 +19,19 @@ public abstract class WorldManager {
 	protected float gameTime;
 	
 	private final HashMap<Integer, Level> levels = new HashMap<>();
-	private final HashMap<Level, HashSet<Entity>> levelEntities = new HashMap<>();
+	private final HashMap<Level, Set<Entity>> levelEntities = new HashMap<>();
 	private final HashMap<Entity, Level> entityLevels = new HashMap<>();
+	
+	@FunctionalInterface
+	interface EntitySetAction {
+		void actOnSet(Set<Entity> set);
+	}
+	
+	@FunctionalInterface
+	interface EntitySetFunction<T> {
+		T getFromSet(Set<Entity> set);
+	}
+	
 	
 	// this class contains all the levels in the game.
 	public WorldManager() {
@@ -55,25 +67,33 @@ public abstract class WorldManager {
 	/** @noinspection MismatchedQueryAndUpdateOfCollection*/
 	private static final HashSet<Entity> emptySet = new HashSet<>();
 	
-	public int getLevelCount() { return levelEntities.size(); }
-	public int getEntityCount(Level level) {
-		return levelEntities.getOrDefault(level, emptySet).size();
+	void actOnEntitySet(Level level, EntitySetAction action) {
+		Set<Entity> entitySet = levelEntities.getOrDefault(level, emptySet);
+		//noinspection SynchronizationOnLocalVariableOrMethodParameter
+		synchronized (entitySet) {
+			action.actOnSet(entitySet);
+		}
 	}
 	
-	Iterable<Entity> getEntitySet(Level level) {
-		return levelEntities.getOrDefault(level, emptySet);
+	<T> T getFromEntitySet(Level level, EntitySetFunction<T> getter) {
+		Set<Entity> entitySet = levelEntities.getOrDefault(level, emptySet);
+		//noinspection SynchronizationOnLocalVariableOrMethodParameter
+		synchronized (entitySet) {
+			return getter.getFromSet(entitySet);
+		}
+	}
+	
+	public int getLevelCount() { return levelEntities.size(); }
+	public int getEntityCount(Level level) {
+		return getFromEntitySet(level, set -> set.size());
 	}
 	
 	protected Entity[] getEntities(Level level) {
-		if(!levelEntities.containsKey(level))
-			return new Entity[0];
-		
-		HashSet<Entity> entities = levelEntities.get(level);
-		return entities.toArray(new Entity[entities.size()]);
+		return getFromEntitySet(level, set -> set.toArray(new Entity[set.size()]));
 	}
 	
 	protected void addLevel(@NotNull Level level) {
-		levelEntities.put(level, new HashSet<>());
+		levelEntities.put(level, Collections.synchronizedSet(new HashSet<>()));
 		levels.put(level.getDepth(), level);
 	}
 	
@@ -105,28 +125,30 @@ public abstract class WorldManager {
 		return eid;
 	}
 	
+	public void deregisterEntity(int eid) {
+		Entity e = entityIDMap.get(eid);
+		Level level = entityLevels.remove(e);
+		
+		actOnEntitySet(level, set -> set.remove(e));
+		entityIDMap.remove(eid);
+		System.out.println(this+": deregistered entity "+e);
+	}
+	
 	public void setEntityLevel(Entity e, @NotNull Level level) {
-		if(!entityIDMap.containsKey(e.getId()) || !levels.containsKey(level.getDepth()))
-			throw new IllegalArgumentException("couldn't set entity level, entity or level is not registered.");
+		if(!entityIDMap.containsKey(e.getId()) || !levels.containsKey(level.getDepth())) {
+			System.err.println(this + ": couldn't set entity level, entity " + e + " or level " + level + " is not registered. Ignoring request.");
+			return;
+		}
 		
 		Level oldLevel = entityLevels.put(e, level);
 		System.out.println("for "+this+": setting level of entity " + e + " to " + level + " (removing from level "+oldLevel+")");
 		
 		if(!level.equals(oldLevel)) {
-			levelEntities.get(level).add(e);
-			
-			if(levelEntities.containsKey(oldLevel))
-				levelEntities.get(oldLevel).remove(e);
+			actOnEntitySet(level, set -> set.add(e));
+			actOnEntitySet(oldLevel, set -> set.remove(e));
 		}
 		
-		level.entityMoved(e);
-	}
-	
-	public void deregisterEntity(int eid) {
-		Entity e = entityIDMap.get(eid);
-		entityLevels.remove(e);
-		entityIDMap.remove(eid);
-		System.out.println(this+": deregistered entity "+e);
+		level.entityMoved(e, true);
 	}
 	
 	/** should the level keep chunks around this object loaded? */

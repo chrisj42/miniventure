@@ -119,6 +119,7 @@ public abstract class Mob extends Entity {
 	protected int getHealth() { return health; }
 	
 	public Direction getDirection() { return dir; }
+	protected void setDirection(@NotNull Direction dir) { this.dir = dir; }
 	
 	public boolean isKnockedBack() { return knockbackTimeLeft > 0 && knockbackVelocity.len() > 0; }
 	

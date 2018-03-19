@@ -13,7 +13,10 @@ import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.mob.Player.PlayerUpdate;
+import miniventure.game.world.tile.Tile;
+import miniventure.game.world.tile.Tile.TileData;
 
+import com.badlogic.gdx.math.Vector3;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
@@ -51,6 +54,16 @@ public class GameClient implements GameProtocol {
 					ClientCore.setScreen(null);
 				}
 				
+				if(object instanceof TileUpdate) {
+					// individual tile update
+					TileUpdate update = (TileUpdate) object;
+					Level level = world.getLevel(update.levelDepth);
+					if(level == null) return;
+					Tile tile = level.getTile(update.x, update.y);
+					if(tile != null)
+						update.tileData.apply(tile);
+				}
+				
 				if(object instanceof PlayerUpdate) {
 					System.out.println("client received update");
 					((PlayerUpdate)object).apply(world.getMainPlayer());
@@ -69,7 +82,13 @@ public class GameClient implements GameProtocol {
 				if(object instanceof EntityAddition) {
 					System.out.println("client received entity addition");
 					EntityAddition addition = (EntityAddition) object;
-					Entity.deserialize(addition.data, world, addition.eid);
+					if(addition.levelDepth == null) return; // no point to it, really.
+					Entity e = Entity.deserialize(addition.data, world, addition.eid);
+					Player player = world.getMainPlayer();
+					if(player != null && e.getId() == player.getId()) return; // shouldn't pay attention to trying to set the client player like this.
+					Level level = world.getLevel(addition.levelDepth);
+					if(level != null)
+						world.setEntityLevel(e, level);
 				}
 				
 				if(object instanceof EntityRemoval) {
@@ -79,13 +98,15 @@ public class GameClient implements GameProtocol {
 				}
 				
 				if(object instanceof Movement) {
-					System.out.println("client received entity movement");
+					//System.out.println("client received entity movement");
 					Movement move = (Movement) object;
-					if(move.eid == world.getMainPlayer().getId()) return;
+					if(move.eid == world.getMainPlayer().getId()) return; // no sense to have the server move the client... at least not at this point in development.
 					Entity e = world.getEntity(move.eid);
 					Level level = move.levelDepth == null ? null : world.getLevel(move.levelDepth);
-					if(e != null && level != null)
+					if(e != null && level != null) {
+						e.move(new Vector3(move.x, move.y, move.z).sub(new Vector3(e.getPosition(), e.getZ())));
 						e.moveTo(level, move.x, move.y, move.z);
+					}
 				}
 			}
 			

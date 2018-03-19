@@ -55,6 +55,8 @@ public class ClientCore extends ApplicationAdapter {
 		try {
 			updateAndRender(clientWorld);
 		} catch(Throwable t) {
+			//System.out.println("running threads: " + Thread.activeCount());
+			
 			StringWriter string = new StringWriter();
 			PrintWriter printer = new PrintWriter(string);
 			t.printStackTrace(printer);

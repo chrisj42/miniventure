@@ -12,6 +12,7 @@ import miniventure.game.world.entity.Entity.EntityTag;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.mob.Player.PlayerUpdate;
 import miniventure.game.world.entity.mob.Player.Stat;
+import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.Tile.TileData;
 import miniventure.game.world.tile.Tile.TileTag;
 
@@ -88,6 +89,23 @@ public interface GameProtocol {
 		}
 	}
 	
+	class TileUpdate {
+		public final TileData tileData;
+		public final int levelDepth;
+		public final int x;
+		public final int y;
+		
+		private TileUpdate() { this(null, 0, 0, 0); }
+		public TileUpdate(Tile tile) { this(tile, tile.getLocation()); }
+		private TileUpdate(Tile tile, Point pos) { this(new TileData(tile), tile.getLevel().getDepth(), pos.x, pos.y); }
+		public TileUpdate(TileData data, int levelDepth, int x, int y) {
+			tileData = data;
+			this.levelDepth = levelDepth;
+			this.x = x;
+			this.y = y;
+		}
+	}
+	
 	class ChunkRequest {
 		public final int x;
 		public final int y;
@@ -103,12 +121,15 @@ public interface GameProtocol {
 	class EntityAddition {
 		public final int eid;
 		public final String data;
+		public final Integer levelDepth;
 		
-		private EntityAddition() { this(null, 0); }
-		public EntityAddition(Entity e) { this(Entity.serialize(e), e.getId()); }
-		public EntityAddition(String data, int eid) {
+		private EntityAddition() { this(null, 0, null); }
+		public EntityAddition(Entity e) { this(e, e.getLevel()); }
+		private EntityAddition(Entity e, Level level) { this(Entity.serialize(e), e.getId(), level == null ? null : level.getDepth()); }
+		public EntityAddition(String data, int eid, Integer levelDepth) {
 			this.data = data;
 			this.eid = eid;
+			this.levelDepth = levelDepth;
 		}
 	}
 	

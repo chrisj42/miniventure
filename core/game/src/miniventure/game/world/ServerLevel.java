@@ -1,5 +1,6 @@
 package miniventure.game.world;
 
+import miniventure.game.GameProtocol.EntityAddition;
 import miniventure.game.item.Item;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Chunk.ChunkData;
@@ -35,7 +36,7 @@ public class ServerLevel extends Level {
 	}
 	
 	@Override
-	public void entityMoved(Entity entity) {
+	public void entityMoved(Entity entity, boolean changedChunk) {
 		if(getWorld().isKeepAlive(entity)) {
 			if(entity.getServerLevel() == this) {
 				// load all surrounding chunks
@@ -46,8 +47,12 @@ public class ServerLevel extends Level {
 				}
 			}
 		}
+		else if(changedChunk) {
+			// if the entity changed chunk, then send an addition to all other players on the level
+			getWorld().getSender().sendData(new EntityAddition(entity));
+		}
 		
-		super.entityMoved(entity);
+		super.entityMoved(entity, changedChunk);
 	}
 	
 	public void update(Entity[] entities, float delta) {

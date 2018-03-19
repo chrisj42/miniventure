@@ -8,9 +8,11 @@ import java.util.List;
 import java.util.Set;
 
 import miniventure.game.GameProtocol;
+import miniventure.game.world.Chunk;
 import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
+import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Player;
 
 import com.badlogic.gdx.math.Vector2;
@@ -61,8 +63,13 @@ public class GameServer implements GameProtocol {
 					System.out.println("server received chunk request");
 					ChunkRequest request = (ChunkRequest) object;
 					ServerLevel level = world.getLevel(0);
-					if(level != null)
-						connection.sendTCP(new ChunkData(level.getChunk(request.x, request.y), level));
+					if(level != null) {
+						Chunk chunk = level.getChunk(request.x, request.y);
+						connection.sendTCP(new ChunkData(chunk, level));
+						Array<Entity> newEntities = level.getOverlappingEntities(chunk.getBounds());
+						for(Entity e: newEntities)
+							connection.sendTCP(new EntityAddition(e));
+					}
 				}
 				
 				if(object instanceof Movement) {
@@ -70,6 +77,7 @@ public class GameServer implements GameProtocol {
 					Movement m = (Movement) object;
 					Player p = connectionToPlayerMap.get(connection);
 					Level level = world.getLevel(m.levelDepth);
+					//p.move(new Vector3(m.x, m.y, m.z).sub(new Vector3(p.getPosition(), p.getZ())));
 					if(level != null)
 						p.moveTo(level, m.x, m.y);
 					//System.out.println("server has player at " + p.getPosition(true));

@@ -93,10 +93,10 @@ public class MobAi extends Mob {
 	
 	@Override
 	public void remove() {
-		Level level = getLevel();
-		if(level instanceof ServerLevel)
+		ServerLevel level = getServerLevel();
+		if(level != null)
 			for (ItemDrop drop: itemDrops)
-				drop.dropItems((ServerLevel)level, this, null);
+				drop.dropItems(level, this, null);
 		
 		super.remove();
 	}

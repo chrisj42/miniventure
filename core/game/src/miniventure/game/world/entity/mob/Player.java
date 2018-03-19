@@ -15,6 +15,7 @@ import miniventure.game.util.Version;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
+import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.particle.ActionParticle.ActionType;
 import miniventure.game.world.tile.Tile;
 
@@ -332,19 +333,21 @@ public class Player extends Mob {
 	public static class PlayerUpdate {
 		public final float x;
 		public final float y;
+		public final int dir;
 		public final Integer levelDepth;
 		public final String[] inventory;
 		public final String[] handItem;
 		public final Integer[] stats;
 		
-		private PlayerUpdate() { this(0, 0, 0, null, null, null); }
+		private PlayerUpdate() { this(0, 0, 0, 0, null, null, null); }
 		
-		public PlayerUpdate(Player player) { this(player, player.getPosition(), player.getLevel()); }
+		public PlayerUpdate(Player player) { this(player, player.getPosition(), player.getDirection(), player.getLevel()); }
 		
-		private PlayerUpdate(Player player, Vector2 position, Level level) { this(position.x, position.y, level == null ? null : level.getDepth(), player.inventory.save(), player.hands.save(), Stat.save(player.stats)); }
-		public PlayerUpdate(float x, float y, Integer depth, String[] inventory, String[] handItem, Integer[] stats) {
+		private PlayerUpdate(Player player, Vector2 position, Direction dir, Level level) { this(position.x, position.y, dir.ordinal(), level == null ? null : level.getDepth(), player.inventory.save(), player.hands.save(), Stat.save(player.stats)); }
+		public PlayerUpdate(float x, float y, int dir, Integer depth, String[] inventory, String[] handItem, Integer[] stats) {
 			this.x = x;
 			this.y = y;
+			this.dir = dir;
 			this.levelDepth = depth;
 			this.inventory = inventory;
 			this.handItem = handItem;
@@ -357,6 +360,7 @@ public class Player extends Mob {
 				if(level != null)
 					player.moveTo(level, x, y);
 			}
+			player.setDirection(Direction.values[dir]);
 			player.inventory.loadItems(inventory);
 			player.hands.setItem(ItemStack.load(handItem));
 			Stat.load(stats, player.stats);
