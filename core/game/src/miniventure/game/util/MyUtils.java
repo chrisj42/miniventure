@@ -26,7 +26,7 @@ public class MyUtils {
 		return String.join(" ", words);
 	}
 	
-	public static String encodeStringArray(String[] strings) { return encodeStringArray(strings, '(', ')',','); }
+	public static String encodeStringArray(String... strings) { return encodeStringArray(strings, '(', ')',','); }
 	public static String encodeStringArray(String[] strings, char elementStart, char elementEnd, char delimiter) {
 		StringBuilder str = new StringBuilder();
 		for(int i = 0; i < strings.length; i++) {
@@ -42,20 +42,34 @@ public class MyUtils {
 	
 	public static String[] parseLayeredString(String str) { return parseLayeredString(str, '(', ')', ','); }
 	public static String[] parseLayeredString(String str, char layerStart, char layerEnd, char delimiter) {
+		if(str.length() == 0) return new String[0];
+		
 		Array<String> result = new Array<>();
 		char[] chars = str.toCharArray();
-		int offset = 0;
+		//int offset = 0;
 		int curLayers = 0;
+		StringBuilder curStr = new StringBuilder();
 		for(int i = 0; i < chars.length; i++) {
 			if(chars[i] == delimiter && curLayers == 0) {
-				result.add(new String(chars, offset, i - offset));
-				offset = i+1;
+				//result.add(new String(chars, offset, i - offset));
+				//offset = i+1;
+				result.add(curStr.toString());
+				curStr = new StringBuilder();
 			}
-			else if(chars[i] == layerStart) curLayers++;
-			else if(chars[i] == layerEnd) curLayers--;
+			else if(chars[i] == layerStart) {
+				if(curLayers > 0) curStr.append(chars[i]);
+				curLayers++;
+			}
+			else if(chars[i] == layerEnd) {
+				if(curLayers != 1) curStr.append(chars[i]);
+				if(curLayers > 0)
+					curLayers--;
+			}
+			else curStr.append(chars[i]);
 		}
 		
-		result.add(str.substring(offset));
+		//result.add(str.substring(offset+1, str.length()-1)); // past the layerStart, and before the layerEnd.
+		result.add(curStr.toString());
 		
 		return result.toArray(String.class);
 	}

@@ -1,5 +1,6 @@
 package miniventure.game.world;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -50,7 +51,26 @@ public abstract class WorldManager {
 	
 	/*  --- LEVEL MANAGEMENT --- */
 	
+	
+	/** @noinspection MismatchedQueryAndUpdateOfCollection*/
+	private static final HashSet<Entity> emptySet = new HashSet<>();
+	
 	public int getLevelCount() { return levelEntities.size(); }
+	public int getEntityCount(Level level) {
+		return levelEntities.getOrDefault(level, emptySet).size();
+	}
+	
+	Iterable<Entity> getEntitySet(Level level) {
+		return levelEntities.getOrDefault(level, emptySet);
+	}
+	
+	protected Entity[] getEntities(Level level) {
+		if(!levelEntities.containsKey(level))
+			return new Entity[0];
+		
+		HashSet<Entity> entities = levelEntities.get(level);
+		return entities.toArray(new Entity[entities.size()]);
+	}
 	
 	protected void addLevel(@NotNull Level level) {
 		levelEntities.put(level, new HashSet<>());
@@ -70,6 +90,7 @@ public abstract class WorldManager {
 	
 	
 	public void registerEntity(Entity e, int eid) {
+		System.out.println(this+": registered entity "+e);
 		entityIDMap.put(eid, e);
 	}
 	
@@ -84,15 +105,19 @@ public abstract class WorldManager {
 		return eid;
 	}
 	
-	public void setEntityLevel(Entity e, Level level) {
+	public void setEntityLevel(Entity e, @NotNull Level level) {
 		if(!entityIDMap.containsKey(e.getId()) || !levels.containsKey(level.getDepth()))
 			throw new IllegalArgumentException("couldn't set entity level, entity or level is not registered.");
 		
 		Level oldLevel = entityLevels.put(e, level);
-		if(levelEntities.containsKey(oldLevel))
-			levelEntities.get(oldLevel).remove(e);
+		System.out.println("for "+this+": setting level of entity " + e + " to " + level + " (removing from level "+oldLevel+")");
 		
-		levelEntities.get(level).add(e);
+		if(!level.equals(oldLevel)) {
+			levelEntities.get(level).add(e);
+			
+			if(levelEntities.containsKey(oldLevel))
+				levelEntities.get(oldLevel).remove(e);
+		}
 		
 		level.entityMoved(e);
 	}
@@ -101,6 +126,7 @@ public abstract class WorldManager {
 		Entity e = entityIDMap.get(eid);
 		entityLevels.remove(e);
 		entityIDMap.remove(eid);
+		System.out.println(this+": deregistered entity "+e);
 	}
 	
 	/** should the level keep chunks around this object loaded? */

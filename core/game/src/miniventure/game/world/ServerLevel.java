@@ -1,10 +1,5 @@
 package miniventure.game.world;
 
-import java.util.HashMap;
-
-import miniventure.game.GameProtocol.EntityAddition;
-import miniventure.game.GameProtocol.EntityRemoval;
-import miniventure.game.util.ProgressLogger;
 import miniventure.game.item.Item;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Chunk.ChunkData;
@@ -55,7 +50,7 @@ public class ServerLevel extends Level {
 		super.entityMoved(entity);
 	}
 	
-	public void update(float delta) {
+	public void update(Entity[] entities, float delta) {
 		if(loadedChunks.size() == 0) return;
 		
 		int tilesToUpdate = (int) (percentTilesUpdatedPerSecond * tileCount * delta);
@@ -70,9 +65,9 @@ public class ServerLevel extends Level {
 		}
 		
 		// update entities
-		updateEntities(delta, true);
+		updateEntities(entities, delta, true);
 		
-		if(this.entities.size() < getEntityCap() && MathUtils.randomBoolean(0.01f))
+		if(entities.length < getEntityCap() && MathUtils.randomBoolean(0.01f))
 			spawnMob(new MobAi(getWorld(), AiType.values[MathUtils.random(AiType.values.length-1)]));
 	}
 	
@@ -213,4 +208,7 @@ public class ServerLevel extends Level {
 	
 	@Override
 	public boolean equals(Object other) { return other instanceof ServerLevel && super.equals(other); }
+	
+	@Override
+	public String toString() { return "Server"+super.toString(); }
 }

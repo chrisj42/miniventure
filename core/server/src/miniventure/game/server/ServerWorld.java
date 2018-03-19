@@ -62,7 +62,7 @@ public class ServerWorld extends WorldManager {
 		}
 		
 		for(ServerLevel level: loadedLevels)
-			level.update(delta);
+			level.update(getEntities(level), delta);
 		
 		gameTime += delta;
 	}
@@ -121,15 +121,19 @@ public class ServerWorld extends WorldManager {
 	
 	
 	@Override
-	public void setEntityLevel(Entity e, Level level) {
+	public void setEntityLevel(Entity e, @NotNull Level level) {
 		Level previous = getEntityLevel(e);
 		super.setEntityLevel(e, level);
 		Level newLevel = getEntityLevel(e);
 		
-		if(previous != newLevel) {
-			// TODO remove entity from old level, add it to new... if this does not suffice.
-			server.broadcast(new EntityRemoval(e));
-			server.broadcast(new EntityAddition(e));
+		if(!newLevel.equals(previous)) {
+			if(e instanceof Player) {
+				server.broadcast(new EntityRemoval(e), previous, (Player)e);
+				server.broadcast(new EntityAddition(e), newLevel, (Player)e);
+			} else {
+				server.broadcast(new EntityRemoval(e), previous);
+				server.broadcast(new EntityAddition(e), newLevel);
+			}
 		}
 	}
 	
@@ -156,7 +160,7 @@ public class ServerWorld extends WorldManager {
 	public void respawnPlayer(Player player) {
 		player.reset();
 		
-		ServerLevel level = (ServerLevel) getLevel(0);
+		ServerLevel level = getLevel(0);
 		
 		if(level == null)
 			throw new NullPointerException("Surface level found to be null while attempting to spawn player.");
@@ -184,4 +188,7 @@ public class ServerWorld extends WorldManager {
 	
 	@Override
 	public GameProtocol getSender() { return server; }
+	
+	@Override
+	public String toString() { return "ServerWorld"; }
 }

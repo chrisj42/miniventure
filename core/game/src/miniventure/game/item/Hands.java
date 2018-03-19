@@ -1,6 +1,7 @@
 package miniventure.game.item;
 
 import miniventure.game.GameCore;
+import miniventure.game.util.MyUtils;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;
@@ -21,13 +22,10 @@ public class Hands {
 			super(ItemType.Misc, "Hand", GameCore.icons.get("blank"));
 		}
 		
-		static {
-			ItemType.miscClasses.put(HandItem.class.getCanonicalName(), HandItem.class);
-		}
-		
 		@Override
-		public String[] save() { return new String[] {ItemType.Misc.name(), HandItem.class.getCanonicalName().replace(Item.class.getPackage().getName()+".", "")}; }
+		public String[] save() { return new String[] {ItemType.Misc.name(), MyUtils.encodeStringArray(Hands.class.getCanonicalName().replace(Item.class.getPackage().getName()+".", ""), HandItem.class.getSimpleName())}; }
 		
+		/** @noinspection Contract*/
 		public static Item load(String[] data) { return new HandItem(); }
 		
 		@Override public Item getUsedItem() { return this; }

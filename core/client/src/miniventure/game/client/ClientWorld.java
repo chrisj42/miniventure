@@ -64,8 +64,9 @@ public class ClientWorld extends WorldManager {
 		}
 		
 		gameScreen.handleInput(mainPlayer);
+		mainPlayer.updateStats(delta);
 		
-		level.updateEntities(delta, false);
+		level.updateEntities(getEntities(level), delta, false);
 		
 		if(menu == null || !menu.usesWholeScreen())
 			gameScreen.render(mainPlayer, TimeOfDay.getSkyColors(gameTime), level);
@@ -136,18 +137,15 @@ public class ClientWorld extends WorldManager {
 	/*  --- PLAYER MANAGEMENT --- */
 	
 	
-	public void spawnPlayer(float x, float y, int eid) {
+	public void spawnPlayer(Player mainPlayer) {
 		Level level = getLevel(0);//mainPlayer == null ?  : mainPlayer.getLevel();
-		if(mainPlayer != null)
-			mainPlayer.remove();
-		
-		Player mainPlayer = new Player(this);
-		registerEntity(mainPlayer, eid);
+		if(this.mainPlayer != null)
+			this.mainPlayer.remove();
 		
 		if(level != null)
-			level.addEntity(mainPlayer, x, y, false);
+			setEntityLevel(mainPlayer, level);
 		else
-			System.err.println("could not add main player");
+			System.err.println("could not add main player, default level is null");
 		
 		this.mainPlayer = mainPlayer;
 	}
@@ -179,4 +177,7 @@ public class ClientWorld extends WorldManager {
 	public GameClient getClient() { return client; }
 	
 	public Player getMainPlayer() { return mainPlayer; }
+	
+	@Override
+	public String toString() { return "ClientWorld"; }
 }

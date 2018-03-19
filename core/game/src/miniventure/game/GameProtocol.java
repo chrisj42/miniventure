@@ -77,13 +77,13 @@ public interface GameProtocol {
 	}
 	
 	class SpawnData {
-		public final float x, y;
+		public final String playerData;
 		public final int eid;
 		
-		private SpawnData() { this(0, 0, 0); }
-		public SpawnData(float x, float y, int eid) {
-			this.x = x;
-			this.y = y;
+		private SpawnData() { this((String)null, 0); }
+		public SpawnData(Player player) { this(Entity.serialize(player), player.getId()); }
+		public SpawnData(String playerData, int eid) {
+			this.playerData = playerData;
 			this.eid = eid;
 		}
 	}

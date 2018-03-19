@@ -26,8 +26,6 @@ public class Level {
 	protected final HashMap<Point, Chunk> loadedChunks = new HashMap<>();
 	protected int tileCount;
 	
-	protected final HashSet<Entity> entities = new HashSet<>();
-	
 	/** @noinspection FieldCanBeLocal*/
 	private int entityCap = 8; // per chunk
 	
@@ -53,7 +51,7 @@ public class Level {
 	public int getDepth() { return depth; }
 	@NotNull public WorldManager getWorld() { return world; }
 	public int getEntityCap() { return entityCap*loadedChunks.size(); }
-	public int getEntityCount() { return entities.size(); }
+	public int getEntityCount() { return world.getEntityCount(this); }
 	
 	public void entityMoved(Entity entity) {
 		if(!world.isKeepAlive(entity)) {
@@ -102,8 +100,7 @@ public class Level {
 		e.moveTo(this, x, y);
 	}
 	
-	public void updateEntities(float delta, boolean server) {
-		Entity[] entities = this.entities.toArray(new Entity[this.entities.size()]);
+	public void updateEntities(Entity[] entities, float delta, boolean server) {
 		for(Entity e: entities)
 			e.update(delta, server);
 	}
@@ -214,7 +211,7 @@ public class Level {
 	}
 	public Array<Entity> getOverlappingEntities(Rectangle rect, Entity... exclude) {
 		Array<Entity> overlapping = new Array<>();
-		for(Entity entity: entities)
+		for(Entity entity: world.getEntitySet(this))
 			if(entity.getBounds().overlaps(rect))
 				overlapping.add(entity);
 		
@@ -271,7 +268,7 @@ public class Level {
 	@Nullable
 	public Player getClosestPlayer(final Vector2 pos) {
 		Array<Player> players = new Array<>();
-		for(Entity e: entities)
+		for(Entity e: world.getEntitySet(this))
 			if(e instanceof Player)
 				players.add((Player)e);
 		
@@ -306,4 +303,6 @@ public class Level {
 	public boolean equals(Object other) { return other instanceof Level && ((Level)other).depth == depth; }
 	@Override public int hashCode() { return depth; }
 	
+	@Override
+	public String toString() { return "Level(depth="+depth+")"; }
 }

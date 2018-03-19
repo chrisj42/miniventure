@@ -230,14 +230,10 @@ public class Player extends Mob {
 		}
 	}
 	
-	@Override
-	public void update(float delta, boolean server) {
-		super.update(delta, server);
-		
+	public void updateStats(float delta) {
 		// update things like hunger, stamina, etc.
-		if(!server)
-			for(StatEvolver evo: statEvoMap.values())
-				evo.update(delta);
+		for(StatEvolver evo: statEvoMap.values())
+			evo.update(delta);
 	}
 	
 	public boolean takeItem(@NotNull Item item) {

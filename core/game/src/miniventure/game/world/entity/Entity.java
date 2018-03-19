@@ -1,5 +1,6 @@
 package miniventure.game.world.entity;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import miniventure.game.GameCore;
@@ -40,9 +41,9 @@ public abstract class Entity implements WorldObject {
 	
 	protected Entity(@NotNull WorldManager world, String[][] data, Version version) {
 		this(world);
-		x = Integer.parseInt(data[0][0]);
-		y = Integer.parseInt(data[0][1]);
-		z = Integer.parseInt(data[0][2]);
+		x = Float.parseFloat(data[0][0]);
+		y = Float.parseFloat(data[0][1]);
+		z = Float.parseFloat(data[0][2]);
 	}
 	
 	public Array<String[]> save() {
@@ -292,7 +293,7 @@ public abstract class Entity implements WorldObject {
 		}
 		
 		try {
-			Class<?> clazz = Class.forName(Entity.class.getPackage().getName()+"."+partData[0].replace("(", "").replace(")", ""));
+			Class<?> clazz = Class.forName(Entity.class.getPackage().getName()+"."+partData[0]);
 			
 			Class<? extends Entity> entityClass = clazz.asSubclass(Entity.class);
 			
@@ -303,11 +304,13 @@ public abstract class Entity implements WorldObject {
 			return null;
 		}
 	}
-	public static Entity deserialize(@NotNull WorldManager world, int eid, Class<? extends Entity> clazz, String[][] data) {
-		Entity newEntity = null;
+	public static <T extends Entity> T deserialize(@NotNull WorldManager world, int eid, Class<T> clazz, String[][] data) {
+		T newEntity = null;
 		try {
-			newEntity = clazz.getDeclaredConstructor(WorldManager.class, String[][].class, Version.class).newInstance(world, data, GameCore.VERSION);
-			newEntity.eid = eid;
+			Constructor<T> constructor = clazz.getDeclaredConstructor(WorldManager.class, String[][].class, Version.class);
+			constructor.setAccessible(true);
+			newEntity = constructor.newInstance(world, data, GameCore.VERSION);
+			((Entity)newEntity).eid = eid;
 			world.registerEntity(newEntity, eid);
 		} catch(NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
 			e.printStackTrace();
@@ -330,4 +333,7 @@ public abstract class Entity implements WorldObject {
 	
 	@Override
 	public Tag getTag() { return new EntityTag(eid); }
+	
+	@Override
+	public String toString() { return getClass().getSimpleName(); }
 }

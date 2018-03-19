@@ -11,6 +11,7 @@ import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
+import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.mob.Player.PlayerUpdate;
 
 import com.esotericsoftware.kryonet.Client;
@@ -46,7 +47,7 @@ public class GameClient implements GameProtocol {
 				if(object instanceof SpawnData) {
 					System.out.println("client received player");
 					SpawnData data = (SpawnData) object; 
-					world.spawnPlayer(data.x, data.y, data.eid);
+					world.spawnPlayer((Player)Entity.deserialize(data.playerData, world, data.eid));
 					ClientCore.setScreen(null);
 				}
 				

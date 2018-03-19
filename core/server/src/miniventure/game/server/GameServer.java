@@ -1,8 +1,10 @@
 package miniventure.game.server;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import miniventure.game.GameProtocol;
@@ -13,6 +15,7 @@ import miniventure.game.world.entity.mob.Player;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
@@ -49,8 +52,7 @@ public class GameServer implements GameProtocol {
 						connection.sendTCP(new LevelData(level));
 						for(ChunkData chunk: playerChunks)
 							connection.sendTCP(chunk);
-						Vector2 pos = player.getPosition();
-						connection.sendTCP(new SpawnData(pos.x, pos.y, player.getId()));
+						connection.sendTCP(new SpawnData(player));
 						System.out.println("server player level: " + player.getLevel());
 					}
 				}
@@ -70,7 +72,7 @@ public class GameServer implements GameProtocol {
 					Level level = world.getLevel(m.levelDepth);
 					if(level != null)
 						p.moveTo(level, m.x, m.y);
-					System.out.println("server has player at " + p.getPosition(true));
+					//System.out.println("server has player at " + p.getPosition(true));
 				}
 				
 				if(object instanceof InteractRequest) {
@@ -82,7 +84,11 @@ public class GameServer implements GameProtocol {
 					else p.interact();
 				}
 				
-				
+				if(object.equals(DatalessRequest.Respawn)) {
+					Player client = connectionToPlayerMap.get(connection);
+					world.respawnPlayer(client);
+					connection.sendTCP(new SpawnData(client));
+				}
 			}
 			
 			/*@Override
@@ -123,12 +129,31 @@ public class GameServer implements GameProtocol {
 			c.sendTCP(obj);
 	}
 	
-	public void broadcast(Object obj, @NotNull Player... exclude) {
-		Set<Player> players = new HashSet<>(playerToConnectionMap.keySet());
-		for(Player p: exclude)
-			players.remove(p);
+	// levelMask is the level a player must be on to receive this data.
+	public void broadcast(Object obj, Level levelMask, @NotNull Player... exclude) {
+		if(levelMask == null) return; // no level, no packet.
 		
-		for(Player p: players)
+		Array<Player> players = new Array<>(exclude);
+		for(Player p: playerToConnectionMap.keySet())
+			if(levelMask.equals(p.getLevel()))
+				players.add(p);
+		
+		for(Player p: exclude)
+			players.removeValue(p, false);
+		
+		broadcast(obj, false, players.toArray(Player.class));
+	}
+	public void broadcast(Object obj, @NotNull Player... excludedPlayers) { broadcast(obj, false, excludedPlayers); }
+	public void broadcast(Object obj, boolean includeGiven, @NotNull Player... players) {
+		Set<Player> playerSet = new HashSet<>(playerToConnectionMap.keySet());
+		List<Player> playerList = Arrays.asList(players);
+		
+		if(includeGiven)
+			playerSet.retainAll(playerList);
+		else
+			playerSet.removeAll(playerList);
+		
+		for(Player p: playerSet)
 			playerToConnectionMap.get(p).sendTCP(obj);
 	}
 	

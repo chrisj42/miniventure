@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import miniventure.game.item.ToolItem.Material;
+import miniventure.game.util.MyUtils;
 import miniventure.game.world.tile.TileType;
 
 public enum ItemType {
@@ -19,19 +20,23 @@ public enum ItemType {
 	
 	Misc(data -> {
 		try {
-			//noinspection unchecked
-			Class<?> clazz = ((HashMap<String, Class<?>>)ItemType.class.getDeclaredField("miscClasses").get(null)).get(ItemType.class.getPackage().getName()+"."+data[0]);
-			if(clazz == null)
-				clazz = Class.forName(ItemType.class.getPackage().getName()+"."+data[0]);
+			String[] enclosingClasses = MyUtils.parseLayeredString(data[0]);
+			Class<?> clazz = Class.forName(ItemType.class.getPackage().getName()+"."+enclosingClasses[0]);
+			for(int i = 1; i < enclosingClasses.length; i++) {
+				for(Class<?> inner: clazz.getDeclaredClasses()) {
+					if(inner.getSimpleName().equals(enclosingClasses[i])) {
+						clazz = inner;
+						break;
+					}
+				}
+			}
 			return (Item) clazz.getMethod("load", String[].class).invoke(null, (Object)Arrays.copyOfRange(data, 1, data.length));
-		} catch(ClassNotFoundException | IllegalAccessException | InvocationTargetException | NoSuchMethodException | NoSuchFieldException e) {
+		} catch(ClassNotFoundException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
 			e.printStackTrace();
 		}
 		
 		return null;
 	});
-	
-	static final HashMap<String, Class<?>> miscClasses = new HashMap<>();
 	
 	/*
 		This is mainly for saving and loading.
