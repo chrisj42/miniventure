@@ -2,6 +2,9 @@ package miniventure.game;
 
 import java.io.File;
 
+import miniventure.game.item.Hands;
+import miniventure.game.item.Inventory;
+import miniventure.game.item.ItemStack;
 import miniventure.game.util.Version;
 import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.Level;
@@ -207,6 +210,28 @@ public interface GameProtocol {
 			this.target = target;
 			this.damage = damage;
 			this.attackItem = attackItem;
+		}
+	}
+	
+	class ItemDropRequest {
+		public final ItemStack stack;
+		
+		private ItemDropRequest() { this(null); }
+		public ItemDropRequest(ItemStack stack) {
+			this.stack = stack;
+		}
+	}
+	
+	class InventoryUpdate {
+		public final String[] inventory;
+		public final String[] heldItemStack;
+		
+		private InventoryUpdate() { this((String[])null, null); }
+		public InventoryUpdate(Player player) { this(player.getInventory(), player.getHands()); }
+		public InventoryUpdate(Inventory inv, Hands hands) { this(inv.save(), hands.save()); }
+		public InventoryUpdate(String[] inventory, String[] heldItemStack) {
+			this.inventory = inventory;
+			this.heldItemStack = heldItemStack;
 		}
 	}
 	

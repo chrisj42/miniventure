@@ -11,6 +11,7 @@ import miniventure.game.GameProtocol;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.Level;
+import miniventure.game.world.ServerLevel;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Player;
 

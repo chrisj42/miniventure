@@ -154,7 +154,7 @@ public class Player extends Mob {
 		
 		super.reset();
 		
-		hands.clearItem(inventory);
+		hands.reset();
 		inventory = new Inventory(20, hands);
 	}
 	

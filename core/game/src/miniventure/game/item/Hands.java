@@ -2,11 +2,9 @@ package miniventure.game.item;
 
 import miniventure.game.GameCore;
 import miniventure.game.util.MyUtils;
-import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.mob.Player.Stat;
-import miniventure.game.world.entity.particle.ItemEntity;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 
@@ -48,7 +46,7 @@ public class Hands {
 	
 	@NotNull private Item item;
 	private int count = 1;
-	private final Player player;
+	final Player player;
 	
 	public Hands(Player player) {
 		this.player = player;
@@ -72,25 +70,23 @@ public class Hands {
 		return true;
 	}
 	
+	public void reset() { setItem(new HandItem(), 1); }
+	
 	public void clearItem(Inventory inv) {
 		if(inv != null && count > 0 && !(item instanceof HandItem)) {
 			int added = inv.addItem(item, count);
-			if(added != count) {
-				ServerLevel level = player.getServerLevel();
-				if(level != null)
-					for(int i = 0; i < count-added; i++)
-						level.addEntity(new ItemEntity(player.getWorld(), item, null), player.getPosition(), true);
-			}
+			if(added != count)
+				dropStack(new ItemStack(item, count - added));
 		}
 		
-		item = new HandItem();
-		count = 1;
+		reset();
 	}
+	
+	void dropStack(@NotNull ItemStack stack) {}
 	
 	public void resetItemUsage() {
 		if(count <= 0) { // this shouldn't happen, generally... unless stuff has been removed from the active item by the crafting menu.
-			item = new HandItem();
-			count = 1;
+			reset();
 			return;
 		}
 		
@@ -106,9 +102,7 @@ public class Hands {
 			count--;
 			if(newItem != null && !player.takeItem(newItem)) {// will add it to hand, or inventory, whichever fits.
 				// this happens if the inventory is full; in such a case, drop the new item on the ground.
-				ServerLevel level = player.getServerLevel();
-				if(level != null)
-					level.dropItem(newItem, player.getCenter(), null);//count++; // if there was a new item, and it couldn't be picked up, then the count is not decreased.
+				dropStack(new ItemStack(newItem, 1)); // if there was a new item, and it couldn't be picked up, then the count is not decreased.
 			}
 		}
 	}

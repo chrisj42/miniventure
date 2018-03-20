@@ -181,12 +181,25 @@ public class ServerLevel extends Level {
 	
 	@Override
 	void loadChunk(Point chunkCoord) {
-		// TODO 
+		// TODO this will need to get redone when loading from file
+		
+		if(loadedChunks.containsKey(chunkCoord)) return;
+		
+		loadedChunks.put(chunkCoord, new Chunk(chunkCoord.x, chunkCoord.y, this, levelGenerator.generateChunk(chunkCoord.x, chunkCoord.y)));
 	}
 	
 	@Override
 	void unloadChunk(Point chunkCoord) {
-		// TODO 
+		// TODO this will need to get redone when saving to file
+		
+		Chunk chunk = loadedChunks.get(chunkCoord);
+		if(chunk == null) return; // already unloaded
+		
+		for(Entity e: entityChunks.keySet().toArray(new Entity[entityChunks.size()]))
+			if(entityChunks.get(e).equals(chunk))
+				e.remove();
+		
+		loadedChunks.remove(chunkCoord);
 	}
 	
 	public ChunkData[] createClientLevel(Player client) {
@@ -199,8 +212,7 @@ public class ServerLevel extends Level {
 		
 		for (int i = 0; i < points.size; i++) {
 			Point p = points.get(i);
-			Chunk chunk = loadedChunks.containsKey(p) ? loadedChunks.get(p) : new Chunk(p.x, p.y, this, levelGenerator.generateChunk(p.x, p.y));
-			chunks[i] = new ChunkData(chunk, this);
+			chunks[i] = new ChunkData(getChunk(p.x, p.y), this);
 		}
 		
 		return chunks;
