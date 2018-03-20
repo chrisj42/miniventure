@@ -9,6 +9,7 @@ import miniventure.game.world.entity.particle.Particle;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -17,13 +18,16 @@ import com.badlogic.gdx.utils.Array;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class Level {
+public abstract class Level {
 	
 	private final int depth, width, height;
 	
 	@NotNull private final WorldManager world;
 	protected final HashMap<Point, Chunk> loadedChunks = new HashMap<>();
 	protected int tileCount;
+	
+	// this is to track when entities go in and out of chunks
+	protected final HashMap<Entity, Chunk> entityChunks = new HashMap<>();
 	
 	/** @noinspection FieldCanBeLocal*/
 	private int entityCap = 8; // per chunk
@@ -52,17 +56,19 @@ public class Level {
 	public int getEntityCap() { return entityCap*loadedChunks.size(); }
 	public int getEntityCount() { return world.getEntityCount(this); }
 	
-	public void entityMoved(Entity entity, boolean changedChunk) {
-		if(!world.isKeepAlive(entity)) {
-			// check if they've gone (mostly?) out of bounds, if so, remove them
-			Vector2 pos = entity.getCenter();
-			if(!loadedChunks.containsKey(new Point(Chunk.getCoord(pos.x), Chunk.getCoord(pos.y))))
-				entity.remove();
-			return;
-		}
+	public void entityMoved(Entity entity) {
+		Chunk entityChunk = getClosestChunk(entity.getCenter());
+		Chunk curChunk = entityChunks.get(entity);
+		boolean chunkChanged = !(curChunk == null && entityChunk == null) && ((curChunk == null || entityChunk == null) || !curChunk.equals(entityChunk));
 		
-		// TODO I really need to find a better way of handling server vs. client situations... technically, the below request for tile chunks should never be sent to a client, that doesn't make sense. But since the server level extends this and calls this, it probably will send it. Not to mention, things like the item entity touchedBy method could really use a reference to a server, so they can send a pickup request.
-		if(!changedChunk) return;
+		if(!chunkChanged) return;
+		
+		if(entityChunk == null)
+			entityChunks.remove(entity);
+		else
+			entityChunks.put(entity, entityChunk);
+		
+		if(!world.isKeepAlive(entity)) return;
 		
 		// check for any chunks that no longer need to be loaded
 		Array<Point> chunkCoords = new Array<>(loadedChunks.keySet().toArray(new Point[loadedChunks.size()]));
@@ -83,12 +89,12 @@ public class Level {
 			
 			// I don't think I have to worry about the tiles...
 			// now, remove the chunk from the set of loaded chunks
-			loadedChunks.remove(chunkCoord);
+			unloadChunk(chunkCoord);
 		}
 		
 		// load any new chunks surrounding the given entity
 		for (Point p : getAreaChunks(entity.getCenter(), 1, false, true)) {
-			getWorld().getSender().sendData(new ChunkRequest(p));
+			loadChunk(p);
 		}
 	}
 	
@@ -104,7 +110,7 @@ public class Level {
 	
 	public void updateEntities(Entity[] entities, float delta, boolean server) {
 		for(Entity e: entities)
-			e.update(delta, server);
+			e.update(delta);
 	}
 	
 	public void render(Rectangle renderSpace, SpriteBatch batch, float delta, Vector2 posOffset) {
@@ -264,9 +270,12 @@ public class Level {
 	}
 	
 	@Nullable
-	public Tile getClosestTile(Rectangle rect) {
-		Vector2 center = rect.getCenter(new Vector2());
-		return getTile(center.x, center.y);
+	public Tile getClosestTile(Rectangle rect) { return getClosestTile(rect.getCenter(new Vector2())); }
+	public Tile getClosestTile(Vector2 center) { return getTile(center.x, center.y); }
+	
+	@Nullable
+	public Chunk getClosestChunk(Vector2 pos) {
+		return loadedChunks.get(new Point(Chunk.getCoord(pos.x), Chunk.getCoord(pos.y)));
 	}
 	
 	@Nullable
@@ -285,10 +294,6 @@ public class Level {
 		return players.get(0);
 	}
 	
-	/*public boolean tileLoaded(int tx, int ty) {
-		return loadedChunks.containsKey(new Point(Chunk.getCoord(tx), Chunk.getCoord(ty)));
-	}*/
-	
 	public boolean chunkExists(int cx, int cy) { return tileExists(cx * Chunk.SIZE, cy * Chunk.SIZE); }
 	public boolean tileExists(int tx, int ty) {
 		if(tx < 0 || ty < 0) return false;
@@ -304,6 +309,8 @@ public class Level {
 		loadedChunks.put(new Point(newChunk.chunkX, newChunk.chunkY), newChunk);
 	}
 	
+	abstract void loadChunk(Point chunkCoord);
+	abstract void unloadChunk(Point chunkCoord);
 	
 	@Override
 	public boolean equals(Object other) { return other instanceof Level && ((Level)other).depth == depth; }

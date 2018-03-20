@@ -136,8 +136,8 @@ public abstract class Mob extends Entity {
 	}
 	
 	@Override
-	public void update(float delta, boolean server) {
-		super.update(delta, server);
+	public void update(float delta) {
+		super.update(delta);
 		
 		if(knockbackTimeLeft > 0) {
 			super.move(new Vector2(knockbackVelocity).scl(delta));
@@ -151,6 +151,7 @@ public abstract class Mob extends Entity {
 		if(invulnerableTime > 0) invulnerableTime -= Math.min(invulnerableTime, delta);
 	}
 	
+	@NotNull
 	@Override
 	public Rectangle getBounds() {
 		Rectangle bounds = super.getBounds();
@@ -210,7 +211,8 @@ public abstract class Mob extends Entity {
 		ServerLevel level = getServerLevel();
 		if(level != null) {
 			// send to clients
-			level.getWorld().getSender().sendData(new Hurt(obj.getTag(), getTag(), damage, Item.save(item)));
+			// TODO send hurt event to clients
+			//level.getWorld().getSender().sendData(new Hurt(obj.getTag(), getTag(), damage, Item.save(item)));
 			level.addEntity(new TextParticle(getWorld(), damage + "", this instanceof Player ? Color.PINK : Color.RED), getCenter(), true);
 		}
 		

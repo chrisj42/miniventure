@@ -5,6 +5,7 @@ public class ServerCore {
 	private static ServerWorld serverWorld;
 	
 	public static ServerWorld getWorld() { return serverWorld; }
+	public static GameServer getServer() { return serverWorld.getServer(); }
 	
 	public static void main(String[] args) {
 		boolean success = args.length == 3 && args[0].equalsIgnoreCase("--server");

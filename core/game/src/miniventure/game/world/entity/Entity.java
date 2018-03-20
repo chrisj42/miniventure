@@ -8,7 +8,6 @@ import miniventure.game.GameProtocol.Movement;
 import miniventure.game.item.Item;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
-import miniventure.game.world.Chunk;
 import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldManager;
@@ -72,9 +71,7 @@ public abstract class Entity implements WorldObject {
 	}
 	
 	@Override
-	public void update(float delta, boolean server) {
-		if(!server) return;
-		
+	public void update(float delta) {
 		Level level = getLevel();
 		if(level == null) return;
 		Array<WorldObject> objects = new Array<>();
@@ -105,6 +102,7 @@ public abstract class Entity implements WorldObject {
 		return new Rectangle(x, y, texture.getRegionWidth(), texture.getRegionHeight());
 	}
 	
+	@NotNull
 	@Override
 	public Rectangle getBounds() {
 		Rectangle bounds = getUnscaledBounds();
@@ -129,8 +127,9 @@ public abstract class Entity implements WorldObject {
 		boolean moved = !movement.isZero();
 		if(moved) {
 			moveTo(level, x+movement.x, y+movement.y);
-			if(level instanceof ServerLevel)
-				level.getWorld().getSender().sendData(new Movement(getId(), level.getDepth(), new Vector3(getPosition(), getZ())));
+			// TODO send movement updates to clients
+			//if(level instanceof ServerLevel)
+			//	level.getWorld().getSender().sendData(new Movement(getId(), level.getDepth(), new Vector3(getPosition(), getZ())));
 		}
 		return moved;
 	}
@@ -219,16 +218,16 @@ public abstract class Entity implements WorldObject {
 		y = Math.min(y, level.getHeight() - size.y);
 		
 		// check and see if the entity is changing chunks from their current position.
-		boolean changedChunk =
+		/*boolean changedChunk =
 			!level.equals(getLevel()) ||
 			Chunk.getCoord(x) != Chunk.getCoord(this.x) ||
 			Chunk.getCoord(y) != Chunk.getCoord(this.y);
-		
+		*/
 		this.x = x;
 		this.y = y;
 		
 		if(level == getLevel())
-			level.entityMoved(this, changedChunk);
+			level.entityMoved(this);
 		else
 			world.setEntityLevel(this, level);
 	}

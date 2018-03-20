@@ -33,7 +33,7 @@ public final class TilePropertyType<PT extends TilePropertyInstance> {
 	
 	public static final TilePropertyType<SolidProperty> Solid = new TilePropertyType<>(tileType -> SolidProperty.WALKABLE);
 	
-	public static final TilePropertyType<TouchListener> Touch = new TilePropertyType<>(tileType -> (entity, tile, initial) -> {});
+	public static final TilePropertyType<TouchListener> Touch = new TilePropertyType<>(tileType -> (entity, tile, initial) -> false);
 	
 	public static final TilePropertyType<DestructibleProperty> Attack = new TilePropertyType<>(DestructibleProperty::INDESTRUCTIBLE);
 	

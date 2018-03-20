@@ -5,7 +5,6 @@ import java.util.Arrays;
 import miniventure.game.item.Item;
 import miniventure.game.util.Version;
 import miniventure.game.world.ItemDrop;
-import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
@@ -76,8 +75,8 @@ public class MobAi extends Mob {
 	}
 	
 	@Override
-	public void update(float delta, boolean server) {
-		super.update(delta, server);
+	public void update(float delta) {
+		super.update(delta);
 		
 		if(!server) return;
 		

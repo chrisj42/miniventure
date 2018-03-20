@@ -1,6 +1,5 @@
 package miniventure.game.world;
 
-import miniventure.game.GameProtocol.EntityAddition;
 import miniventure.game.item.Item;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Chunk.ChunkData;
@@ -36,23 +35,13 @@ public class ServerLevel extends Level {
 	}
 	
 	@Override
-	public void entityMoved(Entity entity, boolean changedChunk) {
-		if(getWorld().isKeepAlive(entity)) {
-			if(entity.getServerLevel() == this) {
-				// load all surrounding chunks
-				for (Point p : getAreaChunks(entity.getCenter(), 1, false, true)) {
-					Chunk newChunk = new Chunk(p.x, p.y, this, levelGenerator.generateChunk(p.x, p.y));
-					tileCount += newChunk.width * newChunk.height;
-					loadedChunks.put(p, newChunk);
-				}
-			}
-		}
-		else if(changedChunk) {
-			// if the entity changed chunk, then send an addition to all other players on the level
-			getWorld().getSender().sendData(new EntityAddition(entity));
-		}
+	public void entityMoved(Entity entity) {
+		Chunk prevChunk = entityChunks.get(entity);
+		super.entityMoved(entity);
+		Chunk newChunk = entityChunks.get(entity);
 		
-		super.entityMoved(entity, changedChunk);
+		//if(newChunk != prevChunk)
+			//ServerCore.getServer().broadcast(new EntityAddition(entity), this);
 	}
 	
 	public void update(Entity[] entities, float delta) {
@@ -66,7 +55,7 @@ public class ServerLevel extends Level {
 			int x = MathUtils.random(chunk.width-1);
 			int y = MathUtils.random(chunk.height-1);
 			Tile t = chunk.getTile(x, y);
-			if(t != null) t.update(delta, true);
+			if(t != null) t.update(delta);
 		}
 		
 		// update entities
@@ -80,6 +69,7 @@ public class ServerLevel extends Level {
 	public void render(Rectangle renderSpace, SpriteBatch batch, float delta, Vector2 posOffset) {}
 	@Override
 	public Array<Vector3> renderLighting(Rectangle renderSpace) { return new Array<>(); }
+	
 	
 	public void dropItems(@NotNull ItemDrop drop, @NotNull WorldObject source, @Nullable WorldObject target) {
 		dropItems(drop, source.getCenter(), target == null ? null : target.getCenter());
@@ -112,7 +102,7 @@ public class ServerLevel extends Level {
 		if(!closest.isPermeableBy(ie)) {
 			// we need to look around for a tile that the item *can* be placed on.
 			Array<Tile> adjacent = closest.getAdjacentTiles(true);
-			WorldObject.sortByDistance(adjacent, targetPos == null ? dropPos : targetPos);
+			Boundable.sortByDistance(adjacent, targetPos == null ? dropPos : targetPos);
 			for(Tile adj: adjacent) {
 				if(adj.isPermeableBy(ie)) {
 					closest = adj;
@@ -187,6 +177,16 @@ public class ServerLevel extends Level {
 			
 			spawnMob(mob, new Tile[] {new Tile(this, x, y, type)});
 		}
+	}
+	
+	@Override
+	void loadChunk(Point chunkCoord) {
+		// TODO 
+	}
+	
+	@Override
+	void unloadChunk(Point chunkCoord) {
+		// TODO 
 	}
 	
 	public ChunkData[] createClientLevel(Player client) {

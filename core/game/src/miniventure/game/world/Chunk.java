@@ -10,15 +10,17 @@ import com.badlogic.gdx.math.Rectangle;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class Chunk {
+public class Chunk implements Boundable {
 	
 	public static final int SIZE = 32;
 	
+	@NotNull private final Level level;
 	@NotNull private Tile[][] tiles;
 	public final int width, height;
 	public final int chunkX, chunkY;
 	
 	public Chunk(int chunkX, int chunkY, @NotNull Level level, @NotNull TileType[][][] tileTypes) {
+		this.level = level;
 		tiles = new Tile[tileTypes.length][];
 		width = tiles.length;
 		this.chunkX = chunkX;
@@ -33,6 +35,7 @@ public class Chunk {
 		this.height = height;
 	}
 	public Chunk(@NotNull Level level, @NotNull ChunkData data) {
+		this.level = level;
 		this.chunkX = data.chunkX;
 		this.chunkY = data.chunkY;
 		
@@ -64,13 +67,28 @@ public class Chunk {
 	@NotNull
 	Tile[][] getTiles() { return tiles; }
 	
+	@NotNull @Override
+	public Level getLevel() { return level; }
+	
+	@NotNull @Override
+	public Rectangle getBounds() { return new Rectangle(chunkX*SIZE, chunkY*SIZE, width, height); }
+	
+	
+	@Override
+	public boolean equals(Object other) {
+		if(!(other instanceof Chunk)) return false;
+		Chunk o = (Chunk) other;
+		return chunkX == o.chunkX && chunkY == o.chunkY && level.equals(o.level);
+	}
+	
+	@Override
+	public int hashCode() { return 31 * chunkX + 17 * chunkY; }
+	
+	
 	public static int getCoord(float pos) {
 		int worldCoord = MathUtils.floor(pos);
 		return worldCoord / SIZE;
 	}
-	
-	public Rectangle getBounds() { return new Rectangle(chunkX*SIZE, chunkY*SIZE, width, height); }
-	
 	
 	public static class ChunkData {
 		public final int chunkX, chunkY, levelDepth;

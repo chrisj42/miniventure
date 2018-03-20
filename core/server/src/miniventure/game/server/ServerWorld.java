@@ -2,7 +2,6 @@ package miniventure.game.server;
 
 import java.util.HashSet;
 
-import miniventure.game.GameProtocol;
 import miniventure.game.GameProtocol.EntityAddition;
 import miniventure.game.GameProtocol.EntityRemoval;
 import miniventure.game.GameProtocol.StatChange;
@@ -196,8 +195,7 @@ public class ServerWorld extends WorldManager {
 		return keepAlives;
 	}
 	
-	@Override
-	public GameProtocol getSender() { return server; }
+	public GameServer getServer() { return server; }
 	
 	@Override
 	public String toString() { return "ServerWorld"; }

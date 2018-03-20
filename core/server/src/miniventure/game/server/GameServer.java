@@ -11,12 +11,9 @@ import miniventure.game.GameProtocol;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.Level;
-import miniventure.game.world.ServerLevel;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Player;
 
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
@@ -164,7 +161,4 @@ public class GameServer implements GameProtocol {
 		for(Player p: playerSet)
 			playerToConnectionMap.get(p).sendTCP(obj);
 	}
-	
-	@Override
-	public void sendData(Object obj) { broadcast(obj); }
 }

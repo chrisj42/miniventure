@@ -145,7 +145,4 @@ public class GameClient implements GameProtocol {
 		
 		return true;
 	}
-	
-	@Override
-	public void sendData(Object obj) { send(obj); }
 }

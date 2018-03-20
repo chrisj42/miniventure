@@ -137,6 +137,9 @@ public abstract class WorldManager {
 			entityIDMap.remove(eid);
 		});
 		System.out.println(this+": deregistered entity "+e);
+		
+		if(e != null)
+			level.entityMoved(e);
 	}
 	
 	public void setEntityLevel(Entity e, @NotNull Level level) {
@@ -153,7 +156,7 @@ public abstract class WorldManager {
 			actOnEntitySet(oldLevel, set -> set.remove(e));
 		}
 		
-		level.entityMoved(e, true);
+		level.entityMoved(e);
 	}
 	
 	/** should the level keep chunks around this object loaded? */
@@ -173,8 +176,6 @@ public abstract class WorldManager {
 	public Level getLevel(int depth) { return levels.get(depth); }
 	
 	public Level getEntityLevel(Entity e) { return entityLevels.get(e); }
-	
-	public abstract GameProtocol getSender();
 	
 	/** fetches time since the world was originally created (while the world is loaded and running) */
 	public float getGameTime() { return gameTime; }

@@ -176,9 +176,6 @@ public class ClientWorld extends WorldManager {
 		return playerHolder;
 	}
 	
-	@Override
-	public GameProtocol getSender() { return client; }
-	
 	public GameClient getClient() { return client; }
 	
 	public Player getMainPlayer() { return mainPlayer; }

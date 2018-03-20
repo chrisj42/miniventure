@@ -11,6 +11,7 @@ import miniventure.game.item.Item;
 import miniventure.game.item.ItemStack;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
+import miniventure.game.world.Boundable;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
@@ -261,7 +262,7 @@ public class Player extends Mob {
 		Rectangle interactionBounds = getInteractionRect();
 		
 		objects.addAll(level.getOverlappingEntities(interactionBounds, this));
-		WorldObject.sortByDistance(objects, getCenter());
+		Boundable.sortByDistance(objects, getCenter());
 		
 		Tile tile = level.getClosestTile(interactionBounds);
 		if(tile != null)

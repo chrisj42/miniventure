@@ -238,8 +238,4 @@ public interface GameProtocol {
 			for(File subpack: subpackages)
 				registerClassesInPackage(kryo, packageName+"."+subpack.getName(), subpack, true);
 	}
-	
-	
-	
-	void sendData(Object object);
 }

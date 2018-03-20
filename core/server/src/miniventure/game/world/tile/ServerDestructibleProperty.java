@@ -1,7 +1,6 @@
 package miniventure.game.world.tile;
 
 import miniventure.game.world.ItemDrop;
-import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
 
 import org.jetbrains.annotations.NotNull;

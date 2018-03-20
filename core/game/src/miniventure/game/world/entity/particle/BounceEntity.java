@@ -77,7 +77,7 @@ public abstract class BounceEntity extends Entity {
 	
 	private boolean moving = true;
 	@Override
-	public void update(float delta, boolean server) {
+	public void update(float delta) {
 		//super.update(delta);
 		/*
 			Movement will work like this:
