@@ -1,4 +1,4 @@
-package miniventure.game.world.tilenew;
+package miniventure.game.world.tile;
 
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.ServerLevel;

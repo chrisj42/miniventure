@@ -3,7 +3,6 @@ package miniventure.game.world.tile;
 import java.util.HashMap;
 
 import miniventure.game.GameCore;
-import miniventure.game.world.tilenew.Tile;
 
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.math.MathUtils;
@@ -11,7 +10,7 @@ import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
 
-public class AnimationProperty implements TileProperty {
+public class AnimationProperty implements TilePropertyInstance {
 	
 	private static HashMap<String, HashMap<String, Array<AtlasRegion>>> tileConnectionAnimations = new HashMap<>();
 	private static HashMap<String, HashMap<String, Array<AtlasRegion>>> tileOverlapAnimations = new HashMap<>();
@@ -33,9 +32,6 @@ public class AnimationProperty implements TileProperty {
 			}
 		}
 	}
-	
-	@Override
-	public Class<? extends TileProperty> getUniquePropertyClass() { return AnimationProperty.class; }
 	
 	private class TileAnimation {
 		private final AnimationType animationType;
@@ -79,24 +75,18 @@ public class AnimationProperty implements TileProperty {
 	
 	private final boolean isOpaque;
 	private final TileAnimation main, overlay;
-	private TileType tileType;
+	private final TileType tileType;
 	
-	AnimationProperty(boolean isOpaque, AnimationType main) { this(isOpaque, main, 0); }
-	AnimationProperty(boolean isOpaque, AnimationType main, float mainFrameTime) { this(isOpaque, main, mainFrameTime, main, mainFrameTime); }
-	AnimationProperty(boolean isOpaque, AnimationType main, float mainFrameTime, AnimationType overlay, float overlayFrameTime) {
+	AnimationProperty(@NotNull TileType tileType, boolean isOpaque, AnimationType main) { this(tileType, isOpaque, main, 0); }
+	AnimationProperty(@NotNull TileType tileType, boolean isOpaque, AnimationType main, float mainFrameTime) { this(tileType, isOpaque, main, mainFrameTime, main, mainFrameTime); }
+	AnimationProperty(@NotNull TileType tileType, boolean isOpaque, AnimationType main, float mainFrameTime, AnimationType overlay, float overlayFrameTime) {
+		this.tileType = tileType;
 		this.main = new TileAnimation(main, mainFrameTime, tileConnectionAnimations);
 		this.overlay = new TileAnimation(overlay, overlayFrameTime, tileOverlapAnimations);
 		this.isOpaque = isOpaque;
 	}
-	AnimationProperty(AnimationProperty model) {
-		this(model.isOpaque, model.main.animationType, model.main.frameTime, model.overlay.animationType, model.overlay.frameTime);
-	}
-	
-	@Override
-	public void init(@NotNull TileType type) { this.tileType = type; }
 	
 	public boolean isOpaque() { return isOpaque; }
-	
 	
 	AtlasRegion getSprite(int spriteIndex, boolean isOverlapSprite, Tile tile) {
 		return getSprite(spriteIndex, isOverlapSprite, tile, GameCore.getElapsedProgramTime());

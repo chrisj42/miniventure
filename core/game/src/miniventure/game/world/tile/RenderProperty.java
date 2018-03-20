@@ -1,4 +1,4 @@
-package miniventure.game.world.tilenew;
+package miniventure.game.world.tile;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 

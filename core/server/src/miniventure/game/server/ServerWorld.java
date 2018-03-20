@@ -15,9 +15,9 @@ import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.levelgen.LevelGenerator;
-import miniventure.game.world.tilenew.DestructibleProperty;
-import miniventure.game.world.tilenew.ServerDestructibleProperty;
-import miniventure.game.world.tilenew.TilePropertyInstanceFetcher;
+import miniventure.game.world.tile.DestructibleProperty;
+import miniventure.game.world.tile.ServerDestructibleProperty;
+import miniventure.game.world.tile.TilePropertyInstanceFetcher;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;

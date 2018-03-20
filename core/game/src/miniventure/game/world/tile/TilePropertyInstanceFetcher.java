@@ -1,4 +1,4 @@
-package miniventure.game.world.tilenew;
+package miniventure.game.world.tile;
 
 import java.util.EnumMap;
 import java.util.HashMap;

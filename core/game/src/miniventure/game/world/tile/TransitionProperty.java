@@ -4,14 +4,15 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import miniventure.game.GameCore;
-import miniventure.game.world.tilenew.Tile;
 
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
 
-public class TransitionProperty implements TileProperty {
+import static miniventure.game.world.tile.TilePropertyType.Transition;
+
+public class TransitionProperty implements TilePropertyInstance {
 	
 	private enum Data {
 		ANIM, TILE, TIME;
@@ -31,19 +32,15 @@ public class TransitionProperty implements TileProperty {
 	
 	private static final HashMap<TileType, HashMap<String, Array<AtlasRegion>>> allAnimations = new HashMap<>();
 	
-	private TileType tileType;
+	private final TileType tileType;
 	private final @NotNull TransitionAnimation[] animations;
 	
 	/// note: the sprite name key for the animations is the name of the animation set for that animation; aka, it's what the name of all the images are before the _## at the end.
-	public TransitionProperty(@NotNull TransitionAnimation... animations) {
+	public TransitionProperty(@NotNull TileType tileType, @NotNull TransitionAnimation... animations) {
+		this.tileType = tileType;
 		this.animations = animations;
-	}
-	
-	@Override
-	public void init(@NotNull TileType type) {
-		this.tileType = type;
-		if(animations.length == 0) return;
 		
+		if(animations.length == 0) return;
 		if(GameCore.tileAtlas == null) return;
 		
 		allAnimations.putIfAbsent(tileType, new HashMap<>());
@@ -76,9 +73,9 @@ public class TransitionProperty implements TileProperty {
 					found = true;
 			
 			if(found) {
-				tile.setData(getClass(), tileType, Data.ANIM.idx, i+"");
-				tile.setData(getClass(), tileType, Data.TILE.idx, (!isEntering && addNext ? other.name() : "")); // if removing, this specifies the tile to add after removal
-				tile.setData(getClass(), tileType, Data.TIME.idx, GameCore.getElapsedProgramTime()+"");
+				tile.setData(Transition, tileType, Data.ANIM.idx, i+"");
+				tile.setData(Transition, tileType, Data.TILE.idx, (!isEntering && addNext ? other.name() : "")); // if removing, this specifies the tile to add after removal
+				tile.setData(Transition, tileType, Data.TIME.idx, GameCore.getElapsedProgramTime()+"");
 				return true;
 			}
 		}
@@ -87,17 +84,17 @@ public class TransitionProperty implements TileProperty {
 	}
 	
 	public boolean playingAnimation(@NotNull Tile tile) {
-		return animations.length > 0 && tile.getData(getClass(), tileType, Data.ANIM.idx).length() > 0;
+		return animations.length > 0 && tile.getData(Transition, tileType, Data.ANIM.idx).length() > 0;
 	}
 	
 	// throws error if no animation is playing
 	public AtlasRegion getAnimationFrame(@NotNull Tile tile) {
 		if(!playingAnimation(tile)) throw new IllegalStateException("Not allowed to fetch animation frame for transition when no animation is playing. invoking tile: "+tile);
 		
-		float timeStarted = Float.parseFloat(tile.getData(getClass(), tileType, Data.TIME.idx));
+		float timeStarted = Float.parseFloat(tile.getData(Transition, tileType, Data.TIME.idx));
 		float timeElapsed = GameCore.getElapsedProgramTime() - timeStarted;
 		
-		TransitionAnimation anim = animations[Integer.parseInt(tile.getData(getClass(), tileType, Data.ANIM.idx))];
+		TransitionAnimation anim = animations[Integer.parseInt(tile.getData(Transition, tileType, Data.ANIM.idx))];
 		
 		tryFinishAnimation(tile, timeElapsed, anim); // updates it for next render
 		
@@ -110,12 +107,12 @@ public class TransitionProperty implements TileProperty {
 	// TODO later, I should make a system so tiles can request constant updates, so they don't have to rely on the render loop. This will be used for this, probably, as well as maybe water..? Actually, water might just need updates whenever an adjacent tile is updated. That would probably be a worthwhile system as well.
 	private void tryFinishAnimation(@NotNull Tile tile, float timeElapsed, @NotNull TransitionAnimation anim) {
 		if(timeElapsed > anim.getAnimationTime()) {
-			tile.setData(getClass(), tileType, Data.TIME.idx, "");
-			tile.setData(getClass(), tileType, Data.ANIM.idx, "");
+			tile.setData(Transition, tileType, Data.TIME.idx, "");
+			tile.setData(Transition, tileType, Data.ANIM.idx, "");
 			 
 			// if entering, no action required. if removing, remove the current tile from the stack, specifying not to check for an exit animation. If removing, and there is data for a tile type, then add that tile type.
-			String nextTileTypeData = tile.getData(getClass(), tileType, Data.TILE.idx);
-			tile.setData(getClass(), tileType, Data.TILE.idx, "");
+			String nextTileTypeData = tile.getData(Transition, tileType, Data.TILE.idx);
+			tile.setData(Transition, tileType, Data.TILE.idx, "");
 			
 			if(!anim.isEntrance()) {
 				tile.breakTile(false);
@@ -132,7 +129,4 @@ public class TransitionProperty implements TileProperty {
 		Arrays.fill(data, "");
 		return data;
 	}
-	
-	@Override
-	public Class<? extends TileProperty> getUniquePropertyClass() { return TransitionProperty.class; }
 }

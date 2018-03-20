@@ -1,8 +1,6 @@
-package miniventure.game.world.tilenew;
+package miniventure.game.world.tile;
 
 import miniventure.game.util.property.Property;
-
-import org.jetbrains.annotations.NotNull;
 
 public interface TilePropertyInstance extends Property {
 	

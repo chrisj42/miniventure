@@ -15,8 +15,7 @@ import miniventure.game.world.TimeOfDay;
 import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;
-import miniventure.game.world.tilenew.AnimationProperty;
-import miniventure.game.world.tilenew.TilePropertyInstanceFetcher;
+import miniventure.game.world.tile.TilePropertyInstanceFetcher;
 
 import com.badlogic.gdx.utils.Array;
 

@@ -7,8 +7,7 @@ import java.util.Set;
 
 import miniventure.game.GameProtocol;
 import miniventure.game.world.entity.Entity;
-import miniventure.game.world.tilenew.TilePropertyInstance;
-import miniventure.game.world.tilenew.TilePropertyInstanceFetcher;
+import miniventure.game.world.tile.TilePropertyInstanceFetcher;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;

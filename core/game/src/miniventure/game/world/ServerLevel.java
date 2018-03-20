@@ -11,7 +11,7 @@ import miniventure.game.world.entity.mob.MobAi;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.particle.ItemEntity;
 import miniventure.game.world.levelgen.LevelGenerator;
-import miniventure.game.world.tilenew.Tile;
+import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileType;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;

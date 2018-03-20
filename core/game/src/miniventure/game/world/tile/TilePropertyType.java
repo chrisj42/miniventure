@@ -1,9 +1,9 @@
-package miniventure.game.world.tilenew;
+package miniventure.game.world.tile;
 
 import java.util.Arrays;
 import java.util.HashMap;
 
-import miniventure.game.world.tilenew.AnimationProperty.AnimationType;
+import miniventure.game.world.tile.AnimationProperty.AnimationType;
 
 // PT is the class required.
 public final class TilePropertyType<PT extends TilePropertyInstance> {

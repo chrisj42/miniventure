@@ -17,91 +17,91 @@ import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
 
+import static miniventure.game.world.tile.TilePropertyType.*;
+
 public enum TileType {
 	
-	HOLE(() -> {
-		return new TileProperty[] {
-			SolidProperty.SOLID,
-			new ConnectionProperty(true, TileType.valueOf("WATER"))
-		};
+	HOLE((tileType, map) -> {
+		map.put(Solid, SolidProperty.SOLID);
+		map.put(Connect, new ConnectionProperty(tileType, true, TileType.valueOf("WATER")));
 	}),
 	
-	DIRT(() -> new TileProperty[] {
-		SolidProperty.WALKABLE,
-		new DestructibleProperty(true, new RequiredTool(ToolType.Shovel))
+	DIRT((tileType, map) -> {
+		map.put(Solid, SolidProperty.WALKABLE);
+		map.put(Attack, new DestructibleProperty(tileType, new RequiredTool(ToolType.Shovel)));
 	}),
 	
-	SAND(() -> new TileProperty[] {
-		SolidProperty.WALKABLE,
-		new DestructibleProperty(true, new RequiredTool(ToolType.Shovel)),
-		new OverlapProperty(true)
+	SAND((tileType, map) -> {
+		map.put(Solid, SolidProperty.WALKABLE);
+		map.put(Attack, new DestructibleProperty(tileType, new RequiredTool(ToolType.Shovel)));
+		map.put(Overlap, new OverlapProperty(tileType, true));
 	}),
 	
-	GRASS(() -> new TileProperty[] {
-		SolidProperty.WALKABLE,
-		new DestructibleProperty(true, new RequiredTool(ToolType.Shovel)),
-		new OverlapProperty(true)
+	GRASS((tileType, map) -> {
+		map.put(Solid, SolidProperty.WALKABLE);
+		map.put(Attack, new DestructibleProperty(tileType, new RequiredTool(ToolType.Shovel)));
+		map.put(Overlap, new OverlapProperty(tileType, true));
 	}),
 	
-	WATER(() -> new TileProperty[] {
-		new AnimationProperty(true, AnimationType.RANDOM, 0.2f, AnimationType.SEQUENCE, 1/24f),
-		new SpreadUpdateProperty(HOLE),
-		new OverlapProperty(true)
+	WATER((tileType, map) -> {
+		map.put(Render, new AnimationProperty(tileType, true, AnimationType.RANDOM, 0.2f, AnimationType.SEQUENCE, 1/24f));
+		map.put(Update, new SpreadUpdateProperty(tileType, (type, tile) -> tile.addTile(type), HOLE));
+		map.put(Overlap, new OverlapProperty(tileType, true));
 	}),
 	
-	STONE(() -> new TileProperty[] {
-		SolidProperty.SOLID,
-		new DestructibleProperty(20, new PreferredTool(ToolType.Pickaxe, 5), true)
+	STONE((tileType, map) -> {
+		map.put(Solid, SolidProperty.SOLID);
+		map.put(Attack, new DestructibleProperty(tileType, 20, new PreferredTool(ToolType.Pickaxe, 5)));
 	}),
 	
-	DOOR_CLOSED(() -> new TileProperty[] {
-		SolidProperty.SOLID,
-		new DestructibleProperty(true, new RequiredTool(ToolType.Axe)),
-		new AnimationProperty(true, AnimationType.SINGLE_FRAME),
-		(InteractableProperty) (p, i, t) -> {
+	DOOR_CLOSED((tileType, map) -> {
+		map.put(Solid, SolidProperty.SOLID);
+		map.put(Attack, new DestructibleProperty(tileType, new RequiredTool(ToolType.Axe)));
+		map.put(Render, new AnimationProperty(tileType, true, AnimationType.SINGLE_FRAME));
+		map.put(Interact, (InteractableProperty) (p, i, t) -> {
 			t.replaceTile(TileType.valueOf("DOOR_OPEN"));
 			return true;
-		}
+		});
 	}),
 	
-	DOOR_OPEN(() -> new TileProperty[] {
-		SolidProperty.WALKABLE,
-		new AnimationProperty(false, AnimationType.SINGLE_FRAME),
-		new TransitionProperty(
+	DOOR_OPEN((tileType, map) -> {
+		map.put(Solid, SolidProperty.WALKABLE);
+		map.put(Render, new AnimationProperty(tileType, false, AnimationType.SINGLE_FRAME));
+		map.put(Transition, new TransitionProperty(tileType,
 			new TransitionAnimation("open", true, 1/24f, DOOR_CLOSED),
 			new TransitionAnimation("close", false, 1/24f, DOOR_CLOSED)
-		),
-		(InteractableProperty) (p, i, t) -> {
+		));
+		map.put(Interact, (InteractableProperty) (p, i, t) -> {
 			t.replaceTile(DOOR_CLOSED);
 			return true;
-		},
-		new DestructibleProperty(new ItemDrop(TileItem.get(TileType.DOOR_CLOSED)), new RequiredTool(ToolType.Axe))
+		});
+		map.put(Attack, new DestructibleProperty(tileType, new ItemDrop(TileItem.get(TileType.DOOR_CLOSED)), new RequiredTool(ToolType.Axe)));
 	}),
 	
-	TORCH(() -> new TileProperty[] {
-		new DestructibleProperty(true),
-		(LightProperty) () -> 2,
-		new AnimationProperty(false, AnimationType.SEQUENCE, 1/12f),
-		new TransitionProperty(new TransitionAnimation("enter", true, 1/12f))
+	TORCH((tileType, map) -> {
+		map.put(Attack, new DestructibleProperty(tileType));
+		map.put(Light, (LightProperty) () -> 2);
+		map.put(Render, new AnimationProperty(tileType, false, AnimationType.SEQUENCE, 1/12f));
+		map.put(Transition, new TransitionProperty(tileType, new TransitionAnimation("enter", true, 1/12f)));
 	}),
 	
-	CACTUS(() -> new TileProperty[] {
-		SolidProperty.SOLID,
-		new DestructibleProperty(7, null, true),
-		new AnimationProperty(false, AnimationType.SINGLE_FRAME),
-		(TouchListener) (e, t, initial) -> e.attackedBy(t, null, 1)
+	CACTUS((tileType, map) -> {
+		map.put(Solid, SolidProperty.SOLID);
+		map.put(Attack, new DestructibleProperty(tileType, 7, null));
+		map.put(Render, new AnimationProperty(tileType, false, AnimationType.SINGLE_FRAME));
+		map.put(Touch, (TouchListener) (e, t, initial) -> e.attackedBy(t, null, 1));
 	}),
 	
-	TREE(() -> new TileProperty[] {
-		SolidProperty.SOLID,
-		new DestructibleProperty(10, new PreferredTool(ToolType.Axe, 2), new ItemDrop(ResourceItem.Log.get()), new ItemDrop(FoodItem.Apple.get())),
-		new AnimationProperty(false, AnimationType.SINGLE_FRAME),
-		new ConnectionProperty(true)
+	TREE((tileType, map) -> {
+		map.put(Solid, SolidProperty.SOLID);
+		map.put(Attack, new DestructibleProperty(tileType, 10, new PreferredTool(ToolType.Axe, 2), new ItemDrop(ResourceItem.Log.get()), new ItemDrop(FoodItem.Apple.get())));
+		map.put(Render, new AnimationProperty(tileType, false, AnimationType.SINGLE_FRAME));
+		map.put(Connect, new ConnectionProperty(tileType, true));
 	});
 	
-	/*LAVA(() -> new TileProperty[] {
-		(TouchListener) (e, t) -> e.attackedBy(t, null, 5),
-		new AnimationProperty.RandomFrame(0.1f)
+	/*LAVA(() -> new TilePropertyInstance[] {
+		map.put(Touch, (TouchListener) (e, t) -> e.attackedBy(t, null, 5));
+		map.put(Render, new AnimationProperty.RandomFrame(0.1f);
 	});*/
 	
 	/*
@@ -111,20 +111,20 @@ public enum TileType {
 	 */
 	
 	
-	private final HashMap<Class<? extends TileProperty>, TileProperty> propertyMap = new HashMap<>();
+	private final HashMap<TilePropertyType, TilePropertyInstance> propertyMap = new HashMap<>();
 	
-	private final HashMap<Class<? extends TileProperty>, Integer> propertyDataIndexes = new HashMap<>();
-	private final HashMap<Class<? extends TileProperty>, Integer> propertyDataLengths = new HashMap<>();
+	private final HashMap<TilePropertyType, Integer> propertyDataIndexes = new HashMap<>();
+	private final HashMap<TilePropertyType, Integer> propertyDataLengths = new HashMap<>();
 	private String[] initialData;
 	
-	interface PropertyFetcher {
-		TileProperty[] getProperties();
+	interface PropertyAdder {
+		void addProperties(TileType tileType, HashMap<TilePropertyType, TilePropertyInstance> map);
 	}
 	
-	private final PropertyFetcher fetcher;
+	private final PropertyAdder adder;
 	
-	TileType(@NotNull PropertyFetcher fetcher) {
-		this.fetcher = fetcher;
+	TileType(@NotNull PropertyAdder adder) {
+		this.adder = adder;
 	}
 	
 	public static final TileType[] values = TileType.values();
@@ -136,22 +136,20 @@ public enum TileType {
 	
 	private void init() {
 		// add the default properties
-		for(TileProperty prop: TileProperty.getDefaultProperties())
-			propertyMap.put(castProp(prop), prop);
+		
+		for(TilePropertyType type: TilePropertyType.values)
+			propertyMap.put(type, type.getDefaultInstance(this));
 		
 		// replace the defaults with specified properties
-		for(TileProperty prop: fetcher.getProperties())
-			propertyMap.put(castProp(prop), prop);
-		
-		for(TileProperty prop: propertyMap.values())
-			prop.init(this);
+		adder.addProperties(this, propertyMap);
 		
 		Array<String> initData = new Array<>();
 		
-		for(TileProperty prop: propertyMap.values()) {
-			propertyDataIndexes.put(castProp(prop), initData.size);
+		for(TilePropertyType propType: propertyMap.keySet()) {
+			TilePropertyInstance prop = propertyMap.get(propType);
+			propertyDataIndexes.put(propType, initData.size);
 			String[] propData = prop.getInitialData();
-			propertyDataLengths.put(castProp(prop), propData.length);
+			propertyDataLengths.put(propType, propData.length);
 			initData.addAll(propData);
 		}
 		
@@ -160,36 +158,30 @@ public enum TileType {
 			initialData[i] = initData.get(i);
 	}
 	
-	/* What I've learned:
-		Casting with parenthesis works because the generic type is replaced by Object during runtime, or, if you've specified bounds, as specific a class as you can get with the specified bounds.
-		But calling (T var).getClass().cast(Tile t) doesn't always work because getClass() returns the actual class of the generic variable, and that may not be compatible with whatever you're trying to cast.
-	 */
-	
-	private static Class<? extends TileProperty> castProp(TileProperty prop) { return castProp(prop.getClass()); }
-	private static Class<? extends TileProperty> castProp(Class<? extends TileProperty> clazz) {
-		return MyUtils.getDirectSubclass(TileProperty.class, clazz);
+	public <T extends TilePropertyInstance> T getProp(TilePropertyType<T> propertyType) {
+		//noinspection unchecked
+		return (T) propertyMap.get(propertyType);
 	}
 	
-	public <T extends TileProperty> T getProp(Class<T> clazz) {
+	public <T extends TilePropertyInstance> T getProp(TilePropertyType<? super T> propertyType, Class<T> asClass) {
 		//noinspection unchecked
-		return (T) propertyMap.get(castProp(clazz));
+		return (T) getProp(propertyType);
 	}
 	
 	int getDataLength() { return initialData.length; }
 	String[] getInitialData() { return Arrays.copyOf(initialData, initialData.length); }
 	
-	void checkDataAccess(Class<? extends TileProperty> prop, int propDataIndex) {
-		Class<? extends TileProperty> property = castProp(prop);
-		// technically, the below should never happen, unless it's passed the TileProperty class or a dynamically generated class, or something, because the propertyMap should have an instance of each implementer of the TileProperty interface.
-		if(!propertyDataIndexes.containsKey(property))
-			throw new IllegalArgumentException("The specified property class, " + property + ", is not part of the list of property classes for the "+this+" tile type.");
+	void checkDataAccess(TilePropertyType propertyType, int propDataIndex) {
+		// technically, the below should never happen, unless it's passed the TilePropertyInstance class or a dynamically generated class, or something, because the propertyMap should have an instance of each implementer of the TilePropertyInstance interface.
+		if(!propertyDataIndexes.containsKey(propertyType))
+			throw new IllegalArgumentException("The specified property type, " + propertyType + ", is not part of the list of property classes for the "+this+" tile type.");
 		
-		if(propDataIndex >= propertyDataLengths.get(property))
-			throw new IllegalArgumentException("Tile property " + property + ", for the "+this+" tile type, tried to access index past stated length; length="+propertyDataLengths.get(property)+", index="+propDataIndex);
+		if(propDataIndex >= propertyDataLengths.get(propertyType))
+			throw new IllegalArgumentException("Tile property type " + propertyType + ", for the "+this+" tile type, tried to access index past stated length; length="+propertyDataLengths.get(propertyType)+", index="+propDataIndex);
 	}
 	
-	int getPropDataIndex(Class<? extends TileProperty> prop) { return propertyDataIndexes.get(castProp(prop)); }
-	int getPropDataLength(Class<? extends TileProperty> prop) { return propertyDataLengths.get(castProp(prop)); }
+	int getPropDataIndex(TilePropertyType type) { return propertyDataIndexes.get(type); }
+	int getPropDataLength(TilePropertyType type) { return propertyDataLengths.get(type); }
 	
 	public String getName() { return MyUtils.toTitleCase(name()); }
 }

@@ -12,9 +12,9 @@ import miniventure.game.world.entity.Entity.EntityTag;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.mob.Player.PlayerUpdate;
 import miniventure.game.world.entity.mob.Player.Stat;
-import miniventure.game.world.tilenew.Tile;
-import miniventure.game.world.tilenew.Tile.TileData;
-import miniventure.game.world.tilenew.Tile.TileTag;
+import miniventure.game.world.tile.Tile;
+import miniventure.game.world.tile.Tile.TileData;
+import miniventure.game.world.tile.Tile.TileTag;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;

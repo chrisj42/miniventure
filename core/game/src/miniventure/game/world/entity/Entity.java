@@ -14,7 +14,7 @@ import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;
-import miniventure.game.world.tilenew.Tile;
+import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
