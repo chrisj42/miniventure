@@ -14,7 +14,7 @@ import miniventure.game.world.Level;
 import miniventure.game.world.TimeOfDay;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.mob.Player.PlayerUpdate;
-import miniventure.game.world.tile.Tile;
+import miniventure.game.world.tilenew.Tile;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;

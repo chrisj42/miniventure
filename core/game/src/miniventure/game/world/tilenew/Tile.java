@@ -1,4 +1,4 @@
-package miniventure.game.world.tile;
+package miniventure.game.world.tilenew;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -26,6 +26,22 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class Tile implements WorldObject {
+	
+	/*
+		So. The client, in terms of properties, doesn't have to worry about tile interaction properties. It always sends a request to the server when interactions should occur.
+		The server, in turn, doesn't have to worry about animation or rendering properties.
+		
+		So, it seems like we have a situation where there are ServerProperties and ClientProperties, and some property types are both.
+		
+		This could mean that I should just take the client and server properties out of the main game module and into their own respective modules. But that would mean they can never be referenced in the main package, and I like how the property types are all given in the same place, the TileType class. So maybe I can leave the shell there, and just separate the stuff that actually does the heavy lifting..?
+		
+		 Hey, that actually gives me an idea: What if the property types/classes I specify in the TileType class weren't actually the objects that I used for the tile behaviors, in the end? What if they were just markers, and the actual property instances were instantiated later? For entities, they would obviously be instantiated on entity creation, but since there are so many tiles loaded at one time, we have to do tiles different...
+		 Hey, I know: how about we have a tile property instance fetcher, that creates all the actual tile property instances within the respective client/server modules, with the right classes, based on the given main property class? That could work! Then, whenever a tile property was asked for, it would fetch it from the fetcher, given the TileType and property class/type. With entities, each would simply have their own list, their own fetcher.
+		 The fetchers would be created in ClientCore and ServerCore, more or less. or maybe the Worlds, since the WorldManager class would have to have a way to fetch a property instance given a TileType and and Property class/type. For entities, the fetcher would be given the entity instance too. Or maybe each entity would just already have its properties. Yeah that'll probably be the case.
+		 
+		 So! End result. Actual property instances are created in Client/Server individually, not in the TileType enum. That is only where the basic templates go. The is a fetcher that can take a property type instance, and return a completed property instance of that type.
+		 Note, we might end up having a property type enum as well as a tile type enum...
+	 */
 	
 	public static final int SIZE = 32;
 	private static final TileType baseType = TileType.values[0];
@@ -83,19 +99,19 @@ public class Tile implements WorldObject {
 	TileType[] getTypes() { return tileTypes.toArray(new TileType[tileTypes.size()]); }
 	boolean hasType(TileType type) { return tileTypes.contains(type); }
 	
-	String getData(Class<? extends TileProperty> property, TileType type, int propDataIndex) {
-		return data[getIndex(type, property, propDataIndex)];
+	String getData(TilePropertyType propertyType, TileType type, int propDataIndex) {
+		return data[getIndex(type, propertyType, propDataIndex)];
 	}
 	
-	void setData(Class<? extends TileProperty> property, TileType type, int propDataIndex, String data) {
-		this.data[getIndex(type, property, propDataIndex)] = data;
+	void setData(TilePropertyType propertyType, TileType type, int propDataIndex, String data) {
+		this.data[getIndex(type, propertyType, propDataIndex)] = data;
 	}
 	
-	private int getIndex(TileType type, Class<? extends TileProperty> property, int propDataIndex) {
+	private int getIndex(TileType type, TilePropertyType propertyType, int propDataIndex) {
 		if(!tileTypes.contains(type))
 			throw new IllegalArgumentException("Tile " + this + " does not have a " + type + " type, cannot fetch the data index.");
 		
-		type.checkDataAccess(property, propDataIndex);
+		type.checkDataAccess(propertyType, propDataIndex);
 		
 		int offset = 0;
 		
@@ -107,7 +123,7 @@ public class Tile implements WorldObject {
 				break;
 		}
 		
-		return type.getPropDataIndex(property) + propDataIndex + offset;
+		return type.getPropDataIndex(propertyType) + propDataIndex + offset;
 	}
 	
 	
@@ -288,7 +304,7 @@ public class Tile implements WorldObject {
 		TileType[] mainTypes = getTypes();
 		int firstIdx = 0;
 		for(int i = mainTypes.length-1; i >= 0; i--) {
-			if(mainTypes[i].getProp(AnimationProperty.class).isOpaque()) {
+			if(mainTypes[i].getProp(TilePropertyType.Render).isOpaque()) {
 				firstIdx = i;
 				break;
 			}
@@ -300,7 +316,7 @@ public class Tile implements WorldObject {
 		Arrays.fill(model, Boolean.FALSE);
 		for(int i = 0; i < aroundTypes.length; i++) {
 			for (TileType oType : aroundTypes[i]) { // doesn't matter the order.
-				if(!oType.getProp(OverlapProperty.class).canOverlap()) continue; // the type can't even overlap anyway.
+				if(!oType.getProp(TilePropertyType.Overlap).canOverlap()) continue; // the type can't even overlap anyway.
 				//if(TileType.tileSorter.compare(mainTypes[firstIdx], oType) >= 0) continue; // the type is lower than the lowest *visible* main type.
 				overlappingTypes.putIfAbsent(oType, Arrays.copyOf(model, model.length));
 				overlappingTypes.get(oType)[i] = true;
@@ -318,7 +334,7 @@ public class Tile implements WorldObject {
 				sprites.add(mainTypes[i].getProp(ConnectionProperty.class).getSprite(this, aroundTypes));
 			
 			while(overlapType != null && (i >= mainTypes.length-1 || mainTypes[i+1].compareTo(overlapType) > 0)) {
-				sprites.addAll(mainTypes[i].getProp(OverlapProperty.class).getSprites(this, overlapType, overlappingTypes.get(overlapType)));
+				sprites.addAll(mainTypes[i].getProp(TilePropertyType.Overlap).getSprites(this, overlapType, overlappingTypes.get(overlapType)));
 				overlapType = overlapTypeIter.hasNext() ? overlapTypeIter.next() : null;
 			}
 		}

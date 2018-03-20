@@ -1,7 +1,7 @@
 package miniventure.game.world;
 
-import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.Tile.TileData;
+import miniventure.game.world.tilenew.Tile;
+import miniventure.game.world.tilenew.Tile.TileData;
 import miniventure.game.world.tile.TileType;
 
 import com.badlogic.gdx.math.MathUtils;

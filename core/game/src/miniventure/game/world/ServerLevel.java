@@ -11,7 +11,7 @@ import miniventure.game.world.entity.mob.MobAi;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.particle.ItemEntity;
 import miniventure.game.world.levelgen.LevelGenerator;
-import miniventure.game.world.tile.Tile;
+import miniventure.game.world.tilenew.Tile;
 import miniventure.game.world.tile.TileType;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -81,6 +81,13 @@ public class ServerLevel extends Level {
 	@Override
 	public Array<Vector3> renderLighting(Rectangle renderSpace) { return new Array<>(); }
 	
+	public void dropItems(@NotNull ItemDrop drop, @NotNull WorldObject source, @Nullable WorldObject target) {
+		dropItems(drop, source.getCenter(), target == null ? null : target.getCenter());
+	}
+	public void dropItems(@NotNull ItemDrop drop, Vector2 dropPos, @Nullable Vector2 targetPos) {
+		for(Item item: drop.getDroppedItems())
+			dropItem(item, dropPos, targetPos);
+	}
 	
 	public void dropItem(@NotNull Item item, @NotNull Vector2 dropPos, @Nullable Vector2 targetPos) {
 		

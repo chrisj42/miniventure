@@ -2,6 +2,7 @@ package miniventure.game.world.tile;
 
 import miniventure.game.item.Item;
 import miniventure.game.world.entity.mob.Player;
+import miniventure.game.world.tilenew.Tile;
 
 import org.jetbrains.annotations.Nullable;
 

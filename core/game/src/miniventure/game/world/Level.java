@@ -1,13 +1,12 @@
 package miniventure.game.world;
 
 import java.util.HashMap;
-import java.util.HashSet;
 
 import miniventure.game.GameProtocol.ChunkRequest;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.particle.Particle;
-import miniventure.game.world.tile.Tile;
+import miniventure.game.world.tilenew.Tile;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;

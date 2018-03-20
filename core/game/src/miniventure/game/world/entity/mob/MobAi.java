@@ -54,6 +54,8 @@ public class MobAi extends Mob {
 		this.movePattern = aiType.defaultPattern.copy();
 	}
 	
+	public MobAi(MobAi model) { this(model.getWorld(), model.aiType); }
+	
 	@Override
 	public Array<String[]> save() {
 		Array<String[]> data = super.save();
@@ -64,6 +66,8 @@ public class MobAi extends Mob {
 		
 		return data;
 	}
+	
+	protected AiType getType() { return aiType; }
 	
 	protected void setMovePattern(@NotNull MovementPattern pattern) { movePattern = pattern; }
 	protected void setMovePattern(@NotNull MovementPattern pattern, float duration) {
@@ -96,7 +100,7 @@ public class MobAi extends Mob {
 		ServerLevel level = getServerLevel();
 		if(level != null)
 			for (ItemDrop drop: itemDrops)
-				drop.dropItems(level, this, null);
+				level.dropItems(drop, this, null);
 		
 		super.remove();
 	}

@@ -88,9 +88,6 @@ public class AnimationProperty implements TileProperty {
 		this.overlay = new TileAnimation(overlay, overlayFrameTime, tileOverlapAnimations);
 		this.isOpaque = isOpaque;
 	}
-	AnimationProperty(AnimationProperty model) {
-		this(model.isOpaque, model.main.animationType, model.main.frameTime, model.overlay.animationType, model.overlay.frameTime);
-	}
 	
 	@Override
 	public void init(@NotNull TileType type) { this.tileType = type; }

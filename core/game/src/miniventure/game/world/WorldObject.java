@@ -3,7 +3,7 @@ package miniventure.game.world;
 import miniventure.game.item.Item;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Player;
-import miniventure.game.world.tile.Tile;
+import miniventure.game.world.tilenew.Tile;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;

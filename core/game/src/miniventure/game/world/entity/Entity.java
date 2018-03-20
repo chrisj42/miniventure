@@ -14,7 +14,7 @@ import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;
-import miniventure.game.world.tile.Tile;
+import miniventure.game.world.tilenew.Tile;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -273,6 +273,8 @@ public abstract class Entity implements WorldObject {
 	@Override
 	public int hashCode() { return eid; }
 	
+	
+	protected Class<? extends Entity> getSerialClass() { return getClass(); }
 	
 	public static String serialize(Entity e) {
 		Array<String[]> data = e.save();

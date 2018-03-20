@@ -1,33 +1,24 @@
-package miniventure.game.world.tile;
-
-import miniventure.game.world.tilenew.Tile;
+package miniventure.game.world.tilenew;
 
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
 
-public class ConnectionProperty implements TileProperty {
+public class ConnectionProperty implements TilePropertyInstance {
 	
 	private final boolean connects;
 	private final Array<TileType> connectingTiles;
 	
-	private TileType tileType;
+	private final TileType tileType;
 	
-	ConnectionProperty(boolean connects, TileType... connectingTiles) {
+	ConnectionProperty(@NotNull TileType tileType, boolean connects, TileType... connectingTiles) {
+		this.tileType = tileType;
 		this.connects = connects;
 		this.connectingTiles = new Array<>(connectingTiles);
-	}
-	
-	@Override
-	public void init(@NotNull TileType type) {
-		addConnectingType(type);
-		this.tileType = type;
-	}
-	
-	void addConnectingType(TileType type) {
-		if(!connectingTiles.contains(type, true))
-			connectingTiles.add(type);
+		
+		if(!this.connectingTiles.contains(tileType, true))
+			this.connectingTiles.add(tileType);
 	}
 	
 	AtlasRegion getSprite(Tile tile, TileType[][] aroundTypes) {
@@ -48,7 +39,7 @@ public class ConnectionProperty implements TileProperty {
 						connects = true;
 						break;
 					}
-					if(aroundTypes[i][ti].getProp(AnimationProperty.class).isOpaque()) // the type also doesn't connect, at this point.
+					if(aroundTypes[i][ti].getProp(TilePropertyType.Render).isOpaque()) // the type also doesn't connect, at this point.
 						break; // lower tiles are irrelevant.
 				}
 				
@@ -63,9 +54,7 @@ public class ConnectionProperty implements TileProperty {
 			}
 		}
 		
-		return tileType.getProp(AnimationProperty.class).getSprite(spriteIdx, false, tile);
+		return tileType.getProp(TilePropertyType.Render).getSprite(spriteIdx, false, tile);
 	}
 	
-	@Override
-	public Class<? extends TileProperty> getUniquePropertyClass() { return ConnectionProperty.class; }
 }

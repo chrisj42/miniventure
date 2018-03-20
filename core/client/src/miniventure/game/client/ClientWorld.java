@@ -14,8 +14,9 @@ import miniventure.game.world.Level;
 import miniventure.game.world.TimeOfDay;
 import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
-import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Player;
+import miniventure.game.world.tilenew.AnimationProperty;
+import miniventure.game.world.tilenew.TilePropertyInstanceFetcher;
 
 import com.badlogic.gdx.utils.Array;
 
@@ -43,6 +44,8 @@ public class ClientWorld extends WorldManager {
 	private Player mainPlayer;
 	
 	ClientWorld(GameScreen gameScreen) {
+		super(new TilePropertyInstanceFetcher(instanceTemplate -> instanceTemplate));
+		
 		this.gameScreen = gameScreen;
 		
 		client = new GameClient(); // doesn't automatically connect

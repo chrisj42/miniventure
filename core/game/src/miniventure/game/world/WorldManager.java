@@ -7,6 +7,8 @@ import java.util.Set;
 
 import miniventure.game.GameProtocol;
 import miniventure.game.world.entity.Entity;
+import miniventure.game.world.tilenew.TilePropertyInstance;
+import miniventure.game.world.tilenew.TilePropertyInstanceFetcher;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
@@ -32,10 +34,11 @@ public abstract class WorldManager {
 		T getFromSet(Set<Entity> set);
 	}
 	
+	private final TilePropertyInstanceFetcher tilePropertyInstanceFetcher;
 	
 	// this class contains all the levels in the game.
-	public WorldManager() {
-		
+	public WorldManager(TilePropertyInstanceFetcher fetcher) {
+		tilePropertyInstanceFetcher = fetcher;
 	}
 	
 	
@@ -163,6 +166,8 @@ public abstract class WorldManager {
 	
 	/** get all keep-alive objects on the given level */
 	public abstract Array<WorldObject> getKeepAlives(Level level);
+	
+	public TilePropertyInstanceFetcher getTilePropertyFetcher() { return tilePropertyInstanceFetcher; }
 	
 	public Entity getEntity(int eid) { return entityIDMap.get(eid); }
 	

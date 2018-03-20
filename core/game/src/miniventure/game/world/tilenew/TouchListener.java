@@ -1,10 +1,10 @@
-package miniventure.game.world.tile;
+package miniventure.game.world.tilenew;
 
 import miniventure.game.world.entity.Entity;
-import miniventure.game.world.tilenew.Tile;
+
 
 @FunctionalInterface
-public interface TouchListener extends TileProperty {
+public interface TouchListener extends TilePropertyInstance {
 	
 	//TouchListener DO_NOTHING = entity -> {};
 	
@@ -12,6 +12,4 @@ public interface TouchListener extends TileProperty {
 	//void stillTouchedBy(Entity entity);
 	//void steppedOff(Entity entity); // idk, this will be much later.
 	
-	@Override
-	default Class<? extends TileProperty> getUniquePropertyClass() { return TouchListener.class; }
 }

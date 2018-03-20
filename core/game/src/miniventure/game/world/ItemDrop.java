@@ -123,11 +123,11 @@ public class ItemDrop {
 		return count;
 	}
 	
-	public void dropItems(ServerLevel level, @NotNull WorldObject source, @Nullable WorldObject target) {
-		dropItems(level, source.getCenter(), target == null ? null : target.getCenter());
-	}
-	public void dropItems(ServerLevel level, Vector2 dropPos, @Nullable Vector2 targetPos) {
-		for(int i = 0; i < getItemsDropped(); i++)
-			level.dropItem(item.copy(), dropPos, targetPos);
+	public Item[] getDroppedItems() {
+		Item[] items = new Item[getItemsDropped()];
+		for(int i = 0; i < items.length; i++)
+			items[i] = item.copy();
+		
+		return items;
 	}
 }

@@ -1,24 +1,20 @@
-package miniventure.game.world.tile;
+package miniventure.game.world.tilenew;
 
-import miniventure.game.world.tilenew.Tile;
 
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
 
-public class OverlapProperty implements TileProperty {
+public class OverlapProperty implements TilePropertyInstance {
 	
 	private final boolean overlaps;
 	
 	private TileType tileType;
 	
-	OverlapProperty(boolean overlaps) {
+	OverlapProperty(@NotNull TileType tileType, boolean overlaps) {
+		this.tileType = tileType;
 		this.overlaps = overlaps;
-	}
-	
-	@Override public void init(@NotNull TileType type) {
-		this.tileType = type;
 	}
 	
 	boolean canOverlap() { return overlaps; }
@@ -27,7 +23,7 @@ public class OverlapProperty implements TileProperty {
 	Array<AtlasRegion> getSprites(Tile tile, TileType aroundType, Boolean[] aroundMatches) {
 		Array<AtlasRegion> sprites = new Array<>();
 		
-		if(!aroundType.getProp(OverlapProperty.class).overlaps) return sprites;
+		if(!aroundType.getProp(TilePropertyType.Overlap).overlaps) return sprites;
 		if(tileType.compareTo(aroundType) >= 0) return sprites;
 		
 		
@@ -50,11 +46,8 @@ public class OverlapProperty implements TileProperty {
 		if(aroundMatches[6] && bits[2] == 0 && bits[3] == 0) indexes.add(2);
 		if(aroundMatches[0] && bits[3] == 0 && bits[0] == 0) indexes.add(3);
 		for(Integer idx: indexes)
-			sprites.add(aroundType.getProp(AnimationProperty.class).getSprite(idx, true, tile));
+			sprites.add(aroundType.getProp(TilePropertyType.Render, AnimationProperty.class).getSprite(idx, true, tile));
 		
 		return sprites;
 	}
-	
-	@Override
-	public Class<? extends TileProperty> getUniquePropertyClass() { return OverlapProperty.class; }
 }

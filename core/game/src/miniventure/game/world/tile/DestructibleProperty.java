@@ -1,6 +1,5 @@
 package miniventure.game.world.tile;
 
-import miniventure.game.GameProtocol.Hurt;
 import miniventure.game.item.Item;
 import miniventure.game.item.TileItem;
 import miniventure.game.item.ToolItem;
@@ -11,6 +10,7 @@ import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.particle.ActionParticle;
 import miniventure.game.world.entity.particle.TextParticle;
+import miniventure.game.world.tilenew.Tile;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -94,7 +94,7 @@ public class DestructibleProperty implements TileProperty {
 				if(tile.getLevel() instanceof ServerLevel)
 					for(ItemDrop drop: drops)
 						if(drop != null)
-							drop.dropItems((ServerLevel)tile.getLevel(), tile, attacker);
+							((ServerLevel)tile.getLevel()).dropItems(drop, tile, attacker);
 			} else
 				tile.setData(getClass(), tileType, HEALTH_IDX, health+"");
 			

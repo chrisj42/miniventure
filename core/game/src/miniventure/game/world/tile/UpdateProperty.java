@@ -1,5 +1,7 @@
 package miniventure.game.world.tile;
 
+import miniventure.game.world.tilenew.Tile;
+
 @FunctionalInterface
 public interface UpdateProperty extends TileProperty {
 	
