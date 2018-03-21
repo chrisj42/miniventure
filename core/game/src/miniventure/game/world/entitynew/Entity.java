@@ -1,13 +1,8 @@
-package miniventure.game.world.entity;
+package miniventure.game.world.entitynew;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 
-import miniventure.game.GameCore;
-import miniventure.game.GameProtocol.Movement;
 import miniventure.game.item.Item;
-import miniventure.game.util.MyUtils;
-import miniventure.game.util.Version;
 import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldManager;
@@ -16,7 +11,6 @@ import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -25,94 +19,152 @@ import com.badlogic.gdx.utils.Array;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class Entity implements WorldObject {
+public class Entity implements WorldObject {
 	
-	@NotNull private final WorldManager world;
+	private final WorldManager world;
 	
-	private int eid;
+	private float x, y, z;
 	
-	private float x, y, z = 0;
+	private HashMap<EntityPropertyType<? extends EntityProperty>, EntityProperty> singleProperties = new HashMap<>();
+	private HashMap<EntityPropertyType<?>, Array<EntityProperty>> propertyLists = new HashMap<>();
 	
-	public Entity(@NotNull WorldManager world) {
+	public Entity(@NotNull WorldManager world, EntityProperty... properties) {
 		this.world = world;
+		for(EntityPropertyType<?> type: EntityPropertyType.values) {
+			addProps(type, properties);
+		}
+	}
+	
+	private <T extends EntityProperty> void addProps(EntityPropertyType<T> type, EntityProperty[] properties) {
+		propertyLists.put(type, new Array<>());
+		put(type, type.getDefaultInstance(this));
+		for(EntityProperty prop: properties) {
+			if(type.getPropertyClass().isAssignableFrom(prop.getClass()))
+				put(type, type.getPropertyClass().cast(prop));
+		}
+	}
+	
+	private <T extends EntityProperty> void put(EntityPropertyType<T> type, T entityProperty) {
+		singleProperties.put(type, entityProperty);
+		propertyLists.get(type).add(entityProperty);
+	}
+	
+	interface Action<T extends EntityProperty> {
+		void act(T property);
+	}
+	
+	interface Evaluator<T extends EntityProperty, R> {
+		R getValue(T property);
+	}
+	
+	public <T extends EntityProperty> void forAll(EntityPropertyType<T> type, Action<T> action) {
+		//noinspection unchecked
+		Array<? extends T> properties = (Array<? extends T>)propertyLists.get(type);
+		for(T prop: properties)
+			action.act(prop);
+	}
+	public <T extends EntityProperty, ST extends T> void forAll(EntityPropertyType<T> type, Class<ST> subClass, Action<ST> action) {
+		//noinspection unchecked
+		Array<? extends T> properties = (Array<? extends T>)propertyLists.get(type);
+		for(T prop: properties) {
+			if(subClass.isAssignableFrom(prop.getClass()))
+				action.act(subClass.cast(prop));
+		}
+	}
+	
+	public <T extends EntityProperty> boolean fromAll(EntityPropertyType<T> type, Evaluator<T, Boolean> boolMaker) {
+		//noinspection unchecked
+		Array<? extends T> properties = (Array<? extends T>)propertyLists.get(type);
+		boolean done = false;
+		for(T prop: properties)
+			done = boolMaker.getValue(prop) || done;
 		
-		eid = world.registerEntityWithNewId(this);
+		return done;
 	}
 	
-	protected Entity(@NotNull WorldManager world, String[][] data, Version version) {
-		this.world = world;
-		x = Float.parseFloat(data[0][0]);
-		y = Float.parseFloat(data[0][1]);
-		z = Float.parseFloat(data[0][2]);
+	public <T extends EntityProperty, ST extends T> boolean fromAll(EntityPropertyType<T> type, Class<ST> subClass, Evaluator<ST, Boolean> boolMaker) {
+		//noinspection unchecked
+		Array<? extends T> properties = (Array<? extends T>)propertyLists.get(type);
+		boolean done = false;
+		for(T prop: properties)
+			if(subClass.isAssignableFrom(prop.getClass()))
+				done = boolMaker.getValue(subClass.cast(prop)) || done;
+		
+		return done;
 	}
 	
-	public Array<String[]> save() {
-		Array<String[]> data = new Array<>(String[].class);
-		data.add(new String[] {x+"", y+"", z+""});
-		return data;
+	public <T extends EntityProperty> T getSingleProp(EntityPropertyType<T> type) {
+		//noinspection unchecked
+		return (T) singleProperties.get(type);
 	}
-	
-	public int getId() { return eid; }
+	public <T extends EntityProperty> T getSingleProp(EntityPropertyType<? super T> type, Class<T> asClass) {
+		//noinspection unchecked
+		return (T) singleProperties.get(type);
+	}
 	
 	@NotNull @Override
 	public WorldManager getWorld() { return world; }
 	
-	@Override @Nullable
-	public Level getLevel() { return world.getEntityLevel(this); }
-	@Override @Nullable
-	public ServerLevel getServerLevel() {
-		Level level = getLevel();
-		return level instanceof ServerLevel ? (ServerLevel) level : null;
+	@Nullable @Override
+	public Level getLevel() { return null; }
+	
+	@NotNull @Override
+	public Rectangle getBounds() {
+		Vector2 size = getSize();
+		return new Rectangle(x, y, size.x, size.y);
 	}
 	
-	/// this is called only to remove an entity completely from the game, not to change levels.
-	public void remove() {
-		world.deregisterEntity(eid);
+	@Override
+	public Vector2 getSize() { return getSingleProp(EntityPropertyType.Renderer).getSize().scl(1f/Tile.SIZE); }
+	
+	@Nullable @Override
+	public ServerLevel getServerLevel() {
+		return null;
 	}
 	
 	@Override
 	public void update(float delta) {
-		Level level = getLevel();
-		if(level == null) return;
-		Array<WorldObject> objects = new Array<>();
-		objects.addAll(level.getOverlappingEntities(getBounds(), this));
-		Tile tile = level.getClosestTile(getBounds());
-		if(tile != null) objects.add(tile);
-		
-		for(WorldObject obj: objects)
-			obj.touching(this);
+		forAll(EntityPropertyType.Updatable, updater -> updater.update(delta, this));
 	}
-	
-	protected abstract TextureRegion getSprite();
 	
 	@Override
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
-		drawSprite(batch, (x-posOffset.x) * Tile.SIZE, (y+z - posOffset.y) * Tile.SIZE);
+		forAll(EntityPropertyType.Renderer, renderer -> renderer.drawSprite((x - posOffset.x) * Tile.SIZE, (y - posOffset.y) * Tile.SIZE, batch, delta, this));
 	}
 	
-	protected void drawSprite(SpriteBatch batch, float x, float y) {
-		batch.draw(getSprite(), x, y);
+	@Override
+	public boolean isPermeableBy(Entity entity) {
+		return fromAll(EntityPropertyType.Tangibility, tangibility -> tangibility.isPermeableBy(entity, this));
+	}
+	
+	@Override
+	public boolean interactWith(Player player, @Nullable Item heldItem) {
+		return fromAll(EntityPropertyType.InteractAction, interaction -> interaction.interactWith(player, heldItem, this));
+	}
+	
+	@Override
+	public boolean attackedBy(WorldObject obj, @Nullable Item item, int dmg) {
+		return fromAll(EntityPropertyType.AttackResult, attackResult -> attackResult.attackedBy(obj, item, dmg, this));
+	}
+	
+	@Override
+	public boolean touchedBy(Entity entity) {
+		return fromAll(EntityPropertyType.TouchListener, touchListener -> touchListener.touchedBy(entity, true, this));
+	}
+	
+	@Override
+	public void touching(Entity entity) {
+		forAll(EntityPropertyType.TouchListener, touchListener -> touchListener.touchedBy(entity, false, this));
+	}
+	
+	@Override
+	public Tag getTag() {
+		return null;
 	}
 	
 	public float getZ() { return z; }
 	protected void setZ(float z) { this.z = z; }
 	
-	protected Rectangle getUnscaledBounds() {
-		TextureRegion texture = getSprite();
-		return new Rectangle(x, y, texture.getRegionWidth(), texture.getRegionHeight());
-	}
-	
-	@NotNull
-	@Override
-	public Rectangle getBounds() {
-		Rectangle bounds = getUnscaledBounds();
-		bounds.width /= Tile.SIZE;
-		bounds.height /= Tile.SIZE;
-		return bounds;
-	}
-	
-	@Override
-	public boolean interactWith(Player player, @Nullable Item item) { return false; }
 	
 	public boolean move(Vector2 v) { return move(v.x, v.y); }
 	public boolean move(Vector3 v) { return move(v.x, v.y, v.z); }
@@ -189,9 +241,9 @@ public abstract class Entity implements WorldObject {
 		
 		// get and touch entities, and check for blockage
 		
-		Array<Entity> newEntities = level.getOverlappingEntities(newRect);
+		Array<miniventure.game.world.entity.Entity> newEntities = level.getOverlappingEntities(newRect);
 		newEntities.removeAll(level.getOverlappingEntities(oldRect), true); // because the "old rect" entities are never added in the first place, we don't need to worry about this entity being included in this list, and accidentally interacting with itself.
-		for(Entity entity: newEntities) {
+		for(miniventure.game.world.entity.Entity entity: newEntities) {
 			if(getServerLevel() != null)
 				if(!entity.touchedBy(this))
 					this.touchedBy(entity); // to make sure something has a chance to happen, but it doesn't happen twice.
@@ -246,102 +298,4 @@ public abstract class Entity implements WorldObject {
 		if(level != null)
 			moveTo(level, x, y);
 	}
-	
-	// returns whether anything meaningful happened; if false, then other.touchedBy(this) will be called.
-	@Override
-	public boolean touchedBy(Entity other) { return false; }
-	
-	@Override
-	public void touching(Entity entity) {}
-	
-	@Override
-	public final boolean isPermeableBy(Entity entity) { return isPermeableBy(entity, true); }
-	
-	public boolean isPermeableBy(Entity entity, boolean delegate) {
-		if(delegate)
-			return entity.isPermeableBy(this, false);
-		return false;
-	}
-	
-	@Override
-	public boolean attackedBy(WorldObject obj, @Nullable Item attackItem, int damage) { return false; }
-	
-	@Override
-	public boolean equals(Object other) { return other instanceof Entity && ((Entity)other).eid == eid; }
-	
-	@Override
-	public int hashCode() { return eid; }
-	
-	
-	protected Class<? extends Entity> getSerialClass() { return getClass(); }
-	
-	public static String serialize(Entity e) {
-		Array<String[]> data = e.save();
-		String[][] doubleDataArray = data.shrink();
-		
-		String[] partEncodedData = new String[doubleDataArray.length+1];
-		for(int i = 0; i < doubleDataArray.length; i++) {
-			partEncodedData[i+1] = MyUtils.encodeStringArray(doubleDataArray[i]);
-		}
-		
-		partEncodedData[0] = e.getSerialClass().getCanonicalName().replace(Entity.class.getPackage().getName()+".", "");
-		
-		return MyUtils.encodeStringArray(partEncodedData);
-	}
-	
-	public static Entity deserialize(String data, @NotNull WorldManager world, int eid) {
-		String[] partData = MyUtils.parseLayeredString(data);
-		
-		String[][] sepData = new String[partData.length-1][];
-		for(int i = 0; i < sepData.length; i++) {
-			sepData[i] = MyUtils.parseLayeredString(partData[i+1]);
-		}
-		
-		Entity entity = null;
-		
-		try {
-			Class<?> clazz = Class.forName(Entity.class.getPackage().getName()+"."+partData[0]);
-			
-			Class<? extends Entity> entityClass = clazz.asSubclass(Entity.class);
-			
-			entity = deserialize(world, eid, entityClass, sepData);
-			
-		} catch(ClassNotFoundException e) {
-			e.printStackTrace();
-		}
-		
-		return entity;
-	}
-	public static <T extends Entity> T deserialize(@NotNull WorldManager world, int eid, Class<T> clazz, String[][] data) {
-		T newEntity = null;
-		try {
-			Constructor<T> constructor = clazz.getDeclaredConstructor(WorldManager.class, String[][].class, Version.class);
-			constructor.setAccessible(true);
-			newEntity = constructor.newInstance(world, data, GameCore.VERSION);
-			((Entity)newEntity).eid = eid;
-			world.registerEntity(newEntity);
-		} catch(NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-			e.printStackTrace();
-		}
-		
-		return newEntity;
-	}
-	
-	public static class EntityTag implements Tag {
-		public final int eid;
-		
-		private EntityTag() { this(0); }
-		public EntityTag(int eid) {
-			this.eid = eid;
-		}
-		
-		@Override
-		public WorldObject getObject(WorldManager world) { return world.getEntity(eid); }
-	}
-	
-	@Override
-	public Tag getTag() { return new EntityTag(eid); }
-	
-	@Override
-	public String toString() { return getClass().getSimpleName(); }
 }

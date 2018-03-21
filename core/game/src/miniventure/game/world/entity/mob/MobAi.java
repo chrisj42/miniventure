@@ -78,8 +78,6 @@ public class MobAi extends Mob {
 	public void update(float delta) {
 		super.update(delta);
 		
-		if(!server) return;
-		
 		if(tempTimeLeft > 0) tempTimeLeft -= delta;
 		
 		if(tempTimeLeft <= 0 && tempMovePattern != null)
