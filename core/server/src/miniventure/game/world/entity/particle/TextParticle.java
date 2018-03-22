@@ -2,17 +2,10 @@ package miniventure.game.world.entity.particle;
 
 import java.util.Arrays;
 
-import miniventure.game.GameCore;
 import miniventure.game.util.Version;
 import miniventure.game.world.entity.EntityRenderer.TextRenderer;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;

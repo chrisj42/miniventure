@@ -1,6 +1,5 @@
 package miniventure.game.world.tile;
 
-import java.util.Arrays;
 import java.util.HashMap;
 
 import miniventure.game.world.tile.AnimationProperty.AnimationType;

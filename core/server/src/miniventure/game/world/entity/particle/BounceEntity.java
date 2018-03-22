@@ -6,18 +6,13 @@ import miniventure.game.util.FrameBlinker;
 import miniventure.game.util.Version;
 import miniventure.game.world.Level;
 import miniventure.game.world.entity.Entity;
-import miniventure.game.world.entity.EntityRenderer;
-import miniventure.game.world.entity.EntityRenderer.BlinkRenderer;
-import miniventure.game.world.entity.EntityRenderer.SpriteRenderer;
 import miniventure.game.world.entity.ServerEntity;
 
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class BounceEntity extends ServerEntity {

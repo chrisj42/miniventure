@@ -46,43 +46,12 @@ public class Tile implements WorldObject {
 	protected final int x, y;
 	private String[] data;
 	
-	private Tile(@NotNull Level level, int x, int y) {
+	// the TileType array is ALWAYS expected in order of bottom to top.
+	protected Tile(@NotNull Level level, int x, int y, @NotNull TileType[] types, @NotNull String[] data) {
 		this.level = level;
 		this.x = x;
 		this.y = y;
-	}
-	
-	// the TileType array is expected in order of top to bottom.
-	// used most when creating new tiles for new levels
-	public Tile(@NotNull Level level, int x, int y, @NotNull TileType... types) {
-		this(level, x, y);
 		
-		// reverse the stack order, so it's bottom to top.
-		for(int i = types.length-1; i >= 0; i--)
-			tileTypes.push(types[i]);
-		
-		/// now it's time to initialize the tile data.
-		
-		int len = 0;
-		Stack<String[]> eachData = new Stack<>();
-		
-		for(TileType type: tileTypes) { // goes through starting from bottom of stack, at bottom tile.
-			eachData.push(type.getInitialData());
-			len += type.getDataLength();
-		}
-		
-		data = new String[len];
-		int offset = 0;
-		while(!eachData.empty()) {
-			String[] typeData = eachData.pop();
-			System.arraycopy(typeData, 0, data, offset, typeData.length);
-			offset += typeData.length;
-		}
-	}
-	
-	// will be used most often when loading saved tiles.
-	public Tile(@NotNull Level level, int x, int y, @NotNull TileType[] types, @NotNull String[] data) {
-		this(level, x, y);
 		this.data = data;
 		// because this is the first type, we need to establish all the tiles under it.
 		for(TileType type: types)

@@ -34,7 +34,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 	private ClientHands hands;
 	
 	private float moveSpeed = Player.MOVE_SPEED;
-	private Direction dir;
+	@NotNull private Direction dir;
 	
 	public ClientPlayer(SpawnData data) {
 		super(data.playerData.eid, EntityRenderer.deserialize(data.playerData.spriteUpdate.rendererData));
@@ -61,7 +61,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 		return stats.get(stat) - prevVal;
 	}
 	
-	@Override public Direction getDirection() { return dir; }
+	@Override @NotNull public Direction getDirection() { return dir; }
 	@Override public Inventory getInventory() { return inventory; }
 	@Override public ClientHands getHands() { return hands; }
 	
@@ -77,7 +77,9 @@ public class ClientPlayer extends ClientEntity implements Player {
 		movement.add(mouseInput); // mouseInput is already normalized
 		movement.nor();
 		
-		dir = Direction.getDirection(movement.x, movement.y);
+		Direction newDir = Direction.getDirection(movement.x, movement.y);
+		if(newDir != null)
+			dir = newDir;
 		
 		boolean moved = move(movement, Gdx.graphics.getDeltaTime());
 		

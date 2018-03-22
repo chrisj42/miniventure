@@ -1,6 +1,7 @@
 package miniventure.game;
 
 import java.io.File;
+import java.util.Arrays;
 
 import miniventure.game.item.Hands;
 import miniventure.game.item.Inventory;
@@ -130,6 +131,13 @@ public interface GameProtocol {
 			this.playerData = playerData;
 			this.inventory = inventory;
 			this.stats = stats;
+			
+			if(playerData != null) {
+				if(playerData.spriteUpdate == null)
+					System.out.println("made spawn data, but no renderer");
+				else
+					System.out.println("made spawn data; renderer data: " + Arrays.toString(playerData.spriteUpdate.rendererData));
+			}
 		}
 	}
 	
@@ -216,7 +224,7 @@ public interface GameProtocol {
 		
 		private SpriteUpdate() { this((String[])null); }
 		public SpriteUpdate(Entity e) { this(e.getRenderer()); }
-		public SpriteUpdate(EntityRenderer renderer) { this(renderer.save()); }
+		public SpriteUpdate(EntityRenderer renderer) { this(EntityRenderer.serialize(renderer)); }
 		public SpriteUpdate(String[] rendererData) {
 			this.rendererData = rendererData;
 		}

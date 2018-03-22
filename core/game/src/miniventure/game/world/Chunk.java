@@ -6,6 +6,7 @@ import miniventure.game.world.tile.TileType;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -30,7 +31,7 @@ public class Chunk implements Boundable {
 			tiles[x] = new Tile[tileTypes[x].length];
 			height = Math.max(height, tiles[x].length);
 			for(int y = 0; y < tiles[x].length; y++)
-				tiles[x][y] = new Tile(level, chunkX*SIZE + x, chunkY*SIZE + y, tileTypes[x][y]);
+				tiles[x][y] = level.createTile(chunkX*SIZE + x, chunkY*SIZE + y, tileTypes[x][y], TileType.getJoinedInitialData(tileTypes[x][y]));
 		}
 		this.height = height;
 	}
@@ -51,14 +52,14 @@ public class Chunk implements Boundable {
 				for(int i = 0; i < types.length; i++)
 					types[i] = TileType.values[tileData.typeOrdinals[i]];
 				
-				tiles[x][y] = new Tile(level, chunkX * SIZE + x, chunkY * SIZE + y, types, tileData.data);
+				tiles[x][y] = level.createTile(chunkX * SIZE + x, chunkY * SIZE + y, types, tileData.data);
 			}
 		}
 		this.height = height;
 	}
 	
 	@Nullable
-	public Tile getTile(int x, int y) {
+	Tile getTile(int x, int y) {
 		if(x < 0 || y < 0 || x >= tiles.length || y >= tiles[x].length)
 			return null;
 		return tiles[x][y];
@@ -85,6 +86,9 @@ public class Chunk implements Boundable {
 	public int hashCode() { return 31 * chunkX + 17 * chunkY; }
 	
 	
+	public static Point getCoords(Point tileCoords) { return getCoords(tileCoords.x, tileCoords.y); }
+	public static Point getCoords(Vector2 pos) { return getCoords(pos.x, pos.y); }
+	public static Point getCoords(float x, float y) { return new Point(getCoord(x), getCoord(y)); }
 	public static int getCoord(float pos) {
 		int worldCoord = MathUtils.floor(pos);
 		return worldCoord / SIZE;

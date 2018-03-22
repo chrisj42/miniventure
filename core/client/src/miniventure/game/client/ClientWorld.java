@@ -148,12 +148,12 @@ public class ClientWorld extends WorldManager {
 		if(this.mainPlayer != null)
 			this.mainPlayer.remove();
 		
+		this.mainPlayer = mainPlayer;
+		
 		if(level != null)
 			setEntityLevel(mainPlayer, level);
 		else
 			System.err.println("could not add main player, default level is null");
-		
-		this.mainPlayer = mainPlayer;
 	}
 	
 	public void respawnPlayer() {

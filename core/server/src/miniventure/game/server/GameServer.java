@@ -95,6 +95,7 @@ public class GameServer implements GameProtocol {
 				
 				forPacket(object, PlayerMovement.class, r -> {
 					p.moveInDir(new Vector2(r.xdir, r.ydir));
+					
 				});
 				
 				forPacket(object, ItemDropRequest.class, drop -> {

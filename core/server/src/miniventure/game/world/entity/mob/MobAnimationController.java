@@ -1,16 +1,9 @@
 package miniventure.game.world.entity.mob;
 
-import java.util.HashMap;
 import java.util.PriorityQueue;
 
-import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.SpriteUpdate;
-import miniventure.game.server.ServerCore;
-import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.EntityRenderer.AnimationRenderer;
-
-import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class MobAnimationController {
 	

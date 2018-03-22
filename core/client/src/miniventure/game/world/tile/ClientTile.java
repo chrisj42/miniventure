@@ -17,8 +17,8 @@ public class ClientTile extends Tile {
 	
 	@NotNull private ClientLevel level;
 	
-	public ClientTile(@NotNull ClientLevel level, int x, int y, @NotNull TileType... types) {
-		super(level, x, y, types);
+	public ClientTile(@NotNull ClientLevel level, int x, int y, @NotNull TileType[] types, String[] data) {
+		super(level, x, y, types, data);
 		this.level = level;
 	}
 	

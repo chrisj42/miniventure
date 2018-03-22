@@ -23,15 +23,15 @@ import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
 
-public interface EntityRenderer {
+public abstract class EntityRenderer {
 	
-	String[] save();
+	protected abstract String[] save();
 	
-	void render(float x, float y, Batch batch, float delta);
+	public abstract void render(float x, float y, Batch batch, float delta);
 	
-	Vector2 getSize();
+	public abstract Vector2 getSize();
 	
-	class SpriteRenderer implements EntityRenderer {
+	public static class SpriteRenderer extends EntityRenderer {
 		
 		private static final HashMap<String, AtlasRegion> textures = new HashMap<>();
 		
@@ -55,7 +55,7 @@ public interface EntityRenderer {
 		}
 		
 		@Override
-		public String[] save() { return new String[] {spriteName}; }
+		protected String[] save() { return new String[] {spriteName}; }
 		
 		public String getName() { return spriteName; }
 		
@@ -67,7 +67,7 @@ public interface EntityRenderer {
 	}
 	
 	
-	class ItemSpriteRenderer extends SpriteRenderer {
+	public static class ItemSpriteRenderer extends SpriteRenderer {
 		
 		private final Item item;
 		
@@ -81,11 +81,11 @@ public interface EntityRenderer {
 		}
 		
 		@Override
-		public String[] save() { return item.save(); }
+		protected String[] save() { return item.save(); }
 	}
 	
 	
-	class AnimationRenderer implements EntityRenderer {
+	public static class AnimationRenderer extends EntityRenderer {
 		
 		private static final HashMap<String, Array<AtlasRegion>> animationFrames = new HashMap<>();
 		
@@ -114,7 +114,7 @@ public interface EntityRenderer {
 		}
 		
 		@Override
-		public String[] save() {
+		protected String[] save() {
 			return new String[] {animationName, duration+"", isFrameDuration+""};
 		}
 		
@@ -134,7 +134,7 @@ public interface EntityRenderer {
 	}
 	
 	
-	/*class DirectionalAnimationRenderer implements EntityRenderer {
+	/*public static class DirectionalAnimationRenderer extends EntityRenderer {
 		
 		private Direction dir;
 		
@@ -147,7 +147,7 @@ public interface EntityRenderer {
 		}
 		
 		@Override
-		public String[] save() {
+		protected String[] save() {
 			return new String[0];
 		}
 		
@@ -163,7 +163,7 @@ public interface EntityRenderer {
 	}*/
 	
 	
-	class TextRenderer implements EntityRenderer {
+	public static class TextRenderer extends EntityRenderer {
 		
 		private final String text;
 		private final Color main;
@@ -185,7 +185,7 @@ public interface EntityRenderer {
 		}
 		
 		@Override
-		public String[] save() { return new String[] {text, main.toString(), shadow.toString()}; }
+		protected String[] save() { return new String[] {text, main.toString(), shadow.toString()}; }
 		
 		@Override
 		public void render(float x, float y, Batch batch, float delta) {
@@ -201,7 +201,7 @@ public interface EntityRenderer {
 	}
 	
 	// NOTE, I won't be using this for mobs. I want to just enforce blinking no matter the sprite underneath, and only for a period of time...
-	class BlinkRenderer implements EntityRenderer {
+	public static class BlinkRenderer extends EntityRenderer {
 		
 		private EntityRenderer mainRenderer;
 		private final boolean blinkFirst;
@@ -226,9 +226,9 @@ public interface EntityRenderer {
 		}
 		
 		@Override
-		public String[] save() {
+		protected String[] save() {
 			return new String[] {
-				MyUtils.encodeStringArray(mainRenderer.save()),
+				MyUtils.encodeStringArray(EntityRenderer.serialize(mainRenderer)),
 				initialDuration +"",
 				blinkFirst+"",
 				MyUtils.encodeStringArray(blinker.save())
@@ -260,14 +260,14 @@ public interface EntityRenderer {
 	}
 	
 	
-	EntityRenderer BLANK = new EntityRenderer() {
+	public static final EntityRenderer BLANK = new EntityRenderer() {
 		@Override public void render(float x, float y, Batch batch, float delta) {}
 		@Override public Vector2 getSize() { return new Vector2(); }
-		@Override public String[] save() { return new String[0]; }
+		@Override protected String[] save() { return new String[0]; }
 	};
 	
 	
-	static String[] serialize(EntityRenderer renderer) {
+	public static String[] serialize(EntityRenderer renderer) {
 		String[] data = renderer.save();
 		String[] allData = new String[data.length+1];
 		
@@ -275,7 +275,7 @@ public interface EntityRenderer {
 		if(className == null)
 			allData[0] = "";
 		else
-			allData[0] = className.replace(EntityRenderer.class.getPackage().getName()+".", "");
+			allData[0] = className.replace(EntityRenderer.class.getCanonicalName()+".", "");
 		
 		System.arraycopy(data, 0, allData, 1, data.length);
 		
@@ -283,20 +283,28 @@ public interface EntityRenderer {
 	}
 	
 	@NotNull
-	static EntityRenderer deserialize(String[] allData) {
+	public static EntityRenderer deserialize(String[] allData) {
 		if(allData[0].length() == 0) return BLANK;
 		
 		String className = allData[0];
 		String[] data = Arrays.copyOfRange(allData, 1, allData.length);
 		
 		try {
-			Class<?> clazz = Class.forName(EntityRenderer.class.getPackage().getName()+"."+className);
-			Class<? extends EntityRenderer> erClass = clazz.asSubclass(EntityRenderer.class);
-			//noinspection JavaReflectionMemberAccess
-			Constructor<? extends EntityRenderer> constructor = erClass.getDeclaredConstructor(String[].class);
+			//Class<?> clazz = Class.forName(EntityRenderer.class.getPackage().getName()+"."+className);
+			for(Class<?> inner: EntityRenderer.class.getDeclaredClasses()) {
+				//System.out.println("found inner class " + inner.getSimpleName());
+				if(inner.getSimpleName().equals(className)) {
+					
+					Class<? extends EntityRenderer> erClass = inner.asSubclass(EntityRenderer.class);
+					//noinspection JavaReflectionMemberAccess
+					Constructor<? extends EntityRenderer> constructor = erClass.getDeclaredConstructor(String[].class);
+					
+					constructor.setAccessible(true);
+					return constructor.newInstance((Object)data);
+				}
+			}
 			
-			constructor.setAccessible(true);
-			return constructor.newInstance((Object)data);
+			throw new ClassNotFoundException(className);
 			
 		} catch(ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
 			e.printStackTrace();

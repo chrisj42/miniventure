@@ -11,7 +11,6 @@ import miniventure.game.GameProtocol.HeldItemRequest;
 import miniventure.game.item.InventoryScreen;
 import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
-import miniventure.game.world.WorldManager;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -55,7 +54,16 @@ public class ClientCore extends ApplicationAdapter {
 	@Override
 	public void render() {
 		try {
-			updateAndRender(clientWorld);
+			input.update();
+			
+			if (clientWorld.worldLoaded())
+				clientWorld.update(Gdx.graphics.getDeltaTime()); // renders as well
+			
+			hasMenu = menuScreen != null;
+			if (menuScreen != null) {
+				menuScreen.act();
+				menuScreen.draw();
+			}
 		} catch(Throwable t) {
 			//System.out.println("running threads: " + Thread.activeCount());
 			
@@ -68,19 +76,6 @@ public class ClientCore extends ApplicationAdapter {
 			JOptionPane.showMessageDialog(null, errorDisplay, "An error has occurred", JOptionPane.ERROR_MESSAGE);
 			
 			throw t;
-		}
-	}
-	
-	public static void updateAndRender(WorldManager world) {
-		input.update();
-		
-		if (world.worldLoaded())
-			world.update(Gdx.graphics.getDeltaTime());
-		
-		hasMenu = menuScreen != null;
-		if (menuScreen != null) {
-			menuScreen.act();
-			menuScreen.draw();
 		}
 	}
 	

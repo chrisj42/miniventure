@@ -184,4 +184,21 @@ public enum TileType {
 	int getPropDataLength(TilePropertyType type) { return propertyDataLengths.get(type); }
 	
 	public String getName() { return MyUtils.toTitleCase(name()); }
+	
+	public static String[] getJoinedInitialData(TileType... types) {
+		int len = 0;
+		for(TileType type: types)
+			len += type.getDataLength();
+		
+		String[] data = new String[len];
+		
+		int offset = 0;
+		for(TileType type: types) {
+			String[] typeData = type.getInitialData();
+			System.arraycopy(typeData, 0, data, offset, typeData.length);
+			offset += typeData.length;
+		}
+		
+		return data;
+	}
 }

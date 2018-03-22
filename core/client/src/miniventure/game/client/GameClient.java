@@ -14,10 +14,10 @@ import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClientEntity;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.EntityRenderer;
-import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.ClientPlayer;
 import miniventure.game.world.tile.Tile;
 
+import com.badlogic.gdx.Gdx;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
@@ -105,7 +105,7 @@ public class GameClient implements GameProtocol {
 					PositionUpdate newPos = update.positionUpdate;
 					SpriteUpdate newSprite = update.spriteUpdate;
 					
-					ServerEntity e = (ServerEntity) update.tag.getObject(world);
+					ClientEntity e = (ClientEntity) update.tag.getObject(world);
 					if(e == null) return;
 					
 					if(newPos != null) {
@@ -129,7 +129,7 @@ public class GameClient implements GameProtocol {
 			public void disconnected(Connection connection) {
 				System.err.println("client disconnected from server.");
 				// TODO make ErrorScreen, which accepts a string to display and has a "back to title screen" button.
-				ClientCore.setScreen(new MainMenu(ClientCore.getWorld()));
+				Gdx.app.postRunnable(() -> ClientCore.setScreen(new MainMenu(ClientCore.getWorld())));
 				//GameCore.setScreen(new ErrorScreen("Lost connection with server."));
 			}
 		});

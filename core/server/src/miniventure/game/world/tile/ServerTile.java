@@ -10,11 +10,6 @@ public class ServerTile extends Tile {
 	
 	private final ServerLevel level;
 	
-	public ServerTile(@NotNull ServerLevel level, int x, int y, @NotNull TileType... types) {
-		super(level, x, y, types);
-		this.level = level;
-	}
-	
 	public ServerTile(@NotNull ServerLevel level, int x, int y, @NotNull TileType[] types, @NotNull String[] data) {
 		super(level, x, y, types, data);
 		this.level = level;

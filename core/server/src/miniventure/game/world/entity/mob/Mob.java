@@ -7,19 +7,18 @@ import miniventure.game.GameProtocol.SpriteUpdate;
 import miniventure.game.item.Item;
 import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolType;
-import miniventure.game.util.FrameBlinker;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Direction;
+import miniventure.game.world.entity.EntityRenderer;
 import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.MobAnimationController.AnimationState;
 import miniventure.game.world.entity.particle.TextParticle;
 import miniventure.game.world.tile.TileType;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
@@ -51,7 +50,7 @@ public abstract class Mob extends ServerEntity {
 	@NotNull private Vector2 knockbackVelocity = new Vector2(); // knockback is applied once, at the start, as a velocity. The mob is moved with this velocity constantly, slowing down at a fixed rate, until the knockback is gone.
 	
 	private float invulnerableTime = 0;
-	private FrameBlinker blinker;
+	//private FrameBlinker blinker;
 	
 	private final String spriteName;
 	
@@ -63,12 +62,11 @@ public abstract class Mob extends ServerEntity {
 		
 		this.spriteName = spriteName;
 		
-		blinker = new FrameBlinker(5, 1, false);
+		//blinker = new FrameBlinker(5, 1, false);
 		
 		animator = new MobAnimationController(this, spriteName);
 		
-		// TODO mob animations
-		//setRenderer(new AnimationRenderer());
+		setRenderer(EntityRenderer.deserialize(animator.getSpriteUpdate().rendererData));
 	}
 	
 	protected Mob(String[][] allData, Version version) {
@@ -86,9 +84,11 @@ public abstract class Mob extends ServerEntity {
 		float ky = Float.parseFloat(data[7]);
 		knockbackVelocity = new Vector2(kx, ky);
 		
-		blinker = new FrameBlinker(5, 1, false);
+		//blinker = new FrameBlinker(5, 1, false);
 		
 		animator = new MobAnimationController(this, spriteName);
+		
+		setRenderer(EntityRenderer.deserialize(animator.getSpriteUpdate().rendererData));
 	}
 	
 	@Override
@@ -128,13 +128,13 @@ public abstract class Mob extends ServerEntity {
 	//@Override
 	//protected TextureRegion getSprite() { return animator.getSprite(); }
 	
-	@Override
+	/*@Override
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
 		blinker.update(delta);
 		
 		if(invulnerableTime <= 0 || blinker.shouldRender())
 			super.render(batch, delta, posOffset);
-	}
+	}*/
 	
 	@Override
 	public void update(float delta) {
@@ -169,7 +169,6 @@ public abstract class Mob extends ServerEntity {
 	public boolean move(float xd, float yd, float zd) {
 		boolean moved = super.move(xd, yd, zd);
 		
-		// TODO I need to somehow fix the problem of mobs not animating properly. This is likely happening because the updates from the server do not come every frame, as they did when running in the same thread, so polling the animation every frame results in reverting the animation state to idle almost instantly after every attempt to make it walk. I need a way to somehow cache the previous state, or current state, which means that I'll have to make a way to tell it to stop the animation, as well.
 		if(xd != 0 || yd != 0) animator.requestState(AnimationState.WALK);
 		
 		Direction dir = Direction.getDirection(xd, yd);

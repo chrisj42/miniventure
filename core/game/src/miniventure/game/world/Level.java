@@ -1,10 +1,14 @@
 package miniventure.game.world;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
+import miniventure.game.util.SynchronizedAccessor;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.tile.Tile;
+import miniventure.game.world.tile.TileType;
 
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -19,11 +23,11 @@ public abstract class Level {
 	private final int depth, width, height;
 	
 	@NotNull private final WorldManager world;
-	protected final HashMap<Point, Chunk> loadedChunks = new HashMap<>();
+	protected final SynchronizedAccessor<Map<Point, Chunk>> loadedChunks = new SynchronizedAccessor<>(Collections.synchronizedMap(new HashMap<>()));
 	protected int tileCount;
 	
 	// this is to track when entities go in and out of chunks
-	protected final HashMap<Entity, Chunk> entityChunks = new HashMap<>();
+	protected final HashMap<Entity, Point> entityChunks = new HashMap<>();
 	
 	/** @noinspection FieldCanBeLocal*/
 	private int entityCap = 8; // per chunk
@@ -49,12 +53,18 @@ public abstract class Level {
 	public int getHeight() { return height; }
 	public int getDepth() { return depth; }
 	@NotNull public WorldManager getWorld() { return world; }
-	public int getEntityCap() { return entityCap*loadedChunks.size(); }
+	public int getEntityCap() { return entityCap*getLoadedChunkCount(); }
 	public int getEntityCount() { return world.getEntityCount(this); }
 	
-	public void entityMoved(Entity entity) {
-		Chunk entityChunk = getClosestChunk(entity.getCenter());
-		Chunk curChunk = entityChunks.get(entity);
+	protected int getLoadedChunkCount() { return loadedChunks.get(Map::size); }
+	protected Chunk getLoadedChunk(Point p) { return loadedChunks.get(chunks -> chunks.get(p)); }
+	protected Chunk[] getLoadedChunkArray() { return loadedChunks.get(chunks -> chunks.values().toArray(new Chunk[chunks.size()])); }
+	protected boolean isChunkLoaded(Point p) { return loadedChunks.get(chunks -> chunks.containsKey(p)); }
+	protected void putLoadedChunk(Point p, Chunk c) { loadedChunks.access(chunks -> chunks.put(p, c)); }
+	
+	public synchronized void entityMoved(Entity entity) {
+		Point entityChunk = getClosestChunkCoord(entity.getCenter());
+		Point curChunk = entityChunks.get(entity);
 		boolean chunkChanged = !(curChunk == null && entityChunk == null) && ((curChunk == null || entityChunk == null) || !curChunk.equals(entityChunk));
 		
 		if(!chunkChanged) return;
@@ -67,13 +77,13 @@ public abstract class Level {
 		if(!world.isKeepAlive(entity)) return;
 		
 		// check for any chunks that no longer need to be loaded
-		Array<Point> chunkCoords = new Array<>(loadedChunks.keySet().toArray(new Point[loadedChunks.size()]));
+		Array<Point> chunkCoords = new Array<>(loadedChunks.<Point[]>get(chunks -> chunks.keySet().toArray(new Point[chunks.size()])));
 		for(WorldObject obj: world.getKeepAlives(this)) // remove loaded chunks in radius
 			chunkCoords.removeAll(getAreaChunks(obj.getCenter(), 2, true, false), false);
 		
 		// chunkCoords now contains all chunks which have no nearby keepAlive object, so they should be unloaded.
 		for(Point chunkCoord: chunkCoords) {
-			Chunk chunk = loadedChunks.get(chunkCoord);
+			Chunk chunk = getLoadedChunk(chunkCoord);
 			if(chunk == null) continue; // shouldn't happen, but just in case
 			
 			// decrease tile count by number of tiles in chunk
@@ -139,7 +149,7 @@ public abstract class Level {
 		xt -= chunkX * Chunk.SIZE;
 		yt -= chunkY * Chunk.SIZE;
 		
-		Chunk chunk = loadedChunks.get(new Point(chunkX, chunkY));
+		Chunk chunk = getLoadedChunk(new Point(chunkX, chunkY));
 		if(chunk != null)
 			return chunk.getTile(xt, yt);
 		
@@ -180,7 +190,7 @@ public abstract class Level {
 		Array<Point> points = getOverlappingTileCoords(rect);
 		
 		for(Point p: points) {
-			Point chunk = new Point(Chunk.getCoord(p.x), Chunk.getCoord(p.y));
+			Point chunk = Chunk.getCoords(p);
 			if(!overlappingChunks.contains(chunk, false))
 				overlappingChunks.add(chunk);
 		}
@@ -233,7 +243,7 @@ public abstract class Level {
 			for (int y = chunkY - radius; y <= chunkY + radius; y++) {
 				if (chunkExists(x, y)) {
 					Point p = new Point(x, y);
-					boolean isLoaded = loadedChunks.containsKey(p);
+					boolean isLoaded = isChunkLoaded(p);
 					if(loaded && isLoaded || unloaded && !isLoaded)
 						chunkCoords.add(new Point(x, y));
 				}
@@ -248,8 +258,8 @@ public abstract class Level {
 	public Tile getClosestTile(Vector2 center) { return getTile(center.x, center.y); }
 	
 	@Nullable
-	public Chunk getClosestChunk(Vector2 pos) {
-		return loadedChunks.get(new Point(Chunk.getCoord(pos.x), Chunk.getCoord(pos.y)));
+	public Point getClosestChunkCoord(Vector2 pos) {
+		return new Point(Chunk.getCoord(pos.x), Chunk.getCoord(pos.y));
 	}
 	
 	@Nullable
@@ -278,9 +288,11 @@ public abstract class Level {
 		return true;
 	}
 	
+	abstract Tile createTile(int x, int y, TileType[] types, String[] data);
+	
 	public void loadChunk(Chunk newChunk) {
 		tileCount += newChunk.width * newChunk.height;
-		loadedChunks.put(new Point(newChunk.chunkX, newChunk.chunkY), newChunk);
+		putLoadedChunk(new Point(newChunk.chunkX, newChunk.chunkY), newChunk);
 	}
 	
 	abstract void loadChunk(Point chunkCoord);

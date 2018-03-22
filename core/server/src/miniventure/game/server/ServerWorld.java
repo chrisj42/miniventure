@@ -187,7 +187,7 @@ public class ServerWorld extends WorldManager {
 		Rectangle spawnBounds = new Rectangle(0, 0, Math.min(level.getWidth(), 5*Chunk.SIZE), Math.min(level.getHeight(), 5*Chunk.SIZE));
 		spawnBounds.setCenter(level.getWidth()/2, level.getHeight()/2);
 		
-		level.spawnMob(player, spawnBounds, false);
+		level.spawnMob(player, spawnBounds);
 	}
 	
 	

@@ -41,7 +41,7 @@ enum Biome {
 		ArrayList<TileType> types = new ArrayList<>();
 		TileType curType = tileFetcher.getType(noise);
 		while(curType != null) {
-			types.add(curType);
+			types.add(0, curType);
 			curType = underTiles.get(curType);
 		}
 		

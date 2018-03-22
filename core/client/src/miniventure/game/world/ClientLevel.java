@@ -5,6 +5,8 @@ import miniventure.game.client.ClientCore;
 import miniventure.game.client.ClientWorld;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.particle.Particle;
+import miniventure.game.world.tile.ClientTile;
+import miniventure.game.world.tile.TileType;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
@@ -27,7 +29,6 @@ public class ClientLevel extends Level {
 	
 	public void render(Rectangle renderSpace, SpriteBatch batch, float delta, Vector2 posOffset) {
 		renderSpace = new Rectangle(Math.max(0, renderSpace.x), Math.max(0, renderSpace.y), Math.min(getWidth()-renderSpace.x, renderSpace.width), Math.min(getHeight()-renderSpace.y, renderSpace.height));
-		//System.out.println("render space: " + renderSpace);
 		// pass the offset vector to all objects being rendered.
 		
 		Array<WorldObject> objects = new Array<>();
@@ -48,17 +49,20 @@ public class ClientLevel extends Level {
 	}
 	
 	@Override
+	ClientTile createTile(int x, int y, TileType[] types, String[] data) { return new ClientTile(this, x, y, types, data); }
+	
+	@Override
 	void loadChunk(Point chunkCoord) { ClientCore.getClient().send(new ChunkRequest(chunkCoord)); }
 	
 	@Override
 	void unloadChunk(Point chunkCoord) {
-		Chunk chunk = loadedChunks.get(chunkCoord);
+		Chunk chunk = getLoadedChunk(chunkCoord);
 		if(chunk == null) return; // already unloaded
 		
 		for(Entity e: entityChunks.keySet().toArray(new Entity[entityChunks.size()]))
-			if(entityChunks.get(e).equals(chunk))
+			if(entityChunks.get(e).equals(chunkCoord))
 				e.remove();
 		
-		loadedChunks.remove(chunkCoord);
+		loadedChunks.access(chunks -> chunks.remove(chunkCoord));
 	}
 }
