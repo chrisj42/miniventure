@@ -2,7 +2,6 @@ package miniventure.game.screen;
 
 import miniventure.game.GameCore;
 import miniventure.game.client.ClientWorld;
-import miniventure.game.world.WorldManager;
 
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;

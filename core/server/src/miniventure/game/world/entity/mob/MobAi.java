@@ -39,14 +39,14 @@ public class MobAi extends Mob {
 	private float tempTimeLeft = 0;
 	
 	public MobAi(@NotNull WorldManager world, @NotNull AiType aiType) {
-		super(world, "player", aiType.health);
+		super("player", aiType.health);
 		this.aiType = aiType;
 		this.itemDrops = aiType.deathDrops;
 		this.movePattern = aiType.defaultPattern.copy();
 	}
 	
 	protected MobAi(@NotNull WorldManager world, String[][] allData, Version version) {
-		super(world, Arrays.copyOfRange(allData, 0, allData.length-1), version);
+		super(Arrays.copyOfRange(allData, 0, allData.length-1), version);
 		String[] data = allData[allData.length-1];
 		aiType = AiType.valueOf(data[0]);
 		this.itemDrops = aiType.deathDrops;
@@ -94,7 +94,7 @@ public class MobAi extends Mob {
 	
 	@Override
 	public void remove() {
-		ServerLevel level = getServerLevel();
+		ServerLevel level = getLevel();
 		if(level != null)
 			for (ItemDrop drop: itemDrops)
 				level.dropItems(drop, this, null);

@@ -12,9 +12,8 @@ import miniventure.game.world.Point;
 import miniventure.game.world.WorldObject.Tag;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.Entity.EntityTag;
+import miniventure.game.world.entity.EntityRenderer;
 import miniventure.game.world.entity.mob.Player;
-import miniventure.game.world.entity.mob.Player.PlayerUpdate;
-import miniventure.game.world.entity.mob.Player.Stat;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.Tile.TileData;
 import miniventure.game.world.tile.Tile.TileTag;
@@ -40,7 +39,6 @@ public interface GameProtocol {
 		kryo.register(ChunkData.class);
 		kryo.register(ChunkData[].class);
 		kryo.register(Version.class);
-		kryo.register(PlayerUpdate.class);
 		kryo.register(Tag.class);
 		kryo.register(EntityTag.class);
 		kryo.register(TileTag.class);
@@ -49,6 +47,17 @@ public interface GameProtocol {
 		kryo.register(int[].class);
 		kryo.register(Integer.class);
 		kryo.register(Integer[].class);
+	}
+	
+	@FunctionalInterface
+	// T = Request class
+	interface RequestResponse<T> {
+		void respond(T request);
+	}
+	
+	default <T> void forPacket(Object packet, Class<T> type, RequestResponse<T> response) {
+		if(type.isAssignableFrom(packet.getClass()))
+			response.respond(type.cast(packet));
 	}
 	
 	enum DatalessRequest {
@@ -80,18 +89,6 @@ public interface GameProtocol {
 		}
 	}
 	
-	class SpawnData {
-		public final String playerData;
-		public final int eid;
-		
-		private SpawnData() { this((String)null, 0); }
-		public SpawnData(Player player) { this(Entity.serialize(player), player.getId()); }
-		public SpawnData(String playerData, int eid) {
-			this.playerData = playerData;
-			this.eid = eid;
-		}
-	}
-	
 	class TileUpdate {
 		public final TileData tileData;
 		public final int levelDepth;
@@ -109,6 +106,7 @@ public interface GameProtocol {
 		}
 	}
 	
+	// sent by client to ask for a chunk. Server assumes level to be the client's current level.
 	class ChunkRequest {
 		public final int x;
 		public final int y;
@@ -121,18 +119,31 @@ public interface GameProtocol {
 		}
 	}
 	
-	class EntityAddition {
-		public final int eid;
-		public final String data;
-		public final Integer levelDepth;
+	class SpawnData {
+		public final EntityAddition playerData;
+		public final InventoryUpdate inventory;
+		public final StatUpdate stats;
 		
-		private EntityAddition() { this(null, 0, null); }
-		public EntityAddition(Entity e) { this(e, e.getLevel()); }
-		private EntityAddition(Entity e, Level level) { this(Entity.serialize(e), e.getId(), level == null ? null : level.getDepth()); }
-		public EntityAddition(String data, int eid, Integer levelDepth) {
-			this.data = data;
+		private SpawnData() { this(null, null, null); }
+		public SpawnData(EntityAddition playerData, Player player) { this(playerData, new InventoryUpdate(player), new StatUpdate(player)); }
+		public SpawnData(EntityAddition playerData, InventoryUpdate inventory, StatUpdate stats) {
+			this.playerData = playerData;
+			this.inventory = inventory;
+			this.stats = stats;
+		}
+	}
+	
+	class EntityAddition {
+		public final PositionUpdate positionUpdate;
+		public final SpriteUpdate spriteUpdate;
+		public final int eid;
+		
+		private EntityAddition() { this(0, null, null); }
+		public EntityAddition(Entity e) { this(e.getId(), new PositionUpdate(e), new SpriteUpdate(e)); }
+		public EntityAddition(int eid, PositionUpdate positionUpdate, SpriteUpdate spriteUpdate) {
 			this.eid = eid;
-			this.levelDepth = levelDepth;
+			this.positionUpdate = positionUpdate;
+			this.spriteUpdate = spriteUpdate;
 		}
 	}
 	
@@ -146,62 +157,86 @@ public interface GameProtocol {
 		}
 	}
 	
-	class Ping {
-		// this is the occasional ping sent by each client, to make sure things like position are still accurate.
-		public final float x, y;
+	// sent by server (and client in response to server ping) to make sure the client is still connected.
+	// however, might not be needed since I'm using kryonet.
+	//class Ping {}
+	
+	/*
+		The server sends to the clients entity position, and new entity animations.
 		
-		private Ping() { this(0, 0); }
-		public Ping(Player player) { this(player.getPosition()); }
-		public Ping(Vector2 pos) { this(pos.x, pos.y); }
-		public Ping(float x, float y) {
-			this.x = x;
-			this.y = y;
+		The client moves itself at a speed previously set by the server, and sends to the server which direction they are going, and where they ended up. If the server finds that the client's position according to it differs from the received position by more than a quarter tile, then it sends back a player update to correct the client's position.
+	 */
+	
+	// the server won't receive this, only the client. The entity is updated even if the entity given by the tag is the client player.
+	class EntityUpdate {
+		public final PositionUpdate positionUpdate; // can be null
+		public final SpriteUpdate spriteUpdate; // can be null
+		public final EntityTag tag;
+		
+		private EntityUpdate() { this(null, null, null); }
+		public EntityUpdate(EntityTag tag, PositionUpdate positionUpdate, SpriteUpdate spriteUpdate) {
+			this.tag = tag;
+			this.positionUpdate = positionUpdate;
+			this.spriteUpdate = spriteUpdate;
 		}
 	}
 	
-	class Movement {
+	// sent in EntityUpdate
+	class PositionUpdate {
 		public final float x, y, z;
-		public final int eid;
-		public final Integer levelDepth;
+		public final Integer levelDepth; // can be null
 		
-		private Movement() { this(0, null, 0, 0, 0); }
-		public Movement(Entity e) { this(e, e.getLevel(), new Vector3(e.getPosition(), e.getZ())); }
-		private Movement(Entity e, Level level, Vector3 pos) { this(e.getId(), level==null?null:level.getDepth(), pos); }
-		public Movement(int eid, Integer depth, Vector3 pos) { this(eid, depth, pos.x, pos.y, pos.z); }
-		public Movement(int eid, Integer depth, float x, float y, float z) {
+		private PositionUpdate() { this(null, 0, 0, 0); }
+		public PositionUpdate(Entity e) { this(e, e.getLevel(), e.getLocation()); }
+		private PositionUpdate(Entity e, Level level, Vector3 pos) { this(level==null?null:level.getDepth(), pos); }
+		public PositionUpdate(Integer depth, Vector3 pos) { this(depth, pos.x, pos.y, pos.z); }
+		public PositionUpdate(Integer depth, float x, float y, float z) {
 			this.levelDepth = depth;
 			this.x = x;
 			this.y = y;
 			this.z = z;
-			this.eid = eid;
+		}
+		
+		public boolean variesFrom(Entity entity) { return variesFrom(entity, entity.getLevel()); }
+		private boolean variesFrom(Entity entity, Level level) { return variesFrom(entity.getPosition(), level==null?null:level.getDepth()); }
+		public boolean variesFrom(Vector3 pos, Integer levelDepth) { return variesFrom(new Vector2(pos.x, pos.y), levelDepth); }
+		public boolean variesFrom(Vector2 pos, Integer levelDepth) {
+			if(pos.dst(x, y) > 0.25) return true;
+			
+			if((levelDepth == null) != (this.levelDepth == null)) return true;
+			if(levelDepth != null && !levelDepth.equals(this.levelDepth)) return true;
+			
+			return false;
 		}
 	}
 	
+	// sent in EntityUpdate
+	class SpriteUpdate {
+		public final String[] rendererData;
+		
+		private SpriteUpdate() { this((String[])null); }
+		public SpriteUpdate(Entity e) { this(e.getRenderer()); }
+		public SpriteUpdate(EntityRenderer renderer) { this(renderer.save()); }
+		public SpriteUpdate(String[] rendererData) {
+			this.rendererData = rendererData;
+		}
+	}
+	
+	// sent by client to interact or attack.
 	class InteractRequest {
 		public final boolean attack;
-		public final PlayerUpdate update;
+		public final PositionUpdate playerPosition;
 		
 		private InteractRequest() { this(false, null); }
-		public InteractRequest(boolean attack, PlayerUpdate update) {
+		public InteractRequest(boolean attack, PositionUpdate playerPosition) {
 			this.attack = attack;
-			this.update = update;
+			this.playerPosition = playerPosition;
 		}
 	}
 	
-	class StatChange {
-		public final int stat, amt;
-		
-		private StatChange() { this(0, 0); }
-		public StatChange(Stat stat, int amt) { this(stat.ordinal(), amt); }
-		public StatChange(int statOrd, int amt) {
-			this.stat = statOrd;
-			this.amt = amt;
-		}
-	}
-	
+	// sent by server to tell clients to use blinking rendering.
 	class Hurt {
 		public final int damage;
-		public final String[] attackItem;
 		public final Tag source, target;
 		
 		private Hurt() { this(null, null, 0, null); }
@@ -209,10 +244,47 @@ public interface GameProtocol {
 			this.source = source;
 			this.target = target;
 			this.damage = damage;
-			this.attackItem = attackItem;
 		}
 	}
 	
+	// sent by client to tell the server that it wishes to move in the given direction.
+	class PlayerMovement {
+		public final float xdir;
+		public final float ydir;
+		
+		public final PositionUpdate playerPosition; // where the client thinks it should be, after moving.
+		
+		private PlayerMovement() { this(0, 0, null); }
+		public PlayerMovement(Vector2 dir, PositionUpdate playerPosition) { this(dir.x, dir.y, playerPosition); }
+		public PlayerMovement(float xdir, float ydir, PositionUpdate playerPosition) {
+			this.xdir = xdir;
+			this.ydir = ydir;
+			this.playerPosition = playerPosition;
+		}
+	}
+	
+	class StatUpdate {
+		public final Integer[] stats;
+		
+		private StatUpdate() { this((Integer[])null); }
+		public StatUpdate(Player player) { this(player.saveStats()); }
+		public StatUpdate(Integer[] stats) {
+			this.stats = stats;
+		}
+	}
+	
+	// sent by client to let the server know that a new held item has been selected from the inventory.
+	class HeldItemRequest {
+		public final ItemStack stack;
+		
+		private HeldItemRequest() { this((ItemStack)null); }
+		public HeldItemRequest(Hands hands) { this(new ItemStack(hands.getUsableItem(), hands.getCount())); }
+		public HeldItemRequest(ItemStack stack) {
+			this.stack = stack;
+		}
+	}
+	
+	// sent by client to drop an item from the inventory
 	class ItemDropRequest {
 		public final ItemStack stack;
 		
@@ -222,6 +294,7 @@ public interface GameProtocol {
 		}
 	}
 	
+	// sent by server to update clients' inventory, after dropping items and attacking/interacting.
 	class InventoryUpdate {
 		public final String[] inventory;
 		public final String[] heldItemStack;

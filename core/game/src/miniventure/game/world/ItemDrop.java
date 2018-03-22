@@ -2,11 +2,6 @@ package miniventure.game.world;
 
 import miniventure.game.item.Item;
 
-import com.badlogic.gdx.math.Vector2;
-
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 public class ItemDrop {
 	
 	/*

@@ -32,7 +32,7 @@ public class GameCore {
 	
 	private static SpriteBatch batch;
 	private static FreeTypeFontGenerator fontGenerator;
-	private static GlyphLayout layout;
+	private static GlyphLayout layout = new GlyphLayout();
 	private static Skin skin;
 	
 	public static void initGdx() {
@@ -44,7 +44,6 @@ public class GameCore {
 		batch = new SpriteBatch();
 		//font = new BitmapFont(); // uses libGDX's default Arial font
 		fontGenerator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/arial.ttf"));
-		layout = new GlyphLayout();
 		skin = new Skin(Gdx.files.internal("skins/visui/uiskin.json"));
 		
 		for(AtlasRegion region: iconAtlas.getRegions())
@@ -66,7 +65,8 @@ public class GameCore {
 	
 	
 	public static GlyphLayout getTextLayout(String text) {
-		layout.setText(getFont(), text);
+		if(fontGenerator != null)
+			layout.setText(getFont(), text);
 		return layout;
 	}
 	

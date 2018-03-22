@@ -1,9 +1,9 @@
 package miniventure.game.item;
 
 import miniventure.game.world.Level;
-import miniventure.game.world.entity.particle.TextParticle;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.mob.Player.Stat;
+import miniventure.game.world.entity.particle.TextParticle;
 
 import com.badlogic.gdx.graphics.Color;
 

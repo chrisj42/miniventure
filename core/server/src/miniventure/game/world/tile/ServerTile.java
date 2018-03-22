@@ -2,6 +2,7 @@ package miniventure.game.world.tile;
 
 import miniventure.game.GameProtocol.TileUpdate;
 import miniventure.game.server.ServerCore;
+import miniventure.game.world.ServerLevel;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -20,7 +21,8 @@ public class ServerTile extends Tile {
 	}
 	
 	
-	@NotNull @Override public ServerLevel getLevel() { return level; }
+	@NotNull @Override
+	public ServerLevel getLevel() { return level; }
 	
 	@Override
 	public boolean addTile(@NotNull TileType newType) {

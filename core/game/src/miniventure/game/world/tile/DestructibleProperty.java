@@ -10,7 +10,6 @@ import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.particle.ActionParticle;
 import miniventure.game.world.entity.particle.TextParticle;
 
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

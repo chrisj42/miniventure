@@ -1,6 +1,5 @@
 package miniventure.game.client;
 
-import miniventure.game.GameProtocol;
 import miniventure.game.GameProtocol.DatalessRequest;
 import miniventure.game.GameProtocol.LevelData;
 import miniventure.game.screen.LoadingScreen;
@@ -10,11 +9,13 @@ import miniventure.game.screen.RespawnScreen;
 import miniventure.game.server.ServerCore;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.Chunk.ChunkData;
+import miniventure.game.world.ClientLevel;
 import miniventure.game.world.Level;
 import miniventure.game.world.TimeOfDay;
 import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
-import miniventure.game.world.entity.mob.Player;
+import miniventure.game.world.entity.Entity;
+import miniventure.game.world.entity.mob.ClientPlayer;
 import miniventure.game.world.tile.TilePropertyInstanceFetcher;
 
 import com.badlogic.gdx.utils.Array;
@@ -40,7 +41,7 @@ public class ClientWorld extends WorldManager {
 	
 	private GameClient client;
 	
-	private Player mainPlayer;
+	private ClientPlayer mainPlayer;
 	
 	ClientWorld(GameScreen gameScreen) {
 		super(new TilePropertyInstanceFetcher(instanceTemplate -> instanceTemplate));
@@ -58,7 +59,7 @@ public class ClientWorld extends WorldManager {
 		
 		MenuScreen menu = ClientCore.getScreen();
 		
-		Level level = mainPlayer.getLevel();
+		ClientLevel level = mainPlayer.getLevel();
 		if(level == null) {
 			if(!(menu instanceof RespawnScreen))
 				ClientCore.setScreen(new RespawnScreen());
@@ -66,9 +67,9 @@ public class ClientWorld extends WorldManager {
 		}
 		
 		gameScreen.handleInput(mainPlayer);
-		mainPlayer.updateStats(delta);
+		//mainPlayer.updateStats(delta);
 		
-		level.updateEntities(getEntities(level), delta, false);
+		//level.updateEntities(getEntities(level), delta);
 		
 		if(menu == null || !menu.usesWholeScreen())
 			gameScreen.render(mainPlayer, TimeOfDay.getSkyColors(gameTime), level);
@@ -118,7 +119,7 @@ public class ClientWorld extends WorldManager {
 	
 	
 	public void addLevel(LevelData data) {
-		addLevel(new Level(this, data.depth, data.width, data.height));
+		addLevel(new ClientLevel(this, data.depth, data.width, data.height));
 	}
 	
 	public void loadChunk(ChunkData data) {
@@ -142,7 +143,7 @@ public class ClientWorld extends WorldManager {
 	/*  --- PLAYER MANAGEMENT --- */
 	
 	
-	public void spawnPlayer(Player mainPlayer) {
+	public void spawnPlayer(ClientPlayer mainPlayer) {
 		Level level = getLevel(0);//mainPlayer == null ?  : mainPlayer.getLevel();
 		if(this.mainPlayer != null)
 			this.mainPlayer.remove();
@@ -178,7 +179,13 @@ public class ClientWorld extends WorldManager {
 	
 	public GameClient getClient() { return client; }
 	
-	public Player getMainPlayer() { return mainPlayer; }
+	@Override
+	public ClientLevel getLevel(int depth) { return (ClientLevel) super.getLevel(depth); }
+	
+	@Override
+	public ClientLevel getEntityLevel(Entity e) { return (ClientLevel) super.getEntityLevel(e); }
+	
+	public ClientPlayer getMainPlayer() { return mainPlayer; }
 	
 	@Override
 	public String toString() { return "ClientWorld"; }

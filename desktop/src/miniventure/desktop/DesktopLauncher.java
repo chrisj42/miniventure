@@ -1,7 +1,7 @@
 package miniventure.desktop;
 
-import miniventure.game.client.ClientCore;
 import miniventure.game.GameCore;
+import miniventure.game.client.ClientCore;
 import miniventure.game.server.ServerCore;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;

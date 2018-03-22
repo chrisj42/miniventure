@@ -1,6 +1,8 @@
 package miniventure.game.world;
 
+import miniventure.game.GameProtocol.EntityAddition;
 import miniventure.game.item.Item;
+import miniventure.game.server.ServerCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.entity.Entity;
@@ -13,7 +15,6 @@ import miniventure.game.world.levelgen.LevelGenerator;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileType;
 
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -40,8 +41,8 @@ public class ServerLevel extends Level {
 		super.entityMoved(entity);
 		Chunk newChunk = entityChunks.get(entity);
 		
-		//if(newChunk != prevChunk)
-			//ServerCore.getServer().broadcast(new EntityAddition(entity), this);
+		if(newChunk != prevChunk)
+			ServerCore.getServer().broadcast(new EntityAddition(entity), this);
 	}
 	
 	public void update(Entity[] entities, float delta) {
@@ -59,14 +60,12 @@ public class ServerLevel extends Level {
 		}
 		
 		// update entities
-		updateEntities(entities, delta, true);
+		updateEntities(entities, delta);
 		
 		if(entities.length < getEntityCap() && MathUtils.randomBoolean(0.01f))
 			spawnMob(new MobAi(getWorld(), AiType.values[MathUtils.random(AiType.values.length-1)]));
 	}
 	
-	@Override
-	public void render(Rectangle renderSpace, SpriteBatch batch, float delta, Vector2 posOffset) {}
 	@Override
 	public Array<Vector3> renderLighting(Rectangle renderSpace) { return new Array<>(); }
 	
@@ -87,7 +86,7 @@ public class ServerLevel extends Level {
 		 		But if it finds a non-solid tile, it drops it towards the non-solid tile.
 		  */
 		
-		ItemEntity ie = new ItemEntity(getWorld(), item, Vector2.Zero.cpy()); // this is a dummy variable.
+		ItemEntity ie = new ItemEntity(item, Vector2.Zero.cpy()); // this is a dummy variable.
 		
 		Tile closest = getTile(dropPos.x, dropPos.y);
 		
@@ -123,7 +122,7 @@ public class ServerLevel extends Level {
 		else
 			dropDir = targetPos.sub(dropPos);
 		
-		ie = new ItemEntity(getWorld(), item, dropDir);
+		ie = new ItemEntity(item, dropDir);
 		
 		ie.moveTo(this, dropPos);
 		getWorld().setEntityLevel(ie, this);

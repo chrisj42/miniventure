@@ -13,8 +13,9 @@ import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.entity.Entity;
-import miniventure.game.world.entity.mob.Player;
+import miniventure.game.world.entity.mob.ServerPlayer;
 
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
@@ -24,8 +25,8 @@ import org.jetbrains.annotations.NotNull;
 
 public class GameServer implements GameProtocol {
 	
-	private final HashMap<Connection, Player> connectionToPlayerMap = new HashMap<>();
-	private final HashMap<Player, Connection> playerToConnectionMap = new HashMap<>();
+	private final HashMap<Connection, ServerPlayer> connectionToPlayerMap = new HashMap<>();
+	private final HashMap<ServerPlayer, Connection> playerToConnectionMap = new HashMap<>();
 	
 	private Server server;
 	
@@ -44,7 +45,7 @@ public class GameServer implements GameProtocol {
 					// prepare level
 					ServerLevel level = world.getLevel(0);
 					if(level != null) {
-						Player player = world.addPlayer();
+						ServerPlayer player = world.addPlayer();
 						System.out.println("server player level: " + player.getLevel());
 						connectionToPlayerMap.put(connection, player);
 						playerToConnectionMap.put(player, connection);
@@ -52,10 +53,13 @@ public class GameServer implements GameProtocol {
 						connection.sendTCP(new LevelData(level));
 						for(ChunkData chunk: playerChunks)
 							connection.sendTCP(chunk);
-						connection.sendTCP(new SpawnData(player));
+						connection.sendTCP(new SpawnData(new EntityAddition(player), player));
 						System.out.println("server player level: " + player.getLevel());
 					}
+					return;
 				}
+				
+				ServerPlayer p = connectionToPlayerMap.get(connection);
 				
 				if(object instanceof ChunkRequest) {
 					System.out.println("server received chunk request");
@@ -70,10 +74,9 @@ public class GameServer implements GameProtocol {
 					}
 				}
 				
-				if(object instanceof Movement) {
+				if(object instanceof PositionUpdate) {
 					//System.out.println("server received movement");
-					Movement m = (Movement) object;
-					Player p = connectionToPlayerMap.get(connection);
+					PositionUpdate m = (PositionUpdate) object;
 					Level level = world.getLevel(m.levelDepth);
 					//p.move(new Vector3(m.x, m.y, m.z).sub(new Vector3(p.getPosition(), p.getZ())));
 					if(level != null)
@@ -84,16 +87,35 @@ public class GameServer implements GameProtocol {
 				if(object instanceof InteractRequest) {
 					System.out.println("server received interaction request");
 					InteractRequest r = (InteractRequest) object;
-					Player p = connectionToPlayerMap.get(connection);
-					r.update.apply(p);
+					if(r.playerPosition.variesFrom(p))
+						connection.sendTCP(new PositionUpdate(p)); // fix the player's position
 					if(r.attack) p.attack();
 					else p.interact();
 				}
 				
+				forPacket(object, PlayerMovement.class, r -> {
+					p.moveInDir(new Vector2(r.xdir, r.ydir));
+				});
+				
+				forPacket(object, ItemDropRequest.class, drop -> {
+					int removed = p.getInventory().removeItem(drop.stack);
+					ServerLevel level = p.getLevel();
+					if(level == null) return;
+					for(int i = 0; i < removed; i++)
+						level.dropItem(drop.stack.item.copy(), p.getPosition(), null);
+				});
+				
+				forPacket(object, HeldItemRequest.class, handItem -> {
+					p.getHands().clearItem(p.getInventory());
+					int count = p.getInventory().removeItem(handItem.stack);
+					if(count > 0)
+						p.getHands().setItem(handItem.stack.item, count);
+				});
+				
 				if(object.equals(DatalessRequest.Respawn)) {
-					Player client = connectionToPlayerMap.get(connection);
+					ServerPlayer client = connectionToPlayerMap.get(connection);
 					world.respawnPlayer(client);
-					connection.sendTCP(new SpawnData(client));
+					connection.sendTCP(new SpawnData(new EntityAddition(client), client));
 				}
 			}
 			
@@ -104,7 +126,7 @@ public class GameServer implements GameProtocol {
 			
 			@Override
 			public void disconnected(Connection connection) {
-				Player player = connectionToPlayerMap.get(connection);
+				ServerPlayer player = connectionToPlayerMap.get(connection);
 				if(player != null)
 					player.remove();
 				
@@ -129,37 +151,37 @@ public class GameServer implements GameProtocol {
 		return true;
 	}
 	
-	public void sendToPlayer(@NotNull Player player, Object obj) {
+	public void sendToPlayer(@NotNull ServerPlayer player, Object obj) {
 		Connection c = playerToConnectionMap.get(player);
 		if(c != null)
 			c.sendTCP(obj);
 	}
 	
 	// levelMask is the level a player must be on to receive this data.
-	public void broadcast(Object obj, Level levelMask, @NotNull Player... exclude) {
+	public void broadcast(Object obj, Level levelMask, @NotNull ServerPlayer... exclude) {
 		if(levelMask == null) return; // no level, no packet.
 		
-		Array<Player> players = new Array<>(exclude);
-		for(Player p: playerToConnectionMap.keySet())
+		Array<ServerPlayer> players = new Array<>(exclude);
+		for(ServerPlayer p: playerToConnectionMap.keySet())
 			if(levelMask.equals(p.getLevel()))
 				players.add(p);
 		
-		for(Player p: exclude)
+		for(ServerPlayer p: exclude)
 			players.removeValue(p, false);
 		
-		broadcast(obj, false, players.toArray(Player.class));
+		broadcast(obj, false, players.toArray(ServerPlayer.class));
 	}
-	public void broadcast(Object obj, @NotNull Player... excludedPlayers) { broadcast(obj, false, excludedPlayers); }
-	public void broadcast(Object obj, boolean includeGiven, @NotNull Player... players) {
-		Set<Player> playerSet = new HashSet<>(playerToConnectionMap.keySet());
-		List<Player> playerList = Arrays.asList(players);
+	public void broadcast(Object obj, @NotNull ServerPlayer... excludedPlayers) { broadcast(obj, false, excludedPlayers); }
+	public void broadcast(Object obj, boolean includeGiven, @NotNull ServerPlayer... players) {
+		Set<ServerPlayer> playerSet = new HashSet<>(playerToConnectionMap.keySet());
+		List<ServerPlayer> playerList = Arrays.asList(players);
 		
 		if(includeGiven)
 			playerSet.retainAll(playerList);
 		else
 			playerSet.removeAll(playerList);
 		
-		for(Player p: playerSet)
+		for(ServerPlayer p: playerSet)
 			playerToConnectionMap.get(p).sendTCP(obj);
 	}
 }

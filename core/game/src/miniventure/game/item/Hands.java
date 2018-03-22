@@ -4,7 +4,6 @@ import miniventure.game.GameCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;
-import miniventure.game.world.entity.mob.Player.Stat;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 
@@ -85,29 +84,11 @@ public class Hands {
 	void dropStack(@NotNull ItemStack stack) {}
 	
 	public void resetItemUsage() {
-		if(count <= 0) { // this shouldn't happen, generally... unless stuff has been removed from the active item by the crafting menu.
+		if(count <= 0) // this shouldn't happen, generally... unless stuff has been removed from the active item by the crafting menu.
 			reset();
-			return;
-		}
-		
-		if(!item.isUsed()) return;
-		
-		Item newItem = item.resetUsage();
-		
-		player.changeStat(Stat.Stamina, -item.getStaminaUsage());
-		
-		if(count == 1 || item instanceof HandItem)
-			setItem(newItem == null ? new HandItem() : newItem, 1);
-		else {
-			count--;
-			if(newItem != null && !player.takeItem(newItem)) {// will add it to hand, or inventory, whichever fits.
-				// this happens if the inventory is full; in such a case, drop the new item on the ground.
-				dropStack(new ItemStack(newItem, 1)); // if there was a new item, and it couldn't be picked up, then the count is not decreased.
-			}
-		}
 	}
 	
-	public boolean hasUsableItem() { return !(item.isUsed() || count <= 0 || player.getStat(Stat.Stamina) < item.getStaminaUsage()); }
+	public boolean hasUsableItem() { return !(item.isUsed() || count <= 0); }
 	
 	@NotNull
 	public Item getUsableItem() { return item; }

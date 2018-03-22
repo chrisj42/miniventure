@@ -5,8 +5,11 @@ import java.util.Arrays;
 import miniventure.game.util.FrameBlinker;
 import miniventure.game.util.Version;
 import miniventure.game.world.Level;
-import miniventure.game.world.WorldManager;
 import miniventure.game.world.entity.Entity;
+import miniventure.game.world.entity.EntityRenderer;
+import miniventure.game.world.entity.EntityRenderer.BlinkRenderer;
+import miniventure.game.world.entity.EntityRenderer.SpriteRenderer;
+import miniventure.game.world.entity.ServerEntity;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
@@ -17,7 +20,7 @@ import com.badlogic.gdx.utils.Array;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class BounceEntity extends Entity {
+public abstract class BounceEntity extends ServerEntity {
 	
 	private static final float GRAVITY = -50;
 	private static final float REBOUND_SPEED_FACTOR = 0.5f;
@@ -28,23 +31,25 @@ public abstract class BounceEntity extends Entity {
 	
 	private Vector3 velocity; // in tiles / second.
 	private float time; // the current time relative to the creation of this item entity. used as the current position along the "x-axis".
-	private FrameBlinker blinker;
+	//private FrameBlinker blinker;
 	
 	private float lastBounceTime; // used to halt the entity once it starts bouncing a lot really quickly.
 	
-	public BounceEntity(@NotNull WorldManager world, @Nullable Vector2 goalDir, float lifetime) {
-		super(world);
+	public BounceEntity(@Nullable Vector2 goalDir, float lifetime) {
+		super();
 		this.lifetime = lifetime;
 		if(goalDir == null)
 			goalDir = new Vector2().setToRandomDirection();
 		
-		blinker = new FrameBlinker(1, 1, false);
+		//blinker = new FrameBlinker(1, 1, false);
 		
 		velocity = new Vector3(goalDir.cpy().nor().scl(MathUtils.random(0.5f, 2.5f)), MathUtils.random(8f, 12f));
+		
+		setBlinker(lifetime * BLINK_THRESHOLD, false, new FrameBlinker(1, 1, false));
 	}
 	
-	protected BounceEntity(@NotNull WorldManager world, String[][] allData, Version version) {
-		super(world, Arrays.copyOfRange(allData, 0, allData.length-1), version);
+	protected BounceEntity(String[][] allData, Version version) {
+		super(Arrays.copyOfRange(allData, 0, allData.length-1), version);
 		String[] data = allData[allData.length-1];
 		lifetime = Float.parseFloat(data[0]);
 		float x = Float.parseFloat(data[1]);
@@ -54,7 +59,8 @@ public abstract class BounceEntity extends Entity {
 		time = Float.parseFloat(data[4]);
 		lastBounceTime = Float.parseFloat(data[5]);
 		
-		blinker = new FrameBlinker(1, 1, false);
+		//blinker = new FrameBlinker(1, 1, false);
+		setBlinker(lifetime * BLINK_THRESHOLD, false, new FrameBlinker(1, 1, false));
 	}
 	
 	@Override
@@ -121,11 +127,11 @@ public abstract class BounceEntity extends Entity {
 	@Override
 	public boolean isPermeableBy(Entity entity, boolean delegate) { return true; }
 	
-	@Override
+	/*@Override
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
 		blinker.update(delta);
 		
 		if(time < lifetime * BLINK_THRESHOLD || blinker.shouldRender())
 			super.render(batch, delta, posOffset);
-	}
+	}*/
 }

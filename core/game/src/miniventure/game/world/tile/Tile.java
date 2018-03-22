@@ -1,22 +1,17 @@
 package miniventure.game.world.tile;
 
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.Stack;
-import java.util.TreeMap;
 
 import miniventure.game.item.Item;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Level;
 import miniventure.game.world.Point;
-import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Player;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
@@ -130,11 +125,6 @@ public class Tile implements WorldObject {
 	public WorldManager getWorld() { return level.getWorld(); }
 	
 	@NotNull @Override public Level getLevel() { return level; }
-	@Nullable @Override public ServerLevel getServerLevel() {
-		if(level instanceof ServerLevel)
-			return (ServerLevel) level;
-		return null;
-	}
 	
 	@NotNull
 	@Override public Rectangle getBounds() { return new Rectangle(x, y, 1, 1); }
@@ -279,68 +269,7 @@ public class Tile implements WorldObject {
 	}
 	
 	@Override
-	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
-		/*
-			- Get the surrounding tile types for a tile
-			- draw an overlap only after all the centers under it have been drawn
-				So, before drawing an overlap, check that the current center is supposed to be drawn under it.
-		 */
-		
-		TileType[][] aroundTypes = new TileType[9][];
-		int idx = 0;
-		for(int x = -1; x <= 1; x++) {
-			for (int y = -1; y <= 1; y++) {
-				Tile oTile = level.getTile(this.x + x, this.y + y);
-				if(x == 0 && y == 0) {if(oTile != this) throw new IllegalStateException("Level reference or position of Tile " + this + " is faulty; Level "+level+" returns Tile " + oTile + " at position "+this.x+","+this.y+"."); aroundTypes[idx] = new TileType[0]; }
-				else aroundTypes[idx] = oTile != null ? oTile.getTypes() : new TileType[0];
-				idx++;
-			}
-		}
-		
-		Array<AtlasRegion> sprites = new Array<>();
-		
-		TileType[] mainTypes = getTypes();
-		int firstIdx = 0;
-		for(int i = mainTypes.length-1; i >= 0; i--) {
-			if(mainTypes[i].getProp(TilePropertyType.Render).isOpaque()) {
-				firstIdx = i;
-				break;
-			}
-		}
-		
-		// To find overlap sprites, it's easier if the tiles are sorted by TileType first, and then position.
-		TreeMap<TileType, Boolean[]> overlappingTypes = new TreeMap<>();
-		Boolean[] model = new Boolean[9];
-		Arrays.fill(model, Boolean.FALSE);
-		for(int i = 0; i < aroundTypes.length; i++) {
-			for (TileType oType : aroundTypes[i]) { // doesn't matter the order.
-				if(!oType.getProp(TilePropertyType.Overlap).canOverlap()) continue; // the type can't even overlap anyway.
-				//if(TileType.tileSorter.compare(mainTypes[firstIdx], oType) >= 0) continue; // the type is lower than the lowest *visible* main type.
-				overlappingTypes.putIfAbsent(oType, Arrays.copyOf(model, model.length));
-				overlappingTypes.get(oType)[i] = true;
-			}
-		}
-		
-		Iterator<TileType> overlapTypeIter = overlappingTypes.tailMap(mainTypes[firstIdx], false).keySet().iterator();
-		TileType overlapType = overlapTypeIter.hasNext() ? overlapTypeIter.next() : null; // this type will always be just above mainTypes[firstIdx].
-		
-		for(int i = firstIdx; i < mainTypes.length; i++) {
-			// before we use the connection property of the main type, let's check and see if we are transitioning.
-			if(i == mainTypes.length - 1 && mainTypes[i].getProp(TilePropertyType.Transition).playingAnimation(this)) // only the top tile can ever be transitioning.
-				sprites.add(mainTypes[i].getProp(TilePropertyType.Transition).getAnimationFrame(this));
-			else // otherwise, use connection sprite.
-				sprites.add(mainTypes[i].getProp(TilePropertyType.Connect).getSprite(this, aroundTypes));
-			
-			while(overlapType != null && (i >= mainTypes.length-1 || mainTypes[i+1].compareTo(overlapType) > 0)) {
-				sprites.addAll(mainTypes[i].getProp(TilePropertyType.Overlap).getSprites(this, overlapType, overlappingTypes.get(overlapType)));
-				overlapType = overlapTypeIter.hasNext() ? overlapTypeIter.next() : null;
-			}
-		}
-		
-		
-		for(AtlasRegion texture: sprites)
-			batch.draw(texture, (x-posOffset.x) * SIZE, (y-posOffset.y) * SIZE);
-	}
+	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {}
 	
 	
 	@Override
@@ -428,20 +357,25 @@ public class Tile implements WorldObject {
 		}
 	}
 	
-	public static class TileTag implements Tag {
+	public static class TileTag implements Tag<Tile> {
 		public final int x;
 		public final int y;
+		public final int levelDepth;
 		
-		private TileTag() { this(0, 0); }
-		public TileTag(Tile tile) { this(tile.x, tile.y); }
-		public TileTag(int x, int y) {
+		private TileTag() { this(0, 0, 0); }
+		public TileTag(Tile tile) { this(tile.x, tile.y, tile.getLevel().getDepth()); }
+		public TileTag(int x, int y, int levelDepth) {
 			this.x = x;
 			this.y = y;
+			this.levelDepth = levelDepth;
 		}
 		
 		@Override
-		public WorldObject getObject(WorldManager world) {
-			return world.getLevel(0).getTile(x, y);
+		public Tile getObject(WorldManager world) {
+			Level level = world.getLevel(levelDepth);
+			if(level != null)
+				return level.getTile(x, y);
+			return null;
 		}
 	}
 	

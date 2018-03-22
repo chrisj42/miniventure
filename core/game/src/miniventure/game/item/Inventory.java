@@ -1,7 +1,5 @@
 package miniventure.game.item;
 
-import java.util.Arrays;
-
 import miniventure.game.util.MyUtils;
 
 import com.badlogic.gdx.utils.Array;
@@ -78,6 +76,7 @@ public class Inventory {
 	}
 	
 	/// Returns how many items could successfully be removed.
+	public int removeItem(ItemStack stack) { return removeItem(stack.item, stack.count); }
 	public int removeItem(Item item) { return removeItem(item, 1); }
 	public int removeItem(Item item, int count) { return removeItem(item, count, true); }
 	public int removeItem(Item item, int count, boolean startFromBack) {

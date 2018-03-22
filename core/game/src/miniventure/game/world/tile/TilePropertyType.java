@@ -50,10 +50,10 @@ public final class TilePropertyType<PT extends TilePropertyInstance> {
 		Render, Overlap, Connect, Light, Update, Solid, Touch, Attack, Interact, Transition
 	};
 	
-	private static final HashMap<TilePropertyType<?>, Integer> ordinalToValue = new HashMap<>();
+	private static final HashMap<TilePropertyType<?>, Integer> valueToOrdinal = new HashMap<>();
 	static {
 		for(int i = 0; i < values.length; i++)
-			ordinalToValue.put(values[i], i);
+			valueToOrdinal.put(values[i], i);
 	}
 	
 	private static final HashMap<String, TilePropertyType<?>> nameToValue = new HashMap<>();
@@ -78,7 +78,7 @@ public final class TilePropertyType<PT extends TilePropertyInstance> {
 	public static TilePropertyType valueOf(String str) { return nameToValue.get(str); }
 	
 	public String name() { return valueToName.get(this); }
-	public int ordinal() { return ordinalToValue.get(this); }
+	public int ordinal() { return valueToOrdinal.get(this); }
 	
 	@Override public int hashCode() { return ordinal(); }
 	@Override public boolean equals(Object other) { return other instanceof TilePropertyType && ((TilePropertyType)other).ordinal() == ordinal(); }

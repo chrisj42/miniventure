@@ -3,7 +3,6 @@ package miniventure.game.world.tile;
 import miniventure.game.item.Item;
 import miniventure.game.world.entity.mob.Player;
 
-
 import org.jetbrains.annotations.Nullable;
 
 @FunctionalInterface

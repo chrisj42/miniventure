@@ -4,6 +4,12 @@ import miniventure.game.GameProtocol.ChunkRequest;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.ClientWorld;
 import miniventure.game.world.entity.Entity;
+import miniventure.game.world.entity.particle.Particle;
+
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -18,6 +24,28 @@ public class ClientLevel extends Level {
 	
 	@Override @NotNull
 	public ClientWorld getWorld() { return world; }
+	
+	public void render(Rectangle renderSpace, SpriteBatch batch, float delta, Vector2 posOffset) {
+		renderSpace = new Rectangle(Math.max(0, renderSpace.x), Math.max(0, renderSpace.y), Math.min(getWidth()-renderSpace.x, renderSpace.width), Math.min(getHeight()-renderSpace.y, renderSpace.height));
+		//System.out.println("render space: " + renderSpace);
+		// pass the offset vector to all objects being rendered.
+		
+		Array<WorldObject> objects = new Array<>();
+		objects.addAll(getOverlappingTiles(renderSpace)); // tiles first
+		
+		Array<Entity> entities = getOverlappingEntities(renderSpace); // entities second
+		entities.sort((e1, e2) -> {
+			if(e1 instanceof Particle && !(e2 instanceof Particle))
+				return 1;
+			if(!(e1 instanceof Particle) && e2 instanceof Particle)
+				return -1;
+			return Float.compare(e2.getCenter().y, e1.getCenter().y);
+		});
+		objects.addAll(entities);
+		
+		for(WorldObject obj: objects)
+			obj.render(batch, delta, posOffset);
+	}
 	
 	@Override
 	void loadChunk(Point chunkCoord) { ClientCore.getClient().send(new ChunkRequest(chunkCoord)); }

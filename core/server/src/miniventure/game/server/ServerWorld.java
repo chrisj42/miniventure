@@ -4,7 +4,7 @@ import java.util.HashSet;
 
 import miniventure.game.GameProtocol.EntityAddition;
 import miniventure.game.GameProtocol.EntityRemoval;
-import miniventure.game.GameProtocol.StatChange;
+import miniventure.game.GameProtocol.StatUpdate;
 import miniventure.game.ProgressPrinter;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.Level;
@@ -12,7 +12,7 @@ import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
-import miniventure.game.world.entity.mob.Player;
+import miniventure.game.world.entity.mob.ServerPlayer;
 import miniventure.game.world.levelgen.LevelGenerator;
 import miniventure.game.world.tile.DestructibleProperty;
 import miniventure.game.world.tile.ServerDestructibleProperty;
@@ -65,7 +65,7 @@ public class ServerWorld extends WorldManager {
 		
 		HashSet<ServerLevel> loadedLevels = new HashSet<>();
 		for(WorldObject obj: keepAlives) {
-			ServerLevel level = obj.getServerLevel();
+			ServerLevel level = (ServerLevel) obj.getLevel();
 			if(level != null)
 				loadedLevels.add(level);
 		}
@@ -120,10 +120,7 @@ public class ServerWorld extends WorldManager {
 	/*  --- LEVEL MANAGEMENT --- */
 	
 	
-	@Override
-	public ServerLevel getLevel(int depth) { return (ServerLevel) super.getLevel(depth); }
-	@Override
-	public ServerLevel getEntityLevel(Entity e) { return (ServerLevel) super.getEntityLevel(e); }
+	
 	
 	
 	/*  --- ENTITY MANAGEMENT --- */
@@ -131,14 +128,14 @@ public class ServerWorld extends WorldManager {
 	
 	@Override
 	public void setEntityLevel(Entity e, @NotNull Level level) {
-		Level previous = getEntityLevel(e);
+		ServerLevel previous = getEntityLevel(e);
 		super.setEntityLevel(e, level);
-		Level newLevel = getEntityLevel(e);
+		ServerLevel newLevel = getEntityLevel(e);
 		
 		if(!newLevel.equals(previous)) {
-			if(e instanceof Player) {
-				server.broadcast(new EntityRemoval(e), previous, (Player)e);
-				server.broadcast(new EntityAddition(e), newLevel, (Player)e);
+			if(e instanceof ServerPlayer) {
+				server.broadcast(new EntityRemoval(e), previous, (ServerPlayer)e);
+				server.broadcast(new EntityAddition(e), newLevel, (ServerPlayer)e);
 			} else {
 				server.broadcast(new EntityRemoval(e), previous);
 				server.broadcast(new EntityAddition(e), newLevel);
@@ -155,9 +152,9 @@ public class ServerWorld extends WorldManager {
 	/*  --- PLAYER MANAGEMENT --- */
 	
 	
-	public Player addPlayer() {
-		Player player = new Player(this);
-		player.setStatListener(((stat, amt) -> server.sendToPlayer(player, new StatChange(stat, amt))));
+	public ServerPlayer addPlayer() {
+		ServerPlayer player = new ServerPlayer();
+		player.setStatListener(((stat, amt) -> server.sendToPlayer(player, new StatUpdate(player.saveStats()))));
 		
 		keepAlives.add(player);
 		
@@ -166,7 +163,7 @@ public class ServerWorld extends WorldManager {
 		return player;
 	}
 	
-	public void respawnPlayer(Player player) {
+	public void respawnPlayer(ServerPlayer player) {
 		player.reset();
 		
 		ServerLevel level = getLevel(0);
@@ -196,6 +193,12 @@ public class ServerWorld extends WorldManager {
 	}
 	
 	public GameServer getServer() { return server; }
+	
+	@Override
+	public ServerLevel getLevel(int depth) { return (ServerLevel) super.getLevel(depth); }
+	
+	@Override
+	public ServerLevel getEntityLevel(Entity e) { return (ServerLevel) super.getEntityLevel(e); }
 	
 	@Override
 	public String toString() { return "ServerWorld"; }

@@ -13,6 +13,18 @@ public class TimeBlinker implements Blinker {
 		this.timeOff = timeOff;
 		this.startOn = startOn;
 	}
+	TimeBlinker(String[] data) {
+		this(Float.parseFloat(data[0]), Float.parseFloat(data[1]), Boolean.parseBoolean(data[2]));
+	}
+	
+	@Override
+	public String[] save() {
+		return new String[] {
+			timeOn+"",
+			timeOff+"",
+			startOn+""
+		};
+	}
 	
 	@Override
 	public void update(float delta) {

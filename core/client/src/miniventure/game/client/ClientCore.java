@@ -7,9 +7,11 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import miniventure.game.GameCore;
-import miniventure.game.world.WorldManager;
+import miniventure.game.GameProtocol.HeldItemRequest;
+import miniventure.game.item.InventoryScreen;
 import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
+import miniventure.game.world.WorldManager;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -83,6 +85,9 @@ public class ClientCore extends ApplicationAdapter {
 	}
 	
 	public static void setScreen(@Nullable MenuScreen screen) {
+		if(menuScreen instanceof InventoryScreen)
+			getClient().send(new HeldItemRequest(clientWorld.getMainPlayer().getHands()));
+		
 		if(screen == null && menuScreen != null)
 			menuScreen.dispose();
 		else if(screen != null)

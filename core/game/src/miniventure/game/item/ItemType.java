@@ -2,7 +2,6 @@ package miniventure.game.item;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
-import java.util.HashMap;
 
 import miniventure.game.item.ToolItem.Material;
 import miniventure.game.util.MyUtils;

@@ -1,23 +1,15 @@
 package miniventure.game.client;
 
 import miniventure.game.GameCore;
-import miniventure.game.GameProtocol.InteractRequest;
-import miniventure.game.GameProtocol.Movement;
-import miniventure.game.item.CraftingScreen;
-import miniventure.game.item.Hands;
-import miniventure.game.item.Inventory;
-import miniventure.game.item.InventoryScreen;
-import miniventure.game.item.Recipes;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Chunk;
+import miniventure.game.world.ClientLevel;
 import miniventure.game.world.Level;
 import miniventure.game.world.TimeOfDay;
-import miniventure.game.world.entity.mob.Player;
-import miniventure.game.world.entity.mob.Player.PlayerUpdate;
+import miniventure.game.world.entity.mob.ClientPlayer;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -46,7 +38,6 @@ public class GameScreen {
 	private float maxWorldViewHeight = 0;
 	
 	private SpriteBatch batch = GameCore.getBatch();
-	private BitmapFont font = GameCore.getFont();
 	
 	private final OrthographicCamera camera, uiCamera;
 	private int zoom = 0;
@@ -65,46 +56,8 @@ public class GameScreen {
 			lightingBuffer.dispose();
 	}
 	
-	public void handleInput(@NotNull Player player) {
-		Vector2 mouseInput = getMouseInput();
-		
-		Vector2 movement = new Vector2();
-		if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) movement.x--;
-		if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) movement.x++;
-		if(Gdx.input.isKeyPressed(Input.Keys.UP)) movement.y++;
-		if(Gdx.input.isKeyPressed(Input.Keys.DOWN)) movement.y--;
-		
-		movement.nor();
-		
-		movement.add(mouseInput);
-		movement.nor();
-		
-		boolean moved = player.move(movement, Gdx.graphics.getDeltaTime());
-		
-		if(moved)
-			ClientCore.getClient().send(new Movement(player));
-		
-		if(!player.isKnockedBack()) {
-			if (ClientCore.input.pressingKey(Input.Keys.C))
-				ClientCore.getClient().send(new InteractRequest(true, new PlayerUpdate(player)));
-			else if (ClientCore.input.pressingKey(Input.Keys.V))
-				ClientCore.getClient().send(new InteractRequest(false, new PlayerUpdate(player)));
-			
-			//if(Gdx.input.isKeyPressed(Input.Keys.C) || Gdx.input.isKeyPressed(Input.Keys.V))
-			//	animator.requestState(AnimationState.ATTACK);
-		}
-		
-		Hands hands = player.getHands();
-		Inventory inventory = player.getInventory();
-		
-		hands.resetItemUsage();
-		
-		if(ClientCore.input.pressingKey(Input.Keys.E)) {
-			hands.clearItem(inventory);
-			ClientCore.setScreen(new InventoryScreen(inventory, hands));
-		}
-		else if(ClientCore.input.pressingKey(Input.Keys.Z))
-			ClientCore.setScreen(new CraftingScreen(Recipes.recipes, inventory));
+	public void handleInput(@NotNull ClientPlayer player) {
+		player.handleInput(getMouseInput());
 		
 		if(Gdx.input.isKeyJustPressed(Keys.MINUS))
 			zoom(-1);
@@ -118,7 +71,7 @@ public class GameScreen {
 			debug = !debug;
 	}
 	
-	public void render(@NotNull Player mainPlayer, Color[] lightOverlays, @NotNull Level level) {
+	public void render(@NotNull ClientPlayer mainPlayer, Color[] lightOverlays, @NotNull ClientLevel level) {
 		
 		// get the size of the area of the game on screen by projecting the application window dimensions into world space.
 		Vector3 screenSize = new Vector3(Gdx.graphics.getWidth(), 0, 0); // because unproject has origin at the top, so the upper right corner is at (width, 0).
@@ -225,7 +178,7 @@ public class GameScreen {
 		return new Vector2();
 	}
 	
-	private void renderGui(@NotNull Player mainPlayer, @NotNull Level level) {
+	private void renderGui(@NotNull ClientPlayer mainPlayer, @NotNull Level level) {
 		batch.setProjectionMatrix(uiCamera.combined);
 		
 		// draw UI for current item, and stats

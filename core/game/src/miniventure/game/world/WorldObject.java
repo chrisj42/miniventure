@@ -14,8 +14,6 @@ public interface WorldObject extends Boundable {
 	
 	@NotNull WorldManager getWorld();
 	
-	@Nullable ServerLevel getServerLevel();
-	
 	void update(float delta);
 	
 	void render(SpriteBatch batch, float delta, Vector2 posOffset);
@@ -35,8 +33,8 @@ public interface WorldObject extends Boundable {
 	
 	void touching(Entity entity);
 	
-	interface Tag {
-		WorldObject getObject(WorldManager world);
+	interface Tag<T extends WorldObject> {
+		T getObject(WorldManager world);
 	}
 	
 	Tag getTag();

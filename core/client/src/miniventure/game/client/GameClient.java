@@ -4,18 +4,20 @@ import java.io.IOException;
 
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol;
-import miniventure.game.item.Item;
 import miniventure.game.screen.MainMenu;
+import miniventure.game.util.FrameBlinker;
 import miniventure.game.util.ProgressLogger;
 import miniventure.game.world.Chunk.ChunkData;
+import miniventure.game.world.ClientLevel;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
+import miniventure.game.world.entity.ClientEntity;
 import miniventure.game.world.entity.Entity;
-import miniventure.game.world.entity.mob.Player;
-import miniventure.game.world.entity.mob.Player.PlayerUpdate;
+import miniventure.game.world.entity.EntityRenderer;
+import miniventure.game.world.entity.ServerEntity;
+import miniventure.game.world.entity.mob.ClientPlayer;
 import miniventure.game.world.tile.Tile;
 
-import com.badlogic.gdx.math.Vector3;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
@@ -48,8 +50,8 @@ public class GameClient implements GameProtocol {
 				
 				if(object instanceof SpawnData) {
 					System.out.println("client received player");
-					SpawnData data = (SpawnData) object; 
-					world.spawnPlayer((Player)Entity.deserialize(data.playerData, world, data.eid));
+					SpawnData data = (SpawnData) object;
+					world.spawnPlayer(new ClientPlayer(data));
 					ClientCore.setScreen(null);
 				}
 				
@@ -63,31 +65,32 @@ public class GameClient implements GameProtocol {
 						update.tileData.apply(tile);
 				}
 				
-				if(object instanceof PlayerUpdate) {
-					System.out.println("client received update");
-					((PlayerUpdate)object).apply(world.getMainPlayer());
-				}
-				
 				if(object instanceof Hurt) {
 					System.out.println("client received object hurt");
 					Hurt hurt = (Hurt) object;
 					
 					WorldObject target = hurt.target.getObject(world);
 					WorldObject source = hurt.source.getObject(world);
-					Item attackItem = Item.load(hurt.attackItem);
-					target.attackedBy(source, attackItem, hurt.damage);
+					
+					// TODO later, show health bar
+					//target.attackedBy(source, attackItem, hurt.damage);
+					if(target instanceof Entity)
+						((Entity)target).setBlinker(0.5f, true, new FrameBlinker(5, 1, false));
 				}
 				
 				if(object instanceof EntityAddition) {
 					System.out.println("client received entity addition");
 					EntityAddition addition = (EntityAddition) object;
-					if(addition.levelDepth == null) return; // no point to it, really.
-					Entity e = Entity.deserialize(addition.data, world, addition.eid);
-					Player player = world.getMainPlayer();
-					if(player != null && e.getId() == player.getId()) return; // shouldn't pay attention to trying to set the client player like this.
-					Level level = world.getLevel(addition.levelDepth);
-					if(level != null)
-						world.setEntityLevel(e, level);
+					if(addition.positionUpdate.levelDepth == null) return; // no point to it, really.
+					
+					ClientPlayer player = world.getMainPlayer();
+					if(player != null && addition.eid == player.getId()) return; // shouldn't pay attention to trying to set the client player like this.
+					ClientLevel level = world.getLevel(addition.positionUpdate.levelDepth);
+					if(level == null || (player != null && !level.equals(player.getLevel()))) return;
+					
+					ClientEntity e = new ClientEntity(addition.eid, EntityRenderer.deserialize(addition.spriteUpdate.rendererData));
+					PositionUpdate newPos = addition.positionUpdate;
+					e.moveTo(level, newPos.x, newPos.y, newPos.z);
 				}
 				
 				if(object instanceof EntityRemoval) {
@@ -96,17 +99,30 @@ public class GameClient implements GameProtocol {
 					world.deregisterEntity(eid);
 				}
 				
-				if(object instanceof Movement) {
+				if(object instanceof EntityUpdate) {
 					//System.out.println("client received entity movement");
-					Movement move = (Movement) object;
-					if(world.getMainPlayer() != null && move.eid == world.getMainPlayer().getId()) return; // no sense to have the server move the client... at least not at this point in development.
-					Entity e = world.getEntity(move.eid);
-					Level level = move.levelDepth == null ? null : world.getLevel(move.levelDepth);
-					if(e != null && level != null) {
-						e.move(new Vector3(move.x, move.y, move.z).sub(new Vector3(e.getPosition(), e.getZ())));
-						e.moveTo(level, move.x, move.y, move.z);
+					EntityUpdate update = (EntityUpdate) object;
+					PositionUpdate newPos = update.positionUpdate;
+					SpriteUpdate newSprite = update.spriteUpdate;
+					
+					ServerEntity e = (ServerEntity) update.tag.getObject(world);
+					if(e == null) return;
+					
+					if(newPos != null) {
+						ClientLevel level = newPos.levelDepth == null ? null : world.getLevel(newPos.levelDepth);
+						if(level != null)
+							e.moveTo(level, newPos.x, newPos.y, newPos.z);
+					}
+					if(newSprite != null) {
+						e.setRenderer(EntityRenderer.deserialize(newSprite.rendererData));
 					}
 				}
+				
+				forPacket(object, InventoryUpdate.class, newInv -> {
+					ClientPlayer player = world.getMainPlayer();
+					player.getInventory().loadItems(newInv.inventory);
+					player.getHands().loadItem(newInv.heldItemStack);
+				});
 			}
 			
 			@Override

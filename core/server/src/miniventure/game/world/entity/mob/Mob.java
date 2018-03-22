@@ -2,7 +2,8 @@ package miniventure.game.world.entity.mob;
 
 import java.util.Arrays;
 
-import miniventure.game.GameProtocol.Hurt;
+import miniventure.game.GameProtocol.EntityUpdate;
+import miniventure.game.GameProtocol.SpriteUpdate;
 import miniventure.game.item.Item;
 import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolType;
@@ -10,17 +11,15 @@ import miniventure.game.util.FrameBlinker;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
 import miniventure.game.world.ServerLevel;
-import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Direction;
-import miniventure.game.world.entity.Entity;
+import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.MobAnimationController.AnimationState;
 import miniventure.game.world.entity.particle.TextParticle;
 import miniventure.game.world.tile.TileType;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
@@ -31,7 +30,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * This class is necessary because it ought to nicely package up the functionality of a mob, that moves around, and has up/down/left/right walking animations. Though, I may move the directional + state driven animation to its own class...
  */
-public abstract class Mob extends Entity {
+public abstract class Mob extends ServerEntity {
 	
 	// for knockback, the whole process should take about 0.5s. The first half at a constant speed, and the second half can be spend slowing down at a linear pace.
 	
@@ -56,8 +55,8 @@ public abstract class Mob extends Entity {
 	
 	private final String spriteName;
 	
-	public Mob(@NotNull WorldManager world, @NotNull String spriteName, int health) {
-		super(world);
+	public Mob(@NotNull String spriteName, int health) {
+		super();
 		dir = Direction.DOWN;
 		this.maxHealth = health;
 		this.health = health;
@@ -67,10 +66,13 @@ public abstract class Mob extends Entity {
 		blinker = new FrameBlinker(5, 1, false);
 		
 		animator = new MobAnimationController(this, spriteName);
+		
+		// TODO mob animations
+		//setRenderer(new AnimationRenderer());
 	}
 	
-	protected Mob(@NotNull WorldManager world, String[][] allData, Version version) {
-		super(world, Arrays.copyOfRange(allData, 0, allData.length-1), version);
+	protected Mob(String[][] allData, Version version) {
+		super(Arrays.copyOfRange(allData, 0, allData.length-1), version);
 		String[] data = allData[allData.length-1];
 		
 		this.spriteName = data[0];
@@ -113,7 +115,7 @@ public abstract class Mob extends Entity {
 		knockbackTimeLeft = 0;
 		knockbackVelocity.setZero();
 		invulnerableTime = 0;
-		animator.pollAnimation(0);
+		animator.progressAnimation(0);
 	}
 	
 	protected int getHealth() { return health; }
@@ -123,13 +125,12 @@ public abstract class Mob extends Entity {
 	
 	public boolean isKnockedBack() { return knockbackTimeLeft > 0 && knockbackVelocity.len() > 0; }
 	
-	@Override
-	protected TextureRegion getSprite() { return animator.getSprite(); }
+	//@Override
+	//protected TextureRegion getSprite() { return animator.getSprite(); }
 	
 	@Override
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
 		blinker.update(delta);
-		animator.pollAnimation(delta);
 		
 		if(invulnerableTime <= 0 || blinker.shouldRender())
 			super.render(batch, delta, posOffset);
@@ -137,7 +138,10 @@ public abstract class Mob extends Entity {
 	
 	@Override
 	public void update(float delta) {
-		super.update(delta);
+		animator.progressAnimation(delta);
+		SpriteUpdate newSprite = animator.getSpriteUpdate();
+		if(newSprite != null)
+			updateCache = new EntityUpdate(getTag(), updateCache == null ? null : updateCache.positionUpdate, newSprite);
 		
 		if(knockbackTimeLeft > 0) {
 			super.move(new Vector2(knockbackVelocity).scl(delta));
@@ -147,6 +151,8 @@ public abstract class Mob extends Entity {
 				knockbackVelocity.setZero();
 			}
 		}
+		
+		super.update(delta);
 		
 		if(invulnerableTime > 0) invulnerableTime -= Math.min(invulnerableTime, delta);
 	}
@@ -208,12 +214,12 @@ public abstract class Mob extends Entity {
 			knockbackTimeLeft = MyUtils.map(Math.min(healthPercent, DAMAGE_PERCENT_FOR_MAX_PUSH), 0, DAMAGE_PERCENT_FOR_MAX_PUSH, MIN_KNOCKBACK_TIME, MAX_KNOCKBACK_TIME);
 		}
 		
-		ServerLevel level = getServerLevel();
+		ServerLevel level = getLevel();
 		if(level != null) {
 			// send to clients
 			// TODO send hurt event to clients
 			//level.getWorld().getSender().sendData(new Hurt(obj.getTag(), getTag(), damage, Item.save(item)));
-			level.addEntity(new TextParticle(getWorld(), damage + "", this instanceof Player ? Color.PINK : Color.RED), getCenter(), true);
+			level.addEntity(new TextParticle(damage + "", this instanceof ServerPlayer ? Color.PINK : Color.RED), getCenter(), true);
 		}
 		
 		if (health == 0)

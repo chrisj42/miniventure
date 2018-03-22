@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-import miniventure.game.GameProtocol;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.tile.TilePropertyInstanceFetcher;
 
@@ -87,7 +86,7 @@ public abstract class WorldManager {
 	
 	public int getLevelCount() { return levelEntities.size(); }
 	public int getEntityCount(Level level) {
-		return getFromEntitySet(level, set -> set.size());
+		return getFromEntitySet(level, Set::size);
 	}
 	
 	protected Entity[] getEntities(Level level) {
