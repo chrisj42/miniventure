@@ -29,12 +29,12 @@ class Testing {
 	}
 	private static void displayLevelVisually(int width, int height, int scale, long seed) {
 		LevelGenerator gen = new LevelGenerator(seed, 0, 0, 32, 6);
-		TileType[][] tiles = gen.generateTiles(0, 0, width, height);
+		TileType[][][] tiles = gen.generateTiles(0, 0, width, height);
 		
 		Color[][] colors = new Color[width][height];
 		for(int x = 0; x < tiles.length; x++)
 			for(int y = 0; y < tiles[x].length; y++)
-				colors[x][y] = tileMap.get(tiles[x][y]);
+				colors[x][y] = tileMap.get(tiles[x][y][0]);
 		
 		displayMap(width, height, colors, scale);
 	}

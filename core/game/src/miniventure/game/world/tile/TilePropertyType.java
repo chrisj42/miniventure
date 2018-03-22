@@ -17,6 +17,7 @@ public final class TilePropertyType<PT extends TilePropertyInstance> {
 		
 	 */
 	
+	private static int curOrdinal = 0;
 	
 	/* --- TYPE DEFINITIONS --- */
 	
@@ -45,17 +46,6 @@ public final class TilePropertyType<PT extends TilePropertyInstance> {
 	/* --- ENUMERATION SETUP --- */
 	
 	
-	/** @noinspection unchecked*/
-	public static final TilePropertyType<? extends TilePropertyInstance>[] values = new TilePropertyType[] {
-		Render, Overlap, Connect, Light, Update, Solid, Touch, Attack, Interact, Transition
-	};
-	
-	private static final HashMap<TilePropertyType<?>, Integer> valueToOrdinal = new HashMap<>();
-	static {
-		for(int i = 0; i < values.length; i++)
-			valueToOrdinal.put(values[i], i);
-	}
-	
 	private static final HashMap<String, TilePropertyType<?>> nameToValue = new HashMap<>();
 	private static final HashMap<TilePropertyType<?>, String> valueToName = new HashMap<>();
 	static {
@@ -74,11 +64,16 @@ public final class TilePropertyType<PT extends TilePropertyInstance> {
 			valueToName.put(nameToValue.get(name), name);
 	}
 	
-	public static TilePropertyType<? extends TilePropertyInstance>[] values() { return Arrays.copyOf(values, values.length); }
+	/** @noinspection unchecked*/
+	public static TilePropertyType<? extends TilePropertyInstance>[] values() { return valueToName.keySet().toArray(new TilePropertyType[valueToName.size()]); }
 	public static TilePropertyType valueOf(String str) { return nameToValue.get(str); }
 	
+	public static final TilePropertyType<? extends TilePropertyInstance>[] values = values();
+	
+	private final int ordinal;
+	
 	public String name() { return valueToName.get(this); }
-	public int ordinal() { return valueToOrdinal.get(this); }
+	public int ordinal() { return ordinal; }
 	
 	@Override public int hashCode() { return ordinal(); }
 	@Override public boolean equals(Object other) { return other instanceof TilePropertyType && ((TilePropertyType)other).ordinal() == ordinal(); }
@@ -95,6 +90,8 @@ public final class TilePropertyType<PT extends TilePropertyInstance> {
 	
 	private TilePropertyType(PropertyFetcher<PT> defaultInstance) {
 		this.defaultInstance = defaultInstance;
+		ordinal = curOrdinal;
+		curOrdinal++;
 	}
 	
 	public PT getDefaultInstance(TileType tileType) { return defaultInstance.getProperty(tileType); }

@@ -12,12 +12,15 @@ import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
+import miniventure.game.world.entity.mob.Player.Stat;
 import miniventure.game.world.entity.mob.ServerPlayer;
+import miniventure.game.world.entity.particle.TextParticle;
 import miniventure.game.world.levelgen.LevelGenerator;
 import miniventure.game.world.tile.DestructibleProperty;
 import miniventure.game.world.tile.ServerDestructibleProperty;
 import miniventure.game.world.tile.TilePropertyInstanceFetcher;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
@@ -154,7 +157,15 @@ public class ServerWorld extends WorldManager {
 	
 	public ServerPlayer addPlayer() {
 		ServerPlayer player = new ServerPlayer();
-		player.setStatListener(((stat, amt) -> server.sendToPlayer(player, new StatUpdate(player.saveStats()))));
+		player.setStatListener(((stat, amt) -> {
+			server.sendToPlayer(player, new StatUpdate(player.saveStats()));
+			
+			if(stat == Stat.Hunger && amt > 0) {
+				Level level = player.getLevel();
+				if (level != null)
+					level.addEntity(new TextParticle(amt + "", Color.CORAL), player.getCenter(), true);
+			}
+		}));
 		
 		keepAlives.add(player);
 		

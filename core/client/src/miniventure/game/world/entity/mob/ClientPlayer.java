@@ -24,6 +24,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
+import org.jetbrains.annotations.NotNull;
+
 public class ClientPlayer extends ClientEntity implements Player {
 	
 	private final EnumMap<Stat, Integer> stats = new EnumMap<>(Stat.class);
@@ -50,6 +52,14 @@ public class ClientPlayer extends ClientEntity implements Player {
 	
 	@Override
 	public Integer[] saveStats() { return Stat.save(stats); }
+	
+	@Override
+	public int changeStat(@NotNull Stat stat, int amt) {
+		int prevVal = stats.get(stat);
+		stats.put(stat, Math.max(0, Math.min(stat.max, stats.get(stat) + amt)));
+		
+		return stats.get(stat) - prevVal;
+	}
 	
 	@Override public Direction getDirection() { return dir; }
 	@Override public Inventory getInventory() { return inventory; }

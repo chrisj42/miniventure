@@ -7,8 +7,6 @@ import miniventure.game.item.ToolItem.Material;
 import miniventure.game.item.ToolType;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.WorldObject;
-import miniventure.game.world.entity.particle.ActionParticle;
-import miniventure.game.world.entity.particle.TextParticle;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,16 +17,16 @@ public class DestructibleProperty implements TilePropertyInstance {
 		return new DestructibleProperty(tileType, -1, (PreferredTool)null, item -> false);
 	}
 	
-	private static final int HEALTH_IDX = 0;
+	static final int HEALTH_IDX = 0;
 	
-	private final int totalHealth;
+	final int totalHealth;
 	
 	@NotNull private final PreferredTool[] preferredTools;
 	
 	@NotNull private final DamageConditionCheck[] damageConditions;
-	@NotNull private final ItemDrop[] drops;
+	@NotNull final ItemDrop[] drops;
 	
-	@NotNull private final TileType tileType;
+	@NotNull final TileType tileType;
 	
 	// main constructor
 	DestructibleProperty(@NotNull TileType tileType, int totalHealth, @Nullable PreferredTool[] preferredTools, @Nullable DamageConditionCheck[] damageConditions, @Nullable ItemDrop... drops) {
@@ -92,34 +90,10 @@ public class DestructibleProperty implements TilePropertyInstance {
 	
 	
 	boolean tileAttacked(@NotNull Tile tile, @NotNull WorldObject attacker, @Nullable Item item, int damage) {
-		damage = getDamage(item, damage);
-		
-		if(damage > 0) {
-			//if(tile.getServerLevel() != null)
-			//	tile.getLevel().getWorld().getSender().sendData(new Hurt(attacker.getTag(), tile.getTag(), damage, Item.save(item)));
-			
-			// add damage particle
-			tile.getLevel().addEntity(ActionParticle.ActionType.IMPACT.get(tile.getWorld(), null), tile.getCenter(), true);
-			
-			int health = totalHealth > 1 ? new Integer(tile.getData(TilePropertyType.Attack, tileType, HEALTH_IDX)) : 1;
-			health -= damage;
-			if(totalHealth > 1)
-				tile.getLevel().addEntity(new TextParticle(tile.getWorld(), damage+""), tile.getCenter(), true);
-			if(health <= 0) {
-				tile.breakTile();
-				dropItems(drops, tile, attacker);
-			} else
-				tile.setData(TilePropertyType.Attack, tileType, HEALTH_IDX, health+"");
-			
-			return true;
-		}
-		
 		return false;
 	}
 	
-	void dropItems(ItemDrop[] drops, @NotNull Tile tile, @NotNull WorldObject attacker) {}
-	
-	private int getDamage(@Nullable Item attackItem, int damage) {
+	int getDamage(@Nullable Item attackItem, int damage) {
 		if(damageConditions.length > 0) {
 			// must satisfy at least one condition
 			boolean doDamage = true;

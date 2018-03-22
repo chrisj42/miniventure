@@ -1,11 +1,7 @@
 package miniventure.game.item;
 
-import miniventure.game.world.Level;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.mob.Player.Stat;
-import miniventure.game.world.entity.particle.TextParticle;
-
-import com.badlogic.gdx.graphics.Color;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -33,9 +29,6 @@ public enum FoodItem {
 				int gained = player.changeStat(Stat.Hunger, healthGained);
 				if(gained > 0) {
 					use();
-					Level level = player.getLevel();
-					if (level != null)
-						level.addEntity(new TextParticle(level.getWorld(), gained + "", Color.CORAL), player.getCenter(), true);
 				}
 			}
 		};

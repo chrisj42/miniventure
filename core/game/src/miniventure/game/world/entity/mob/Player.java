@@ -12,6 +12,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
+import org.jetbrains.annotations.NotNull;
+
 public interface Player extends WorldObject {
 	
 	int INV_SIZE = 20;
@@ -70,6 +72,7 @@ public interface Player extends WorldObject {
 	}
 	
 	Integer[] saveStats();
+	int changeStat(@NotNull Stat stat, int amt);
 	
 	default Rectangle getInteractionRect() {
 		Rectangle bounds = getBounds();
