@@ -9,8 +9,11 @@ import org.jetbrains.annotations.Nullable;
 
 public class ClientEntity extends Entity {
 	
-	public ClientEntity(int eid, @NotNull EntityRenderer renderer) {
+	private final boolean permeable;
+	
+	public ClientEntity(int eid, boolean permeable, @NotNull EntityRenderer renderer) {
 		super(ClientCore.getWorld(), eid);
+		this.permeable = permeable;
 		setRenderer(renderer);
 	}
 	
@@ -19,6 +22,9 @@ public class ClientEntity extends Entity {
 	
 	@Nullable @Override
 	public ClientLevel getLevel() { return (ClientLevel) super.getLevel(); }
+	
+	@Override
+	public boolean isPermeable() { return permeable; }
 	
 	@Override
 	public void update(float delta) {}

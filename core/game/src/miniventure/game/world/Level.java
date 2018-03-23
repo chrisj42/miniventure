@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import miniventure.game.util.MyUtils;
 import miniventure.game.util.SynchronizedAccessor;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Player;
@@ -63,11 +64,14 @@ public abstract class Level {
 	protected void putLoadedChunk(Point p, Chunk c) { loadedChunks.access(chunks -> chunks.put(p, c)); }
 	
 	public synchronized void entityMoved(Entity entity) {
-		Point entityChunk = getClosestChunkCoord(entity.getCenter());
+		Point entityChunk = entity.getLevel() != this ? null : getClosestChunkCoord(entity.getCenter());
 		Point curChunk = entityChunks.get(entity);
-		boolean chunkChanged = !(curChunk == null && entityChunk == null) && ((curChunk == null || entityChunk == null) || !curChunk.equals(entityChunk));
 		
-		if(!chunkChanged) return;
+		if(!MyUtils.nullablesAreEqual(curChunk, entityChunk)) return;
+		else if(curChunk == null || entityChunk == null)
+			System.err.println("Level nullable chunk comparison failed, both null but considered different.");
+		
+		System.out.println(world+" entity "+entity+" changed chunk, from "+curChunk+" to "+entityChunk);
 		
 		if(entityChunk == null)
 			entityChunks.remove(entity);
@@ -76,10 +80,22 @@ public abstract class Level {
 		
 		if(!world.isKeepAlive(entity)) return;
 		
+		System.out.println("keep alive changed chunk on "+world);
+		
+		pruneLoadedChunks();
+		
+		// load any new chunks surrounding the given entity
+		for (Point p : getAreaChunkCoords(entity.getCenter(), 1, false, true)) {
+			System.out.println("loading chunk on "+world+" at "+p);
+			loadChunk(p);
+		}
+	}
+	
+	void pruneLoadedChunks() {
 		// check for any chunks that no longer need to be loaded
 		Array<Point> chunkCoords = new Array<>(loadedChunks.<Point[]>get(chunks -> chunks.keySet().toArray(new Point[chunks.size()])));
 		for(WorldObject obj: world.getKeepAlives(this)) // remove loaded chunks in radius
-			chunkCoords.removeAll(getAreaChunks(obj.getCenter(), 2, true, false), false);
+			chunkCoords.removeAll(getAreaChunkCoords(obj.getCenter(), 2, true, false), false);
 		
 		// chunkCoords now contains all chunks which have no nearby keepAlive object, so they should be unloaded.
 		for(Point chunkCoord: chunkCoords) {
@@ -96,11 +112,6 @@ public abstract class Level {
 			// I don't think I have to worry about the tiles...
 			// now, remove the chunk from the set of loaded chunks
 			unloadChunk(chunkCoord);
-		}
-		
-		// load any new chunks surrounding the given entity
-		for (Point p : getAreaChunks(entity.getCenter(), 1, false, true)) {
-			loadChunk(p);
 		}
 	}
 	
@@ -231,13 +242,13 @@ public abstract class Level {
 	}
 	
 	// chunkRadius is in chunks.
-	protected Array<Point> getAreaChunks(Vector2 tilePos, int chunkRadius, boolean loaded, boolean unloaded) {
-		return getAreaChunks(tilePos.x, tilePos.y, chunkRadius, loaded, unloaded);
+	public Array<Point> getAreaChunkCoords(Vector2 tilePos, int chunkRadius, boolean loaded, boolean unloaded) {
+		return getAreaChunkCoords(tilePos.x, tilePos.y, chunkRadius, loaded, unloaded);
 	}
-	protected Array<Point> getAreaChunks(float x, float y, int radius, boolean loaded, boolean unloaded) {
-		return getAreaChunks(Chunk.getCoord(x), Chunk.getCoord(y), radius, loaded, unloaded);
+	public Array<Point> getAreaChunkCoords(float x, float y, int radius, boolean loaded, boolean unloaded) {
+		return getAreaChunkCoords(Chunk.getCoord(x), Chunk.getCoord(y), radius, loaded, unloaded);
 	}
-	protected Array<Point> getAreaChunks(int chunkX, int chunkY, int radius, boolean loaded, boolean unloaded) {
+	public Array<Point> getAreaChunkCoords(int chunkX, int chunkY, int radius, boolean loaded, boolean unloaded) {
 		Array<Point> chunkCoords = new Array<>();
 		for(int x = chunkX - radius; x <= chunkX + radius; x++) {
 			for (int y = chunkY - radius; y <= chunkY + radius; y++) {
@@ -289,11 +300,6 @@ public abstract class Level {
 	}
 	
 	abstract Tile createTile(int x, int y, TileType[] types, String[] data);
-	
-	public void loadChunk(Chunk newChunk) {
-		tileCount += newChunk.width * newChunk.height;
-		putLoadedChunk(new Point(newChunk.chunkX, newChunk.chunkY), newChunk);
-	}
 	
 	abstract void loadChunk(Point chunkCoord);
 	abstract void unloadChunk(Point chunkCoord);

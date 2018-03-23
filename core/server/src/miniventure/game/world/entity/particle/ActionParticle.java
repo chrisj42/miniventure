@@ -4,7 +4,6 @@ import java.util.Arrays;
 
 import miniventure.game.util.Version;
 import miniventure.game.world.entity.Direction;
-import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.EntityRenderer.AnimationRenderer;
 import miniventure.game.world.entity.ServerEntity;
 
@@ -84,5 +83,5 @@ public class ActionParticle extends ServerEntity implements Particle {
 	}
 	
 	@Override
-	public boolean isPermeableBy(Entity entity, boolean delegate) { return true; }
+	public boolean isPermeable() { return true; }
 }

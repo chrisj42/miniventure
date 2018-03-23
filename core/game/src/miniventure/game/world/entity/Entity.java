@@ -10,10 +10,10 @@ import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -73,7 +73,7 @@ public abstract class Entity implements WorldObject {
 	
 	@Override
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
-		renderer.render((x-posOffset.x) * Tile.SIZE, (y+z - posOffset.y) * Tile.SIZE, batch, delta);
+		getRenderer().render((x-posOffset.x) * Tile.SIZE, (y+z - posOffset.y) * Tile.SIZE, batch, delta);
 	}
 	
 	protected Rectangle getUnscaledBounds() {
@@ -82,6 +82,7 @@ public abstract class Entity implements WorldObject {
 	}
 	
 	public Vector3 getLocation() { return new Vector3(x, y, z); }
+	public Vector3 getLocation(boolean worldOriginCenter) { return new Vector3(getPosition(worldOriginCenter), z); }
 		
 	@Override @NotNull
 	public Rectangle getBounds() {
@@ -99,9 +100,80 @@ public abstract class Entity implements WorldObject {
 	public abstract boolean move(float xd, float yd);
 	public abstract boolean move(float xd, float yd, float zd);
 	
+	protected float moveAxis(@NotNull Level level, boolean xaxis, float amt, float other) {
+		if(amt == 0) return 0;
+		Rectangle oldRect = getBounds();
+		oldRect.setPosition(x+(xaxis?0:other), y+(xaxis?other:0));
+		Rectangle newRect = new Rectangle(oldRect.x+(xaxis?amt:0), oldRect.y+(xaxis?0:amt), oldRect.width, oldRect.height);
+		
+		// check and see if the entity can go to the new coordinates.
+		/*
+			We can do this by:
+				- finding entities in the new occupied area that wasn't in the old area, and seeing if any of them prevent this entity from moving
+				- determining which tiles the entity is going to touch, that it isn't already in, and checking to see if any of them prevent movement
+				- calling any interaction methods along the way
+		 */
+		
+		Array<Tile> futureTiles = level.getOverlappingTiles(newRect);
+		Array<Tile> currentTiles = level.getOverlappingTiles(oldRect);
+		Array<Tile> newTiles = new Array<>(futureTiles);
+		
+		
+		newTiles.removeAll(currentTiles, false); // "true" means use == for comparison rather than .equals()
+		
+		// we now have a list of the tiles that will be touched, but aren't now.
+		boolean canMoveCurrent = false;
+		for(Tile tile: currentTiles) // if any are permeable, then don't let the player escape to new impermeable tiles.
+			canMoveCurrent = canMoveCurrent || tile.isPermeableBy(this);
+		
+		boolean canMove = true;
+		for(Tile tile: newTiles) {
+			touchTile(tile);
+			canMove = canMove && (!canMoveCurrent || tile.isPermeableBy(this));
+		}
+		
+		if(canMove && canMoveCurrent) {
+			Array<Tile> oldTiles = new Array<>(currentTiles);
+			oldTiles.removeAll(futureTiles, false);
+			
+			Array<Tile> sameTiles = new Array<>(futureTiles);
+			sameTiles.removeAll(newTiles, false);
+			
+			// check the sameTiles; if at least one is not permeable, and at least one oldTile is, then stop the move.
+			boolean canMoveOld = false, canMoveSame = true;
+			for(Tile oldTile: oldTiles)
+				canMoveOld = canMoveOld || oldTile.isPermeableBy(this);
+			for(Tile sameTile: sameTiles)
+				canMoveSame = canMoveSame && sameTile.isPermeableBy(this);
+			
+			if(!canMoveSame && canMoveOld)
+				canMove = false;
+		}
+		
+		if(!canMove) return 0; // don't bother interacting with entities if tiles prevent movement.
+		
+		// get and touch entities, and check for blockage
+		
+		Array<Entity> newEntities = level.getOverlappingEntities(newRect);
+		newEntities.removeAll(level.getOverlappingEntities(oldRect), true); // because the "old rect" entities are never added in the first place, we don't need to worry about this entity being included in this list, and accidentally interacting with itself.
+		for(Entity entity: newEntities) {
+			touchEntity(entity);
+			canMove = canMove && entity.isPermeableBy(this);
+		}
+		
+		if(!canMove) return 0;
+		
+		// the entity can move.
+		
+		return amt;
+	}
+	
+	void touchTile(Tile tile) {}
+	void touchEntity(Entity entity) {}
+	
 	public void moveTo(@NotNull Level level, @NotNull Vector2 pos) { moveTo(level, pos.x, pos.y); }
 	public void moveTo(@NotNull Level level, float x, float y) {
-		if(level == getLevel() && x == this.x && y == this.y) return; // no action or updating required.
+		//if(level == getLevel() && x == this.x && y == this.y) return; // no action or updating required.
 		
 		// this method doesn't care where you end up.
 		x = Math.max(x, 0);
@@ -142,13 +214,8 @@ public abstract class Entity implements WorldObject {
 	public void touching(Entity entity) {}
 	
 	@Override
-	public final boolean isPermeableBy(Entity entity) { return isPermeableBy(entity, true); }
-	
-	public boolean isPermeableBy(Entity entity, boolean delegate) {
-		if(delegate)
-			return entity.isPermeableBy(this, false);
-		return false;
-	}
+	public final boolean isPermeableBy(Entity e) { return isPermeable(); }
+	public boolean isPermeable() { return false; }
 	
 	@Override
 	public boolean attackedBy(WorldObject obj, @Nullable Item attackItem, int damage) { return false; }

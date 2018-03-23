@@ -29,7 +29,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * This class is necessary because it ought to nicely package up the functionality of a mob, that moves around, and has up/down/left/right walking animations. Though, I may move the directional + state driven animation to its own class...
  */
-public abstract class Mob extends ServerEntity {
+public abstract class ServerMob extends ServerEntity implements Mob {
 	
 	// for knockback, the whole process should take about 0.5s. The first half at a constant speed, and the second half can be spend slowing down at a linear pace.
 	
@@ -54,7 +54,7 @@ public abstract class Mob extends ServerEntity {
 	
 	private final String spriteName;
 	
-	public Mob(@NotNull String spriteName, int health) {
+	public ServerMob(@NotNull String spriteName, int health) {
 		super();
 		dir = Direction.DOWN;
 		this.maxHealth = health;
@@ -69,7 +69,7 @@ public abstract class Mob extends ServerEntity {
 		setRenderer(EntityRenderer.deserialize(animator.getSpriteUpdate().rendererData));
 	}
 	
-	protected Mob(String[][] allData, Version version) {
+	protected ServerMob(String[][] allData, Version version) {
 		super(Arrays.copyOfRange(allData, 0, allData.length-1), version);
 		String[] data = allData[allData.length-1];
 		
@@ -119,7 +119,9 @@ public abstract class Mob extends ServerEntity {
 	}
 	
 	protected int getHealth() { return health; }
+	protected void setHealth(int health) { this.health = health; if(health == 0) remove(); }
 	
+	@Override
 	public Direction getDirection() { return dir; }
 	protected void setDirection(@NotNull Direction dir) { this.dir = dir; }
 	

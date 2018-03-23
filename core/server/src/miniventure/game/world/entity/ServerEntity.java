@@ -62,7 +62,7 @@ public abstract class ServerEntity extends Entity {
 			obj.touching(this);
 		
 		if(updateCache != null) {
-			ServerCore.getServer().broadcast(updateCache);
+			ServerCore.getServer().broadcast(updateCache, this);
 			updateCache = null;
 		}
 	}
@@ -86,74 +86,15 @@ public abstract class ServerEntity extends Entity {
 		return moved;
 	}
 	
-	private float moveAxis(@NotNull Level level, boolean xaxis, float amt, float other) {
-		if(amt == 0) return 0;
-		Rectangle oldRect = getBounds();
-		oldRect.setPosition(x+(xaxis?0:other), y+(xaxis?other:0));
-		Rectangle newRect = new Rectangle(oldRect.x+(xaxis?amt:0), oldRect.y+(xaxis?0:amt), oldRect.width, oldRect.height);
-		
-		// check and see if the entity can go to the new coordinates.
-		/*
-			We can do this by:
-				- finding entities in the new occupied area that wasn't in the old area, and seeing if any of them prevent this entity from moving
-				- determining which tiles the entity is going to touch, that it isn't already in, and checking to see if any of them prevent movement
-				- calling any interaction methods along the way
-		 */
-		
-		Array<Tile> futureTiles = level.getOverlappingTiles(newRect);
-		Array<Tile> currentTiles = level.getOverlappingTiles(oldRect);
-		Array<Tile> newTiles = new Array<>(futureTiles);
-		
-		
-		newTiles.removeAll(currentTiles, false); // "true" means use == for comparison rather than .equals()
-		
-		// we now have a list of the tiles that will be touched, but aren't now.
-		boolean canMoveCurrent = false;
-		for(Tile tile: currentTiles) // if any are permeable, then don't let the player escape to new impermeable tiles.
-			canMoveCurrent = canMoveCurrent || tile.isPermeableBy(this);
-		
-		boolean canMove = true;
-		for(Tile tile: newTiles) {
-			tile.touchedBy(this); // NOTE: I can see this causing an issue if you move too fast; it will "touch" tiles that could be far away, if the player will move there next frame.
-			canMove = canMove && (!canMoveCurrent || tile.isPermeableBy(this));
-		}
-		
-		if(canMove && canMoveCurrent) {
-			Array<Tile> oldTiles = new Array<>(currentTiles);
-			oldTiles.removeAll(futureTiles, false);
-			
-			Array<Tile> sameTiles = new Array<>(futureTiles);
-			sameTiles.removeAll(newTiles, false);
-			
-			// check the sameTiles; if at least one is not permeable, and at least one oldTile is, then stop the move.
-			boolean canMoveOld = false, canMoveSame = true;
-			for(Tile oldTile: oldTiles)
-				canMoveOld = canMoveOld || oldTile.isPermeableBy(this);
-			for(Tile sameTile: sameTiles)
-				canMoveSame = canMoveSame && sameTile.isPermeableBy(this);
-			
-			if(!canMoveSame && canMoveOld)
-				canMove = false;
-		}
-		
-		if(!canMove) return 0; // don't bother interacting with entities if tiles prevent movement.
-		
-		// get and touch entities, and check for blockage
-		
-		Array<Entity> newEntities = level.getOverlappingEntities(newRect);
-		newEntities.removeAll(level.getOverlappingEntities(oldRect), true); // because the "old rect" entities are never added in the first place, we don't need to worry about this entity being included in this list, and accidentally interacting with itself.
-		for(Entity entity: newEntities) {
-			if(!entity.touchedBy(this))
-				this.touchedBy(entity); // to make sure something has a chance to happen, but it doesn't happen twice.
-			
-			canMove = canMove && entity.isPermeableBy(this);
-		}
-		
-		if(!canMove) return 0;
-		
-		// the entity can move.
-		
-		return amt;
+	@Override
+	void touchTile(Tile tile) {
+		tile.touchedBy(this); // NOTE: I can see this causing an issue if you move too fast; it will "touch" tiles that could be far away, if the player will move there next frame.
+	}
+	
+	@Override
+	void touchEntity(Entity entity) {
+		if(!entity.touchedBy(this))
+			this.touchedBy(entity); // to make sure something has a chance to happen, but it doesn't happen twice.
 	}
 	
 	public static String serialize(ServerEntity e) {

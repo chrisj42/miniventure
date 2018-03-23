@@ -1,14 +1,14 @@
 package miniventure.game.world.tile;
 
-import miniventure.game.world.entity.Entity;
 
+import miniventure.game.world.entity.Entity;
 
 @FunctionalInterface
 public interface SolidProperty extends TilePropertyInstance {
 	
-	SolidProperty SOLID = (e) -> false;
-	SolidProperty WALKABLE = (e) -> true;
+	SolidProperty SOLID = e -> false;
+	SolidProperty WALKABLE = e -> true;
 	
-	boolean isPermeableBy(Entity entity);
+	boolean isPermeableBy(Entity e);
 	
 }

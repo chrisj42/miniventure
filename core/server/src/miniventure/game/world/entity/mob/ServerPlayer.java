@@ -2,9 +2,9 @@ package miniventure.game.world.entity.mob;
 
 import java.util.Arrays;
 import java.util.EnumMap;
-import java.util.HashMap;
 
 import miniventure.game.GameProtocol.InventoryUpdate;
+import miniventure.game.GameProtocol.StatUpdate;
 import miniventure.game.item.Hands;
 import miniventure.game.item.Inventory;
 import miniventure.game.item.Item;
@@ -16,39 +16,19 @@ import miniventure.game.world.Boundable;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.particle.ActionParticle.ActionType;
+import miniventure.game.world.entity.particle.TextParticle;
 import miniventure.game.world.tile.Tile;
 
-import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class ServerPlayer extends Mob implements Player {
-	
-	@FunctionalInterface
-	public interface StatListener { void statChanged(Stat stat, int amt); }
-	
-	@Nullable private StatListener statListener = null;
-	public void setStatListener(@Nullable StatListener listener) { statListener = listener; }
-	
-	interface StatEvolver { void update(float delta); }
-	
-	private final HashMap<Class<? extends StatEvolver>, StatEvolver> statEvoMap = new HashMap<>();
-	private <T extends StatEvolver> void addStatEvo(T evolver) {
-		statEvoMap.put(evolver.getClass(), evolver);
-	}
-	<T extends StatEvolver> T getStatEvo(Class<T> clazz) {
-		//noinspection unchecked
-		return (T) statEvoMap.get(clazz);
-	}
-	{
-		addStatEvo(new StaminaSystem());
-		addStatEvo(new HealthSystem());
-		addStatEvo(new HungerSystem());
-	}
+public class ServerPlayer extends ServerMob implements Player {
 	
 	private final EnumMap<Stat, Integer> stats = new EnumMap<>(Stat.class);
 	
@@ -114,39 +94,27 @@ public class ServerPlayer extends Mob implements Player {
 		
 		int change = stats.get(stat) - prevVal;
 		
-		if(change != 0 && statListener != null)
-			statListener.statChanged(stat, change);
+		if(amt != 0) {
+			ServerCore.getServer().sendToPlayer(this, new StatUpdate(stat, amt));
+			
+			if(stat == Stat.Hunger && amt > 0) {
+				Level level = getLevel();
+				if(level != null)
+					level.addEntity(new TextParticle(amt + "", Color.CORAL), getCenter(), true);
+			}
+		}
 		
 		return change;
 	}
 	
-	private boolean moveRequested = false;
-	private Vector2 moveDir = null;
-	
-	public boolean moveInDir(Vector2 direction) {
-		if(moveRequested) return false;
-		moveDir = direction;
-		moveRequested = true;
-		return true;
+	public void loadStat(StatUpdate update) {
+		Stat stat = Stat.values[update.statIndex];
+		stats.put(stat, update.amount);
+		if(stat == Stat.Health) setHealth(update.amount);
 	}
 	
-	@Override
-	public void update(float delta) {
-		super.update(delta);
-		if(moveRequested) {
-			Vector2 movement = moveDir.cpy().scl(MOVE_SPEED * delta);
-			
-			boolean moved = super.move(movement);
-			
-			getStatEvo(StaminaSystem.class).isMoving = moved;
-			if(moved)
-				getStatEvo(HungerSystem.class).addHunger(delta * 0.35f);
-			
-			moveRequested = false;
-		}
-		
-		updateStats(delta);
-	}
+	public boolean moveTo(float x, float y, float z) { return moveTo(new Vector3(x, y, z)); }
+	public boolean moveTo(Vector3 pos) { return move(pos.cpy().sub(getLocation())); }
 	
 	@Override
 	public Integer[] saveStats() { return Stat.save(stats); }
@@ -156,12 +124,6 @@ public class ServerPlayer extends Mob implements Player {
 	public Hands getHands() { return hands; }
 	@Override
 	public Inventory getInventory() { return inventory; }
-	
-	public void updateStats(float delta) {
-		// update things like hunger, stamina, etc.
-		for(StatEvolver evo: statEvoMap.values())
-			evo.update(delta);
-	}
 	
 	public boolean takeItem(@NotNull Item item) {
 		boolean success = false;
@@ -247,94 +209,10 @@ public class ServerPlayer extends Mob implements Player {
 		if(super.attackedBy(source, item, dmg)) {
 			int health = stats.get(Stat.Health);
 			if (health == 0) return false;
-			stats.put(Stat.Health, Math.max(0, health - dmg));
+			changeStat(Stat.Health, -dmg);
 			// here is where I'd make a death chest, and show the death screen.
 			return true;
 		}
 		return false;
-	}
-	
-	
-	protected class StaminaSystem implements StatEvolver {
-		
-		private static final float STAMINA_REGEN_RATE = 0.35f; // time taken to regen 1 stamina point.
-		
-		boolean isMoving = false;
-		private float regenTime;
-		
-		StaminaSystem() {}
-		
-		@Override
-		public void update(float delta) {
-			regenTime += delta;
-			float regenRate = STAMINA_REGEN_RATE;
-			if(isMoving) regenRate *= 0.75f;
-			//if(getStat(Stat.Health) != Stat.Health.max)
-				//regenRate *= 1 - (0.5f * getStat(Stat.Hunger) / Stat.Hunger.max); // slow the stamina gen based on how fast you're regen-ing health; if you have very little hunger, then you aren't regen-ing much, so your stamina isn't affected as much.
-			
-			int staminaGained = MathUtils.floor(regenTime / regenRate);
-			if(staminaGained > 0) {
-				regenTime -= staminaGained * regenRate;
-				changeStat(Stat.Stamina, staminaGained);
-			}
-		}
-	}
-	
-	protected class HealthSystem implements StatEvolver {
-		
-		private static final float REGEN_RATE = 2f; // whenever the regenTime reaches this value, a health point is added.
-		private float regenTime;
-		
-		HealthSystem() {}
-		
-		@Override
-		public void update(float delta) {
-			if(getStat(Stat.Health) != Stat.Health.max) {
-				float hungerRatio = getStat(Stat.Hunger)*1f / Stat.Hunger.max;
-				regenTime += delta * hungerRatio;
-				getStatEvo(HungerSystem.class).addHunger(delta);
-				if(regenTime >= REGEN_RATE) {
-					int healthGained = MathUtils.floor(regenTime / REGEN_RATE);
-					changeStat(Stat.Health, healthGained);
-					regenTime -= healthGained * REGEN_RATE;
-				}
-			}
-			else regenTime = 0;
-		}
-	}
-	
-	protected class HungerSystem implements StatEvolver {
-		/*
-			Hunger... you get it:
-				- over time
-				- walking
-				- doing things (aka when stamina is low)
-		 */
-		
-		private static final float HUNGER_RATE = 60f; // whenever the hunger count reaches this value, a hunger point is taken off.
-		private static final float MAX_STAMINA_MULTIPLIER = 6; // you will lose hunger this many times as fast if you have absolutely no stamina.
-		
-		private float hunger = 0;
-		
-		HungerSystem() {}
-		
-		public void addHunger(float amt) {
-			float hungerRatio = getStat(Stat.Hunger)*1f / Stat.Hunger.max;
-			// make it so a ratio of 1 means x2 addition, and a ratio of 0 makes it 0.5 addition
-			float amtMult = MyUtils.map(hungerRatio, 0, 1, 0.5f, 2);
-			hunger += amt * amtMult;
-		}
-		
-		@Override
-		public void update(float delta) {
-			float staminaRatio = 1 + (1 - (getStat(Stat.Stamina)*1f / Stat.Stamina.max)) * MAX_STAMINA_MULTIPLIER;
-			addHunger(delta * staminaRatio);
-			
-			if(hunger >= HUNGER_RATE) {
-				int hungerLost = MathUtils.floor(hunger / HUNGER_RATE);
-				changeStat(Stat.Hunger, -hungerLost);
-				hunger -= hungerLost * HUNGER_RATE;
-			}
-		}
 	}
 }

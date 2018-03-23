@@ -27,6 +27,13 @@ public class ClientLevel extends Level {
 	@Override @NotNull
 	public ClientWorld getWorld() { return world; }
 	
+	@Override
+	void pruneLoadedChunks() {
+		if(getWorld().getMainPlayer() == null) return; // don't prune chunks before the main player is loaded.
+		
+		super.pruneLoadedChunks();
+	}
+	
 	public void render(Rectangle renderSpace, SpriteBatch batch, float delta, Vector2 posOffset) {
 		renderSpace = new Rectangle(Math.max(0, renderSpace.x), Math.max(0, renderSpace.y), Math.min(getWidth()-renderSpace.x, renderSpace.width), Math.min(getHeight()-renderSpace.y, renderSpace.height));
 		// pass the offset vector to all objects being rendered.
@@ -51,13 +58,22 @@ public class ClientLevel extends Level {
 	@Override
 	ClientTile createTile(int x, int y, TileType[] types, String[] data) { return new ClientTile(this, x, y, types, data); }
 	
+	public void loadChunk(Chunk newChunk) {
+		putLoadedChunk(new Point(newChunk.chunkX, newChunk.chunkY), newChunk);
+	}
+	
 	@Override
-	void loadChunk(Point chunkCoord) { ClientCore.getClient().send(new ChunkRequest(chunkCoord)); }
+	void loadChunk(Point chunkCoord) {
+		System.out.println("Client requesting chunk "+chunkCoord);
+		ClientCore.getClient().send(new ChunkRequest(chunkCoord));
+	}
 	
 	@Override
 	void unloadChunk(Point chunkCoord) {
 		Chunk chunk = getLoadedChunk(chunkCoord);
 		if(chunk == null) return; // already unloaded
+		
+		System.out.println("Client unloading chunk "+chunkCoord);
 		
 		for(Entity e: entityChunks.keySet().toArray(new Entity[entityChunks.size()]))
 			if(entityChunks.get(e).equals(chunkCoord))

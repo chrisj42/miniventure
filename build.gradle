@@ -38,7 +38,6 @@ project(":core:game") {
 project(":core:client") {
 	dependencies {
 		compile project(":core:game")
-		compile project(":core:server")
 		compile "com.badlogicgames.gdx:gdx:$gdxVersion"
 		compile "com.esotericsoftware:kryonet:2.22.0-RC1"
 	}

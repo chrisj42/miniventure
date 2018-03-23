@@ -21,4 +21,7 @@ public class Point {
 		return new java.awt.Point(x, y).hashCode();
 	}
 	
+	@Override
+	public String toString() { return "("+x+","+y+")"; }
+	
 }

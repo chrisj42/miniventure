@@ -21,7 +21,7 @@ public interface WorldObject extends Boundable {
 	default float getLightRadius() { return 0; }
 	
 	// returns whether the given entity can share the same space as this object.
-	boolean isPermeableBy(Entity entity);
+	boolean isPermeableBy(Entity e);
 	
 	// returns whether interaction had any effect (should we look for other objects to interact with?)
 	boolean interactWith(Player player, @Nullable Item heldItem);

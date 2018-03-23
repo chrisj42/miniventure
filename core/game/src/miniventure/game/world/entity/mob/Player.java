@@ -14,12 +14,10 @@ import com.badlogic.gdx.math.Vector2;
 
 import org.jetbrains.annotations.NotNull;
 
-public interface Player extends WorldObject {
+public interface Player extends Mob {
 	
 	int INV_SIZE = 20;
 	float MOVE_SPEED = 5;
-	
-	interface StatEvolver { void update(float delta); }
 	
 	enum Stat {
 		Health("heart", 10, 20),
@@ -72,6 +70,7 @@ public interface Player extends WorldObject {
 	}
 	
 	Integer[] saveStats();
+	int getStat(@NotNull Stat stat);
 	int changeStat(@NotNull Stat stat, int amt);
 	
 	default Rectangle getInteractionRect() {
@@ -82,7 +81,6 @@ public interface Player extends WorldObject {
 		return bounds;
 	}
 	
-	Direction getDirection();
 	Inventory getInventory();
 	Hands getHands();
 	

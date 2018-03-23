@@ -20,6 +20,7 @@ public class FrameBlinker implements Blinker {
 	@Override
 	public String[] save() {
 		return new String[] {
+			"frame",
 			framesOn+"",
 			framesOff+"",
 			startOn+""

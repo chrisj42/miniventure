@@ -3,15 +3,14 @@ package miniventure.game.world;
 import java.util.Map;
 
 import miniventure.game.GameProtocol.EntityAddition;
+import miniventure.game.GameProtocol.EntityRemoval;
 import miniventure.game.item.Item;
 import miniventure.game.server.ServerCore;
 import miniventure.game.util.MyUtils;
-import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.AiType;
-import miniventure.game.world.entity.mob.Mob;
+import miniventure.game.world.entity.mob.ServerMob;
 import miniventure.game.world.entity.mob.MobAi;
-import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.particle.ItemEntity;
 import miniventure.game.world.levelgen.LevelGenerator;
 import miniventure.game.world.tile.ServerTile;
@@ -44,8 +43,13 @@ public class ServerLevel extends Level {
 		super.entityMoved(entity);
 		Point newChunk = entityChunks.get(entity);
 		
-		if(newChunk != prevChunk)
-			ServerCore.getServer().broadcast(new EntityAddition(entity), this);
+		if(!MyUtils.nullablesAreEqual(prevChunk, newChunk)) {
+			System.out.println("Server broadcasting entity "+(newChunk==null?"removal":"addition")+": "+entity);
+			if(newChunk != null)
+				ServerCore.getServer().broadcast(new EntityAddition(entity), this);
+			else
+				ServerCore.getServer().broadcast(new EntityRemoval(entity), this);
+		}
 	}
 	
 	public void update(Entity[] entities, float delta) {
@@ -132,7 +136,7 @@ public class ServerLevel extends Level {
 	}
 	
 	
-	private void spawnMob(Mob mob, Tile[] tiles) {
+	private void spawnMob(ServerMob mob, Tile[] tiles) {
 		if(tiles.length == 0) throw new IllegalArgumentException("Tile array for spawning mobs must have at least one tile in it. (tried to spawn mob "+mob+")");
 		
 		Tile spawnTile;
@@ -146,7 +150,7 @@ public class ServerLevel extends Level {
 		mob.moveTo(spawnTile);
 	}
 	
-	public void spawnMob(Mob mob) {
+	public void spawnMob(ServerMob mob) {
 		// only spawns on loaded chunks
 		Array<Tile> tiles = new Array<>(false, getLoadedChunkCount() * Chunk.SIZE * Chunk.SIZE, Tile.class);
 		for(Chunk chunk: loadedChunks.get(Map::values))
@@ -159,7 +163,7 @@ public class ServerLevel extends Level {
 	}
 	
 	// only spawns within the given area
-	public void spawnMob(Mob mob, Rectangle spawnArea) {
+	public void spawnMob(ServerMob mob, Rectangle spawnArea) {
 		// if the mob is a keepAlive mob, then unloaded tiles are considered; otherwise, they are not.
 		if(!getWorld().isKeepAlive(mob))
 			spawnMob(mob, getOverlappingTiles(spawnArea).toArray(Tile.class));
@@ -184,6 +188,21 @@ public class ServerLevel extends Level {
 		}
 	}
 	
+	// note that asking for unloaded chunks will load them.
+	public Array<Chunk> getAreaChunks(Vector2 tilePos, int radius, boolean loaded, boolean unloaded) {
+		return getAreaChunks(Chunk.getCoords(tilePos), radius, loaded, unloaded);
+	}
+	public Array<Chunk> getAreaChunks(Point chunkCoords, int radius, boolean loaded, boolean unloaded) {
+		Array<Point> coords = getAreaChunkCoords(chunkCoords.x, chunkCoords.y, radius, loaded, unloaded);
+		Array<Chunk> chunks = new Array<>(false, coords.size, Chunk.class);
+		for(Point p: coords) {
+			if(!isChunkLoaded(p)) loadChunk(p);
+			chunks.add(getLoadedChunk(p));
+		}
+		
+		return chunks;
+	}
+	
 	@Override
 	ServerTile createTile(int x, int y, TileType[] types, String[] data) { return new ServerTile(this, x, y, types, data); }
 	
@@ -192,6 +211,8 @@ public class ServerLevel extends Level {
 		// TODO this will need to get redone when loading from file
 		
 		if(isChunkLoaded(chunkCoord)) return;
+		
+		System.out.println("Server loading chunk "+chunkCoord);
 		
 		putLoadedChunk(chunkCoord, new Chunk(chunkCoord.x, chunkCoord.y, this, levelGenerator.generateChunk(chunkCoord.x, chunkCoord.y)));
 	}
@@ -203,39 +224,20 @@ public class ServerLevel extends Level {
 		Chunk chunk = getLoadedChunk(chunkCoord);
 		if(chunk == null) return; // already unloaded
 		
+		System.out.println("Server unloading chunk "+chunkCoord);
+		
 		for(Entity e: entityChunks.keySet().toArray(new Entity[entityChunks.size()]))
 			if(entityChunks.get(e).equals(chunkCoord))
-				e.remove();
+				e.remove(); // removed from entityChunks within
 		
 		loadedChunks.access(chunks -> chunks.remove(chunkCoord));
-	}
-	
-	public ChunkData[] createClientLevel(Player client) {
-		// creates a new level instance to send to the new client
-		
-		Array<Point> points = getAreaChunks(client.getCenter(), 1, true, true);
-		
-		ChunkData[] chunks = new ChunkData[points.size];
-		//Array<EntityData> entities = new Array<>(EntityData.class);
-		
-		for (int i = 0; i < points.size; i++) {
-			Point p = points.get(i);
-			chunks[i] = new ChunkData(getChunk(p.x, p.y), this);
-		}
-		
-		return chunks;
 	}
 	
 	@NotNull
 	public Chunk getChunk(int cx, int cy) {
 		Point p = new Point(cx, cy);
-		Chunk chunk = getLoadedChunk(p);
-		if(chunk == null) {
-			chunk = new Chunk(cx, cy, this, levelGenerator.generateChunk(cx, cy));
-			putLoadedChunk(p, chunk);
-		}
-		
-		return chunk;
+		loadChunk(p);
+		return getLoadedChunk(p);
 	}
 	
 	@Override

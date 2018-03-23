@@ -14,7 +14,7 @@ import com.badlogic.gdx.utils.Array;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class MobAi extends Mob {
+public class MobAi extends ServerMob {
 	
 	/*
 		The key component of MobAis is just that they will move by themselves.

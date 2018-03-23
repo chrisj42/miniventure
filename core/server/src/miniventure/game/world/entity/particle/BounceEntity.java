@@ -5,7 +5,6 @@ import java.util.Arrays;
 import miniventure.game.util.FrameBlinker;
 import miniventure.game.util.Version;
 import miniventure.game.world.Level;
-import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ServerEntity;
 
 import com.badlogic.gdx.math.MathUtils;
@@ -120,7 +119,7 @@ public abstract class BounceEntity extends ServerEntity {
 	}
 	
 	@Override
-	public boolean isPermeableBy(Entity entity, boolean delegate) { return true; }
+	public boolean isPermeable() { return true; }
 	
 	/*@Override
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {

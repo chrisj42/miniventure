@@ -1,7 +1,6 @@
 package miniventure.game;
 
 import java.io.File;
-import java.util.Arrays;
 
 import miniventure.game.item.Hands;
 import miniventure.game.item.Inventory;
@@ -15,6 +14,7 @@ import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.Entity.EntityTag;
 import miniventure.game.world.entity.EntityRenderer;
 import miniventure.game.world.entity.mob.Player;
+import miniventure.game.world.entity.mob.Player.Stat;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.Tile.TileData;
 import miniventure.game.world.tile.Tile.TileTag;
@@ -123,21 +123,14 @@ public interface GameProtocol {
 	class SpawnData {
 		public final EntityAddition playerData;
 		public final InventoryUpdate inventory;
-		public final StatUpdate stats;
+		public final Integer[] stats;
 		
 		private SpawnData() { this(null, null, null); }
-		public SpawnData(EntityAddition playerData, Player player) { this(playerData, new InventoryUpdate(player), new StatUpdate(player)); }
-		public SpawnData(EntityAddition playerData, InventoryUpdate inventory, StatUpdate stats) {
+		public SpawnData(EntityAddition playerData, Player player) { this(playerData, new InventoryUpdate(player), player.saveStats()); }
+		public SpawnData(EntityAddition playerData, InventoryUpdate inventory, Integer[] stats) {
 			this.playerData = playerData;
 			this.inventory = inventory;
 			this.stats = stats;
-			
-			if(playerData != null) {
-				if(playerData.spriteUpdate == null)
-					System.out.println("made spawn data, but no renderer");
-				else
-					System.out.println("made spawn data; renderer data: " + Arrays.toString(playerData.spriteUpdate.rendererData));
-			}
 		}
 	}
 	
@@ -145,13 +138,15 @@ public interface GameProtocol {
 		public final PositionUpdate positionUpdate;
 		public final SpriteUpdate spriteUpdate;
 		public final int eid;
+		public final boolean permeable;
 		
-		private EntityAddition() { this(0, null, null); }
-		public EntityAddition(Entity e) { this(e.getId(), new PositionUpdate(e), new SpriteUpdate(e)); }
-		public EntityAddition(int eid, PositionUpdate positionUpdate, SpriteUpdate spriteUpdate) {
+		private EntityAddition() { this(0, null, null, false); }
+		public EntityAddition(Entity e) { this(e.getId(), new PositionUpdate(e), new SpriteUpdate(e), e.isPermeable()); }
+		public EntityAddition(int eid, PositionUpdate positionUpdate, SpriteUpdate spriteUpdate, boolean permeable) {
 			this.eid = eid;
 			this.positionUpdate = positionUpdate;
 			this.spriteUpdate = spriteUpdate;
+			this.permeable = permeable;
 		}
 	}
 	
@@ -255,29 +250,16 @@ public interface GameProtocol {
 		}
 	}
 	
-	// sent by client to tell the server that it wishes to move in the given direction.
-	class PlayerMovement {
-		public final float xdir;
-		public final float ydir;
-		
-		public final PositionUpdate playerPosition; // where the client thinks it should be, after moving.
-		
-		private PlayerMovement() { this(0, 0, null); }
-		public PlayerMovement(Vector2 dir, PositionUpdate playerPosition) { this(dir.x, dir.y, playerPosition); }
-		public PlayerMovement(float xdir, float ydir, PositionUpdate playerPosition) {
-			this.xdir = xdir;
-			this.ydir = ydir;
-			this.playerPosition = playerPosition;
-		}
-	}
-	
+	// a stat changed; sent by both the client and the server. When the client sends it, the amount is the total, but when the server sends it to a client, it is a delta.
 	class StatUpdate {
-		public final Integer[] stats;
+		public final int statIndex;
+		public final int amount;
 		
-		private StatUpdate() { this((Integer[])null); }
-		public StatUpdate(Player player) { this(player.saveStats()); }
-		public StatUpdate(Integer[] stats) {
-			this.stats = stats;
+		private StatUpdate() { this(0, 0); }
+		public StatUpdate(Stat stat, int amt) { this(stat.ordinal(), amt); }
+		private StatUpdate(int idx, int amt) {
+			this.statIndex = idx;
+			this.amount = amt;
 		}
 	}
 	

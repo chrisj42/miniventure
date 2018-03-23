@@ -28,6 +28,12 @@ public class ClientCore extends ApplicationAdapter {
 	private static boolean hasMenu = false;
 	private static MenuScreen menuScreen;
 	
+	private final ServerStarter serverStarter;
+	
+	public ClientCore(ServerStarter serverStarter) {
+		this.serverStarter = serverStarter;
+	}
+	
 	@Override
 	public void create () {
 		VisUI.load(Gdx.files.internal("skins/visui/uiskin.json"));
@@ -35,7 +41,7 @@ public class ClientCore extends ApplicationAdapter {
 		GameCore.initGdx();
 		
 		gameScreen = new GameScreen();
-		clientWorld = new ClientWorld(gameScreen);
+		clientWorld = new ClientWorld(serverStarter, gameScreen);
 		
 		setScreen(new MainMenu(clientWorld));
 	}

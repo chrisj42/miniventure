@@ -80,11 +80,6 @@ public class MobAnimationController {
 	void progressAnimation(float delta) {
 		// update the animation
 		animationTime += delta;
-		// fetch the current frame
-		String textureName = mobSpriteName + "/" + state.name().toLowerCase() + "-" + mob.getDirection().name().toLowerCase();
-		
-		if(!textureName.equals(previousAnimation))
-			animationChanged = true;
 		
 		//if(animationTime > ani.getAnimationDuration()) animationTime = 0; // reset the animationTime to prevent any possibility of overflow
 		//TextureRegion frame = ani.getKeyFrame(animationTime, true);
@@ -99,6 +94,11 @@ public class MobAnimationController {
 		}
 		requestedAnimations.clear();
 		
+		// fetch the current frame
+		String textureName = mobSpriteName + "/" + state.name().toLowerCase() + "-" + mob.getDirection().name().toLowerCase();
+		
+		if(!textureName.equals(previousAnimation))
+			animationChanged = true;
 		
 		this.previousAnimation = textureName;
 	}

@@ -37,6 +37,7 @@ public class GameClient implements GameProtocol {
 			@Override
 			public void received (Connection connection, Object object) {
 				ClientWorld world = ClientCore.getWorld();
+				ClientPlayer player = world.getMainPlayer();
 				
 				if(object instanceof LevelData) {
 					System.out.println("client received level");
@@ -51,7 +52,7 @@ public class GameClient implements GameProtocol {
 				if(object instanceof SpawnData) {
 					System.out.println("client received player");
 					SpawnData data = (SpawnData) object;
-					world.spawnPlayer(new ClientPlayer(data));
+					world.spawnPlayer(data);
 					ClientCore.setScreen(null);
 				}
 				
@@ -83,12 +84,11 @@ public class GameClient implements GameProtocol {
 					EntityAddition addition = (EntityAddition) object;
 					if(addition.positionUpdate.levelDepth == null) return; // no point to it, really.
 					
-					ClientPlayer player = world.getMainPlayer();
 					if(player != null && addition.eid == player.getId()) return; // shouldn't pay attention to trying to set the client player like this.
 					ClientLevel level = world.getLevel(addition.positionUpdate.levelDepth);
 					if(level == null || (player != null && !level.equals(player.getLevel()))) return;
 					
-					ClientEntity e = new ClientEntity(addition.eid, EntityRenderer.deserialize(addition.spriteUpdate.rendererData));
+					ClientEntity e = new ClientEntity(addition.eid, addition.permeable, EntityRenderer.deserialize(addition.spriteUpdate.rendererData));
 					PositionUpdate newPos = addition.positionUpdate;
 					e.moveTo(level, newPos.x, newPos.y, newPos.z);
 				}
@@ -119,9 +119,14 @@ public class GameClient implements GameProtocol {
 				}
 				
 				forPacket(object, InventoryUpdate.class, newInv -> {
-					ClientPlayer player = world.getMainPlayer();
+					if(player == null) return;
 					player.getInventory().loadItems(newInv.inventory);
 					player.getHands().loadItem(newInv.heldItemStack);
+				});
+				
+				forPacket(object, PositionUpdate.class, newPos -> {
+					if(player == null) return;
+					player.moveTo(world.getLevel(newPos.levelDepth), newPos.x, newPos.y, newPos.z);
 				});
 			}
 			

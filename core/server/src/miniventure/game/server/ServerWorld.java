@@ -4,7 +4,6 @@ import java.util.HashSet;
 
 import miniventure.game.GameProtocol.EntityAddition;
 import miniventure.game.GameProtocol.EntityRemoval;
-import miniventure.game.GameProtocol.StatUpdate;
 import miniventure.game.ProgressPrinter;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.Level;
@@ -12,15 +11,13 @@ import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
-import miniventure.game.world.entity.mob.Player.Stat;
+import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.ServerPlayer;
-import miniventure.game.world.entity.particle.TextParticle;
 import miniventure.game.world.levelgen.LevelGenerator;
 import miniventure.game.world.tile.DestructibleProperty;
 import miniventure.game.world.tile.ServerDestructibleProperty;
 import miniventure.game.world.tile.TilePropertyInstanceFetcher;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
@@ -136,13 +133,8 @@ public class ServerWorld extends WorldManager {
 		ServerLevel newLevel = getEntityLevel(e);
 		
 		if(!newLevel.equals(previous)) {
-			if(e instanceof ServerPlayer) {
-				server.broadcast(new EntityRemoval(e), previous, (ServerPlayer)e);
-				server.broadcast(new EntityAddition(e), newLevel, (ServerPlayer)e);
-			} else {
-				server.broadcast(new EntityRemoval(e), previous);
-				server.broadcast(new EntityAddition(e), newLevel);
-			}
+			server.broadcast(new EntityRemoval(e), previous, (ServerEntity) e);
+			server.broadcast(new EntityAddition(e), newLevel, (ServerEntity) e);
 		}
 	}
 	
@@ -157,15 +149,6 @@ public class ServerWorld extends WorldManager {
 	
 	public ServerPlayer addPlayer() {
 		ServerPlayer player = new ServerPlayer();
-		player.setStatListener(((stat, amt) -> {
-			server.sendToPlayer(player, new StatUpdate(player.saveStats()));
-			
-			if(stat == Stat.Hunger && amt > 0) {
-				Level level = player.getLevel();
-				if (level != null)
-					level.addEntity(new TextParticle(amt + "", Color.CORAL), player.getCenter(), true);
-			}
-		}));
 		
 		keepAlives.add(player);
 		

@@ -11,10 +11,16 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class MyUtils {
 	
 	private MyUtils() {} // can't instantiate
+	
+	public static boolean nullablesAreEqual(@Nullable Object o1, @Nullable Object o2) {
+		if(o1 != null) return o1.equals(o2);
+		return o2 == null;
+	}
 	
 	public static String toTitleCase(String string) {
 		String[] words = string.split(" ");

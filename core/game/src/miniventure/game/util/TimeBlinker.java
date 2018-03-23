@@ -20,6 +20,7 @@ public class TimeBlinker implements Blinker {
 	@Override
 	public String[] save() {
 		return new String[] {
+			"time",
 			timeOn+"",
 			timeOff+"",
 			startOn+""

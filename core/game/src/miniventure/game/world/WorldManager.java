@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import miniventure.game.world.entity.Entity;
+import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.tile.TilePropertyInstanceFetcher;
 
 import com.badlogic.gdx.math.MathUtils;
@@ -148,7 +149,8 @@ public abstract class WorldManager {
 		}
 		
 		Level oldLevel = entityLevels.put(e, level);
-		System.out.println("for "+this+": setting level of entity " + e + " to " + level + " (removing from level "+oldLevel+")");
+		if(e instanceof Player) // so it doesn't go too crazy
+			System.out.println("for "+this+": setting level of entity " + e + " to " + level + " (removing from level "+oldLevel+") - entity location = " + e.getLocation(true));
 		
 		if(!level.equals(oldLevel)) {
 			actOnEntitySet(level, set -> set.add(e));

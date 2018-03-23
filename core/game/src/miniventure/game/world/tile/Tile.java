@@ -259,8 +259,8 @@ public class Tile implements WorldObject {
 	}
 	
 	@Override
-	public boolean isPermeableBy(Entity entity) {
-		return getType().getProp(TilePropertyType.Solid).isPermeableBy(entity);
+	public boolean isPermeableBy(Entity e) {
+		return getType().getProp(TilePropertyType.Solid).isPermeableBy(e);
 	}
 	
 	@Override

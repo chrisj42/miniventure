@@ -2,11 +2,13 @@ package miniventure.game.client;
 
 import miniventure.game.GameProtocol.DatalessRequest;
 import miniventure.game.GameProtocol.LevelData;
+import miniventure.game.GameProtocol.PositionUpdate;
+import miniventure.game.GameProtocol.SpawnData;
 import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.RespawnScreen;
-import miniventure.game.server.ServerCore;
+import miniventure.game.util.Action;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.ClientLevel;
@@ -37,15 +39,18 @@ public class ClientWorld extends WorldManager {
 		GameScreen... game screen won't do much, just do the rendering. 
 	 */
 	
+	private final ServerStarter serverStarter;
+	
 	private final GameScreen gameScreen;
 	
 	private GameClient client;
 	
 	private ClientPlayer mainPlayer;
 	
-	ClientWorld(GameScreen gameScreen) {
+	ClientWorld(ServerStarter serverStarter, GameScreen gameScreen) {
 		super(new TilePropertyInstanceFetcher(instanceTemplate -> instanceTemplate));
 		
+		this.serverStarter = serverStarter;
 		this.gameScreen = gameScreen;
 		
 		client = new GameClient(); // doesn't automatically connect
@@ -67,7 +72,7 @@ public class ClientWorld extends WorldManager {
 		}
 		
 		gameScreen.handleInput(mainPlayer);
-		//mainPlayer.updateStats(delta);
+		mainPlayer.updateStats(delta);
 		
 		//level.updateEntities(getEntities(level), delta);
 		
@@ -94,15 +99,14 @@ public class ClientWorld extends WorldManager {
 		clearLevels();
 		
 		new Thread(() -> {
-			if(startServer) {
-				ServerCore.initServer(width, height);
-				
-				// server running, and world loaded; now, get the server world updating
-				new Thread(ServerCore::run).start();
-			}
+			// with a server running, attempt to connect the client. If successful, it will set the screen to null.
+			Action connect = () -> client.connectToServer(loadingScreen, "localhost");
 			
-			// finally, attempt to connect the client. If successful, it will set the screen to null.
-			client.connectToServer(loadingScreen, "localhost");
+			if(startServer) // start server, then connect
+				serverStarter.startServer(width, height, connect);
+			else // server should already be running; just connect
+				connect.act();
+			
 		}).start();
 	}
 	
@@ -123,7 +127,7 @@ public class ClientWorld extends WorldManager {
 	}
 	
 	public void loadChunk(ChunkData data) {
-		Level level = getLevel(data.levelDepth);
+		ClientLevel level = getLevel(data.levelDepth);
 		if(level == null) {
 			System.err.println("client could not load chunk because level is null");
 			return;
@@ -143,13 +147,17 @@ public class ClientWorld extends WorldManager {
 	/*  --- PLAYER MANAGEMENT --- */
 	
 	
-	public void spawnPlayer(ClientPlayer mainPlayer) {
-		Level level = getLevel(0);//mainPlayer == null ?  : mainPlayer.getLevel();
+	public void spawnPlayer(SpawnData data) {
+		ClientPlayer mainPlayer = new ClientPlayer(data);
+		PositionUpdate newPos = data.playerData.positionUpdate;
+		mainPlayer.move(newPos.x, newPos.y, newPos.z);
+		
 		if(this.mainPlayer != null)
 			this.mainPlayer.remove();
 		
 		this.mainPlayer = mainPlayer;
 		
+		Level level = getLevel(newPos.levelDepth);
 		if(level != null)
 			setEntityLevel(mainPlayer, level);
 		else
