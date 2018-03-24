@@ -1,6 +1,7 @@
 package miniventure.game;
 
 import java.io.File;
+import java.util.Arrays;
 
 import miniventure.game.item.Hands;
 import miniventure.game.item.Inventory;
@@ -139,14 +140,17 @@ public interface GameProtocol {
 		public final SpriteUpdate spriteUpdate;
 		public final int eid;
 		public final boolean permeable;
+		public final String descriptor;
 		
-		private EntityAddition() { this(0, null, null, false); }
-		public EntityAddition(Entity e) { this(e.getId(), new PositionUpdate(e), new SpriteUpdate(e), e.isPermeable()); }
-		public EntityAddition(int eid, PositionUpdate positionUpdate, SpriteUpdate spriteUpdate, boolean permeable) {
+		private EntityAddition() { this(0, null, null, false, "Blank entity"); }
+		public EntityAddition(Entity e) { this(e.getId(), new PositionUpdate(e), new SpriteUpdate(e), e.isPermeable(), e.getClass().getSimpleName().replace("Server", "")); }
+		public EntityAddition(Entity e, String descriptor) { this(e.getId(), new PositionUpdate(e), new SpriteUpdate(e), e.isPermeable(), descriptor); }
+		public EntityAddition(int eid, PositionUpdate positionUpdate, SpriteUpdate spriteUpdate, boolean permeable, String descriptor) {
 			this.eid = eid;
 			this.positionUpdate = positionUpdate;
 			this.spriteUpdate = spriteUpdate;
 			this.permeable = permeable;
+			this.descriptor = descriptor;
 		}
 	}
 	
@@ -182,6 +186,8 @@ public interface GameProtocol {
 			this.positionUpdate = positionUpdate;
 			this.spriteUpdate = spriteUpdate;
 		}
+		
+		@Override public String toString() { return "EntityUpdate("+positionUpdate+","+spriteUpdate+")"; }
 	}
 	
 	// sent in EntityUpdate
@@ -211,6 +217,8 @@ public interface GameProtocol {
 			
 			return false;
 		}
+		
+		@Override public String toString() { return "PositionUpdate("+x+","+y+","+z+",lvl"+levelDepth+")"; }
 	}
 	
 	// sent in EntityUpdate
@@ -223,6 +231,8 @@ public interface GameProtocol {
 		public SpriteUpdate(String[] rendererData) {
 			this.rendererData = rendererData;
 		}
+		
+		@Override public String toString() { return "SpriteUpdate("+ Arrays.toString(rendererData)+")"; }
 	}
 	
 	// sent by client to interact or attack.
@@ -239,14 +249,14 @@ public interface GameProtocol {
 	
 	// sent by server to tell clients to use blinking rendering.
 	class Hurt {
-		public final int damage;
+		public final float power; // this is 0 to 1, used to determine knockback. (It's really the percent of health taken off.)
 		public final Tag source, target;
 		
-		private Hurt() { this(null, null, 0, null); }
-		public Hurt(Tag source, Tag target, int damage, String[] attackItem) {
+		private Hurt() { this(null, null, 0); }
+		public Hurt(Tag source, Tag target, float healthPercent) {
 			this.source = source;
 			this.target = target;
-			this.damage = damage;
+			this.power = healthPercent;
 		}
 	}
 	

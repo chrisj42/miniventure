@@ -45,7 +45,7 @@ public class ActionParticle extends ServerEntity implements Particle {
 		//Array<AtlasRegion> frames = GameCore.entityAtlas.findRegions(spriteName);
 		//animation = new Animation<>(animationTime / frames.size, frames);
 		
-		setRenderer(new AnimationRenderer(spriteName, animationTime, false));
+		setRenderer(new AnimationRenderer(spriteName, animationTime, false, false));
 	}
 	
 	protected ActionParticle(String[][] allData, Version version) {
@@ -58,7 +58,7 @@ public class ActionParticle extends ServerEntity implements Particle {
 		//Array<AtlasRegion> frames = GameCore.entityAtlas.findRegions(spriteName);
 		//animation = new Animation<>(animationTime / frames.size, frames);
 		
-		setRenderer(new AnimationRenderer(spriteName, animationTime, false));
+		setRenderer(new AnimationRenderer(spriteName, animationTime, false, false));
 	}
 	
 	@Override

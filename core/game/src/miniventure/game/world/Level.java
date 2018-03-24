@@ -33,8 +33,8 @@ public abstract class Level {
 	/** @noinspection FieldCanBeLocal*/
 	private int entityCap = 8; // per chunk
 	
-	protected Level(@NotNull WorldManager world) { this(world, 0, 0, 0); }
-	public Level(@NotNull WorldManager world, int depth, int width, int height) {
+	//protected Level(@NotNull WorldManager world) { this(world, 0, 0, 0); }
+	Level(@NotNull WorldManager world, int depth, int width, int height) {
 		this.world = world;
 		this.depth = depth;
 		this.width = width;
@@ -64,19 +64,16 @@ public abstract class Level {
 	protected void putLoadedChunk(Point p, Chunk c) { loadedChunks.access(chunks -> chunks.put(p, c)); }
 	
 	public synchronized void entityMoved(Entity entity) {
-		Point entityChunk = entity.getLevel() != this ? null : getClosestChunkCoord(entity.getCenter());
-		Point curChunk = entityChunks.get(entity);
+		Point prevChunk = entityChunks.get(entity);
+		Point curChunk = entity.getLevel() != this ? null : getClosestChunkCoord(entity.getCenter());
 		
-		if(!MyUtils.nullablesAreEqual(curChunk, entityChunk)) return;
-		else if(curChunk == null || entityChunk == null)
-			System.err.println("Level nullable chunk comparison failed, both null but considered different.");
+		if(MyUtils.nullablesAreEqual(prevChunk, curChunk)) return;
+		System.out.println(world+" entity "+entity+" changed chunk, from "+prevChunk+" to "+curChunk);
 		
-		System.out.println(world+" entity "+entity+" changed chunk, from "+curChunk+" to "+entityChunk);
-		
-		if(entityChunk == null)
+		if(curChunk == null)
 			entityChunks.remove(entity);
 		else
-			entityChunks.put(entity, entityChunk);
+			entityChunks.put(entity, curChunk);
 		
 		if(!world.isKeepAlive(entity)) return;
 		
@@ -309,5 +306,5 @@ public abstract class Level {
 	@Override public int hashCode() { return depth; }
 	
 	@Override
-	public String toString() { return "Level(depth="+depth+")"; }
+	public String toString() { return getClass().getSimpleName()+"(depth="+depth+")"; }
 }

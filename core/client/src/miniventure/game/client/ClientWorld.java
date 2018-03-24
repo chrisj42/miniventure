@@ -72,9 +72,9 @@ public class ClientWorld extends WorldManager {
 		}
 		
 		gameScreen.handleInput(mainPlayer);
-		mainPlayer.updateStats(delta);
+		//mainPlayer.updateStats(delta);
 		
-		//level.updateEntities(getEntities(level), delta);
+		level.updateEntities(getEntities(level), delta);
 		
 		if(menu == null || !menu.usesWholeScreen())
 			gameScreen.render(mainPlayer, TimeOfDay.getSkyColors(gameTime), level);
@@ -150,7 +150,7 @@ public class ClientWorld extends WorldManager {
 	public void spawnPlayer(SpawnData data) {
 		ClientPlayer mainPlayer = new ClientPlayer(data);
 		PositionUpdate newPos = data.playerData.positionUpdate;
-		mainPlayer.move(newPos.x, newPos.y, newPos.z);
+		mainPlayer.moveTo(newPos.x, newPos.y, newPos.z);
 		
 		if(this.mainPlayer != null)
 			this.mainPlayer.remove();

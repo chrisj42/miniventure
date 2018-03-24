@@ -74,7 +74,7 @@ public class MobAnimationController {
 	public SpriteUpdate getSpriteUpdate() {
 		if(!animationChanged) return null;
 		animationChanged = false;
-		return new SpriteUpdate(new AnimationRenderer(previousAnimation, prevState.frameDuration, true));
+		return new SpriteUpdate(new AnimationRenderer(previousAnimation, prevState.frameDuration));
 	}
 	
 	void progressAnimation(float delta) {

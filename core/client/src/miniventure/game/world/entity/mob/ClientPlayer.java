@@ -21,6 +21,7 @@ import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClientEntity;
 import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.EntityRenderer;
+import miniventure.game.world.entity.KnockbackController;
 import miniventure.game.world.entity.mob.MobAnimationController.AnimationState;
 
 import com.badlogic.gdx.Gdx;
@@ -30,7 +31,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -61,9 +61,10 @@ public class ClientPlayer extends ClientEntity implements Player {
 	@NotNull private Direction dir;
 	
 	private MobAnimationController animator;
+	private KnockbackController knockbackController;
 	
 	public ClientPlayer(SpawnData data) {
-		super(data.playerData.eid, data.playerData.permeable, EntityRenderer.deserialize(data.playerData.spriteUpdate.rendererData));
+		super(data.playerData.eid, data.playerData.permeable, EntityRenderer.deserialize(data.playerData.spriteUpdate.rendererData), data.playerData.descriptor);
 		
 		dir = Direction.DOWN;
 		
@@ -76,6 +77,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 		Stat.load(data.stats, this.stats);
 		
 		animator = new MobAnimationController(this, "player");
+		knockbackController = new KnockbackController(this);
 	}
 	
 	@Override
@@ -101,7 +103,12 @@ public class ClientPlayer extends ClientEntity implements Player {
 	@Override public Inventory getInventory() { return inventory; }
 	@Override public ClientHands getHands() { return hands; }
 	
-	public void updateStats(float delta) {
+	@Override
+	public void update(float delta) {
+		super.update(delta);
+		
+		knockbackController.update(delta);
+		
 		// update things like hunger, stamina, etc.
 		for(StatEvolver evo: statEvoMap.values())
 			evo.update(delta);
@@ -175,16 +182,18 @@ public class ClientPlayer extends ClientEntity implements Player {
 		bounds.setPosition(newPos);
 		
 		ClientLevel level = getLevel();
-		if(level == null)
-			return move(newPos);
+		if(level == null) {
+			moveTo(newPos);
+			return true;
+		}
 		
-		Vector2 movement = new Vector2();
-		movement.x = moveAxis(level, true, moveDist.x, 0);
-		movement.y = moveAxis(level, false, moveDist.y, movement.x);
-		
-		move(getPosition().add(movement));
-		
-		return !movement.isZero();
+		return move(moveDist, true);
+	}
+	
+	@Override
+	public void hurt(WorldObject source, float power) {
+		super.hurt(source, power);
+		knockbackController.knock(source, KNOCKBACK_SPEED, Mob.getKnockbackDuration(power));
 	}
 	
 	public void drawGui(Rectangle canvas, SpriteBatch batch) {

@@ -51,39 +51,30 @@ public abstract class ServerEntity extends Entity {
 	
 	@Override
 	public void update(float delta) {
+		if(updateCache != null) {
+			ServerCore.getServer().broadcast(updateCache, this);
+			updateCache = null;
+		}
+		
 		ServerLevel level = getLevel();
 		if(level == null) return;
 		Array<WorldObject> objects = new Array<>();
 		objects.addAll(level.getOverlappingEntities(getBounds(), this));
+		// we don't want to trigger things like getting hurt by lava until the entity is actually *in* the tile, so we'll only consider the closest one to be "touching".
 		Tile tile = level.getClosestTile(getBounds());
 		if(tile != null) objects.add(tile);
 		
 		for(WorldObject obj: objects)
 			obj.touching(this);
-		
-		if(updateCache != null) {
-			ServerCore.getServer().broadcast(updateCache, this);
-			updateCache = null;
-		}
 	}
 	
 	public float getZ() { return z; }
 	protected void setZ(float z) { this.z = z; }
 	
-	public boolean move(float xd, float yd) { return move(xd, yd, 0); }
-	public boolean move(float xd, float yd, float zd) {
-		Level level = getLevel();
-		if(level == null) return false; // can't move if you're not in a level...
-		Vector2 movement = new Vector2();
-		movement.x = moveAxis(level, true, xd, 0);
-		movement.y = moveAxis(level, false, yd, movement.x);
-		z += zd;
-		boolean moved = !movement.isZero();
-		if(moved) {
-			moveTo(level, x+movement.x, y+movement.y);
-			updateCache = new EntityUpdate(getTag(), new PositionUpdate(this), updateCache == null ? null : updateCache.spriteUpdate);
-		}
-		return moved;
+	@Override
+	public void moveTo(@NotNull Level level, float x, float y) {
+		super.moveTo(level, x, y);
+		updateCache = new EntityUpdate(getTag(), new PositionUpdate(this), updateCache == null ? null : updateCache.spriteUpdate);
 	}
 	
 	@Override

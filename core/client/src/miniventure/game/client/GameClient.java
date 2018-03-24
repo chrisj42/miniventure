@@ -5,14 +5,12 @@ import java.io.IOException;
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol;
 import miniventure.game.screen.MainMenu;
-import miniventure.game.util.FrameBlinker;
 import miniventure.game.util.ProgressLogger;
 import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.ClientLevel;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClientEntity;
-import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.EntityRenderer;
 import miniventure.game.world.entity.mob.ClientPlayer;
 import miniventure.game.world.tile.Tile;
@@ -74,9 +72,9 @@ public class GameClient implements GameProtocol {
 					WorldObject source = hurt.source.getObject(world);
 					
 					// TODO later, show health bar
-					//target.attackedBy(source, attackItem, hurt.damage);
-					if(target instanceof Entity)
-						((Entity)target).setBlinker(0.5f, true, new FrameBlinker(5, 1, false));
+					
+					if(target instanceof ClientEntity)
+						((ClientEntity)target).hurt(source, hurt.power);
 				}
 				
 				if(object instanceof EntityAddition) {
@@ -88,7 +86,7 @@ public class GameClient implements GameProtocol {
 					ClientLevel level = world.getLevel(addition.positionUpdate.levelDepth);
 					if(level == null || (player != null && !level.equals(player.getLevel()))) return;
 					
-					ClientEntity e = new ClientEntity(addition.eid, addition.permeable, EntityRenderer.deserialize(addition.spriteUpdate.rendererData));
+					ClientEntity e = new ClientEntity(addition.eid, addition.permeable, EntityRenderer.deserialize(addition.spriteUpdate.rendererData), addition.descriptor);
 					PositionUpdate newPos = addition.positionUpdate;
 					e.moveTo(level, newPos.x, newPos.y, newPos.z);
 				}
@@ -100,18 +98,20 @@ public class GameClient implements GameProtocol {
 				}
 				
 				if(object instanceof EntityUpdate) {
-					//System.out.println("client received entity movement");
 					EntityUpdate update = (EntityUpdate) object;
 					PositionUpdate newPos = update.positionUpdate;
 					SpriteUpdate newSprite = update.spriteUpdate;
 					
 					ClientEntity e = (ClientEntity) update.tag.getObject(world);
+					//System.out.println("client received entity update for " + e + ": " + update);
 					if(e == null) return;
 					
 					if(newPos != null) {
 						ClientLevel level = newPos.levelDepth == null ? null : world.getLevel(newPos.levelDepth);
-						if(level != null)
+						if(level != null) {
 							e.moveTo(level, newPos.x, newPos.y, newPos.z);
+							System.out.println("moved client entity "+e+", new pos: "+e.getPosition(true));
+						}
 					}
 					if(newSprite != null) {
 						e.setRenderer(EntityRenderer.deserialize(newSprite.rendererData));

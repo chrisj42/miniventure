@@ -9,9 +9,9 @@ import com.badlogic.gdx.utils.Array;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public interface Boundable<L extends Level> {
+public interface Boundable {
 	
-	@Nullable L getLevel();
+	@Nullable Level getLevel();
 	
 	@NotNull Rectangle getBounds();
 	

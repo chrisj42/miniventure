@@ -3,16 +3,19 @@ package miniventure.game.world.entity.mob;
 import java.util.Arrays;
 
 import miniventure.game.GameProtocol.EntityUpdate;
+import miniventure.game.GameProtocol.Hurt;
 import miniventure.game.GameProtocol.SpriteUpdate;
 import miniventure.game.item.Item;
 import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolType;
+import miniventure.game.server.ServerCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.EntityRenderer;
+import miniventure.game.world.entity.KnockbackController;
 import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.MobAnimationController.AnimationState;
 import miniventure.game.world.entity.particle.TextParticle;
@@ -31,13 +34,6 @@ import org.jetbrains.annotations.Nullable;
  */
 public abstract class ServerMob extends ServerEntity implements Mob {
 	
-	// for knockback, the whole process should take about 0.5s. The first half at a constant speed, and the second half can be spend slowing down at a linear pace.
-	
-	private static final float KNOCKBACK_SPEED = 10; // in tiles / second
-	private static final float MIN_KNOCKBACK_TIME = 0.05f;
-	private static final float MAX_KNOCKBACK_TIME = 0.25f;
-	private static final float DAMAGE_PERCENT_FOR_MAX_PUSH = 0.2f;
-	
 	private static final float HURT_COOLDOWN = 0.5f; // minimum time between taking damage, in seconds; prevents a mob from getting hurt multiple times in quick succession. 
 	
 	@NotNull private Direction dir;
@@ -46,8 +42,9 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 	private final int maxHealth;
 	private int health;
 	
-	private float knockbackTimeLeft = 0;
-	@NotNull private Vector2 knockbackVelocity = new Vector2(); // knockback is applied once, at the start, as a velocity. The mob is moved with this velocity constantly, slowing down at a fixed rate, until the knockback is gone.
+	@NotNull private KnockbackController knockbackController;
+	//private float knockbackTimeLeft = 0;
+	//@NotNull private Vector2 knockbackVelocity = new Vector2();
 	
 	private float invulnerableTime = 0;
 	//private FrameBlinker blinker;
@@ -62,7 +59,7 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 		
 		this.spriteName = spriteName;
 		
-		//blinker = new FrameBlinker(5, 1, false);
+		knockbackController = new KnockbackController(this);
 		
 		animator = new MobAnimationController(this, spriteName);
 		
@@ -79,13 +76,7 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 		health = Integer.parseInt(data[3]);
 		invulnerableTime = Float.parseFloat(data[4]);
 		
-		knockbackTimeLeft = Float.parseFloat(data[5]);
-		float kx = Float.parseFloat(data[6]);
-		float ky = Float.parseFloat(data[7]);
-		knockbackVelocity = new Vector2(kx, ky);
-		
-		//blinker = new FrameBlinker(5, 1, false);
-		
+		knockbackController = new KnockbackController(this);
 		animator = new MobAnimationController(this, spriteName);
 		
 		setRenderer(EntityRenderer.deserialize(animator.getSpriteUpdate().rendererData));
@@ -100,10 +91,7 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 			dir.name(),
 			maxHealth+"",
 			health+"",
-			invulnerableTime+"",
-			knockbackTimeLeft+"",
-			knockbackVelocity.x+"",
-			knockbackVelocity.y+""
+			invulnerableTime+""
 		});
 		
 		return data;
@@ -112,8 +100,7 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 	public void reset() {
 		dir = Direction.DOWN;
 		this.health = maxHealth;
-		knockbackTimeLeft = 0;
-		knockbackVelocity.setZero();
+		knockbackController.reset();
 		invulnerableTime = 0;
 		animator.progressAnimation(0);
 	}
@@ -123,9 +110,9 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 	
 	@Override
 	public Direction getDirection() { return dir; }
-	protected void setDirection(@NotNull Direction dir) { this.dir = dir; }
+	//protected void setDirection(@NotNull Direction dir) { this.dir = dir; }
 	
-	public boolean isKnockedBack() { return knockbackTimeLeft > 0 && knockbackVelocity.len() > 0; }
+	//public boolean isKnockedBack() { return knockbackTimeLeft > 0 && knockbackVelocity.len() > 0; }
 	
 	//@Override
 	//protected TextureRegion getSprite() { return animator.getSprite(); }
@@ -145,14 +132,15 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 		if(newSprite != null)
 			updateCache = new EntityUpdate(getTag(), updateCache == null ? null : updateCache.positionUpdate, newSprite);
 		
-		if(knockbackTimeLeft > 0) {
+		/*if(knockbackTimeLeft > 0) {
 			super.move(new Vector2(knockbackVelocity).scl(delta));
 			knockbackTimeLeft -= delta;
 			if(knockbackTimeLeft <= 0) {
 				knockbackTimeLeft = 0;
 				knockbackVelocity.setZero();
 			}
-		}
+		}*/
+		knockbackController.update(delta);
 		
 		super.update(delta);
 		
@@ -199,27 +187,13 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 		
 		if(health > 0) {
 			// do knockback
-			
-			knockbackVelocity.set(getCenter().sub(obj.getCenter()).nor().scl(KNOCKBACK_SPEED));
-			
-			/*
-				I want the player to be pushed back somewhere between min and max time.
-				Min time should approach no health lost
-				Max time should be at the constant
-				so, steps:
-					- get percent lost, capped at max
-					- map percent to times
-			 */
-			
-			float healthPercent = MyUtils.map(damage, 0, maxHealth, 0, 1);
-			knockbackTimeLeft = MyUtils.map(Math.min(healthPercent, DAMAGE_PERCENT_FOR_MAX_PUSH), 0, DAMAGE_PERCENT_FOR_MAX_PUSH, MIN_KNOCKBACK_TIME, MAX_KNOCKBACK_TIME);
+			if(!(this instanceof Player)) // client will take care of it for themself
+				knockbackController.knock(obj, KNOCKBACK_SPEED, Mob.getKnockbackDuration(damage*1f/maxHealth));
 		}
 		
 		ServerLevel level = getLevel();
 		if(level != null) {
-			// send to clients
-			// TODO send hurt event to clients
-			//level.getWorld().getSender().sendData(new Hurt(obj.getTag(), getTag(), damage, Item.save(item)));
+			ServerCore.getServer().broadcast(new Hurt(obj.getTag(), getTag(), damage*1f/maxHealth));
 			level.addEntity(new TextParticle(damage + "", this instanceof ServerPlayer ? Color.PINK : Color.RED), getCenter(), true);
 		}
 		

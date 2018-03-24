@@ -25,9 +25,13 @@ import org.jetbrains.annotations.NotNull;
 
 public abstract class EntityRenderer {
 	
+	private float elapsedTime = 0;
+	
 	protected abstract String[] save();
 	
-	public abstract void render(float x, float y, Batch batch, float delta);
+	public void update(float delta) { elapsedTime += delta; }
+	
+	public abstract void render(float x, float y, Batch batch);
 	
 	public abstract Vector2 getSize();
 	
@@ -60,7 +64,7 @@ public abstract class EntityRenderer {
 		public String getName() { return spriteName; }
 		
 		@Override
-		public void render(float x, float y, Batch batch, float delta) { batch.draw(sprite, x, y); }
+		public void render(float x, float y, Batch batch) { batch.draw(sprite, x, y); }
 		
 		@Override
 		public Vector2 getSize() { return new Vector2(sprite.getRegionWidth(), sprite.getRegionHeight()); }
@@ -92,15 +96,16 @@ public abstract class EntityRenderer {
 		private final String animationName;
 		private final boolean isFrameDuration;
 		private final float duration;
+		private final boolean loopAnimation;
 		
 		private final Animation<TextureRegion> animation;
-		private float elapsedTime = 0;
 		
-		public AnimationRenderer(String animationName, float frameTime) { this(animationName, frameTime, true); }
-		public AnimationRenderer(String animationName, float duration, boolean isFrameDuration) {
+		public AnimationRenderer(String animationName, float frameTime) { this(animationName, frameTime, true, true); }
+		public AnimationRenderer(String animationName, float duration, boolean isFrameDuration, boolean loopAnimation) {
 			this.animationName = animationName;
 			this.duration = duration;
 			this.isFrameDuration = isFrameDuration;
+			this.loopAnimation = loopAnimation;
 			
 			if(!animationFrames.containsKey(animationName))
 				animationFrames.put(animationName, GameCore.entityAtlas.findRegions(animationName));
@@ -110,25 +115,24 @@ public abstract class EntityRenderer {
 			animation = new Animation<>(frames.size==0?1:isFrameDuration?duration:duration/frames.size, frames);
 		}
 		private AnimationRenderer(String[] data) {
-			this(data[0], Float.parseFloat(data[1]), Boolean.parseBoolean(data[2]));
+			this(data[0], Float.parseFloat(data[1]), Boolean.parseBoolean(data[2]), Boolean.parseBoolean(data[3]));
 		}
 		
 		@Override
 		protected String[] save() {
-			return new String[] {animationName, duration+"", isFrameDuration+""};
+			return new String[] {animationName, duration+"", isFrameDuration+"", loopAnimation+""};
 		}
 		
 		public String getName() { return animationName; }
 		
 		@Override
-		public void render(float x, float y, Batch batch, float delta) {
-			elapsedTime += delta;
-			batch.draw(animation.getKeyFrame(elapsedTime, true), x, y);
+		public void render(float x, float y, Batch batch) {
+			batch.draw(animation.getKeyFrame(super.elapsedTime, loopAnimation), x, y);
 		}
 		
 		@Override
 		public Vector2 getSize() {
-			TextureRegion frame = animation.getKeyFrame(elapsedTime, true);
+			TextureRegion frame = animation.getKeyFrame(super.elapsedTime, loopAnimation);
 			return new Vector2(frame.getRegionWidth(), frame.getRegionHeight());
 		}
 	}
@@ -188,7 +192,7 @@ public abstract class EntityRenderer {
 		protected String[] save() { return new String[] {text, main.toString(), shadow.toString()}; }
 		
 		@Override
-		public void render(float x, float y, Batch batch, float delta) {
+		public void render(float x, float y, Batch batch) {
 			BitmapFont font = GameCore.getFont();
 			font.setColor(shadow);
 			font.draw(batch, text, x-1, y+1, 0, Align.center, false);
@@ -207,8 +211,6 @@ public abstract class EntityRenderer {
 		private final boolean blinkFirst;
 		private final float initialDuration;
 		private final Blinker blinker;
-		
-		private float elapsedTime;
 		
 		public BlinkRenderer(EntityRenderer mainRenderer, float initialDuration, boolean blinkFirst, Blinker blinker) {
 			this.mainRenderer = mainRenderer;
@@ -235,24 +237,22 @@ public abstract class EntityRenderer {
 			};
 		}
 		
+		private boolean blinkerActive() {
+			boolean firstDuration = super.elapsedTime <= initialDuration;
+			return blinkFirst == firstDuration; // blinker is active if (should blink first == is first time), aka the current time matches when it should be active.
+		}
+		
 		@Override
-		public void render(float x, float y, Batch batch, float delta) {
-			elapsedTime += delta;
-			
-			if(blinkFirst) {
+		public void update(float delta) {
+			super.update(delta);
+			if(blinkerActive())
 				blinker.update(delta);
-				
-				if(elapsedTime > initialDuration || blinker.shouldRender())
-					mainRenderer.render(x, y, batch, delta);
-			}
-			else {
-				boolean blinking = elapsedTime > initialDuration;
-				
-				if(blinking) blinker.update(delta);
-				
-				if(!blinking || blinker.shouldRender())
-					mainRenderer.render(x, y, batch, delta);
-			}
+		}
+		
+		@Override
+		public void render(float x, float y, Batch batch) {
+			if(!blinkerActive() || blinker.shouldRender())
+				mainRenderer.render(x, y, batch);
 		}
 		
 		@Override
@@ -261,7 +261,7 @@ public abstract class EntityRenderer {
 	
 	
 	public static final EntityRenderer BLANK = new EntityRenderer() {
-		@Override public void render(float x, float y, Batch batch, float delta) {}
+		@Override public void render(float x, float y, Batch batch) {}
 		@Override public Vector2 getSize() { return new Vector2(); }
 		@Override protected String[] save() { return new String[0]; }
 	};

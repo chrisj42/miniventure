@@ -22,7 +22,7 @@ public abstract class Entity implements WorldObject {
 	
 	@NotNull private final WorldManager world;
 	
-	private int eid;
+	private final int eid;
 	float x, y, z = 0;
 	
 	@NotNull private EntityRenderer renderer = EntityRenderer.BLANK;
@@ -56,7 +56,11 @@ public abstract class Entity implements WorldObject {
 	}
 	
 	@Override
-	public void update(float delta) {}
+	public void update(float delta) {
+		renderer.update(delta);
+		if(blinker != null)
+			blinker.update(delta);
+	}
 	
 	public void setRenderer(@NotNull EntityRenderer renderer) {
 		this.renderer = renderer;
@@ -73,7 +77,8 @@ public abstract class Entity implements WorldObject {
 	
 	@Override
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
-		getRenderer().render((x-posOffset.x) * Tile.SIZE, (y+z - posOffset.y) * Tile.SIZE, batch, delta);
+		System.out.println("rendering entity "+this+" at "+getPosition(true));
+		getRenderer().render((x-posOffset.x) * Tile.SIZE, (y+z - posOffset.y) * Tile.SIZE, batch);
 	}
 	
 	protected Rectangle getUnscaledBounds() {
@@ -97,8 +102,19 @@ public abstract class Entity implements WorldObject {
 	
 	public boolean move(Vector2 v) { return move(v.x, v.y); }
 	public boolean move(Vector3 v) { return move(v.x, v.y, v.z); }
-	public abstract boolean move(float xd, float yd);
-	public abstract boolean move(float xd, float yd, float zd);
+	public boolean move(float xd, float yd) { return move(xd, yd, 0); }
+	public boolean move(float xd, float yd, float zd) {
+		Level level = getLevel();
+		if(level == null) return false; // can't move if you're not in a level...
+		Vector2 movement = new Vector2();
+		movement.x = moveAxis(level, true, xd, 0);
+		movement.y = moveAxis(level, false, yd, movement.x);
+		z += zd;
+		boolean moved = !movement.isZero();
+		if(moved)
+			moveTo(level, x+movement.x, y+movement.y);
+		return moved;
+	}
 	
 	protected float moveAxis(@NotNull Level level, boolean xaxis, float amt, float other) {
 		if(amt == 0) return 0;
@@ -243,5 +259,7 @@ public abstract class Entity implements WorldObject {
 	public EntityTag getTag() { return new EntityTag(eid); }
 	
 	@Override
-	public String toString() { return getClass().getSimpleName(); }
+	public String toString() { return Integer.toHexString(super.hashCode())+"_"+getClass().getSimpleName()+"-"+eid; }
+	
+	public int superHash() { return super.hashCode(); }
 }

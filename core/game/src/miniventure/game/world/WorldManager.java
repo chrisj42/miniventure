@@ -112,8 +112,10 @@ public abstract class WorldManager {
 	
 	
 	public void registerEntity(Entity e) {
-		System.out.println(this+": registered entity "+e);
-		entityIDMap.put(e.getId(), e);
+		//System.out.println(this+": registered entity "+e);
+		Entity old = entityIDMap.put(e.getId(), e);
+		//if(old != null)
+		//	throw new IllegalStateException("Attempted to register entity with duplicate entity id "+e.getId()+"; original="+old+", new="+e);
 	}
 	
 	/** generates a entity id that is unique for this game. */

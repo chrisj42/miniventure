@@ -166,9 +166,6 @@ public class GameServer implements GameProtocol {
 	public void sendToPlayer(@NotNull ServerPlayer player, Object obj) {
 		Connection c = playerToConnectionMap.get(player);
 		if(c != null) {
-			if(obj instanceof EntityAddition)
-				System.out.println("Server sending entity addition to 1 player.");
-			
 			c.sendTCP(obj);
 		}
 	}
@@ -199,9 +196,6 @@ public class GameServer implements GameProtocol {
 			playerSet.removeAll(players);
 			players = playerSet;
 		}
-		
-		if(obj instanceof EntityAddition)
-			System.out.println("Server sending entity addition to "+players.size()+" players.");
 		
 		for(ServerPlayer p: players)
 			playerToConnectionMap.get(p).sendTCP(obj);
