@@ -44,8 +44,7 @@ public class ServerLevel extends Level {
 		Point newChunk = entityChunks.get(entity);
 		
 		if(!MyUtils.nullablesAreEqual(prevChunk, newChunk)) {
-			if(newChunk == null)
-				System.out.println("Server broadcasting entity "+(newChunk==null?"removal":"addition")+": "+entity);
+			//	System.out.println("Server broadcasting entity "+(newChunk==null?"removal":"addition")+": "+entity);
 			if(newChunk != null)
 				ServerCore.getServer().broadcast(new EntityAddition(entity), this);
 			else

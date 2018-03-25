@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.InteractRequest;
+import miniventure.game.GameProtocol.MovementRequest;
 import miniventure.game.GameProtocol.PositionUpdate;
 import miniventure.game.GameProtocol.SpawnData;
 import miniventure.game.GameProtocol.SpriteUpdate;
@@ -16,7 +17,6 @@ import miniventure.game.item.Inventory;
 import miniventure.game.item.InventoryScreen;
 import miniventure.game.item.Recipes;
 import miniventure.game.util.MyUtils;
-import miniventure.game.world.ClientLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClientEntity;
 import miniventure.game.world.entity.Direction;
@@ -104,6 +104,9 @@ public class ClientPlayer extends ClientEntity implements Player {
 	@Override public ClientHands getHands() { return hands; }
 	
 	@Override
+	public boolean isKnockedBack() { return knockbackController.hasKnockback(); }
+	
+	@Override
 	public void update(float delta) {
 		super.update(delta);
 		
@@ -116,47 +119,49 @@ public class ClientPlayer extends ClientEntity implements Player {
 	
 	@Override
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
+		super.render(batch, delta, posOffset);
+		
 		animator.progressAnimation(delta);
+		
 		SpriteUpdate newSprite = animator.getSpriteUpdate();
 		if(newSprite != null)
 			setRenderer(EntityRenderer.deserialize(newSprite.rendererData));
-		
-		super.render(batch, delta, posOffset);
 	}
 	
 	public void handleInput(Vector2 mouseInput) {
-		Vector2 movement = new Vector2();
-		if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) movement.x--;
-		if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) movement.x++;
-		if(Gdx.input.isKeyPressed(Input.Keys.UP)) movement.y++;
-		if(Gdx.input.isKeyPressed(Input.Keys.DOWN)) movement.y--;
+		Vector2 inputDir = new Vector2();
+		if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) inputDir.x--;
+		if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) inputDir.x++;
+		if(Gdx.input.isKeyPressed(Input.Keys.UP)) inputDir.y++;
+		if(Gdx.input.isKeyPressed(Input.Keys.DOWN)) inputDir.y--;
 		
-		movement.nor();
+		inputDir.nor();
 		
-		movement.add(mouseInput); // mouseInput is already normalized
-		movement.nor();
+		inputDir.add(mouseInput); // mouseInput is already normalized
+		inputDir.nor();
 		
-		Direction newDir = Direction.getDirection(movement.x, movement.y);
+		Direction newDir = Direction.getDirection(inputDir.x, inputDir.y);
 		if(newDir != null)
 			dir = newDir;
 		
-		boolean moved = move(movement, Gdx.graphics.getDeltaTime());
+		Vector2 moveDist = inputDir.cpy().scl(moveSpeed*Gdx.graphics.getDeltaTime());
 		
-		if(moved) {
-			ClientCore.getClient().send(new PositionUpdate(this));
+		if(!moveDist.isZero()) {
+			move(moveDist, getLevel() != null);
+			
 			animator.requestState(AnimationState.WALK);
+			
+			getStatEvo(HungerSystem.class).addHunger(Gdx.graphics.getDeltaTime() * 0.35f);
 		}
 		
-		getStatEvo(StaminaSystem.class).isMoving = moved;
-		if(moved)
-			getStatEvo(HungerSystem.class).addHunger(Gdx.graphics.getDeltaTime() * 0.35f);
+		getStatEvo(StaminaSystem.class).isMoving = !moveDist.isZero();
 		
-		//if(!player.isKnockedBack()) {
-		if (ClientCore.input.pressingKey(Input.Keys.C))
-			ClientCore.getClient().send(new InteractRequest(true, new PositionUpdate(this)));
-		else if (ClientCore.input.pressingKey(Input.Keys.V))
-			ClientCore.getClient().send(new InteractRequest(false, new PositionUpdate(this)));
-		
+		if(!isKnockedBack()) {
+			if(ClientCore.input.pressingKey(Input.Keys.C))
+				ClientCore.getClient().send(new InteractRequest(true, new PositionUpdate(this), getDirection()));
+			else if(ClientCore.input.pressingKey(Input.Keys.V))
+				ClientCore.getClient().send(new InteractRequest(false, new PositionUpdate(this), getDirection()));
+		}
 		//if(Gdx.input.isKeyPressed(Input.Keys.C) || Gdx.input.isKeyPressed(Input.Keys.V))
 		//	animator.requestState(AnimationState.ATTACK);
 		//}
@@ -173,21 +178,15 @@ public class ClientPlayer extends ClientEntity implements Player {
 		
 	}
 	
-	private boolean move(Vector2 inputDir, float delta) {
-		if(inputDir.isZero()) return false;
-		Vector2 moveDist = inputDir.cpy().scl(moveSpeed*delta);
-		Vector2 newPos = getPosition().add(moveDist);
+	@Override
+	public boolean move(float xd, float yd, float zd, boolean validate) {
+		PositionUpdate prevPos = new PositionUpdate(this);
 		
-		Rectangle bounds = getBounds();
-		bounds.setPosition(newPos);
+		boolean moved = super.move(xd, yd, zd, validate);
 		
-		ClientLevel level = getLevel();
-		if(level == null) {
-			moveTo(newPos);
-			return true;
-		}
+		ClientCore.getClient().send(new MovementRequest(prevPos, xd, yd, zd, new PositionUpdate(this)));
 		
-		return move(moveDist, true);
+		return moved;
 	}
 	
 	@Override

@@ -11,6 +11,7 @@ import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.Level;
 import miniventure.game.world.Point;
 import miniventure.game.world.WorldObject.Tag;
+import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.Entity.EntityTag;
 import miniventure.game.world.entity.EntityRenderer;
@@ -49,6 +50,8 @@ public interface GameProtocol {
 		kryo.register(int[].class);
 		kryo.register(Integer.class);
 		kryo.register(Integer[].class);
+		
+		kryo.register(PositionUpdate[].class);
 	}
 	
 	@FunctionalInterface
@@ -190,10 +193,54 @@ public interface GameProtocol {
 		@Override public String toString() { return "EntityUpdate("+positionUpdate+","+spriteUpdate+")"; }
 	}
 	
+	// sent by the server every 10 seconds or so with all entities in the 5x5 chunks surrounding the client. The client can use this to validate all the entities that it has loaded; if there are any listed that it doesn't have loaded (and the chunk it's on is loaded), it can send back an entity request to get it loaded. Also, if it finds that there are entities it has loaded, which aren't present in the list, it can unload them.
+	// TODO send these.
+	class EntityValidation {
+		public final int[] ids;
+		public final PositionUpdate[] positions;
+		
+		private EntityValidation() { this(null, null); }
+		public EntityValidation(Entity[] entities) {
+			this(new int[entities.length], new PositionUpdate[entities.length]);
+			for(int i = 0; i < entities.length; i++) {
+				ids[i] = entities[i].getId();
+				positions[i] = new PositionUpdate(entities[i]);
+			}
+		}
+		public EntityValidation(int[] ids, PositionUpdate[] positions) {
+			this.ids = ids;
+			this.positions = positions;
+		}
+	}
+	
+	// sent by the client when it receives an entity update that is in the loaded chunks, but isn't loaded for some reason.
+	class EntityRequest {
+		public int eid;
+		
+		private EntityRequest() { this(0); }
+		public EntityRequest(int eid) {
+			this.eid = eid;
+		}
+	}
+	
+	// sent in EntityUpdate
+	class SpriteUpdate {
+		public final String[] rendererData;
+		
+		private SpriteUpdate() { this((String[])null); }
+		public SpriteUpdate(Entity e) { this(e.getRenderer()); }
+		public SpriteUpdate(EntityRenderer renderer) { this(EntityRenderer.serialize(renderer)); }
+		public SpriteUpdate(String[] rendererData) {
+			this.rendererData = rendererData;
+		}
+		
+		@Override public String toString() { return "SpriteUpdate("+ Arrays.toString(rendererData)+")"; }
+	}
+	
 	// sent in EntityUpdate
 	class PositionUpdate {
 		public final float x, y, z;
-		public final Integer levelDepth; // can be null
+		public final Integer levelDepth; // should never be null, actually, because it is always on one level or another, and if not, then it's not in the game, aka removed. An entity removal would be sent rather than a position update. However, it's a bit complicated to change now, so I'll leave it...
 		
 		private PositionUpdate() { this(null, 0, 0, 0); }
 		public PositionUpdate(Entity e) { this(e, e.getLevel(), e.getLocation()); }
@@ -218,32 +265,42 @@ public interface GameProtocol {
 			return false;
 		}
 		
+		public Vector3 getPos() { return new Vector3(x, y, z); }
+		
 		@Override public String toString() { return "PositionUpdate("+x+","+y+","+z+",lvl"+levelDepth+")"; }
 	}
 	
-	// sent in EntityUpdate
-	class SpriteUpdate {
-		public final String[] rendererData;
+	class MovementRequest {
+		public final PositionUpdate startPos; // where the player was before movement. The server will update to this as long as it is a valid position.
+		public final float xd, yd, zd; // this is useful to the server because it can do things like getting hurt by touching something that the player can't actually run into.
+		public final PositionUpdate endPos; // where the player ended up after movement. If this doesn't match where the server thinks the player should have ended up, it will end back a position update to correct it.
 		
-		private SpriteUpdate() { this((String[])null); }
-		public SpriteUpdate(Entity e) { this(e.getRenderer()); }
-		public SpriteUpdate(EntityRenderer renderer) { this(EntityRenderer.serialize(renderer)); }
-		public SpriteUpdate(String[] rendererData) {
-			this.rendererData = rendererData;
+		private MovementRequest() { this(null, 0, 0, 0, null); }
+		public MovementRequest(PositionUpdate startPos, Vector2 moveDist, PositionUpdate endPos) { this(startPos, moveDist.x, moveDist.y, 0, endPos); }
+		public MovementRequest(PositionUpdate startPos, Vector3 moveDist, PositionUpdate endPos) { this(startPos, moveDist.x, moveDist.y, moveDist.z, endPos); }
+		public MovementRequest(PositionUpdate startPos, float xd, float yd, float zd, PositionUpdate endPos) {
+			this.startPos = startPos;
+			this.xd = xd;
+			this.yd = yd;
+			this.zd = zd;
+			this.endPos = endPos;
 		}
 		
-		@Override public String toString() { return "SpriteUpdate("+ Arrays.toString(rendererData)+")"; }
+		public Vector3 getMoveDist() { return new Vector3(xd, yd, zd); }
 	}
 	
 	// sent by client to interact or attack.
 	class InteractRequest {
 		public final boolean attack;
 		public final PositionUpdate playerPosition;
+		public final int dir;
 		
-		private InteractRequest() { this(false, null); }
-		public InteractRequest(boolean attack, PositionUpdate playerPosition) {
+		private InteractRequest() { this(false, null, 0); }
+		public InteractRequest(boolean attack, PositionUpdate playerPosition, Direction dir) { this(attack, playerPosition, dir.ordinal()); }
+		public InteractRequest(boolean attack, PositionUpdate playerPosition, int dir) {
 			this.attack = attack;
 			this.playerPosition = playerPosition;
+			this.dir = dir;
 		}
 	}
 	

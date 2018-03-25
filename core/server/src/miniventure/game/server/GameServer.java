@@ -80,31 +80,32 @@ public class GameServer implements GameProtocol {
 						System.err.println("Server could not satisfy chunk request, player level is null");
 				}
 				
-				if(object instanceof PositionUpdate) {
-					//System.out.println("server received movement");
-					PositionUpdate m = (PositionUpdate) object;
-					/*ServerLevel clientLevel;
-					if(m.levelDepth == null) clientLevel = null;
-					else clientLevel = world.getLevel(m.levelDepth);
-					
-					ServerLevel playerLevel = p.getLevel();
-					if(!MyUtils.nullableEquals(clientLevel, playerLevel)) {
-						// TO-DO the client thinks it's on the wrong level, for some reason. Send back a packet to fix it.
-					}*/
-					Vector3 newPos = new Vector3(m.x, m.y, m.z);
-					p.move(newPos.cpy().sub(p.getLocation()));
-					if(p.getLocation().dst(newPos) > 0.25f)
-						connection.sendTCP(new PositionUpdate(p));
-					//System.out.println("server has player at " + p.getPosition(true));
-				}
+				forPacket(object, EntityRequest.class, req -> {
+					Entity e = world.getEntity(req.eid);
+					if(e != null)
+						connection.sendTCP(new EntityAddition(e));
+				});
 				
 				forPacket(object, StatUpdate.class, p::loadStat);
+				
+				forPacket(object, MovementRequest.class, move -> {
+					// move to start pos
+					p.move(p.getLocation().sub(move.startPos.getPos()));
+					// move given dist
+					p.move(move.getMoveDist());
+					// compare against given end pos
+					if(move.endPos.variesFrom(p))
+						connection.sendTCP(new PositionUpdate(p));
+					
+					// note that the server will always have the say when it comes to which level the player should be on.
+				});
 				
 				if(object instanceof InteractRequest) {
 					System.out.println("server received interaction request");
 					InteractRequest r = (InteractRequest) object;
 					if(r.playerPosition.variesFrom(p))
 						connection.sendTCP(new PositionUpdate(p)); // fix the player's position
+					
 					if(r.attack) p.attack();
 					else p.interact();
 				}

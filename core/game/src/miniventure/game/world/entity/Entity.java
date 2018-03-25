@@ -56,11 +56,7 @@ public abstract class Entity implements WorldObject {
 	}
 	
 	@Override
-	public void update(float delta) {
-		renderer.update(delta);
-		if(blinker != null)
-			blinker.update(delta);
-	}
+	public void update(float delta) {}
 	
 	public void setRenderer(@NotNull EntityRenderer renderer) {
 		this.renderer = renderer;
@@ -77,7 +73,10 @@ public abstract class Entity implements WorldObject {
 	
 	@Override
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
-		System.out.println("rendering entity "+this+" at "+getPosition(true));
+		renderer.update(delta);
+		if(blinker != null) blinker.update(delta);
+		
+		//System.out.println("rendering entity "+this+" at "+getPosition(true));
 		getRenderer().render((x-posOffset.x) * Tile.SIZE, (y+z - posOffset.y) * Tile.SIZE, batch);
 	}
 	

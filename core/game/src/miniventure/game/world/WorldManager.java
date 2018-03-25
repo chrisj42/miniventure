@@ -113,7 +113,7 @@ public abstract class WorldManager {
 	
 	public void registerEntity(Entity e) {
 		//System.out.println(this+": registered entity "+e);
-		Entity old = entityIDMap.put(e.getId(), e);
+		entityIDMap.put(e.getId(), e);
 		//if(old != null)
 		//	throw new IllegalStateException("Attempted to register entity with duplicate entity id "+e.getId()+"; original="+old+", new="+e);
 	}
@@ -138,7 +138,7 @@ public abstract class WorldManager {
 			set.remove(e);
 			entityIDMap.remove(eid);
 		});
-		System.out.println(this+": deregistered entity "+e);
+		//System.out.println(this+": deregistered entity "+e);
 		
 		if(e != null)
 			level.entityMoved(e);
@@ -151,8 +151,8 @@ public abstract class WorldManager {
 		}
 		
 		Level oldLevel = entityLevels.put(e, level);
-		if(e instanceof Player) // so it doesn't go too crazy
-			System.out.println("for "+this+": setting level of entity " + e + " to " + level + " (removing from level "+oldLevel+") - entity location = " + e.getLocation(true));
+		//if(e instanceof Player) // so it doesn't go too crazy
+		//	System.out.println("for "+this+": setting level of entity " + e + " to " + level + " (removing from level "+oldLevel+") - entity location = " + e.getLocation(true));
 		
 		if(!level.equals(oldLevel)) {
 			actOnEntitySet(level, set -> set.add(e));

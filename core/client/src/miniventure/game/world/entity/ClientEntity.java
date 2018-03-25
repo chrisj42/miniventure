@@ -38,15 +38,15 @@ public class ClientEntity extends Entity {
 		setBlinker(0.5f, true, new FrameBlinker(5, 1, false));
 	}
 	
-	public boolean move(Vector2 pos, boolean validate) { return move(pos.x, pos.y, validate); }
-	public boolean move(Vector3 pos, boolean validate) { return move(pos.x, pos.y, pos.z, validate); }
-	public boolean move(float x, float y, boolean validate) { return move(x, y, this.z, validate); }
-	public boolean move(float x, float y, float z) { return move(x, y, z, false); }
-	public boolean move(float x, float y, float z, boolean validate) {
+	public boolean move(Vector2 moveDist, boolean validate) { return move(moveDist.x, moveDist.y, validate); }
+	public boolean move(Vector3 moveDist, boolean validate) { return move(moveDist.x, moveDist.y, moveDist.z, validate); }
+	public boolean move(float xd, float yd, boolean validate) { return move(xd, yd, this.z, validate); }
+	public boolean move(float xd, float yd, float zd) { return move(xd, yd, zd, false); }
+	public boolean move(float xd, float yd, float zd, boolean validate) {
 		if(validate)
-			return super.move(x, y, z);
+			return super.move(xd, yd, zd);
 		
-		moveTo(new Vector3(x, y, z).add(getLocation()));
+		moveTo(new Vector3(xd, yd, zd).add(getLocation()));
 		return true;
 	}
 	

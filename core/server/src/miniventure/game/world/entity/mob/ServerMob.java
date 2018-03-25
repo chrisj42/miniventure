@@ -112,7 +112,8 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 	public Direction getDirection() { return dir; }
 	//protected void setDirection(@NotNull Direction dir) { this.dir = dir; }
 	
-	//public boolean isKnockedBack() { return knockbackTimeLeft > 0 && knockbackVelocity.len() > 0; }
+	@Override
+	public boolean isKnockedBack() { return knockbackController.hasKnockback(); }
 	
 	//@Override
 	//protected TextureRegion getSprite() { return animator.getSprite(); }

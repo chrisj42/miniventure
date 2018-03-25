@@ -60,15 +60,15 @@ public abstract class Level {
 	protected int getLoadedChunkCount() { return loadedChunks.get(Map::size); }
 	protected Chunk getLoadedChunk(Point p) { return loadedChunks.get(chunks -> chunks.get(p)); }
 	protected Chunk[] getLoadedChunkArray() { return loadedChunks.get(chunks -> chunks.values().toArray(new Chunk[chunks.size()])); }
-	protected boolean isChunkLoaded(Point p) { return loadedChunks.get(chunks -> chunks.containsKey(p)); }
+	public boolean isChunkLoaded(Point p) { return loadedChunks.get(chunks -> chunks.containsKey(p)); }
 	protected void putLoadedChunk(Point p, Chunk c) { loadedChunks.access(chunks -> chunks.put(p, c)); }
 	
 	public synchronized void entityMoved(Entity entity) {
 		Point prevChunk = entityChunks.get(entity);
-		Point curChunk = entity.getLevel() != this ? null : getClosestChunkCoord(entity.getCenter());
+		Point curChunk = entity.getLevel() != this ? null : Chunk.getCoords(entity.getCenter());
 		
 		if(MyUtils.nullablesAreEqual(prevChunk, curChunk)) return;
-		System.out.println(world+" entity "+entity+" changed chunk, from "+prevChunk+" to "+curChunk);
+		//System.out.println(world+" entity "+entity+" changed chunk, from "+prevChunk+" to "+curChunk);
 		
 		if(curChunk == null)
 			entityChunks.remove(entity);
@@ -264,11 +264,6 @@ public abstract class Level {
 	@Nullable
 	public Tile getClosestTile(Rectangle rect) { return getClosestTile(rect.getCenter(new Vector2())); }
 	public Tile getClosestTile(Vector2 center) { return getTile(center.x, center.y); }
-	
-	@Nullable
-	public Point getClosestChunkCoord(Vector2 pos) {
-		return new Point(Chunk.getCoord(pos.x), Chunk.getCoord(pos.y));
-	}
 	
 	@Nullable
 	public Player getClosestPlayer(final Vector2 pos) {

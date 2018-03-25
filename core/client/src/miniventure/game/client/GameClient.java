@@ -6,9 +6,11 @@ import miniventure.game.GameCore;
 import miniventure.game.GameProtocol;
 import miniventure.game.screen.MainMenu;
 import miniventure.game.util.ProgressLogger;
+import miniventure.game.world.Chunk;
 import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.ClientLevel;
 import miniventure.game.world.Level;
+import miniventure.game.world.Point;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClientEntity;
 import miniventure.game.world.entity.EntityRenderer;
@@ -16,6 +18,7 @@ import miniventure.game.world.entity.mob.ClientPlayer;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.math.Vector2;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
@@ -78,9 +81,10 @@ public class GameClient implements GameProtocol {
 				}
 				
 				if(object instanceof EntityAddition) {
-					System.out.println("client received entity addition");
+					//System.out.println("client received entity addition");
 					EntityAddition addition = (EntityAddition) object;
-					if(addition.positionUpdate.levelDepth == null) return; // no point to it, really.
+					
+					if(world.getEntity(addition.eid) != null) return; // entity is already loaded.
 					
 					if(player != null && addition.eid == player.getId()) return; // shouldn't pay attention to trying to set the client player like this.
 					ClientLevel level = world.getLevel(addition.positionUpdate.levelDepth);
@@ -92,7 +96,7 @@ public class GameClient implements GameProtocol {
 				}
 				
 				if(object instanceof EntityRemoval) {
-					System.out.println("client received entity removal");
+					//System.out.println("client received entity removal");
 					int eid = ((EntityRemoval)object).eid;
 					world.deregisterEntity(eid);
 				}
@@ -104,19 +108,34 @@ public class GameClient implements GameProtocol {
 					
 					ClientEntity e = (ClientEntity) update.tag.getObject(world);
 					//System.out.println("client received entity update for " + e + ": " + update);
-					if(e == null) return;
+					if(e == null) {
+						Level level = world.getLevel(newPos.levelDepth);
+						if(level == null) return; // entity is on unloaded level
+						Vector2 pos = new Vector2(newPos.x, newPos.y);
+						Point cpos = Chunk.getCoords(pos);
+						if(!level.isChunkLoaded(cpos))
+							return; // entity is on unloaded chunk
+						
+						// chunk is loaded, but entity doesn't exist; ask for it from the server
+						send(new EntityRequest(update.tag.eid));
+						return;
+					}
 					
 					if(newPos != null) {
-						ClientLevel level = newPos.levelDepth == null ? null : world.getLevel(newPos.levelDepth);
+						ClientLevel level = world.getLevel(newPos.levelDepth);
 						if(level != null) {
 							e.moveTo(level, newPos.x, newPos.y, newPos.z);
-							System.out.println("moved client entity "+e+", new pos: "+e.getPosition(true));
+							//System.out.println("moved client entity "+e+", new pos: "+e.getPosition(true));
 						}
 					}
 					if(newSprite != null) {
 						e.setRenderer(EntityRenderer.deserialize(newSprite.rendererData));
 					}
 				}
+				
+				forPacket(object, EntityValidation.class, list -> {
+					// TODO
+				});
 				
 				forPacket(object, InventoryUpdate.class, newInv -> {
 					if(player == null) return;
