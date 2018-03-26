@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import miniventure.game.GameProtocol;
+import miniventure.game.item.ItemStack;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.Level;
@@ -111,18 +112,20 @@ public class GameServer implements GameProtocol {
 				}
 				
 				forPacket(object, ItemDropRequest.class, drop -> {
-					int removed = p.getInventory().removeItem(drop.stack);
+					ItemStack stack = ItemStack.load(drop.stackData);
+					int removed = p.getInventory().removeItem(stack);
 					ServerLevel level = p.getLevel();
 					if(level == null) return;
 					for(int i = 0; i < removed; i++)
-						level.dropItem(drop.stack.item.copy(), p.getPosition(), null);
+						level.dropItem(stack.item.copy(), p.getPosition(), null);
 				});
 				
 				forPacket(object, HeldItemRequest.class, handItem -> {
 					p.getHands().clearItem(p.getInventory());
-					int count = p.getInventory().removeItem(handItem.stack);
+					ItemStack stack = ItemStack.load(handItem.stackData);
+					int count = p.getInventory().removeItem(stack);
 					if(count > 0)
-						p.getHands().setItem(handItem.stack.item, count);
+						p.getHands().setItem(stack.item, count);
 				});
 				
 				if(object.equals(DatalessRequest.Respawn)) {

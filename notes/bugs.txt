@@ -1,6 +1,8 @@
-player can only interact once, then it doesn't work. But only if you actually do something; else it still works.
-
 Trying to run into a mob from top or bottom seems not to make the client stop, so the server keeps correcting it and it looks bad.
 
 Mobs on the server go a lot faster than expected.
+
+player health and stamina stats don't update (hunger does)
+
+player still moves with a menu open
 

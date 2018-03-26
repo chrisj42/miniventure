@@ -113,6 +113,13 @@ public class ServerPlayer extends ServerMob implements Player {
 		if(stat == Stat.Health) setHealth(update.amount);
 	}
 	
+	@Override
+	public void update(float delta) {
+		super.update(delta);
+		
+		hands.resetItemUsage();
+	}
+	
 	public boolean moveTo(float x, float y, float z) { return moveTo(new Vector3(x, y, z)); }
 	public boolean moveTo(Vector3 pos) { return move(pos.cpy().sub(getLocation())); }
 	
@@ -126,7 +133,7 @@ public class ServerPlayer extends ServerMob implements Player {
 	public Inventory getInventory() { return inventory; }
 	
 	public boolean takeItem(@NotNull Item item) {
-		boolean success = false;
+		boolean success;
 		if(hands.addItem(item))
 			success = true;
 		else

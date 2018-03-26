@@ -14,6 +14,8 @@ public class ItemStack {
 		this.count = count;
 	}
 	
+	public String[] save() { return save(item, count); }
+	
 	public static String[] save(Item item, int count) {
 		String[] itemData = item.save();
 		String[] data = new String[itemData.length+1];

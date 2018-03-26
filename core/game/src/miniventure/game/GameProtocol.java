@@ -344,22 +344,28 @@ public interface GameProtocol {
 	
 	// sent by client to let the server know that a new held item has been selected from the inventory.
 	class HeldItemRequest {
-		public final ItemStack stack;
+		public final String[] stackData;
 		
-		private HeldItemRequest() { this((ItemStack)null); }
+		private HeldItemRequest() { this((String[])null); }
 		public HeldItemRequest(Hands hands) { this(new ItemStack(hands.getUsableItem(), hands.getCount())); }
 		public HeldItemRequest(ItemStack stack) {
-			this.stack = stack;
+			this(stack.save());
+		}
+		public HeldItemRequest(String[] stackData) {
+			this.stackData = stackData;
 		}
 	}
 	
 	// sent by client to drop an item from the inventory
 	class ItemDropRequest {
-		public final ItemStack stack;
+		public final String[] stackData;
 		
-		private ItemDropRequest() { this(null); }
+		private ItemDropRequest() { this((String[])null); }
 		public ItemDropRequest(ItemStack stack) {
-			this.stack = stack;
+			this(stack.save());
+		}
+		public ItemDropRequest(String[] stackData) {
+			this.stackData = stackData;
 		}
 	}
 	
