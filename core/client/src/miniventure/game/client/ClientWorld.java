@@ -71,7 +71,8 @@ public class ClientWorld extends WorldManager {
 			return;
 		}
 		
-		gameScreen.handleInput(mainPlayer);
+		if(menu == null)
+			gameScreen.handleInput(mainPlayer);
 		//mainPlayer.updateStats(delta);
 		
 		level.updateEntities(getEntities(level), delta);

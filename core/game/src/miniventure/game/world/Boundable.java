@@ -4,6 +4,7 @@ import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
@@ -19,14 +20,19 @@ public interface Boundable {
 	default Vector2 getPosition() { return getBounds().getPosition(new Vector2()); }
 	default Vector2 getSize() { return getBounds().getSize(new Vector2()); }
 	
+	static Vector2 toLevelCoords(@Nullable Level level, Vector2 pos) {
+		if(level != null) {
+			pos.x -= level.getWidth() / 2;
+			pos.y -= level.getHeight() / 2;
+		}
+		return pos;
+	}
+	
 	default Rectangle getBounds(boolean worldOriginCenter) {
 		Rectangle bounds = getBounds();
 		if(worldOriginCenter) {
-			Level level = getLevel();
-			if(level != null) {
-				bounds.x -= level.getWidth() / 2;
-				bounds.y -= level.getHeight() / 2;
-			}
+			Vector2 pos = toLevelCoords(getLevel(), new Vector2(bounds.x, bounds.y));
+			bounds.setPosition(pos);
 		}
 		return bounds;
 	}

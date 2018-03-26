@@ -7,9 +7,11 @@ import miniventure.game.item.Hands;
 import miniventure.game.item.Inventory;
 import miniventure.game.item.ItemStack;
 import miniventure.game.util.Version;
+import miniventure.game.world.Boundable;
 import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.Level;
 import miniventure.game.world.Point;
+import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject.Tag;
 import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.Entity;
@@ -46,6 +48,7 @@ public interface GameProtocol {
 		kryo.register(EntityTag.class);
 		kryo.register(TileTag.class);
 		kryo.register(Direction.class);
+		kryo.register(Stat.class);
 		
 		kryo.register(String[].class);
 		kryo.register(int[].class);
@@ -279,7 +282,15 @@ public interface GameProtocol {
 		
 		public Vector3 getPos() { return new Vector3(x, y, z); }
 		
-		@Override public String toString() { return "PositionUpdate("+x+","+y+","+z+",lvl"+levelDepth+")"; }
+		@Override public String toString() {
+			return "PositionUpdate("+x+","+y+","+z+",lvl"+levelDepth+")";
+		}
+		
+		public String toString(WorldManager world) {
+			if(levelDepth == null) return toString();
+			Vector2 pos = Boundable.toLevelCoords(world.getLevel(levelDepth), new Vector2(x, y));
+			return "PositionUpdate("+pos.x+","+pos.y+","+z+",lvl"+levelDepth+")";
+		}
 	}
 	
 	class MovementRequest {
@@ -331,13 +342,12 @@ public interface GameProtocol {
 	
 	// a stat changed; sent by both the client and the server. When the client sends it, the amount is the total, but when the server sends it to a client, it is a delta.
 	class StatUpdate {
-		public final int statIndex;
+		public final Stat stat;
 		public final int amount;
 		
-		private StatUpdate() { this(0, 0); }
-		public StatUpdate(Stat stat, int amt) { this(stat.ordinal(), amt); }
-		private StatUpdate(int idx, int amt) {
-			this.statIndex = idx;
+		private StatUpdate() { this(null, 0); }
+		public StatUpdate(Stat stat, int amt) {
+			this.stat = stat;
 			this.amount = amt;
 		}
 	}
@@ -366,6 +376,15 @@ public interface GameProtocol {
 		}
 		public ItemDropRequest(String[] stackData) {
 			this.stackData = stackData;
+		}
+	}
+	
+	class CraftRequest {
+		public final int recipeIndex; // TO-DO this only works because there is only one array of recipes; it'll have to be changed later.
+		
+		private CraftRequest() { this(0); }
+		public CraftRequest(int recipeIndex) {
+			this.recipeIndex = recipeIndex;
 		}
 	}
 	

@@ -85,6 +85,9 @@ public class Chunk implements Boundable {
 	@Override
 	public int hashCode() { return 31 * chunkX + 17 * chunkY; }
 	
+	@Override
+	public String toString() { return "Chunk("+chunkX+","+chunkY+")"; }
+	
 	
 	public static Point getCoords(Point tileCoords) { return getCoords(tileCoords.x, tileCoords.y); }
 	public static Point getCoords(Vector2 pos) { return getCoords(pos.x, pos.y); }

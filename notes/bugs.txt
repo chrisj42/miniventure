@@ -1,8 +1,4 @@
-Trying to run into a mob from top or bottom seems not to make the client stop, so the server keeps correcting it and it looks bad.
+possible for there to be confusion with particle entity levels, it seems.
 
-Mobs on the server go a lot faster than expected.
-
-player health and stamina stats don't update (hunger does)
-
-player still moves with a menu open
+possible for the requestedAnimations queue to generate a null pointer exception when attempting to poll, for some reason.
 

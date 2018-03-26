@@ -5,6 +5,7 @@ import java.util.HashSet;
 import miniventure.game.GameProtocol.EntityAddition;
 import miniventure.game.GameProtocol.EntityRemoval;
 import miniventure.game.ProgressPrinter;
+import miniventure.game.util.MyUtils;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
@@ -132,9 +133,11 @@ public class ServerWorld extends WorldManager {
 		super.setEntityLevel(e, level);
 		ServerLevel newLevel = getEntityLevel(e);
 		
-		if(!newLevel.equals(previous)) {
-			server.broadcast(new EntityRemoval(e), previous, (ServerEntity) e);
-			server.broadcast(new EntityAddition(e), newLevel, (ServerEntity) e);
+		if(!MyUtils.nullablesAreEqual(previous, newLevel)) {
+			if(previous != null)
+				server.broadcast(new EntityRemoval(e), previous, (ServerEntity) e);
+			if(newLevel != null)
+				server.broadcast(new EntityAddition(e), newLevel, (ServerEntity) e);
 		}
 	}
 	

@@ -30,4 +30,7 @@ public class ItemStack {
 		Item item = Item.load(Arrays.copyOfRange(data, 1, data.length));
 		return new ItemStack(item, count);
 	}
+	
+	@Override
+	public String toString() { return "ItemStack("+count+" "+item+")"; }
 }

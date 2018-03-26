@@ -1,6 +1,7 @@
 package miniventure.game.client;
 
 import java.io.IOException;
+import java.lang.Thread.UncaughtExceptionHandler;
 
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol;
@@ -111,12 +112,7 @@ public class GameClient implements GameProtocol {
 					ClientEntity e = (ClientEntity) update.tag.getObject(world);
 					//System.out.println("client received entity update for " + e + ": " + update);
 					if(e == null) {
-						Level level = world.getLevel(newPos.levelDepth);
-						if(level == null) return; // entity is on unloaded level
-						Vector2 pos = new Vector2(newPos.x, newPos.y);
-						Point cpos = Chunk.getCoords(pos);
-						if(!level.isChunkLoaded(cpos))
-							return; // entity is on unloaded chunk
+						if(!isPositionLoaded(newPos)) return;
 						
 						// chunk is loaded, but entity doesn't exist; ask for it from the server
 						send(new EntityRequest(update.tag.eid));
@@ -137,6 +133,7 @@ public class GameClient implements GameProtocol {
 				
 				forPacket(object, MobUpdate.class, update -> {
 					Entity e = update.tag.getObject(world);
+					if(e == null) return;
 					DirectionalAnimationRenderer renderer = (DirectionalAnimationRenderer) e.getMainRenderer();
 					renderer.setDirection(update.newDir);
 				});
@@ -155,6 +152,11 @@ public class GameClient implements GameProtocol {
 					if(player == null) return;
 					player.moveTo(world.getLevel(newPos.levelDepth), newPos.x, newPos.y, newPos.z);
 				});
+				
+				forPacket(object, StatUpdate.class, update -> {
+					if(player == null) return;
+					player.changeStat(update.stat, update.amount);
+				});
 			}
 			
 			@Override
@@ -167,6 +169,11 @@ public class GameClient implements GameProtocol {
 		});
 		
 		client.start();
+		client.getUpdateThread().setUncaughtExceptionHandler((t, e) -> {
+			ClientCore.exceptionHandler.uncaughtException(t, e);
+			t.getThreadGroup().uncaughtException(t, e);
+			client.stop();
+		});
 	}
 	
 	public void send(Object obj) { client.sendTCP(obj); }
@@ -190,6 +197,17 @@ public class GameClient implements GameProtocol {
 		send(new Login("player", GameCore.VERSION));
 		
 		logger.editMessage("Loading world from server...");
+		
+		return true;
+	}
+	
+	private boolean isPositionLoaded(PositionUpdate posUpdate) {
+		Level level = ClientCore.getWorld().getLevel(posUpdate.levelDepth);
+		if(level == null) return false; // entity is on unloaded level
+		Vector2 pos = new Vector2(posUpdate.x, posUpdate.y);
+		Point cpos = Chunk.getCoords(pos);
+		if(!level.isChunkLoaded(cpos))
+			return false; // entity is on unloaded chunk
 		
 		return true;
 	}

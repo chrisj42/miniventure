@@ -96,4 +96,6 @@ public class ToolItem extends Item {
 	public String[] save() {
 		return new String[] {getType().name(), toolType.name(), material.name(), durability+""};
 	}
+	
+	@Override public String toString() { return "ToolItem("+material+" "+toolType+",dura="+durability+")"; }
 }

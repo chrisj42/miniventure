@@ -43,7 +43,14 @@ public class ServerCore {
 		//noinspection InfiniteLoopStatement
 		while(true) {
 			long now = System.nanoTime();
-			serverWorld.update((now-lastNow)/1E9f);
+			
+			try {
+				serverWorld.update((now - lastNow) / 1E9f);
+			} catch(Throwable t) {
+				getServer().stop();
+				throw t;
+			}
+			
 			lastNow = now;
 			
 			try {

@@ -7,6 +7,8 @@ import java.util.HashSet;
 
 import miniventure.game.GameProtocol;
 import miniventure.game.item.ItemStack;
+import miniventure.game.item.Recipe;
+import miniventure.game.item.Recipes;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.Level;
@@ -16,6 +18,7 @@ import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.ServerPlayer;
 
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.esotericsoftware.kryonet.Connection;
@@ -32,7 +35,17 @@ public class GameServer implements GameProtocol {
 	private Server server;
 	
 	public GameServer() {
-		server = new Server(writeBufferSize, objectBufferSize);
+		server = new Server(writeBufferSize, objectBufferSize) {
+			@Override
+			public void start() {
+				Thread thread = new Thread(this, "Server");
+				thread.setUncaughtExceptionHandler((t, ex) -> {
+					t.getThreadGroup().uncaughtException(t, ex);
+					close();
+				});
+				thread.start();
+			}
+		};
 		GameProtocol.registerClasses(server.getKryo());
 		
 		addListener(new Listener() {
@@ -73,6 +86,7 @@ public class GameServer implements GameProtocol {
 					ServerLevel level = p.getLevel(); // assumes player wants for current level
 					if(level != null) {
 						Chunk chunk = level.getChunk(request.x, request.y);
+						System.out.println("server sending back chunk "+chunk);
 						connection.sendTCP(new ChunkData(chunk, level));
 						Array<Entity> newEntities = level.getOverlappingEntities(chunk.getBounds());
 						for(Entity e: newEntities)
@@ -103,7 +117,7 @@ public class GameServer implements GameProtocol {
 				
 				if(object instanceof InteractRequest) {
 					InteractRequest r = (InteractRequest) object;
-					System.out.println("server received interaction request; dir="+r.dir+", pos="+r.playerPosition);
+					System.out.println("server received interaction request; dir="+r.dir+", pos="+r.playerPosition.toString(world));
 					if(r.playerPosition.variesFrom(p))
 						connection.sendTCP(new PositionUpdate(p)); // fix the player's position
 					
@@ -116,16 +130,28 @@ public class GameServer implements GameProtocol {
 					int removed = p.getInventory().removeItem(stack);
 					ServerLevel level = p.getLevel();
 					if(level == null) return;
+					// get target pos, which is one tile in front of player.
+					Vector2 targetPos = p.getCenter();
+					targetPos.add(p.getDirection().getVector()); // adds 1 in the direction of the player.
 					for(int i = 0; i < removed; i++)
-						level.dropItem(stack.item.copy(), p.getPosition(), null);
+						level.dropItem(stack.item.copy(), p.getPosition(), targetPos);
 				});
 				
 				forPacket(object, HeldItemRequest.class, handItem -> {
-					p.getHands().clearItem(p.getInventory());
 					ItemStack stack = ItemStack.load(handItem.stackData);
+					System.out.println("server received held item request: "+stack);
+					p.getHands().clearItem(p.getInventory());
+					System.out.println("server player inventory: "+Arrays.toString(p.getInventory().save()));
 					int count = p.getInventory().removeItem(stack);
 					if(count > 0)
 						p.getHands().setItem(stack.item, count);
+					connection.sendTCP(new InventoryUpdate(p));
+				});
+				
+				forPacket(object, CraftRequest.class, req -> {
+					Recipe recipe = Recipes.recipes[req.recipeIndex];
+					recipe.tryCraft(p.getInventory());
+					connection.sendTCP(new InventoryUpdate(p));
 				});
 				
 				if(object.equals(DatalessRequest.Respawn)) {
@@ -204,4 +230,6 @@ public class GameServer implements GameProtocol {
 		for(ServerPlayer p: players)
 			playerToConnectionMap.get(p).sendTCP(obj);
 	}
+	
+	void stop() { server.stop(); }
 }

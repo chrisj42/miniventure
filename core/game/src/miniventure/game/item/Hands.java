@@ -54,6 +54,7 @@ public class Hands {
 	
 	public void setItem(@NotNull ItemStack stack) { setItem(stack.item, stack.count); }
 	public void setItem(@NotNull Item item, int count) {
+		System.out.println("setting "+player+" hands to "+count+" "+item);
 		this.item = item;
 		this.count = count;
 	}

@@ -3,6 +3,7 @@ package miniventure.game.item;
 import java.util.Arrays;
 
 import miniventure.game.GameCore;
+import miniventure.game.GameProtocol.CraftRequest;
 import miniventure.game.client.ClientCore;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.util.MyUtils;
@@ -145,6 +146,9 @@ public class CraftingScreen extends MenuScreen {
 		void select(int idx) {
 			if(recipe.tryCraft(playerInv))
 				refreshCanCraft();
+			
+			// tell server about the attempt
+			ClientCore.getClient().send(new CraftRequest(idx));
 		}
 		
 		@Override

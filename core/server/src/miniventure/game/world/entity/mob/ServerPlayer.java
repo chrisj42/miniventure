@@ -108,9 +108,8 @@ public class ServerPlayer extends ServerMob implements Player {
 	}
 	
 	public void loadStat(StatUpdate update) {
-		Stat stat = Stat.values[update.statIndex];
-		stats.put(stat, update.amount);
-		if(stat == Stat.Health) setHealth(update.amount);
+		stats.put(update.stat, update.amount);
+		if(update.stat == Stat.Health) setHealth(update.amount);
 	}
 	
 	@Override
@@ -166,7 +165,7 @@ public class ServerPlayer extends ServerMob implements Player {
 	}
 	
 	public void attack() {
-		System.out.println("server player attacking");
+		System.out.println("server player attacking; dir="+getDirection()+", pos="+getPosition(true));
 		if(!hands.hasUsableItem()) return; // only ever not true for attacks in the same frame or if not enough stamina
 		
 		Level level = getLevel();

@@ -5,6 +5,7 @@ import javax.swing.JTextArea;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.Thread.UncaughtExceptionHandler;
 
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.HeldItemRequest;
@@ -29,6 +30,16 @@ public class ClientCore extends ApplicationAdapter {
 	private static MenuScreen menuScreen;
 	
 	private final ServerStarter serverStarter;
+	
+	public static final UncaughtExceptionHandler exceptionHandler = (thread, throwable) -> {
+		StringWriter string = new StringWriter();
+		PrintWriter printer = new PrintWriter(string);
+		throwable.printStackTrace(printer);
+		
+		JTextArea errorDisplay = new JTextArea(string.toString());
+		errorDisplay.setEditable(false);
+		JOptionPane.showMessageDialog(null, errorDisplay, "An error has occurred", JOptionPane.ERROR_MESSAGE);
+	};
 	
 	public ClientCore(ServerStarter serverStarter) {
 		this.serverStarter = serverStarter;
@@ -73,21 +84,17 @@ public class ClientCore extends ApplicationAdapter {
 		} catch(Throwable t) {
 			//System.out.println("running threads: " + Thread.activeCount());
 			
-			StringWriter string = new StringWriter();
-			PrintWriter printer = new PrintWriter(string);
-			t.printStackTrace(printer);
-			
-			JTextArea errorDisplay = new JTextArea(string.toString());
-			errorDisplay.setEditable(false);
-			JOptionPane.showMessageDialog(null, errorDisplay, "An error has occurred", JOptionPane.ERROR_MESSAGE);
+			exceptionHandler.uncaughtException(Thread.currentThread(), t);
 			
 			throw t;
 		}
 	}
 	
 	public static void setScreen(@Nullable MenuScreen screen) {
-		if(menuScreen instanceof InventoryScreen)
+		if(menuScreen instanceof InventoryScreen) {
+			System.out.println("sending held item request to server for "+clientWorld.getMainPlayer().getHands().getUsableItem());
 			getClient().send(new HeldItemRequest(clientWorld.getMainPlayer().getHands()));
+		}
 		
 		if(screen == null && menuScreen != null)
 			menuScreen.dispose();

@@ -12,6 +12,6 @@ public interface HitReaction {
 	HitReaction FLEE = (attacked, attacker, item) -> attacked.setMovePattern(new FleePattern((self) -> attacker), 5f);
 	HitReaction CHASE = (attacked, attacker, item) -> {
 		if(attacker instanceof Entity)
-			attacked.setMovePattern(new PursuePattern((self) -> attacker, Player.MOVE_SPEED), 5f);
+			attacked.setMovePattern(new PursuePattern((self) -> attacker, Player.MOVE_SPEED*4f/5), 5f);
 	};
 }

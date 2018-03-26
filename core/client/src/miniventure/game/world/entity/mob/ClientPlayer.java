@@ -69,7 +69,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 		dir = Direction.DOWN;
 		
 		hands = new ClientHands(this);
-		inventory = new Inventory(INV_SIZE); // no must-fit because that is handled by the server
+		inventory = new Inventory(INV_SIZE, hands); // no must-fit because that is handled by the server
 		
 		hands.loadItem(data.inventory.heldItemStack);
 		inventory.loadItems(data.inventory.inventory);
@@ -105,6 +105,13 @@ public class ClientPlayer extends ClientEntity implements Player {
 	
 	@Override
 	public boolean isKnockedBack() { return knockbackController.hasKnockback(); }
+	
+	@Override @NotNull
+	public Rectangle getBounds() {
+		Rectangle bounds = super.getBounds();
+		bounds.setHeight(bounds.getHeight()*2/3);
+		return bounds;
+	}
 	
 	@Override
 	public void update(float delta) {

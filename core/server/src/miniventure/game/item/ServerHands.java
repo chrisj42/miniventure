@@ -25,7 +25,7 @@ public class ServerHands extends Hands {
 		ServerLevel level = player.getLevel();
 		if(level != null)
 			for(int i = 0; i < removed; i++)
-				level.addEntity(new ItemEntity(stack.item, null), player.getPosition(), true);
+				level.addEntity(new ItemEntity(stack.item, player.getDirection().getVector()), player.getPosition(), true);
 		
 		// TO-DO update the client's inventory (note that the server ultimately keeps track of the player's inventory)
 		ServerCore.getServer().sendToPlayer(player, new InventoryUpdate(player.getInventory(), player.getHands()));
@@ -39,6 +39,7 @@ public class ServerHands extends Hands {
 		
 		if(!item.isUsed()) return;
 		
+		System.out.println("used item "+item);
 		Item newItem = item.resetUsage();
 		
 		player.changeStat(Stat.Stamina, -item.getStaminaUsage());
