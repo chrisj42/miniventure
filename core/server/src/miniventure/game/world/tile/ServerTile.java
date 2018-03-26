@@ -15,7 +15,6 @@ public class ServerTile extends Tile {
 		this.level = level;
 	}
 	
-	
 	@NotNull @Override
 	public ServerLevel getLevel() { return level; }
 	

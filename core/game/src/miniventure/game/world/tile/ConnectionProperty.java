@@ -39,7 +39,7 @@ public class ConnectionProperty implements TilePropertyInstance {
 						connects = true;
 						break;
 					}
-					if(aroundTypes[i][ti].getProp(TilePropertyType.Render).isOpaque()) // the type also doesn't connect, at this point.
+					if(tile.getProp(aroundTypes[i][ti], TilePropertyType.Render).isOpaque()) // the type also doesn't connect, at this point.
 						break; // lower tiles are irrelevant.
 				}
 				
@@ -54,7 +54,7 @@ public class ConnectionProperty implements TilePropertyInstance {
 			}
 		}
 		
-		return tileType.getProp(TilePropertyType.Render).getSprite(spriteIdx, false, tile);
+		return tile.getProp(tileType, TilePropertyType.Render).getSprite(spriteIdx, false, tile);
 	}
 	
 }

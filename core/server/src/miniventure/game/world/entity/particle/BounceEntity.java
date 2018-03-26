@@ -78,7 +78,7 @@ public abstract class BounceEntity extends ServerEntity {
 	private boolean moving = true;
 	@Override
 	public void update(float delta) {
-		//super.update(delta);
+		super.update(delta);
 		/*
 			Movement will work like this:
 				- the itemEntity will move along a base axis, as time progresses, and the actual position will vary according to time.
@@ -101,7 +101,7 @@ public abstract class BounceEntity extends ServerEntity {
 		time += delta;
 		
 		if(getZ() < 0) {
-			setZ(0);
+			move(0, 0, -getZ());
 			velocity.scl(REBOUND_SPEED_FACTOR, REBOUND_SPEED_FACTOR, -REBOUND_SPEED_FACTOR);
 			if(time - lastBounceTime < 0.01f) {
 				moving = false;

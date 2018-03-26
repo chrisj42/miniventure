@@ -46,7 +46,7 @@ public class ClientTile extends Tile {
 		TileType[] mainTypes = getTypes();
 		int firstIdx = 0;
 		for(int i = mainTypes.length-1; i >= 0; i--) {
-			if(mainTypes[i].getProp(TilePropertyType.Render).isOpaque()) {
+			if(getProp(mainTypes[i], TilePropertyType.Render).isOpaque()) {
 				firstIdx = i;
 				break;
 			}
@@ -58,7 +58,7 @@ public class ClientTile extends Tile {
 		Arrays.fill(model, Boolean.FALSE);
 		for(int i = 0; i < aroundTypes.length; i++) {
 			for (TileType oType : aroundTypes[i]) { // doesn't matter the order.
-				if(!oType.getProp(TilePropertyType.Overlap).canOverlap()) continue; // the type can't even overlap anyway.
+				if(!getProp(oType, TilePropertyType.Overlap).canOverlap()) continue; // the type can't even overlap anyway.
 				//if(TileType.tileSorter.compare(mainTypes[firstIdx], oType) >= 0) continue; // the type is lower than the lowest *visible* main type.
 				overlappingTypes.putIfAbsent(oType, Arrays.copyOf(model, model.length));
 				overlappingTypes.get(oType)[i] = true;
@@ -70,13 +70,13 @@ public class ClientTile extends Tile {
 		
 		for(int i = firstIdx; i < mainTypes.length; i++) {
 			// before we use the connection property of the main type, let's check and see if we are transitioning.
-			if(i == mainTypes.length - 1 && mainTypes[i].getProp(TilePropertyType.Transition).playingAnimation(this)) // only the top tile can ever be transitioning.
-				sprites.add(mainTypes[i].getProp(TilePropertyType.Transition).getAnimationFrame(this));
+			if(i == mainTypes.length - 1 && getProp(mainTypes[i], TilePropertyType.Transition).playingAnimation(this)) // only the top tile can ever be transitioning.
+				sprites.add(getProp(mainTypes[i], TilePropertyType.Transition).getAnimationFrame(this));
 			else // otherwise, use connection sprite.
-				sprites.add(mainTypes[i].getProp(TilePropertyType.Connect).getSprite(this, aroundTypes));
+				sprites.add(getProp(mainTypes[i], TilePropertyType.Connect).getSprite(this, aroundTypes));
 			
 			while(overlapType != null && (i >= mainTypes.length-1 || mainTypes[i+1].compareTo(overlapType) > 0)) {
-				sprites.addAll(mainTypes[i].getProp(TilePropertyType.Overlap).getSprites(this, overlapType, overlappingTypes.get(overlapType)));
+				sprites.addAll(getProp(mainTypes[i], TilePropertyType.Overlap).getSprites(this, overlapType, overlappingTypes.get(overlapType)));
 				overlapType = overlapTypeIter.hasNext() ? overlapTypeIter.next() : null;
 			}
 		}

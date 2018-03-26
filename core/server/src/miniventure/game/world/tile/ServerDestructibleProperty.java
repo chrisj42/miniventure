@@ -34,8 +34,7 @@ public class ServerDestructibleProperty extends DestructibleProperty {
 			if(health <= 0) {
 				tile.breakTile();
 				for(ItemDrop drop: drops)
-					if(drop != null)
-						((ServerLevel)tile.getLevel()).dropItems(drop, tile, attacker);
+					((ServerLevel)tile.getLevel()).dropItems(drop, tile, attacker);
 			} else
 				tile.setData(TilePropertyType.Attack, tileType, HEALTH_IDX, health+"");
 			

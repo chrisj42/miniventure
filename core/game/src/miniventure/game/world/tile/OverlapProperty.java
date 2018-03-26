@@ -23,7 +23,7 @@ public class OverlapProperty implements TilePropertyInstance {
 	Array<AtlasRegion> getSprites(Tile tile, TileType aroundType, Boolean[] aroundMatches) {
 		Array<AtlasRegion> sprites = new Array<>();
 		
-		if(!aroundType.getProp(TilePropertyType.Overlap).overlaps) return sprites;
+		if(!tile.getProp(aroundType, TilePropertyType.Overlap).overlaps) return sprites;
 		if(tileType.compareTo(aroundType) >= 0) return sprites;
 		
 		
@@ -46,7 +46,7 @@ public class OverlapProperty implements TilePropertyInstance {
 		if(aroundMatches[6] && bits[2] == 0 && bits[3] == 0) indexes.add(2);
 		if(aroundMatches[0] && bits[3] == 0 && bits[0] == 0) indexes.add(3);
 		for(Integer idx: indexes)
-			sprites.add(aroundType.getProp(TilePropertyType.Render, AnimationProperty.class).getSprite(idx, true, tile));
+			sprites.add(tile.getProp(aroundType, TilePropertyType.Render, AnimationProperty.class).getSprite(idx, true, tile));
 		
 		return sprites;
 	}

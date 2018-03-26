@@ -133,7 +133,7 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 		
 		SpriteUpdate newSprite = animator.getSpriteUpdate();
 		if(newSprite != null)
-			updateCache = new EntityUpdate(getTag(), updateCache == null ? null : updateCache.positionUpdate, newSprite);
+			updateSprite(newSprite);
 		
 		/*if(knockbackTimeLeft > 0) {
 			super.move(new Vector2(knockbackVelocity).scl(delta));

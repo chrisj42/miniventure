@@ -6,8 +6,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import miniventure.game.world.entity.Entity;
-import miniventure.game.world.entity.mob.Player;
+import miniventure.game.world.tile.TilePropertyInstance;
 import miniventure.game.world.tile.TilePropertyInstanceFetcher;
+import miniventure.game.world.tile.TilePropertyType;
+import miniventure.game.world.tile.TileType;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;

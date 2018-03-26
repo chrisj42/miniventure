@@ -8,6 +8,7 @@ import miniventure.game.item.ResourceItem;
 import miniventure.game.item.TileItem;
 import miniventure.game.item.ToolType;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.property.PropertyInstanceFetcher;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.tile.AnimationProperty.AnimationType;
 import miniventure.game.world.tile.DestructibleProperty.PreferredTool;
@@ -158,14 +159,10 @@ public enum TileType {
 			initialData[i] = initData.get(i);
 	}
 	
-	public <T extends TilePropertyInstance> T getProp(TilePropertyType<T> propertyType) {
+	// used in TilePropertyInstanceFetcher to get the property instances.
+	<T extends TilePropertyInstance> T getProp(TilePropertyType<T> propertyType, PropertyInstanceFetcher<TilePropertyInstance> instanceFetcher) {
 		//noinspection unchecked
-		return (T) propertyMap.get(propertyType);
-	}
-	
-	public <T extends TilePropertyInstance> T getProp(TilePropertyType<? super T> propertyType, Class<T> asClass) {
-		//noinspection unchecked
-		return (T) getProp(propertyType);
+		return (T) instanceFetcher.getPropertyInstance(propertyMap.get(propertyType));
 	}
 	
 	int getDataLength() { return initialData.length; }

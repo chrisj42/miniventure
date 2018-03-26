@@ -101,8 +101,8 @@ public class GameServer implements GameProtocol {
 				});
 				
 				if(object instanceof InteractRequest) {
-					System.out.println("server received interaction request");
 					InteractRequest r = (InteractRequest) object;
+					System.out.println("server received interaction request; dir="+r.dir+", pos="+r.playerPosition);
 					if(r.playerPosition.variesFrom(p))
 						connection.sendTCP(new PositionUpdate(p)); // fix the player's position
 					

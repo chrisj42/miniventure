@@ -159,15 +159,19 @@ public class ServerPlayer extends ServerMob implements Player {
 	}
 	
 	public void attack() {
-		if(!hands.hasUsableItem()) return;
+		System.out.println("server player attacking");
+		if(!hands.hasUsableItem()) return; // only ever not true for attacks in the same frame or if not enough stamina
 		
 		Level level = getLevel();
 		Item heldItem = hands.getUsableItem();
+		System.out.println("has usable item: "+heldItem);
 		
 		boolean success = false;
 		for(WorldObject obj: getInteractionQueue()) {
+			System.out.println("attacking "+obj);
 			if (heldItem.attack(obj, this)) {
 				success = true;
+				System.out.println("success");
 				break;
 			}
 		}

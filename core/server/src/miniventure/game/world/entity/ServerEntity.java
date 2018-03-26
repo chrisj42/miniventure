@@ -6,6 +6,7 @@ import java.lang.reflect.InvocationTargetException;
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.EntityUpdate;
 import miniventure.game.GameProtocol.PositionUpdate;
+import miniventure.game.GameProtocol.SpriteUpdate;
 import miniventure.game.server.ServerCore;
 import miniventure.game.server.ServerWorld;
 import miniventure.game.util.MyUtils;
@@ -13,6 +14,7 @@ import miniventure.game.util.Version;
 import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
+import miniventure.game.world.entity.particle.Particle;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.math.Rectangle;
@@ -24,7 +26,8 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class ServerEntity extends Entity {
 	
-	protected EntityUpdate updateCache = null;
+	private SpriteUpdate newSprite = null;
+	private PositionUpdate newPos = null;
 	
 	public ServerEntity() {
 		super(ServerCore.getWorld());
@@ -51,10 +54,13 @@ public abstract class ServerEntity extends Entity {
 	
 	@Override
 	public void update(float delta) {
-		if(updateCache != null) {
-			ServerCore.getServer().broadcast(updateCache, this);
-			updateCache = null;
+		if(/*!(this instanceof Particle) && */(newSprite != null || newPos != null)) {
+			ServerCore.getServer().broadcast(new EntityUpdate(getTag(), newPos, newSprite), this);
+			newPos = null;
+			newSprite = null;
 		}
+		
+		if(this instanceof Particle) return; // particles don't interact
 		
 		ServerLevel level = getLevel();
 		if(level == null) return;
@@ -68,13 +74,16 @@ public abstract class ServerEntity extends Entity {
 			obj.touching(this);
 	}
 	
+	protected void updateSprite(SpriteUpdate newSprite) { this.newSprite = newSprite; }
+	protected void updatePosition(PositionUpdate newPos) { this.newPos = newPos; }
+	
 	public float getZ() { return z; }
 	protected void setZ(float z) { this.z = z; }
 	
 	@Override
 	public void moveTo(@NotNull Level level, float x, float y) {
 		super.moveTo(level, x, y);
-		updateCache = new EntityUpdate(getTag(), new PositionUpdate(this), updateCache == null ? null : updateCache.spriteUpdate);
+		updatePosition(new PositionUpdate(this));
 	}
 	
 	@Override
