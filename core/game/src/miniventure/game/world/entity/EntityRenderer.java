@@ -3,6 +3,7 @@ package miniventure.game.world.entity;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.HashMap;
 
 import miniventure.game.GameCore;
@@ -30,6 +31,7 @@ public abstract class EntityRenderer {
 	protected abstract String[] save();
 	
 	public void update(float delta) { elapsedTime += delta; }
+	//public void reset() { elapsedTime = 0; }
 	
 	public abstract void render(float x, float y, Batch batch);
 	
@@ -138,33 +140,61 @@ public abstract class EntityRenderer {
 	}
 	
 	
-	/*public static class DirectionalAnimationRenderer extends EntityRenderer {
+	public static class DirectionalAnimationRenderer extends EntityRenderer {
 		
-		private Direction dir;
-		
-		public DirectionalAnimationRenderer() {
-			
+		@FunctionalInterface
+		public interface DirectionalSpriteFetcher {
+			String getSpriteName(Direction dir);
 		}
 		
-		protected DirectionalAnimationRenderer(String[] data) {
-			this();
+		private final EnumMap<Direction, AnimationRenderer> animations = new EnumMap<>(Direction.class);
+		
+		@NotNull private Direction dir;
+		
+		public DirectionalAnimationRenderer(@NotNull Direction initialDir, DirectionalSpriteFetcher spriteFetcher, float frameTime) { this(initialDir, spriteFetcher, frameTime, true, true); }
+		public DirectionalAnimationRenderer(@NotNull Direction initialDir, DirectionalSpriteFetcher spriteFetcher, float duration, boolean isFrameDuration, boolean loopAnimation) {
+			this.dir = initialDir;
+			
+			for(Direction dir: Direction.values)
+				animations.put(dir, new AnimationRenderer(spriteFetcher.getSpriteName(dir), duration, isFrameDuration, loopAnimation));
+		}
+		
+		private DirectionalAnimationRenderer(String[] data) {
+			this.dir = Direction.valueOf(data[0]);
+			
+			int i = 1;
+			for(Direction dir: Direction.values) {
+				animations.put(dir, new AnimationRenderer(MyUtils.parseLayeredString(data[i])));
+				i++;
+			}
 		}
 		
 		@Override
 		protected String[] save() {
-			return new String[0];
-		}
-		
-		@Override
-		public void render(float x, float y, Batch batch, float delta) {
+			String[] data = new String[animations.size()+1];
+			data[0] = dir.name();
 			
+			int i = 1;
+			for(Direction dir: Direction.values) {
+				data[i] = MyUtils.encodeStringArray(animations.get(dir).save());
+				i++;
+			}
+			
+			return data;
+		}
+		
+		public void setDirection(@NotNull Direction dir) { this.dir = dir; }
+		
+		@Override
+		public void render(float x, float y, Batch batch) {
+			AnimationRenderer renderer = animations.get(dir);
+			((EntityRenderer)renderer).elapsedTime = super.elapsedTime;
+			renderer.render(x, y, batch);
 		}
 		
 		@Override
-		public Vector2 getSize() {
-			return null;
-		}
-	}*/
+		public Vector2 getSize() { return animations.get(dir).getSize(); }
+	}
 	
 	
 	public static class TextRenderer extends EntityRenderer {

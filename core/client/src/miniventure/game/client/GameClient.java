@@ -13,7 +13,9 @@ import miniventure.game.world.Level;
 import miniventure.game.world.Point;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClientEntity;
+import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.EntityRenderer;
+import miniventure.game.world.entity.EntityRenderer.DirectionalAnimationRenderer;
 import miniventure.game.world.entity.mob.ClientPlayer;
 import miniventure.game.world.tile.Tile;
 
@@ -132,6 +134,12 @@ public class GameClient implements GameProtocol {
 						e.setRenderer(EntityRenderer.deserialize(newSprite.rendererData));
 					}
 				}
+				
+				forPacket(object, MobUpdate.class, update -> {
+					Entity e = update.tag.getObject(world);
+					DirectionalAnimationRenderer renderer = (DirectionalAnimationRenderer) e.getMainRenderer();
+					renderer.setDirection(update.newDir);
+				});
 				
 				forPacket(object, EntityValidation.class, list -> {
 					// TODO

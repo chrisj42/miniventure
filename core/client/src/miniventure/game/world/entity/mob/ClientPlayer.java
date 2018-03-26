@@ -76,7 +76,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 		
 		Stat.load(data.stats, this.stats);
 		
-		animator = new MobAnimationController(this, "player");
+		animator = new MobAnimationController<>(this, "player");
 		knockbackController = new KnockbackController(this);
 	}
 	
@@ -123,9 +123,9 @@ public class ClientPlayer extends ClientEntity implements Player {
 		
 		animator.progressAnimation(delta);
 		
-		SpriteUpdate newSprite = animator.getSpriteUpdate();
-		if(newSprite != null)
-			setRenderer(EntityRenderer.deserialize(newSprite.rendererData));
+		// SpriteUpdate newSprite = animator.getSpriteUpdate();
+		// if(newSprite != null)
+		// 	setRenderer(EntityRenderer.deserialize(newSprite.rendererData));
 	}
 	
 	public void handleInput(Vector2 mouseInput) {
@@ -139,10 +139,12 @@ public class ClientPlayer extends ClientEntity implements Player {
 		
 		inputDir.add(mouseInput); // mouseInput is already normalized
 		inputDir.nor();
-		
+			
 		Direction newDir = Direction.getDirection(inputDir.x, inputDir.y);
-		if(newDir != null)
+		if(newDir != null) {
 			dir = newDir;
+			animator.setDirection(dir);
+		}
 		
 		Vector2 moveDist = inputDir.cpy().scl(moveSpeed*Gdx.graphics.getDeltaTime());
 		

@@ -1,6 +1,4 @@
 text particles don't move.
 
-player can only interact once, then it doesn't work...
-
-walking animation doesn't update like it should...
+player can only interact once, then it doesn't work.
 

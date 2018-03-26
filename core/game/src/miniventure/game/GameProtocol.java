@@ -45,6 +45,7 @@ public interface GameProtocol {
 		kryo.register(Tag.class);
 		kryo.register(EntityTag.class);
 		kryo.register(TileTag.class);
+		kryo.register(Direction.class);
 		
 		kryo.register(String[].class);
 		kryo.register(int[].class);
@@ -191,6 +192,17 @@ public interface GameProtocol {
 		}
 		
 		@Override public String toString() { return "EntityUpdate("+positionUpdate+","+spriteUpdate+")"; }
+	}
+	
+	class MobUpdate {
+		public final EntityTag tag;
+		public final Direction newDir;
+		
+		private MobUpdate() { this(null, null); }
+		public MobUpdate(EntityTag tag, Direction newDir) {
+			this.tag = tag;
+			this.newDir = newDir;
+		}
 	}
 	
 	// sent by the server every 10 seconds or so with all entities in the 5x5 chunks surrounding the client. The client can use this to validate all the entities that it has loaded; if there are any listed that it doesn't have loaded (and the chunk it's on is loaded), it can send back an entity request to get it loaded. Also, if it finds that there are entities it has loaded, which aren't present in the list, it can unload them.

@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import miniventure.game.GameProtocol.EntityUpdate;
 import miniventure.game.GameProtocol.Hurt;
+import miniventure.game.GameProtocol.MobUpdate;
 import miniventure.game.GameProtocol.SpriteUpdate;
 import miniventure.game.item.Item;
 import miniventure.game.item.ToolItem;
@@ -61,9 +62,9 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 		
 		knockbackController = new KnockbackController(this);
 		
-		animator = new MobAnimationController(this, spriteName);
+		animator = new MobAnimationController<>(this, spriteName);
 		
-		setRenderer(EntityRenderer.deserialize(animator.getSpriteUpdate().rendererData));
+		//setRenderer(animator.getRendererUpdate());
 	}
 	
 	protected ServerMob(String[][] allData, Version version) {
@@ -77,9 +78,9 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 		invulnerableTime = Float.parseFloat(data[4]);
 		
 		knockbackController = new KnockbackController(this);
-		animator = new MobAnimationController(this, spriteName);
+		animator = new MobAnimationController<>(this, spriteName);
 		
-		setRenderer(EntityRenderer.deserialize(animator.getSpriteUpdate().rendererData));
+		//setRenderer(animator.getRendererUpdate());
 	}
 	
 	@Override
@@ -129,6 +130,7 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 	@Override
 	public void update(float delta) {
 		animator.progressAnimation(delta);
+		
 		SpriteUpdate newSprite = animator.getSpriteUpdate();
 		if(newSprite != null)
 			updateCache = new EntityUpdate(getTag(), updateCache == null ? null : updateCache.positionUpdate, newSprite);
@@ -166,6 +168,8 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 		if(dir != null) {
 			// change sprite direction
 			this.dir = dir;
+			animator.setDirection(dir);
+			ServerCore.getServer().broadcast(new MobUpdate(getTag(), dir), this);
 		}
 		
 		return moved;

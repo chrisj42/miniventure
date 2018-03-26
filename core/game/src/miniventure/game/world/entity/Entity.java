@@ -69,7 +69,8 @@ public abstract class Entity implements WorldObject {
 	@NotNull public EntityRenderer getRenderer() {
 		if(blinker != null) return blinker;
 		return renderer;
-	} 
+	}
+	@NotNull public EntityRenderer getMainRenderer() { return renderer; }
 	
 	@Override
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
