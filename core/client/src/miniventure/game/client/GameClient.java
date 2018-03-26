@@ -202,6 +202,7 @@ public class GameClient implements GameProtocol {
 	}
 	
 	private boolean isPositionLoaded(PositionUpdate posUpdate) {
+		if(posUpdate == null) return false;
 		Level level = ClientCore.getWorld().getLevel(posUpdate.levelDepth);
 		if(level == null) return false; // entity is on unloaded level
 		Vector2 pos = new Vector2(posUpdate.x, posUpdate.y);
