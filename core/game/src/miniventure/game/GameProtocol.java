@@ -6,6 +6,7 @@ import java.util.Arrays;
 import miniventure.game.item.Hands;
 import miniventure.game.item.Inventory;
 import miniventure.game.item.ItemStack;
+import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
 import miniventure.game.world.Boundable;
 import miniventure.game.world.Chunk.ChunkData;
@@ -17,6 +18,7 @@ import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.Entity.EntityTag;
 import miniventure.game.world.entity.EntityRenderer;
+import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.mob.Player.Stat;
 import miniventure.game.world.tile.Tile;
@@ -151,16 +153,18 @@ public interface GameProtocol {
 		public final int eid;
 		public final boolean permeable;
 		public final String descriptor;
+		public final boolean cutHeight;
 		
-		private EntityAddition() { this(0, null, null, false, "Blank entity"); }
-		public EntityAddition(Entity e) { this(e.getId(), new PositionUpdate(e), new SpriteUpdate(e), e.isPermeable(), e.getClass().getSimpleName().replace("Server", "")); }
-		public EntityAddition(Entity e, String descriptor) { this(e.getId(), new PositionUpdate(e), new SpriteUpdate(e), e.isPermeable(), descriptor); }
-		public EntityAddition(int eid, PositionUpdate positionUpdate, SpriteUpdate spriteUpdate, boolean permeable, String descriptor) {
+		private EntityAddition() { this(0, null, null, false, "Blank entity", false); }
+		public EntityAddition(Entity e) { this(e, e.getClass().getSimpleName().replace("Server", "")); }
+		public EntityAddition(Entity e, String descriptor) { this(e.getId(), new PositionUpdate(e), new SpriteUpdate(e), e.isPermeable(), descriptor, e instanceof Mob); }
+		public EntityAddition(int eid, PositionUpdate positionUpdate, SpriteUpdate spriteUpdate, boolean permeable, String descriptor, boolean cutHeight) {
 			this.eid = eid;
 			this.positionUpdate = positionUpdate;
 			this.spriteUpdate = spriteUpdate;
 			this.permeable = permeable;
 			this.descriptor = descriptor;
+			this.cutHeight = cutHeight;
 		}
 	}
 	
@@ -276,11 +280,7 @@ public interface GameProtocol {
 		public boolean variesFrom(Vector3 pos, Integer levelDepth) { return variesFrom(new Vector2(pos.x, pos.y), levelDepth); }
 		public boolean variesFrom(Vector2 pos, Integer levelDepth) {
 			if(pos.dst(x, y) > 0.25) return true;
-			
-			if((levelDepth == null) != (this.levelDepth == null)) return true;
-			if(levelDepth != null && !levelDepth.equals(this.levelDepth)) return true;
-			
-			return false;
+			return !MyUtils.nullablesAreEqual(levelDepth, this.levelDepth);
 		}
 		
 		public Vector3 getPos() { return new Vector3(x, y, z); }
@@ -305,6 +305,7 @@ public interface GameProtocol {
 		public MovementRequest(PositionUpdate startPos, Vector2 moveDist, PositionUpdate endPos) { this(startPos, moveDist.x, moveDist.y, 0, endPos); }
 		public MovementRequest(PositionUpdate startPos, Vector3 moveDist, PositionUpdate endPos) { this(startPos, moveDist.x, moveDist.y, moveDist.z, endPos); }
 		public MovementRequest(PositionUpdate startPos, float xd, float yd, float zd, PositionUpdate endPos) {
+			//System.out.println("made movement request, starting "+);
 			this.startPos = startPos;
 			this.xd = xd;
 			this.yd = yd;

@@ -1,11 +1,14 @@
 package miniventure.game.world.entity;
 
+import miniventure.game.GameProtocol.EntityAddition;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.ClientWorld;
 import miniventure.game.util.FrameBlinker;
 import miniventure.game.world.ClientLevel;
 import miniventure.game.world.WorldObject;
+import miniventure.game.world.entity.mob.Mob;
 
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
@@ -16,12 +19,17 @@ public class ClientEntity extends Entity {
 	
 	private final boolean permeable;
 	private final String descriptor;
+	private final boolean cutHeight;
 	
-	public ClientEntity(int eid, boolean permeable, @NotNull EntityRenderer renderer, String descriptor) {
+	private ClientEntity(int eid, boolean permeable, @NotNull EntityRenderer renderer, String descriptor, boolean cutHeight) {
 		super(ClientCore.getWorld(), eid);
 		this.permeable = permeable;
 		this.descriptor = descriptor;
+		this.cutHeight = cutHeight;
 		setRenderer(renderer);
+	}
+	public ClientEntity(EntityAddition data) {
+		this(data.eid, data.permeable, EntityRenderer.deserialize(data.spriteUpdate.rendererData), data.descriptor, data.cutHeight);
 	}
 	
 	@NotNull @Override
@@ -29,6 +37,13 @@ public class ClientEntity extends Entity {
 	
 	@Nullable @Override
 	public ClientLevel getLevel() { return (ClientLevel) super.getLevel(); }
+	
+	@NotNull @Override
+	public Rectangle getBounds() {
+		Rectangle bounds = super.getBounds();
+		if(cutHeight) bounds.height = Mob.shortenSprite(bounds.height);
+		return bounds;
+	}
 	
 	@Override
 	public boolean isPermeable() { return permeable; }
@@ -57,8 +72,9 @@ public class ClientEntity extends Entity {
 		this.z = z;
 		ClientLevel level = getLevel();
 		if(level == null) {
-			this.x = x;
-			this.y = y;
+			setPos(x, y);
+			// this.x = x;
+			// this.y = y;
 		}
 		else
 			moveTo(level, x, y);

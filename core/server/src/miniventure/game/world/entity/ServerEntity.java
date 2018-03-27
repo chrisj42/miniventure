@@ -35,14 +35,15 @@ public abstract class ServerEntity extends Entity {
 	
 	protected ServerEntity(String[][] data, Version version) {
 		super(ServerCore.getWorld());
-		x = Float.parseFloat(data[0][0]);
-		y = Float.parseFloat(data[0][1]);
+		float x = Float.parseFloat(data[0][0]);
+		float y = Float.parseFloat(data[0][1]);
+		setPos(x, y);
 		z = Float.parseFloat(data[0][2]);
 	}
 	
 	public Array<String[]> save() {
 		Array<String[]> data = new Array<>(String[].class);
-		data.add(new String[] {x+"", y+"", z+""});
+		//data.add(new String[] {x+"", y+"", z+""});
 		return data;
 	}
 	

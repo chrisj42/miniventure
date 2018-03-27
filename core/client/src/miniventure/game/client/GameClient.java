@@ -39,7 +39,7 @@ public class GameClient implements GameProtocol {
 		
 		GameProtocol.registerClasses(client.getKryo());
 		
-		addListener(new LagListener(lagMin, lagMax, new Listener() {
+		addListener(/*new LagListener(lagMin, lagMax, */new Listener() {
 			@Override
 			public void received (Connection connection, Object object) {
 				ClientWorld world = ClientCore.getWorld();
@@ -95,7 +95,7 @@ public class GameClient implements GameProtocol {
 					ClientLevel level = world.getLevel(addition.positionUpdate.levelDepth);
 					if(level == null || (player != null && !level.equals(player.getLevel()))) return;
 					
-					ClientEntity e = new ClientEntity(addition.eid, addition.permeable, EntityRenderer.deserialize(addition.spriteUpdate.rendererData), addition.descriptor);
+					ClientEntity e = new ClientEntity(addition);
 					PositionUpdate newPos = addition.positionUpdate;
 					e.moveTo(level, newPos.x, newPos.y, newPos.z);
 				}
@@ -152,6 +152,7 @@ public class GameClient implements GameProtocol {
 				
 				forPacket(object, PositionUpdate.class, newPos -> {
 					if(player == null) return;
+					//player.updatePos(newPos);
 					player.moveTo(world.getLevel(newPos.levelDepth), newPos.x, newPos.y, newPos.z);
 				});
 				
@@ -168,7 +169,7 @@ public class GameClient implements GameProtocol {
 				Gdx.app.postRunnable(() -> ClientCore.setScreen(new MainMenu()));
 				//GameCore.setScreen(new ErrorScreen("Lost connection with server."));
 			}
-		}));
+		});//);
 		
 		new Thread(client) {
 			public void start() {

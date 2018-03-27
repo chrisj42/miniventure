@@ -42,7 +42,11 @@ public class GameCore {
 	private static GlyphLayout layout = new GlyphLayout();
 	private static Skin skin;
 	
+	private static boolean initialized = false;
+	
 	public static void initGdx() {
+		if(initialized) return;
+		initialized = true;
 		entityAtlas = new TextureAtlasHolder(new TextureAtlas("sprites/entities.txt"));
 		tileAtlas = new TextureAtlas("sprites/tiles.txt");
 		tileConnectionAtlas = new TextureAtlas("sprites/tileconnectmap.txt");
@@ -59,6 +63,8 @@ public class GameCore {
 	}
 	
 	public static void initNonGdx() {
+		if(initialized) return;
+		initialized = true;
 		// initialize entity atlas and icon atlas, b/c that's what the server needs to determine entity sizes (icons b/c of item entities)
 		LwjglNativesLoader.load();
 		Gdx.files = new LwjglFiles();

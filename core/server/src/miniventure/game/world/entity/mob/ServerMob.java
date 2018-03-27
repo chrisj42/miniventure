@@ -160,7 +160,7 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 	@Override @NotNull
 	public Rectangle getBounds() {
 		Rectangle bounds = super.getBounds();
-		bounds.setHeight(bounds.getHeight()*2/3);
+		bounds.setHeight(Mob.shortenSprite(bounds.getHeight()));
 		return bounds;
 	}
 	

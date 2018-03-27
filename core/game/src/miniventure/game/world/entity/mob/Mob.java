@@ -13,6 +13,8 @@ public interface Mob extends WorldObject {
 	float MAX_KNOCKBACK_TIME = 0.25f;
 	float DAMAGE_PERCENT_FOR_MAX_PUSH = 0.2f;
 	
+	static float shortenSprite(float height) { return height * 2 / 3; }
+	
 	Direction getDirection();
 	boolean isKnockedBack();
 	

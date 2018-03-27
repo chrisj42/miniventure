@@ -2,6 +2,7 @@ package miniventure.game.world.entity;
 
 import miniventure.game.item.Item;
 import miniventure.game.util.Blinker;
+import miniventure.game.world.Boundable;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
@@ -23,7 +24,21 @@ public abstract class Entity implements WorldObject {
 	@NotNull private final WorldManager world;
 	
 	private final int eid;
-	float x, y, z = 0;
+	private float x, y;
+	float z = 0;
+	
+	void setPos(float x, float y) {
+		if(getLevel() != null) {
+			Vector2 pos = Boundable.toLevelCoords(getLevel(), new Vector2(x, y));
+			if(pos.len() > 1000) {
+				System.err.println("entity is moving far away from center: " + pos);
+				Thread.dumpStack();
+				System.exit(1);
+			}
+		}
+		this.x = x;
+		this.y = y;
+	}
 	
 	@NotNull private EntityRenderer renderer = EntityRenderer.BLANK;
 	private BlinkRenderer blinker = null;
@@ -88,7 +103,7 @@ public abstract class Entity implements WorldObject {
 	
 	public Vector3 getLocation() { return new Vector3(x, y, z); }
 	public Vector3 getLocation(boolean worldOriginCenter) { return new Vector3(getPosition(worldOriginCenter), z); }
-		
+	
 	@Override @NotNull
 	public Rectangle getBounds() {
 		Rectangle bounds = getUnscaledBounds();
@@ -198,8 +213,9 @@ public abstract class Entity implements WorldObject {
 		x = Math.min(x, level.getWidth() - size.x);
 		y = Math.min(y, level.getHeight() - size.y);
 		
-		this.x = x;
-		this.y = y;
+		setPos(x, y);
+		// this.x = x;
+		// this.y = y;
 		
 		if(level == getLevel())
 			level.entityMoved(this);

@@ -17,6 +17,7 @@ import miniventure.game.item.Inventory;
 import miniventure.game.item.InventoryScreen;
 import miniventure.game.item.Recipes;
 import miniventure.game.util.MyUtils;
+import miniventure.game.world.Boundable;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClientEntity;
 import miniventure.game.world.entity.Direction;
@@ -31,6 +32,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -52,6 +54,9 @@ public class ClientPlayer extends ClientEntity implements Player {
 		addStatEvo(new HungerSystem());
 	}
 	
+	//private PositionUpdate posUpdate = null;
+	//public void updatePos(PositionUpdate update) { posUpdate = update; }
+	
 	private final EnumMap<Stat, Integer> stats = new EnumMap<>(Stat.class);
 	
 	private Inventory inventory;
@@ -64,7 +69,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 	private KnockbackController knockbackController;
 	
 	public ClientPlayer(SpawnData data) {
-		super(data.playerData.eid, data.playerData.permeable, EntityRenderer.deserialize(data.playerData.spriteUpdate.rendererData), data.playerData.descriptor);
+		super(data.playerData);
 		
 		dir = Direction.DOWN;
 		
@@ -106,13 +111,6 @@ public class ClientPlayer extends ClientEntity implements Player {
 	@Override
 	public boolean isKnockedBack() { return knockbackController.hasKnockback(); }
 	
-	@Override @NotNull
-	public Rectangle getBounds() {
-		Rectangle bounds = super.getBounds();
-		bounds.setHeight(bounds.getHeight()*2/3);
-		return bounds;
-	}
-	
 	@Override
 	public void update(float delta) {
 		super.update(delta);
@@ -136,6 +134,8 @@ public class ClientPlayer extends ClientEntity implements Player {
 	}
 	
 	public void handleInput(Vector2 mouseInput) {
+		
+		
 		Vector2 inputDir = new Vector2();
 		if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) inputDir.x--;
 		if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) inputDir.x++;
@@ -189,9 +189,13 @@ public class ClientPlayer extends ClientEntity implements Player {
 	
 	@Override
 	public boolean move(float xd, float yd, float zd, boolean validate) {
+		
 		PositionUpdate prevPos = new PositionUpdate(this);
+		//System.out.println("client player prev pos: "+getPosition(true));
 		
 		boolean moved = super.move(xd, yd, zd, validate);
+		
+		//System.out.println("after moving "+new Vector2(xd, yd)+", pos is "+ getPosition(true));
 		
 		ClientCore.getClient().send(new MovementRequest(prevPos, xd, yd, zd, new PositionUpdate(this)));
 		

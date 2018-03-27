@@ -9,6 +9,7 @@ import miniventure.game.GameProtocol;
 import miniventure.game.item.ItemStack;
 import miniventure.game.item.Recipe;
 import miniventure.game.item.Recipes;
+import miniventure.game.world.Boundable;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.Level;
@@ -50,7 +51,7 @@ public class GameServer implements GameProtocol {
 		};
 		GameProtocol.registerClasses(server.getKryo());
 		
-		addListener(new LagListener(lagMin, lagMax, new Listener() {
+		addListener(/*new LagListener(lagMin, lagMax, */new Listener() {
 			@Override
 			public void received (Connection connection, Object object) {
 				ServerWorld world = ServerCore.getWorld();
@@ -83,12 +84,12 @@ public class GameServer implements GameProtocol {
 				ServerPlayer p = connectionToPlayerMap.get(connection);
 				
 				if(object instanceof ChunkRequest) {
-					System.out.println("server received chunk request");
+					//System.out.println("server received chunk request");
 					ChunkRequest request = (ChunkRequest) object;
 					ServerLevel level = p.getLevel(); // assumes player wants for current level
 					if(level != null) {
 						Chunk chunk = level.getChunk(request.x, request.y);
-						System.out.println("server sending back chunk "+chunk);
+						//System.out.println("server sending back chunk "+chunk);
 						connection.sendTCP(new ChunkData(chunk, level));
 						Array<Entity> newEntities = level.getOverlappingEntities(chunk.getBounds());
 						for(Entity e: newEntities)
@@ -106,19 +107,34 @@ public class GameServer implements GameProtocol {
 				forPacket(object, StatUpdate.class, p::loadStat);
 				
 				forPacket(object, MovementRequest.class, move -> {
-					if(move.getMoveDist().len() > 1) {
-						connection.sendTCP(new PositionUpdate(p));
-						return;
+					//Level lvl = world.getLevel(0);
+					//System.out.println("server received movement request, start="+ Boundable.toLevelCoords(lvl, move.startPos.getPos())+", move="+move.getMoveDist()+", end="+Boundable.toLevelCoords(lvl, move.endPos.getPos()));
+					Vector3 loc = p.getLocation();
+					//System.out.println("current player location in server: "+Boundable.toLevelCoords(lvl, loc));
+					if(move.getMoveDist().len() > 1 || move.startPos.variesFrom(p)) {
+						//System.out.println("position varies, ignoring move and correcting player.");
+						//connection.sendTCP(new PositionUpdate(p));
+					} else {
+						// move to start pos
+						Vector3 start = move.startPos.getPos();
+						//System.out.println("current player location as given by client: "+Boundable.toLevelCoords(lvl, start));
+						Vector3 diff = loc.cpy().sub(start);
+						//System.out.println("server location minus client location (will move this dist to start): "+diff);
+						p.move(diff);
+						//System.out.println("after initial movement to start pos, server player location: "+p.getLocation(true));
 					}
-					// move to start pos
-					p.move(p.getLocation().sub(move.startPos.getPos()));
 					// move given dist
-					p.move(move.getMoveDist());
+					Vector3 moveDist = move.getMoveDist();
+					//System.out.println("server player will move dist: "+moveDist);
+					p.move(moveDist);
+					//System.out.println("server player position after main move: "+p.getLocation(true));
 					// compare against given end pos
-					if(move.endPos.variesFrom(p))
+					if(move.endPos.variesFrom(p)) {
+						//System.out.println("server is updating client");
 						connection.sendTCP(new PositionUpdate(p));
-					else if(!move.endPos.getPos().equals(p.getLocation()))
-						p.moveTo(move.endPos.getPos());
+					}
+					//else if(!move.endPos.getPos().equals(p.getLocation()))
+					//	p.moveTo(move.endPos.getPos());
 					// TODO gonna have to take level into account above.
 					// note that the server will always have the say when it comes to which level the player should be on.
 				});
@@ -183,7 +199,7 @@ public class GameServer implements GameProtocol {
 				
 				//System.out.println("client disconnected: " + connection.getRemoteAddressTCP().getHostString());
 			}
-		}));
+		});//);
 		
 		server.start();
 	}
