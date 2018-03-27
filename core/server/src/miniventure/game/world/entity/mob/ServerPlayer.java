@@ -15,6 +15,7 @@ import miniventure.game.util.Version;
 import miniventure.game.world.Boundable;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
+import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.particle.ActionParticle.ActionType;
 import miniventure.game.world.entity.particle.TextParticle;
 import miniventure.game.world.tile.Tile;
@@ -125,6 +126,8 @@ public class ServerPlayer extends ServerMob implements Player {
 	@Override
 	public Integer[] saveStats() { return Stat.save(stats); }
 	
+	public void setDirection(@NotNull Direction dir) { super.setDirection(dir); }
+	
 	/// These two methods are ONLY to be accessed by GameScreen, so far.
 	@NotNull @Override
 	public Hands getHands() { return hands; }
@@ -165,7 +168,7 @@ public class ServerPlayer extends ServerMob implements Player {
 	}
 	
 	public void attack() {
-		System.out.println("server player attacking; dir="+getDirection()+", pos="+getPosition(true));
+		//System.out.println("server player attacking; dir="+getDirection()+", pos="+getPosition(true));
 		if(!hands.hasUsableItem()) return; // only ever not true for attacks in the same frame or if not enough stamina
 		
 		Level level = getLevel();

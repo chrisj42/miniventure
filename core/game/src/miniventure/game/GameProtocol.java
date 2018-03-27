@@ -33,6 +33,9 @@ public interface GameProtocol {
 	int writeBufferSize = 16384*2;
 	int objectBufferSize = 16384;
 	
+	boolean lag = false;
+	int lagMin = lag?10:0, lagMax = lag?100:0;
+	
 	static void registerClasses(Kryo kryo) {
 		Class<?>[] classes = GameProtocol.class.getDeclaredClasses();
 		for(Class<?> clazz: classes)
@@ -70,7 +73,7 @@ public interface GameProtocol {
 	}
 	
 	enum DatalessRequest {
-		Respawn
+		Respawn, Tile
 	}
 	
 	class Login {
@@ -321,6 +324,7 @@ public interface GameProtocol {
 		private InteractRequest() { this(false, null, 0); }
 		public InteractRequest(boolean attack, PositionUpdate playerPosition, Direction dir) { this(attack, playerPosition, dir.ordinal()); }
 		public InteractRequest(boolean attack, PositionUpdate playerPosition, int dir) {
+			System.out.println("made interact request with dir "+dir);
 			this.attack = attack;
 			this.playerPosition = playerPosition;
 			this.dir = dir;

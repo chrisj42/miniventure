@@ -3,6 +3,7 @@ package miniventure.game.item;
 import java.util.Arrays;
 
 import miniventure.game.GameCore;
+import miniventure.game.texture.TextureHolder;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;
 
@@ -22,7 +23,7 @@ public abstract class Item {
 	
 	// NOTE: all data aspects should be final, because one item instance is used to represent a whole stack. Now, with this in mind, one can set a temp var to determine what sort of item to return from the use() method. It should be reset following that, however.
 	
-	@NotNull private final TextureRegion texture;
+	@NotNull private final TextureHolder texture;
 	@NotNull private final String name;
 	@NotNull private final ItemType type;
 	
@@ -31,13 +32,13 @@ public abstract class Item {
 	Item(@NotNull ItemType type, @NotNull String name) {
 		this(type, name, GameCore.icons.get(name.toLowerCase()));
 	}
-	Item(@NotNull ItemType type, @NotNull String name, TextureRegion texture) {
-		this.texture = texture == null ? new TextureRegion() : texture;
+	Item(@NotNull ItemType type, @NotNull String name, @NotNull TextureHolder texture) {
+		this.texture = texture;
 		this.name = name;
 		this.type = type;
 	}
 	
-	@NotNull public TextureRegion getTexture() { return texture; }
+	@NotNull public TextureHolder getTexture() { return texture; }
 	@NotNull public String getName() { return name; }
 	@NotNull public ItemType getType() { return type; }
 	public int getMaxStackSize() { return 64; } // by default
@@ -77,6 +78,8 @@ public abstract class Item {
 		drawItem(stackSize, batch, x, y, Color.WHITE);
 	}
 	public void drawItem(int stackSize, Batch batch, float x, float y, Color textColor) {
+		TextureRegion texture = this.texture.texture;
+		
 		float width = texture.getRegionWidth();
 		//float height = texture.getRegionHeight();
 		float tx = x + Math.max(0, (ICON_SIZE - texture.getRegionWidth())/2);
@@ -97,7 +100,7 @@ public abstract class Item {
 	
 	public float getRenderHeight() {
 		if(!initializedHeight) {
-			renderHeight = Math.max(texture.getRegionHeight(), GameCore.getTextLayout(name).height);
+			renderHeight = Math.max(texture.height, GameCore.getTextLayout(name).height);
 			initializedHeight = true;
 		}
 		return renderHeight;
@@ -105,7 +108,7 @@ public abstract class Item {
 	
 	public float getRenderWidth() {
 		if(!initializedWidth) {
-			renderWidth = texture.getRegionWidth() + 10 + GameCore.getTextLayout(name).width;
+			renderWidth = texture.width + 10 + GameCore.getTextLayout(name).width;
 			initializedWidth = true;
 		}
 		return renderWidth;

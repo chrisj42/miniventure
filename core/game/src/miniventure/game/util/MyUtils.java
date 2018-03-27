@@ -81,8 +81,8 @@ public class MyUtils {
 	}
 	
 	// In terms of types, what this method guarantees is that, given a target super class, and a starting class that extends the super, it will return a class that is a super of T, and extends S, ideally one level below. But if the target equals the superClass from the beginning (which can't be prevented), that is the only case where it won't return a direct subclass of superClass.
-	/** @noinspection unchecked*/
 	@NotNull
+	@SuppressWarnings("unchecked")
 	public static <S, T extends S> Class<? extends S> getDirectSubclass(@NotNull Class<S> superClass, @NotNull Class<T> target) {
 		if (superClass.equals(target))
 			return target; // this returns the super class, not it's direct subclass, but in this situation that's that best we're gonna get.
@@ -167,13 +167,13 @@ public class MyUtils {
 	public static void fillRect(float x, float y, float width, float height, float r, float g, float b, float a, Batch batch) {
 		Color c = batch.getColor();
 		batch.setColor(r, g, b, a);
-		batch.draw(GameCore.icons.get("white"), x, y, width, height);
+		batch.draw(GameCore.icons.get("white").texture, x, y, width, height);
 		batch.setColor(c);
 	}
 	public static void fillRect(float x, float y, float r, float g, float b, float a, Batch batch) {
 		Color c = batch.getColor();
 		batch.setColor(r, g, b, a);
-		batch.draw(GameCore.icons.get("white"), x, y);
+		batch.draw(GameCore.icons.get("white").texture, x, y);
 		batch.setColor(c);
 	}
 	

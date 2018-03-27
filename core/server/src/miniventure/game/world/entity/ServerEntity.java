@@ -75,7 +75,6 @@ public abstract class ServerEntity extends Entity {
 	}
 	
 	protected void updateSprite(SpriteUpdate newSprite) { this.newSprite = newSprite; }
-	protected void updatePosition(PositionUpdate newPos) { this.newPos = newPos; }
 	
 	public float getZ() { return z; }
 	protected void setZ(float z) { this.z = z; }
@@ -83,7 +82,7 @@ public abstract class ServerEntity extends Entity {
 	@Override
 	public void moveTo(@NotNull Level level, float x, float y) {
 		super.moveTo(level, x, y);
-		updatePosition(new PositionUpdate(this));
+		newPos = new PositionUpdate(this);
 	}
 	
 	@Override

@@ -1,6 +1,7 @@
 package miniventure.game.client;
 
 import miniventure.game.GameCore;
+import miniventure.game.GameProtocol.DatalessRequest;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.ClientLevel;
@@ -64,6 +65,9 @@ public class GameScreen {
 		if(Gdx.input.isKeyJustPressed(Keys.EQUALS) || Gdx.input.isKeyJustPressed(Keys.PLUS))
 			zoom(1);
 		
+		if(Gdx.input.isKeyJustPressed(Keys.T))
+			ClientCore.getClient().send(DatalessRequest.Tile);
+		
 		//if(Gdx.input.isKeyJustPressed(Keys.R) && Gdx.input.isKeyPressed(Keys.SHIFT_LEFT))
 		//	GameCore.getWorld().createWorld(0, 0);
 		
@@ -109,7 +113,7 @@ public class GameScreen {
 		batch.setBlendFunction(GL20.GL_ZERO, GL20.GL_ONE_MINUS_SRC_ALPHA);
 		
 		Array<Vector3> lights = level.renderLighting(lightRenderSpace);
-		final TextureRegion lightTexture = GameCore.icons.get("light");
+		final TextureRegion lightTexture = GameCore.icons.get("light").texture;
 		
 		for(Vector3 light: lights) {
 			light.sub(offset.x, offset.y, 0).scl(Tile.SIZE); // world to render coords
@@ -150,7 +154,7 @@ public class GameScreen {
 		Tile interactTile = level.getClosestTile(mainPlayer.getInteractionRect());
 		if(interactTile != null) {
 			Vector2 pos = interactTile.getPosition().sub(offset).scl(Tile.SIZE); // world to render coords
-			batch.draw(GameCore.icons.get("tile-frame"), pos.x, pos.y);
+			batch.draw(GameCore.icons.get("tile-frame").texture, pos.x, pos.y);
 		}
 		
 		batch.setProjectionMatrix(uiCamera.combined); // batch uses coords as is, screen to screen

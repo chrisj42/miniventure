@@ -8,6 +8,7 @@ import java.util.HashMap;
 
 import miniventure.game.GameCore;
 import miniventure.game.item.Item;
+import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.Blinker;
 import miniventure.game.util.MyUtils;
 
@@ -39,12 +40,12 @@ public abstract class EntityRenderer {
 	
 	public static class SpriteRenderer extends EntityRenderer {
 		
-		private static final HashMap<String, AtlasRegion> textures = new HashMap<>();
+		private static final HashMap<String, TextureHolder> textures = new HashMap<>();
 		
 		private final String spriteName;
-		private final TextureRegion sprite;
+		private final TextureHolder sprite;
 		
-		public SpriteRenderer(String spriteName, TextureRegion texture) {
+		public SpriteRenderer(String spriteName, TextureHolder texture) {
 			this.spriteName = spriteName;
 			this.sprite = texture;
 		}
@@ -66,10 +67,10 @@ public abstract class EntityRenderer {
 		public String getName() { return spriteName; }
 		
 		@Override
-		public void render(float x, float y, Batch batch) { batch.draw(sprite, x, y); }
+		public void render(float x, float y, Batch batch) { batch.draw(sprite.texture, x, y); }
 		
 		@Override
-		public Vector2 getSize() { return new Vector2(sprite.getRegionWidth(), sprite.getRegionHeight()); }
+		public Vector2 getSize() { return new Vector2(sprite.width, sprite.height); }
 	}
 	
 	
@@ -93,14 +94,14 @@ public abstract class EntityRenderer {
 	
 	public static class AnimationRenderer extends EntityRenderer {
 		
-		private static final HashMap<String, Array<AtlasRegion>> animationFrames = new HashMap<>();
+		private static final HashMap<String, Array<TextureHolder>> animationFrames = new HashMap<>();
 		
 		private final String animationName;
 		private final boolean isFrameDuration;
 		private final float duration;
 		private final boolean loopAnimation;
 		
-		private final Animation<TextureRegion> animation;
+		private final Animation<TextureHolder> animation;
 		
 		public AnimationRenderer(String animationName, float frameTime) { this(animationName, frameTime, true, true); }
 		public AnimationRenderer(String animationName, float duration, boolean isFrameDuration, boolean loopAnimation) {
@@ -112,9 +113,14 @@ public abstract class EntityRenderer {
 			if(!animationFrames.containsKey(animationName))
 				animationFrames.put(animationName, GameCore.entityAtlas.findRegions(animationName));
 			
-			Array<AtlasRegion> frames = animationFrames.get(animationName);
+			Array<TextureHolder> frames = animationFrames.get(animationName);
+			/*TextureRegion[] frameTextures = new TextureRegion[frames.size];
+			for(int i = 0; i < frames.size; i++) {
+				TextureHolder holder = frames.get(i);
+				frameTextures[i] = holder.texture == null ? new TextureRegion() : holder.texture;
+			}*/
 			
-			animation = new Animation<>(frames.size==0?1:isFrameDuration?duration:duration/frames.size, frames);
+			animation = new Animation<>(isFrameDuration ? duration : duration/frames.size, frames);
 		}
 		private AnimationRenderer(String[] data) {
 			this(data[0], Float.parseFloat(data[1]), Boolean.parseBoolean(data[2]), Boolean.parseBoolean(data[3]));
@@ -127,22 +133,19 @@ public abstract class EntityRenderer {
 		
 		public String getName() { return animationName; }
 		
-		private TextureRegion getSprite() {
-			if(animation.getKeyFrames().length == 0)
-				return new TextureRegion();
-			else
-				return animation.getKeyFrame(super.elapsedTime, loopAnimation);
+		private TextureHolder getSprite() {
+			return animation.getKeyFrame(super.elapsedTime, loopAnimation);
 		}
 		
 		@Override
 		public void render(float x, float y, Batch batch) {
-			batch.draw(getSprite(), x, y);
+			batch.draw(getSprite().texture, x, y);
 		}
 		
 		@Override
 		public Vector2 getSize() {
-			TextureRegion frame = getSprite();
-			return new Vector2(frame.getRegionWidth(), frame.getRegionHeight());
+			TextureHolder frame = getSprite();
+			return new Vector2(frame.width, frame.height);
 		}
 	}
 	

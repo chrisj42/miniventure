@@ -100,8 +100,12 @@ public class MobAnimationController<M extends Entity & Mob> {
 		
 		// reset the animation
 		prevState = state;
-		state = requestedAnimations.poll();
-		if(state == null) state = AnimationState.IDLE;
+		try {
+			state = requestedAnimations.poll();
+			if(state == null) state = AnimationState.IDLE;
+		} catch(NullPointerException ex) {
+			state = AnimationState.IDLE;
+		}
 		if(state != prevState) {
 			animationChanged = true;
 			

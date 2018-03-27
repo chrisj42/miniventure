@@ -26,6 +26,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
+import com.esotericsoftware.kryonet.Listener.LagListener;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -38,7 +39,7 @@ public class GameClient implements GameProtocol {
 		
 		GameProtocol.registerClasses(client.getKryo());
 		
-		addListener(new Listener() {
+		addListener(new LagListener(lagMin, lagMax, new Listener() {
 			@Override
 			public void received (Connection connection, Object object) {
 				ClientWorld world = ClientCore.getWorld();
@@ -167,7 +168,7 @@ public class GameClient implements GameProtocol {
 				Gdx.app.postRunnable(() -> ClientCore.setScreen(new MainMenu()));
 				//GameCore.setScreen(new ErrorScreen("Lost connection with server."));
 			}
-		});
+		}));
 		
 		new Thread(client) {
 			public void start() {

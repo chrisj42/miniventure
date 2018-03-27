@@ -40,7 +40,7 @@ public class ToolItem extends Item {
 	
 	public ToolItem(ToolType type, Material material) { this(type, material, material.maxDurability); }
 	public ToolItem(ToolType type, Material material, int durability) {
-		super(ItemType.Tool, material.name() + " " + type.name(), type.texture==null?new TextureRegion():type.texture);
+		super(ItemType.Tool, material.name() + " " + type.name(), type.texture);
 		this.toolType = type;
 		this.material = material;
 		this.durability = durability;

@@ -13,6 +13,7 @@ import miniventure.game.world.Chunk;
 import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
+import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.ServerPlayer;
@@ -23,6 +24,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
+import com.esotericsoftware.kryonet.Listener.LagListener;
 import com.esotericsoftware.kryonet.Server;
 
 import org.jetbrains.annotations.NotNull;
@@ -48,7 +50,7 @@ public class GameServer implements GameProtocol {
 		};
 		GameProtocol.registerClasses(server.getKryo());
 		
-		addListener(new Listener() {
+		addListener(new LagListener(lagMin, lagMax, new Listener() {
 			@Override
 			public void received (Connection connection, Object object) {
 				ServerWorld world = ServerCore.getWorld();
@@ -104,6 +106,10 @@ public class GameServer implements GameProtocol {
 				forPacket(object, StatUpdate.class, p::loadStat);
 				
 				forPacket(object, MovementRequest.class, move -> {
+					if(move.getMoveDist().len() > 1) {
+						connection.sendTCP(new PositionUpdate(p));
+						return;
+					}
 					// move to start pos
 					p.move(p.getLocation().sub(move.startPos.getPos()));
 					// move given dist
@@ -111,7 +117,9 @@ public class GameServer implements GameProtocol {
 					// compare against given end pos
 					if(move.endPos.variesFrom(p))
 						connection.sendTCP(new PositionUpdate(p));
-					
+					else if(!move.endPos.getPos().equals(p.getLocation()))
+						p.moveTo(move.endPos.getPos());
+					// TODO gonna have to take level into account above.
 					// note that the server will always have the say when it comes to which level the player should be on.
 				});
 				
@@ -120,7 +128,10 @@ public class GameServer implements GameProtocol {
 					System.out.println("server received interaction request; dir="+r.dir+", pos="+r.playerPosition.toString(world));
 					if(r.playerPosition.variesFrom(p))
 						connection.sendTCP(new PositionUpdate(p)); // fix the player's position
+					else if(!r.playerPosition.getPos().equals(p.getLocation()))
+						p.moveTo(r.playerPosition.getPos());
 					
+					p.setDirection(Direction.values[r.dir]);
 					if(r.attack) p.attack();
 					else p.interact();
 				}
@@ -139,9 +150,9 @@ public class GameServer implements GameProtocol {
 				
 				forPacket(object, HeldItemRequest.class, handItem -> {
 					ItemStack stack = ItemStack.load(handItem.stackData);
-					System.out.println("server received held item request: "+stack);
+					//System.out.println("server received held item request: "+stack);
 					p.getHands().clearItem(p.getInventory());
-					System.out.println("server player inventory: "+Arrays.toString(p.getInventory().save()));
+					//System.out.println("server player inventory: "+Arrays.toString(p.getInventory().save()));
 					int count = p.getInventory().removeItem(stack);
 					if(count > 0)
 						p.getHands().setItem(stack.item, count);
@@ -159,6 +170,11 @@ public class GameServer implements GameProtocol {
 					world.respawnPlayer(client);
 					connection.sendTCP(new SpawnData(new EntityAddition(client), client));
 				}
+				
+				if(object.equals(DatalessRequest.Tile)) {
+					System.out.println("player position: "+p.getPosition(true));
+					System.out.println("player tile: "+p.getLevel().getClosestTile(p.getCenter()));
+				}
 			}
 			
 			/*@Override
@@ -174,7 +190,7 @@ public class GameServer implements GameProtocol {
 				
 				//System.out.println("client disconnected: " + connection.getRemoteAddressTCP().getHostString());
 			}
-		});
+		}));
 		
 		server.start();
 	}

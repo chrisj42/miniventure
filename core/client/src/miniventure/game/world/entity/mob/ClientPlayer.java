@@ -218,8 +218,8 @@ public class ClientPlayer extends ClientEntity implements Player {
 	private void renderBar(Stat stat, float x, float y, SpriteBatch batch, int spacing) { renderBar(stat, x, y, batch, spacing, true); }
 	private void renderBar(Stat stat, float x, float y, SpriteBatch batch, int spacing, boolean rightSide) {
 		float pointsPerIcon = stat.max*1f / stat.iconCount;
-		TextureRegion fullIcon = GameCore.icons.get(stat.icon);
-		TextureRegion emptyIcon = GameCore.icons.get(stat.outlineIcon);
+		TextureRegion fullIcon = GameCore.icons.get(stat.icon).texture;
+		TextureRegion emptyIcon = GameCore.icons.get(stat.outlineIcon).texture;
 		
 		int iconWidth = stat.iconWidth + spacing;
 		

@@ -5,6 +5,7 @@ import java.util.EnumMap;
 import miniventure.game.GameCore;
 import miniventure.game.item.Hands;
 import miniventure.game.item.Inventory;
+import miniventure.game.texture.TextureHolder;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Direction;
 
@@ -42,12 +43,10 @@ public interface Player extends Mob {
 			this.iconCount = iconCount;
 			
 			if(icon.length() > 0) {
-				TextureRegion fullIcon = GameCore.icons.get(icon);
-				if(fullIcon == null) fullIcon = new TextureRegion();
-				TextureRegion emptyIcon = GameCore.icons.get(outlineIcon);
-				if(emptyIcon == null) emptyIcon = new TextureRegion();
-				iconWidth = Math.max(fullIcon.getRegionWidth(), emptyIcon.getRegionWidth());
-				iconHeight = Math.max(fullIcon.getRegionHeight(), emptyIcon.getRegionHeight());
+				TextureHolder fullIcon = GameCore.icons.get(icon);
+				TextureHolder emptyIcon = GameCore.icons.get(outlineIcon);
+				iconWidth = Math.max(fullIcon.width, emptyIcon.height);
+				iconHeight = Math.max(fullIcon.width, emptyIcon.height);
 			} else
 				iconWidth = iconHeight = 0;
 		}

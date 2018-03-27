@@ -1,5 +1,7 @@
 package miniventure.game.server;
 
+import miniventure.game.GameCore;
+
 public class ServerCore {
 	
 	private static ServerWorld serverWorld;
@@ -11,6 +13,8 @@ public class ServerCore {
 		boolean success = args.length == 3 && args[0].equalsIgnoreCase("--server");
 		
 		if(success) {
+			GameCore.initNonGdx();
+			
 			System.out.println("loading server world...");
 			try {
 				initServer(Integer.parseInt(args[1]), Integer.parseInt(args[2]));

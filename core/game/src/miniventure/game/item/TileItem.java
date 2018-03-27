@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import miniventure.game.GameCore;
+import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;
@@ -55,7 +56,8 @@ public class TileItem extends Item {
 		this(MyUtils.toTitleCase(type.name()), GameCore.tileAtlas.findRegion(type.name().toLowerCase()+"/00"), type, canPlaceOn); // so, if the placeOn is null, then...
 	}
 	
-	private TileItem(String name, TextureRegion texture, @NotNull TileType result, @Nullable TileType... placeOn) {
+	private TileItem(String name, TextureRegion texture, @NotNull TileType result, @Nullable TileType... placeOn) { this(name, new TextureHolder(texture, Tile.SIZE, Tile.SIZE), result, placeOn); }
+	private TileItem(String name, TextureHolder texture, @NotNull TileType result, @Nullable TileType... placeOn) {
 		super(ItemType.Tile, name, texture);
 		this.canPlaceOn = placeOn;
 		this.result = result;
