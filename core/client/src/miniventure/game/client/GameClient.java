@@ -73,7 +73,7 @@ public class GameClient implements GameProtocol {
 				}
 				
 				if(object instanceof Hurt) {
-					System.out.println("client received object hurt");
+					//System.out.println("client received object hurt");
 					Hurt hurt = (Hurt) object;
 					
 					WorldObject target = hurt.target.getObject(world);

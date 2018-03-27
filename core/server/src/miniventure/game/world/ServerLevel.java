@@ -212,7 +212,7 @@ public class ServerLevel extends Level {
 		
 		if(isChunkLoaded(chunkCoord)) return;
 		
-		System.out.println("Server loading chunk "+chunkCoord);
+		//System.out.println("Server loading chunk "+chunkCoord);
 		
 		putLoadedChunk(chunkCoord, new Chunk(chunkCoord.x, chunkCoord.y, this, levelGenerator.generateChunk(chunkCoord.x, chunkCoord.y)));
 	}
@@ -224,7 +224,7 @@ public class ServerLevel extends Level {
 		Chunk chunk = getLoadedChunk(chunkCoord);
 		if(chunk == null) return; // already unloaded
 		
-		System.out.println("Server unloading chunk "+chunkCoord);
+		//System.out.println("Server unloading chunk "+chunkCoord);
 		
 		for(Entity e: entityChunks.keySet().toArray(new Entity[entityChunks.size()]))
 			if(entityChunks.get(e).equals(chunkCoord))

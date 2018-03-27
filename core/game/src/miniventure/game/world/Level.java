@@ -77,13 +77,13 @@ public abstract class Level {
 		
 		if(!world.isKeepAlive(entity)) return;
 		
-		System.out.println("keep alive changed chunk on "+world);
+		//System.out.println("keep alive changed chunk on "+world);
 		
 		pruneLoadedChunks();
 		
 		// load any new chunks surrounding the given entity
 		for (Point p : getAreaChunkCoords(entity.getCenter(), 1, false, true)) {
-			System.out.println("loading chunk on "+world+" at "+p);
+			//System.out.println("loading chunk on "+world+" at "+p);
 			loadChunk(p);
 		}
 	}

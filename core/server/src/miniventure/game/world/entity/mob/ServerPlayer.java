@@ -173,14 +173,11 @@ public class ServerPlayer extends ServerMob implements Player {
 		
 		Level level = getLevel();
 		Item heldItem = hands.getUsableItem();
-		System.out.println("has usable item: "+heldItem);
 		
 		boolean success = false;
 		for(WorldObject obj: getInteractionQueue()) {
-			System.out.println("attacking "+obj);
 			if (heldItem.attack(obj, this)) {
 				success = true;
-				System.out.println("success");
 				break;
 			}
 		}

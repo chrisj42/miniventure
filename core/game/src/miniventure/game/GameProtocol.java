@@ -73,7 +73,7 @@ public interface GameProtocol {
 	}
 	
 	enum DatalessRequest {
-		Respawn, Tile
+		Respawn
 	}
 	
 	class Login {
@@ -319,12 +319,10 @@ public interface GameProtocol {
 	class InteractRequest {
 		public final boolean attack;
 		public final PositionUpdate playerPosition;
-		public final int dir;
+		public final Direction dir;
 		
-		private InteractRequest() { this(false, null, 0); }
-		public InteractRequest(boolean attack, PositionUpdate playerPosition, Direction dir) { this(attack, playerPosition, dir.ordinal()); }
-		public InteractRequest(boolean attack, PositionUpdate playerPosition, int dir) {
-			System.out.println("made interact request with dir "+dir);
+		private InteractRequest() { this(false, null, null); }
+		public InteractRequest(boolean attack, PositionUpdate playerPosition, Direction dir) {
 			this.attack = attack;
 			this.playerPosition = playerPosition;
 			this.dir = dir;

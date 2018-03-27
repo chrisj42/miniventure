@@ -39,7 +39,7 @@ public class ServerHands extends Hands {
 		
 		if(!item.isUsed()) return;
 		
-		System.out.println("used item "+item);
+		//System.out.println("used item "+item);
 		Item newItem = item.resetUsage();
 		
 		player.changeStat(Stat.Stamina, -item.getStaminaUsage());

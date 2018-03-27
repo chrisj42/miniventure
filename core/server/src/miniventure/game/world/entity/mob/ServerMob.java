@@ -111,7 +111,14 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 	
 	@Override
 	public Direction getDirection() { return dir; }
-	protected void setDirection(@NotNull Direction dir) { this.dir = dir; }
+	protected void setDirection(@NotNull Direction dir) {
+		boolean diff = this.dir != dir;
+		this.dir = dir;
+		animator.setDirection(dir);
+		
+		if(diff)
+			ServerCore.getServer().broadcast(new MobUpdate(getTag(), dir), this);
+	}
 	
 	@Override
 	public boolean isKnockedBack() { return knockbackController.hasKnockback(); }
@@ -165,10 +172,8 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 		
 		Direction dir = Direction.getDirection(xd, yd);
 		if(dir != null) {
-			// change sprite direction
-			this.dir = dir;
-			animator.setDirection(dir);
-			ServerCore.getServer().broadcast(new MobUpdate(getTag(), dir), this);
+			// set/change sprite direction
+			setDirection(dir);
 		}
 		
 		return moved;

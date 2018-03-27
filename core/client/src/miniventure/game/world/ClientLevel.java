@@ -64,7 +64,7 @@ public class ClientLevel extends Level {
 	
 	@Override
 	void loadChunk(Point chunkCoord) {
-		System.out.println("Client requesting chunk "+chunkCoord);
+		//System.out.println("Client requesting chunk "+chunkCoord);
 		ClientCore.getClient().send(new ChunkRequest(chunkCoord));
 	}
 	

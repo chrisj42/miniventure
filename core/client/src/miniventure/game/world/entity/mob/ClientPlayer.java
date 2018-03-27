@@ -42,8 +42,8 @@ public class ClientPlayer extends ClientEntity implements Player {
 	private <T extends StatEvolver> void addStatEvo(T evolver) {
 		statEvoMap.put(evolver.getClass(), evolver);
 	}
-	<T extends StatEvolver> T getStatEvo(Class<T> clazz) {
-		//noinspection unchecked
+	@SuppressWarnings("unchecked")
+	private <T extends StatEvolver> T getStatEvo(Class<T> clazz) {
 		return (T) statEvoMap.get(clazz);
 	}
 	{

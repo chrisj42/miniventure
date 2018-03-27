@@ -125,13 +125,11 @@ public class GameServer implements GameProtocol {
 				
 				if(object instanceof InteractRequest) {
 					InteractRequest r = (InteractRequest) object;
-					System.out.println("server received interaction request; dir="+r.dir+", pos="+r.playerPosition.toString(world));
+					//System.out.println("server received interaction request; dir="+r.dir+", pos="+r.playerPosition.toString(world));
 					if(r.playerPosition.variesFrom(p))
 						connection.sendTCP(new PositionUpdate(p)); // fix the player's position
-					else if(!r.playerPosition.getPos().equals(p.getLocation()))
-						p.moveTo(r.playerPosition.getPos());
 					
-					p.setDirection(Direction.values[r.dir]);
+					p.setDirection(r.dir);
 					if(r.attack) p.attack();
 					else p.interact();
 				}
@@ -169,11 +167,6 @@ public class GameServer implements GameProtocol {
 					ServerPlayer client = connectionToPlayerMap.get(connection);
 					world.respawnPlayer(client);
 					connection.sendTCP(new SpawnData(new EntityAddition(client), client));
-				}
-				
-				if(object.equals(DatalessRequest.Tile)) {
-					System.out.println("player position: "+p.getPosition(true));
-					System.out.println("player tile: "+p.getLevel().getClosestTile(p.getCenter()));
 				}
 			}
 			
