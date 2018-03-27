@@ -103,7 +103,7 @@ public class MobAnimationController<M extends Entity & Mob> {
 		state = requestedAnimations.poll();
 		if(state == null) state = AnimationState.IDLE;
 		if(state != prevState) {
-			animationChanged = true; // if we're going to render a new animation, we should start it from the beginning, I think. Though, I could see this not ending up being a good idea... NOTE: this is not just set to zero because it seems this causes a divide by zero error when fetching the keyframe.
+			animationChanged = true;
 			
 			String textureName = mobSpriteName + "/" + state.name().toLowerCase() + "-";
 			renderer = new DirectionalAnimationRenderer(mob.getDirection(), dir -> textureName+dir.name().toLowerCase(), state.frameDuration);

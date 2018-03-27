@@ -3,6 +3,7 @@ package miniventure.game.screen;
 import javax.swing.JOptionPane;
 
 import miniventure.game.GameCore;
+import miniventure.game.client.ClientCore;
 import miniventure.game.client.ClientWorld;
 
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -13,8 +14,10 @@ import com.kotcrab.vis.ui.widget.VisTextButton;
 
 public class MainMenu extends MenuScreen {
 	
-	public MainMenu(ClientWorld world) {
+	public MainMenu() {
 		super();
+		
+		ClientWorld world = ClientCore.getWorld();
 		
 		addLabel("Miniventure", 20);
 		addLabel("You are playing version " + GameCore.VERSION, 15);
@@ -39,7 +42,7 @@ public class MainMenu extends MenuScreen {
 		addActor(table);
 		table.add(button);
 		
-		VisTextButton joinBtn = new VisTextButton("Join Local Server");
+		VisTextButton joinBtn = new VisTextButton("Join Server");
 		joinBtn.addListener(new ClickListener() {
 			@Override
 			public void clicked(InputEvent e, float x, float y) {

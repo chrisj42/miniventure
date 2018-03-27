@@ -43,7 +43,9 @@ public interface Player extends Mob {
 			
 			if(icon.length() > 0) {
 				TextureRegion fullIcon = GameCore.icons.get(icon);
+				if(fullIcon == null) fullIcon = new TextureRegion();
 				TextureRegion emptyIcon = GameCore.icons.get(outlineIcon);
+				if(emptyIcon == null) emptyIcon = new TextureRegion();
 				iconWidth = Math.max(fullIcon.getRegionWidth(), emptyIcon.getRegionWidth());
 				iconHeight = Math.max(fullIcon.getRegionHeight(), emptyIcon.getRegionHeight());
 			} else

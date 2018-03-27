@@ -54,7 +54,7 @@ public class ClientCore extends ApplicationAdapter {
 		gameScreen = new GameScreen();
 		clientWorld = new ClientWorld(serverStarter, gameScreen);
 		
-		setScreen(new MainMenu(clientWorld));
+		setScreen(new MainMenu());
 	}
 	
 	@Override

@@ -5,6 +5,7 @@ import java.lang.Thread.UncaughtExceptionHandler;
 
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol;
+import miniventure.game.screen.ErrorScreen;
 import miniventure.game.screen.MainMenu;
 import miniventure.game.util.ProgressLogger;
 import miniventure.game.world.Chunk;
@@ -163,17 +164,21 @@ public class GameClient implements GameProtocol {
 			public void disconnected(Connection connection) {
 				System.err.println("client disconnected from server.");
 				// TODO make ErrorScreen, which accepts a string to display and has a "back to title screen" button.
-				Gdx.app.postRunnable(() -> ClientCore.setScreen(new MainMenu(ClientCore.getWorld())));
+				Gdx.app.postRunnable(() -> ClientCore.setScreen(new MainMenu()));
 				//GameCore.setScreen(new ErrorScreen("Lost connection with server."));
 			}
 		});
 		
-		client.start();
-		client.getUpdateThread().setUncaughtExceptionHandler((t, e) -> {
-			ClientCore.exceptionHandler.uncaughtException(t, e);
-			t.getThreadGroup().uncaughtException(t, e);
-			client.stop();
-		});
+		new Thread(client) {
+			public void start() {
+				client.start();
+				client.getUpdateThread().setUncaughtExceptionHandler((t, e) -> {
+					ClientCore.exceptionHandler.uncaughtException(t, e);
+					t.getThreadGroup().uncaughtException(t, e);
+					client.close();
+				});
+			}
+		}.start();
 	}
 	
 	public void send(Object obj) { client.sendTCP(obj); }
@@ -188,7 +193,7 @@ public class GameClient implements GameProtocol {
 		} catch(IOException e) {
 			e.printStackTrace();
 			// error screen
-			logger.editMessage("failed to connect to server.");
+			Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen("failed to connect to server.")));
 			return false;
 		}
 		

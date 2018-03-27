@@ -117,7 +117,7 @@ public class ClientWorld extends WorldManager {
 		// set menu to main menu, and dispose of level/world resources
 		mainPlayer = null;
 		clearLevels();
-		ClientCore.setScreen(new MainMenu(this));
+		ClientCore.setScreen(new MainMenu());
 	}
 	
 	

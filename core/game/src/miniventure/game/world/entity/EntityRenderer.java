@@ -127,14 +127,21 @@ public abstract class EntityRenderer {
 		
 		public String getName() { return animationName; }
 		
+		private TextureRegion getSprite() {
+			if(animation.getKeyFrames().length == 0)
+				return new TextureRegion();
+			else
+				return animation.getKeyFrame(super.elapsedTime, loopAnimation);
+		}
+		
 		@Override
 		public void render(float x, float y, Batch batch) {
-			batch.draw(animation.getKeyFrame(super.elapsedTime, loopAnimation), x, y);
+			batch.draw(getSprite(), x, y);
 		}
 		
 		@Override
 		public Vector2 getSize() {
-			TextureRegion frame = animation.getKeyFrame(super.elapsedTime, loopAnimation);
+			TextureRegion frame = getSprite();
 			return new Vector2(frame.getRegionWidth(), frame.getRegionHeight());
 		}
 	}
