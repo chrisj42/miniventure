@@ -1,4 +1,4 @@
-package miniventure.desktop;
+package miniventure.game.desktop;
 
 import miniventure.game.GameCore;
 import miniventure.game.client.ClientCore;

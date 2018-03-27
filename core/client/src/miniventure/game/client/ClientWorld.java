@@ -91,8 +91,9 @@ public class ClientWorld extends WorldManager {
 	public boolean worldLoaded() { return getLevelCount() > 0; }
 	
 	@Override
-	public void createWorld(int width, int height) { createWorld(width, height, true); }
-	public void createWorld(int width, int height, boolean startServer) {
+	public void createWorld(int width, int height) { createWorld(width, height, true, ""); }
+	public void createWorld(String ipAddress) { createWorld(0, 0, false, ipAddress); }
+	private void createWorld(int width, int height, boolean startServer, String ipAddress) {
 		LoadingScreen loadingScreen = new LoadingScreen();
 		ClientCore.setScreen(loadingScreen);
 		
@@ -106,7 +107,7 @@ public class ClientWorld extends WorldManager {
 			if(startServer) // start server, then connect
 				serverStarter.startServer(width, height, connect);
 			else // server should already be running; just connect
-				connect.act();
+				client.connectToServer(loadingScreen, ipAddress);
 			
 		}).start();
 	}
