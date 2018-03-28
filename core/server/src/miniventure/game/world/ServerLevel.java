@@ -70,7 +70,7 @@ public class ServerLevel extends Level {
 		updateEntities(entities, delta);
 		
 		if(entities.length < getEntityCap() && MathUtils.randomBoolean(0.01f))
-			spawnMob(new MobAi(getWorld(), AiType.values[MathUtils.random(AiType.values.length-1)]));
+			spawnMob(new MobAi(AiType.values[MathUtils.random(AiType.values.length-1)]));
 	}
 	
 	@Override

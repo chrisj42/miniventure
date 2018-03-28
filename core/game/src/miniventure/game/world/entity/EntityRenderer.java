@@ -114,11 +114,6 @@ public abstract class EntityRenderer {
 				animationFrames.put(animationName, GameCore.entityAtlas.findRegions(animationName));
 			
 			Array<TextureHolder> frames = animationFrames.get(animationName);
-			/*TextureRegion[] frameTextures = new TextureRegion[frames.size];
-			for(int i = 0; i < frames.size; i++) {
-				TextureHolder holder = frames.get(i);
-				frameTextures[i] = holder.texture == null ? new TextureRegion() : holder.texture;
-			}*/
 			
 			animation = new Animation<>(isFrameDuration ? duration : duration/frames.size, frames);
 		}
@@ -133,9 +128,7 @@ public abstract class EntityRenderer {
 		
 		public String getName() { return animationName; }
 		
-		private TextureHolder getSprite() {
-			return animation.getKeyFrame(super.elapsedTime, loopAnimation);
-		}
+		private TextureHolder getSprite() { return animation.getKeyFrame(super.elapsedTime, loopAnimation); }
 		
 		@Override
 		public void render(float x, float y, Batch batch) {

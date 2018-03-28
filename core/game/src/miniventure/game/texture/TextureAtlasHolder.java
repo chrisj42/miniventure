@@ -36,12 +36,13 @@ public class TextureAtlasHolder {
 		if(atlas != null) {
 			for(AtlasRegion region: atlas.findRegions(name))
 				textures.add(new TextureHolder(region));
-			return textures;
 		}
-		
-		for(Region region: regions)
-			if(region.name.equals(name))
-				textures.add(new TextureHolder(region));
+		else {
+			for(Region region : regions) {
+				if(region.name.equals(name))
+					textures.add(new TextureHolder(region));
+			}
+		}
 		
 		return textures;
 	}

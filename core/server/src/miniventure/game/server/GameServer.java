@@ -38,7 +38,7 @@ public class GameServer implements GameProtocol {
 	private Server server;
 	
 	public GameServer() {
-		server = new Server(writeBufferSize, objectBufferSize) {
+		server = new Server(writeBufferSize*5, objectBufferSize) {
 			@Override
 			public void start() {
 				Thread thread = new Thread(this, "Server");
