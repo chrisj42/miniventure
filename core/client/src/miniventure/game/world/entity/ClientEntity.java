@@ -72,9 +72,8 @@ public class ClientEntity extends Entity {
 		this.z = z;
 		ClientLevel level = getLevel();
 		if(level == null) {
-			setPos(x, y);
-			// this.x = x;
-			// this.y = y;
+			this.x = x;
+			this.y = y;
 		}
 		else
 			moveTo(level, x, y);

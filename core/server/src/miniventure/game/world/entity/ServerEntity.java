@@ -35,9 +35,8 @@ public abstract class ServerEntity extends Entity {
 	
 	protected ServerEntity(String[][] data, Version version) {
 		super(ServerCore.getWorld());
-		float x = Float.parseFloat(data[0][0]);
-		float y = Float.parseFloat(data[0][1]);
-		setPos(x, y);
+		x = Float.parseFloat(data[0][0]);
+		y = Float.parseFloat(data[0][1]);
 		z = Float.parseFloat(data[0][2]);
 	}
 	

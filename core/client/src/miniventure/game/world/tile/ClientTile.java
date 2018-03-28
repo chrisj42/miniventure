@@ -71,7 +71,7 @@ public class ClientTile extends Tile {
 		for(int i = firstIdx; i < mainTypes.length; i++) {
 			// before we use the connection property of the main type, let's check and see if we are transitioning.
 			if(i == mainTypes.length - 1 && getProp(mainTypes[i], TilePropertyType.Transition).playingAnimation(this)) // only the top tile can ever be transitioning.
-				sprites.add(getProp(mainTypes[i], TilePropertyType.Transition).getAnimationFrame(this));
+				sprites.add(getProp(mainTypes[i], TilePropertyType.Transition).getAnimationFrame(this, delta));
 			else // otherwise, use connection sprite.
 				sprites.add(getProp(mainTypes[i], TilePropertyType.Connect).getSprite(this, aroundTypes));
 			

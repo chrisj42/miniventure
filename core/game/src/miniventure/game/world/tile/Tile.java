@@ -1,5 +1,6 @@
 package miniventure.game.world.tile;
 
+import java.util.Arrays;
 import java.util.Stack;
 
 import miniventure.game.item.Item;
@@ -307,23 +308,31 @@ public class Tile implements WorldObject {
 		public final String[] data;
 		
 		private TileData() { this(null, null); }
-		public TileData(int[] typeOrdinals, String[] data) {
+		private TileData(int[] typeOrdinals, String[] data) {
 			this.typeOrdinals = typeOrdinals;
 			this.data = data;
 		}
 		public TileData(Tile tile) {
-			this.data = tile.data;
+			this.data = Arrays.copyOf(tile.data, tile.data.length);
 			
 			TileType[] tileTypes = tile.getTypes();
 			typeOrdinals = new int[tileTypes.length];
-			for(int i = 0; i < tileTypes.length; i++)
-				typeOrdinals[i] = tileTypes[i].ordinal();
+			for(int i = 0; i < tileTypes.length; i++) {
+				TileType type = tileTypes[i];
+				typeOrdinals[i] = type.ordinal();
+				//for(TilePropertyInstance prop: tile.getWorld().getTilePropertyFetcher().getProperties(type))
+				//	prop.configureDataForSave(tile);
+			}
 		}
 		
 		public void apply(Tile tile) {
 			TileType[] types = new TileType[typeOrdinals.length];
-			for(int i = 0; i < types.length; i++)
+			String[] data = Arrays.copyOf(this.data, this.data.length);
+			for(int i = 0; i < types.length; i++) {
 				types[i] = TileType.values[typeOrdinals[i]];
+				//for(TilePropertyInstance prop: tile.getWorld().getTilePropertyFetcher().getProperties(types[i]))
+				//	prop.configureDataForLoad(tile);
+			}
 			
 			Stack<TileType> typeStack = new Stack<>();
 			for(TileType type: types)

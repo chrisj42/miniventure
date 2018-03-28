@@ -15,6 +15,8 @@ import static miniventure.game.world.tile.TilePropertyType.Transition;
 public class TransitionProperty implements TilePropertyInstance {
 	
 	private enum Data {
+		// time start is the time of the last render, aka animation frame fetch
+		// time delta is the time of the animation previous from time start.
 		ANIM, TILE, TIME;
 		private final int idx;
 		Data() { idx = ordinal(); }
@@ -75,7 +77,7 @@ public class TransitionProperty implements TilePropertyInstance {
 			if(found) {
 				tile.setData(Transition, tileType, Data.ANIM.idx, i+"");
 				tile.setData(Transition, tileType, Data.TILE.idx, (!isEntering && addNext ? other.name() : "")); // if removing, this specifies the tile to add after removal
-				tile.setData(Transition, tileType, Data.TIME.idx, GameCore.getElapsedProgramTime()+"");
+				tile.setData(Transition, tileType, Data.TIME.idx, "0");
 				return true;
 			}
 		}
@@ -88,11 +90,12 @@ public class TransitionProperty implements TilePropertyInstance {
 	}
 	
 	// throws error if no animation is playing
-	public AtlasRegion getAnimationFrame(@NotNull Tile tile) {
+	public AtlasRegion getAnimationFrame(@NotNull Tile tile, float delta) {
 		if(!playingAnimation(tile)) throw new IllegalStateException("Not allowed to fetch animation frame for transition when no animation is playing. invoking tile: "+tile);
 		
-		float timeStarted = Float.parseFloat(tile.getData(Transition, tileType, Data.TIME.idx));
-		float timeElapsed = GameCore.getElapsedProgramTime() - timeStarted;
+		float timeElapsed = Float.parseFloat(tile.getData(Transition, tileType, Data.TIME.idx));
+		timeElapsed += delta;
+		tile.setData(Transition, tileType, Data.TIME.idx, timeElapsed+"");
 		
 		TransitionAnimation anim = animations[Integer.parseInt(tile.getData(Transition, tileType, Data.ANIM.idx))];
 		

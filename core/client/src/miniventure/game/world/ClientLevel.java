@@ -73,7 +73,7 @@ public class ClientLevel extends Level {
 		Chunk chunk = getLoadedChunk(chunkCoord);
 		if(chunk == null) return; // already unloaded
 		
-		System.out.println("Client unloading chunk "+chunkCoord);
+		//System.out.println("Client unloading chunk "+chunkCoord);
 		
 		for(Entity e: entityChunks.keySet().toArray(new Entity[entityChunks.size()]))
 			if(entityChunks.get(e).equals(chunkCoord))
