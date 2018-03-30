@@ -26,6 +26,7 @@ public class MainMenu extends MenuScreen {
 		addLabel("C to attack, V to interact.", 10);
 		addLabel("E to open your inventory, Z to craft items.", 10);
 		addLabel("+ and - keys to zoom in and out.", 30);
+		addLabel("Press \"t\" to chat with other players.", 30);
 		//addLabel("(press b to show/hide chunk boundaries)", 30);
 		//addLabel("", 10);
 		
