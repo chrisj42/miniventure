@@ -160,6 +160,8 @@ public class GameClient implements GameProtocol {
 					if(player == null) return;
 					player.changeStat(update.stat, update.amount);
 				});
+				
+				forPacket(object, Message.class, msg -> ClientCore.addMessage(msg.msg));
 			}
 			
 			@Override

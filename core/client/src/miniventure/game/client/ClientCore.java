@@ -96,9 +96,9 @@ public class ClientCore extends ApplicationAdapter {
 			getClient().send(new HeldItemRequest(clientWorld.getMainPlayer().getHands()));
 		}
 		
-		if(screen == null && menuScreen != null)
+		if(screen == null && menuScreen != null && menuScreen != gameScreen.chat)
 			menuScreen.dispose();
-		else if(screen != null)
+		else if(screen != null && menuScreen != gameScreen.chat)
 			screen.setParent(menuScreen);
 		
 		System.out.println("setting screen to " + screen);
@@ -107,6 +107,8 @@ public class ClientCore extends ApplicationAdapter {
 		Gdx.input.setInputProcessor(menuScreen == null ? input : menuScreen);
 		input.reset();
 	}
+	
+	static void addMessage(String msg) { gameScreen.chat.addMessage(msg); }
 	
 	@Override
 	public void resize(int width, int height) {

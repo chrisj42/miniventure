@@ -9,7 +9,7 @@ import java.util.HashMap;
 import miniventure.game.GameCore;
 import miniventure.game.item.Item;
 import miniventure.game.texture.TextureHolder;
-import miniventure.game.util.Blinker;
+import miniventure.game.util.blinker.Blinker;
 import miniventure.game.util.MyUtils;
 
 import com.badlogic.gdx.graphics.Color;
@@ -17,8 +17,6 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;

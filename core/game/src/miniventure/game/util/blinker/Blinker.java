@@ -1,4 +1,4 @@
-package miniventure.game.util;
+package miniventure.game.util.blinker;
 
 import java.util.Arrays;
 

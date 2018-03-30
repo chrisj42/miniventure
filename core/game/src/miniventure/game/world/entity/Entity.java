@@ -1,8 +1,7 @@
 package miniventure.game.world.entity;
 
 import miniventure.game.item.Item;
-import miniventure.game.util.Blinker;
-import miniventure.game.world.Boundable;
+import miniventure.game.util.blinker.Blinker;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;

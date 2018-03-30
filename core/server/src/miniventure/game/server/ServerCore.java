@@ -1,6 +1,7 @@
 package miniventure.game.server;
 
 import miniventure.game.GameCore;
+import miniventure.game.util.command.CommandInputParser;
 
 public class ServerCore {
 	
@@ -42,6 +43,9 @@ public class ServerCore {
 	}
 	
 	public static void run() {
+		// start scanner thread
+		new CommandInputParser().start();
+		
 		long lastNow = System.nanoTime();
 		
 		//noinspection InfiniteLoopStatement

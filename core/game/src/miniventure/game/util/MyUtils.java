@@ -183,4 +183,14 @@ public class MyUtils {
 		while(list.size() > 0)
 			stack.push(list.remove(list.size()-1));
 	}
+	
+	public static boolean noException(Action action) {
+		try {
+			action.act();
+		} catch(Throwable t) {
+			return false;
+		}
+		
+		return true;
+	}
 }

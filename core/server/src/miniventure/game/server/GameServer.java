@@ -184,6 +184,8 @@ public class GameServer implements GameProtocol {
 					world.respawnPlayer(client);
 					connection.sendTCP(new SpawnData(new EntityAddition(client), client));
 				}
+				
+				forPacket(object, Message.class, msg -> broadcast(msg));
 			}
 			
 			/*@Override

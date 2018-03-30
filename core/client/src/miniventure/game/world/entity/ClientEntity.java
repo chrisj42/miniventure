@@ -3,7 +3,7 @@ package miniventure.game.world.entity;
 import miniventure.game.GameProtocol.EntityAddition;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.ClientWorld;
-import miniventure.game.util.FrameBlinker;
+import miniventure.game.util.blinker.FrameBlinker;
 import miniventure.game.world.ClientLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Mob;

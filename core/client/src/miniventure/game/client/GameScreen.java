@@ -2,6 +2,7 @@ package miniventure.game.client;
 
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.DatalessRequest;
+import miniventure.game.screen.ChatScreen;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.ClientLevel;
@@ -44,12 +45,16 @@ public class GameScreen {
 	private int zoom = 0;
 	private FrameBuffer lightingBuffer;
 	
+	final ChatScreen chat;
+	
 	private boolean debug = false;
 	
 	public GameScreen() {
 		camera = new OrthographicCamera();
 		uiCamera = new OrthographicCamera();
 		resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		
+		chat = new ChatScreen();
 	}
 	
 	void dispose() {
@@ -73,6 +78,12 @@ public class GameScreen {
 		
 		if(Gdx.input.isKeyJustPressed(Keys.B))
 			debug = !debug;
+		
+		
+		if(Gdx.input.isKeyJustPressed(Keys.T)) {
+			ClientCore.setScreen(chat);
+			chat.getInput();
+		}
 	}
 	
 	public void render(@NotNull ClientPlayer mainPlayer, Color[] lightOverlays, @NotNull ClientLevel level) {
@@ -162,6 +173,8 @@ public class GameScreen {
 		
 		renderGui(mainPlayer, level);
 		batch.end();
+		
+		chat.draw();
 	}
 	
 	private Vector2 getMouseInput() {

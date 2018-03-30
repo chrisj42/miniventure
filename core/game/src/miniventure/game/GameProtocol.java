@@ -89,6 +89,15 @@ public interface GameProtocol {
 		}
 	}
 	
+	class Message {
+		public final String msg;
+		
+		private Message() { this(null); }
+		public Message(String msg) {
+			this.msg = msg;
+		}
+	}
+	
 	class LevelData {
 		public final int width;
 		public final int height;

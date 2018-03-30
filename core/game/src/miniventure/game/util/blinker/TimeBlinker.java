@@ -1,4 +1,4 @@
-package miniventure.game.util;
+package miniventure.game.util.blinker;
 
 public class TimeBlinker implements Blinker {
 	

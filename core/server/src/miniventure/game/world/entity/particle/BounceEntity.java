@@ -2,7 +2,7 @@ package miniventure.game.world.entity.particle;
 
 import java.util.Arrays;
 
-import miniventure.game.util.FrameBlinker;
+import miniventure.game.util.blinker.FrameBlinker;
 import miniventure.game.util.Version;
 import miniventure.game.world.Level;
 import miniventure.game.world.entity.ServerEntity;
