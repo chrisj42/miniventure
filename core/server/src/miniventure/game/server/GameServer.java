@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import miniventure.game.GameCore;
 import miniventure.game.GameProtocol;
 import miniventure.game.chat.ChatMessage;
 import miniventure.game.chat.ChatMessageBuilder;
@@ -38,6 +39,7 @@ public class GameServer implements GameProtocol {
 		final Connection connection;
 		final ServerPlayer player;
 		final ChatMessageBuilder toClientOut, toClientErr;
+		boolean op;
 		
 		PlayerData(Connection connection, ServerPlayer player) {
 			this.connection = connection;
@@ -45,6 +47,8 @@ public class GameServer implements GameProtocol {
 			
 			toClientOut = new ChatMessageBuilder(text -> new ChatMessageLine(Color.WHITE, text));
 			toClientErr = new ChatMessageBuilder(toClientOut, text -> new ChatMessageLine(Color.RED, text));
+			
+			op = connection.getRemoteAddressTCP().getAddress().isLoopbackAddress();
 		}
 	}
 	
@@ -74,11 +78,25 @@ public class GameServer implements GameProtocol {
 				
 				if(object instanceof Login) {
 					System.out.println("server received login");
+					Login login = (Login) object;
+					
+					if(login.version.compareTo(GameCore.VERSION) != 0) {
+						connection.sendTCP(new LoginFailure("Required version: "+GameCore.VERSION));
+						return;
+					}
+					
+					String name = login.username;
+					
+					for(ServerPlayer player: playerToConnectionMap.keySet()) {
+						if(player.getName().equals(name)) {
+							connection.sendTCP(new LoginFailure("Username already exists."));
+							return;
+						}
+					}
 					
 					// prepare level
 					ServerLevel level = world.getLevel(0);
 					if(level != null) {
-						String name = "Player";
 						ServerPlayer player = world.addPlayer(name);
 						connectionToPlayerDataMap.put(connection, new PlayerData(connection, player));
 						playerToConnectionMap.put(player, connection);
@@ -289,6 +307,13 @@ public class GameServer implements GameProtocol {
 				return player;
 		
 		return null;
+	}
+	
+	public boolean isAdmin(@Nullable ServerPlayer player) {
+		if(player == null) return true; // from server command prompt
+		PlayerData data = connectionToPlayerDataMap.get(playerToConnectionMap.get(player));
+		if(data == null) return false; // unrecognized player (should never happen)
+		return data.op;
 	}
 	
 	void stop() { server.stop(); }

@@ -7,20 +7,39 @@ import miniventure.game.util.function.ValueFunction;
 import miniventure.game.util.function.ValueMonoFunction;
 import miniventure.game.world.entity.mob.ServerPlayer;
 
+import org.jetbrains.annotations.NotNull;
+
 public interface Argument {
 	
 	boolean satisfiedBy(String[] args, int offset);
 	int length();
 	
 	static Argument[] noArgs() { return new Argument[0]; }
-	static Argument[] singleArg(ArgumentValidator validator) {
-		return new Argument[] {new Argument() {
+	//static Argument[] useArgs(@NotNull Argument... args) { return args; }
+	static Argument[] getSingleArgs(@NotNull ArgumentValidator... validators) {
+		Argument[] args = new Argument[validators.length];
+		
+		for(int i = 0; i < args.length; i++) {
+			final int index = i;
+			args[i] = new Argument() {
+				@Override
+				public boolean satisfiedBy(String[] args, int offset) {
+					return validators[index].isValid(args[offset]);
+				}
+				
+				@Override public int length() { return 1; }
+			};
+		}
+		
+		return args;
+		
+		/*return new Argument[] {new Argument() {
 			@Override
 			public boolean satisfiedBy(String[] args, int offset) {
 				return validator.isValid(args[offset]);
 			}
 			@Override public int length() { return 1; }
-		}};
+		}};*/
 	}
 	
 	static Argument varArg(ArgumentValidator validator) {
@@ -61,7 +80,7 @@ public interface Argument {
 		}
 		
 		ArgumentValidator<Integer> INTEGER = arg -> noException(() -> Integer.parseInt(arg));
-		ArgumentValidator<Double> DECIMAL = arg -> noException(() -> Double.parseDouble(arg));
+		ArgumentValidator<Float> DECIMAL = arg -> noException(() -> Float.parseFloat(arg));
 		ArgumentValidator<ServerPlayer> PLAYER = arg -> notNull(() -> ServerCore.getServer().getPlayerByName(arg));
 		ArgumentValidator<Command> COMMAND = arg -> noException(() -> Enum.valueOf(Command.class, arg.toUpperCase()));
 		

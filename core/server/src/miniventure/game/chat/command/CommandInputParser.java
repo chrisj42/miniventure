@@ -65,7 +65,7 @@ public class CommandInputParser extends Thread {
 		}
 		
 		String commandName = parsed.remove(0);
-		Command command = Command.getCommand(commandName);
+		Command command = Command.getCommand(commandName, executor);
 		if(command == null)
 			err.println("Command not recognized: \""+commandName+"\". Type \"help\" for a list of commands.");
 		else

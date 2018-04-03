@@ -40,6 +40,7 @@ public class ClientWorld extends WorldManager {
 	 */
 	
 	private final ServerStarter serverStarter;
+	private String ipAddress;
 	
 	private final GameScreen gameScreen;
 	
@@ -92,6 +93,7 @@ public class ClientWorld extends WorldManager {
 	
 	@Override
 	public void createWorld(int width, int height) { createWorld(width, height, true, ""); }
+	public void rejoinWorld() { createWorld(0, 0, false, ipAddress); }
 	public void createWorld(String ipAddress) { createWorld(0, 0, false, ipAddress); }
 	private void createWorld(int width, int height, boolean startServer, String ipAddress) {
 		LoadingScreen loadingScreen = new LoadingScreen();
@@ -99,6 +101,8 @@ public class ClientWorld extends WorldManager {
 		
 		gameTime = 0;
 		clearLevels();
+		
+		this.ipAddress = ipAddress;
 		
 		new Thread(() -> {
 			// with a server running, attempt to connect the client. If successful, it will set the screen to null.

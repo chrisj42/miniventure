@@ -1,12 +1,13 @@
 package miniventure.game.client;
 
+import javax.swing.JOptionPane;
+
 import java.io.IOException;
 
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol;
 import miniventure.game.chat.ChatMessage;
 import miniventure.game.screen.ErrorScreen;
-import miniventure.game.screen.MainMenu;
 import miniventure.game.util.ProgressLogger;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.Chunk.ChunkData;
@@ -32,6 +33,7 @@ import org.jetbrains.annotations.NotNull;
 public class GameClient implements GameProtocol {
 	
 	private Client client;
+	private String username;
 	
 	public GameClient() {
 		client = new Client(writeBufferSize, objectBufferSize);
@@ -162,14 +164,16 @@ public class GameClient implements GameProtocol {
 				
 				forPacket(object, Message.class, msg -> ClientCore.addMessage(msg.msg));
 				forPacket(object, ChatMessage.class, ClientCore::addMessage);
+				
+				forPacket(object, LoginFailure.class, failure -> {
+					ClientCore.setScreen(new ErrorScreen(failure.message));
+				});
 			}
 			
 			@Override
 			public void disconnected(Connection connection) {
 				System.err.println("client disconnected from server.");
-				// TODO make ErrorScreen, which accepts a string to display and has a "back to title screen" button.
-				Gdx.app.postRunnable(() -> ClientCore.setScreen(new MainMenu()));
-				//GameCore.setScreen(new ErrorScreen("Lost connection with server."));
+				Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen("Lost connection with server.")));
 			}
 		});//);
 		
@@ -203,7 +207,8 @@ public class GameClient implements GameProtocol {
 		
 		logger.editMessage("logging in...");
 		
-		send(new Login("player", GameCore.VERSION));
+		username = JOptionPane.showInputDialog("Specify username:", username);
+		send(new Login(username, GameCore.VERSION));
 		
 		logger.editMessage("Loading world from server...");
 		

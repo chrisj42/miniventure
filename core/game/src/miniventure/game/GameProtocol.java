@@ -94,6 +94,13 @@ public interface GameProtocol {
 		}
 	}
 	
+	class LoginFailure {
+		public final String message;
+		
+		private LoginFailure() { this(null); }
+		public LoginFailure(String msg) { this.message = msg; }
+	}
+	
 	class Message {
 		public final String msg;
 		

@@ -16,6 +16,17 @@ public class ErrorScreen extends MenuScreen {
 		vGroup.space(50);
 		
 		
+		VisTextButton retryBtn = new VisTextButton("Reconnect");
+		retryBtn.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent e, float x, float y) {
+				ClientCore.getWorld().rejoinWorld();
+			}
+		});
+		vGroup.addActor(retryBtn);
+		
+		vGroup.space(10);
+		
 		VisTextButton returnBtn = new VisTextButton("Back to main menu");
 		returnBtn.addListener(new ClickListener() {
 			@Override
