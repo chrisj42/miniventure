@@ -6,10 +6,7 @@ import miniventure.game.GameCore;
 import miniventure.game.item.Hands;
 import miniventure.game.item.Inventory;
 import miniventure.game.texture.TextureHolder;
-import miniventure.game.world.WorldObject;
-import miniventure.game.world.entity.Direction;
 
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
@@ -45,8 +42,8 @@ public interface Player extends Mob {
 			if(icon.length() > 0) {
 				TextureHolder fullIcon = GameCore.icons.get(icon);
 				TextureHolder emptyIcon = GameCore.icons.get(outlineIcon);
-				iconWidth = Math.max(fullIcon.width, emptyIcon.height);
-				iconHeight = Math.max(fullIcon.width, emptyIcon.height);
+				iconWidth = Math.max(fullIcon.width, emptyIcon.width);
+				iconHeight = Math.max(fullIcon.height, emptyIcon.height);
 			} else
 				iconWidth = iconHeight = 0;
 		}
