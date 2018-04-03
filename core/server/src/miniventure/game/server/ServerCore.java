@@ -1,14 +1,17 @@
 package miniventure.game.server;
 
 import miniventure.game.GameCore;
-import miniventure.game.util.command.CommandInputParser;
+import miniventure.game.chat.command.CommandInputParser;
 
 public class ServerCore {
 	
 	private static ServerWorld serverWorld;
 	
+	private static CommandInputParser commandParser = new CommandInputParser();
+	
 	public static ServerWorld getWorld() { return serverWorld; }
 	public static GameServer getServer() { return serverWorld.getServer(); }
+	public static CommandInputParser getCommandInput() { return commandParser; }
 	
 	public static void main(String[] args) {
 		boolean success = args.length == 3 && args[0].equalsIgnoreCase("--server");
@@ -44,7 +47,7 @@ public class ServerCore {
 	
 	public static void run() {
 		// start scanner thread
-		new CommandInputParser().start();
+		commandParser.start();
 		
 		long lastNow = System.nanoTime();
 		
@@ -65,5 +68,11 @@ public class ServerCore {
 				Thread.sleep(10);
 			} catch(InterruptedException ignored) {}
 		}
+	}
+	
+	// stop the server.
+	public static void quit() {
+		getWorld().exitWorld(true);
+		getServer().stop();
 	}
 }

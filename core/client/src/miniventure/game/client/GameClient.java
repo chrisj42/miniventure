@@ -1,10 +1,10 @@
 package miniventure.game.client;
 
 import java.io.IOException;
-import java.lang.Thread.UncaughtExceptionHandler;
 
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol;
+import miniventure.game.chat.ChatMessage;
 import miniventure.game.screen.ErrorScreen;
 import miniventure.game.screen.MainMenu;
 import miniventure.game.util.ProgressLogger;
@@ -26,7 +26,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
-import com.esotericsoftware.kryonet.Listener.LagListener;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -162,6 +161,7 @@ public class GameClient implements GameProtocol {
 				});
 				
 				forPacket(object, Message.class, msg -> ClientCore.addMessage(msg.msg));
+				forPacket(object, ChatMessage.class, ClientCore::addMessage);
 			}
 			
 			@Override

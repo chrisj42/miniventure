@@ -1,7 +1,6 @@
 package miniventure.game.client;
 
 import miniventure.game.GameCore;
-import miniventure.game.GameProtocol.DatalessRequest;
 import miniventure.game.screen.ChatScreen;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Chunk;
@@ -82,7 +81,11 @@ public class GameScreen {
 		
 		if(Gdx.input.isKeyJustPressed(Keys.T)) {
 			ClientCore.setScreen(chat);
-			chat.getInput();
+			chat.sendMessage();
+		}
+		if(Gdx.input.isKeyJustPressed(Keys.SLASH)) {
+			ClientCore.setScreen(chat);
+			chat.sendCommand();
 		}
 	}
 	

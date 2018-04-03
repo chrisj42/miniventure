@@ -3,6 +3,8 @@ package miniventure.game;
 import java.io.File;
 import java.util.Arrays;
 
+import miniventure.game.chat.ChatMessage;
+import miniventure.game.chat.ChatMessageLine;
 import miniventure.game.item.Hands;
 import miniventure.game.item.Inventory;
 import miniventure.game.item.ItemStack;
@@ -54,6 +56,9 @@ public interface GameProtocol {
 		kryo.register(TileTag.class);
 		kryo.register(Direction.class);
 		kryo.register(Stat.class);
+		kryo.register(ChatMessageLine.class);
+		kryo.register(ChatMessageLine[].class);
+		kryo.register(ChatMessage.class);
 		
 		kryo.register(String[].class);
 		kryo.register(int[].class);

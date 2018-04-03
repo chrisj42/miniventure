@@ -1,41 +1,49 @@
-package miniventure.game.util.command;
+package miniventure.game.chat.command;
 
-import java.io.InputStream;
-import java.io.PrintStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
+import miniventure.game.chat.MessageBuilder;
+import miniventure.game.server.ServerCore;
+import miniventure.game.world.entity.mob.ServerPlayer;
+
+import org.jetbrains.annotations.Nullable;
+
 public class CommandInputParser extends Thread {
 	
 	private Scanner in;
-	private PrintStream out;
-	private PrintStream err;
+	boolean shouldRun;
 	
-	public CommandInputParser() { this(System.in, System.out, System.err); }
-	public CommandInputParser(InputStream in, PrintStream out, PrintStream err) {
+	private MessageBuilder out, err;
+	
+	public CommandInputParser() {
 		super("CommandInputParser");
-		this.in = new Scanner(in).useDelimiter(System.lineSeparator());
-		this.out = out;
-		this.err = err;
+		this.in = new Scanner(System.in).useDelimiter(System.lineSeparator());
+		
+		out = new ConsoleMessageBuilder(new PrintWriter(new OutputStreamWriter(System.out), true));
+		err = new ConsoleMessageBuilder(new PrintWriter(new OutputStreamWriter(System.err), true));
 	}
 	
 	@Override
 	public void run() {
-		boolean shouldRun = true;
-		
+		shouldRun = true;
 		while(shouldRun) {
-			// TODO when adapting this for use on the client, the out prints will be removed.
 			out.print("Enter a command: ");
 			String input = in.next();
 			
-			executeCommand(input);
+			executeCommand(input, null, out, err);
 			out.println();
 		}
+		
+		ServerCore.quit();
 	}
 	
-	private void executeCommand(String input) {
+	// a null player indicates that it is from the server console.
+	public void executeCommand(String input, @Nullable ServerPlayer executor, MessageBuilder out, MessageBuilder err) {
 		if(input.length() == 0) return;
 		List<String> parsed = new ArrayList<>();
 		parsed.addAll(Arrays.asList(input.split(" ")));
@@ -59,9 +67,9 @@ public class CommandInputParser extends Thread {
 		String commandName = parsed.remove(0);
 		Command command = Command.getCommand(commandName);
 		if(command == null)
-			err.println("Command not recognized: \""+commandName+"\".");
+			err.println("Command not recognized: \""+commandName+"\". Type \"help\" for a list of commands.");
 		else
-			command.execute(parsed.toArray(new String[parsed.size()]), out, err);
+			command.execute(parsed.toArray(new String[parsed.size()]), executor, out, err);
 	}
 	
 }

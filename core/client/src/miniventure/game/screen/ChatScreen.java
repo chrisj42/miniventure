@@ -3,11 +3,15 @@ package miniventure.game.screen;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
+import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.Message;
+import miniventure.game.chat.ChatMessage;
+import miniventure.game.chat.ChatMessageLine;
 import miniventure.game.client.ClientCore;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.TextInputListener;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Align;
@@ -50,7 +54,22 @@ public class ChatScreen extends MenuScreen {
 		});*/
 	}
 	
-	public void getInput() {
+	public void sendMessage() {
+		Gdx.input.getTextInput(new TextInputListener() {
+			@Override
+			public void input(String text) {
+				ClientCore.getClient().send(new Message("msg "+text));
+				ClientCore.setScreen(null);
+			}
+			
+			@Override
+			public void canceled() {
+				ClientCore.setScreen(null);
+			}
+		}, "Enter your message", "", "");
+	}
+	
+	public void sendCommand() {
 		Gdx.input.getTextInput(new TextInputListener() {
 			@Override
 			public void input(String text) {
@@ -62,11 +81,20 @@ public class ChatScreen extends MenuScreen {
 			public void canceled() {
 				ClientCore.setScreen(null);
 			}
-		}, "Enter your message", "", "");
+		}, "Enter command", "", "");
 	}
 	
+	public void addMessage(ChatMessage msg) {
+		for(ChatMessageLine line: msg.lines) {
+			addMessage(table.add(new Label(line.line, new Label.LabelStyle(GameCore.getFont(), Color.valueOf(line.color)))));
+		}
+	}
 	public void addMessage(String msg) {
-		queue.add(table.add(msg));
+		addMessage(table.add(msg));
+	}
+	
+	private void addMessage(Cell<Label> msg) {
+		queue.add(msg);
 		table.row();
 		if(table.getRows() > 10)
 			table.removeActor(queue.poll().getActor());

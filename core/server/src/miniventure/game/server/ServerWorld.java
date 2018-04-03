@@ -150,8 +150,8 @@ public class ServerWorld extends WorldManager {
 	/*  --- PLAYER MANAGEMENT --- */
 	
 	
-	public ServerPlayer addPlayer() {
-		ServerPlayer player = new ServerPlayer();
+	public ServerPlayer addPlayer(String playerName) {
+		ServerPlayer player = new ServerPlayer(playerName);
 		
 		keepAlives.add(player);
 		

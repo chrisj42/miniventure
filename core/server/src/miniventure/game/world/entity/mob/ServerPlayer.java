@@ -36,9 +36,12 @@ public class ServerPlayer extends ServerMob implements Player {
 	@NotNull private final ServerHands hands;
 	private Inventory inventory;
 	
-	public ServerPlayer() {
+	private final String name;
+	
+	public ServerPlayer(String name) {
 		super("player", Stat.Health.initial);
 		
+		this.name = name;
 		hands = new ServerHands(this);
 		reset();
 	}
@@ -47,16 +50,17 @@ public class ServerPlayer extends ServerMob implements Player {
 		super(Arrays.copyOfRange(allData, 0, allData.length-1), version);
 		String[] data = allData[allData.length-1];
 		
+		name = data[0];
 		hands = new ServerHands(this);
 		reset();
 		
 		stats.put(Stat.Health, getHealth());
-		stats.put(Stat.Hunger, Integer.parseInt(data[0]));
-		stats.put(Stat.Stamina, Integer.parseInt(data[1]));
-		//stats.put(Stat.Armor, Integer.parseInt(data[2]));
+		stats.put(Stat.Hunger, Integer.parseInt(data[1]));
+		stats.put(Stat.Stamina, Integer.parseInt(data[2]));
+		//stats.put(Stat.Armor, Integer.parseInt(data[3]));
 		
-		inventory.loadItems(MyUtils.parseLayeredString(data[2]));
-		hands.loadItem(MyUtils.parseLayeredString(data[3]));
+		inventory.loadItems(MyUtils.parseLayeredString(data[3]));
+		hands.loadItem(MyUtils.parseLayeredString(data[4]));
 	}
 	
 	@Override
@@ -64,6 +68,7 @@ public class ServerPlayer extends ServerMob implements Player {
 		Array<String[]> data = super.save();
 		
 		data.add(new String[] {
+			name,
 			getStat(Stat.Hunger)+"",
 			getStat(Stat.Stamina)+"",
 			MyUtils.encodeStringArray(inventory.save()),
@@ -72,6 +77,8 @@ public class ServerPlayer extends ServerMob implements Player {
 		
 		return data;
 	}
+	
+	public String getName() { return name; }
 	
 	// use this instead of creating a new player.
 	public void reset() {

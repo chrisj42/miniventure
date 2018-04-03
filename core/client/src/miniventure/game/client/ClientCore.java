@@ -9,6 +9,7 @@ import java.lang.Thread.UncaughtExceptionHandler;
 
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.HeldItemRequest;
+import miniventure.game.chat.ChatMessage;
 import miniventure.game.item.InventoryScreen;
 import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
@@ -109,6 +110,7 @@ public class ClientCore extends ApplicationAdapter {
 	}
 	
 	static void addMessage(String msg) { gameScreen.chat.addMessage(msg); }
+	static void addMessage(ChatMessage msg) { gameScreen.chat.addMessage(msg); }
 	
 	@Override
 	public void resize(int width, int height) {
