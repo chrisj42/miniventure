@@ -5,15 +5,13 @@ import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
 
-public class ConnectionProperty implements TilePropertyInstance {
+public class ConnectionProperty extends TileProperty {
 	
 	private final boolean connects;
 	private final Array<TileType> connectingTiles;
 	
-	private final TileType tileType;
-	
 	ConnectionProperty(@NotNull TileType tileType, boolean connects, TileType... connectingTiles) {
-		this.tileType = tileType;
+		super(tileType);
 		this.connects = connects;
 		this.connectingTiles = new Array<>(connectingTiles);
 		

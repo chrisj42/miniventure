@@ -28,8 +28,8 @@ enum Biome {
 		put(SAND, DIRT);
 		put(CACTUS, SAND);
 		put(TREE, GRASS);
-		put(GRASS, DIRT);
 		put(DIRT, HOLE);
+		put(GRASS, HOLE);
 		put(STONE, DIRT);
 	}};
 	

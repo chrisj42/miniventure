@@ -18,7 +18,7 @@ import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.ClientPlayer;
-import miniventure.game.world.tile.TilePropertyInstanceFetcher;
+import miniventure.game.world.tile.TilePropertyFetcher;
 
 import com.badlogic.gdx.utils.Array;
 
@@ -49,7 +49,7 @@ public class ClientWorld extends WorldManager {
 	private ClientPlayer mainPlayer;
 	
 	ClientWorld(ServerStarter serverStarter, GameScreen gameScreen) {
-		super(new TilePropertyInstanceFetcher(instanceTemplate -> instanceTemplate));
+		super(new TilePropertyFetcher(instanceTemplate -> instanceTemplate));
 		
 		this.serverStarter = serverStarter;
 		this.gameScreen = gameScreen;

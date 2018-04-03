@@ -55,7 +55,6 @@ public abstract class Entity implements WorldObject {
 		world.deregisterEntity(eid);
 	}
 	
-	@Override
 	public void update(float delta) {}
 	
 	public void setRenderer(@NotNull EntityRenderer renderer) {

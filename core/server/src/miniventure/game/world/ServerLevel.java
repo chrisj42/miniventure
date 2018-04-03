@@ -1,16 +1,22 @@
 package miniventure.game.world;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import miniventure.game.GameProtocol.EntityAddition;
 import miniventure.game.GameProtocol.EntityRemoval;
+import miniventure.game.GameProtocol.TileUpdate;
 import miniventure.game.item.Item;
 import miniventure.game.server.ServerCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.AiType;
-import miniventure.game.world.entity.mob.ServerMob;
 import miniventure.game.world.entity.mob.MobAi;
+import miniventure.game.world.entity.mob.ServerMob;
 import miniventure.game.world.entity.particle.ItemEntity;
 import miniventure.game.world.levelgen.LevelGenerator;
 import miniventure.game.world.tile.ServerTile;
@@ -29,6 +35,9 @@ import org.jetbrains.annotations.Nullable;
 public class ServerLevel extends Level {
 	
 	private static final float percentTilesUpdatedPerSecond = 2f; // this represents the percent of the total number of tiles in the map that are updated per second.
+	
+	private final Set<Tile> newTileUpdates = Collections.synchronizedSet(new HashSet<>());
+	private final Set<Tile> oldTileUpdates = new HashSet<>();
 	
 	private final LevelGenerator levelGenerator;
 	
@@ -52,19 +61,53 @@ public class ServerLevel extends Level {
 		}
 	}
 	
+	public void onTileUpdate(Tile tile) {
+		ServerCore.getServer().broadcast(new TileUpdate(tile), this);
+		
+		List<Tile> tiles = Arrays.asList(getAreaTiles(tile.getLocation(), 1, true).shrink());
+		
+		synchronized (newTileUpdates) {
+			newTileUpdates.addAll(tiles);
+		}
+	}
+	
 	public void update(Entity[] entities, float delta) {
 		if(getLoadedChunkCount() == 0) return;
 		
-		int tilesToUpdate = (int) (percentTilesUpdatedPerSecond * tileCount * delta);
+		int tilesToTick = (int) (percentTilesUpdatedPerSecond * tileCount * delta);
 		
 		Chunk[] chunks = getLoadedChunkArray();
-		for(int i = 0; i < tilesToUpdate; i++) {
-			Chunk chunk = (Chunk) chunks[MathUtils.random(chunks.length-1)];
+		for(int i = 0; i < tilesToTick; i++) {
+			Chunk chunk = chunks[MathUtils.random(chunks.length-1)];
 			int x = MathUtils.random(chunk.width-1);
 			int y = MathUtils.random(chunk.height-1);
 			Tile t = chunk.getTile(x, y);
-			if(t != null) t.update(delta);
+			if(t != null) t.tick();
 		}
+		
+		// update the tiles in the queue
+		Tile[] tilesToUpdate = newTileUpdates.toArray(new Tile[newTileUpdates.size()]);
+		synchronized (newTileUpdates) { newTileUpdates.clear(); } // clear it first, so we won't lose any updates added while updating.
+		
+		boolean[] unfinishedTiles = new boolean[tilesToUpdate.length];
+		for(int i = 0; i < tilesToUpdate.length; i++) {
+			unfinishedTiles[i] = tilesToUpdate[i].update(delta, true);
+		}
+		
+		// now do old updates
+		Tile[] previouslyUpdatedTiles = oldTileUpdates.toArray(new Tile[oldTileUpdates.size()]);
+		for(Tile tile: previouslyUpdatedTiles) {
+			boolean shouldUpdate = tile.update(delta, false);
+			if(!shouldUpdate)
+				oldTileUpdates.remove(tile);
+		}
+		
+		// now, add any new tiles that still need updates
+		for(int i = 0; i < unfinishedTiles.length; i++) {
+			if(unfinishedTiles[i])
+				oldTileUpdates.add(tilesToUpdate[i]);
+		}
+		
 		
 		// update entities
 		updateEntities(entities, delta);

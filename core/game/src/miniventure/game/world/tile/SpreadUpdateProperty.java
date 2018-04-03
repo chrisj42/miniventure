@@ -1,42 +1,22 @@
 package miniventure.game.world.tile;
 
-import java.util.Arrays;
-import java.util.HashSet;
-
-import com.badlogic.gdx.utils.Array;
+import miniventure.game.world.tile.SpreadProperty.TileReplaceBehavior;
+import miniventure.game.world.tile.UpdateProperty.DelayedUpdate;
 
 import org.jetbrains.annotations.NotNull;
 
-public class SpreadUpdateProperty implements UpdateProperty {
+public class SpreadUpdateProperty extends DelayedUpdate {
 	
-	private final TileReplaceBehavior replaceBehavior;
-	private final HashSet<TileType> replaces;
-	private final TileType tileType;
+	private SpreadProperty spreadProperty;
 	
-	interface TileReplaceBehavior {
-		void spreadType(TileType newType, Tile tile);
-	}
-	
-	SpreadUpdateProperty(@NotNull TileType tileType, TileReplaceBehavior replaceBehavior, TileType... replaces) {
-		this.tileType = tileType;
-		this.replaceBehavior = replaceBehavior;
-		this.replaces = new HashSet<>(Arrays.asList(replaces));
+	SpreadUpdateProperty(@NotNull TileType tileType, float spreadDelay, TileReplaceBehavior replaceBehavior, TileType... replaces) {
+		super(tileType, spreadDelay, null, null); // will specify them directly
+		spreadProperty = new SpreadProperty(tileType, replaceBehavior, replaces);
 	}
 	
 	@Override
-	public void update(float delta, Tile tile) {
-		if(!tile.hasType(tileType)) {
-			System.err.println("Warning: SpreadUpdateProperty for " + tileType + " being used for tile " + tile + "; not updating");
-			return; // the current tile being updated is not of the original tile type which is supposed to be spreading. This should never happen, but it can't hurt anything to have this here.
-		}
-		
-		Array<Tile> around = tile.getAdjacentTiles(false);
-		around.shuffle();
-		for(Tile t: around) {
-			if(replaces.contains(t.getType())) {
-				replaceBehavior.spreadType(tileType, t);
-				//break;
-			}
-		}
-	}
+	public boolean shouldUpdate(Tile tile) { return spreadProperty.canSpread(tile); }
+	
+	@Override
+	public void update(Tile tile) { spreadProperty.spread(tile); }
 }

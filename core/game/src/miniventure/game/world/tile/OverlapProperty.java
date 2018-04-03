@@ -6,14 +6,12 @@ import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
 
-public class OverlapProperty implements TilePropertyInstance {
+public class OverlapProperty extends TileProperty {
 	
 	private final boolean overlaps;
 	
-	private TileType tileType;
-	
 	OverlapProperty(@NotNull TileType tileType, boolean overlaps) {
-		this.tileType = tileType;
+		super(tileType);
 		this.overlaps = overlaps;
 	}
 	

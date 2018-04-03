@@ -113,10 +113,17 @@ public class GameServer implements GameProtocol {
 						
 						System.out.println("Server: new player successfully connected: "+player.getName());
 					}
+					else connection.sendTCP(new LoginFailure("Server world is not initialized."));
+					
 					return;
 				}
 				
 				PlayerData clientData = connectionToPlayerDataMap.get(connection);
+				if(clientData == null) {
+					System.err.println("server received packet from unknown client "+connection.getRemoteAddressTCP().getHostString()+"; ignoring packet "+object);
+					return;
+				}
+				
 				ServerPlayer client = clientData.player;
 				
 				if(object instanceof ChunkRequest) {
@@ -143,35 +150,20 @@ public class GameServer implements GameProtocol {
 				forPacket(object, StatUpdate.class, client::loadStat);
 				
 				forPacket(object, MovementRequest.class, move -> {
-					//Level lvl = world.getLevel(0);
-					//System.out.println("server received movement request, start="+ Boundable.toLevelCoords(lvl, move.startPos.getPos())+", move="+move.getMoveDist()+", end="+Boundable.toLevelCoords(lvl, move.endPos.getPos()));
 					Vector3 loc = client.getLocation();
-					//System.out.println("current player location in server: "+Boundable.toLevelCoords(lvl, loc));
-					if(move.getMoveDist().len() > 1 || move.startPos.variesFrom(client)) {
-						//System.out.println("position varies, ignoring move and correcting player.");
-						//connection.sendTCP(new PositionUpdate(p));
-					} else {
+					if(move.getMoveDist().len() < 1 && !move.startPos.variesFrom(client)) {
 						// move to start pos
 						Vector3 start = move.startPos.getPos();
-						//System.out.println("current player location as given by client: "+Boundable.toLevelCoords(lvl, start));
 						Vector3 diff = loc.cpy().sub(start);
-						//System.out.println("server location minus client location (will move this dist to start): "+diff);
 						client.move(diff);
-						//System.out.println("after initial movement to start pos, server player location: "+p.getLocation(true));
 					}
 					// move given dist
 					Vector3 moveDist = move.getMoveDist();
-					//System.out.println("server player will move dist: "+moveDist);
 					client.move(moveDist);
-					//System.out.println("server player position after main move: "+p.getLocation(true));
 					// compare against given end pos
 					if(move.endPos.variesFrom(client)) {
-						//System.out.println("server is updating client");
 						connection.sendTCP(new PositionUpdate(client));
 					}
-					//else if(!move.endPos.getPos().equals(p.getLocation()))
-					//	p.moveTo(move.endPos.getPos());
-					// TODO gonna have to take level into account above.
 					// note that the server will always have the say when it comes to which level the player should be on.
 				});
 				
@@ -222,7 +214,7 @@ public class GameServer implements GameProtocol {
 				}
 				
 				forPacket(object, Message.class, msg -> {
-					System.out.println("server: executing command "+msg.msg);
+					//System.out.println("server: executing command "+msg.msg);
 					ServerCore.getCommandInput().executeCommand(msg.msg, client, clientData.toClientOut, clientData.toClientErr);
 					ChatMessage output = clientData.toClientOut.flushMessage();
 					if(output != null)

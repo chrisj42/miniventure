@@ -90,13 +90,15 @@ public class Tile implements WorldObject {
 		return type.getPropDataIndex(propertyType) + propDataIndex + offset;
 	}
 	
-	public <T extends TilePropertyInstance> T getProp(TileType tileType, TilePropertyType<T> propertyType) {
+	<T extends TileProperty> T getProp(TileType tileType, TilePropertyType<T> propertyType) {
 		return getWorld().getTilePropertyFetcher().getProp(propertyType, tileType);
 	}
 	
-	public <T extends TilePropertyInstance> T getProp(TileType tileType, TilePropertyType<? super T> propertyType, Class<T> asClass) {
+	<T extends TileProperty> T getProp(TileType tileType, TilePropertyType<? super T> propertyType, Class<T> asClass) {
 		return getWorld().getTilePropertyFetcher().getProp(propertyType, tileType, asClass);
 	}
+	
+	
 	
 	
 	@NotNull @Override
@@ -250,12 +252,28 @@ public class Tile implements WorldObject {
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {}
 	
 	
-	@Override
-	public void update(float delta) {
+	//public final void update(float delta) { update(delta, true); }
+	public void tick() {
 		for(TileType type: tileTypes) {// goes from bottom to top
 			if(!(type == getType() && getProp(type, TilePropertyType.Transition).playingAnimation(this))) // only update main tile if not transitioning.
-				getProp(type, TilePropertyType.Update).update(delta, this);
+				getProp(type, TilePropertyType.Tick).tick(this);
 		}
+	}
+	
+	public boolean update(float delta, boolean initial) {
+		TransitionProperty transProp = getProp(getType(), TilePropertyType.Transition);
+		if(transProp.playingAnimation(this) && !transProp.isEntranceAnim(this))
+			// playing exit anim; no more updates
+			return false;
+		
+		boolean update;
+		
+		if(initial)
+			update = getProp(getType(), TilePropertyType.Update).firstUpdate(this);
+		else
+			update = getProp(getType(), TilePropertyType.Update).update(delta, this);
+		
+		return update;
 	}
 	
 	@Override

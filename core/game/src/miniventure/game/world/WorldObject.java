@@ -14,7 +14,7 @@ public interface WorldObject extends Boundable {
 	
 	@NotNull WorldManager getWorld();
 	
-	void update(float delta);
+	//void update(float delta);
 	
 	void render(SpriteBatch batch, float delta, Vector2 posOffset);
 	

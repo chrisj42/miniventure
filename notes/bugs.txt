@@ -8,7 +8,9 @@ doors do not function correctly.
 
 player should show indication of failed interaction
 
-water doesn't flow into adjacent holes, or not quickly enough to notice
+water doesn't flow into adjacent holes.
 
 find a way to initialize jpanel environment so it doesn't lag the first time.
+
+random tile ticks aren't working.
 

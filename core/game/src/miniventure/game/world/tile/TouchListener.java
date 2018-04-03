@@ -1,14 +1,22 @@
 package miniventure.game.world.tile;
 
+import miniventure.game.util.function.ValueTriFunction;
 import miniventure.game.world.entity.Entity;
 
+import org.jetbrains.annotations.NotNull;
 
-@FunctionalInterface
-public interface TouchListener extends TilePropertyInstance {
+public class TouchListener extends TileProperty {
 	
 	//TouchListener DO_NOTHING = entity -> {};
 	
-	boolean touchedBy(Entity entity, Tile tile, boolean initial);
+	private final ValueTriFunction<Boolean, Entity, Tile, Boolean> onTouch;
+	
+	TouchListener(@NotNull TileType tileType, ValueTriFunction<Boolean, Entity, Tile, Boolean> onTouch) {
+		super(tileType);
+		this.onTouch = onTouch;
+	}
+	
+	public boolean touchedBy(Entity entity, Tile tile, boolean initial) { return onTouch.get(entity, tile, initial); }
 	//void stillTouchedBy(Entity entity);
 	//void steppedOff(Entity entity); // idk, this will be much later.
 	

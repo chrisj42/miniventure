@@ -17,7 +17,7 @@ import miniventure.game.world.entity.mob.ServerPlayer;
 import miniventure.game.world.levelgen.LevelGenerator;
 import miniventure.game.world.tile.DestructibleProperty;
 import miniventure.game.world.tile.ServerDestructibleProperty;
-import miniventure.game.world.tile.TilePropertyInstanceFetcher;
+import miniventure.game.world.tile.TilePropertyFetcher;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -48,7 +48,7 @@ public class ServerWorld extends WorldManager {
 	private final HashSet<WorldObject> keepAlives = new HashSet<>(); // always keep chunks around these objects loaded.
 	
 	public ServerWorld() {
-		super(new TilePropertyInstanceFetcher((instanceTemplate -> {
+		super(new TilePropertyFetcher((instanceTemplate -> {
 			if(instanceTemplate instanceof DestructibleProperty)
 				return new ServerDestructibleProperty((DestructibleProperty)instanceTemplate);
 			

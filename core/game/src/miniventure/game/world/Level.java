@@ -224,6 +224,7 @@ public abstract class Level {
 		return overlapping;
 	}
 	
+	public Array<Tile> getAreaTiles(Point tilePos, int radius, boolean includeCenter) { return getAreaTiles(tilePos.x, tilePos.y, radius, includeCenter); }
 	public Array<Tile> getAreaTiles(int x, int y, int radius, boolean includeCenter) {
 		Array<Tile> tiles = new Array<>();
 		for(int xo = Math.max(0, x-radius); xo <= Math.min(getWidth()-1, x+radius); xo++) {

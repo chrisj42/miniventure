@@ -5,7 +5,7 @@ import java.util.HashMap;
 import miniventure.game.world.tile.AnimationProperty.AnimationType;
 
 // PT is the class required.
-public final class TilePropertyType<PT extends TilePropertyInstance> {
+public final class TilePropertyType<PT extends TileProperty> {
 	
 	/*
 		This specifies all the different top level property types all tile types have.
@@ -27,17 +27,19 @@ public final class TilePropertyType<PT extends TilePropertyInstance> {
 	
 	public static final TilePropertyType<ConnectionProperty> Connect = new TilePropertyType<>(tileType -> new ConnectionProperty(tileType, false));
 	
-	public static final TilePropertyType<LightProperty> Light = new TilePropertyType<>(tileType -> () -> 0);
+	public static final TilePropertyType<LightProperty> Light = new TilePropertyType<>(tileType -> new LightProperty(tileType, () -> 0f));
 	
-	public static final TilePropertyType<UpdateProperty> Update = new TilePropertyType<>(tileType -> (delta, tile) -> {});
+	public static final TilePropertyType<UpdateProperty> Update = new TilePropertyType<>(UpdateProperty::noAct);
 	
-	public static final TilePropertyType<SolidProperty> Solid = new TilePropertyType<>(tileType -> SolidProperty.WALKABLE);
+	public static final TilePropertyType<TickProperty> Tick = new TilePropertyType<>(tileType -> new TickProperty(tileType, tile -> {}));
 	
-	public static final TilePropertyType<TouchListener> Touch = new TilePropertyType<>(tileType -> (entity, tile, initial) -> false);
+	public static final TilePropertyType<SolidProperty> Solid = new TilePropertyType<>(tileType -> SolidProperty.get(tileType, false));
+	
+	public static final TilePropertyType<TouchListener> Touch = new TilePropertyType<>(tileType -> new TouchListener(tileType, (entity, tileInfo, initial) -> false));
 	
 	public static final TilePropertyType<DestructibleProperty> Attack = new TilePropertyType<>(DestructibleProperty::INDESTRUCTIBLE);
 	
-	public static final TilePropertyType<InteractableProperty> Interact = new TilePropertyType<>(tileType -> (p, i, t) -> false);
+	public static final TilePropertyType<InteractableProperty> Interact = new TilePropertyType<>(tileType -> new InteractableProperty(tileType, (p, i, t) -> false));
 	
 	public static final TilePropertyType<TransitionProperty> Transition = new TilePropertyType<>(tileType -> new TransitionProperty(tileType));
 	
@@ -53,21 +55,22 @@ public final class TilePropertyType<PT extends TilePropertyInstance> {
 		nameToValue.put("Connect", Connect);
 		nameToValue.put("Light", Light);
 		nameToValue.put("Update", Update);
+		nameToValue.put("Tick", Tick);
 		nameToValue.put("Solid", Solid);
 		nameToValue.put("Touch", Touch);
-		nameToValue.put("AttackResponse", Attack);
-		nameToValue.put("InteractResponse", Interact);
+		nameToValue.put("Attack", Attack);
+		nameToValue.put("Interact", Interact);
 		nameToValue.put("Transition", Transition);
 		
 		for(String name: nameToValue.keySet())
 			valueToName.put(nameToValue.get(name), name);
 	}
 	
-	/** @noinspection unchecked*/
-	public static TilePropertyType<? extends TilePropertyInstance>[] values() { return valueToName.keySet().toArray(new TilePropertyType[valueToName.size()]); }
+	@SuppressWarnings("unchecked")
+	public static TilePropertyType<? extends TileProperty>[] values() { return valueToName.keySet().toArray(new TilePropertyType[valueToName.size()]); }
 	public static TilePropertyType valueOf(String str) { return nameToValue.get(str); }
 	
-	public static final TilePropertyType<? extends TilePropertyInstance>[] values = values();
+	public static final TilePropertyType<? extends TileProperty>[] values = values();
 	
 	private final int ordinal;
 	
@@ -78,7 +81,7 @@ public final class TilePropertyType<PT extends TilePropertyInstance> {
 	@Override public boolean equals(Object other) { return other instanceof TilePropertyType && ((TilePropertyType)other).ordinal() == ordinal(); }
 	
 	
-	interface PropertyFetcher<PT extends TilePropertyInstance> {
+	interface PropertyFetcher<PT extends TileProperty> {
 		PT getProperty(TileType tileType);
 	}
 	

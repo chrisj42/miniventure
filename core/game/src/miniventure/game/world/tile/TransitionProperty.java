@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 
 import static miniventure.game.world.tile.TilePropertyType.Transition;
 
-public class TransitionProperty implements TilePropertyInstance {
+public class TransitionProperty extends TileProperty {
 	
 	private enum Data {
 		// time start is the time of the last render, aka animation frame fetch
@@ -34,12 +34,12 @@ public class TransitionProperty implements TilePropertyInstance {
 	
 	private static final HashMap<TileType, HashMap<String, Array<AtlasRegion>>> allAnimations = new HashMap<>();
 	
-	private final TileType tileType;
 	private final @NotNull TransitionAnimation[] animations;
 	
 	/// note: the sprite name key for the animations is the name of the animation set for that animation; aka, it's what the name of all the images are before the _## at the end.
 	public TransitionProperty(@NotNull TileType tileType, @NotNull TransitionAnimation... animations) {
-		this.tileType = tileType;
+		super(tileType);
+		
 		this.animations = animations;
 		
 		if(animations.length == 0) return;
@@ -56,15 +56,15 @@ public class TransitionProperty implements TilePropertyInstance {
 	}
 	
 	// enter animation
-	public boolean tryStartAnimation(@NotNull Tile tile, @NotNull TileType previous) {
+	public boolean tryStartAnimation(Tile tile, @NotNull TileType previous) {
 		return tryStartAnimation(tile, true, previous, false);
 	}
 	// exit animation
-	public boolean tryStartAnimation(@NotNull Tile tile, @NotNull TileType next, boolean addNext) {
+	public boolean tryStartAnimation(Tile tile, @NotNull TileType next, boolean addNext) {
 		return tryStartAnimation(tile, false, next, addNext);
 	}
 	// check for transition animation; tiletype is being entered or removed, and given what tile type will be the main one next.
-	private boolean tryStartAnimation(@NotNull Tile tile, boolean isEntering, @NotNull TileType other, boolean addNext) { // addNext is ignored if isEntering is true
+	private boolean tryStartAnimation(Tile tile, boolean isEntering, @NotNull TileType other, boolean addNext) { // addNext is ignored if isEntering is true
 		boolean found = false;
 		for(int i = 0; i < animations.length; i++) {
 			TransitionAnimation anim = animations[i];
@@ -85,13 +85,20 @@ public class TransitionProperty implements TilePropertyInstance {
 		return false;
 	}
 	
-	public boolean playingAnimation(@NotNull Tile tile) {
+	public boolean playingAnimation(Tile tile) {
 		return animations.length > 0 && tile.getData(Transition, tileType, Data.ANIM.idx).length() > 0;
 	}
 	
+	public boolean isEntranceAnim(Tile tile) {
+		if(!playingAnimation(tile)) throw new IllegalStateException("Cannot check if transition animation is entrance, if no animation is playing. invoking tile: "+ tile);
+		
+		TransitionAnimation anim = animations[Integer.parseInt(tile.getData(Transition, tileType, Data.ANIM.idx))];
+		return anim.isEntrance();
+	}
+	
 	// throws error if no animation is playing
-	public AtlasRegion getAnimationFrame(@NotNull Tile tile, float delta) {
-		if(!playingAnimation(tile)) throw new IllegalStateException("Not allowed to fetch animation frame for transition when no animation is playing. invoking tile: "+tile);
+	public AtlasRegion getAnimationFrame(Tile tile, float delta) {
+		if(!playingAnimation(tile)) throw new IllegalStateException("Not allowed to fetch animation frame for transition when no animation is playing. invoking tile: "+ tile);
 		
 		float timeElapsed = Float.parseFloat(tile.getData(Transition, tileType, Data.TIME.idx));
 		timeElapsed += delta;
@@ -107,8 +114,7 @@ public class TransitionProperty implements TilePropertyInstance {
 		return frames.get(curFrameIdx);
 	}
 	
-	// TODO later, I should make a system so tiles can request constant updates, so they don't have to rely on the render loop. This will be used for this, probably, as well as maybe water..? Actually, water might just need updates whenever an adjacent tile is updated. That would probably be a worthwhile system as well.
-	private void tryFinishAnimation(@NotNull Tile tile, float timeElapsed, @NotNull TransitionAnimation anim) {
+	private void tryFinishAnimation(Tile tile, float timeElapsed, @NotNull TransitionAnimation anim) {
 		if(timeElapsed > anim.getAnimationTime()) {
 			tile.setData(Transition, tileType, Data.TIME.idx, "");
 			tile.setData(Transition, tileType, Data.ANIM.idx, "");

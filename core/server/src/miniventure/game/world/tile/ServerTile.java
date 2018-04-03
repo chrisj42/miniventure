@@ -1,7 +1,5 @@
 package miniventure.game.world.tile;
 
-import miniventure.game.GameProtocol.TileUpdate;
-import miniventure.game.server.ServerCore;
 import miniventure.game.world.ServerLevel;
 
 import org.jetbrains.annotations.NotNull;
@@ -19,29 +17,16 @@ public class ServerTile extends Tile {
 	public ServerLevel getLevel() { return level; }
 	
 	@Override
-	public boolean addTile(@NotNull TileType newType) {
-		boolean success = super.addTile(newType);
-		if(success)
-			ServerCore.getServer().broadcast(new TileUpdate(this), level);
-		
-		return success;
-	}
+	public boolean addTile(@NotNull TileType newType) { return tileUpdate(super.addTile(newType)); }
 	
 	@Override
-	boolean breakTile(boolean checkForExitAnim) {
-		boolean success = super.breakTile(checkForExitAnim);
-		if(success)
-			ServerCore.getServer().broadcast(new TileUpdate(this), level);
-		
-		return success;
-	}
+	boolean breakTile(boolean checkForExitAnim) { return tileUpdate(super.breakTile(checkForExitAnim)); }
 	
 	@Override
-	boolean replaceTile(@NotNull TileType newType) {
-		boolean success = super.replaceTile(newType);
-		if(success)
-			ServerCore.getServer().broadcast(new TileUpdate(this), level);
-		
+	boolean replaceTile(@NotNull TileType newType) { return tileUpdate(super.replaceTile(newType)); }
+	
+	private boolean tileUpdate(boolean success) {
+		if(success) level.onTileUpdate(this);
 		return success;
 	}
 	

@@ -8,7 +8,7 @@ import miniventure.game.item.ResourceItem;
 import miniventure.game.item.TileItem;
 import miniventure.game.item.ToolType;
 import miniventure.game.util.MyUtils;
-import miniventure.game.util.property.PropertyInstanceFetcher;
+import miniventure.game.util.function.MapFunction;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.tile.AnimationProperty.AnimationType;
 import miniventure.game.world.tile.DestructibleProperty.PreferredTool;
@@ -23,85 +23,86 @@ import static miniventure.game.world.tile.TilePropertyType.*;
 public enum TileType {
 	
 	HOLE((tileType, map) -> {
-		map.put(Solid, SolidProperty.SOLID);
+		map.put(Solid, SolidProperty.get(tileType, true));
 		map.put(Connect, new ConnectionProperty(tileType, true, TileType.valueOf("WATER")));
 	}),
 	
 	DIRT((tileType, map) -> {
-		map.put(Solid, SolidProperty.WALKABLE);
+		map.put(Solid, SolidProperty.get(tileType, false));
 		map.put(Attack, new DestructibleProperty(tileType, new RequiredTool(ToolType.Shovel)));
 	}),
 	
 	SAND((tileType, map) -> {
-		map.put(Solid, SolidProperty.WALKABLE);
+		map.put(Solid, SolidProperty.get(tileType, false));
 		map.put(Attack, new DestructibleProperty(tileType, new RequiredTool(ToolType.Shovel)));
 		map.put(Overlap, new OverlapProperty(tileType, true));
 	}),
 	
 	GRASS((tileType, map) -> {
-		map.put(Solid, SolidProperty.WALKABLE);
-		map.put(Attack, new DestructibleProperty(tileType, new RequiredTool(ToolType.Shovel)));
+		map.put(Solid, SolidProperty.get(tileType, false));
+		map.put(Attack, new DestructibleProperty(tileType, new ItemDrop(TileItem.get(DIRT)), new RequiredTool(ToolType.Shovel)));
 		map.put(Overlap, new OverlapProperty(tileType, true));
+		map.put(Tick, new SpreadTickProperty(tileType, (newType, tile) -> tile.replaceTile(newType), DIRT));
 	}),
 	
 	WATER((tileType, map) -> {
 		map.put(Render, new AnimationProperty(tileType, true, AnimationType.RANDOM, 0.2f, AnimationType.SEQUENCE, 1/24f));
-		map.put(Update, new SpreadUpdateProperty(tileType, (type, tile) -> tile.addTile(type), HOLE));
+		map.put(Update, new SpreadUpdateProperty(tileType, 0.33f, (type, tile) -> tile.addTile(type), HOLE));
 		map.put(Overlap, new OverlapProperty(tileType, true));
 	}),
 	
 	STONE((tileType, map) -> {
-		map.put(Solid, SolidProperty.SOLID);
+		map.put(Solid, SolidProperty.get(tileType, true));
 		map.put(Attack, new DestructibleProperty(tileType, 20, new PreferredTool(ToolType.Pickaxe, 5)));
 	}),
 	
 	DOOR_CLOSED((tileType, map) -> {
-		map.put(Solid, SolidProperty.SOLID);
+		map.put(Solid, SolidProperty.get(tileType, true));
 		map.put(Attack, new DestructibleProperty(tileType, new RequiredTool(ToolType.Axe)));
 		map.put(Render, new AnimationProperty(tileType, true, AnimationType.SINGLE_FRAME));
-		map.put(Interact, (InteractableProperty) (p, i, t) -> {
+		map.put(Interact, new InteractableProperty(tileType, (p, i, t) -> {
 			t.replaceTile(TileType.valueOf("DOOR_OPEN"));
 			return true;
-		});
+		}));
 	}),
 	
 	DOOR_OPEN((tileType, map) -> {
-		map.put(Solid, SolidProperty.WALKABLE);
+		map.put(Solid, SolidProperty.get(tileType, false));
 		map.put(Render, new AnimationProperty(tileType, false, AnimationType.SINGLE_FRAME));
 		map.put(Transition, new TransitionProperty(tileType,
 			new TransitionAnimation("open", true, 1/24f, DOOR_CLOSED),
 			new TransitionAnimation("close", false, 1/24f, DOOR_CLOSED)
 		));
-		map.put(Interact, (InteractableProperty) (p, i, t) -> {
+		map.put(Interact, new InteractableProperty(tileType, (p, i, t) -> {
 			t.replaceTile(DOOR_CLOSED);
 			return true;
-		});
+		}));
 		map.put(Attack, new DestructibleProperty(tileType, new ItemDrop(TileItem.get(TileType.DOOR_CLOSED)), new RequiredTool(ToolType.Axe)));
 	}),
 	
 	TORCH((tileType, map) -> {
 		map.put(Attack, new DestructibleProperty(tileType));
-		map.put(Light, (LightProperty) () -> 2);
+		map.put(Light, new LightProperty(tileType, 2));
 		map.put(Render, new AnimationProperty(tileType, false, AnimationType.SEQUENCE, 1/12f));
 		map.put(Transition, new TransitionProperty(tileType, new TransitionAnimation("enter", true, 1/12f)));
 	}),
 	
 	CACTUS((tileType, map) -> {
-		map.put(Solid, SolidProperty.SOLID);
+		map.put(Solid, SolidProperty.get(tileType, true));
 		map.put(Attack, new DestructibleProperty(tileType, 7, null));
 		map.put(Render, new AnimationProperty(tileType, false, AnimationType.SINGLE_FRAME));
-		map.put(Touch, (TouchListener) (e, t, initial) -> e.attackedBy(t, null, 1));
+		map.put(Touch, new TouchListener(tileType, (e, t, initial) -> e.attackedBy(t, null, 1)));
 	}),
 	
 	TREE((tileType, map) -> {
-		map.put(Solid, SolidProperty.SOLID);
+		map.put(Solid, SolidProperty.get(tileType, true));
 		map.put(Attack, new DestructibleProperty(tileType, 10, new PreferredTool(ToolType.Axe, 2), new ItemDrop(ResourceItem.Log.get()), new ItemDrop(FoodItem.Apple.get())));
 		map.put(Render, new AnimationProperty(tileType, false, AnimationType.SINGLE_FRAME));
 		map.put(Connect, new ConnectionProperty(tileType, true));
 	});
 	
 	/*LAVA(() -> new TilePropertyInstance[] {
-		map.put(Touch, (TouchListener) (e, t) -> e.attackedBy(t, null, 5));
+		map.put(Touch, new TouchListener(tileType, (e, t) -> e.attackedBy(t, null, 5));
 		map.put(Render, new AnimationProperty.RandomFrame(0.1f);
 	});*/
 	
@@ -112,14 +113,14 @@ public enum TileType {
 	 */
 	
 	
-	private final HashMap<TilePropertyType, TilePropertyInstance> propertyMap = new HashMap<>();
+	private final HashMap<TilePropertyType, TileProperty> propertyMap = new HashMap<>();
 	
 	private final HashMap<TilePropertyType, Integer> propertyDataIndexes = new HashMap<>();
 	private final HashMap<TilePropertyType, Integer> propertyDataLengths = new HashMap<>();
 	private String[] initialData;
 	
 	interface PropertyAdder {
-		void addProperties(TileType tileType, HashMap<TilePropertyType, TilePropertyInstance> map);
+		void addProperties(TileType tileType, HashMap<TilePropertyType, TileProperty> map);
 	}
 	
 	private final PropertyAdder adder;
@@ -147,7 +148,7 @@ public enum TileType {
 		Array<String> initData = new Array<>();
 		
 		for(TilePropertyType propType: propertyMap.keySet()) {
-			TilePropertyInstance prop = propertyMap.get(propType);
+			TileProperty prop = propertyMap.get(propType);
 			propertyDataIndexes.put(propType, initData.size);
 			String[] propData = prop.getInitialData();
 			propertyDataLengths.put(propType, propData.length);
@@ -160,9 +161,9 @@ public enum TileType {
 	}
 	
 	// used in TilePropertyInstanceFetcher to get the property instances.
-	<T extends TilePropertyInstance> T getProp(TilePropertyType<T> propertyType, PropertyInstanceFetcher<TilePropertyInstance> instanceFetcher) {
+	<T extends TileProperty> T getProp(TilePropertyType<T> propertyType, MapFunction<TileProperty> instanceFetcher) {
 		//noinspection unchecked
-		return (T) instanceFetcher.getPropertyInstance(propertyMap.get(propertyType));
+		return (T) instanceFetcher.get(propertyMap.get(propertyType));
 	}
 	
 	int getDataLength() { return initialData.length; }

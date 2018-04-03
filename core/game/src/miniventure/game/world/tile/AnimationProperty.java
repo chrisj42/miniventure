@@ -10,7 +10,7 @@ import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
 
-public class AnimationProperty implements TilePropertyInstance {
+public class AnimationProperty extends TileProperty {
 	
 	private static HashMap<String, HashMap<String, Array<AtlasRegion>>> tileConnectionAnimations = new HashMap<>();
 	private static HashMap<String, HashMap<String, Array<AtlasRegion>>> tileOverlapAnimations = new HashMap<>();
@@ -75,12 +75,11 @@ public class AnimationProperty implements TilePropertyInstance {
 	
 	private final boolean isOpaque;
 	private final TileAnimation main, overlay;
-	private final TileType tileType;
 	
 	AnimationProperty(@NotNull TileType tileType, boolean isOpaque, AnimationType main) { this(tileType, isOpaque, main, 0); }
 	AnimationProperty(@NotNull TileType tileType, boolean isOpaque, AnimationType main, float mainFrameTime) { this(tileType, isOpaque, main, mainFrameTime, main, mainFrameTime); }
 	AnimationProperty(@NotNull TileType tileType, boolean isOpaque, AnimationType main, float mainFrameTime, AnimationType overlay, float overlayFrameTime) {
-		this.tileType = tileType;
+		super(tileType);
 		this.main = new TileAnimation(main, mainFrameTime, tileConnectionAnimations);
 		this.overlay = new TileAnimation(overlay, overlayFrameTime, tileOverlapAnimations);
 		this.isOpaque = isOpaque;

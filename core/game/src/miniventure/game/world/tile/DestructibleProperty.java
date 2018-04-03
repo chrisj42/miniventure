@@ -11,7 +11,7 @@ import miniventure.game.world.WorldObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class DestructibleProperty implements TilePropertyInstance {
+public class DestructibleProperty extends TileProperty {
 	
 	static final DestructibleProperty INDESTRUCTIBLE(@NotNull TileType tileType) {
 		return new DestructibleProperty(tileType, -1, (PreferredTool)null, item -> false);
@@ -26,11 +26,9 @@ public class DestructibleProperty implements TilePropertyInstance {
 	@NotNull private final DamageConditionCheck[] damageConditions;
 	@NotNull final ItemDrop[] drops;
 	
-	@NotNull final TileType tileType;
-	
 	// main constructor
 	DestructibleProperty(@NotNull TileType tileType, int totalHealth, @Nullable PreferredTool[] preferredTools, @Nullable DamageConditionCheck[] damageConditions, @Nullable ItemDrop... drops) {
-		this.tileType = tileType;
+		super(tileType);
 		this.totalHealth = totalHealth;
 		this.preferredTools = preferredTools == null ? new PreferredTool[0] : preferredTools;
 		this.damageConditions = damageConditions == null ? new DamageConditionCheck[0] : damageConditions;
@@ -81,7 +79,7 @@ public class DestructibleProperty implements TilePropertyInstance {
 	}
 	
 	DestructibleProperty(DestructibleProperty model) {
-		tileType = model.tileType;
+		super(model.tileType);
 		totalHealth = model.totalHealth;
 		drops = model.drops;
 		preferredTools = model.preferredTools;

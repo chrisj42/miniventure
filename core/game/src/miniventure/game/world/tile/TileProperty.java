@@ -1,10 +1,16 @@
 package miniventure.game.world.tile;
 
-import miniventure.game.util.property.Property;
+import org.jetbrains.annotations.NotNull;
 
-public interface TilePropertyInstance extends Property {
+public abstract class TileProperty {
 	
-	default String[] getInitialData() { return new String[0]; }
+	protected final TileType tileType;
+	
+	TileProperty(@NotNull TileType tileType) {
+		this.tileType = tileType;
+	}
+	
+	public String[] getInitialData() { return new String[0]; }
 	
 	// these methods are used to do and transformations on the tile data that is needed to save it to file, or load it from file (or to/from serialized form)
 	//default void configureDataForLoad(Tile tile) {}
