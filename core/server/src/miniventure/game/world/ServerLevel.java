@@ -34,10 +34,12 @@ import org.jetbrains.annotations.Nullable;
 
 public class ServerLevel extends Level {
 	
-	private static final float percentTilesUpdatedPerSecond = 2f; // this represents the percent of the total number of tiles in the map that are updated per second.
+	private static final float percentTilesUpdatedPerSecond = 0.02f; // this represents the percent of the total number of tiles in the map that are updated per second.
 	
 	private final Set<Tile> newTileUpdates = Collections.synchronizedSet(new HashSet<>());
 	private final Set<Tile> oldTileUpdates = new HashSet<>();
+	
+	private float timeCache = 0; // this is used when you should technically be updating < 1 tile in a frame.
 	
 	private final LevelGenerator levelGenerator;
 	
@@ -74,7 +76,14 @@ public class ServerLevel extends Level {
 	public void update(Entity[] entities, float delta) {
 		if(getLoadedChunkCount() == 0) return;
 		
-		int tilesToTick = (int) (percentTilesUpdatedPerSecond * tileCount * delta);
+		// tiles updated
+		float tilesPerSecond = percentTilesUpdatedPerSecond * tileCount;
+		float secondsPerTile = 1 / tilesPerSecond;
+		timeCache += delta;
+		
+		int tilesToTick = (int) (tilesPerSecond * timeCache);
+		//System.out.println("server ticking "+tilesToTick+" tiles (tiles updated / sec: "+tilesPerSecond+", sec/tile: "+secondsPerTile+" time cache = "+timeCache+")");
+		timeCache -= tilesToTick * secondsPerTile; // subtract time that could be "used"; not all can be used each cycle due to integer math.
 		
 		Chunk[] chunks = getLoadedChunkArray();
 		for(int i = 0; i < tilesToTick; i++) {
@@ -255,9 +264,7 @@ public class ServerLevel extends Level {
 		
 		if(isChunkLoaded(chunkCoord)) return;
 		
-		//System.out.println("Server loading chunk "+chunkCoord);
-		
-		putLoadedChunk(chunkCoord, new Chunk(chunkCoord.x, chunkCoord.y, this, levelGenerator.generateChunk(chunkCoord.x, chunkCoord.y)));
+		loadChunk(new Chunk(chunkCoord.x, chunkCoord.y, this, levelGenerator.generateChunk(chunkCoord.x, chunkCoord.y)));
 	}
 	
 	@Override

@@ -299,6 +299,11 @@ public abstract class Level {
 	abstract void loadChunk(Point chunkCoord);
 	abstract void unloadChunk(Point chunkCoord);
 	
+	public void loadChunk(Chunk newChunk) {
+		tileCount += newChunk.width * newChunk.height;
+		putLoadedChunk(new Point(newChunk.chunkX, newChunk.chunkY), newChunk);
+	}
+	
 	@Override
 	public boolean equals(Object other) { return other instanceof Level && ((Level)other).depth == depth; }
 	@Override public int hashCode() { return depth; }

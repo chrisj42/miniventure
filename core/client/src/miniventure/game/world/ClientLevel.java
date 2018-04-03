@@ -58,10 +58,6 @@ public class ClientLevel extends Level {
 	@Override
 	ClientTile createTile(int x, int y, TileType[] types, String[] data) { return new ClientTile(this, x, y, types, data); }
 	
-	public void loadChunk(Chunk newChunk) {
-		putLoadedChunk(new Point(newChunk.chunkX, newChunk.chunkY), newChunk);
-	}
-	
 	@Override
 	void loadChunk(Point chunkCoord) {
 		//System.out.println("Client requesting chunk "+chunkCoord);

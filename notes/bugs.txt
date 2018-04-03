@@ -12,5 +12,3 @@ water doesn't flow into adjacent holes.
 
 find a way to initialize jpanel environment so it doesn't lag the first time.
 
-random tile ticks aren't working.
-

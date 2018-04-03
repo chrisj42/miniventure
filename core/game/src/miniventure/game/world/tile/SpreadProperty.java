@@ -25,10 +25,10 @@ class SpreadProperty {
 	
 	
 	public boolean canSpread(Tile tile) {
-		if(tile.getType() != tileType) {
+		/*if(tile.getType() != tileType) {
 			System.err.println("Warning: SpreadProperty for " + tileType + " being used for tile " + tile + "; not updating");
 			return false; // the current tile being updated is not of the original tile type which is supposed to be spreading. This should never happen, but it can't hurt anything to have this here.
-		}
+		}*/
 		
 		for(Tile t: tile.getAdjacentTiles(false))
 			if(replaces.contains(t.getType()))
