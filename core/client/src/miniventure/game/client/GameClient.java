@@ -166,7 +166,7 @@ public class GameClient implements GameProtocol {
 				forPacket(object, ChatMessage.class, ClientCore::addMessage);
 				
 				forPacket(object, LoginFailure.class, failure -> {
-					ClientCore.setScreen(new ErrorScreen(failure.message));
+					Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen(failure.message)));
 				});
 			}
 			

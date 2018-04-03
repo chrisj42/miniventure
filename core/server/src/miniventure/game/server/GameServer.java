@@ -111,7 +111,7 @@ public class GameServer implements GameProtocol {
 						for(Entity e: level.getOverlappingEntities(entityRect, player))
 							connection.sendTCP(new EntityAddition(e));
 						
-						System.out.println("Server: new player successfully connected");
+						System.out.println("Server: new player successfully connected: "+player.getName());
 					}
 					return;
 				}
@@ -237,11 +237,13 @@ public class GameServer implements GameProtocol {
 			
 			@Override
 			public void disconnected(Connection connection) {
-				ServerPlayer player = connectionToPlayerDataMap.get(connection).player;
+				PlayerData data = connectionToPlayerDataMap.get(connection);
+				if(data == null) return;
+				ServerPlayer player = data.player;
 				if(player != null)
 					player.remove();
 				
-				//System.out.println("client disconnected: " + connection.getRemoteAddressTCP().getHostString());
+				//System.out.println("server disconnected from client: " + connection.getRemoteAddressTCP().getHostString());
 			}
 		});//);
 		

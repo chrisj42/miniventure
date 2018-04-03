@@ -10,3 +10,7 @@ water doesn't flow into adjacent holes, or not quickly enough to notice
 
 null pointer exception on death.
 
+stamina "bolt" sprite is too wide; has whitespace on edges, it seems.
+
+using the tp command too much can result in renders with tiles with null level references; to fix, perhaps sync player movement with rendering, or just ignore it for that one cycle.
+
