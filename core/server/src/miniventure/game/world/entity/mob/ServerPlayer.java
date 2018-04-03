@@ -232,4 +232,7 @@ public class ServerPlayer extends ServerMob implements Player {
 		}
 		return false;
 	}
+	
+	@Override
+	public void die() { getWorld().despawnPlayer(this); }
 }

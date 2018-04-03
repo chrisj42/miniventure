@@ -240,9 +240,10 @@ public class GameServer implements GameProtocol {
 				PlayerData data = connectionToPlayerDataMap.get(connection);
 				if(data == null) return;
 				ServerPlayer player = data.player;
-				if(player != null)
+				if(player != null) {
 					player.remove();
-				
+					player.getWorld().removePlayer(player);
+				}
 				//System.out.println("server disconnected from client: " + connection.getRemoteAddressTCP().getHostString());
 			}
 		});//);

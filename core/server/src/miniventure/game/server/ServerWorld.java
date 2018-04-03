@@ -128,7 +128,7 @@ public class ServerWorld extends WorldManager {
 	
 	
 	@Override
-	public void setEntityLevel(Entity e, @NotNull Level level) {
+	public void setEntityLevel(@NotNull Entity e, @NotNull Level level) {
 		ServerLevel previous = getEntityLevel(e);
 		super.setEntityLevel(e, level);
 		ServerLevel newLevel = getEntityLevel(e);
@@ -160,6 +160,12 @@ public class ServerWorld extends WorldManager {
 		return player;
 	}
 	
+	// called on player death
+	public void despawnPlayer(ServerPlayer player) {
+		server.sendToPlayer(player, new EntityRemoval(player));
+		removeFromLevels(player);
+	}
+	
 	public void respawnPlayer(ServerPlayer player) {
 		player.reset();
 		
@@ -174,6 +180,10 @@ public class ServerWorld extends WorldManager {
 		spawnBounds.setCenter(level.getWidth()/2, level.getHeight()/2);
 		
 		level.spawnMob(player, spawnBounds);
+	}
+	
+	public void removePlayer(ServerPlayer player) {
+		keepAlives.remove(player);
 	}
 	
 	

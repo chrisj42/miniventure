@@ -81,10 +81,12 @@ public abstract class Level {
 		
 		pruneLoadedChunks();
 		
-		// load any new chunks surrounding the given entity
-		for (Point p : getAreaChunkCoords(entity.getCenter(), 1, false, true)) {
-			//System.out.println("loading chunk on "+world+" at "+p);
-			loadChunk(p);
+		if(curChunk != null) {
+			// load any new chunks surrounding the given entity
+			for(Point p : getAreaChunkCoords(entity.getCenter(), 1, false, true)) {
+				//System.out.println("loading chunk on "+world+" at "+p);
+				loadChunk(p);
+			}
 		}
 	}
 	

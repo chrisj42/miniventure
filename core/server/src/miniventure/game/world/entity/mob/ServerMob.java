@@ -2,7 +2,6 @@ package miniventure.game.world.entity.mob;
 
 import java.util.Arrays;
 
-import miniventure.game.GameProtocol.EntityUpdate;
 import miniventure.game.GameProtocol.Hurt;
 import miniventure.game.GameProtocol.MobUpdate;
 import miniventure.game.GameProtocol.SpriteUpdate;
@@ -10,12 +9,10 @@ import miniventure.game.item.Item;
 import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolType;
 import miniventure.game.server.ServerCore;
-import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Direction;
-import miniventure.game.world.entity.EntityRenderer;
 import miniventure.game.world.entity.KnockbackController;
 import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.MobAnimationController.AnimationState;
@@ -24,7 +21,6 @@ import miniventure.game.world.tile.TileType;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
@@ -107,7 +103,7 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 	}
 	
 	protected int getHealth() { return health; }
-	protected void setHealth(int health) { this.health = health; if(health == 0) remove(); }
+	protected void setHealth(int health) { this.health = health; if(health == 0) die(); }
 	
 	@Override
 	public Direction getDirection() { return dir; }
@@ -196,7 +192,7 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 		
 		if(health > 0) {
 			// do knockback
-			if(!(this instanceof Player)) // client will take care of it for themself
+			if(!(this instanceof Player)) // client will take care of it for theirself
 				knockbackController.knock(obj, KNOCKBACK_SPEED, Mob.getKnockbackDuration(damage*1f/maxHealth));
 		}
 		
@@ -207,12 +203,14 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 		}
 		
 		if (health == 0)
-			remove();
+			die();
 		
 		return true;
 	}
 	
 	void regenHealth(int amount) { health = Math.min(maxHealth, health + amount); }
+	
+	public void die() { remove(); }
 	
 	public boolean maySpawn(TileType type) {
 		return type == TileType.GRASS || type == TileType.DIRT || type == TileType.SAND;

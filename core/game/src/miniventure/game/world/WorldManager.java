@@ -6,10 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import miniventure.game.world.entity.Entity;
-import miniventure.game.world.tile.TilePropertyInstance;
 import miniventure.game.world.tile.TilePropertyInstanceFetcher;
-import miniventure.game.world.tile.TilePropertyType;
-import miniventure.game.world.tile.TileType;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
@@ -121,7 +118,7 @@ public abstract class WorldManager {
 	}
 	
 	/** generates a entity id that is unique for this game. */
-	public int registerEntityWithNewId(Entity e) {
+	public int registerEntityWithNewId(@NotNull Entity e) {
 		int eid;
 		
 		do eid = MathUtils.random.nextInt();
@@ -142,11 +139,25 @@ public abstract class WorldManager {
 		});
 		//System.out.println(this+": deregistered entity "+e);
 		
-		if(e != null)
+		if(e != null && level != null)
 			level.entityMoved(e);
 	}
 	
-	public void setEntityLevel(Entity e, @NotNull Level level) {
+	// removes entity from levels, without deregistering it. Can only be done for keep alives.
+	protected void removeFromLevels(@NotNull Entity e) {
+		if(!isKeepAlive(e))
+			System.err.println(this+": entity "+e+" is not a keep-alive; will not remove from levels without deregistering.");
+		else {
+			Level level = e.getLevel();
+			if(level != null)
+				actOnEntitySet(level, set -> {
+					entityLevels.put(e, null);
+					set.remove(e);
+				});
+		}
+	}
+	
+	public void setEntityLevel(@NotNull Entity e, @NotNull Level level) {
 		if(!entityIDMap.containsKey(e.getId()) || !levels.containsKey(level.getDepth())) {
 			System.err.println(this + ": couldn't set entity level, entity " + e + " or level " + level + " is not registered. Ignoring request.");
 			return;

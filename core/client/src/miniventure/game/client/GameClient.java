@@ -152,7 +152,7 @@ public class GameClient implements GameProtocol {
 				});
 				
 				forPacket(object, PositionUpdate.class, newPos -> {
-					if(player == null) return;
+					if(player == null || newPos.levelDepth == null) return;
 					//player.updatePos(newPos);
 					player.moveTo(world.getLevel(newPos.levelDepth), newPos.x, newPos.y, newPos.z);
 				});
