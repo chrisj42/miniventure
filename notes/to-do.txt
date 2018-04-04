@@ -26,3 +26,7 @@ add time server command
 
 ****
 
+add status server command, to list players connected and such
+
+****
+
