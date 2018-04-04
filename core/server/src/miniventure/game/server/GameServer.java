@@ -320,5 +320,12 @@ public class GameServer implements GameProtocol {
 		return data.op;
 	}
 	
+	public boolean setAdmin(@NotNull ServerPlayer player, boolean op) {
+		PlayerData data = connectionToPlayerDataMap.get(playerToConnectionMap.get(player));
+		if(data == null) return false; // unrecognized player (should never happen)
+		data.op = op;
+		return true;
+	}
+	
 	void stop() { server.stop(); }
 }

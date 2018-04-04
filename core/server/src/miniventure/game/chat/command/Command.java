@@ -80,7 +80,17 @@ public enum Command {
 		}))
 	),
 	
-	//OP("Give another player access to all commands.")
+	OP(true, "Give another player access to all commands, or take it away.",
+		new CommandUsageForm("<playername> <isAdmin>", "Give or take admin permissions for the specified player. (isAdmin = true OR false)", executor -> true, Argument.getSingleArgs(ArgumentValidator.PLAYER, ArgumentValidator.BOOLEAN), ((executor, args, out, err) -> {
+			ServerPlayer player = ArgumentValidator.PLAYER.get(args[0]);
+			boolean give = ArgumentValidator.BOOLEAN.get(args[1]);
+			boolean success = ServerCore.getServer().setAdmin(player, give);
+			if(success)
+				out.println("Admin permissions "+(give?"granted":"removed")+" for player "+player.getName()+".");
+			else
+				err.println("failed to change admin permissions of player "+player.getName()+".");
+		}))
+	),
 	
 	STOP(true, "Stops the server.",
 		new CommandUsageForm("", "Stops the server.", executor -> true, Argument.noArgs(), (executor, args, out, err) -> {

@@ -81,6 +81,7 @@ public interface Argument {
 		
 		ArgumentValidator<Integer> INTEGER = arg -> noException(() -> Integer.parseInt(arg));
 		ArgumentValidator<Float> DECIMAL = arg -> noException(() -> Float.parseFloat(arg));
+		ArgumentValidator<Boolean> BOOLEAN = arg -> noException(() -> Boolean.parseBoolean(arg));
 		ArgumentValidator<ServerPlayer> PLAYER = arg -> notNull(() -> ServerCore.getServer().getPlayerByName(arg));
 		ArgumentValidator<Command> COMMAND = arg -> noException(() -> Enum.valueOf(Command.class, arg.toUpperCase()));
 		
