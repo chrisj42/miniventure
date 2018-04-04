@@ -30,13 +30,18 @@ public class ClientTile extends Tile {
 				So, before drawing an overlap, check that the current center is supposed to be drawn under it.
 		 */
 		
+		if(level.getTile(x, y) == null) return; // cannot render if there are no tiles.
+		
 		TileType[][] aroundTypes = new TileType[9][];
 		int idx = 0;
 		for(int x = -1; x <= 1; x++) {
 			for (int y = -1; y <= 1; y++) {
 				Tile oTile = level.getTile(this.x + x, this.y + y);
-				if(x == 0 && y == 0) {if(oTile != this) throw new IllegalStateException("Level reference or position of Tile " + this + " is faulty; Level "+level+" returns Tile " + oTile + " at position "+this.x+","+this.y+"."); aroundTypes[idx] = new TileType[0]; }
-				else aroundTypes[idx] = oTile != null ? oTile.getTypes() : new TileType[0];
+				//if(x == 0 && y == 0) {if(oTile != this) throw new IllegalStateException("Level reference or position of Tile " + this + " is faulty; Level "+level+" returns Tile " + oTile + " at position "+this.x+","+this.y+"."); aroundTypes[idx] = new TileType[0]; }
+				if(x == 0 && y == 0)
+					aroundTypes[idx] = new TileType[0];
+				else
+					aroundTypes[idx] = oTile != null ? oTile.getTypes() : new TileType[0];
 				idx++;
 			}
 		}

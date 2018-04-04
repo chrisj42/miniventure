@@ -14,3 +14,15 @@ flesh out the item drop class, to allow drops with random drop count, and such.
 
 ****
 
+deal damage when you have no hunger left
+
+****
+
+add OP server command
+
+****
+
+add time server command
+
+****
+

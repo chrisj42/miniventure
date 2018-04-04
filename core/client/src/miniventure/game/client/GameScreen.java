@@ -217,7 +217,7 @@ public class GameScreen {
 		Tile playerTile = level.getClosestTile(playerBounds);
 		debugInfo.add("Tile = " + (playerTile == null ? "Null" : playerTile.getType()));
 		Tile interactTile = level.getClosestTile(mainPlayer.getInteractionRect());
-		debugInfo.add("Looking at: " + (interactTile == null ? "Null" : interactTile.toLocString()));
+		debugInfo.add("Looking at: " + (interactTile == null ? "Null" : interactTile.toLocString().replace("Client ", "")));
 		
 		debugInfo.add("Entities in level: " + level.getEntityCount()+"/"+level.getEntityCap());
 		
