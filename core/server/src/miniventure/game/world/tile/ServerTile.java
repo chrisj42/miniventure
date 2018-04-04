@@ -31,6 +31,19 @@ public class ServerTile extends Tile {
 	}
 	
 	@Override
+	public boolean update(float delta, boolean initial) {
+		boolean shouldUpdate = super.update(delta, initial);
+		TileType startType = getType();
+		TransitionProperty transProp = getProp(startType, TilePropertyType.Transition);
+		if(transProp.playingAnimation(this)) {
+			transProp.getAnimationFrame(this, delta);
+			shouldUpdate = (startType == getType() && transProp.playingAnimation(this)) || shouldUpdate;
+		}
+		
+		return shouldUpdate;
+	}
+	
+	@Override
 	public String toString() { return getType().getName()+" ServerTile"; }
 	
 	@Override

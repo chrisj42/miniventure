@@ -17,7 +17,9 @@ import miniventure.game.world.entity.mob.ServerPlayer;
 import miniventure.game.world.levelgen.LevelGenerator;
 import miniventure.game.world.tile.DestructibleProperty;
 import miniventure.game.world.tile.ServerDestructibleProperty;
+import miniventure.game.world.tile.ServerTransitionProperty;
 import miniventure.game.world.tile.TilePropertyFetcher;
+import miniventure.game.world.tile.TransitionProperty;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -51,6 +53,8 @@ public class ServerWorld extends WorldManager {
 		super(new TilePropertyFetcher((instanceTemplate -> {
 			if(instanceTemplate instanceof DestructibleProperty)
 				return new ServerDestructibleProperty((DestructibleProperty)instanceTemplate);
+			if(instanceTemplate instanceof TransitionProperty)
+				return new ServerTransitionProperty((TransitionProperty)instanceTemplate);
 			
 			return instanceTemplate;
 		})));

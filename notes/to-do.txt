@@ -2,7 +2,15 @@ I need a way to be sure I'm seeing what the server is seeing.
 
 ****
 
-Make the torch TileType, and a LightProperty to go along with it. It wouldn't really make sense *now*, though, becuase there's no darkness to light up.
+player should show indication of failed interaction
+
+****
+
+find a way to initialize jpanel environment so it doesn't lag the first time.
+
+****
+
+flesh out the item drop class, to allow drops with random drop count, and such.
 
 ****
 

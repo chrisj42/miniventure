@@ -9,8 +9,8 @@ import java.util.HashMap;
 import miniventure.game.GameCore;
 import miniventure.game.item.Item;
 import miniventure.game.texture.TextureHolder;
-import miniventure.game.util.blinker.Blinker;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.blinker.Blinker;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -200,13 +200,13 @@ public abstract class EntityRenderer {
 	
 	public static class TextRenderer extends EntityRenderer {
 		
-		private final String text;
+		@NotNull private final String text;
 		private final Color main;
 		private final Color shadow;
 		private final float width;
 		private final float height;
 		
-		public TextRenderer(String text, Color main, Color shadow) {
+		public TextRenderer(@NotNull String text, Color main, Color shadow) {
 			this.text = text;
 			this.main = main;
 			this.shadow = shadow;

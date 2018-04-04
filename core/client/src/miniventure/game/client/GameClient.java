@@ -20,7 +20,7 @@ import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.EntityRenderer;
 import miniventure.game.world.entity.EntityRenderer.DirectionalAnimationRenderer;
 import miniventure.game.world.entity.mob.ClientPlayer;
-import miniventure.game.world.tile.Tile;
+import miniventure.game.world.tile.ClientTile;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
@@ -66,11 +66,11 @@ public class GameClient implements GameProtocol {
 				if(object instanceof TileUpdate) {
 					// individual tile update
 					TileUpdate update = (TileUpdate) object;
-					Level level = world.getLevel(update.levelDepth);
+					ClientLevel level = world.getLevel(update.levelDepth);
 					if(level == null) return;
-					Tile tile = level.getTile(update.x, update.y);
+					ClientTile tile = level.getTile(update.x, update.y);
 					if(tile != null)
-						update.tileData.apply(tile);
+						level.serverUpdate(tile, update.tileData);
 				}
 				
 				if(object instanceof Hurt) {

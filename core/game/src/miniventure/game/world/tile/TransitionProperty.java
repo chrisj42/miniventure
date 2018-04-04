@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import miniventure.game.GameCore;
+import miniventure.game.texture.TextureHolder;
 
-import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
@@ -32,21 +32,22 @@ public class TransitionProperty extends TileProperty {
 			- a frame rate
 	 */
 	
-	private static final HashMap<TileType, HashMap<String, Array<AtlasRegion>>> allAnimations = new HashMap<>();
+	private static final HashMap<TileType, HashMap<String, Array<TextureHolder>>> allAnimations = new HashMap<>();
 	
 	private final @NotNull TransitionAnimation[] animations;
 	
 	/// note: the sprite name key for the animations is the name of the animation set for that animation; aka, it's what the name of all the images are before the _## at the end.
+	protected TransitionProperty(TransitionProperty model) { this(model.tileType, model.animations); }
 	public TransitionProperty(@NotNull TileType tileType, @NotNull TransitionAnimation... animations) {
 		super(tileType);
 		
 		this.animations = animations;
 		
 		if(animations.length == 0) return;
-		if(GameCore.tileAtlas == null) return;
+		//if(GameCore.tileAtlas == null) return;
 		
 		allAnimations.putIfAbsent(tileType, new HashMap<>());
-		HashMap<String, Array<AtlasRegion>> animationMap = allAnimations.get(tileType);
+		HashMap<String, Array<TextureHolder>> animationMap = allAnimations.get(tileType);
 		for(TransitionAnimation anim: animations) {
 			if (!animationMap.containsKey(anim.getName()))
 				animationMap.put(anim.getName(), GameCore.tileAtlas.findRegions(tileType.name().toLowerCase() + "/" + anim.getName()));
@@ -96,8 +97,10 @@ public class TransitionProperty extends TileProperty {
 		return anim.isEntrance();
 	}
 	
+	public boolean playingExitAnimation(Tile tile) { return playingAnimation(tile) && !isEntranceAnim(tile); }
+	
 	// throws error if no animation is playing
-	public AtlasRegion getAnimationFrame(Tile tile, float delta) {
+	public TextureHolder getAnimationFrame(Tile tile, float delta) {
 		if(!playingAnimation(tile)) throw new IllegalStateException("Not allowed to fetch animation frame for transition when no animation is playing. invoking tile: "+ tile);
 		
 		float timeElapsed = Float.parseFloat(tile.getData(Transition, tileType, Data.TIME.idx));
@@ -108,7 +111,7 @@ public class TransitionProperty extends TileProperty {
 		
 		tryFinishAnimation(tile, timeElapsed, anim); // updates it for next render
 		
-		Array<AtlasRegion> frames = allAnimations.get(tileType).get(anim.getName());
+		Array<TextureHolder> frames = allAnimations.get(tileType).get(anim.getName());
 		int curFrameIdx = Math.min(frames.size-1, (int) (timeElapsed / anim.getFrameRate()));
 		// TO-DO perhaps later I could make it so the animation can loop?
 		return frames.get(curFrameIdx);
@@ -116,6 +119,8 @@ public class TransitionProperty extends TileProperty {
 	
 	private void tryFinishAnimation(Tile tile, float timeElapsed, @NotNull TransitionAnimation anim) {
 		if(timeElapsed > anim.getAnimationTime()) {
+			//System.out.println("transition animation finished (entrance="+anim.isEntrance()+") for tile "+tile);
+			
 			tile.setData(Transition, tileType, Data.TIME.idx, "");
 			tile.setData(Transition, tileType, Data.ANIM.idx, "");
 			 

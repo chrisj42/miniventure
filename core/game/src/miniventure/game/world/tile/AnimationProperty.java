@@ -3,8 +3,8 @@ package miniventure.game.world.tile;
 import java.util.HashMap;
 
 import miniventure.game.GameCore;
+import miniventure.game.texture.TextureHolder;
 
-import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 
@@ -12,11 +12,11 @@ import org.jetbrains.annotations.NotNull;
 
 public class AnimationProperty extends TileProperty {
 	
-	private static HashMap<String, HashMap<String, Array<AtlasRegion>>> tileConnectionAnimations = new HashMap<>();
-	private static HashMap<String, HashMap<String, Array<AtlasRegion>>> tileOverlapAnimations = new HashMap<>();
+	private static HashMap<String, HashMap<String, Array<TextureHolder>>> tileConnectionAnimations = new HashMap<>();
+	private static HashMap<String, HashMap<String, Array<TextureHolder>>> tileOverlapAnimations = new HashMap<>();
 	static {
-		Array<AtlasRegion> regions = GameCore.tileAtlas != null ? GameCore.tileAtlas.getRegions() : new Array<>();
-		for(AtlasRegion region: regions) {
+		Array<TextureHolder> regions = GameCore.tileAtlas.getRegions();
+		for(TextureHolder region: regions) {
 			String tilename = region.name.substring(0, region.name.indexOf("/"));
 			String spriteIdx = region.name.substring(region.name.indexOf("/")+1);
 			boolean isOverlap = spriteIdx.startsWith("o");
@@ -36,15 +36,15 @@ public class AnimationProperty extends TileProperty {
 	private class TileAnimation {
 		private final AnimationType animationType;
 		private final float frameTime;
-		private final HashMap<String, HashMap<String, Array<AtlasRegion>>> tileAnimationFrames;
+		private final HashMap<String, HashMap<String, Array<TextureHolder>>> tileAnimationFrames;
 		
-		TileAnimation(AnimationType animationType, float frameTime, HashMap<String, HashMap<String, Array<AtlasRegion>>> tileAnimationFrames) {
+		TileAnimation(AnimationType animationType, float frameTime, HashMap<String, HashMap<String, Array<TextureHolder>>> tileAnimationFrames) {
 			this.animationType = animationType;
 			this.frameTime = frameTime;
 			this.tileAnimationFrames = tileAnimationFrames;
 		}
 		
-		AtlasRegion getSprite(Tile tile, int spriteIndex, float timeElapsed) {
+		TextureHolder getSprite(Tile tile, int spriteIndex, float timeElapsed) {
 			String typeName = tileType.name().toLowerCase();
 			String indexString = (spriteIndex < 10 ? "0" : "") + spriteIndex;
 			return animationType.getSprite(tile, tileAnimationFrames.get(typeName).get(indexString), (int)(timeElapsed/frameTime));
@@ -53,7 +53,7 @@ public class AnimationProperty extends TileProperty {
 	
 	@FunctionalInterface
 	private interface SpriteFetcher {
-		AtlasRegion getSprite(Tile tile, Array<AtlasRegion> frames, int frameIdx);
+		TextureHolder getSprite(Tile tile, Array<TextureHolder> frames, int frameIdx);
 	}
 	
 	enum AnimationType {
@@ -70,7 +70,7 @@ public class AnimationProperty extends TileProperty {
 		
 		AnimationType(SpriteFetcher fetcher) { this.fetcher = fetcher; }
 		
-		public AtlasRegion getSprite(Tile tile, Array<AtlasRegion> frames, int frameIdx) { return fetcher.getSprite(tile, frames, frameIdx); }
+		public TextureHolder getSprite(Tile tile, Array<TextureHolder> frames, int frameIdx) { return fetcher.getSprite(tile, frames, frameIdx); }
 	}
 	
 	private final boolean isOpaque;
@@ -87,10 +87,10 @@ public class AnimationProperty extends TileProperty {
 	
 	public boolean isOpaque() { return isOpaque; }
 	
-	AtlasRegion getSprite(int spriteIndex, boolean isOverlapSprite, Tile tile) {
+	TextureHolder getSprite(int spriteIndex, boolean isOverlapSprite, Tile tile) {
 		return getSprite(spriteIndex, isOverlapSprite, tile, GameCore.getElapsedProgramTime());
 	}
-	AtlasRegion getSprite(int spriteIndex, boolean isOverlapSprite, Tile tile, float timeElapsed) {
+	TextureHolder getSprite(int spriteIndex, boolean isOverlapSprite, Tile tile, float timeElapsed) {
 		if(!isOverlapSprite && !tile.hasType(tileType))
 			System.err.println("Warning: fetching sprite for tile "+tile+" that doesn't have the intended type " + tileType);
 		

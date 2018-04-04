@@ -11,7 +11,7 @@ import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileType;
 
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -56,7 +56,7 @@ public class TileItem extends Item {
 		this(MyUtils.toTitleCase(type.name()), GameCore.tileAtlas.findRegion(type.name().toLowerCase()+"/00"), type, canPlaceOn); // so, if the placeOn is null, then...
 	}
 	
-	private TileItem(String name, TextureRegion texture, @NotNull TileType result, @Nullable TileType... placeOn) { this(name, new TextureHolder(texture, Tile.SIZE, Tile.SIZE), result, placeOn); }
+	private TileItem(String name, AtlasRegion texture, @NotNull TileType result, @Nullable TileType... placeOn) { this(name, new TextureHolder(texture, Tile.SIZE, Tile.SIZE), result, placeOn); }
 	private TileItem(String name, TextureHolder texture, @NotNull TileType result, @Nullable TileType... placeOn) {
 		super(ItemType.Tile, name, texture);
 		this.canPlaceOn = placeOn;

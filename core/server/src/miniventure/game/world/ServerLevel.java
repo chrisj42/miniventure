@@ -63,7 +63,7 @@ public class ServerLevel extends Level {
 		}
 	}
 	
-	public void onTileUpdate(Tile tile) {
+	public void onTileUpdate(ServerTile tile) {
 		ServerCore.getServer().broadcast(new TileUpdate(tile), this);
 		
 		List<Tile> tiles = Arrays.asList(getAreaTiles(tile.getLocation(), 1, true).shrink());

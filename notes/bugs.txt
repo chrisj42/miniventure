@@ -4,11 +4,3 @@ using the tp command too much can result in renders with tiles with null level r
 
 player jumps back whenever walking into an entity that is moving toward it, when the server is remote. I'm pretty sure this is due to the delay between server updates and the server updating the client. The client thinks it can move somewhere, because the server hasn't had a chance to tell it otherwise, so it tries to move. The server then corrects it, causing the "jump-back".
 
-doors do not function correctly.
-
-player should show indication of failed interaction
-
-water doesn't flow into adjacent holes.
-
-find a way to initialize jpanel environment so it doesn't lag the first time.
-

@@ -4,10 +4,10 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.TreeMap;
 
+import miniventure.game.texture.TextureHolder;
 import miniventure.game.world.ClientLevel;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
@@ -41,7 +41,7 @@ public class ClientTile extends Tile {
 			}
 		}
 		
-		Array<AtlasRegion> sprites = new Array<>();
+		Array<TextureHolder> sprites = new Array<>();
 		
 		TileType[] mainTypes = getTypes();
 		int firstIdx = 0;
@@ -82,8 +82,11 @@ public class ClientTile extends Tile {
 		}
 		
 		
-		for(AtlasRegion texture: sprites)
-			batch.draw(texture, (x-posOffset.x) * SIZE, (y-posOffset.y) * SIZE);
+		for(TextureHolder texture: sprites)
+			batch.draw(texture.texture, (x-posOffset.x) * SIZE, (y-posOffset.y) * SIZE);
 	}
+	
+	@Override
+	public String toString() { return getType().getName()+" ClientTile"; }
 	
 }

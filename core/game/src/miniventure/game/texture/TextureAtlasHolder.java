@@ -47,6 +47,21 @@ public class TextureAtlasHolder {
 		return textures;
 	}
 	
+	public Array<TextureHolder> getRegions() {
+		Array<TextureHolder> textures = new Array<>();
+		if(atlas != null) {
+			for(AtlasRegion r: atlas.getRegions()) {
+				textures.add(new TextureHolder(r));
+			}
+		}
+		else {
+			for(Region r: regions)
+				textures.add(new TextureHolder(r));
+		}
+		
+		return textures;
+	}
+	
 	public void dispose() {
 		if(atlas != null)
 			atlas.dispose();

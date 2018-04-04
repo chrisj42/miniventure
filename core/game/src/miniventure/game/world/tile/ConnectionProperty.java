@@ -1,6 +1,7 @@
 package miniventure.game.world.tile;
 
-import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
+import miniventure.game.texture.TextureHolder;
+
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
@@ -19,7 +20,7 @@ public class ConnectionProperty extends TileProperty {
 			this.connectingTiles.add(tileType);
 	}
 	
-	AtlasRegion getSprite(Tile tile, TileType[][] aroundTypes) {
+	TextureHolder getSprite(Tile tile, TileType[][] aroundTypes) {
 		int spriteIdx = 0;
 		
 		if(connects) {

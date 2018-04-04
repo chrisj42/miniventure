@@ -20,6 +20,7 @@ import miniventure.game.world.ServerLevel;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.ServerPlayer;
+import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;
@@ -211,6 +212,14 @@ public class GameServer implements GameProtocol {
 					//ServerPlayer client = connectionToPlayerDataMap.get(connection).player;
 					world.respawnPlayer(client);
 					connection.sendTCP(new SpawnData(new EntityAddition(client), client));
+				}
+				
+				if(object.equals(DatalessRequest.Tile)) {
+					Level level = client.getLevel();
+					if(level != null) {
+						Tile t = level.getClosestTile(client.getInteractionRect());
+						connection.sendTCP(new Message(t==null?null:t.toLocString()));
+					}
 				}
 				
 				forPacket(object, Message.class, msg -> {

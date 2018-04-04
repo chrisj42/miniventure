@@ -31,8 +31,8 @@ public class GameCore {
 	
 	private static final long START_TIME = System.nanoTime();
 	
-	public static TextureAtlasHolder entityAtlas;
-	public static TextureAtlas tileAtlas = new TextureAtlas(), tileConnectionAtlas = new TextureAtlas(); // tile overlap atlas not needed b/c the overlap sprite layout is simple enough to code; it goes in binary. However, the tile connection sprite layout is more complicated, so a map is needed to compare against.
+	public static TextureAtlasHolder entityAtlas, tileAtlas;
+	public static TextureAtlas tileConnectionAtlas = new TextureAtlas(); // tile overlap atlas not needed b/c the overlap sprite layout is simple enough to code; it goes in binary. However, the tile connection sprite layout is more complicated, so a map is needed to compare against.
 	
 	private static TextureAtlas iconAtlas;
 	public static final HashMap<String, TextureHolder> icons = new HashMap<>();
@@ -48,7 +48,7 @@ public class GameCore {
 		if(initialized) return;
 		initialized = true;
 		entityAtlas = new TextureAtlasHolder(new TextureAtlas("sprites/entities.txt"));
-		tileAtlas = new TextureAtlas("sprites/tiles.txt");
+		tileAtlas = new TextureAtlasHolder(new TextureAtlas("sprites/tiles.txt"));
 		tileConnectionAtlas = new TextureAtlas("sprites/tileconnectmap.txt");
 		iconAtlas = new TextureAtlas("sprites/icons.txt");
 		
@@ -73,8 +73,10 @@ public class GameCore {
 		FileHandle spriteFolder = Gdx.files.internal("sprites");
 		TextureAtlasData entityData = new TextureAtlasData(spriteFolder.child("entities.txt"), spriteFolder, false);
 		TextureAtlasData iconData = new TextureAtlasData(spriteFolder.child("icons.txt"), spriteFolder, false);
+		TextureAtlasData tileData = new TextureAtlasData(spriteFolder.child("tiles.txt"), spriteFolder, false);
 		
 		entityAtlas = new TextureAtlasHolder(entityData);
+		tileAtlas = new TextureAtlasHolder(tileData);
 		for(Region region: iconData.getRegions())
 			icons.put(region.name, new TextureHolder(region));
 	}

@@ -161,7 +161,6 @@ public class Tile implements WorldObject {
 		return false; // addTile does the update
 	}
 	
-	/** @noinspection UnusedReturnValue*/
 	boolean replaceTile(@NotNull TileType newType) {
 		// for doors, the animations will be attached to the open door type; an entrance when coming from a closed door, and an exit when going to a closed door.
 		/*
@@ -252,7 +251,6 @@ public class Tile implements WorldObject {
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {}
 	
 	
-	//public final void update(float delta) { update(delta, true); }
 	public void tick() {
 		for(TileType type: tileTypes) {// goes from bottom to top
 			if(!(type == getType() && getProp(type, TilePropertyType.Transition).playingAnimation(this))) // only update main tile if not transitioning.
@@ -292,17 +290,31 @@ public class Tile implements WorldObject {
 	
 	@Override
 	public boolean attackedBy(WorldObject obj, @Nullable Item item, int damage) {
+		if(getProp(getType(), TilePropertyType.Transition).playingExitAnimation(this))
+			return false;
 		return getProp(getType(), TilePropertyType.Attack).tileAttacked(this, obj, item, damage);
 	}
 	
 	@Override
-	public boolean interactWith(Player player, @Nullable Item heldItem) { return getProp(getType(), TilePropertyType.Interact).interact(player, heldItem, this); }
+	public boolean interactWith(Player player, @Nullable Item heldItem) {
+		if(getProp(getType(), TilePropertyType.Transition).playingExitAnimation(this))
+			return false;
+		return getProp(getType(), TilePropertyType.Interact).interact(player, heldItem, this);
+	}
 	
 	@Override
-	public boolean touchedBy(Entity entity) { return getProp(getType(), TilePropertyType.Touch).touchedBy(entity, this, true); }
+	public boolean touchedBy(Entity entity) {
+		if(getProp(getType(), TilePropertyType.Transition).playingExitAnimation(this))
+			return false;
+		return getProp(getType(), TilePropertyType.Touch).touchedBy(entity, this, true);
+	}
 	
 	@Override
-	public void touching(Entity entity) { getProp(getType(), TilePropertyType.Touch).touchedBy(entity, this, false); }
+	public void touching(Entity entity) {
+		if(getProp(getType(), TilePropertyType.Transition).playingExitAnimation(this))
+			return;
+		getProp(getType(), TilePropertyType.Touch).touchedBy(entity, this, false);
+	}
 	
 	@Override
 	public String toString() { return getType().getName()+" Tile"; }

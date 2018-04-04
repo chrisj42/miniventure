@@ -1,11 +1,17 @@
 package miniventure.game.world;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import miniventure.game.GameProtocol.ChunkRequest;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.ClientWorld;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.particle.Particle;
 import miniventure.game.world.tile.ClientTile;
+import miniventure.game.world.tile.Tile.TileData;
 import miniventure.game.world.tile.TileType;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -18,6 +24,8 @@ import org.jetbrains.annotations.NotNull;
 public class ClientLevel extends Level {
 	
 	@NotNull private ClientWorld world;
+	
+	private final Map<ClientTile, TileData> tileUpdates = Collections.synchronizedMap(new HashMap<>());
 	
 	public ClientLevel(@NotNull ClientWorld world, int depth, int width, int height) {
 		super(world, depth, width, height);
@@ -35,6 +43,8 @@ public class ClientLevel extends Level {
 	}
 	
 	public void render(Rectangle renderSpace, SpriteBatch batch, float delta, Vector2 posOffset) {
+		applyTileUpdates();
+		
 		renderSpace = new Rectangle(Math.max(0, renderSpace.x), Math.max(0, renderSpace.y), Math.min(getWidth()-renderSpace.x, renderSpace.width), Math.min(getHeight()-renderSpace.y, renderSpace.height));
 		// pass the offset vector to all objects being rendered.
 		
@@ -55,8 +65,28 @@ public class ClientLevel extends Level {
 			obj.render(batch, delta, posOffset);
 	}
 	
+	@SuppressWarnings("unchecked")
+	private void applyTileUpdates() {
+		Entry<ClientTile, TileData>[] tilesToUpdate;
+		synchronized (tileUpdates) {
+			tilesToUpdate = tileUpdates.entrySet().toArray((Entry<ClientTile, TileData>[]) new Entry[tileUpdates.size()]);
+			tileUpdates.clear();
+		}
+		for(Entry<ClientTile, TileData> entry: tilesToUpdate) {
+			entry.getValue().apply(entry.getKey());
+		}
+	}
+	
+	public void serverUpdate(ClientTile tile, TileData data) {
+		synchronized (tileUpdates) {
+			tileUpdates.put(tile, data);
+		}
+	}
+	
 	@Override
 	ClientTile createTile(int x, int y, TileType[] types, String[] data) { return new ClientTile(this, x, y, types, data); }
+	
+	@Override public ClientTile getTile(float x, float y) { return (ClientTile) super.getTile(x, y); }
 	
 	@Override
 	void loadChunk(Point chunkCoord) {

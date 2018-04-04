@@ -1,7 +1,8 @@
 package miniventure.game.world.tile;
 
 
-import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
+import miniventure.game.texture.TextureHolder;
+
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
@@ -18,8 +19,8 @@ public class OverlapProperty extends TileProperty {
 	boolean canOverlap() { return overlaps; }
 	
 	@NotNull
-	Array<AtlasRegion> getSprites(Tile tile, TileType aroundType, Boolean[] aroundMatches) {
-		Array<AtlasRegion> sprites = new Array<>();
+	Array<TextureHolder> getSprites(Tile tile, TileType aroundType, Boolean[] aroundMatches) {
+		Array<TextureHolder> sprites = new Array<>();
 		
 		if(!tile.getProp(aroundType, TilePropertyType.Overlap).overlaps) return sprites;
 		if(tileType.compareTo(aroundType) >= 0) return sprites;
