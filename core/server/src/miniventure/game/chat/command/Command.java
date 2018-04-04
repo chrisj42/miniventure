@@ -114,7 +114,6 @@ public enum Command {
 	
 	public void execute(String[] args, @Nullable ServerPlayer executor, MessageBuilder out, MessageBuilder err) {
 		for(CommandUsageForm form: forms) {
-			// TODO take executor into account for TP command form; specifying only one player name is only valid if the executor is not null.
 			if(form.execute(executor, args, out, err))
 				return;
 		}

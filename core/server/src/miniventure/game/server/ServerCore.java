@@ -74,5 +74,6 @@ public class ServerCore {
 	public static void quit() {
 		getWorld().exitWorld(true);
 		getServer().stop();
+		System.exit(0);
 	}
 }
