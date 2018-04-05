@@ -178,8 +178,10 @@ public class GameScreen {
 		renderGui(mainPlayer, level);
 		batch.end();
 		
-		if(!(ClientCore.getScreen() instanceof ChatScreen))
+		if(!(ClientCore.getScreen() instanceof ChatScreen)) {
+			chatOverlay.act(Gdx.graphics.getDeltaTime());
 			chatOverlay.draw();
+		}
 	}
 	
 	private Vector2 getMouseInput() {

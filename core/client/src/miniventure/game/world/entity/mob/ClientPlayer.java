@@ -50,9 +50,6 @@ public class ClientPlayer extends ClientEntity implements Player {
 		addStatEvo(new HungerSystem());
 	}
 	
-	//private PositionUpdate posUpdate = null;
-	//public void updatePos(PositionUpdate update) { posUpdate = update; }
-	
 	private final EnumMap<Stat, Integer> stats = new EnumMap<>(Stat.class);
 	
 	private Inventory inventory;
@@ -121,12 +118,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 	@Override
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
 		super.render(batch, delta, posOffset);
-		
 		animator.progressAnimation(delta);
-		
-		// SpriteUpdate newSprite = animator.getSpriteUpdate();
-		// if(newSprite != null)
-		// 	setRenderer(EntityRenderer.deserialize(newSprite.rendererData));
 	}
 	
 	public void handleInput(Vector2 mouseInput) {
@@ -187,11 +179,8 @@ public class ClientPlayer extends ClientEntity implements Player {
 	public boolean move(float xd, float yd, float zd, boolean validate) {
 		
 		PositionUpdate prevPos = new PositionUpdate(this);
-		//System.out.println("client player prev pos: "+getPosition(true));
 		
 		boolean moved = super.move(xd, yd, zd, validate);
-		
-		//System.out.println("after moving "+new Vector2(xd, yd)+", pos is "+ getPosition(true));
 		
 		ClientCore.getClient().send(new MovementRequest(prevPos, xd, yd, zd, new PositionUpdate(this)));
 		
@@ -204,19 +193,27 @@ public class ClientPlayer extends ClientEntity implements Player {
 		knockbackController.knock(source, KNOCKBACK_SPEED, Mob.getKnockbackDuration(power));
 	}
 	
+	private static final float padding = 3;
+	private void drawStat(Stat stat, float x, float y, SpriteBatch batch, Vector2 hold) {
+		Vector2 size = renderBar(stat, x, y, batch);
+		hold.y += size.y+padding;
+		hold.x = Math.max(hold.x, size.x);
+	}
 	public void drawGui(Rectangle canvas, SpriteBatch batch) {
-		hands.getUsableItem().drawItem(hands.getCount(), batch, canvas.width/2, 20);
-		float y = canvas.y + 3;
+		Vector2 hold = new Vector2(0, canvas.y + padding);
 		
-		renderBar(Stat.Health, canvas.x, y, batch);
-		renderBar(Stat.Stamina, canvas.x, y+ Stat.Health.iconHeight+3, batch);
-		renderBar(Stat.Hunger, canvas.x + canvas.width, y, batch, 0, false);
+		drawStat(Stat.Health, canvas.x, hold.y, batch, hold);
+		if(getStat(Stat.Armor) > 0)
+			drawStat(Stat.Armor, canvas.x, hold.y, batch, hold);
+		drawStat(Stat.Stamina, canvas.x, hold.y, batch, hold);
+		drawStat(Stat.Hunger, canvas.x, hold.y, batch, hold);
+		
+		hands.getUsableItem().drawItem(hands.getCount(), batch, hold.x+20, 8);
 	}
 	
-	private void renderBar(Stat stat, float x, float y, SpriteBatch batch) { renderBar(stat, x, y, batch, 0); }
-	/** @noinspection SameParameterValue*/
-	private void renderBar(Stat stat, float x, float y, SpriteBatch batch, int spacing) { renderBar(stat, x, y, batch, spacing, true); }
-	private void renderBar(Stat stat, float x, float y, SpriteBatch batch, int spacing, boolean rightSide) {
+	private Vector2 renderBar(Stat stat, float x, float y, SpriteBatch batch) { return renderBar(stat, x, y, batch, 0); }
+	private Vector2 renderBar(Stat stat, float x, float y, SpriteBatch batch, int spacing) { return renderBar(stat, x, y, batch, spacing, true); }
+	private Vector2 renderBar(Stat stat, float x, float y, SpriteBatch batch, int spacing, boolean rightSide) {
 		float pointsPerIcon = stat.max*1f / stat.iconCount;
 		TextureRegion fullIcon = GameCore.icons.get(stat.icon).texture;
 		TextureRegion emptyIcon = GameCore.icons.get(stat.outlineIcon).texture;
@@ -240,6 +237,8 @@ public class ClientPlayer extends ClientEntity implements Player {
 			if(emptyWidth > 0)
 				batch.draw(emptyIcon.getTexture(), emptyX, y, emptyIcon.getRegionX() + (rightSide?fullWidth:0), emptyIcon.getRegionY(), emptyWidth, emptyIcon.getRegionHeight());
 		}
+		
+		return new Vector2(iconWidth * stat.iconCount, stat.iconHeight);
 	}
 	
 	
