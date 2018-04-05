@@ -8,5 +8,3 @@ hunger particles appear when eating with full hunger
 
 player position tends to be a bit spazzy
 
-time of day might not be synched, when the client connects to the server. Make sure that is specified, upon joining the server.
-

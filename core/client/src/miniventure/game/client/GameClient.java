@@ -46,6 +46,10 @@ public class GameClient implements GameProtocol {
 				ClientWorld world = ClientCore.getWorld();
 				ClientPlayer player = world.getMainPlayer();
 				
+				if(object instanceof WorldData) {
+					world.init((WorldData)object);
+				}
+				
 				if(object instanceof LevelData) {
 					System.out.println("client received level");
 					world.addLevel((LevelData)object);

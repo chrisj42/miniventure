@@ -4,6 +4,7 @@ import miniventure.game.GameProtocol.DatalessRequest;
 import miniventure.game.GameProtocol.LevelData;
 import miniventure.game.GameProtocol.PositionUpdate;
 import miniventure.game.GameProtocol.SpawnData;
+import miniventure.game.GameProtocol.WorldData;
 import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
@@ -87,6 +88,10 @@ public class ClientWorld extends WorldManager {
 	
 	/*  --- WORLD MANAGEMENT --- */
 	
+	
+	void init(WorldData data) {
+		gameTime = data.gameTime;
+	}
 	
 	@Override
 	public boolean worldLoaded() { return getLevelCount() > 0; }

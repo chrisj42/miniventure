@@ -18,15 +18,7 @@ deal damage when you have no hunger left
 
 ****
 
-add OP server command
-
-****
-
 add time server command
-
-****
-
-add status server command, to list players connected and such
 
 ****
 

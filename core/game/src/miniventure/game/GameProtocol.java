@@ -115,6 +115,15 @@ public interface GameProtocol {
 		}
 	}
 	
+	class WorldData {
+		public final float gameTime;
+		
+		private WorldData() { this(0); }
+		public WorldData(float gameTime) {
+			this.gameTime = gameTime;
+		}
+	}
+	
 	class LevelData {
 		public final int width;
 		public final int height;

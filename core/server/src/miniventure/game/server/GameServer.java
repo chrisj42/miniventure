@@ -96,6 +96,8 @@ public class GameServer implements GameProtocol {
 						}
 					}
 					
+					connection.sendTCP(new WorldData(world.getGameTime()));
+					
 					// prepare level
 					ServerLevel level = world.getLevel(0);
 					if(level != null) {
