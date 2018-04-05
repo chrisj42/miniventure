@@ -159,7 +159,7 @@ class Noise {
 		
 		float[] newNums = new float[nums.length];
 		for(int i = 0; i < nums.length; i++)
-			newNums[i] = MyUtils.map(nums[i], min, max, newMin, newMax);
+			newNums[i] = MyUtils.mapFloat(nums[i], min, max, newMin, newMax);
 		
 		return newNums;
 	}

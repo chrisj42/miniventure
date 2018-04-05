@@ -3,8 +3,10 @@ package miniventure.game.chat.command;
 import java.util.Arrays;
 
 import miniventure.game.server.ServerCore;
+import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.ValueFunction;
 import miniventure.game.util.function.ValueMonoFunction;
+import miniventure.game.world.TimeOfDay;
 import miniventure.game.world.entity.mob.ServerPlayer;
 
 import org.jetbrains.annotations.NotNull;
@@ -90,9 +92,26 @@ public interface Argument {
 		ArgumentValidator<Boolean> BOOLEAN = arg -> noException(() -> Boolean.parseBoolean(arg));
 		ArgumentValidator<ServerPlayer> PLAYER = arg -> notNull(() -> ServerCore.getServer().getPlayerByName(arg));
 		ArgumentValidator<Command> COMMAND = arg -> noException(() -> Enum.valueOf(Command.class, arg.toUpperCase()));
+		ArgumentValidator<Float> CLOCK_TIME = arg -> noException(() -> {
+			String[] parts = arg.split(":");
+			int hour = Integer.parseInt(parts[0]);
+			int min = Integer.parseInt(parts[1]);
+			
+			if(hour < 0 || hour >= 24 || min < 0 || min >= 60) throw new IllegalArgumentException();
+			
+			float time = hour + (min / 60f);
+			
+			return MyUtils.mapFloat(time, 0, 24, 0, TimeOfDay.LENGTH_OF_DAY);
+		});
 		
-		static ArgumentValidator<String> exactString(String match, boolean matchCase) {
-			return arg -> isTrue(() -> arg, theArg -> matchCase ? theArg.equals(match) : theArg.equalsIgnoreCase(match));
+		static ArgumentValidator<String> exactString(boolean matchCase, String... matches) {
+			return arg -> isTrue(() -> arg, theArg -> {
+				for(String match: matches)
+					if(matchCase ? theArg.equals(match) : theArg.equalsIgnoreCase(match))
+						return true;
+				
+				return false;
+			});
 		}
 		
 		T get(String arg) throws IllegalArgumentException;

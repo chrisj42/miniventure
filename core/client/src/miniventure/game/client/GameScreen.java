@@ -223,7 +223,7 @@ public class GameScreen {
 		
 		debugInfo.add("Entities in level: " + level.getEntityCount()+"/"+level.getEntityCap());
 		
-		debugInfo.add("Time: " + TimeOfDay.getTimeString(ClientCore.getWorld().getGameTime()));
+		debugInfo.add("Time: " + TimeOfDay.getTimeString(ClientCore.getWorld().getDaylightOffset()));
 		
 		BitmapFont font = GameCore.getFont();
 		for(int i = 0; i < debugInfo.size; i++)

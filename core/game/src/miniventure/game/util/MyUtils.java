@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.Stack;
 
 import miniventure.game.GameCore;
+import miniventure.game.util.function.ValueMonoFunction;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -151,7 +152,7 @@ public class MyUtils {
 		return toMove;
 	}
 	
-	public static float map(float num, float prevMin, float prevMax, float newMin, float newMax) {
+	public static float mapFloat(float num, float prevMin, float prevMax, float newMin, float newMax) {
 		return (num-prevMin)/(prevMax-prevMin) * (newMax-newMin) + newMin;
 	}
 	
@@ -195,5 +196,15 @@ public class MyUtils {
 	}
 	
 	public static <T> boolean notNull(T obj) { return obj != null; }
+	
+	@SuppressWarnings("unchecked")
+	public static <RT, PT> RT[] mapArray(PT[] startValues, Class<RT> returnType, ValueMonoFunction<RT, PT> mapper) {
+		RT[] endValues = (RT[]) java.lang.reflect.Array.newInstance(returnType, startValues.length);
+		
+		for(int i = 0; i < startValues.length; i++)
+			endValues[i] = mapper.get(startValues[i]);
+		
+		return endValues;
+	}
 	
 }

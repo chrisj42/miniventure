@@ -4,11 +4,13 @@ import java.util.HashSet;
 
 import miniventure.game.GameProtocol.EntityAddition;
 import miniventure.game.GameProtocol.EntityRemoval;
+import miniventure.game.GameProtocol.WorldData;
 import miniventure.game.ProgressPrinter;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
+import miniventure.game.world.TimeOfDay;
 import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
@@ -78,12 +80,17 @@ public class ServerWorld extends WorldManager {
 		for(ServerLevel level: loadedLevels)
 			level.update(getEntities(level), delta);
 		
-		gameTime += delta;
+		super.update(delta);
 	}
 	
 	
 	/*  --- WORLD MANAGEMENT --- */
 	
+	
+	public void setTimeOfDay(float daylightOffset) {
+		this.daylightOffset = daylightOffset % TimeOfDay.LENGTH_OF_DAY;
+		server.broadcast(new WorldData(gameTime, this.daylightOffset));
+	}
 	
 	@Override
 	public boolean worldLoaded() { return worldLoaded; }

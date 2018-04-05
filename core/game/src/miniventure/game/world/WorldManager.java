@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 public abstract class WorldManager {
 	
 	private final HashMap<Integer, Entity> entityIDMap = new HashMap<>();
-	protected float gameTime;
+	protected float gameTime, daylightOffset;
 	
 	private final HashMap<Integer, Level> levels = new HashMap<>();
 	private final HashMap<Level, Set<Entity>> levelEntities = new HashMap<>();
@@ -41,7 +41,10 @@ public abstract class WorldManager {
 	
 	
 	/** update the world's game logic. (can also use to render) */
-	public abstract void update(float delta);
+	public void update(float delta) {
+		gameTime += delta;
+		daylightOffset = (daylightOffset + delta) % TimeOfDay.LENGTH_OF_DAY;
+	}
 	
 	
 	/*  --- WORLD MANAGEMENT --- */
@@ -195,6 +198,7 @@ public abstract class WorldManager {
 	
 	/** fetches time since the world was originally created (while the world is loaded and running) */
 	public float getGameTime() { return gameTime; }
+	public float getDaylightOffset() { return daylightOffset; }
 	
-	public String getTimeString() { return TimeOfDay.getTimeString(gameTime); }
+	public String getTimeString() { return TimeOfDay.getTimeString(daylightOffset); }
 }

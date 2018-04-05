@@ -18,5 +18,5 @@ public interface Mob extends WorldObject {
 	Direction getDirection();
 	boolean isKnockedBack();
 	
-	static float getKnockbackDuration(float healthPercent) { return MyUtils.map(Math.min(healthPercent, DAMAGE_PERCENT_FOR_MAX_PUSH), 0, DAMAGE_PERCENT_FOR_MAX_PUSH, MIN_KNOCKBACK_TIME, MAX_KNOCKBACK_TIME); }
+	static float getKnockbackDuration(float healthPercent) { return MyUtils.mapFloat(Math.min(healthPercent, DAMAGE_PERCENT_FOR_MAX_PUSH), 0, DAMAGE_PERCENT_FOR_MAX_PUSH, MIN_KNOCKBACK_TIME, MAX_KNOCKBACK_TIME); }
 }

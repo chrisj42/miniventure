@@ -80,9 +80,9 @@ public class ClientWorld extends WorldManager {
 		level.updateEntities(getEntities(level), delta);
 		
 		if(menu == null || !menu.usesWholeScreen())
-			gameScreen.render(mainPlayer, TimeOfDay.getSkyColors(gameTime), level);
+			gameScreen.render(mainPlayer, TimeOfDay.getSkyColors(daylightOffset), level);
 		
-		gameTime += delta;
+		super.update(delta);
 	}
 	
 	
@@ -91,6 +91,7 @@ public class ClientWorld extends WorldManager {
 	
 	void init(WorldData data) {
 		gameTime = data.gameTime;
+		daylightOffset = data.daylightOffset;
 	}
 	
 	@Override
@@ -105,6 +106,7 @@ public class ClientWorld extends WorldManager {
 		ClientCore.setScreen(loadingScreen);
 		
 		gameTime = 0;
+		daylightOffset = 0;
 		clearLevels();
 		
 		this.ipAddress = ipAddress;

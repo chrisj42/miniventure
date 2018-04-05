@@ -8,6 +8,7 @@ import miniventure.game.chat.command.Argument.ArgumentValidator;
 import miniventure.game.server.ServerCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.ServerLevel;
+import miniventure.game.world.TimeOfDay;
 import miniventure.game.world.entity.mob.ServerPlayer;
 
 import com.badlogic.gdx.utils.Array;
@@ -32,7 +33,7 @@ public enum Command {
 				c.printHelpAdvanced(executor, out);
 				out.println();
 			}
-		}, Argument.get(ArgumentValidator.exactString("--all", false)))
+		}, Argument.get(ArgumentValidator.exactString(false, "--all")))
 	),
 	
 	MSG("Broadcast a message for all players to see.",
@@ -90,6 +91,27 @@ public enum Command {
 			String source = executor.getName();
 			Command.valueOf("TP").execute(new String[] {source, args[0], args[1]}, executor, out, err);
 		}), Argument.get(ArgumentValidator.DECIMAL, ArgumentValidator.DECIMAL))
+	),
+	
+	TIME("Get or set the time of day.",
+		new CommandUsageForm(false, "", "Print the time of day, in 24 hour clock format, and the time Dawn, Day, Dusk, or Night.", (executor, args, out, err) -> {
+			float daylightOffset = ServerCore.getWorld().getDaylightOffset();
+			out.println(TimeOfDay.getClockString(daylightOffset)+" - " + TimeOfDay.getTimeString(daylightOffset));
+		}),
+		
+		new CommandUsageForm(true, "<timeOfDay>", "Set time to start of specified range. timeOfDay can be one of: Dawn, Day, Dusk, Night", (executor, args, out, err) -> {
+			TimeOfDay timeOfDay = TimeOfDay.valueOf(MyUtils.toTitleCase(args[0]));
+			ServerCore.getWorld().setTimeOfDay(timeOfDay.getDaylightOffset());
+			float dayTime = ServerCore.getWorld().getDaylightOffset();
+			out.println("Set time of day to "+TimeOfDay.getClockString(dayTime)+" ("+TimeOfDay.getTimeOfDay(dayTime)+")");
+		}, Argument.get(ArgumentValidator.exactString(false, MyUtils.mapArray(TimeOfDay.values, String.class, TimeOfDay::name)))),
+		
+		new CommandUsageForm(true, "<time>", "Set time to the specified 24-hour clock format time (HH:MM)", (executor, args, out, err) -> {
+			float dayTime = ArgumentValidator.CLOCK_TIME.get(args[0]);
+			ServerCore.getWorld().setTimeOfDay(dayTime);
+			out.println("Set time of day to "+TimeOfDay.getClockString(dayTime)+" ("+TimeOfDay.getTimeOfDay(dayTime)+")");
+			
+		}, Argument.get(ArgumentValidator.CLOCK_TIME))
 	),
 	
 	OP("Give another player access to all commands, or take it away.",

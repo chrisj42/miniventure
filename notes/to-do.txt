@@ -18,7 +18,3 @@ deal damage when you have no hunger left
 
 ****
 
-add time server command
-
-****
-

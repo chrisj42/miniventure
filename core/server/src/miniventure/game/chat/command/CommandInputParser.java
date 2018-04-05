@@ -18,7 +18,7 @@ public class CommandInputParser extends Thread {
 	private Scanner in;
 	boolean shouldRun;
 	
-	private MessageBuilder out, err;
+	private ConsoleMessageBuilder out, err;
 	
 	public CommandInputParser() {
 		super("CommandInputParser");
@@ -33,6 +33,7 @@ public class CommandInputParser extends Thread {
 		shouldRun = true;
 		while(shouldRun) {
 			out.print("Enter a command: ");
+			out.flush();
 			String input = in.next();
 			
 			executeCommand(input, null, out, err);

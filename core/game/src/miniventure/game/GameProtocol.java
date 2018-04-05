@@ -116,11 +116,12 @@ public interface GameProtocol {
 	}
 	
 	class WorldData {
-		public final float gameTime;
+		public final float gameTime, daylightOffset;
 		
-		private WorldData() { this(0); }
-		public WorldData(float gameTime) {
+		private WorldData() { this(0, 0); }
+		public WorldData(float gameTime, float daylightOffset) {
 			this.gameTime = gameTime;
+			this.daylightOffset = daylightOffset;
 		}
 	}
 	

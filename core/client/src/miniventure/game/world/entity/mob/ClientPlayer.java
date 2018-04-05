@@ -8,7 +8,6 @@ import miniventure.game.GameProtocol.InteractRequest;
 import miniventure.game.GameProtocol.MovementRequest;
 import miniventure.game.GameProtocol.PositionUpdate;
 import miniventure.game.GameProtocol.SpawnData;
-import miniventure.game.GameProtocol.SpriteUpdate;
 import miniventure.game.GameProtocol.StatUpdate;
 import miniventure.game.client.ClientCore;
 import miniventure.game.item.ClientHands;
@@ -17,11 +16,9 @@ import miniventure.game.item.Inventory;
 import miniventure.game.item.InventoryScreen;
 import miniventure.game.item.Recipes;
 import miniventure.game.util.MyUtils;
-import miniventure.game.world.Boundable;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClientEntity;
 import miniventure.game.world.entity.Direction;
-import miniventure.game.world.entity.EntityRenderer;
 import miniventure.game.world.entity.KnockbackController;
 import miniventure.game.world.entity.mob.MobAnimationController.AnimationState;
 
@@ -32,7 +29,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -313,7 +309,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 		public void addHunger(float amt) {
 			float hungerRatio = getStat(Stat.Hunger)*1f / Stat.Hunger.max;
 			// make it so a ratio of 1 means x2 addition, and a ratio of 0 makes it 0.5 addition
-			float amtMult = MyUtils.map(hungerRatio, 0, 1, 0.5f, 2);
+			float amtMult = MyUtils.mapFloat(hungerRatio, 0, 1, 0.5f, 2);
 			hunger += amt * amtMult;
 		}
 		

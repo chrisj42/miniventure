@@ -24,4 +24,6 @@ public class ConsoleMessageBuilder implements MessageBuilder {
 	
 	@Override
 	public void println() { out.println(); }
+	
+	public void flush() { out.flush(); }
 }
