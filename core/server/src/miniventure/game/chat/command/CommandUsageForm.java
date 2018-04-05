@@ -1,6 +1,7 @@
 package miniventure.game.chat.command;
 
 import miniventure.game.chat.MessageBuilder;
+import miniventure.game.server.ServerCore;
 import miniventure.game.util.function.ValueMonoFunction;
 import miniventure.game.world.entity.mob.ServerPlayer;
 
@@ -10,6 +11,7 @@ public class CommandUsageForm {
 		void execute(ServerPlayer executor, String[] args, MessageBuilder out, MessageBuilder err);
 	}
 	
+	final boolean restricted;
 	final String usage;
 	final String details;
 	final ValueMonoFunction<Boolean, ServerPlayer> executorCheck;
@@ -17,7 +19,11 @@ public class CommandUsageForm {
 	private final ExecutionBehavior executionBehavior;
 	
 	// pass a list of command parameters, and the lambda for the behavior.
-	CommandUsageForm(String usage, String details, ValueMonoFunction<Boolean, ServerPlayer> executorCheck, Argument[] args, ExecutionBehavior executionBehavior) {
+	CommandUsageForm(boolean restricted, String usage, String details, ExecutionBehavior executionBehavior, Argument... args) {
+		this(restricted, usage, details, executor -> true, executionBehavior, args);
+	}
+	CommandUsageForm(boolean restricted, String usage, String details, ValueMonoFunction<Boolean, ServerPlayer> executorCheck, ExecutionBehavior executionBehavior, Argument... args) {
+		this.restricted = restricted;
 		this.usage = usage;
 		this.details = details;
 		this.executorCheck = executorCheck;
@@ -26,6 +32,8 @@ public class CommandUsageForm {
 	}
 	
 	public boolean execute(ServerPlayer executor, String[] args, MessageBuilder out, MessageBuilder err) {
+		if(restricted && !ServerCore.getServer().isAdmin(executor))
+			return false;
 		if(!executorCheck.get(executor))
 			return false;
 		

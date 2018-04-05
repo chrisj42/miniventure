@@ -193,4 +193,7 @@ public class MyUtils {
 		
 		return true;
 	}
+	
+	public static <T> boolean notNull(T obj) { return obj != null; }
+	
 }

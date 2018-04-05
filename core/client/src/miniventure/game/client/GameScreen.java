@@ -45,7 +45,7 @@ public class GameScreen {
 	private int zoom = 0;
 	private FrameBuffer lightingBuffer;
 	
-	final ChatScreen chat;
+	final ChatScreen chatOverlay, chatScreen;
 	
 	private boolean debug = false;
 	
@@ -54,7 +54,8 @@ public class GameScreen {
 		uiCamera = new OrthographicCamera();
 		resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		
-		chat = new ChatScreen();
+		chatOverlay = new ChatScreen(true);
+		chatScreen = new ChatScreen(false);
 	}
 	
 	void dispose() {
@@ -80,12 +81,12 @@ public class GameScreen {
 			ClientCore.getClient().send(DatalessRequest.Tile); // debug
 		
 		else if(Gdx.input.isKeyJustPressed(Keys.T)) {
-			ClientCore.setScreen(chat);
-			chat.sendMessage();
+			ClientCore.setScreen(chatScreen);
+			chatScreen.sendMessage();
 		}
 		if(Gdx.input.isKeyJustPressed(Keys.SLASH)) {
-			ClientCore.setScreen(chat);
-			chat.sendCommand();
+			ClientCore.setScreen(chatScreen);
+			chatScreen.sendCommand();
 		}
 	}
 	
@@ -177,7 +178,8 @@ public class GameScreen {
 		renderGui(mainPlayer, level);
 		batch.end();
 		
-		chat.draw();
+		if(!(ClientCore.getScreen() instanceof ChatScreen))
+			chatOverlay.draw();
 	}
 	
 	private Vector2 getMouseInput() {
@@ -217,7 +219,7 @@ public class GameScreen {
 		Tile playerTile = level.getClosestTile(playerBounds);
 		debugInfo.add("Tile = " + (playerTile == null ? "Null" : playerTile.getType()));
 		Tile interactTile = level.getClosestTile(mainPlayer.getInteractionRect());
-		debugInfo.add("Looking at: " + (interactTile == null ? "Null" : interactTile.toLocString().replace("Client ", "")));
+		debugInfo.add("Looking at: " + (interactTile == null ? "Null" : interactTile.toLocString().replace("Client", "")));
 		
 		debugInfo.add("Entities in level: " + level.getEntityCount()+"/"+level.getEntityCap());
 		

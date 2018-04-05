@@ -7,9 +7,10 @@ import java.util.HashSet;
 
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol;
-import miniventure.game.chat.ChatMessage;
-import miniventure.game.chat.ChatMessageBuilder;
-import miniventure.game.chat.ChatMessageLine;
+import miniventure.game.chat.InfoMessage;
+import miniventure.game.chat.InfoMessageBuilder;
+import miniventure.game.chat.InfoMessageLine;
+import miniventure.game.chat.MessageBuilder;
 import miniventure.game.item.ItemStack;
 import miniventure.game.item.Recipe;
 import miniventure.game.item.Recipes;
@@ -39,15 +40,15 @@ public class GameServer implements GameProtocol {
 	private class PlayerData {
 		final Connection connection;
 		final ServerPlayer player;
-		final ChatMessageBuilder toClientOut, toClientErr;
+		final InfoMessageBuilder toClientOut, toClientErr;
 		boolean op;
 		
 		PlayerData(Connection connection, ServerPlayer player) {
 			this.connection = connection;
 			this.player = player;
 			
-			toClientOut = new ChatMessageBuilder(text -> new ChatMessageLine(Color.WHITE, text));
-			toClientErr = new ChatMessageBuilder(toClientOut, text -> new ChatMessageLine(Color.RED, text));
+			toClientOut = new InfoMessageBuilder(text -> new InfoMessageLine(Color.WHITE, text));
+			toClientErr = new InfoMessageBuilder(toClientOut, text -> new InfoMessageLine(Color.RED, text));
 			
 			op = connection.getRemoteAddressTCP().getAddress().isLoopbackAddress();
 		}
@@ -218,14 +219,14 @@ public class GameServer implements GameProtocol {
 					Level level = client.getLevel();
 					if(level != null) {
 						Tile t = level.getClosestTile(client.getInteractionRect());
-						connection.sendTCP(new Message(t==null?null:t.toLocString()));
+						connection.sendTCP(new Message(t==null?null:t.toLocString(), Color.WHITE));
 					}
 				}
 				
 				forPacket(object, Message.class, msg -> {
 					//System.out.println("server: executing command "+msg.msg);
 					ServerCore.getCommandInput().executeCommand(msg.msg, client, clientData.toClientOut, clientData.toClientErr);
-					ChatMessage output = clientData.toClientOut.flushMessage();
+					InfoMessage output = clientData.toClientOut.flushMessage();
 					if(output != null)
 						connection.sendTCP(output);
 				});
@@ -325,6 +326,30 @@ public class GameServer implements GameProtocol {
 		if(data == null) return false; // unrecognized player (should never happen)
 		data.op = op;
 		return true;
+	}
+	
+	public void sendMessage(@Nullable ServerPlayer sender, ServerPlayer reciever, String msg) {
+		sendToPlayer(reciever, getMessage(sender, msg));
+	}
+	public void broadcastMessage(@Nullable ServerPlayer sender, String msg) {
+		broadcast(getMessage(sender, msg));
+	}
+	
+	public Message getMessage(@Nullable ServerPlayer sender, String msg) {
+		if(sender == null) return new Message("Server: "+msg, Color.LIGHT_GRAY);
+		return new Message(sender.getName()+": "+msg, Color.WHITE);
+	}
+	
+	public void printStatus(MessageBuilder out) {
+		out.println("Server Running: "+(server.getUpdateThread() != null));
+		out.println("FPS: " + ServerCore.getFPS());
+		out.println("Players connected: "+playerToConnectionMap.size());
+		for(PlayerData pd: connectionToPlayerDataMap.values()) {
+			out.print("\t Player \""+pd.player.getName()+"\" ");
+			if(pd.op) out.print("(admin) ");
+			out.print(pd.player.getLocation(true));
+			out.println();
+		}
 	}
 	
 	void stop() { server.stop(); }

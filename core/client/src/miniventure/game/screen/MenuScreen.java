@@ -49,22 +49,6 @@ public class MenuScreen extends Stage {
 		addActor(vGroup);
 	}
 	
-	/*protected float addToTableSameRowWidth(int spacing, Actor... actors) {
-		float maxWidth = 0;
-		for(Actor a: actors) {
-			table.addActor(a);
-			//System.out.println("made cell " + c + " with actor " + a);
-			//c.size(a.getWidth(), a.getHeight());
-			//maxWidth = Math.max(maxWidth, c.getPrefWidth());
-			//table.row().space(spacing);
-		}
-		
-		for(Cell cell: table.getCells())
-			cell.width(maxWidth);
-		
-		return maxWidth;
-	}*/
-	
 	public void setParent(MenuScreen parent) { this.parent = parent; }
 	
 	public boolean usesWholeScreen() { return true; }

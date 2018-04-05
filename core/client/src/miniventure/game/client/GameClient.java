@@ -6,7 +6,7 @@ import java.io.IOException;
 
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol;
-import miniventure.game.chat.ChatMessage;
+import miniventure.game.chat.InfoMessage;
 import miniventure.game.screen.ErrorScreen;
 import miniventure.game.util.ProgressLogger;
 import miniventure.game.world.Chunk;
@@ -162,8 +162,8 @@ public class GameClient implements GameProtocol {
 					player.changeStat(update.stat, update.amount);
 				});
 				
-				forPacket(object, Message.class, msg -> ClientCore.addMessage(msg.msg));
-				forPacket(object, ChatMessage.class, ClientCore::addMessage);
+				forPacket(object, Message.class, ClientCore::addMessage);
+				forPacket(object, InfoMessage.class, ClientCore::addMessage);
 				
 				forPacket(object, LoginFailure.class, failure -> {
 					Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen(failure.message)));

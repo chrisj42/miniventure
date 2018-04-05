@@ -1,10 +1,12 @@
 package miniventure.game.chat.command;
 
-import miniventure.game.GameProtocol.Message;
+import java.util.Arrays;
+
 import miniventure.game.GameProtocol.PositionUpdate;
 import miniventure.game.chat.MessageBuilder;
 import miniventure.game.chat.command.Argument.ArgumentValidator;
 import miniventure.game.server.ServerCore;
+import miniventure.game.util.MyUtils;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.entity.mob.ServerPlayer;
 
@@ -14,34 +16,44 @@ import org.jetbrains.annotations.Nullable;
 
 public enum Command {
 	
-	HELP(false, "List and show usage of various commands.",
-		new CommandUsageForm("","list all available commands.", executor -> true, Argument.noArgs(), (executor, args, out, err) -> {
+	HELP("List and show usage of various commands.",
+		new CommandUsageForm(false, "","list all available commands.", (executor, args, out, err) -> {
 			for(Command c : Command.valuesFor(executor))
 				c.printHelp(executor, out, true, false, false);
 		}),
 		
-		new CommandUsageForm("<command>", "show detailed help for the given command.", executor -> true, Argument.getSingleArgs(ArgumentValidator.COMMAND), (executor, args, out, err) -> {
+		new CommandUsageForm(false, "<command>", "show detailed help for the given command.", (executor, args, out, err) -> {
 			Command c = ArgumentValidator.COMMAND.get(args[0]);
 			c.printHelpAdvanced(executor, out);
-		}),
+		}, Argument.get(ArgumentValidator.COMMAND)),
 		
-		new CommandUsageForm("--all", "list all commands in detail", executor -> true, Argument.getSingleArgs(ArgumentValidator.exactString("--all", false)), (executor, args, out, err) -> {
+		new CommandUsageForm(false, "--all", "list all commands in detail", (executor, args, out, err) -> {
 			for(Command c: Command.values()) {
 				c.printHelpAdvanced(executor, out);
 				out.println();
 			}
-		})
+		}, Argument.get(ArgumentValidator.exactString("--all", false)))
 	),
 	
-	MSG(false, "Broadcast a message for all players to see.",
-		new CommandUsageForm("<message...>", "Everyone on the server will see the message.", executor -> true, new Argument[] {Argument.varArg(arg -> arg)}, (executor, args, out, err) -> {
+	MSG("Broadcast a message for all players to see.",
+		new CommandUsageForm(false, "<message...>", "Everyone on the server will see the message.", (executor, args, out, err) -> {
 			String msg = String.join(" ", args);
-			ServerCore.getServer().broadcast(new Message(msg));
-		})
+			ServerCore.getServer().broadcastMessage(executor, msg);
+		}, Argument.varArg(ArgumentValidator.ANY))
 	),
 	
-	TP(true, "Teleport a player to a location in the world.",
-		new CommandUsageForm("<playername> <playername>", "Teleport the first player to the second player.", executor -> true, Argument.getSingleArgs(ArgumentValidator.PLAYER, ArgumentValidator.PLAYER), ((executor, args, out, err) -> {
+	PMSG("Send a private message to another player.",
+		new CommandUsageForm(false, "<playername> <message...>", "Send a message to the specified player, that only they can see.", MyUtils::notNull, ((executor, args, out, err) -> {
+			ServerPlayer player = ArgumentValidator.PLAYER.get(args[0]);
+			String msg = String.join("", Arrays.copyOfRange(args, 1, args.length));
+			
+			ServerCore.getServer().sendMessage(executor, player, msg);
+			
+		}), Argument.get(ArgumentValidator.PLAYER), Argument.varArg(ArgumentValidator.ANY))
+	),
+	
+	TP("Teleport a player to a location in the world.",
+		new CommandUsageForm(true, "<playername> <playername>", "Teleport the first player to the second player.", executor -> true, ((executor, args, out, err) -> {
 			ServerPlayer toMove = ArgumentValidator.PLAYER.get(args[0]);
 			ServerPlayer dest = ArgumentValidator.PLAYER.get(args[1]);
 			
@@ -52,14 +64,14 @@ public enum Command {
 				out.println("teleported "+toMove.getName()+" to "+toMove.getPosition(true)+".");
 			} else
 				err.println("player "+dest.getName()+" is not on a valid level; cannot tp to their location.");
-		})),
+		}), Argument.get(ArgumentValidator.PLAYER, ArgumentValidator.PLAYER)),
 		
-		new CommandUsageForm("<playername>", "Teleports user to the specified player.", executor -> executor != null, Argument.getSingleArgs(ArgumentValidator.PLAYER), ((executor, args, out, err) -> {
+		new CommandUsageForm(true, "<playername>", "Teleports user to the specified player.", executor -> executor != null, ((executor, args, out, err) -> {
 			String source = executor.getName();
 			Command.valueOf("TP").execute(new String[] {source, args[0]}, executor, out, err);
-		})),
+		}), Argument.get(ArgumentValidator.PLAYER)),
 		
-		new CommandUsageForm("<playername> <x> <y>", "Teleports the specified player to the specified location.", executor -> true, Argument.getSingleArgs(ArgumentValidator.PLAYER, ArgumentValidator.DECIMAL, ArgumentValidator.DECIMAL), ((executor, args, out, err) -> {
+		new CommandUsageForm(true, "<playername> <x> <y>", "Teleports the specified player to the specified location.", executor -> true, ((executor, args, out, err) -> {
 			ServerPlayer player = ArgumentValidator.PLAYER.get(args[0]);
 			float x = ArgumentValidator.DECIMAL.get(args[1]);
 			float y = ArgumentValidator.DECIMAL.get(args[2]);
@@ -72,16 +84,16 @@ public enum Command {
 				out.println("teleported "+player.getName()+" to "+player.getPosition(true)+".");
 			} else
 				err.println("player "+player.getName()+" is not on a valid level; cannot be teleported.");
-		})),
+		}), Argument.get(ArgumentValidator.PLAYER, ArgumentValidator.DECIMAL, ArgumentValidator.DECIMAL)),
 		
-		new CommandUsageForm("<x> <y>", "Teleports user to the specified location.", executor -> executor != null, Argument.getSingleArgs(ArgumentValidator.DECIMAL, ArgumentValidator.DECIMAL), ((executor, args, out, err) -> {
+		new CommandUsageForm(true, "<x> <y>", "Teleports user to the specified location.", executor -> executor != null, ((executor, args, out, err) -> {
 			String source = executor.getName();
 			Command.valueOf("TP").execute(new String[] {source, args[0], args[1]}, executor, out, err);
-		}))
+		}), Argument.get(ArgumentValidator.DECIMAL, ArgumentValidator.DECIMAL))
 	),
 	
-	OP(true, "Give another player access to all commands, or take it away.",
-		new CommandUsageForm("<playername> <isAdmin>", "Give or take admin permissions for the specified player. (isAdmin = true OR false)", executor -> true, Argument.getSingleArgs(ArgumentValidator.PLAYER, ArgumentValidator.BOOLEAN), ((executor, args, out, err) -> {
+	OP("Give another player access to all commands, or take it away.",
+		new CommandUsageForm(true, "<playername> <isAdmin>", "Give or take admin permissions for the specified player. (isAdmin = true OR false)", executor -> true, ((executor, args, out, err) -> {
 			ServerPlayer player = ArgumentValidator.PLAYER.get(args[0]);
 			boolean give = ArgumentValidator.BOOLEAN.get(args[1]);
 			boolean success = ServerCore.getServer().setAdmin(player, give);
@@ -89,13 +101,15 @@ public enum Command {
 				out.println("Admin permissions "+(give?"granted":"removed")+" for player "+player.getName()+".");
 			else
 				err.println("failed to change admin permissions of player "+player.getName()+".");
-		}))
+		}), Argument.get(ArgumentValidator.PLAYER, ArgumentValidator.BOOLEAN))
 	),
 	
-	STOP(true, "Stops the server.",
-		new CommandUsageForm("", "Stops the server.", executor -> true, Argument.noArgs(), (executor, args, out, err) -> {
-			ServerCore.quit();
-		})
+	STATUS("Print the server's status on various things.",
+		new CommandUsageForm(true, "", "Print various pieces of info about the server.", (executor, args, out, err) -> ServerCore.getServer().printStatus(out))
+	),
+	
+	STOP("Stops the server.",
+		new CommandUsageForm(true, "", "Stops the server.", executor -> true, (executor, args, out, err) -> ServerCore.quit())
 	);
 	
 	static Command getCommand(String commandName, ServerPlayer executor) {
@@ -115,8 +129,12 @@ public enum Command {
 	private final boolean restricted;
 	private final CommandUsageForm[] forms;
 	
-	Command(boolean restricted, String description, CommandUsageForm... forms) {
+	Command(String description, CommandUsageForm... forms) {
+		boolean restricted = true;
+		for(CommandUsageForm form: forms)
+			restricted &= form.restricted;
 		this.restricted = restricted;
+		
 		this.forms = forms;
 		this.name = name();
 		this.description = description;
@@ -133,12 +151,15 @@ public enum Command {
 	}
 	
 	private void printHelp(ServerPlayer executor, MessageBuilder out, boolean printDescription, boolean printUsage, boolean printDetails) {
+		boolean admin = ServerCore.getServer().isAdmin(executor);
+		
 		if(printDescription) out.println(name + " - " + description);
 		
 		if(printUsage) {
 			out.println("Usages:");
 			for(CommandUsageForm form : forms) {
 				if(!form.executorCheck.get(executor)) continue;
+				if(form.restricted && !admin) continue;
 				out.println(name + " " + form.usage);
 				if(printDetails) out.println("\t" + form.details);
 			}

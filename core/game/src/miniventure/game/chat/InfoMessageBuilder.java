@@ -4,30 +4,30 @@ import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.Nullable;
 
-public class ChatMessageBuilder implements MessageBuilder {
+public class InfoMessageBuilder implements MessageBuilder {
 	
 	@FunctionalInterface
 	public interface LineColorizer {
-		ChatMessageLine getLine(String text);
+		InfoMessageLine getLine(String text);
 	}
 	
 	private final Object lock;
 	
-	private Array<ChatMessageLine> lines;
+	private Array<InfoMessageLine> lines;
 	private StringBuilder str = new StringBuilder();
 	
 	private final LineColorizer colorizer;
 	
 	
-	public ChatMessageBuilder(ChatMessageBuilder sync, LineColorizer colorizer) {
+	public InfoMessageBuilder(InfoMessageBuilder sync, LineColorizer colorizer) {
 		this.colorizer = colorizer;
 		this.lock = sync.lock;
 		this.lines = sync.lines;
 	}
-	public ChatMessageBuilder(LineColorizer colorizer) {
+	public InfoMessageBuilder(LineColorizer colorizer) {
 		this.colorizer = colorizer;
 		lock = new Object();
-		lines = new Array<>(ChatMessageLine.class);
+		lines = new Array<>(InfoMessageLine.class);
 	}
 	
 	public void print(String text) { str.append(text); }
@@ -43,8 +43,8 @@ public class ChatMessageBuilder implements MessageBuilder {
 	}
 	
 	@Nullable
-	public ChatMessage flushMessage() {
-		ChatMessageLine[] lines;
+	public InfoMessage flushMessage() {
+		InfoMessageLine[] lines;
 		synchronized (lock) {
 			lines = this.lines.toArray();
 			this.lines.clear();
@@ -52,7 +52,7 @@ public class ChatMessageBuilder implements MessageBuilder {
 		
 		if(lines.length == 0) return null;
 		
-		return new ChatMessage(lines);
+		return new InfoMessage(lines);
 	}
 	
 }

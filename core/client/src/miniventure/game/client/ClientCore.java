@@ -9,7 +9,8 @@ import java.lang.Thread.UncaughtExceptionHandler;
 
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.HeldItemRequest;
-import miniventure.game.chat.ChatMessage;
+import miniventure.game.GameProtocol.Message;
+import miniventure.game.chat.InfoMessage;
 import miniventure.game.item.InventoryScreen;
 import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
@@ -78,10 +79,11 @@ public class ClientCore extends ApplicationAdapter {
 				clientWorld.update(Gdx.graphics.getDeltaTime()); // renders as well
 			
 			hasMenu = menuScreen != null;
-			if (menuScreen != null) {
+			
+			if (menuScreen != null)
 				menuScreen.act();
+			if (menuScreen != null)
 				menuScreen.draw();
-			}
 		} catch(Throwable t) {
 			//System.out.println("running threads: " + Thread.activeCount());
 			
@@ -93,13 +95,13 @@ public class ClientCore extends ApplicationAdapter {
 	
 	public static void setScreen(@Nullable MenuScreen screen) {
 		if(menuScreen instanceof InventoryScreen) {
-			System.out.println("sending held item request to server for "+clientWorld.getMainPlayer().getHands().getUsableItem());
+			//System.out.println("sending held item request to server for "+clientWorld.getMainPlayer().getHands().getUsableItem());
 			getClient().send(new HeldItemRequest(clientWorld.getMainPlayer().getHands()));
 		}
 		
-		if(screen == null && menuScreen != null && menuScreen != gameScreen.chat)
+		if(screen == null && menuScreen != null && menuScreen != gameScreen.chatScreen)
 			menuScreen.dispose();
-		else if(screen != null && menuScreen != gameScreen.chat)
+		else if(screen != null && menuScreen != gameScreen.chatScreen)
 			screen.setParent(menuScreen);
 		
 		System.out.println("setting screen to " + screen);
@@ -109,8 +111,14 @@ public class ClientCore extends ApplicationAdapter {
 		input.reset();
 	}
 	
-	static void addMessage(String msg) { gameScreen.chat.addMessage(msg); }
-	static void addMessage(ChatMessage msg) { gameScreen.chat.addMessage(msg); }
+	static void addMessage(Message msg) {
+		gameScreen.chatOverlay.addMessage(msg);
+		gameScreen.chatScreen.addMessage(msg);
+	}
+	static void addMessage(InfoMessage msg) {
+		gameScreen.chatOverlay.addMessage(msg);
+		gameScreen.chatScreen.addMessage(msg);
+	}
 	
 	@Override
 	public void resize(int width, int height) {

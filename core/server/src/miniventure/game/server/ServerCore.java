@@ -1,5 +1,7 @@
 package miniventure.game.server;
 
+import java.util.Arrays;
+
 import miniventure.game.GameCore;
 import miniventure.game.chat.command.CommandInputParser;
 
@@ -45,15 +47,40 @@ public class ServerCore {
 		serverWorld.createWorld(width, height);
 	}
 	
+	private static final float[] frameTimes = new float[20];
+	private static final int FRAME_INTERVAL = 30; // how many frames are in each time (above)
+	private static int timeIdx = 0, frameIdx = 0;
+	private static boolean loopedFrames = false;
+	
+	public static float getFPS() {
+		float totalTime = 0;
+		for(float duration: frameTimes)
+			totalTime += duration;
+		
+		return ((loopedFrames ? frameTimes.length : timeIdx) * FRAME_INTERVAL) / totalTime;
+	}
+	
 	public static void run() {
 		// start scanner thread
 		commandParser.start();
 		
+		Arrays.fill(frameTimes, 0);
+		
 		long lastNow = System.nanoTime();
+		long lastInterval = lastNow;
 		
 		//noinspection InfiniteLoopStatement
 		while(true) {
 			long now = System.nanoTime();
+			
+			frameIdx = (frameIdx + 1) % FRAME_INTERVAL;
+			if(frameIdx == 0) {
+				frameTimes[timeIdx] = (float) ((now - lastInterval) / 1E9D);
+				lastInterval = now;
+				timeIdx = (timeIdx + 1) % frameTimes.length;
+				if(timeIdx == 0)
+					loopedFrames = true;
+			}
 			
 			try {
 				serverWorld.update((now - lastNow) / 1E9f);

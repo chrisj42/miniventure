@@ -14,9 +14,22 @@ public interface Argument {
 	boolean satisfiedBy(String[] args, int offset);
 	int length();
 	
-	static Argument[] noArgs() { return new Argument[0]; }
-	//static Argument[] useArgs(@NotNull Argument... args) { return args; }
-	static Argument[] getSingleArgs(@NotNull ArgumentValidator... validators) {
+	static Argument get(@NotNull ArgumentValidator... validators) {
+		return new Argument() {
+			@Override
+			public boolean satisfiedBy(String[] args, int offset) {
+				for(int i = 0; i < validators.length; i++)
+					if(!validators[i].isValid(args[i]))
+						return false;
+				return true;
+			}
+			
+			@Override
+			public int length() { return validators.length; }
+		};
+	}
+	
+	/*static Argument[] get(@NotNull ArgumentValidator... validators) {
 		Argument[] args = new Argument[validators.length];
 		
 		for(int i = 0; i < args.length; i++) {
@@ -32,15 +45,7 @@ public interface Argument {
 		}
 		
 		return args;
-		
-		/*return new Argument[] {new Argument() {
-			@Override
-			public boolean satisfiedBy(String[] args, int offset) {
-				return validator.isValid(args[offset]);
-			}
-			@Override public int length() { return 1; }
-		}};*/
-	}
+	}*/
 	
 	static Argument varArg(ArgumentValidator validator) {
 		return new Argument() {
@@ -79,6 +84,7 @@ public interface Argument {
 			return obj;
 		}
 		
+		ArgumentValidator<String> ANY = arg -> arg;
 		ArgumentValidator<Integer> INTEGER = arg -> noException(() -> Integer.parseInt(arg));
 		ArgumentValidator<Float> DECIMAL = arg -> noException(() -> Float.parseFloat(arg));
 		ArgumentValidator<Boolean> BOOLEAN = arg -> noException(() -> Boolean.parseBoolean(arg));

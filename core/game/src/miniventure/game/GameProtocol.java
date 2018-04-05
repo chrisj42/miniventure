@@ -3,8 +3,8 @@ package miniventure.game;
 import java.io.File;
 import java.util.Arrays;
 
-import miniventure.game.chat.ChatMessage;
-import miniventure.game.chat.ChatMessageLine;
+import miniventure.game.chat.InfoMessage;
+import miniventure.game.chat.InfoMessageLine;
 import miniventure.game.item.Hands;
 import miniventure.game.item.Inventory;
 import miniventure.game.item.ItemStack;
@@ -27,6 +27,7 @@ import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.Tile.TileData;
 import miniventure.game.world.tile.Tile.TileTag;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.esotericsoftware.kryo.Kryo;
@@ -56,9 +57,9 @@ public interface GameProtocol {
 		kryo.register(TileTag.class);
 		kryo.register(Direction.class);
 		kryo.register(Stat.class);
-		kryo.register(ChatMessageLine.class);
-		kryo.register(ChatMessageLine[].class);
-		kryo.register(ChatMessage.class);
+		kryo.register(InfoMessageLine.class);
+		kryo.register(InfoMessageLine[].class);
+		kryo.register(InfoMessage.class);
 		
 		kryo.register(String[].class);
 		kryo.register(int[].class);
@@ -101,12 +102,16 @@ public interface GameProtocol {
 		public LoginFailure(String msg) { this.message = msg; }
 	}
 	
+	// this is sent by the client as a command, a single line. Chat messages are already prepended with "msg ". The server sends this whenever a player says something.
 	class Message {
 		public final String msg;
+		public final String color;
 		
-		private Message() { this(null); }
-		public Message(String msg) {
+		private Message() { this(null, (String)null); }
+		public Message(String msg, Color color) { this(msg, color.toString()); }
+		public Message(String msg, String color) {
 			this.msg = msg;
+			this.color = color;
 		}
 	}
 	
