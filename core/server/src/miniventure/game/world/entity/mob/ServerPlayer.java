@@ -105,7 +105,7 @@ public class ServerPlayer extends ServerMob implements Player {
 		if(amt != 0) {
 			ServerCore.getServer().sendToPlayer(this, new StatUpdate(stat, amt));
 			
-			if(stat == Stat.Hunger && amt > 0) {
+			if(stat == Stat.Hunger && change > 0) {
 				Level level = getLevel();
 				if(level != null)
 					level.addEntity(new TextParticle(amt + "", Color.CORAL), getCenter(), true);
