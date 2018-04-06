@@ -55,7 +55,6 @@ public class ChatScreen extends MenuScreen {
 		};
 		input.setWidth(getWidth()/2);
 		input.setAlignment(Align.left);
-		//setKeyboardFocus(input);
 		
 		input.addListener(new InputListener() {
 			@Override
@@ -106,7 +105,7 @@ public class ChatScreen extends MenuScreen {
 					return true;
 				}
 				else
-					return false;//input.getDefaultInputListener().keyDown(event, keycode); // entered a normal key
+					return false;
 			}
 		});
 		
@@ -153,17 +152,6 @@ public class ChatScreen extends MenuScreen {
 	@Override
 	public boolean usesWholeScreen() { return false; }
 	
-	
-	@Override
-	public void act(float delta) {
-		synchronized (labelQueue) {
-			for(TimerLabel label : labelQueue.toArray(new TimerLabel[labelQueue.size()]))
-				label.update(delta);
-		}
-		
-		super.act(delta);
-	}
-	
 	private void repack() {
 		input.pack();
 		input.setPosition(getWidth() / 2, getHeight() - input.getHeight());
@@ -175,7 +163,6 @@ public class ChatScreen extends MenuScreen {
 		float timeLeft;
 		private final boolean connect;
 		
-		//TimerLabel(Label label) { this(label, false); }
 		TimerLabel(Label label, boolean connect) {
 			super(label);
 			this.connect = connect;
@@ -183,8 +170,10 @@ public class ChatScreen extends MenuScreen {
 			timeLeft = MESSAGE_LIFE_TIME;
 		}
 		
-		
-		void update(float delta) {
+		@Override
+		public void act(float delta) {
+			super.act(delta);
+			
 			if(!useTimer) return;
 			timeLeft = Math.max(0, timeLeft-delta);
 			if(timeLeft == 0) {
