@@ -183,7 +183,7 @@ public enum Command {
 				if(!form.executorCheck.get(executor)) continue;
 				if(form.restricted && !admin) continue;
 				out.println(name + " " + form.usage);
-				if(printDetails) out.println("\t" + form.details);
+				if(printDetails) out.println("    " + form.details);
 			}
 		}
 	}

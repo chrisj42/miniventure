@@ -23,7 +23,7 @@ import com.badlogic.gdx.utils.Align;
 
 public class ChatScreen extends MenuScreen {
 	
-	private static final float MESSAGE_LIFE_TIME = 8; // time from post to removal.
+	private static final float MESSAGE_LIFE_TIME = 15; // time from post to removal.
 	private static final float MESSAGE_FADE_TIME = 3; // duration taken to go from full opaque to fully transparent.
 	private static final Color BACKGROUND = Color.GRAY.cpy().sub(0, 0, 0, 0.25f);
 	
@@ -55,7 +55,7 @@ public class ChatScreen extends MenuScreen {
 		};
 		input.setWidth(getWidth()/2);
 		input.setAlignment(Align.left);
-		setKeyboardFocus(input);
+		//setKeyboardFocus(input);
 		
 		input.addListener(new InputListener() {
 			@Override
@@ -64,16 +64,21 @@ public class ChatScreen extends MenuScreen {
 					String text = input.getText();
 					if(text.length() == 0) return true;
 					if(text.equals("/")) return true;
+					
+					// valid command
+					
+					if(prevCommandIdx != 0) // don't add the entry if we are just redoing the previous action
+						previousCommands.push(text);
+					prevCommandIdx = -1;
+					if(previousCommands.size() > COMMAND_BUFFER_SIZE)
+						previousCommands.pollLast(); // remove oldest command from history
+					
 					if(!text.startsWith("/"))
 						text = "msg " + text;
 					else
 						text = text.substring(1);
 					
 					ClientCore.getClient().send(new Message(text, (String)null));
-					previousCommands.push(text);
-					prevCommandIdx = -1;
-					if(previousCommands.size() > COMMAND_BUFFER_SIZE)
-						previousCommands.pollLast(); // remove oldest command from history
 					ClientCore.setScreen(null);
 					return true;
 				}
@@ -106,14 +111,7 @@ public class ChatScreen extends MenuScreen {
 		});
 		
 		addActor(input);
-		input.pack();
-		input.setPosition(getWidth()/2, getHeight()-input.getHeight());
-	}
-	
-	@Override
-	protected void drawTable(Batch batch, float parentAlpha) {
-		if(labelQueue.size() > 0)
-			MyUtils.fillRect(vGroup.getX(), vGroup.getY(), getWidth()/2, vGroup.getPrefHeight()+10, BACKGROUND, batch);
+		repack();
 	}
 	
 	public void focus() { focus(""); }
@@ -122,6 +120,7 @@ public class ChatScreen extends MenuScreen {
 		input.setText(initText);
 		input.pack();
 		input.setWidth(getWidth()/2);
+		input.setCursorPosition(initText.length());
 		setKeyboardFocus(input);
 	}
 	
@@ -130,7 +129,7 @@ public class ChatScreen extends MenuScreen {
 			// add in reverse order
 			for(int i = msg.lines.length - 1; i >= 0; i--) {
 				InfoMessageLine line = msg.lines[i];
-				addMessage(new Label(line.line, new Label.LabelStyle(GameCore.getFont(), Color.valueOf(line.color))));
+				addMessage(new Label(line.line, new Label.LabelStyle(GameCore.getFont(), Color.valueOf(line.color))), i != 0);
 			}
 		}
 	}
@@ -140,17 +139,15 @@ public class ChatScreen extends MenuScreen {
 		}
 	}
 	
-	private void addMessage(Label msg) {
+	private void addMessage(Label msg) { addMessage(msg, false); }
+	private void addMessage(Label msg, boolean connect) {
 		msg.setWrap(true);
-		Container<Label> container = new Container<>(msg).width(getWidth()/2);
-		vGroup.addActorAt(0, container);
-		labelQueue.add(new TimerLabel(container));
+		TimerLabel label = new TimerLabel(msg, connect);
+		vGroup.addActorAt(0, label);
+		labelQueue.add(label);
 		if(vGroup.getChildren().size > 10)
-			vGroup.removeActor(labelQueue.poll().label);
-		vGroup.pack();
-		input.pack();
-		input.setPosition(getWidth()/2, getHeight()-input.getHeight());
-		vGroup.setPosition(getWidth()/2, input.getY()-10-vGroup.getHeight());
+			vGroup.removeActor(labelQueue.poll());
+		repack();
 	}
 	
 	@Override
@@ -159,28 +156,55 @@ public class ChatScreen extends MenuScreen {
 	
 	@Override
 	public void act(float delta) {
-		for(TimerLabel label: labelQueue.toArray(new TimerLabel[labelQueue.size()]))
-			label.update(delta);
+		synchronized (labelQueue) {
+			for(TimerLabel label : labelQueue.toArray(new TimerLabel[labelQueue.size()]))
+				label.update(delta);
+		}
+		
+		super.act(delta);
 	}
 	
-	private class TimerLabel {
-		final Container<Label> label;
+	private void repack() {
+		input.pack();
+		input.setPosition(getWidth() / 2, getHeight() - input.getHeight());
+		vGroup.pack();
+		vGroup.setPosition(getWidth() / 2, input.getY() - 10 - vGroup.getHeight());
+	}
+	
+	private class TimerLabel extends Container<Label> {
 		float timeLeft;
+		private final boolean connect;
 		
-		TimerLabel(Container<Label> label) {
-			this.label = label;
+		//TimerLabel(Label label) { this(label, false); }
+		TimerLabel(Label label, boolean connect) {
+			super(label);
+			this.connect = connect;
+			width(ChatScreen.this.getWidth()/2);
 			timeLeft = MESSAGE_LIFE_TIME;
 		}
+		
 		
 		void update(float delta) {
 			if(!useTimer) return;
 			timeLeft = Math.max(0, timeLeft-delta);
 			if(timeLeft == 0) {
-				vGroup.removeActor(label);
-				vGroup.pack();
-				vGroup.setPosition(getWidth()/2, getHeight()-vGroup.getHeight());
+				vGroup.removeActor(this);
+				repack();
 				labelQueue.remove(this);
 			}
+		}
+		
+		@Override
+		public void draw(Batch batch, float parentAlpha) {
+			float alpha = parentAlpha;
+			
+			// apply alpha, if fading.
+			if(timeLeft < MESSAGE_FADE_TIME)
+				alpha *= (timeLeft / MESSAGE_FADE_TIME);
+			
+			MyUtils.fillRect(getX(), getY(), ChatScreen.this.getWidth()/2, getHeight()+(connect?vGroup.getSpace():0), BACKGROUND.cpy().mul(1, 1, 1, alpha), batch);
+			
+			super.draw(batch, alpha);
 		}
 	}
 }

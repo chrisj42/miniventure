@@ -347,7 +347,7 @@ public class GameServer implements GameProtocol {
 		out.println("FPS: " + ServerCore.getFPS());
 		out.println("Players connected: "+playerToConnectionMap.size());
 		for(PlayerData pd: connectionToPlayerDataMap.values()) {
-			out.print("\t Player \""+pd.player.getName()+"\" ");
+			out.print("     Player \""+pd.player.getName()+"\" ");
 			if(pd.op) out.print("(admin) ");
 			out.print(pd.player.getLocation(true));
 			out.println();

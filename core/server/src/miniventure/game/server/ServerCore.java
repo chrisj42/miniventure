@@ -31,7 +31,7 @@ public class ServerCore {
 		
 		if(!success) {
 			System.out.println("Usage: miniventure.server.ServerCore --server <world width> <world height>");
-			System.out.println("\tspecify 0 for width and/or height to use the maximum value for that dimension.");
+			System.out.println("    specify 0 for width and/or height to use the maximum value for that dimension.");
 		}
 		else {
 			System.out.println("server ready");
