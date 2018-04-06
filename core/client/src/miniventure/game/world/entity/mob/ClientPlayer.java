@@ -7,6 +7,7 @@ import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.InteractRequest;
 import miniventure.game.GameProtocol.MovementRequest;
 import miniventure.game.GameProtocol.PositionUpdate;
+import miniventure.game.GameProtocol.SelfHurt;
 import miniventure.game.GameProtocol.SpawnData;
 import miniventure.game.GameProtocol.StatUpdate;
 import miniventure.game.client.ClientCore;
@@ -319,7 +320,9 @@ public class ClientPlayer extends ClientEntity implements Player {
 			
 			if(hunger >= HUNGER_RATE) {
 				int hungerLost = MathUtils.floor(hunger / HUNGER_RATE);
-				changeStat(Stat.Hunger, -hungerLost);
+				int changed = changeStat(Stat.Hunger, -hungerLost);
+				if(changed < hungerLost)
+					ClientCore.getClient().send(new SelfHurt(1));
 				hunger -= hungerLost * HUNGER_RATE;
 			}
 		}

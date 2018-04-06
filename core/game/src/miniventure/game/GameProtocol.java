@@ -379,6 +379,16 @@ public interface GameProtocol {
 		}
 	}
 	
+	// sent by the client when a player hurts themself.
+	class SelfHurt {
+		public int dmg;
+		
+		private SelfHurt() { this(0); }
+		public SelfHurt(int dmg) {
+			this.dmg = dmg;
+		}
+	}
+	
 	// a stat changed; sent by both the client and the server. When the client sends it, the amount is the total, but when the server sends it to a client, it is a delta.
 	class StatUpdate {
 		public final Stat stat;

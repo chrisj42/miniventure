@@ -14,7 +14,7 @@ flesh out the item drop class, to allow drops with random drop count, and such.
 
 ****
 
-deal damage when you have no hunger left
+make that entity validation system, so that clients can always be sure that they have all the right entities, and only those entities.
 
 ****
 

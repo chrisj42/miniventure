@@ -232,6 +232,11 @@ public class GameServer implements GameProtocol {
 					if(output != null)
 						connection.sendTCP(output);
 				});
+				
+				forPacket(object, SelfHurt.class, hurt -> {
+					// assumed that the client has hurt itself in some way
+					client.attackedBy(client, null, hurt.dmg);
+				});
 			}
 			
 			/*@Override
