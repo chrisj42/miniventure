@@ -31,7 +31,7 @@ public abstract class Level {
 	protected final HashMap<Entity, Point> entityChunks = new HashMap<>();
 	
 	/** @noinspection FieldCanBeLocal*/
-	private int entityCap = 8; // per chunk
+	private int entityCap = 6; // per chunk
 	
 	//protected Level(@NotNull WorldManager world) { this(world, 0, 0, 0); }
 	Level(@NotNull WorldManager world, int depth, int width, int height) {
