@@ -81,12 +81,10 @@ public class GameScreen {
 			ClientCore.getClient().send(DatalessRequest.Tile); // debug
 		
 		else if(Gdx.input.isKeyJustPressed(Keys.T)) {
-			ClientCore.setScreen(chatScreen);
-			chatScreen.sendMessage();
+			chatScreen.focus();
 		}
 		if(Gdx.input.isKeyJustPressed(Keys.SLASH)) {
-			ClientCore.setScreen(chatScreen);
-			chatScreen.sendCommand();
+			chatScreen.focus("/");
 		}
 	}
 	
