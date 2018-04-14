@@ -321,7 +321,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 			if(hunger >= HUNGER_RATE) {
 				int hungerLost = MathUtils.floor(hunger / HUNGER_RATE);
 				int changed = changeStat(Stat.Hunger, -hungerLost);
-				if(changed < hungerLost)
+				if(Math.abs(changed) < hungerLost)
 					ClientCore.getClient().send(new SelfHurt(1));
 				hunger -= hungerLost * HUNGER_RATE;
 			}
