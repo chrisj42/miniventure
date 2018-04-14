@@ -207,4 +207,26 @@ public class MyUtils {
 		return endValues;
 	}
 	
+	public static String arrayToString(int[] array, String start, String end, String delimiter) {
+		Integer[] ar = new Integer[array.length];
+		for(int i = 0; i < ar.length; i++)
+			ar[i] = array[i];
+		return arrayToString(ar, start, end, delimiter);
+	}
+	public static String arrayToString(float[] array, String start, String end, String delimiter) {
+		Float[] ar = new Float[array.length];
+		for(int i = 0; i < ar.length; i++)
+			ar[i] = array[i];
+		return arrayToString(ar, start, end, delimiter);
+	}
+	public static String arrayToString(Object[] array, String start, String end, String delimiter) {
+		StringBuilder str = new StringBuilder(start);
+		for(int i = 0; i < array.length; i++) {
+			str.append(array[i]);
+			if(i < array.length-1)
+				str.append(delimiter);
+		}
+		str.append(end);
+		return str.toString();
+	}
 }

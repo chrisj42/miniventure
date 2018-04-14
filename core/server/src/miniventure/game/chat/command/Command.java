@@ -99,14 +99,15 @@ public enum Command {
 			out.println(TimeOfDay.getClockString(daylightOffset)+" - " + TimeOfDay.getTimeString(daylightOffset));
 		}),
 		
-		new CommandUsageForm(true, "<timeOfDay>", "Set time to start of specified range. timeOfDay can be one of: Dawn, Day, Dusk, Night", (executor, args, out, err) -> {
+		new CommandUsageForm(
+			true, MyUtils.arrayToString(TimeOfDay.names, "<", ">", "|"), "Set time to start of specified range. timeOfDay can be one of: "+MyUtils.arrayToString(TimeOfDay.names, "", "", ", "), (executor, args, out, err) -> {
 			TimeOfDay timeOfDay = TimeOfDay.valueOf(MyUtils.toTitleCase(args[0]));
-			ServerCore.getWorld().setTimeOfDay(timeOfDay.getDaylightOffset());
+			ServerCore.getWorld().setTimeOfDay(timeOfDay.getStartOffsetSeconds());
 			float dayTime = ServerCore.getWorld().getDaylightOffset();
 			out.println("Set time of day to "+TimeOfDay.getClockString(dayTime)+" ("+TimeOfDay.getTimeOfDay(dayTime)+")");
-		}, Argument.get(ArgumentValidator.exactString(false, MyUtils.mapArray(TimeOfDay.values, String.class, TimeOfDay::name)))),
+		}, Argument.get(ArgumentValidator.exactString(false, TimeOfDay.names))),
 		
-		new CommandUsageForm(true, "<time>", "Set time to the specified 24-hour clock format time (HH:MM)", (executor, args, out, err) -> {
+		new CommandUsageForm(true, "<HH:MM>", "Set time to the specified 24-hour clock format time (HH:MM)", (executor, args, out, err) -> {
 			float dayTime = ArgumentValidator.CLOCK_TIME.get(args[0]);
 			ServerCore.getWorld().setTimeOfDay(dayTime);
 			out.println("Set time of day to "+TimeOfDay.getClockString(dayTime)+" ("+TimeOfDay.getTimeOfDay(dayTime)+")");
@@ -158,7 +159,7 @@ public enum Command {
 		this.restricted = restricted;
 		
 		this.forms = forms;
-		this.name = name();
+		this.name = MyUtils.toTitleCase(name());
 		this.description = description;
 	}
 	
@@ -192,7 +193,7 @@ public enum Command {
 	public void printHelpBasic(ServerPlayer executor, MessageBuilder out) {
 		out.print(name+" ");
 		printHelp(executor, out, false, true, false);
-		out.println("type \"help " + name + "\" for more info.");
+		out.println("type /\"help " + name + "\" for more info.");
 	}
 	
 	private static Command[] valuesFor(@Nullable ServerPlayer player) {

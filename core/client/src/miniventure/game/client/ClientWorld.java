@@ -21,6 +21,7 @@ import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.ClientPlayer;
 import miniventure.game.world.tile.TilePropertyFetcher;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
@@ -80,7 +81,7 @@ public class ClientWorld extends WorldManager {
 		level.updateEntities(getEntities(level), delta);
 		
 		if(menu == null || !menu.usesWholeScreen())
-			gameScreen.render(mainPlayer, TimeOfDay.getSkyColors(daylightOffset), level);
+			gameScreen.render(mainPlayer, getLightingOverlays(), level);
 		
 		super.update(delta);
 	}
@@ -129,6 +130,12 @@ public class ClientWorld extends WorldManager {
 		mainPlayer = null;
 		clearLevels();
 		ClientCore.setScreen(new MainMenu());
+	}
+	
+	// TODO add lighting overlays, based on level and/or time of day, depending on the level and perhaps other things.
+	private Color[] getLightingOverlays() {
+		//Array<Color> colors = new Array<>(TimeOfDay.getSkyColors(daylightOffset));
+		return TimeOfDay.getSkyColors(daylightOffset);
 	}
 	
 	

@@ -43,7 +43,7 @@ public abstract class WorldManager {
 	/** update the world's game logic. (can also use to render) */
 	public void update(float delta) {
 		gameTime += delta;
-		daylightOffset = (daylightOffset + delta) % TimeOfDay.LENGTH_OF_DAY;
+		daylightOffset = (daylightOffset + delta) % TimeOfDay.SECONDS_IN_DAY;
 	}
 	
 	

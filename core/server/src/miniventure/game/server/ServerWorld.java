@@ -88,7 +88,7 @@ public class ServerWorld extends WorldManager {
 	
 	
 	public void setTimeOfDay(float daylightOffset) {
-		this.daylightOffset = daylightOffset % TimeOfDay.LENGTH_OF_DAY;
+		this.daylightOffset = daylightOffset % TimeOfDay.SECONDS_IN_DAY;
 		server.broadcast(new WorldData(gameTime, this.daylightOffset));
 	}
 	

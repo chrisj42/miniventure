@@ -101,7 +101,12 @@ public interface Argument {
 			
 			float time = hour + (min / 60f);
 			
-			return MyUtils.mapFloat(time, 0, 24, 0, TimeOfDay.LENGTH_OF_DAY);
+			time = (time + 24 - TimeOfDay.REL_START_TIME_OFFSET) % 24;
+			//System.out.println("interpereted time: "+time);
+			return MyUtils.mapFloat(time, 0, 24, 0, TimeOfDay.SECONDS_IN_DAY);
+			//time = (time + 24 - TimeOfDay.REL_START_TIME_OFFSET) % 24; // account for offset that allows dawn to start at 6 rather than 12AM (though internally, it is still technically 12AM).
+			
+			//return time * TimeOfDay.SECONDS_IN_DAY;
 		});
 		
 		static ArgumentValidator<String> exactString(boolean matchCase, String... matches) {
