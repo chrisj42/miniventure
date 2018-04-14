@@ -38,9 +38,6 @@ public enum TimeOfDay {
 		this.mainColor = mainColor;
 		this.endTime = endTime - REL_START_TIME_OFFSET;
 		this.transitionDuration = transitionDuration;
-		//System.out.println("made time of day with color "+mainColor.r+","+mainColor.g+","+mainColor.b+","+mainColor.a);
-		
-		//System.out.println(this+" ends at "+endTime);
 	}
 	
 	public float getStartOffsetSeconds() {
@@ -73,14 +70,12 @@ public enum TimeOfDay {
 			return new Color[] {tod.mainColor.cpy()};
 		
 		// there are multiple colors to blend
-		//System.out.println("transitioning, time through = " + timeThroughTransition);
 		Color mainTrans = tod.mainColor.cpy();
 		if(timeThroughTransition > 0.5f)
 			mainTrans.a *= (1 - timeThroughTransition)*2;
 		
 		Color secondTrans = values[(tod.ordinal()+1)%values.length].mainColor.cpy();
-		//if(timeThroughTransition < 0.5f)
-		secondTrans.a *= timeThroughTransition;// * 2;
+		secondTrans.a *= timeThroughTransition;
 		
 		return new Color[] {mainTrans, secondTrans};
 	}
