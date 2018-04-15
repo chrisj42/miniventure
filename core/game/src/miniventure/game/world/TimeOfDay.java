@@ -23,7 +23,7 @@ public enum TimeOfDay {
 	public static final TimeOfDay[] values = TimeOfDay.values();
 	public static final String[] names = MyUtils.mapArray(values, String.class, TimeOfDay::name);
 	
-	public static final float SECONDS_IN_DAY = 60 * 24 / 2; // in seconds; two in-game minutes pass for every real-time second. 
+	public static final float SECONDS_IN_DAY = 60*24 / 3f; // in seconds; four in-game minutes pass for every real-time second. 
 	private static final float REL_START_TIME_OFFSET = 7f; // Essentially, this is when the day starts. this determines when dawn is; this is subtracted from the end time of dawn, and the rest.
 	private static final float REL_DAY_DURATION = values[values.length-1].endTime;
 	public static final float SECONDS_START_TIME_OFFSET = MyUtils.mapFloat(REL_START_TIME_OFFSET, 0, REL_DAY_DURATION, 0, SECONDS_IN_DAY);
