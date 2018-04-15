@@ -57,6 +57,8 @@ public abstract class Level {
 	public int getEntityCap() { return entityCap*getLoadedChunkCount(); }
 	public int getEntityCount() { return world.getEntityCount(this); }
 	
+	public Entity[] getEntities() { return world.getEntities(this); }
+	
 	protected int getLoadedChunkCount() { return loadedChunks.get(Map::size); }
 	protected Chunk getLoadedChunk(Point p) { return loadedChunks.get(chunks -> chunks.get(p)); }
 	protected Chunk[] getLoadedChunkArray() { return loadedChunks.get(chunks -> chunks.values().toArray(new Chunk[chunks.size()])); }
@@ -212,7 +214,7 @@ public abstract class Level {
 		return getOverlappingEntities(rect, (Entity)null);
 	}
 	public Array<Entity> getOverlappingEntities(Rectangle rect, Entity... exclude) {
-		Array<Entity> overlapping = new Array<>();
+		Array<Entity> overlapping = new Array<>(Entity.class);
 		world.actOnEntitySet(this, set -> {
 			for(Entity entity: set)
 				if(entity.getBounds().overlaps(rect))

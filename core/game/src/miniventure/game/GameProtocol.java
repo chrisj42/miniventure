@@ -11,6 +11,7 @@ import miniventure.game.item.ItemStack;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
 import miniventure.game.world.Boundable;
+import miniventure.game.world.Chunk;
 import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.Level;
 import miniventure.game.world.Point;
@@ -66,7 +67,8 @@ public interface GameProtocol {
 		kryo.register(Integer.class);
 		kryo.register(Integer[].class);
 		
-		kryo.register(PositionUpdate[].class);
+		kryo.register(Point.class);
+		kryo.register(Point[].class);
 	}
 	
 	@FunctionalInterface
@@ -252,22 +254,26 @@ public interface GameProtocol {
 	}
 	
 	// sent by the server every 10 seconds or so with all entities in the 5x5 chunks surrounding the client. The client can use this to validate all the entities that it has loaded; if there are any listed that it doesn't have loaded (and the chunk it's on is loaded), it can send back an entity request to get it loaded. Also, if it finds that there are entities it has loaded, which aren't present in the list, it can unload them.
-	// TODO send these.
 	class EntityValidation {
+		public final int levelDepth;
 		public final int[] ids;
-		public final PositionUpdate[] positions;
+		public final Point[] chunks;
 		
-		private EntityValidation() { this(null, null); }
-		public EntityValidation(Entity[] entities) {
-			this(new int[entities.length], new PositionUpdate[entities.length]);
+		private EntityValidation() { this(0, null, null); }
+		public EntityValidation(int levelDepth, Entity[] entities) {
+			this(levelDepth, new int[entities.length], new Point[entities.length]);
 			for(int i = 0; i < entities.length; i++) {
 				ids[i] = entities[i].getId();
-				positions[i] = new PositionUpdate(entities[i]);
+				Level level = entities[i].getLevel();
+				if(level == null || level.getDepth() != levelDepth)
+					throw new IllegalArgumentException("Entity "+entities[i]+" in entity array of entity validation is not on the specified level, "+levelDepth+"; its level is "+level+".");
+				chunks[i] = Chunk.getCoords(entities[i].getCenter());
 			}
 		}
-		public EntityValidation(int[] ids, PositionUpdate[] positions) {
+		public EntityValidation(int levelDepth, int[] ids, Point[] chunks) {
+			this.levelDepth = levelDepth;
 			this.ids = ids;
-			this.positions = positions;
+			this.chunks = chunks;
 		}
 	}
 	

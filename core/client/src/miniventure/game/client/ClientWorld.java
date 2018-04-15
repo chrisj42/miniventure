@@ -127,6 +127,7 @@ public class ClientWorld extends WorldManager {
 	@Override
 	public void exitWorld(boolean save) { // returns to title screen
 		// set menu to main menu, and dispose of level/world resources
+		ClientCore.getClient().disconnect();
 		mainPlayer = null;
 		clearLevels();
 		ClientCore.setScreen(new MainMenu());

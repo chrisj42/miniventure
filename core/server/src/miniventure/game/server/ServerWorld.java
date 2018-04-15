@@ -169,6 +169,7 @@ public class ServerWorld extends WorldManager {
 	/*  --- PLAYER MANAGEMENT --- */
 	
 	
+	@NotNull
 	public ServerPlayer addPlayer(String playerName) {
 		ServerPlayer player = new ServerPlayer(playerName);
 		

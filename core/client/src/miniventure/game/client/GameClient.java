@@ -3,6 +3,7 @@ package miniventure.game.client;
 import javax.swing.JOptionPane;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol;
@@ -146,7 +147,54 @@ public class GameClient implements GameProtocol {
 				});
 				
 				forPacket(object, EntityValidation.class, list -> {
-					// TODO
+					//System.out.println("Client received entity validation ("+list.ids.length+" entities)");
+					// first, make a list of all the entities that the client has loaded. Then, go through those given here, removing them from the list just made as you go. For each one, check the position; if it is not in a loaded chunk, then unload it. Else, if a local version doesn't exist, request it from the server. Don't use this data to actually change the positions of the entities, as there is already a system that will take care of that.
+					
+					if(player == null) {
+						System.err.println("Client received entity validation without loaded world; ignoring packet.");
+						return;
+					}
+					ClientLevel level = player.getLevel();
+					if(level == null) {
+						System.err.println("Client: player level is null upon receiving entity validation; ignoring packet.");
+						return;
+					}
+					
+					if(level.getDepth() != list.levelDepth) {
+						System.err.println("Client: player level does not match entity validation level; ignoring packet.");
+						return;
+					}
+					
+					HashMap<Integer, Entity> loaded = new HashMap<>();
+					for(Entity e: level.getEntities())
+						if(e != player)
+							loaded.put(e.getId(), e);
+					
+					for(int i = 0; i < list.ids.length; i++) {
+						boolean chunkLoaded = level.isChunkLoaded(list.chunks[i]);
+						boolean entityLoaded = loaded.containsKey(list.ids[i]);
+						
+						// if the chunk is loaded, but the entity isn't, then request it from the server.
+						// if the entity is loaded, but the chunk isn't, then unload it.
+						// else, do nothing.
+						
+						if(chunkLoaded && !entityLoaded) {
+							//System.out.println("client requesting entity due to validation");
+							client.sendTCP(new EntityRequest(list.ids[i]));
+						}
+						if(entityLoaded && !chunkLoaded) {
+							//System.out.println("client unloading entity due to validation");
+							loaded.get(list.ids[i]).remove();
+						}
+						
+						loaded.remove(list.ids[i]);
+					}
+					
+					// any entities that are left shouldn't still exist
+					//if(loaded.size() > 0)
+					//	System.out.println("client removing "+loaded.size()+" outdated entities due to validation");
+					for(Entity e: loaded.values())
+						e.remove();
 				});
 				
 				forPacket(object, InventoryUpdate.class, newInv -> {
@@ -218,6 +266,8 @@ public class GameClient implements GameProtocol {
 		
 		return true;
 	}
+	
+	public void disconnect() { client.stop(); }
 	
 	private boolean isPositionLoaded(PositionUpdate posUpdate) {
 		if(posUpdate == null) return false;

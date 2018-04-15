@@ -1,5 +1,7 @@
 package miniventure.game.server;
 
+import javax.swing.Timer;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -39,11 +41,12 @@ public class GameServer implements GameProtocol {
 	
 	private class PlayerData {
 		final Connection connection;
-		final ServerPlayer player;
+		@NotNull final ServerPlayer player;
 		final InfoMessageBuilder toClientOut, toClientErr;
 		boolean op;
+		final Timer validationTimer;
 		
-		PlayerData(Connection connection, ServerPlayer player) {
+		PlayerData(Connection connection, @NotNull ServerPlayer player) {
 			this.connection = connection;
 			this.player = player;
 			
@@ -51,6 +54,9 @@ public class GameServer implements GameProtocol {
 			toClientErr = new InfoMessageBuilder(toClientOut, text -> new InfoMessageLine(Color.RED, text));
 			
 			op = connection.getRemoteAddressTCP().getAddress().isLoopbackAddress();
+			
+			validationTimer = new Timer(5000, e -> sendEntityValidation(this));
+			validationTimer.setRepeats(true);
 		}
 	}
 	
@@ -116,6 +122,8 @@ public class GameServer implements GameProtocol {
 							connection.sendTCP(new EntityAddition(e));
 						
 						System.out.println("Server: new player successfully connected: "+player.getName());
+						
+						connectionToPlayerDataMap.get(connection).validationTimer.start();
 					}
 					else connection.sendTCP(new LoginFailure("Server world is not initialized."));
 					
@@ -248,11 +256,10 @@ public class GameServer implements GameProtocol {
 			public void disconnected(Connection connection) {
 				PlayerData data = connectionToPlayerDataMap.get(connection);
 				if(data == null) return;
+				data.validationTimer.stop();
 				ServerPlayer player = data.player;
-				if(player != null) {
-					player.remove();
-					player.getWorld().removePlayer(player);
-				}
+				player.remove();
+				player.getWorld().removePlayer(player);
 				//System.out.println("server disconnected from client: " + connection.getRemoteAddressTCP().getHostString());
 			}
 		});//);
@@ -345,6 +352,34 @@ public class GameServer implements GameProtocol {
 	public Message getMessage(@Nullable ServerPlayer sender, String msg) {
 		if(sender == null) return new Message("Server: "+msg, Color.LIGHT_GRAY);
 		return new Message(sender.getName()+": "+msg, Color.WHITE);
+	}
+	
+	private void sendEntityValidation(@NotNull PlayerData pData) {
+		ServerPlayer player = pData.player;
+		if(!pData.connection.isConnected()) {
+			System.err.println("Server not sending entity validation to player "+player.getName()+" because player has disconnected; stopping validation timer.");
+			pData.validationTimer.stop();
+			return;
+		}
+		
+		ServerLevel level = player.getLevel();
+		if(level == null) {
+			System.out.println("Server: Level of player "+player.getName()+" is null during entity validation attempt, skipping validation.");
+			return;
+		}
+		
+		
+		Rectangle area = null;
+		for(Chunk c: level.getAreaChunks(player.getCenter(), 2, true, false)) {
+			if(area == null)
+				area = c.getBounds();
+			else
+				area.merge(c.getBounds());
+		}
+		
+		Array<Entity> entities = level.getOverlappingEntities(area, player);
+		EntityValidation validation = new EntityValidation(level.getDepth(), entities.shrink());
+		pData.connection.sendTCP(validation);
 	}
 	
 	public void printStatus(MessageBuilder out) {
