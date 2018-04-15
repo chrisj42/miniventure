@@ -1,5 +1,7 @@
 package miniventure.game.client;
 
+import javax.swing.JOptionPane;
+
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.DatalessRequest;
 import miniventure.game.screen.ChatScreen;
@@ -65,7 +67,10 @@ public class GameScreen {
 			lightingBuffer.dispose();
 	}
 	
+	private boolean dialog = false;
 	public void handleInput(@NotNull ClientPlayer player) {
+		if(dialog) return;
+		
 		player.handleInput(getMouseInput());
 		
 		if(Gdx.input.isKeyJustPressed(Keys.MINUS))
@@ -79,14 +84,24 @@ public class GameScreen {
 		//if(Gdx.input.isKeyJustPressed(Keys.R) && Gdx.input.isKeyPressed(Keys.SHIFT_LEFT))
 		//	GameCore.getWorld().createWorld(0, 0);
 		
-		if(Gdx.input.isKeyPressed(Keys.SHIFT_LEFT) && Gdx.input.isKeyJustPressed(Keys.T))
+		if(Gdx.input.isKeyPressed(Keys.CONTROL_LEFT) && Gdx.input.isKeyJustPressed(Keys.T))
 			ClientCore.getClient().send(DatalessRequest.Tile); // debug
 		
 		else if(Gdx.input.isKeyJustPressed(Keys.T)) {
 			chatScreen.focus();
 		}
-		if(Gdx.input.isKeyJustPressed(Keys.SLASH)) {
+		else if(Gdx.input.isKeyJustPressed(Keys.SLASH)) {
 			chatScreen.focus("/");
+		}
+		
+		else if(Gdx.input.isKeyJustPressed(Keys.ESCAPE)) {
+			dialog = true;
+			new Thread(() -> {
+				int choice = JOptionPane.showConfirmDialog(null, "Leave Server?", "Confirmation", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+				if(choice == JOptionPane.YES_OPTION)
+					Gdx.app.postRunnable(() -> ClientCore.getWorld().exitWorld());
+				dialog = false;
+			}).start();
 		}
 	}
 	

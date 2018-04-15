@@ -9,7 +9,7 @@ public class ServerCore {
 	
 	private static ServerWorld serverWorld;
 	
-	private static CommandInputParser commandParser = new CommandInputParser();
+	private static CommandInputParser commandParser = null;
 	
 	public static ServerWorld getWorld() { return serverWorld; }
 	public static GameServer getServer() { return serverWorld.getServer(); }
@@ -23,7 +23,7 @@ public class ServerCore {
 			
 			System.out.println("loading server world...");
 			try {
-				initServer(Integer.parseInt(args[1]), Integer.parseInt(args[2]));
+				initServer(Integer.parseInt(args[1]), Integer.parseInt(args[2]), true);
 			} catch(NumberFormatException ex) {
 				success = false;
 			}
@@ -39,11 +39,11 @@ public class ServerCore {
 		}
 	}
 	
-	public static void initServer(int width, int height) {
+	public static void initServer(int width, int height, boolean standalone) {
 		if(serverWorld != null)
 			serverWorld.exitWorld();
 		
-		serverWorld = new ServerWorld();
+		serverWorld = new ServerWorld(standalone);
 		serverWorld.createWorld(width, height);
 	}
 	
@@ -62,7 +62,11 @@ public class ServerCore {
 	
 	public static void run() {
 		// start scanner thread
-		commandParser.start();
+		if(commandParser != null)
+			commandParser.end();
+		
+		commandParser = new CommandInputParser();
+		new Thread(commandParser, "CommandInputParser").start();
 		
 		Arrays.fill(frameTimes, 0);
 		
@@ -70,7 +74,7 @@ public class ServerCore {
 		long lastInterval = lastNow;
 		
 		//noinspection InfiniteLoopStatement
-		while(true) {
+		while(serverWorld.worldLoaded()) {
 			long now = System.nanoTime();
 			
 			frameIdx = (frameIdx + 1) % FRAME_INTERVAL;
@@ -95,12 +99,12 @@ public class ServerCore {
 				Thread.sleep(10);
 			} catch(InterruptedException ignored) {}
 		}
+		
+		commandParser.end();
 	}
 	
 	// stop the server.
 	public static void quit() {
 		getWorld().exitWorld(true);
-		getServer().stop();
-		System.exit(0);
 	}
 }

@@ -65,7 +65,7 @@ public class GameServer implements GameProtocol {
 	
 	private Server server;
 	
-	public GameServer() {
+	public GameServer(boolean standalone) {
 		server = new Server(writeBufferSize*5, objectBufferSize) {
 			@Override
 			public void start() {
@@ -266,6 +266,9 @@ public class GameServer implements GameProtocol {
 				playerToConnectionMap.remove(player);
 				broadcast(new Message(player.getName()+" left the server.", Color.ORANGE));
 				//System.out.println("server disconnected from client: " + connection.getRemoteAddressTCP().getHostString());
+				
+				if(connectionToPlayerDataMap.size() == 0 && !standalone)
+					ServerCore.quit();
 			}
 		});//);
 		

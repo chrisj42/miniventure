@@ -12,6 +12,7 @@ import miniventure.game.GameProtocol.HeldItemRequest;
 import miniventure.game.GameProtocol.Message;
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.item.InventoryScreen;
+import miniventure.game.screen.ErrorScreen;
 import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
 
@@ -98,6 +99,9 @@ public class ClientCore extends ApplicationAdapter {
 			//System.out.println("sending held item request to server for "+clientWorld.getMainPlayer().getHands().getUsableItem());
 			getClient().send(new HeldItemRequest(clientWorld.getMainPlayer().getHands()));
 		}
+		
+		if(menuScreen instanceof MainMenu && screen instanceof ErrorScreen)
+			return; // ignore it.
 		
 		if(screen == null && menuScreen != null && menuScreen != gameScreen.chatScreen)
 			menuScreen.dispose();

@@ -22,7 +22,7 @@ public class DesktopLauncher {
 			config.width = GameCore.DEFAULT_SCREEN_WIDTH;
 			config.height = GameCore.DEFAULT_SCREEN_HEIGHT;
 			new LwjglApplication(new ClientCore((width, height, callback) -> {
-				ServerCore.initServer(width, height);
+				ServerCore.initServer(width, height, false);
 				// server running, and world loaded; now, get the server world updating
 				new Thread(ServerCore::run, "Miniventure Server").start();
 				callback.act(); // ready to connect

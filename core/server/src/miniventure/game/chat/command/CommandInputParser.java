@@ -1,10 +1,12 @@
 package miniventure.game.chat.command;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 import miniventure.game.chat.MessageBuilder;
 import miniventure.game.server.ServerCore;
@@ -12,16 +14,15 @@ import miniventure.game.world.entity.mob.ServerPlayer;
 
 import org.jetbrains.annotations.Nullable;
 
-public class CommandInputParser extends Thread {
+public class CommandInputParser implements Runnable {
 	
-	private Scanner in;
-	boolean shouldRun;
+	private BufferedReader in;
+	private boolean shouldRun;
 	
 	private ConsoleMessageBuilder out, err;
 	
 	public CommandInputParser() {
-		super("CommandInputParser");
-		this.in = new Scanner(System.in).useDelimiter(System.lineSeparator());
+		this.in = new BufferedReader(new InputStreamReader(System.in));
 		
 		out = new ConsoleMessageBuilder(new PrintWriter(new OutputStreamWriter(System.out), true));
 		err = new ConsoleMessageBuilder(new PrintWriter(new OutputStreamWriter(System.err), true));
@@ -30,10 +31,24 @@ public class CommandInputParser extends Thread {
 	@Override
 	public void run() {
 		shouldRun = true;
+		
 		while(shouldRun) {
 			out.print("Enter a command: ");
 			out.flush();
-			String input = in.next();
+			String input = "";
+			try {
+				while(shouldRun && !in.ready()) {
+					try {
+						Thread.sleep(5);
+					} catch(InterruptedException ignored) {
+					}
+				}
+				if(!shouldRun) break;
+				input = in.readLine();
+			} catch(IOException e) {
+				e.printStackTrace();
+			}
+			if(!shouldRun) break;
 			
 			executeCommand(input, null, out, err);
 			out.println();
@@ -112,4 +127,5 @@ public class CommandInputParser extends Thread {
 			command.execute(args.toArray(new String[args.size()]), executor, out, err);
 	}
 	
+	public void end() { shouldRun = false; }
 }

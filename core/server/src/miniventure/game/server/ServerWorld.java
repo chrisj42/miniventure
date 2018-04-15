@@ -51,7 +51,7 @@ public class ServerWorld extends WorldManager {
 	
 	private final HashSet<WorldObject> keepAlives = new HashSet<>(); // always keep chunks around these objects loaded.
 	
-	public ServerWorld() {
+	public ServerWorld(boolean standalone) {
 		super(new TilePropertyFetcher((instanceTemplate -> {
 			if(instanceTemplate instanceof DestructibleProperty)
 				return new ServerDestructibleProperty((DestructibleProperty)instanceTemplate);
@@ -61,7 +61,7 @@ public class ServerWorld extends WorldManager {
 			return instanceTemplate;
 		})));
 		
-		server = new GameServer();
+		server = new GameServer(standalone);
 		server.startServer();
 	}
 	
@@ -129,10 +129,13 @@ public class ServerWorld extends WorldManager {
 	
 	@Override
 	public void exitWorld(boolean save) {
+		if(!worldLoaded) return;
 		// dispose of level/world resources
 		keepAlives.clear();
 		clearLevels();
 		levelGenerator = null;
+		server.stop();
+		worldLoaded = false;
 		//spawnTile = null;
 	}
 	
@@ -204,6 +207,7 @@ public class ServerWorld extends WorldManager {
 	
 	public void removePlayer(ServerPlayer player) {
 		keepAlives.remove(player);
+		
 	}
 	
 	

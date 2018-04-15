@@ -6,6 +6,7 @@ import miniventure.game.GameCore;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.ClientWorld;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
@@ -13,6 +14,8 @@ import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 
 public class MainMenu extends MenuScreen {
+	
+	private boolean dialog = false;
 	
 	public MainMenu() {
 		super();
@@ -36,6 +39,7 @@ public class MainMenu extends MenuScreen {
 		button.addListener(new ClickListener() {
 			@Override
 			public void clicked(InputEvent e, float x, float y) {
+				if(dialog) return;
 				world.createWorld(0, 0);
 			}
 		});
@@ -48,8 +52,21 @@ public class MainMenu extends MenuScreen {
 		joinBtn.addListener(new ClickListener() {
 			@Override
 			public void clicked(InputEvent e, float x, float y) {
-				String ipAddress = JOptionPane.showInputDialog("Enter the IP Address you want to connect to.");
-				world.createWorld(ipAddress);
+				if(dialog) return;
+				dialog = true;
+				LoadingScreen loader = new LoadingScreen();
+				loader.pushMessage("Preparing to connect...");
+				ClientCore.setScreen(loader);
+				new Thread(() -> {
+					String ipAddress = JOptionPane.showInputDialog("Enter the IP Address you want to connect to.");
+					Gdx.app.postRunnable(() -> {
+						if(ipAddress != null)
+							world.createWorld(ipAddress);
+						else
+							ClientCore.setScreen(new MainMenu());
+					});
+					dialog = false;
+				}).start();
 			}
 		});
 		
@@ -60,7 +77,13 @@ public class MainMenu extends MenuScreen {
 		table.setPosition(getWidth()/2, getHeight()/2);
 	}
 	
-	private void addLabel(String msg, int spacing) {
+	@Override
+	public void draw() {
+		Gdx.gl.glClearColor(0, 0, 0, 1);
+		super.draw();
+	}
+		
+		private void addLabel(String msg, int spacing) {
 		table.add(new VisLabel(msg));
 		table.row().space(spacing);
 	}

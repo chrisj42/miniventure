@@ -9,6 +9,7 @@ import miniventure.game.GameCore;
 import miniventure.game.GameProtocol;
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.screen.ErrorScreen;
+import miniventure.game.screen.MainMenu;
 import miniventure.game.util.ProgressLogger;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.Chunk.ChunkData;
@@ -217,9 +218,7 @@ public class GameClient implements GameProtocol {
 				forPacket(object, Message.class, ClientCore::addMessage);
 				forPacket(object, InfoMessage.class, ClientCore::addMessage);
 				
-				forPacket(object, LoginFailure.class, failure -> {
-					Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen(failure.message)));
-				});
+				forPacket(object, LoginFailure.class, failure -> Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen(failure.message))));
 			}
 			
 			@Override
@@ -251,6 +250,7 @@ public class GameClient implements GameProtocol {
 		try {
 			client.connect(5000, host, port);
 		} catch(IOException e) {
+			System.err.println("(caught IOException:)");
 			e.printStackTrace();
 			// error screen
 			Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen("failed to connect to server.")));
@@ -259,10 +259,17 @@ public class GameClient implements GameProtocol {
 		
 		logger.editMessage("logging in...");
 		
-		username = JOptionPane.showInputDialog("Specify username:", username);
-		send(new Login(username, GameCore.VERSION));
-		
-		logger.editMessage("Loading world from server...");
+		new Thread(() -> {
+			username = JOptionPane.showInputDialog("Specify username:", username);
+			if(username == null) {
+				client.close();
+				Gdx.app.postRunnable(() -> ClientCore.setScreen(new MainMenu()));
+			}
+			
+			send(new Login(username, GameCore.VERSION));
+			
+			logger.editMessage("Loading world from server...");
+		}).start();
 		
 		return true;
 	}
