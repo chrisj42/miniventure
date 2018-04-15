@@ -7,6 +7,7 @@ import miniventure.game.chat.MessageBuilder;
 import miniventure.game.chat.command.Argument.ArgValidator;
 import miniventure.game.server.ServerCore;
 import miniventure.game.util.MyUtils;
+import miniventure.game.world.Config;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.TimeOfDay;
 import miniventure.game.world.entity.mob.ServerPlayer;
@@ -51,6 +52,28 @@ public enum Command {
 			ServerCore.getServer().sendMessage(executor, player, msg);
 			
 		}), Argument.get(ArgValidator.PLAYER), Argument.varArg(ArgValidator.ANY))
+	),
+	
+	CONFIG("Edit configuration values for how the world works.",
+		new CommandUsageForm(true, "list", "Display the current value of all config entries.", (executor, args, out, err) -> {
+			out.println("Config values:");
+			for(Config value: Config.values)
+				out.println("    "+value+" = "+value.get());
+		}, Argument.get(ArgValidator.exactString(false, "list"))),
+		
+		new CommandUsageForm(true, "get <configvalue>", "Display the current value of a config entry.", (executor, args, out, err) -> {
+			Config value = ArgValidator.CONFIG_VALUE.get(args[1]);
+			out.println(value+": "+value.get());
+		}, Argument.get(ArgValidator.exactString(false, "get"), ArgValidator.CONFIG_VALUE)),
+		
+		new CommandUsageForm(true, "set <configname> <value>", "Set the value of a config entry.", (executor, args, out, err) -> {
+			Config value = ArgValidator.CONFIG_VALUE.get(args[1]);
+			if(value.set(args[2])) {
+				out.println("Successfully set " + value + " to " + value.get());
+				ServerCore.getWorld().broadcastWorldUpdate();
+			} else
+				err.println("Could not set config value.");
+		}, Argument.get(ArgValidator.exactString(false, "set"), ArgValidator.CONFIG_VALUE, ArgValidator.ANY))
 	),
 	
 	TP("Teleport a player to a location in the world.",

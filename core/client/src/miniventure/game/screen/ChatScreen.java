@@ -91,6 +91,7 @@ public class ChatScreen extends MenuScreen {
 							curCommand = input.getText();
 						prevCommandIdx++;
 						input.setText(previousCommands.get(prevCommandIdx));
+						input.setCursorPosition(input.getText().length());
 					}
 					return true;
 				}
@@ -102,6 +103,7 @@ public class ChatScreen extends MenuScreen {
 						else
 							input.setText(previousCommands.get(prevCommandIdx));
 					}
+					input.setCursorPosition(input.getText().length());
 					return true;
 				}
 				else

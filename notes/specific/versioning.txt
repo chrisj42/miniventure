@@ -1,7 +1,0 @@
-#.# is the main versions. The third number versions are prereleases, and come after the two number release. So, 1.3.2 is not the same feature as 1.3. When a new feature is completed, the version can either go to the next second number, or a new first number, setting the second number back to 0.
-
-Better, there should be a release version, and then versions afterward that fix bugs in the main version. then another set of versions that prelude the new feature(s).
-
-The problem is that there shoul be a way to specify there have been a ton of changes since the last version, but that it's still not stable.
-
-...Then again, when is it ever stable? *sigh*, but there needs to be versions of greater stability than ones in between.

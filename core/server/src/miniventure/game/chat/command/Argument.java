@@ -6,6 +6,7 @@ import miniventure.game.server.ServerCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.ValueFunction;
 import miniventure.game.util.function.ValueMonoFunction;
+import miniventure.game.world.Config;
 import miniventure.game.world.TimeOfDay;
 import miniventure.game.world.entity.mob.ServerPlayer;
 
@@ -113,6 +114,7 @@ public interface Argument {
 		};
 		ArgValidator<TimeOfDay> TIME_RANGE = arg -> noException(() -> TimeOfDay.valueOf(MyUtils.toTitleCase(arg)));
 		ArgValidator<Float> TIME = anyOf(CLOCK_TIME, map(TIME_RANGE, TimeOfDay::getStartOffsetSeconds));
+		ArgValidator<Config> CONFIG_VALUE = arg -> notNull(() -> Config.valueOf(arg));
 		
 		@SafeVarargs
 		static <T> ArgValidator<T> anyOf(ArgValidator<T>... validators) {

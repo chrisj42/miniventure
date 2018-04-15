@@ -7,12 +7,7 @@ import miniventure.game.GameProtocol.EntityRemoval;
 import miniventure.game.GameProtocol.WorldData;
 import miniventure.game.ProgressPrinter;
 import miniventure.game.util.MyUtils;
-import miniventure.game.world.Chunk;
-import miniventure.game.world.Level;
-import miniventure.game.world.ServerLevel;
-import miniventure.game.world.TimeOfDay;
-import miniventure.game.world.WorldManager;
-import miniventure.game.world.WorldObject;
+import miniventure.game.world.*;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.ServerPlayer;
@@ -87,9 +82,12 @@ public class ServerWorld extends WorldManager {
 	/*  --- WORLD MANAGEMENT --- */
 	
 	
+	public WorldData getWorldUpdate() { return new WorldData(gameTime, this.daylightOffset, Config.DaylightCycle.get()); }
+	public void broadcastWorldUpdate() { server.broadcast(getWorldUpdate()); }
+	
 	public void setTimeOfDay(float daylightOffset) {
 		this.daylightOffset = daylightOffset % TimeOfDay.SECONDS_IN_DAY;
-		server.broadcast(new WorldData(gameTime, this.daylightOffset));
+		broadcastWorldUpdate();
 	}
 	public float changeTimeOfDay(float deltaOffset) {
 		float newOff = this.daylightOffset;
@@ -99,6 +97,8 @@ public class ServerWorld extends WorldManager {
 		setTimeOfDay(newOff);
 		return getDaylightOffset();
 	}
+	
+	@Override protected boolean doDaylightCycle() { return Config.DaylightCycle.get(); }
 	
 	@Override
 	public boolean worldLoaded() { return worldLoaded; }

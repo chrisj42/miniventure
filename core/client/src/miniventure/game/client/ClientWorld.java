@@ -50,6 +50,8 @@ public class ClientWorld extends WorldManager {
 	
 	private ClientPlayer mainPlayer;
 	
+	private boolean doDaylightCycle = true;
+	
 	ClientWorld(ServerStarter serverStarter, GameScreen gameScreen) {
 		super(new TilePropertyFetcher(instanceTemplate -> instanceTemplate));
 		
@@ -93,7 +95,10 @@ public class ClientWorld extends WorldManager {
 	void init(WorldData data) {
 		gameTime = data.gameTime;
 		daylightOffset = data.daylightOffset;
+		this.doDaylightCycle = data.doDaylightCycle;
 	}
+	
+	@Override protected boolean doDaylightCycle() { return doDaylightCycle; }
 	
 	@Override
 	public boolean worldLoaded() { return getLevelCount() > 0; }

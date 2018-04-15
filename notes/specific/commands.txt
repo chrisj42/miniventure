@@ -1,4 +1,31 @@
-ok, so there are going to be client and server commands... right..?
-I mean, technically, I suppose, all commands should be specified for both client and server, but the behavior cannot exist for both.
 
-How about the behavior just exist totally on the server? That sounds good. Maybe I don't even need to define them for the client; they will just be sent over as... a new packet type, CommandList or something. Then a Command class will hold a string that, when sent by a client, holds the line of text that was entered, and when sent back by a server, indicates a string to be printed to the chat stream.
+Alright, so now, this is going to specify the forms that commands can follow.
+
+So, commands can have multiple "forms", and each form is entirely independent of any other.
+
+Within each form, one can have a set of parameters. Before I go off the deep end with this though, I think I'll use examples so I can try to make sense, and stay on track.
+	TP command
+		- playertarget playerdest
+		- playerdest (target is invoker)
+		- playertarget x y [level] (you can't set the z coordinate)
+		- x y [level] (target is invoker)
+	
+	CONFIG command
+		- get configvalue
+		- set configvalue newvalue
+	
+	TIME command
+		- get
+		- set HH:MM|timeofday
+		- add HH:MM
+		- sub HH:MM
+	
+	KILL command
+		- playername
+		- @entitytag [alllevels-bool] - alllevels defaults to false.
+		
+	GIVE command
+		- [playername] item [count] - player defaults to invoker.
+		
+		
+		

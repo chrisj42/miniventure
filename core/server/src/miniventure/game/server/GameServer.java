@@ -102,7 +102,8 @@ public class GameServer implements GameProtocol {
 						}
 					}
 					
-					connection.sendTCP(new WorldData(world.getGameTime(), world.getDaylightOffset()));
+					
+					connection.sendTCP(world.getWorldUpdate());
 					
 					// prepare level
 					ServerLevel level = world.getLevel(0);

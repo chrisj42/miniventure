@@ -18,6 +18,8 @@ public abstract class WorldManager {
 	private final HashMap<Integer, Entity> entityIDMap = new HashMap<>();
 	protected float gameTime, daylightOffset;
 	
+	
+	
 	private final HashMap<Integer, Level> levels = new HashMap<>();
 	private final HashMap<Level, Set<Entity>> levelEntities = new HashMap<>();
 	private final HashMap<Entity, Level> entityLevels = new HashMap<>();
@@ -43,11 +45,15 @@ public abstract class WorldManager {
 	/** update the world's game logic. (can also use to render) */
 	public void update(float delta) {
 		gameTime += delta;
-		daylightOffset = (daylightOffset + delta) % TimeOfDay.SECONDS_IN_DAY;
+		if(doDaylightCycle())
+			daylightOffset = (daylightOffset + delta) % TimeOfDay.SECONDS_IN_DAY;
 	}
 	
 	
 	/*  --- WORLD MANAGEMENT --- */
+	
+	
+	protected abstract boolean doDaylightCycle();
 	
 	/** if there is a world loaded (should be true after calling createWorld) */
 	public abstract boolean worldLoaded();
