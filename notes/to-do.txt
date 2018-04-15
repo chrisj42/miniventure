@@ -18,7 +18,6 @@ save system.
 
 ****
 
-command to halt daylight cycle.
 command to kill entities, using the @ entity targeting system
 command to give items to a player
 
