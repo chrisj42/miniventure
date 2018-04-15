@@ -3,7 +3,6 @@ package miniventure.game.chat.command;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -46,7 +45,41 @@ public class CommandInputParser extends Thread {
 	// a null player indicates that it is from the server console.
 	public void executeCommand(String input, @Nullable ServerPlayer executor, MessageBuilder out, MessageBuilder err) {
 		if(input.length() == 0) return;
-		List<String> parsed = new ArrayList<>();
+		
+		List<String> args = new ArrayList<>();
+		
+		StringBuilder arg = new StringBuilder();
+		boolean escaped = false;
+		boolean quoted = false;
+		for(char c: input.toCharArray()) {
+			if(escaped) {
+				arg.append(c);
+				escaped = false;
+				continue;
+			}
+			if(c == '\\') {
+				escaped = true;
+				continue;
+			}
+			
+			if(c == '\"') {
+				quoted = !quoted;
+				continue;
+			}
+			
+			if(c == ' ' && !quoted) {
+				args.add(arg.toString());
+				arg = new StringBuilder();
+				continue;
+			}
+			
+			arg.append(c);
+		}
+		
+		if(args.size() == 0 || arg.length() > 0)
+			args.add(arg.toString());
+		
+		/*List<String> parsed = new ArrayList<>();
 		parsed.addAll(Arrays.asList(input.split(" ")));
 		int lastIdx = -1;
 		for(int i = 0; i < parsed.size(); i++) {
@@ -63,14 +96,20 @@ public class CommandInputParser extends Thread {
 				parsed.set(i, parsed.get(i).replaceFirst("\"", "")); // remove the parsed quote character from the string.
 				i--; // so that this string can be parsed again, in case there is another quote.
 			}
-		}
+		}*/
 		
-		String commandName = parsed.remove(0);
+		//System.out.println("parsed command: "+args);
+		
+		String commandName = args.remove(0);
 		Command command = Command.getCommand(commandName, executor);
+		if(command == null && commandName.startsWith("/")) {
+			commandName = commandName.substring(1);
+			command = Command.getCommand(commandName, executor);
+		}
 		if(command == null)
 			err.println("Command not recognized: \""+commandName+"\". Type \"help\" for a list of commands.");
 		else
-			command.execute(parsed.toArray(new String[parsed.size()]), executor, out, err);
+			command.execute(args.toArray(new String[args.size()]), executor, out, err);
 	}
 	
 }

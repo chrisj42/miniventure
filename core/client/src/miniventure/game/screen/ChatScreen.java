@@ -73,7 +73,7 @@ public class ChatScreen extends MenuScreen {
 						previousCommands.pollLast(); // remove oldest command from history
 					
 					if(!text.startsWith("/"))
-						text = "msg " + text;
+						text = "msg " + text.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\""); // replace one backslash with two.
 					else
 						text = text.substring(1);
 					
@@ -154,6 +154,7 @@ public class ChatScreen extends MenuScreen {
 	
 	private void repack() {
 		input.pack();
+		input.setWidth(getWidth()/2);
 		input.setPosition(getWidth() / 2, getHeight() - input.getHeight());
 		vGroup.pack();
 		vGroup.setPosition(getWidth() / 2, input.getY() - 10 - vGroup.getHeight());
