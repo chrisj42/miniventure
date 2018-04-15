@@ -57,6 +57,8 @@ public class GameCore {
 		fontGenerator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/arial.ttf"));
 		skin = new Skin(Gdx.files.internal("skins/visui/uiskin.json"));
 		
+		getFont(); // initialize default font
+		
 		//noinspection ConstantConditions
 		for(AtlasRegion region: iconAtlas.getRegions())
 			icons.put(region.name, new TextureHolder(region));

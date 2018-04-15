@@ -124,6 +124,8 @@ public class GameServer implements GameProtocol {
 						System.out.println("Server: new player successfully connected: "+player.getName());
 						
 						connectionToPlayerDataMap.get(connection).validationTimer.start();
+						
+						broadcast(new Message(player.getName()+" joined the server.", Color.ORANGE), false, player);
 					}
 					else connection.sendTCP(new LoginFailure("Server world is not initialized."));
 					
@@ -260,6 +262,9 @@ public class GameServer implements GameProtocol {
 				ServerPlayer player = data.player;
 				player.remove();
 				player.getWorld().removePlayer(player);
+				connectionToPlayerDataMap.remove(connection);
+				playerToConnectionMap.remove(player);
+				broadcast(new Message(player.getName()+" left the server.", Color.ORANGE));
 				//System.out.println("server disconnected from client: " + connection.getRemoteAddressTCP().getHostString());
 			}
 		});//);
