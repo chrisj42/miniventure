@@ -14,3 +14,25 @@ flesh out the item drop class, to allow drops with random drop count, and such.
 
 ****
 
+save system.
+
+****
+
+command to halt daylight cycle.
+command to kill entities, using the @ entity targeting system
+command to give items to a player
+
+****
+
+command tab auto-complete system.
+
+****
+
+increase biome sizes
+
+****
+
+level system; note that levels will not solely be identified by depth (though the core ones will), levels can also be tied to a portal of sorts, like a house door or something. I just need a way to identify them more easily...
+
+****
+
