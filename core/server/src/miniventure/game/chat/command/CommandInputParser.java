@@ -94,26 +94,6 @@ public class CommandInputParser implements Runnable {
 		if(args.size() == 0 || arg.length() > 0)
 			args.add(arg.toString());
 		
-		/*List<String> parsed = new ArrayList<>();
-		parsed.addAll(Arrays.asList(input.split(" ")));
-		int lastIdx = -1;
-		for(int i = 0; i < parsed.size(); i++) {
-			if(parsed.get(i).contains("\"")) {
-				if(lastIdx >= 0) { // closing a quoted String
-					while(i > lastIdx) { // join the words together
-						parsed.set(lastIdx, parsed.get(lastIdx) + " " + parsed.remove(lastIdx+1));
-						i--;
-					}
-					lastIdx = -1; // reset the "last quote" variable.
-				} else // start the quoted String
-					lastIdx = i; // set the "last quote" variable.
-				
-				parsed.set(i, parsed.get(i).replaceFirst("\"", "")); // remove the parsed quote character from the string.
-				i--; // so that this string can be parsed again, in case there is another quote.
-			}
-		}*/
-		
-		//System.out.println("parsed command: "+args);
 		
 		String commandName = args.remove(0);
 		Command command = Command.getCommand(commandName, executor);
