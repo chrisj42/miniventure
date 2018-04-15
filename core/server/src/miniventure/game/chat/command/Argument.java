@@ -16,7 +16,7 @@ public interface Argument {
 	boolean satisfiedBy(String[] args, int offset);
 	int length();
 	
-	static Argument get(@NotNull ArgumentValidator... validators) {
+	static Argument get(@NotNull ArgValidator... validators) {
 		return new Argument() {
 			@Override
 			public boolean satisfiedBy(String[] args, int offset) {
@@ -49,7 +49,7 @@ public interface Argument {
 		return args;
 	}*/
 	
-	static Argument varArg(ArgumentValidator validator) {
+	static Argument varArg(ArgValidator validator) {
 		return new Argument() {
 			@Override
 			public boolean satisfiedBy(String[] args, int offset) {
@@ -61,7 +61,7 @@ public interface Argument {
 		};
 	}
 	
-	interface ArgumentValidator<T> {
+	interface ArgValidator<T> {
 		static <T> T notNull(ValueFunction<T> function) throws IllegalArgumentException {
 			T obj = function.get();
 			if(obj == null)
@@ -86,13 +86,14 @@ public interface Argument {
 			return obj;
 		}
 		
-		ArgumentValidator<String> ANY = arg -> arg;
-		ArgumentValidator<Integer> INTEGER = arg -> noException(() -> Integer.parseInt(arg));
-		ArgumentValidator<Float> DECIMAL = arg -> noException(() -> Float.parseFloat(arg));
-		ArgumentValidator<Boolean> BOOLEAN = arg -> noException(() -> Boolean.parseBoolean(arg));
-		ArgumentValidator<ServerPlayer> PLAYER = arg -> notNull(() -> ServerCore.getServer().getPlayerByName(arg));
-		ArgumentValidator<Command> COMMAND = arg -> noException(() -> Enum.valueOf(Command.class, arg.toUpperCase()));
-		ArgumentValidator<Float> CLOCK_TIME = arg -> noException(() -> {
+		
+		ArgValidator<String> ANY = arg -> arg;
+		ArgValidator<Integer> INTEGER = arg -> noException(() -> Integer.parseInt(arg));
+		ArgValidator<Float> DECIMAL = arg -> noException(() -> Float.parseFloat(arg));
+		ArgValidator<Boolean> BOOLEAN = arg -> noException(() -> Boolean.parseBoolean(arg));
+		ArgValidator<ServerPlayer> PLAYER = arg -> notNull(() -> ServerCore.getServer().getPlayerByName(arg));
+		ArgValidator<Command> COMMAND = arg -> noException(() -> Enum.valueOf(Command.class, arg.toUpperCase()));
+		ArgValidator<Float> CLOCK_DURATION = arg -> noException(() -> {
 			String[] parts = arg.split(":");
 			int hour = Integer.parseInt(parts[0]);
 			int min = Integer.parseInt(parts[1]);
@@ -101,18 +102,42 @@ public interface Argument {
 			
 			float time = hour + (min / 60f);
 			
-			time = (time + 24 - TimeOfDay.REL_START_TIME_OFFSET) % 24;
 			return MyUtils.mapFloat(time, 0, 24, 0, TimeOfDay.SECONDS_IN_DAY);
 		});
+		ArgValidator<Float> CLOCK_TIME = arg -> {
+			float duration = CLOCK_DURATION.get(arg);
+			float total = TimeOfDay.SECONDS_IN_DAY;
+			return (duration + total - TimeOfDay.SECONDS_START_TIME_OFFSET) % total;
+			//time = (time + 24 - ) % 24;
+			//return MyUtils.mapFloat(time, 0, 24, 0, TimeOfDay.SECONDS_IN_DAY);
+		};
+		ArgValidator<TimeOfDay> TIME_RANGE = arg -> noException(() -> TimeOfDay.valueOf(MyUtils.toTitleCase(arg)));
+		ArgValidator<Float> TIME = anyOf(CLOCK_TIME, map(TIME_RANGE, TimeOfDay::getStartOffsetSeconds));
 		
-		static ArgumentValidator<String> exactString(boolean matchCase, String... matches) {
-			return arg -> isTrue(() -> arg, theArg -> {
-				for(String match: matches)
-					if(matchCase ? theArg.equals(match) : theArg.equalsIgnoreCase(match))
-						return true;
+		@SafeVarargs
+		static <T> ArgValidator<T> anyOf(ArgValidator<T>... validators) {
+			return arg -> {
+				for(ArgValidator<T> validator: validators) {
+					if(validator.isValid(arg)) {
+						return validator.get(arg);
+					}
+				}
 				
-				return false;
-			});
+				throw new IllegalArgumentException();
+			};
+		}
+		
+		static <T1, T2> ArgValidator<T2> map(ArgValidator<T1> orig, ValueMonoFunction<T2, T1> mapper) { return arg -> mapper.get(orig.get(arg)); }
+		
+		static ArgValidator<String> exactString(boolean matchCase, String... matches) { return exactString(str -> str, matchCase, matches); }
+		static <T> ArgValidator<T> exactString(ValueMonoFunction<T, String> mapper, boolean matchCase, String... matches) {
+			return arg -> {
+				for(String match : matches)
+					if(matchCase ? arg.equals(match) : arg.equalsIgnoreCase(match))
+						return mapper.get(arg);
+				
+				throw new IllegalArgumentException();
+			};
 		}
 		
 		T get(String arg) throws IllegalArgumentException;

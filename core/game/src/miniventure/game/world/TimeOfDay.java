@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 public enum TimeOfDay {
 	
-	Morning(10.5f, 0.42f, new Color(1, 0.980f, 0, 0.478f)),
+	Morning(10.5f, 0.42f, new Color(1, 0.980f, 0.2f, 0.6f)),
 	
 	Day(12+4, 0.23f, new Color(0, 0, 0, 0)),
 	
@@ -18,14 +18,15 @@ public enum TimeOfDay {
 	
 	Night(24+6, 0.35f, new Color(0, 0.03f, 0.278f, 0.8f)),
 	
-	Dawn(24+7, 1f, new Color(0.7f, 0.28f, 0.25f, 0.7f));
+	Dawn(24+7, 1f, new Color(0.8f, 0.4f, 0.45f, 0.7f));
 	
 	public static final TimeOfDay[] values = TimeOfDay.values();
 	public static final String[] names = MyUtils.mapArray(values, String.class, TimeOfDay::name);
 	
-	public static final float SECONDS_IN_DAY = 60 * 5; // in seconds; 5 minutes is like 24 hours in-game. 
-	public static final float REL_START_TIME_OFFSET = 7f; // Essentially, this is when the day starts. this determines when dawn is; this is subtracted from the end time of dawn, and the rest.
+	public static final float SECONDS_IN_DAY = 60 * 24 / 2; // in seconds; two in-game minutes pass for every real-time second. 
+	private static final float REL_START_TIME_OFFSET = 7f; // Essentially, this is when the day starts. this determines when dawn is; this is subtracted from the end time of dawn, and the rest.
 	private static final float REL_DAY_DURATION = values[values.length-1].endTime;
+	public static final float SECONDS_START_TIME_OFFSET = MyUtils.mapFloat(REL_START_TIME_OFFSET, 0, REL_DAY_DURATION, 0, SECONDS_IN_DAY);
 	
 	private final Color mainColor;
 	private final float endTime; // relative to nothing but the other times.
