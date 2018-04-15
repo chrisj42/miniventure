@@ -1,1 +1,8 @@
-no bugs here. :)
+possible for the requestedAnimations queue to generate a null pointer exception when attempting to poll, for some reason.
+
+using the tp command too much can result in renders with tiles with null level references; to fix, perhaps sync player movement with rendering, or just ignore it for that one cycle.
+
+player jumps back whenever walking into an entity that is moving toward it, when the server is remote. I'm pretty sure this is due to the delay between server updates and the server updating the client. The client thinks it can move somewhere, because the server hasn't had a chance to tell it otherwise, so it tries to move. The server then corrects it, causing the "jump-back".
+
+player position tends to be a bit spazzy
+

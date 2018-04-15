@@ -1,0 +1,4 @@
+ok, so there are going to be client and server commands... right..?
+I mean, technically, I suppose, all commands should be specified for both client and server, but the behavior cannot exist for both.
+
+How about the behavior just exist totally on the server? That sounds good. Maybe I don't even need to define them for the client; they will just be sent over as... a new packet type, CommandList or something. Then a Command class will hold a string that, when sent by a client, holds the line of text that was entered, and when sent back by a server, indicates a string to be printed to the chat stream.

@@ -1,14 +1,16 @@
-I *need* to have a property for whether a TileType is opaque or not. If it is, then I think maybe lower layers can still overlap adjacent tiles, but those tiles should not connect with the hidden layers. If it did, I would have holes connecting to everything.
-Impl. Note: when drawing the tile overlaps that go under the current tile, I should first check to see if the current tile is opaque. If so, skip drawing those under overlaps altogether.
-So, perhaps I should restructure what's inside the loop through the tile's TileTypes. First off, I need to locate the highest up opaque tile, and begin drawing there. I'll just go though a reversed iterator of the tree map, and then once I've found an opaque tile, get a tail list iterator of the tree map starting at the opaque tile type, inclusive. I should also set the iterator for the aroundTypes with a tail list starting at the opaque type, but exclusive. For each main tile type (in loop), I should draw the main connection sprite, get the next higher type, and consider my options; I only want to draw an overlap sprite if the next higher tile is not also overlapped by it. So while there's another overlap sprite to draw, and the next higher main type is null or > the current overlap type (not >=, b/c we don't want to overlap with tiles of the same type), then draw the overlap and advance to the next one. That should draw all the main sprites and overlap sprites pretty efficiently.
-Note that I'll also have to change the part in the ConnectionProperty where it checks the tile's types against the connecting types; I'll have to check the highest opaque tile for each adjacent tile, and only consider those and above, not any of the types under. Otherwise holes would connect to everything.
-Because I'm checking the highest opaque tile so often, perhaps I should store it in a variable? It would be pretty easy, I would just update it in the resetTile method. If you're setting it to a type that is higher than the current one, then it pushes the new type to the type stack, and reinstantiates the data array with as many more slots as the new type needs (the previous data array contents fill the rest of the new array). If it is lower, however, then... Well actually it shouldn't be lower. It prints an error.
-I'll remake the reset method into two methods, addTile and breakTile. Add tile expects a type which is higher than the current one, else it will return false and do nothing. It will also do this if the current type is not part of the TileType list in CoveredTileProperty (unless the type list is null; not empty, null). That's right, CoveredTileProperty will now (optionally) store a list of TileTypes that a type can be placed on. This can be added to, but not overruled, in the TileItem class. The TileItem class will call addTile (after possibly doing it's own checks), and only count as a use if it returns true.
-BreakTile will not take any arguments. It will pop a type from the TileType stack, and reinstantiate the data array with the old type's data removed. If this was the last tile in the stack, however, it will add back the first type in the TileType enum (or just HOLE explicitly perhaps), with the *default* data. This will probably never happen though because nothing should ever end up calling breakTile with only one tile left; in fact, since it's called in DestructibleProperty, I'll make the method package-private. Since the DestructibleProperty for HOLE is indestructible, it shouldn't ever end up being called. But, in case it does, there's a bit of behavior for it, as described above.
+I need a way to be sure I'm seeing what the server is seeing.
 
 ****
 
-Make the torch TileType, and a LightProperty to go along with it. It wouldn't really make sense *now*, though, becuase there's no darkness to light up.
+player should show indication of failed interaction
+
+****
+
+find a way to initialize jpanel environment so it doesn't lag the first time.
+
+****
+
+flesh out the item drop class, to allow drops with random drop count, and such.
 
 ****
 

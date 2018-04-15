@@ -150,7 +150,7 @@
             <key>data</key>
             <struct type="DataFile">
                 <key>name</key>
-                <filename>../core/assets/sprites/entities.txt</filename>
+                <filename>../core/game/assets/sprites/entities.txt</filename>
             </struct>
         </map>
         <key>multiPack</key>
@@ -199,6 +199,42 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
+            <key type="filename">entity-sprites/mob/idle-down_1.png</key>
+            <key type="filename">entity-sprites/mob/idle-left_1.png</key>
+            <key type="filename">entity-sprites/mob/idle-right_1.png</key>
+            <key type="filename">entity-sprites/mob/idle-up_1.png</key>
+            <key type="filename">entity-sprites/mob/walk-down_1.png</key>
+            <key type="filename">entity-sprites/mob/walk-down_2.png</key>
+            <key type="filename">entity-sprites/mob/walk-left_1.png</key>
+            <key type="filename">entity-sprites/mob/walk-left_2.png</key>
+            <key type="filename">entity-sprites/mob/walk-right_1.png</key>
+            <key type="filename">entity-sprites/mob/walk-right_2.png</key>
+            <key type="filename">entity-sprites/mob/walk-up_1.png</key>
+            <key type="filename">entity-sprites/mob/walk-up_2.png</key>
+            <key type="filename">entity-sprites/player/idle-down_1.png</key>
+            <key type="filename">entity-sprites/player/idle-left_1.png</key>
+            <key type="filename">entity-sprites/player/idle-right_1.png</key>
+            <key type="filename">entity-sprites/player/idle-up_1.png</key>
+            <key type="filename">entity-sprites/player/walk-down_1.png</key>
+            <key type="filename">entity-sprites/player/walk-down_2.png</key>
+            <key type="filename">entity-sprites/player/walk-left_1.png</key>
+            <key type="filename">entity-sprites/player/walk-left_2.png</key>
+            <key type="filename">entity-sprites/player/walk-right_1.png</key>
+            <key type="filename">entity-sprites/player/walk-right_2.png</key>
+            <key type="filename">entity-sprites/player/walk-up_1.png</key>
+            <key type="filename">entity-sprites/player/walk-up_2.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>6,7,12,14</rect>
+                <key>scale9Paddings</key>
+                <rect>6,7,12,14</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">entity-sprites/particle/impact_01.png</key>
             <key type="filename">entity-sprites/particle/impact_02.png</key>
             <key type="filename">entity-sprites/particle/impact_03.png</key>
@@ -283,30 +319,6 @@
                 <rect>8,8,16,16</rect>
                 <key>scale9Paddings</key>
                 <rect>8,8,16,16</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">entity-sprites/player/idle-down_1.png</key>
-            <key type="filename">entity-sprites/player/idle-left_1.png</key>
-            <key type="filename">entity-sprites/player/idle-right_1.png</key>
-            <key type="filename">entity-sprites/player/idle-up_1.png</key>
-            <key type="filename">entity-sprites/player/walk-down_1.png</key>
-            <key type="filename">entity-sprites/player/walk-down_2.png</key>
-            <key type="filename">entity-sprites/player/walk-left_1.png</key>
-            <key type="filename">entity-sprites/player/walk-left_2.png</key>
-            <key type="filename">entity-sprites/player/walk-right_1.png</key>
-            <key type="filename">entity-sprites/player/walk-right_2.png</key>
-            <key type="filename">entity-sprites/player/walk-up_1.png</key>
-            <key type="filename">entity-sprites/player/walk-up_2.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>6,7,12,14</rect>
-                <key>scale9Paddings</key>
-                <rect>6,7,12,14</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>

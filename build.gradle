@@ -1,67 +1,62 @@
-buildscript {
-    
-
-    repositories {
-        mavenLocal()
-        mavenCentral()
-        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
-        jcenter()
-    }
-    dependencies {
-        
-
-    }
+allprojects {
+	apply plugin: "java"
+	apply plugin: "idea"
+	
+	version = '1.4.1'
+	ext {
+		appName = "miniventure"
+		gdxVersion = '1.9.8'
+		box2DLightsVersion = '1.4'
+		ashleyVersion = '1.7.3'
+		aiVersion = '1.8.0'
+	}
+	
+	repositories {
+		mavenLocal()
+		mavenCentral()
+		maven { url "https://oss.sonatype.org/content/repositories/releases/" }
+	}
+	
+	dependencies {
+		compile "org.jetbrains:annotations:15.0"
+	}
 }
 
-allprojects {
-    apply plugin: "eclipse"
-    apply plugin: "idea"
+project(":core:game") {
+	dependencies {
+		compile "com.badlogicgames.gdx:gdx:$gdxVersion"
+		compile "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
+		compile "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
+		compile "com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion"
+		compile "com.badlogicgames.ashley:ashley:$ashleyVersion"
+		compile "net.openhft:zero-allocation-hashing:0.8"
+		compile "com.kotcrab.vis:vis-ui:1.4.0"
+		compile "com.esotericsoftware:kryonet:2.22.0-RC1"
+	}
+}
 
-    version = '1.0'
-    ext {
-        appName = "miniventure"
-        gdxVersion = '1.9.7'
-        roboVMVersion = '2.3.1'
-        box2DLightsVersion = '1.4'
-        ashleyVersion = '1.7.0'
-        aiVersion = '1.8.0'
-    }
+project(":core:client") {
+	dependencies {
+		compile project(":core:game")
+		compile "com.badlogicgames.gdx:gdx:$gdxVersion"
+		compile "com.esotericsoftware:kryonet:2.22.0-RC1"
+	}
+}
 
-    repositories {
-        mavenLocal()
-        mavenCentral()
-        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
-        maven { url "https://oss.sonatype.org/content/repositories/releases/" }
-    }
+project(":core:server") {
+	dependencies {
+		compile project(":core:game")
+		compile "com.esotericsoftware:kryonet:2.22.0-RC1"
+	}
 }
 
 project(":desktop") {
-    apply plugin: "java"
-
-
-    dependencies {
-        compile project(":core")
-        compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
-        compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
-        compile "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
-        compile "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
-        compile 'org.jetbrains:annotations:15.0'
-    }
-}
-
-project(":core") {
-    apply plugin: "java"
-
-
-    dependencies {
-        compile "com.badlogicgames.gdx:gdx:$gdxVersion"
-        compile "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
-        compile "com.kotcrab.vis:vis-ui:1.4.0"
-        compile 'org.jetbrains:annotations:15.0'
-        compile "net.openhft:zero-allocation-hashing:0.8"
-    }
-}
-
-tasks.eclipse.doLast {
-    delete ".project"
+	dependencies {
+		compile project(":core:client")
+		compile project(":core:server")
+		compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
+		compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+		compile "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
+		compile "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
+	}
 }
