@@ -6,6 +6,8 @@ import java.util.LinkedList;
 
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.Message;
+import miniventure.game.GameProtocol.TabRequest;
+import miniventure.game.GameProtocol.TabResponse;
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.chat.InfoMessageLine;
 import miniventure.game.client.ClientCore;
@@ -37,6 +39,10 @@ public class ChatScreen extends MenuScreen {
 	private final boolean useTimer;
 	
 	private final TextField input;
+	
+	private boolean tabbing = false;
+	private int tabIndex = -1;
+	private String manualInput = ""; // this is the part of the command that the user entered manually, and so should not be changed when tabbing.
 	
 	public ChatScreen(boolean timeOutMessages) {
 		useTimer = timeOutMessages;
@@ -106,8 +112,31 @@ public class ChatScreen extends MenuScreen {
 					input.setCursorPosition(input.getText().length());
 					return true;
 				}
+				else if(keycode == Keys.TAB) {
+					if(!input.getText().startsWith("/")) return true;
+					
+					String text = tabbing ? manualInput : input.getText().substring(1);
+					if(!tabbing) {
+						manualInput = text;
+						tabbing = true;
+						tabIndex = -1;
+					}
+					ClientCore.getClient().send(new TabRequest(manualInput, tabIndex));
+					tabIndex++;
+					
+					return true;
+				}
 				else
 					return false;
+			}
+			
+			@Override
+			public boolean keyTyped (InputEvent event, char character) {
+				if(character != '\t')
+					tabbing = false;
+				// else
+				// 	return true;
+				return false;
 			}
 		});
 		
@@ -149,6 +178,13 @@ public class ChatScreen extends MenuScreen {
 		if(vGroup.getChildren().size > 10)
 			vGroup.removeActor(labelQueue.poll());
 		repack();
+	}
+	
+	public void autocomplete(TabResponse response) {
+		if(!tabbing) return; // abandoned request
+		if(!manualInput.equals(response.manualText)) return; // response doesn't match the current state
+		input.setText("/"+response.completion);
+		input.setCursorPosition(input.getText().length());
 	}
 	
 	@Override

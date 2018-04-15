@@ -8,8 +8,10 @@ import java.util.HashMap;
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol;
 import miniventure.game.chat.InfoMessage;
+import miniventure.game.screen.ChatScreen;
 import miniventure.game.screen.ErrorScreen;
 import miniventure.game.screen.MainMenu;
+import miniventure.game.screen.MenuScreen;
 import miniventure.game.util.ProgressLogger;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.Chunk.ChunkData;
@@ -217,6 +219,13 @@ public class GameClient implements GameProtocol {
 				
 				forPacket(object, Message.class, ClientCore::addMessage);
 				forPacket(object, InfoMessage.class, ClientCore::addMessage);
+				
+				forPacket(object, TabResponse.class, response -> {
+					MenuScreen screen = ClientCore.getScreen();
+					if(!(screen instanceof ChatScreen)) return; // ignore
+					ChatScreen chat = (ChatScreen) screen;
+					chat.autocomplete(response);
+				});
 				
 				forPacket(object, LoginFailure.class, failure -> Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen(failure.message))));
 			}

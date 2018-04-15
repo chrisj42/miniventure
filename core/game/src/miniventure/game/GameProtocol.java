@@ -117,6 +117,31 @@ public interface GameProtocol {
 		}
 	}
 	
+	// client asking for autocomplete
+	class TabRequest {
+		public final String manualText;
+		public final int tabIndex;
+		
+		private TabRequest() { this(null, 0); }
+		public TabRequest(String manualText, int tabIndex) {
+			this.manualText = manualText;
+			this.tabIndex = tabIndex;
+		}
+	}
+	
+	// server response to autocomplete request
+	class TabResponse {
+		public final String manualText; // used to check against the client text again; if it's different, then it means that the client has abandoned the tab request, and so this response will be ignored.
+		public final String completion;
+		// there will also be output, but that ought to be taken care of separately.
+		
+		private TabResponse() { this(null, null); }
+		public TabResponse(String manualText, String completion) {
+			this.manualText = manualText;
+			this.completion = completion;
+		}
+	}
+	
 	class WorldData {
 		public final float gameTime, daylightOffset;
 		public final boolean doDaylightCycle;

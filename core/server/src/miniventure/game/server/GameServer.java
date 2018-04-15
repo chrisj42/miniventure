@@ -13,9 +13,11 @@ import miniventure.game.chat.InfoMessage;
 import miniventure.game.chat.InfoMessageBuilder;
 import miniventure.game.chat.InfoMessageLine;
 import miniventure.game.chat.MessageBuilder;
+import miniventure.game.chat.command.Command;
 import miniventure.game.item.ItemStack;
 import miniventure.game.item.Recipe;
 import miniventure.game.item.Recipes;
+import miniventure.game.util.MyUtils;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.Level;
@@ -242,6 +244,35 @@ public class GameServer implements GameProtocol {
 					InfoMessage output = clientData.toClientOut.flushMessage();
 					if(output != null)
 						connection.sendTCP(output);
+				});
+				
+				forPacket(object, TabRequest.class, request -> {
+					String text = request.manualText;
+					if(text.split(" ").length == 1) {
+						// hasn't finished entering command name, autocomplete that
+						Array<String> matches = new Array<>(String.class);
+						for(Command c: Command.values()) {
+							String name = c.name();
+							if(text.length() == 0 || name.toLowerCase().contains(text.toLowerCase()))
+								matches.add(name);
+						}
+						
+						if(matches.size == 0) return;
+						
+						if(matches.size == 1) {
+							connection.sendTCP(new TabResponse(request.manualText, matches.get(0)));
+							return;
+						}
+						
+						matches.sort(String::compareToIgnoreCase);
+						
+						if(request.tabIndex < 0)
+							connection.sendTCP(new Message(MyUtils.arrayToString(matches.shrink(), "", "", ", "), Color.WHITE));
+						else {
+							// actually autocomplete
+							connection.sendTCP(new TabResponse(request.manualText, matches.get(request.tabIndex % matches.size)));
+						}
+					}
 				});
 				
 				forPacket(object, SelfHurt.class, hurt -> {
