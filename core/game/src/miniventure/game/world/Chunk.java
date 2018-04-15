@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class Chunk implements Boundable {
 	
-	public static final int SIZE = 32;
+	public static final int SIZE = 20;
 	
 	@NotNull private final Level level;
 	@NotNull private Tile[][] tiles;
