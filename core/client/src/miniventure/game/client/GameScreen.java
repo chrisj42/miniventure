@@ -54,20 +54,20 @@ public class GameScreen {
 		
 		levelView.handleInput();
 		
-		//if(Gdx.input.isKeyJustPressed(Keys.R) && Gdx.input.isKeyPressed(Keys.SHIFT_LEFT))
+		//if(ClientCore.input.pressingKey(Keys.R) && Gdx.input.isKeyPressed(Keys.SHIFT_LEFT))
 		//	GameCore.getWorld().createWorld(0, 0);
 		
-		if(Gdx.input.isKeyPressed(Keys.CONTROL_LEFT) && Gdx.input.isKeyJustPressed(Keys.T))
+		if(Gdx.input.isKeyPressed(Keys.CONTROL_LEFT) && ClientCore.input.pressingKey(Keys.T))
 			ClientCore.getClient().send(DatalessRequest.Tile); // debug
 		
-		else if(Gdx.input.isKeyJustPressed(Keys.T)) {
-			chatScreen.focus();
+		else if(ClientCore.input.pressingKey(Keys.T)) {
+			chatScreen.focus("");
 		}
-		else if(Gdx.input.isKeyJustPressed(Keys.SLASH)) {
+		else if(ClientCore.input.pressingKey(Keys.SLASH)) {
 			chatScreen.focus("/");
 		}
 		
-		else if(Gdx.input.isKeyJustPressed(Keys.ESCAPE)) {
+		else if(ClientCore.input.pressingKey(Keys.ESCAPE)) {
 			dialog = true;
 			new Thread(() -> {
 				int choice = JOptionPane.showConfirmDialog(null, "Leave Server?", "Confirmation", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);

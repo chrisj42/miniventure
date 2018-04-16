@@ -56,6 +56,16 @@ public enum TileType {
 		map.put(Attack, new DestructibleProperty(tileType, 20, new PreferredTool(ToolType.Pickaxe, 5)));
 	}),
 	
+	WOOD_WALL(((tileType, map) -> {
+		map.put(Solid, SolidProperty.get(tileType, true));
+		map.put(Attack, new DestructibleProperty(tileType, new RequiredTool(ToolType.Axe)));
+	})),
+	
+	STONE_WALL(((tileType, map) -> {
+		map.put(Solid, SolidProperty.get(tileType, true));
+		map.put(Attack, new DestructibleProperty(tileType, new RequiredTool(ToolType.Pickaxe)));
+	})),
+	
 	DOOR_CLOSED((tileType, map) -> {
 		map.put(Solid, SolidProperty.get(tileType, true));
 		map.put(Attack, new DestructibleProperty(tileType, new RequiredTool(ToolType.Axe)));

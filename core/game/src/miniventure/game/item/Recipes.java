@@ -50,6 +50,14 @@ public class Recipes {
 		
 		new Recipe(TileItem.get(TileType.DOOR_CLOSED),
 			new ItemStack(ResourceItem.Log.get(), 4)
+		),
+		
+		new Recipe(TileItem.get(TileType.WOOD_WALL),
+			new ItemStack(ResourceItem.Log.get(), 6)
+		),
+		
+		new Recipe(TileItem.get(TileType.STONE_WALL),
+			new ItemStack(TileItem.get(TileType.STONE), 6)
 		)
 	};
 }

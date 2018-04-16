@@ -16,6 +16,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.kotcrab.vis.ui.widget.VisLabel;
@@ -109,7 +110,6 @@ public class MainMenu extends MenuScreen {
 		Music song = ClientCore.setMusicTrack(Gdx.files.internal("audio/music/title.mp3"));
 		/*song.setOnCompletionListener(music -> MyUtils.delay(MathUtils.random(5000, 10000), () -> {
 			music.stop();
-			music.setPosition(0);
 			music.play();
 		}));*/
 		song.setVolume(0.5f);
@@ -142,7 +142,7 @@ public class MainMenu extends MenuScreen {
 	}
 		
 	private void addLabel(String msg, int spacing) {
-		table.add(new VisLabel(msg));
+		table.add(new VisLabel(msg, new LabelStyle(GameCore.getFont(), Color.WHITE)));
 		table.row().space(spacing);
 	}
 }

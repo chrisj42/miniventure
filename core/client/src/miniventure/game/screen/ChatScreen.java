@@ -144,14 +144,15 @@ public class ChatScreen extends MenuScreen {
 		repack();
 	}
 	
-	@Override
-	public void focus() { focus(""); }
 	public void focus(String initText) {
-		ClientCore.setScreen(this);
 		input.setText(initText);
+		input.setCursorPosition(initText.length());
+		ClientCore.setScreen(this);
+	}
+	@Override
+	public void focus() {
 		input.pack();
 		input.setWidth(getWidth()/2);
-		input.setCursorPosition(initText.length());
 		setKeyboardFocus(input);
 	}
 	

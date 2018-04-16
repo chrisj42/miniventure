@@ -273,6 +273,7 @@
             <key type="filename">tile-sprites/sand/o17.png</key>
             <key type="filename">tile-sprites/sand/o18.png</key>
             <key type="filename">tile-sprites/stone/00.png</key>
+            <key type="filename">tile-sprites/stone_wall/00.png</key>
             <key type="filename">tile-sprites/tree/00.png</key>
             <key type="filename">tile-sprites/tree/01.png</key>
             <key type="filename">tile-sprites/tree/02.png</key>
@@ -989,6 +990,7 @@
             <key type="filename">tile-sprites/water/o18_33.png</key>
             <key type="filename">tile-sprites/water/o18_34.png</key>
             <key type="filename">tile-sprites/water/o18_35.png</key>
+            <key type="filename">tile-sprites/wood_wall/00.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>

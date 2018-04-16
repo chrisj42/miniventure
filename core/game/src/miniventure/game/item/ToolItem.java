@@ -6,20 +6,19 @@ import miniventure.game.world.entity.mob.Player;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class ToolItem extends Item {
 	
 	private static final float DURABILITY_BAR_HEIGHT = 4; // 8 pixels.
 	
 	public enum Material {
-		Wood(30, 1, 5),
+		Wood(30, 1, 3),
 		
-		Stone(80, 2, 5),
+		Stone(80, 2, 4),
 		
-		Iron(250, 4, 4),
+		Iron(250, 4, 5),
 		
-		Gem(800, 8, 3);
+		Gem(800, 8, 6);
 		
 		public final int maxDurability; // the number of uses this level of tool gets.
 		public final int damageMultiplier; // damage done by this tool is multiplied by this number.

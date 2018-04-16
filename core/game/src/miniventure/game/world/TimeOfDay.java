@@ -14,7 +14,7 @@ public enum TimeOfDay {
 	
 	Evening(12+7, 0.5f, new Color(0.09f, 0.03f, 0.40f, 0.4f)),
 	
-	Dusk(12+8, 1f, new Color(0.19f, 0.03f, 0.490f, 0.55f)),
+	Dusk(12+8.5f, 1f, new Color(0.19f, 0.03f, 0.490f, 0.65f)),
 	
 	Night(24+6, 0.35f, new Color(0, 0.03f, 0.278f, 0.8f)),
 	
