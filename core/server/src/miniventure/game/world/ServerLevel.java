@@ -125,10 +125,6 @@ public class ServerLevel extends Level {
 			spawnMob(new MobAi(AiType.values[MathUtils.random(AiType.values.length-1)]));
 	}
 	
-	@Override
-	public Array<Vector3> renderLighting(Rectangle renderSpace) { return new Array<>(); }
-	
-	
 	public void dropItems(@NotNull ItemDrop drop, @NotNull WorldObject source, @Nullable WorldObject target) {
 		dropItems(drop, source.getCenter(), target == null ? null : target.getCenter());
 	}
@@ -256,10 +252,10 @@ public class ServerLevel extends Level {
 	}
 	
 	@Override
-	ServerTile createTile(int x, int y, TileType[] types, String[] data) { return new ServerTile(this, x, y, types, data); }
+	protected ServerTile createTile(int x, int y, TileType[] types, String[] data) { return new ServerTile(this, x, y, types, data); }
 	
 	@Override
-	void loadChunk(Point chunkCoord) {
+	protected void loadChunk(Point chunkCoord) {
 		// TODO this will need to get redone when loading from file
 		
 		if(isChunkLoaded(chunkCoord)) return;
@@ -268,7 +264,7 @@ public class ServerLevel extends Level {
 	}
 	
 	@Override
-	void unloadChunk(Point chunkCoord) {
+	protected void unloadChunk(Point chunkCoord) {
 		// TODO this will need to get redone when saving to file
 		
 		Chunk chunk = getLoadedChunk(chunkCoord);

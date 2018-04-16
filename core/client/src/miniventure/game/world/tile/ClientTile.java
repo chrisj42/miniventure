@@ -24,19 +24,22 @@ public class ClientTile extends Tile {
 	
 	@Override
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
+		render(this, batch, delta, posOffset);
+	}
+	public static void render(Tile t, SpriteBatch batch, float delta, Vector2 posOffset) {
 		/*
 			- Get the surrounding tile types for a tile
 			- draw an overlap only after all the centers under it have been drawn
 				So, before drawing an overlap, check that the current center is supposed to be drawn under it.
 		 */
 		
-		if(level.getTile(x, y) == null) return; // cannot render if there are no tiles.
+		if(t.getLevel().getTile(t.x, t.y) == null) return; // cannot render if there are no tiles.
 		
 		TileType[][] aroundTypes = new TileType[9][];
 		int idx = 0;
 		for(int x = -1; x <= 1; x++) {
 			for (int y = -1; y <= 1; y++) {
-				Tile oTile = level.getTile(this.x + x, this.y + y);
+				Tile oTile = t.getLevel().getTile(t.x + x, t.y + y);
 				//if(x == 0 && y == 0) {if(oTile != this) throw new IllegalStateException("Level reference or position of Tile " + this + " is faulty; Level "+level+" returns Tile " + oTile + " at position "+this.x+","+this.y+"."); aroundTypes[idx] = new TileType[0]; }
 				if(x == 0 && y == 0)
 					aroundTypes[idx] = new TileType[0];
@@ -48,10 +51,10 @@ public class ClientTile extends Tile {
 		
 		Array<TextureHolder> sprites = new Array<>();
 		
-		TileType[] mainTypes = getTypes();
+		TileType[] mainTypes = t.getTypes();
 		int firstIdx = 0;
 		for(int i = mainTypes.length-1; i >= 0; i--) {
-			if(getProp(mainTypes[i], TilePropertyType.Render).isOpaque()) {
+			if(t.getProp(mainTypes[i], TilePropertyType.Render).isOpaque()) {
 				firstIdx = i;
 				break;
 			}
@@ -63,7 +66,7 @@ public class ClientTile extends Tile {
 		Arrays.fill(model, Boolean.FALSE);
 		for(int i = 0; i < aroundTypes.length; i++) {
 			for (TileType oType : aroundTypes[i]) { // doesn't matter the order.
-				if(!getProp(oType, TilePropertyType.Overlap).canOverlap()) continue; // the type can't even overlap anyway.
+				if(!t.getProp(oType, TilePropertyType.Overlap).canOverlap()) continue; // the type can't even overlap anyway.
 				//if(TileType.tileSorter.compare(mainTypes[firstIdx], oType) >= 0) continue; // the type is lower than the lowest *visible* main type.
 				overlappingTypes.putIfAbsent(oType, Arrays.copyOf(model, model.length));
 				overlappingTypes.get(oType)[i] = true;
@@ -75,20 +78,20 @@ public class ClientTile extends Tile {
 		
 		for(int i = firstIdx; i < mainTypes.length; i++) {
 			// before we use the connection property of the main type, let's check and see if we are transitioning.
-			if(i == mainTypes.length - 1 && getProp(mainTypes[i], TilePropertyType.Transition).playingAnimation(this)) // only the top tile can ever be transitioning.
-				sprites.add(getProp(mainTypes[i], TilePropertyType.Transition).getAnimationFrame(this, delta));
+			if(i == mainTypes.length - 1 && t.getProp(mainTypes[i], TilePropertyType.Transition).playingAnimation(t)) // only the top tile can ever be transitioning.
+				sprites.add(t.getProp(mainTypes[i], TilePropertyType.Transition).getAnimationFrame(t, delta));
 			else // otherwise, use connection sprite.
-				sprites.add(getProp(mainTypes[i], TilePropertyType.Connect).getSprite(this, aroundTypes));
+				sprites.add(t.getProp(mainTypes[i], TilePropertyType.Connect).getSprite(t, aroundTypes));
 			
 			while(overlapType != null && (i >= mainTypes.length-1 || mainTypes[i+1].compareTo(overlapType) > 0)) {
-				sprites.addAll(getProp(mainTypes[i], TilePropertyType.Overlap).getSprites(this, overlapType, overlappingTypes.get(overlapType)));
+				sprites.addAll(t.getProp(mainTypes[i], TilePropertyType.Overlap).getSprites(t, overlapType, overlappingTypes.get(overlapType)));
 				overlapType = overlapTypeIter.hasNext() ? overlapTypeIter.next() : null;
 			}
 		}
 		
 		
 		for(TextureHolder texture: sprites)
-			batch.draw(texture.texture, (x-posOffset.x) * SIZE, (y-posOffset.y) * SIZE);
+			batch.draw(texture.texture, (t.x-posOffset.x) * SIZE, (t.y-posOffset.y) * SIZE);
 	}
 	
 	@Override

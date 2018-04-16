@@ -11,12 +11,14 @@ import miniventure.game.client.ClientWorld;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.particle.Particle;
 import miniventure.game.world.tile.ClientTile;
+import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.Tile.TileData;
 import miniventure.game.world.tile.TileType;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
@@ -48,10 +50,19 @@ public class ClientLevel extends Level {
 		renderSpace = new Rectangle(Math.max(0, renderSpace.x), Math.max(0, renderSpace.y), Math.min(getWidth()-renderSpace.x, renderSpace.width), Math.min(getHeight()-renderSpace.y, renderSpace.height));
 		// pass the offset vector to all objects being rendered.
 		
-		Array<WorldObject> objects = new Array<>();
-		objects.addAll(getOverlappingTiles(renderSpace)); // tiles first
+		Array<Tile> tiles = getOverlappingTiles(renderSpace);
+		Array<Entity> entities = getOverlappingEntities(renderSpace);
 		
-		Array<Entity> entities = getOverlappingEntities(renderSpace); // entities second
+		render(tiles, entities, batch, delta, posOffset);
+	}
+	
+	public static void render(Array<Tile> tiles, Array<Entity> entities, SpriteBatch batch, float delta, Vector2 posOffset) {
+		// pass the offset vector to all objects being rendered.
+		
+		Array<WorldObject> objects = new Array<>();
+		objects.addAll(tiles); // tiles first
+		
+		// entities second
 		entities.sort((e1, e2) -> {
 			if(e1 instanceof Particle && !(e2 instanceof Particle))
 				return 1;
@@ -63,6 +74,26 @@ public class ClientLevel extends Level {
 		
 		for(WorldObject obj: objects)
 			obj.render(batch, delta, posOffset);
+	}
+	
+	public Array<Vector3> renderLighting(Rectangle renderSpace) {
+		Array<WorldObject> objects = new Array<>();
+		objects.addAll(getOverlappingTiles(renderSpace));
+		objects.addAll(getOverlappingEntities(renderSpace));
+		
+		return renderLighting(objects);
+	}
+	
+	public static Array<Vector3> renderLighting(Array<WorldObject> objects) {
+		Array<Vector3> lighting = new Array<>();
+		
+		for(WorldObject obj: objects) {
+			float lightR = obj.getLightRadius();
+			if(lightR > 0)
+				lighting.add(new Vector3(obj.getCenter(), lightR));
+		}
+		
+		return lighting;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -84,7 +115,7 @@ public class ClientLevel extends Level {
 	}
 	
 	@Override
-	ClientTile createTile(int x, int y, TileType[] types, String[] data) { return new ClientTile(this, x, y, types, data); }
+	protected ClientTile createTile(int x, int y, TileType[] types, String[] data) { return new ClientTile(this, x, y, types, data); }
 	
 	@Override public ClientTile getTile(float x, float y) {
 		ClientTile tile = (ClientTile) super.getTile(x, y);
@@ -95,13 +126,13 @@ public class ClientLevel extends Level {
 	}
 	
 	@Override
-	void loadChunk(Point chunkCoord) {
+	protected void loadChunk(Point chunkCoord) {
 		//System.out.println("Client requesting chunk "+chunkCoord);
 		ClientCore.getClient().send(new ChunkRequest(chunkCoord));
 	}
 	
 	@Override
-	void unloadChunk(Point chunkCoord) {
+	protected void unloadChunk(Point chunkCoord) {
 		Chunk chunk = getLoadedChunk(chunkCoord);
 		if(chunk == null) return; // already unloaded
 		

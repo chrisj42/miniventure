@@ -11,6 +11,7 @@ import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileType;
 
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -34,7 +35,7 @@ public abstract class Level {
 	private int entityCap = 6; // per chunk
 	
 	//protected Level(@NotNull WorldManager world) { this(world, 0, 0, 0); }
-	Level(@NotNull WorldManager world, int depth, int width, int height) {
+	protected Level(@NotNull WorldManager world, int depth, int width, int height) {
 		this.world = world;
 		this.depth = depth;
 		this.width = width;
@@ -116,6 +117,9 @@ public abstract class Level {
 		}
 	}
 	
+	public void render(Rectangle renderSpace, SpriteBatch batch, float delta, Vector2 posOffset) {
+	}
+	
 	public void addEntity(Entity e, Vector2 pos, boolean center) { addEntity(e, pos.x, pos.y, center); }
 	public void addEntity(Entity e, float x, float y, boolean center) {
 		if(center) {
@@ -129,22 +133,6 @@ public abstract class Level {
 	public void updateEntities(Entity[] entities, float delta) {
 		for(Entity e: entities)
 			e.update(delta);
-	}
-	
-	public Array<Vector3> renderLighting(Rectangle renderSpace) {
-		Array<WorldObject> objects = new Array<>();
-		objects.addAll(getOverlappingTiles(renderSpace));
-		objects.addAll(getOverlappingEntities(renderSpace));
-		
-		Array<Vector3> lighting = new Array<>();
-		
-		for(WorldObject obj: objects) {
-			float lightR = obj.getLightRadius();
-			if(lightR > 0)
-				lighting.add(new Vector3(obj.getCenter(), lightR));
-		}
-		
-		return lighting;
 	}
 	
 	@Nullable
@@ -226,6 +214,13 @@ public abstract class Level {
 		return overlapping;
 	}
 	
+	public Array<WorldObject> getOverlappingObjects(Rectangle area) {
+		Array<WorldObject> objects = new Array<>(WorldObject.class);
+		objects.addAll(getOverlappingTiles(area));
+		objects.addAll(getOverlappingEntities(area));
+		return objects;
+	}
+	
 	public Array<Tile> getAreaTiles(Point tilePos, int radius, boolean includeCenter) { return getAreaTiles(tilePos.x, tilePos.y, radius, includeCenter); }
 	public Array<Tile> getAreaTiles(int x, int y, int radius, boolean includeCenter) {
 		Array<Tile> tiles = new Array<>();
@@ -296,10 +291,10 @@ public abstract class Level {
 		return true;
 	}
 	
-	abstract Tile createTile(int x, int y, TileType[] types, String[] data);
+	protected abstract Tile createTile(int x, int y, TileType[] types, String[] data);
 	
-	abstract void loadChunk(Point chunkCoord);
-	abstract void unloadChunk(Point chunkCoord);
+	protected abstract void loadChunk(Point chunkCoord);
+	protected abstract void unloadChunk(Point chunkCoord);
 	
 	public void loadChunk(Chunk newChunk) {
 		tileCount += newChunk.width * newChunk.height;

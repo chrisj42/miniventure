@@ -4,6 +4,7 @@ import miniventure.game.GameCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.ClientLevel;
+import miniventure.game.world.Level;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.Gdx;
@@ -67,7 +68,7 @@ public class LevelViewport {
 			debug = !debug;
 	}
 	
-	public void render(@NotNull Vector2 cameraCenter, Color[] lightOverlays, @NotNull ClientLevel level) {
+	public void render(@NotNull Vector2 cameraCenter, Color[] lightOverlays, @NotNull Level level) {
 		// get the size of the area of the game on screen by projecting the application window dimensions into world space.
 		Vector3 screenSize = new Vector3(Gdx.graphics.getWidth(), 0, 0); // because unproject has origin at the top, so the upper right corner is at (width, 0).
 		camera.unproject(screenSize); // screen to render coords
@@ -101,7 +102,7 @@ public class LevelViewport {
 		
 		batch.setBlendFunction(GL20.GL_ZERO, GL20.GL_ONE_MINUS_SRC_ALPHA);
 		
-		Array<Vector3> lights = level.renderLighting(lightRenderSpace);
+		Array<Vector3> lights = ClientLevel.renderLighting(level.getOverlappingObjects(lightRenderSpace));
 		final TextureRegion lightTexture = GameCore.icons.get("light").texture;
 		
 		for(Vector3 light: lights) {
@@ -121,6 +122,7 @@ public class LevelViewport {
 		batch.setProjectionMatrix(camera.combined); // tells the batch to use the camera's coordinate system.
 		batch.begin();
 		batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA); // default
+		//System.out.println("rendering level in bounds "+renderSpace+" to camera at "+camera.position+" with offset "+offset);
 		level.render(renderSpace, batch, Gdx.graphics.getDeltaTime(), offset); // renderSpace in world coords, but offset can give render coords
 		
 		if(debug) {
@@ -180,4 +182,7 @@ public class LevelViewport {
 			lightingBuffer.dispose();
 		lightingBuffer = new FrameBuffer(Format.RGBA8888, width, height, false);
 	}
+	
+	public float getViewWidth() { return camera.viewportWidth/Tile.SIZE; }
+	public float getViewHeight() { return camera.viewportHeight/Tile.SIZE; }
 }

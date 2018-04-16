@@ -5,8 +5,16 @@ import javax.swing.JOptionPane;
 import miniventure.game.GameCore;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.ClientWorld;
+import miniventure.game.client.DisplayLevel;
+import miniventure.game.client.LevelViewport;
+import miniventure.game.world.ClientLevel;
+import miniventure.game.world.TimeOfDay;
+import miniventure.game.world.levelgen.LevelGenerator;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
@@ -17,12 +25,19 @@ public class MainMenu extends MenuScreen {
 	
 	private boolean dialog = false;
 	
+	private final DisplayLevel backgroundLevel;
+	private final LevelViewport levelView;
+	private final Color[] lightOverlays;
+	private final Vector2 cameraPos, cameraDir;
+	
+	private static final float PAN_SPEED = 3f; // in tiles/second.
+	
 	public MainMenu() {
 		super();
 		
 		ClientWorld world = ClientCore.getWorld();
 		
-		addLabel("Miniventure", 20);
+		addLabel("Welcome to Miniventure!", 20);
 		addLabel("You are playing version " + GameCore.VERSION, 15);
 		
 		addLabel("Use mouse or arrow keys to move around.", 10);
@@ -30,7 +45,7 @@ public class MainMenu extends MenuScreen {
 		addLabel("E to open your inventory, Z to craft items.", 10);
 		addLabel("+ and - keys to zoom in and out.", 10);
 		addLabel("Press \"t\" to chat with other players, and \"/\" to use commands.", 0);
-		addLabel("(Hint: use up arrow key in chat screen to access previous entries and avoid retyping things.)", 30);
+		addLabel("(Hint: use the up key to repeat messages, and tab to autocomplete command names.)", 30);
 		//addLabel("(press b to show/hide chunk boundaries)", 30);
 		//addLabel("", 10);
 		
@@ -75,15 +90,44 @@ public class MainMenu extends MenuScreen {
 		
 		table.setOrigin(Align.top);
 		table.setPosition(getWidth()/2, getHeight()/2);
+		
+		levelView = new LevelViewport();
+		TimeOfDay time = TimeOfDay.values[MathUtils.random(TimeOfDay.values.length-1)];
+		lightOverlays = TimeOfDay.getSkyColors(time.getStartOffsetSeconds());
+		
+		LevelGenerator generator = new LevelGenerator(MathUtils.random.nextLong(), 100, 60, 8, 6);
+		backgroundLevel = new DisplayLevel(generator);
+		
+		Vector2 halfSize = new Vector2(levelView.getViewWidth(), levelView.getViewHeight()).scl(0.5f);
+		cameraPos = new Vector2(MathUtils.random(halfSize.x, backgroundLevel.getWidth()-halfSize.x), MathUtils.random(halfSize.y, backgroundLevel.getHeight()-halfSize.y));
+		
+		cameraDir = new Vector2().setLength(PAN_SPEED).setToRandomDirection().setLength(PAN_SPEED);
 	}
 	
 	@Override
+	public boolean usesWholeScreen() { return false; }
+	
+	@Override
 	public void draw() {
-		Gdx.gl.glClearColor(0, 0, 0, 1);
+		levelView.render(cameraPos, lightOverlays, backgroundLevel);
+		
+		cameraPos.add(cameraDir.cpy().scl(Gdx.graphics.getDeltaTime()));
+		cameraDir.x = velDir(cameraPos.x, cameraDir.x, levelView.getViewWidth()/2, backgroundLevel.getWidth() - levelView.getViewWidth()/2);
+		cameraDir.y = velDir(cameraPos.y, cameraDir.y, levelView.getViewHeight()/2, backgroundLevel.getHeight() - levelView.getViewHeight()/2);
+		
 		super.draw();
 	}
+	
+	private float velDir(float pos, float vel, float min, float max) {
+		if((pos >= max && vel >= 0) || (pos <= min && vel <= 0)) {
+			vel += MathUtils.random(-PAN_SPEED/4, PAN_SPEED/4);
+			vel = -vel;
+		}
 		
-		private void addLabel(String msg, int spacing) {
+		return vel;
+	}
+		
+	private void addLabel(String msg, int spacing) {
 		table.add(new VisLabel(msg));
 		table.row().space(spacing);
 	}
