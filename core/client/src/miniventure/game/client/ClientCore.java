@@ -18,14 +18,19 @@ import miniventure.game.screen.MenuScreen;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.files.FileHandle;
 import com.kotcrab.vis.ui.VisUI;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ClientCore extends ApplicationAdapter {
 	
 	private static GameScreen gameScreen;
 	private static ClientWorld clientWorld;
+	
+	private static Music song;
 	
 	public static final InputHandler input = new InputHandler();
 	
@@ -111,8 +116,32 @@ public class ClientCore extends ApplicationAdapter {
 		System.out.println("setting screen to " + screen);
 		
 		menuScreen = screen;
+		if(menuScreen != null) menuScreen.focus();
 		Gdx.input.setInputProcessor(menuScreen == null ? input : menuScreen);
 		input.reset();
+	}
+	public static void backToParentScreen() {
+		if(menuScreen != null && menuScreen.getParent() != null) {
+			MenuScreen screen = menuScreen.getParent();
+			System.out.println("setting screen back to " + screen);
+			menuScreen.dispose();
+			menuScreen = screen;
+			Gdx.input.setInputProcessor(menuScreen);
+			input.reset();
+		}
+	}
+	
+	public static Music setMusicTrack(@NotNull FileHandle file) {
+		stopMusic();
+		song = Gdx.audio.newMusic(file);
+		return song;
+	}
+	public static void stopMusic() {
+		if(song != null) {
+			song.stop();
+			song.dispose();
+		}
+		song = null;
 	}
 	
 	static void addMessage(Message msg) {

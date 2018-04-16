@@ -37,4 +37,5 @@ public class ErrorScreen extends MenuScreen {
 		vGroup.addActor(returnBtn);
 	} 
 	
+	@Override public void focus() { ClientCore.stopMusic(); }
 }

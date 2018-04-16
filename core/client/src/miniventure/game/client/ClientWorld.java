@@ -108,6 +108,7 @@ public class ClientWorld extends WorldManager {
 	public void rejoinWorld() { createWorld(0, 0, false, ipAddress); }
 	public void createWorld(String ipAddress) { createWorld(0, 0, false, ipAddress); }
 	private void createWorld(int width, int height, boolean startServer, String ipAddress) {
+		ClientCore.stopMusic();
 		LoadingScreen loadingScreen = new LoadingScreen();
 		ClientCore.setScreen(loadingScreen);
 		

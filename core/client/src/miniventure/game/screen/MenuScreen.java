@@ -49,7 +49,11 @@ public class MenuScreen extends Stage {
 		addActor(vGroup);
 	}
 	
+	// called when the menu is focused, the first time and any subsequent times.
+	public void focus() {}
+	
 	public void setParent(MenuScreen parent) { this.parent = parent; }
+	public MenuScreen getParent() { return parent; }
 	
 	public boolean usesWholeScreen() { return true; }
 	

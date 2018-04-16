@@ -144,6 +144,7 @@ public class ChatScreen extends MenuScreen {
 		repack();
 	}
 	
+	@Override
 	public void focus() { focus(""); }
 	public void focus(String initText) {
 		ClientCore.setScreen(this);

@@ -178,4 +178,6 @@ public class MyUtils {
 		str.append(end);
 		return str.toString();
 	}
+	
+	public static void delay(int milliDelay, Action action) { new DelayedAction(milliDelay, action).start(); }
 }

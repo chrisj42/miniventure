@@ -7,11 +7,11 @@ import miniventure.game.client.ClientCore;
 import miniventure.game.client.ClientWorld;
 import miniventure.game.client.DisplayLevel;
 import miniventure.game.client.LevelViewport;
-import miniventure.game.world.ClientLevel;
 import miniventure.game.world.TimeOfDay;
 import miniventure.game.world.levelgen.LevelGenerator;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -91,6 +91,8 @@ public class MainMenu extends MenuScreen {
 		table.setOrigin(Align.top);
 		table.setPosition(getWidth()/2, getHeight()/2);
 		
+		// setup level scrolling in background
+		
 		levelView = new LevelViewport();
 		TimeOfDay time = TimeOfDay.values[MathUtils.random(TimeOfDay.values.length-1)];
 		lightOverlays = TimeOfDay.getSkyColors(time.getStartOffsetSeconds());
@@ -102,6 +104,18 @@ public class MainMenu extends MenuScreen {
 		cameraPos = new Vector2(MathUtils.random(halfSize.x, backgroundLevel.getWidth()-halfSize.x), MathUtils.random(halfSize.y, backgroundLevel.getHeight()-halfSize.y));
 		
 		cameraDir = new Vector2().setLength(PAN_SPEED).setToRandomDirection().setLength(PAN_SPEED);
+		
+		// setup background music
+		Music song = ClientCore.setMusicTrack(Gdx.files.internal("audio/music/title.mp3"));
+		/*song.setOnCompletionListener(music -> MyUtils.delay(MathUtils.random(5000, 10000), () -> {
+			music.stop();
+			music.setPosition(0);
+			music.play();
+		}));*/
+		song.setVolume(0.5f);
+		//MyUtils.delay(100, song::play);
+		song.setLooping(true);
+		song.play();
 	}
 	
 	@Override
