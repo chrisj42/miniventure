@@ -35,3 +35,7 @@ level system; note that levels will not solely be identified by depth (though th
 
 ****
 
+make some mobs hurt you, once I get more mob sprites.
+
+****
+

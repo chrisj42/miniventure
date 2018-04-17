@@ -12,6 +12,7 @@ import miniventure.game.screen.ChatScreen;
 import miniventure.game.screen.ErrorScreen;
 import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
+import miniventure.game.util.MyUtils;
 import miniventure.game.util.ProgressLogger;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.Chunk.ChunkData;
@@ -27,6 +28,8 @@ import miniventure.game.world.entity.mob.ClientPlayer;
 import miniventure.game.world.tile.ClientTile;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
@@ -69,6 +72,12 @@ public class GameClient implements GameProtocol {
 					SpawnData data = (SpawnData) object;
 					world.spawnPlayer(data);
 					ClientCore.setScreen(null);
+					Music song = ClientCore.setMusicTrack(Gdx.files.internal("audio/music/game.mp3"));
+					song.setOnCompletionListener(music -> {
+						music.stop();
+						MyUtils.delay(MathUtils.random(10_000, 30_000), music::play);
+					});
+					MyUtils.delay(1_000, song::play);
 				}
 				
 				if(object instanceof TileUpdate) {

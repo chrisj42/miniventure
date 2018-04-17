@@ -112,7 +112,7 @@ public class MainMenu extends MenuScreen {
 			music.stop();
 			music.play();
 		}));*/
-		song.setVolume(0.5f);
+		//song.setVolume(0.5f);
 		//MyUtils.delay(100, song::play);
 		song.setLooping(true);
 		song.play();
