@@ -1,0 +1,10 @@
+---
+
+failed interaction animation - player should show indication of failed interaction.
+
+---
+
+Add a highlight to whatever the player *will* interact with if the attack or interact keys are pressed. Maybe overlay the sprite with a translucent white color.
+
+---
+

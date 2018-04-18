@@ -1,0 +1,15 @@
+****
+
+why not give the player an animation holding items? Or better, use the item's sprite, and just draw it in the player's hand, in each of the player's positions. It's a possible idea, but I'm skeptical.
+
+****
+
+limited visibility; you have to explore for an area to be shown, otherwise it's black. Or, stones and stuff block the player's view.
+Dither effect around the edges, perhaps.
+
+****
+
+Make a way to be sure I'm seeing what the server is seeing.
+
+****
+

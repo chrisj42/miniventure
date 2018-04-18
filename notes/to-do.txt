@@ -1,12 +1,21 @@
-I need a way to be sure I'm seeing what the server is seeing.
+next steps, for sure:
+
+- give command
+- better menu creation system, perhaps make something over scene2D
+- make menu lists scrollable
+- flesh out item drop class
+- 
+later
+- make menus with new menu system, including world creation menu and world loading menu
+- actually do saving to and loading from file when loading worlds and world chunks (and entities) in server.
+- auto-updater
+
+---------
+to-do list
 
 ****
 
-player should show indication of failed interaction
-
-****
-
-find a way to initialize jpanel environment so it doesn't lag the first time.
+Items are... well, not in the best shape. I need to try and make them better.
 
 ****
 
@@ -27,7 +36,7 @@ command tab auto-complete system.
 
 ****
 
-increase biome sizes
+increase biome sizes, in prep of biome song tracks
 
 ****
 

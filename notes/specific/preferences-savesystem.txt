@@ -1,0 +1,4 @@
+- pick default save locations for world data, and for global preferences
+- allow both locations to be customized (keep a bool for if the path is set manually, as a checkbox probably; this is in case the location changes later)
+- have a global preferences menu that allows you to set things like default username, default world save location (global preferences stored here).
+

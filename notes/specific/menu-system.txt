@@ -1,0 +1,2 @@
+Because Scene2D is SUCH A PAIN to work with, and actually get right, I think I'm going to try and build something on top of it, a sort of menu-manager of sorts. It could resemble the one in minicraft+, because I really like how that turned out, but of course this time it'll be backed by Scene2D components, and will include mouse support.
+

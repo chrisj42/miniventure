@@ -1,9 +1,0 @@
-I've finally come up with a way to do entities in miniventure.
-
-So, basic concepts: I can still use the existing entity system, with minimal changes. All I have to do is add a save method to each entity class, and a load constructor.
-
-The main idea is to use a 2D array of Strings to hold the data; each subarray is for each progressive extension class to Entity. So, for a player, it would look like [Entity data array, Mob data array, Player data array].
-
-The save method returns a Array<String[]>, and accepts nothing. It calls super.save() to get the Array<String[]>, and then adds a String[] to it with the data it uses.
-
-The load constructor takes a String[][] and a Version, and calls super with a copy of the array (and the version), minus the last String[] (can use Arrays.copyOfRange() for this). It then uses the last String[] to fill whatever data it uses, while also using the given version to account for any changes since that version.
