@@ -26,6 +26,7 @@ import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.ServerPlayer;
 import miniventure.game.world.tile.Tile;
+import miniventure.game.world.tile.TileType;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;
@@ -420,6 +421,24 @@ public class GameServer implements GameProtocol {
 		Array<Entity> entities = level.getOverlappingEntities(area, player);
 		EntityValidation validation = new EntityValidation(level.getDepth(), entities.shrink());
 		pData.connection.sendTCP(validation);
+	}
+	
+	public void playEntitySound(String soundName, Entity source) {
+		/*if(source instanceof Player)
+			playSound("entity/player/"+soundName, source.getCenter());
+		else if(source instanceof MobAi)
+			playSound("entity/"+((MobAi)source).getType().name().toLowerCase()+"/");*/
+		playGenericSound("entity/"+soundName, source.getCenter());
+	}
+	public void playTileSound(String soundName, Tile tile, TileType type) {
+		//playGenericSound("tile/"+type+"/"+soundName, tile.getCenter());
+		playGenericSound("tile/"+soundName, tile.getCenter());
+	}
+	public void playGenericSound(String soundName, Vector2 source) {
+		for(ServerPlayer player: playerToConnectionMap.keySet()) {
+			if(player.getPosition().dst(source) <= GameCore.SOUND_RADIUS)
+				playerToConnectionMap.get(player).sendTCP(new SoundRequest(soundName));
+		}
 	}
 	
 	public void printStatus(MessageBuilder out) {

@@ -190,6 +190,8 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 		health -= Math.min(damage, health);
 		invulnerableTime = HURT_COOLDOWN;
 		
+		ServerCore.getServer().playEntitySound("hurt", this);
+		
 		if(health > 0) {
 			// do knockback
 			if(!(this instanceof Player)) // client will take care of it for theirself

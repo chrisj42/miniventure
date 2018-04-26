@@ -1,6 +1,7 @@
 package miniventure.game.world.tile;
 
 import miniventure.game.item.Item;
+import miniventure.game.server.ServerCore;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
@@ -32,11 +33,14 @@ public class ServerDestructibleProperty extends DestructibleProperty {
 			if(totalHealth > 1)
 				tile.getLevel().addEntity(new TextParticle(damage+""), tile.getCenter(), true);
 			if(health <= 0) {
+				ServerCore.getServer().playTileSound("break", tile, tileType);
 				tile.breakTile();
 				for(ItemDrop drop: drops)
 					((ServerLevel)tile.getLevel()).dropItems(drop, tile, attacker);
-			} else
-				tile.setData(TilePropertyType.Attack, tileType, HEALTH_IDX, health+"");
+			} else {
+				tile.setData(TilePropertyType.Attack, tileType, HEALTH_IDX, health + "");
+				ServerCore.getServer().playTileSound("hit", tile, tileType);
+			}
 			
 			return true;
 		}

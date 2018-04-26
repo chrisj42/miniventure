@@ -150,6 +150,8 @@ public class ClientPlayer extends ClientEntity implements Player {
 			animator.requestState(AnimationState.WALK);
 			
 			getStatEvo(HungerSystem.class).addHunger(Gdx.graphics.getDeltaTime() * 0.35f);
+			
+			// TODO add walking sound. Also make sound enum that is a simple enum, just as a way to track all the sound file names.
 		}
 		
 		getStatEvo(StaminaSystem.class).isMoving = !moveDist.isZero();

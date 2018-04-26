@@ -121,7 +121,7 @@ public class TransitionProperty extends TileProperty {
 		if(timeElapsed > anim.getAnimationTime()) {
 			//System.out.println("transition animation finished (entrance="+anim.isEntrance()+") for tile "+tile);
 			
-			tile.setData(Transition, tileType, Data.TIME.idx, "");
+			tile.setData(Transition, tileType, Data.TIME.idx, "0");
 			tile.setData(Transition, tileType, Data.ANIM.idx, "");
 			 
 			// if entering, no action required. if removing, remove the current tile from the stack, specifying not to check for an exit animation. If removing, and there is data for a tile type, then add that tile type.

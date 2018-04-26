@@ -198,6 +198,9 @@ public class ServerPlayer extends ServerMob implements Player {
 			else
 				level.addEntity(ActionType.PUNCH.get(getDirection()), getInteractionRect().getCenter(new Vector2()), true);
 		}
+		
+		if(!success) // if successful, then the sound will be taken care of. This sound is of an empty swing.
+			ServerCore.getServer().playEntitySound("swing", this);
 	}
 	
 	public void interact() {
@@ -217,8 +220,10 @@ public class ServerPlayer extends ServerMob implements Player {
 			// none of the above interactions were successful, do the reflexive use.
 			heldItem.interact(this);
 		
-		if(!heldItem.isUsed())
+		if(!heldItem.isUsed()) {
 			changeStat(Stat.Stamina, -1); // for trying...
+			// TODO failed interaction sound
+		}
 	}
 	
 	@Override

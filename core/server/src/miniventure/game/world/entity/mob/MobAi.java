@@ -65,7 +65,7 @@ public class MobAi extends ServerMob {
 		return data;
 	}
 	
-	protected AiType getType() { return aiType; }
+	public AiType getType() { return aiType; }
 	
 	protected void setMovePattern(@NotNull MovementPattern pattern) { movePattern = pattern; }
 	protected void setMovePattern(@NotNull MovementPattern pattern, float duration) {

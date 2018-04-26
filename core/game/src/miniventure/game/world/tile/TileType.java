@@ -79,7 +79,7 @@ public enum TileType {
 	DOOR_OPEN((tileType, map) -> {
 		map.put(Solid, SolidProperty.get(tileType, false));
 		map.put(Render, new AnimationProperty(tileType, false, AnimationType.SINGLE_FRAME));
-		map.put(Transition, new TransitionProperty(tileType,
+		map.put(Transition, new TransitionProperty(tileType, // TODO add sound effects for transitions
 			new TransitionAnimation("open", true, 1/24f, DOOR_CLOSED),
 			new TransitionAnimation("close", false, 1/24f, DOOR_CLOSED)
 		));

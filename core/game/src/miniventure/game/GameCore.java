@@ -7,6 +7,7 @@ import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.Version;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.backends.lwjgl.LwjglFiles;
 import com.badlogic.gdx.backends.lwjgl.LwjglNativesLoader;
 import com.badlogic.gdx.files.FileHandle;
@@ -31,11 +32,15 @@ public class GameCore {
 	
 	private static final long START_TIME = System.nanoTime();
 	
+	public static final float SOUND_RADIUS = 10; // 10 tiles
+	
 	public static TextureAtlasHolder entityAtlas, tileAtlas;
 	public static TextureAtlas tileConnectionAtlas = new TextureAtlas(); // tile overlap atlas not needed b/c the overlap sprite layout is simple enough to code; it goes in binary. However, the tile connection sprite layout is more complicated, so a map is needed to compare against.
 	
 	private static TextureAtlas iconAtlas;
 	public static final HashMap<String, TextureHolder> icons = new HashMap<>();
+	
+	private static final HashMap<String, Sound> soundEffects = new HashMap<>();
 	
 	private static SpriteBatch batch;
 	private static FreeTypeFontGenerator fontGenerator;
@@ -62,6 +67,11 @@ public class GameCore {
 		//noinspection ConstantConditions
 		for(AtlasRegion region: iconAtlas.getRegions())
 			icons.put(region.name, new TextureHolder(region));
+		
+		FileHandle soundFolder = Gdx.files.internal("audio/effects");
+		for(FileHandle subfolder: soundFolder.list())
+			for(FileHandle sound: subfolder.list())
+				soundEffects.put(sound.nameWithoutExtension(), Gdx.audio.newSound(sound));
 	}
 	
 	public static void initNonGdx() {
@@ -96,6 +106,12 @@ public class GameCore {
 		iconAtlas.dispose();
 	}
 	
+	
+	public static void playSound(String soundName) {
+		Sound s = soundEffects.get(soundName);
+		if(s != null)
+			s.play();
+	}
 	
 	public static GlyphLayout getTextLayout(String text) {
 		if(fontGenerator != null)

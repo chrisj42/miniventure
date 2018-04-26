@@ -484,6 +484,15 @@ public interface GameProtocol {
 		}
 	}
 	
+	class SoundRequest {
+		public final String sound;
+		
+		private SoundRequest() { this(null); }
+		public SoundRequest(String sound) {
+			this.sound = sound;
+		}
+	}
+	
 	
 	static void registerClassesInPackage(Kryo kryo, String packageName, boolean recursive) {
 		String sep = File.separator;
