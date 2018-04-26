@@ -148,8 +148,10 @@ public class ServerPlayer extends ServerMob implements Player {
 		else
 			success = inventory.addItem(item, 1) == 1;
 		
-		if(success)
+		if(success) {
+			ServerCore.getServer().playEntitySound("pickup", this, false);
 			ServerCore.getServer().sendToPlayer(this, new InventoryUpdate(this));
+		}
 		
 		return success;
 	}

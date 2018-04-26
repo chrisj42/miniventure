@@ -122,6 +122,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 		animator.progressAnimation(delta);
 	}
 	
+	private float lastWalkTime = 0;
 	public void handleInput(Vector2 mouseInput) {
 		
 		
@@ -144,6 +145,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 		
 		Vector2 moveDist = inputDir.cpy().scl(moveSpeed*Gdx.graphics.getDeltaTime());
 		
+		float elapTime = GameCore.getElapsedProgramTime();
 		if(!moveDist.isZero()) {
 			move(moveDist, getLevel() != null);
 			
@@ -151,8 +153,13 @@ public class ClientPlayer extends ClientEntity implements Player {
 			
 			getStatEvo(HungerSystem.class).addHunger(Gdx.graphics.getDeltaTime() * 0.35f);
 			
-			// TODO add walking sound. Also make sound enum that is a simple enum, just as a way to track all the sound file names.
+			if(elapTime - lastWalkTime > 0.25f) {
+				GameCore.playSound("player/walk");
+				lastWalkTime = elapTime;
+			}
 		}
+		else
+			lastWalkTime = elapTime;
 		
 		getStatEvo(StaminaSystem.class).isMoving = !moveDist.isZero();
 		

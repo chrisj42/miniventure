@@ -71,7 +71,9 @@ public class GameCore {
 		FileHandle soundFolder = Gdx.files.internal("audio/effects");
 		for(FileHandle subfolder: soundFolder.list())
 			for(FileHandle sound: subfolder.list())
-				soundEffects.put(sound.nameWithoutExtension(), Gdx.audio.newSound(sound));
+				soundEffects.put(subfolder.nameWithoutExtension()+"/"+sound.nameWithoutExtension(), Gdx.audio.newSound(sound));
+		
+		System.out.println("loaded sounds: "+soundEffects.keySet());
 	}
 	
 	public static void initNonGdx() {
@@ -109,6 +111,7 @@ public class GameCore {
 	
 	public static void playSound(String soundName) {
 		Sound s = soundEffects.get(soundName);
+		//System.out.println("playing sound "+soundName+": "+s);
 		if(s != null)
 			s.play();
 	}

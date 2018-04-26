@@ -24,6 +24,7 @@ import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ServerEntity;
+import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.mob.ServerPlayer;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileType;
@@ -423,12 +424,14 @@ public class GameServer implements GameProtocol {
 		pData.connection.sendTCP(validation);
 	}
 	
-	public void playEntitySound(String soundName, Entity source) {
-		/*if(source instanceof Player)
-			playSound("entity/player/"+soundName, source.getCenter());
-		else if(source instanceof MobAi)
-			playSound("entity/"+((MobAi)source).getType().name().toLowerCase()+"/");*/
-		playGenericSound("entity/"+soundName, source.getCenter());
+	public void playEntitySound(String soundName, Entity source) { playEntitySound(soundName, source, true); }
+	public void playEntitySound(String soundName, Entity source, boolean broadcast) {
+		if(source instanceof Player)
+			playGenericSound("player/"+soundName, source.getCenter());
+		//else if(source instanceof MobAi)
+		//	playSound("entity/"+((MobAi)source).getType().name().toLowerCase()+"/");
+		else
+			playGenericSound("entity/"+soundName, source.getCenter());
 	}
 	public void playTileSound(String soundName, Tile tile, TileType type) {
 		//playGenericSound("tile/"+type+"/"+soundName, tile.getCenter());
