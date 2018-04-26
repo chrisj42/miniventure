@@ -145,7 +145,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 		
 		Vector2 moveDist = inputDir.cpy().scl(moveSpeed*Gdx.graphics.getDeltaTime());
 		
-		float elapTime = GameCore.getElapsedProgramTime();
+		//float elapTime = GameCore.getElapsedProgramTime();
 		if(!moveDist.isZero()) {
 			move(moveDist, getLevel() != null);
 			
@@ -153,13 +153,13 @@ public class ClientPlayer extends ClientEntity implements Player {
 			
 			getStatEvo(HungerSystem.class).addHunger(Gdx.graphics.getDeltaTime() * 0.35f);
 			
-			if(elapTime - lastWalkTime > 0.25f) {
+			/*if(elapTime - lastWalkTime > 0.25f) {
 				ClientCore.playSound("player/walk");
 				lastWalkTime = elapTime;
-			}
-		}
+			}*/
+		}/*
 		else
-			lastWalkTime = elapTime;
+			lastWalkTime = elapTime-.2f;*/
 		
 		getStatEvo(StaminaSystem.class).isMoving = !moveDist.isZero();
 		
