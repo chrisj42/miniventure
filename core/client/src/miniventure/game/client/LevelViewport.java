@@ -68,7 +68,7 @@ public class LevelViewport {
 			debug = !debug;
 	}
 	
-	public void render(@NotNull Vector2 cameraCenter, Color[] lightOverlays, @NotNull Level level) {
+	public void render(@NotNull Vector2 cameraCenter, Color ambientLighting, @NotNull Level level) {
 		// get the size of the area of the game on screen by projecting the application window dimensions into world space.
 		Vector3 screenSize = new Vector3(Gdx.graphics.getWidth(), 0, 0); // because unproject has origin at the top, so the upper right corner is at (width, 0).
 		camera.unproject(screenSize); // screen to render coords
@@ -96,9 +96,8 @@ public class LevelViewport {
 		batch.setProjectionMatrix(camera.combined); // batch will convert render coords to screen coords
 		batch.begin();
 		
-		for(Color color: lightOverlays)
-			if (color.a > 0)
-				MyUtils.fillRect(0, 0, camera.viewportWidth, camera.viewportHeight, color, batch); // render coords
+		if (ambientLighting.a > 0)
+			MyUtils.fillRect(0, 0, camera.viewportWidth, camera.viewportHeight, ambientLighting, batch); // render coords
 		
 		batch.setBlendFunction(GL20.GL_ZERO, GL20.GL_ONE_MINUS_SRC_ALPHA);
 		

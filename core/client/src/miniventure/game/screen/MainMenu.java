@@ -28,7 +28,7 @@ public class MainMenu extends MenuScreen {
 	
 	private final DisplayLevel backgroundLevel;
 	private final LevelViewport levelView;
-	private final Color[] lightOverlays;
+	private final Color lightOverlay;
 	private final Vector2 cameraPos, cameraDir;
 	
 	private static final float PAN_SPEED = 3f; // in tiles/second.
@@ -96,7 +96,7 @@ public class MainMenu extends MenuScreen {
 		
 		levelView = new LevelViewport();
 		TimeOfDay time = TimeOfDay.values[MathUtils.random(TimeOfDay.values.length-1)];
-		lightOverlays = TimeOfDay.getSkyColors(time.getStartOffsetSeconds());
+		lightOverlay = TimeOfDay.getSkyColor(time.getStartOffsetSeconds());
 		
 		LevelGenerator generator = new LevelGenerator(MathUtils.random.nextLong(), 100, 60, 8, 6);
 		backgroundLevel = new DisplayLevel(generator);
@@ -123,7 +123,7 @@ public class MainMenu extends MenuScreen {
 	
 	@Override
 	public void draw() {
-		levelView.render(cameraPos, lightOverlays, backgroundLevel);
+		levelView.render(cameraPos, lightOverlay, backgroundLevel);
 		
 		cameraPos.add(cameraDir.cpy().scl(Gdx.graphics.getDeltaTime()));
 		cameraDir.x = velDir(cameraPos.x, cameraDir.x, levelView.getViewWidth()/2, backgroundLevel.getWidth() - levelView.getViewWidth()/2);

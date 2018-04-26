@@ -61,24 +61,23 @@ public enum TimeOfDay {
 		return (secondsOffset % SECONDS_IN_DAY) / SECONDS_IN_DAY * REL_DAY_DURATION;
 	}
 	
-	public static Color[] getSkyColors(float secondsOffset) {
+	public static Color getSkyColor(float secondsOffset) {
 		TimeOfDay tod = getTimeOfDay(secondsOffset);
 		float time = getRelTime(secondsOffset);
 		
 		float timeThroughTransition = tod.getTransProgress(time);
 		
 		if(timeThroughTransition <= 0)
-			return new Color[] {tod.mainColor.cpy()};
+			return tod.mainColor.cpy();
 		
 		// there are multiple colors to blend
 		Color mainTrans = tod.mainColor.cpy();
-		if(timeThroughTransition > 0.5f)
-			mainTrans.a *= (1 - timeThroughTransition)*2;
-		
 		Color secondTrans = values[(tod.ordinal()+1)%values.length].mainColor.cpy();
-		secondTrans.a *= timeThroughTransition;
 		
-		return new Color[] {mainTrans, secondTrans};
+		// we should blend in a way that mixes the lighting, but also doesn't brighten with opacity changes. The net opacity should steadily approach the next time's opacity.
+		// oh, hey, look at that, there just so happens to be a method which does exactly that...
+		
+		return mainTrans.lerp(secondTrans, timeThroughTransition);
 	}
 	
 	

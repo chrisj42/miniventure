@@ -83,7 +83,7 @@ public class ClientWorld extends WorldManager {
 		level.updateEntities(getEntities(level), delta);
 		
 		if(menu == null || !menu.usesWholeScreen())
-			gameScreen.render(mainPlayer, getLightingOverlays(), level);
+			gameScreen.render(mainPlayer, getLightingOverlay(), level);
 		
 		super.update(delta);
 	}
@@ -140,9 +140,9 @@ public class ClientWorld extends WorldManager {
 	}
 	
 	// TODO add lighting overlays, based on level and/or time of day, depending on the level and perhaps other things.
-	private Color[] getLightingOverlays() {
+	private Color getLightingOverlay() {
 		//Array<Color> colors = new Array<>(TimeOfDay.getSkyColors(daylightOffset));
-		return TimeOfDay.getSkyColors(daylightOffset);
+		return TimeOfDay.getSkyColor(daylightOffset);
 	}
 	
 	

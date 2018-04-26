@@ -78,9 +78,9 @@ public class GameScreen {
 		}
 	}
 	
-	public void render(@NotNull ClientPlayer mainPlayer, Color[] lightOverlays, @NotNull ClientLevel level) {
+	public void render(@NotNull ClientPlayer mainPlayer, Color lightOverlay, @NotNull ClientLevel level) {
 		
-		levelView.render(mainPlayer.getCenter(), lightOverlays, level);
+		levelView.render(mainPlayer.getCenter(), lightOverlay, level);
 		
 		batch.setProjectionMatrix(uiCamera.combined);
 		batch.begin();
