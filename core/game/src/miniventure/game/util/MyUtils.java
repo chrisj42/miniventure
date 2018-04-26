@@ -179,5 +179,22 @@ public class MyUtils {
 		return str.toString();
 	}
 	
+	@SafeVarargs
+	public static <T> T[] arrayJoin(Class<T> clazz, T[]... arrays) {
+		int length = 0;
+		for(T[] ar: arrays)
+			length += ar.length;
+		
+		//noinspection unchecked
+		T[] joined = (T[]) java.lang.reflect.Array.newInstance(clazz, length);
+		int offset = 0;
+		for(T[] ar: arrays) {
+			System.arraycopy(ar, 0, joined, offset, ar.length);
+			offset += ar.length;
+		}
+		
+		return joined;
+	}
+	
 	public static void delay(int milliDelay, Action action) { new DelayedAction(milliDelay, action).start(); }
 }

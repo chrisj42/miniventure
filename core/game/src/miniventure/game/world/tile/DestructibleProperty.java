@@ -5,6 +5,7 @@ import miniventure.game.item.TileItem;
 import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolItem.Material;
 import miniventure.game.item.ToolType;
+import miniventure.game.util.MyUtils;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.WorldObject;
 
@@ -14,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
 public class DestructibleProperty extends TileProperty {
 	
 	static final DestructibleProperty INDESTRUCTIBLE(@NotNull TileType tileType) {
-		return new DestructibleProperty(tileType, -1, (PreferredTool)null, item -> false);
+		return new DestructibleBuilder(tileType, -1).require(item -> false).make();
 	}
 	
 	static final int HEALTH_IDX = 0;
@@ -22,17 +23,16 @@ public class DestructibleProperty extends TileProperty {
 	final int totalHealth;
 	
 	@NotNull private final PreferredTool[] preferredTools;
-	
 	@NotNull private final DamageConditionCheck[] damageConditions;
 	@NotNull final ItemDrop[] drops;
 	
 	// main constructor
-	DestructibleProperty(@NotNull TileType tileType, int totalHealth, @Nullable PreferredTool[] preferredTools, @Nullable DamageConditionCheck[] damageConditions, @Nullable ItemDrop... drops) {
+	DestructibleProperty(@NotNull TileType tileType, int totalHealth, @NotNull PreferredTool[] preferredTools, @NotNull DamageConditionCheck[] damageConditions, @NotNull ItemDrop[] drops) {
 		super(tileType);
 		this.totalHealth = totalHealth;
-		this.preferredTools = preferredTools == null ? new PreferredTool[0] : preferredTools;
-		this.damageConditions = damageConditions == null ? new DamageConditionCheck[0] : damageConditions;
-		this.drops = drops == null ? new ItemDrop[0] : drops;
+		this.preferredTools = preferredTools;
+		this.damageConditions = damageConditions;
+		this.drops = drops;
 	}
 	
 	// for those with health, preferred tools, and drops a tile item.
@@ -41,7 +41,7 @@ public class DestructibleProperty extends TileProperty {
 	}
 	// above, but custom drop
 	DestructibleProperty(@NotNull TileType tileType, int totalHealth, PreferredTool preferredTool, ItemDrop... drops) {
-		this(tileType, totalHealth, preferredTool, (DamageConditionCheck)null, drops);
+		this(tileType, totalHealth, new PreferredTool[] {preferredTool}, new DamageConditionCheck[0], drops);
 	}
 	
 	// for those that are one-shot, and have certain damage conditions, and drop a tile item
@@ -50,32 +50,7 @@ public class DestructibleProperty extends TileProperty {
 	}
 	// above, but custom single item drop
 	DestructibleProperty(@NotNull TileType tileType, ItemDrop drop, DamageConditionCheck... damageConditions) {
-		this(tileType, 1, drop, damageConditions);
-	}
-	// single damage condition, multiple custom drops
-	DestructibleProperty(@NotNull TileType tileType, DamageConditionCheck damageCondition, ItemDrop[] drops) {
-		this(tileType, 1, null, damageCondition, drops);
-	}
-	
-	DestructibleProperty(@NotNull TileType tileType, int totalHealth, @Nullable PreferredTool preferredTool, @Nullable DamageConditionCheck[] damageConditions, @Nullable ItemDrop... drops) {
-		this(tileType, totalHealth, preferredTool == null ? null : new PreferredTool[] {preferredTool}, damageConditions, drops);
-	}
-	DestructibleProperty(@NotNull TileType tileType, int totalHealth, @Nullable PreferredTool preferredTool, @Nullable DamageConditionCheck damageCondition, @Nullable ItemDrop... drops) {
-		this(tileType, totalHealth, preferredTool, damageCondition == null ? null : new DamageConditionCheck[] {damageCondition}, drops);
-	}
-	
-	DestructibleProperty(@NotNull TileType tileType, int totalHealth, @Nullable ItemDrop drop, @Nullable PreferredTool[] preferredTools, @Nullable DamageConditionCheck... damageConditions) {
-		this(tileType, totalHealth, preferredTools, damageConditions, drop == null ? null : new ItemDrop[] {drop});
-	}
-	DestructibleProperty(@NotNull TileType tileType, int totalHealth, @Nullable ItemDrop drop, @Nullable PreferredTool preferredTool, @Nullable DamageConditionCheck... damageConditions) {
-		this(tileType, totalHealth, drop, preferredTool == null ? null : new PreferredTool[] {preferredTool}, damageConditions);
-	}
-	
-	DestructibleProperty(@NotNull TileType tileType, int totalHealth, @Nullable ItemDrop drop, @Nullable DamageConditionCheck[] damageConditions, @Nullable PreferredTool... preferredTools) {
-		this(tileType, totalHealth, preferredTools, damageConditions, drop == null ? null : new ItemDrop[] {drop});
-	}
-	DestructibleProperty(@NotNull TileType tileType, int totalHealth, @Nullable ItemDrop drop, @Nullable DamageConditionCheck damageCondition, @Nullable PreferredTool... preferredTools) {
-		this(tileType, totalHealth, drop, preferredTools, damageCondition == null ? null : new DamageConditionCheck[] {damageCondition});
+		this(tileType, 1, new PreferredTool[0], damageConditions, new ItemDrop[] {drop});
 	}
 	
 	DestructibleProperty(DestructibleProperty model) {
@@ -86,6 +61,78 @@ public class DestructibleProperty extends TileProperty {
 		damageConditions = model.damageConditions;
 	}
 	
+	public static class DestructibleBuilder {
+		@NotNull
+		private TileType type;
+		private int health;
+		private PreferredTool[] preferredTools;
+		private DamageConditionCheck[] damageConditions;
+		private ItemDrop[] drops;
+		
+		public DestructibleBuilder(@NotNull TileType type) { this(type, 1); }
+		public DestructibleBuilder(@NotNull TileType type, int health) { this(type, health, health == 1); }
+		public DestructibleBuilder(@NotNull TileType type, boolean dropTileItem) { this(type, 1, dropTileItem); }
+		public DestructibleBuilder(@NotNull TileType type, int health, boolean dropTileItem) {
+			this.type = type;
+			this.health = health;
+			preferredTools = new PreferredTool[0];
+			damageConditions = new DamageConditionCheck[0];
+			if(dropTileItem)
+				drops = new ItemDrop[] { new ItemDrop(TileItem.get(type)) };
+			else
+				drops = new ItemDrop[0];
+		}
+		
+		public DestructibleBuilder(@NotNull TileType type, DestructibleProperty model) {
+			this.type = type;
+			this.health = model.totalHealth;
+			this.drops = model.drops;
+			this.preferredTools = model.preferredTools;
+			this.damageConditions = model.damageConditions;
+		}
+		
+		public DestructibleBuilder tileType(@NotNull TileType type) { this.type = type; return this; }
+		
+		public DestructibleBuilder health(int health) { this.health = health; return this; }
+		
+		public DestructibleBuilder prefer(PreferredTool... preferredTools) { return prefer(true, preferredTools); }
+		public DestructibleBuilder prefer(boolean replace, PreferredTool... preferredTools) {
+			if(replace || this.preferredTools.length == 0)
+				this.preferredTools = preferredTools;
+			else if(preferredTools.length > 0)
+				this.preferredTools = MyUtils.arrayJoin(PreferredTool.class, this.preferredTools, preferredTools);
+			return this;
+		}
+		
+		public DestructibleBuilder require(DamageConditionCheck... damageConditions) { return require(true, damageConditions); }
+		public DestructibleBuilder require(boolean replace, DamageConditionCheck... damageConditions) {
+			if(replace || this.damageConditions.length == 0)
+				this.damageConditions = damageConditions;
+			else if(damageConditions.length > 0)
+				this.damageConditions = MyUtils.arrayJoin(DamageConditionCheck.class, this.damageConditions, damageConditions);
+			return this;
+		}
+		
+		public DestructibleBuilder drops(boolean dropTileItem) { return drops(true, dropTileItem); }
+		public DestructibleBuilder drops(boolean replace, boolean dropTileItem) {
+			if(dropTileItem)
+				return drops(replace, new ItemDrop(TileItem.get(type)));
+			else
+				return drops(replace, new ItemDrop[0]);
+		}
+		public DestructibleBuilder drops(@NotNull ItemDrop... drops) { return drops(true, drops); }
+		public DestructibleBuilder drops(boolean replace, @NotNull ItemDrop... drops) {
+			if(replace || this.drops.length == 0)
+				this.drops = drops;
+			else if(drops.length > 0)
+				this.drops = MyUtils.arrayJoin(ItemDrop.class, this.drops, drops);
+			return this;
+		}
+		
+		public DestructibleProperty make() {
+			return new DestructibleProperty(type, health, preferredTools, damageConditions, drops);
+		}
+	}
 	
 	boolean tileAttacked(@NotNull Tile tile, @NotNull WorldObject attacker, @Nullable Item item, int damage) {
 		return false;

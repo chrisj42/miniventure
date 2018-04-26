@@ -40,7 +40,7 @@ public enum TileType {
 	
 	GRASS((tileType, map) -> {
 		map.put(Solid, SolidProperty.get(tileType, false));
-		map.put(Attack, new DestructibleProperty(tileType, (ItemDrop)null/*, new ItemDrop(TileItem.get(tileType), )*/, new RequiredTool(ToolType.Shovel)));
+		map.put(Attack, new DestructibleProperty(tileType, (ItemDrop)null, new RequiredTool(ToolType.Shovel)));
 		map.put(Overlap, new OverlapProperty(tileType, true));
 		map.put(Tick, new SpreadTickProperty(tileType, (newType, tile) -> tile.replaceTile(newType), DIRT));
 	}),
