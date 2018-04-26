@@ -75,9 +75,9 @@ public class GameClient implements GameProtocol {
 					Music song = ClientCore.setMusicTrack(Gdx.files.internal("audio/music/game.mp3"));
 					song.setOnCompletionListener(music -> {
 						music.stop();
-						MyUtils.delay(MathUtils.random(10_000, 30_000), music::play);
+						MyUtils.delay(MathUtils.random(30_000, 90_000), music::play);
 					});
-					MyUtils.delay(1_000, song::play);
+					MyUtils.delay(10_000, song::play);
 				}
 				
 				if(object instanceof TileUpdate) {
@@ -238,7 +238,7 @@ public class GameClient implements GameProtocol {
 				
 				forPacket(object, LoginFailure.class, failure -> Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen(failure.message))));
 				
-				forPacket(object, SoundRequest.class, sound -> GameCore.playSound(sound.sound));
+				forPacket(object, SoundRequest.class, sound -> ClientCore.playSound(sound.sound));
 			}
 			
 			@Override

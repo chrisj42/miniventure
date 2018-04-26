@@ -6,6 +6,7 @@ import javax.swing.JTextArea;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.util.HashMap;
 
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.HeldItemRequest;
@@ -13,12 +14,15 @@ import miniventure.game.GameProtocol.Message;
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.item.InventoryScreen;
 import miniventure.game.screen.ErrorScreen;
+import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
+import miniventure.game.util.MyUtils;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
 import com.kotcrab.vis.ui.VisUI;
 
@@ -31,6 +35,7 @@ public class ClientCore extends ApplicationAdapter {
 	private static ClientWorld clientWorld;
 	
 	private static Music song;
+	private static final HashMap<String, Sound> soundEffects = new HashMap<>();
 	
 	public static final InputHandler input = new InputHandler();
 	
@@ -57,12 +62,25 @@ public class ClientCore extends ApplicationAdapter {
 	public void create () {
 		VisUI.load(Gdx.files.internal("skins/visui/uiskin.json"));
 		
-		GameCore.initGdx();
-		
-		gameScreen = new GameScreen();
-		clientWorld = new ClientWorld(serverStarter, gameScreen);
-		
-		setScreen(new MainMenu());
+		LoadingScreen loader = new LoadingScreen();
+		loader.pushMessage("Initializing...");
+		setScreen(loader);
+		//System.out.println("start delay");
+		MyUtils.delay(0, () -> Gdx.app.postRunnable(() -> {
+			//System.out.println("end delay");
+			GameCore.initGdx();
+			
+			gameScreen = new GameScreen();
+			clientWorld = new ClientWorld(serverStarter, gameScreen);
+			
+			FileHandle soundFolder = Gdx.files.internal("audio/effects");
+			for(FileHandle subfolder: soundFolder.list())
+				for(FileHandle sound: subfolder.list())
+					soundEffects.put(subfolder.nameWithoutExtension()+"/"+sound.nameWithoutExtension(), Gdx.audio.newSound(sound));
+			
+			System.out.println("loaded sounds: "+soundEffects.keySet());
+			setScreen(new MainMenu());
+		}));
 	}
 	
 	@Override
@@ -81,7 +99,7 @@ public class ClientCore extends ApplicationAdapter {
 		try {
 			input.update();
 			
-			if (clientWorld.worldLoaded())
+			if (clientWorld != null && clientWorld.worldLoaded())
 				clientWorld.update(Gdx.graphics.getDeltaTime()); // renders as well
 			
 			hasMenu = menuScreen != null;
@@ -110,7 +128,7 @@ public class ClientCore extends ApplicationAdapter {
 		
 		if(screen == null && menuScreen != null && menuScreen != gameScreen.chatScreen)
 			menuScreen.dispose();
-		else if(screen != null && menuScreen != gameScreen.chatScreen)
+		else if(screen != null && menuScreen != null && menuScreen != gameScreen.chatScreen)
 			screen.setParent(menuScreen);
 		
 		System.out.println("setting screen to " + screen);
@@ -129,6 +147,13 @@ public class ClientCore extends ApplicationAdapter {
 			Gdx.input.setInputProcessor(menuScreen);
 			input.reset();
 		}
+	}
+	
+	public static void playSound(String soundName) {
+		Sound s = soundEffects.get(soundName);
+		//System.out.println("playing sound "+soundName+": "+s);
+		if(s != null)
+			s.play();
 	}
 	
 	public static Music setMusicTrack(@NotNull FileHandle file) {

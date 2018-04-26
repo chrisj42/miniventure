@@ -7,7 +7,6 @@ import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.Version;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.backends.lwjgl.LwjglFiles;
 import com.badlogic.gdx.backends.lwjgl.LwjglNativesLoader;
 import com.badlogic.gdx.files.FileHandle;
@@ -40,8 +39,6 @@ public class GameCore {
 	private static TextureAtlas iconAtlas;
 	public static final HashMap<String, TextureHolder> icons = new HashMap<>();
 	
-	private static final HashMap<String, Sound> soundEffects = new HashMap<>();
-	
 	private static SpriteBatch batch;
 	private static FreeTypeFontGenerator fontGenerator;
 	private static GlyphLayout layout = new GlyphLayout();
@@ -67,13 +64,6 @@ public class GameCore {
 		//noinspection ConstantConditions
 		for(AtlasRegion region: iconAtlas.getRegions())
 			icons.put(region.name, new TextureHolder(region));
-		
-		FileHandle soundFolder = Gdx.files.internal("audio/effects");
-		for(FileHandle subfolder: soundFolder.list())
-			for(FileHandle sound: subfolder.list())
-				soundEffects.put(subfolder.nameWithoutExtension()+"/"+sound.nameWithoutExtension(), Gdx.audio.newSound(sound));
-		
-		System.out.println("loaded sounds: "+soundEffects.keySet());
 	}
 	
 	public static void initNonGdx() {
@@ -108,14 +98,6 @@ public class GameCore {
 		iconAtlas.dispose();
 	}
 	
-	
-	public static void playSound(String soundName) {
-		Sound s = soundEffects.get(soundName);
-		//System.out.println("playing sound "+soundName+": "+s);
-		if(s != null)
-			s.play();
-	}
-	
 	public static GlyphLayout getTextLayout(String text) {
 		if(fontGenerator != null)
 			layout.setText(getFont(), text);
@@ -124,7 +106,10 @@ public class GameCore {
 	
 	public static Skin getSkin() { return skin; }
 	
-	public static SpriteBatch getBatch() { return batch; }
+	public static SpriteBatch getBatch() {
+		if(batch == null) batch = new SpriteBatch();
+		return batch;
+	}
 	
 	private static BitmapFont defaultFont;
 	

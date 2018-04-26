@@ -154,7 +154,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 			getStatEvo(HungerSystem.class).addHunger(Gdx.graphics.getDeltaTime() * 0.35f);
 			
 			if(elapTime - lastWalkTime > 0.25f) {
-				GameCore.playSound("player/walk");
+				ClientCore.playSound("player/walk");
 				lastWalkTime = elapTime;
 			}
 		}
