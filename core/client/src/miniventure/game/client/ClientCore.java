@@ -73,12 +73,6 @@ public class ClientCore extends ApplicationAdapter {
 			gameScreen = new GameScreen();
 			clientWorld = new ClientWorld(serverStarter, gameScreen);
 			
-			FileHandle soundFolder = Gdx.files.internal("audio/effects");
-			for(FileHandle subfolder: soundFolder.list())
-				for(FileHandle sound: subfolder.list())
-					soundEffects.put(subfolder.nameWithoutExtension()+"/"+sound.nameWithoutExtension(), Gdx.audio.newSound(sound));
-			
-			System.out.println("loaded sounds: "+soundEffects.keySet());
 			setScreen(new MainMenu());
 		}));
 	}
@@ -150,6 +144,9 @@ public class ClientCore extends ApplicationAdapter {
 	}
 	
 	public static void playSound(String soundName) {
+		if(!soundEffects.containsKey(soundName))
+			soundEffects.put(soundName, Gdx.audio.newSound(Gdx.files.internal("audio/effects/"+soundName+".wav")));
+		
 		Sound s = soundEffects.get(soundName);
 		//System.out.println("playing sound "+soundName+": "+s);
 		if(s != null)
