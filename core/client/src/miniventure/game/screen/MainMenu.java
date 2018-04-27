@@ -41,15 +41,6 @@ public class MainMenu extends MenuScreen {
 		addLabel("Welcome to Miniventure!", 20);
 		addLabel("You are playing version " + GameCore.VERSION, 15);
 		
-		addLabel("Use mouse or arrow keys to move around.", 10);
-		addLabel("C to attack, V to interact.", 10);
-		addLabel("E to open your inventory, Z to craft items.", 10);
-		addLabel("+ and - keys to zoom in and out.", 10);
-		addLabel("Press \"t\" to chat with other players, and \"/\" to use commands.", 0);
-		addLabel("(Hint: use the up key to repeat messages, and tab to autocomplete command names.)", 30);
-		//addLabel("(press b to show/hide chunk boundaries)", 30);
-		//addLabel("", 10);
-		
 		VisTextButton button = new VisTextButton("Play");
 		
 		button.addListener(new ClickListener() {
@@ -79,7 +70,7 @@ public class MainMenu extends MenuScreen {
 						if(ipAddress != null)
 							world.createWorld(ipAddress);
 						else
-							ClientCore.setScreen(new MainMenu());
+							ClientCore.backToParentScreen();
 					});
 					dialog = false;
 				}).start();
@@ -88,6 +79,10 @@ public class MainMenu extends MenuScreen {
 		
 		table.row();
 		table.add(joinBtn);
+		table.row().space(20);
+		
+		VisTextButton helpBtn = makeButton("Instructions", () -> ClientCore.setScreen(new InstructionsScreen()));
+		table.add(helpBtn).row();
 		
 		table.setOrigin(Align.top);
 		table.setPosition(getWidth()/2, getHeight()/2);

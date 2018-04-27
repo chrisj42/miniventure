@@ -142,7 +142,7 @@ public class ClientCore extends ApplicationAdapter {
 		if(menuScreen != null && menuScreen.getParent() != null) {
 			MenuScreen screen = menuScreen.getParent();
 			System.out.println("setting screen back to " + screen);
-			menuScreen.dispose();
+			menuScreen.dispose(false);
 			menuScreen = screen;
 			Gdx.input.setInputProcessor(menuScreen);
 			input.reset();
