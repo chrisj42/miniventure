@@ -77,7 +77,9 @@ public abstract class Item {
 	public void drawItem(int stackSize, Batch batch, float x, float y) {
 		drawItem(stackSize, batch, x, y, Color.WHITE);
 	}
-	public void drawItem(int stackSize, Batch batch, float x, float y, Color textColor) {
+	//public void drawItem(int stackSize, Batch batch, float x, float y, Color textColor) {
+	public void drawItem(int stackSize, Batch batch, float x, float y, Color textColor) { drawItem(stackSize, batch, x, y, textColor, true); }
+	public void drawItem(int stackSize, Batch batch, float x, float y, Color textColor, boolean drawName) {
 		TextureRegion texture = this.texture.texture;
 		
 		float width = texture.getRegionWidth();
@@ -95,7 +97,8 @@ public abstract class Item {
 		
 		float textOff = font.getCapHeight() + font.getAscent();
 		font.draw(batch, stackSize+"", x+1, y+textOff-font.getDescent());
-		font.draw(batch, name, x+width+10, y+(getRenderHeight()+textOff)/2);
+		if(drawName)
+			font.draw(batch, name, x+width+10, y+(getRenderHeight()+textOff)/2);
 	}
 	
 	public float getRenderHeight() {

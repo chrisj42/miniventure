@@ -14,19 +14,29 @@ public class InventoryScreen extends MenuScreen {
 	
 	private final Inventory inventory;
 	private final Hands hands;
+	private ItemSelectionTable<InventoryItem> table;
 	
 	public InventoryScreen(Inventory inventory, Hands hands) {
 		this.inventory = inventory;
 		this.hands = hands;
 		
-		for(int i = 0; i < inventory.getFilledSlots(); i++)
-			vGroup.addActor(new InventoryItem(inventory.getItemAt(i), i));
+		InventoryItem[] items = new InventoryItem[inventory.getFilledSlots()];
+		for(int i = 0; i < items.length; i++)
+			items[i] = new InventoryItem(inventory.getItemAt(i), i);
+			//vGroup.addActor(new InventoryItem(inventory.getItemAt(i), i));
 		
-		vGroup.setOrigin(Align.right);
-		vGroup.columnAlign(Align.left);
-		vGroup.align(Align.center);
-		vGroup.pack();
-		vGroup.setPosition(getWidth()/2, getHeight()/2, Align.center);
+		vGroup.remove();
+		table = new ItemSelectionTable<>(items, inventory.getSlots(), item -> {});
+		
+		for(InventoryItem item: items)
+			item.setTable(table);
+		
+		addActor(table);
+		table.setOrigin(Align.right);
+		//table.columnAlign(Align.left);
+		table.align(Align.center);
+		table.pack();
+		table.setPosition(getWidth()/2, getHeight()/2, Align.center);
 		
 		getRoot().addListener(new InputListener() {
 			@Override
@@ -37,12 +47,13 @@ public class InventoryScreen extends MenuScreen {
 			}
 		});
 		
-		setKeyboardFocus(vGroup.getChildren().size > 0 ? vGroup.getChildren().get(0) : getRoot());
+		setKeyboardFocus(items.length == 0 ? getRoot() : items[0]);
+		//setKeyboardFocus(vGroup.getChildren().size > 0 ? vGroup.getChildren().get(0) : getRoot());
 	}
 	
 	@Override
 	protected void drawTable(Batch batch, float parentAlpha) {
-		MyUtils.fillRect(vGroup.getX(), vGroup.getY(), Math.max(vGroup.getWidth(), 100), Math.max(vGroup.getHeight(),120), .2f, .4f, 1f, parentAlpha, batch);
+		MyUtils.fillRect(table.getX(), table.getY(), Math.max(table.getWidth(), 100), Math.max(table.getHeight(),120), .2f, .4f, 1f, parentAlpha, batch);
 	}
 	
 	@Override
@@ -51,7 +62,7 @@ public class InventoryScreen extends MenuScreen {
 	
 	private class InventoryItem extends RenderableListItem {
 		InventoryItem(Item item, int idx) {
-			super(item, idx, vGroup);
+			super(item, idx);
 		}
 		
 		@Override

@@ -10,22 +10,22 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
-import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
 abstract class RenderableListItem extends Button {
 	
+	public static final float MAX_HEIGHT = Item.ICON_SIZE;
+	
 	private final Item item;
 	private final int idx;
-	private final VerticalGroup table;
+	private ItemSelectionTable table;
 	
 	private final float width, height;
 	
-	RenderableListItem(Item item, int idx, VerticalGroup table) {
+	RenderableListItem(Item item, int idx) {
 		super(GameCore.getSkin());
 		this.item = item;
 		this.idx = idx;
-		this.table = table;
 		
 		width = item.getRenderWidth()+10;
 		height = item.getRenderHeight()+10;
@@ -33,21 +33,27 @@ abstract class RenderableListItem extends Button {
 		addListener(new InputListener() {
 			@Override
 			public boolean keyDown (InputEvent event, int keycode) {
-				if(keycode == Keys.DOWN)
-					moveFocus(1);
-				else if(keycode == Keys.UP)
-					moveFocus(-1);
-				else if(keycode == Keys.ENTER)
-					select(idx);
-				else 
-					RenderableListItem.this.keyDown(event, keycode);
+				if(table == null)
+					return false;
 				
-				return true;
+				switch(keycode) {
+					case Keys.RIGHT: table.moveFocus(1, 0); return true;
+					case Keys.LEFT: table.moveFocus(-1, 0); return true;
+					case Keys.UP: table.moveFocus(0, 1); return true;
+					case Keys.DOWN: table.moveFocus(0, -1); return true;
+					
+					case Keys.ENTER: select(idx); return true;
+					
+					default: RenderableListItem.this.keyDown(event, keycode); return true;
+				}
 			}
 			
 			@Override
 			public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-				getStage().setKeyboardFocus(RenderableListItem.this);
+				if(table != null)
+					table.moveFocus(idx);
+				else
+					getStage().setKeyboardFocus(RenderableListItem.this);
 			}
 		});
 		
@@ -59,13 +65,7 @@ abstract class RenderableListItem extends Button {
 		});
 	}
 	
-	private void moveFocus(int amt) {
-		Actor focused = getStage().getKeyboardFocus();
-		int row = table.getChildren().indexOf(focused, true);
-		row += amt;
-		while(row < 0) row += table.getChildren().size;
-		getStage().setKeyboardFocus(table.getChildren().get(row % table.getChildren().size));
-	}
+	void setTable(ItemSelectionTable table) { this.table = table; }
 	
 	void keyDown(InputEvent event, int keycode) {}
 	
@@ -82,7 +82,7 @@ abstract class RenderableListItem extends Button {
 		if(getStage().getKeyboardFocus() == this)
 			MyUtils.fillRect(getX(), getY(), getPrefWidth(), getPrefHeight(), .8f, .8f, .8f, 0.5f*parentAlpha, batch);
 		
-		item.drawItem(getStackSize(idx), batch, getX()+5, getY()+5, getItemTextColor());
+		item.drawItem(getStackSize(idx), batch, getX()+5, getY()+5, getItemTextColor(), false);
 	}
 	
 	protected Color getItemTextColor() { return Color.WHITE; }

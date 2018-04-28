@@ -123,7 +123,7 @@ public class CraftingScreen extends MenuScreen {
 		private boolean canCraft;
 		
 		private CraftableItem(Recipe recipe, int idx) {
-			super(recipe.getResult().item, idx, vGroup);
+			super(recipe.getResult().item, idx);
 			this.recipe = recipe;
 			canCraft = recipe.canCraft(playerInv);
 			
