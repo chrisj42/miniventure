@@ -107,7 +107,7 @@ public class ItemSelectionTable extends VerticalFlowGroup {
 	public RenderableListItem getSelected() { return listItems.length == 0 ? null : listItems[selectionIndex]; }
 	
 	public void moveFocus(int xd, int yd) {
-		int newSelection = selectionIndex + yd;
+		int newSelection = selectionIndex - yd;
 		if(newSelection < 0)
 			newSelection = listItems.length - ((-newSelection) % listItems.length);
 		newSelection = newSelection % listItems.length;
