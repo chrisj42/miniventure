@@ -41,7 +41,7 @@ public abstract class Item {
 	@NotNull public TextureHolder getTexture() { return texture; }
 	@NotNull public String getName() { return name; }
 	@NotNull public ItemType getType() { return type; }
-	public int getMaxStackSize() { return 64; } // by default
+	public int getMaxStackSize() { return 1; } // by default
 	public int getStaminaUsage() { return 1; } // default; note that without a successful attack or interaction, no stamina is lost.
 	
 	public abstract String[] save();
@@ -96,7 +96,8 @@ public abstract class Item {
 		font.setColor(textColor);
 		
 		float textOff = font.getCapHeight() + font.getAscent();
-		font.draw(batch, stackSize+"", x+1, y+textOff-font.getDescent());
+		if(stackSize > 1)
+			font.draw(batch, stackSize+"", x+1, y+textOff-font.getDescent());
 		if(drawName)
 			font.draw(batch, name, x+width+10, y+(getRenderHeight()+textOff)/2);
 	}

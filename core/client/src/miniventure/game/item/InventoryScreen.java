@@ -14,7 +14,7 @@ public class InventoryScreen extends MenuScreen {
 	
 	private final Inventory inventory;
 	private final Hands hands;
-	private ItemSelectionTable<InventoryItem> table;
+	private ItemSelectionTable table;
 	
 	public InventoryScreen(Inventory inventory, Hands hands) {
 		this.inventory = inventory;
@@ -26,7 +26,7 @@ public class InventoryScreen extends MenuScreen {
 			//vGroup.addActor(new InventoryItem(inventory.getItemAt(i), i));
 		
 		vGroup.remove();
-		table = new ItemSelectionTable<>(items, inventory.getSlots(), item -> {});
+		table = new ItemSelectionTable(items, inventory.getSlots());
 		
 		for(InventoryItem item: items)
 			item.setTable(table);
@@ -34,7 +34,7 @@ public class InventoryScreen extends MenuScreen {
 		addActor(table);
 		table.setOrigin(Align.right);
 		//table.columnAlign(Align.left);
-		table.align(Align.center);
+		//table.align(Align.center);
 		table.pack();
 		table.setPosition(getWidth()/2, getHeight()/2, Align.center);
 		
@@ -53,7 +53,7 @@ public class InventoryScreen extends MenuScreen {
 	
 	@Override
 	protected void drawTable(Batch batch, float parentAlpha) {
-		MyUtils.fillRect(table.getX(), table.getY(), Math.max(table.getWidth(), 100), Math.max(table.getHeight(),120), .2f, .4f, 1f, parentAlpha, batch);
+		MyUtils.fillRect(table.getX(), table.getY(), table.getWidth(), table.getHeight(), .2f, .4f, 1f, parentAlpha, batch);
 	}
 	
 	@Override

@@ -28,7 +28,7 @@ abstract class RenderableListItem extends Button {
 		this.idx = idx;
 		
 		width = item.getRenderWidth()+10;
-		height = item.getRenderHeight()+10;
+		height = MAX_HEIGHT;//item.getRenderHeight()+10;
 		
 		addListener(new InputListener() {
 			@Override
@@ -73,16 +73,15 @@ abstract class RenderableListItem extends Button {
 	
 	protected abstract int getStackSize(int idx);
 	
-	@Override
-	public float getPrefWidth() { return width; }
-	public float getPrefHeight() { return height; }
+	@Override public float getPrefWidth() { return width; }
+	@Override public float getPrefHeight() { return height; }
 	
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
 		if(getStage().getKeyboardFocus() == this)
 			MyUtils.fillRect(getX(), getY(), getPrefWidth(), getPrefHeight(), .8f, .8f, .8f, 0.5f*parentAlpha, batch);
 		
-		item.drawItem(getStackSize(idx), batch, getX()+5, getY()+5, getItemTextColor(), false);
+		item.drawItem(getStackSize(idx), batch, getX()+5, getY()+5, getItemTextColor(), true);
 	}
 	
 	protected Color getItemTextColor() { return Color.WHITE; }
