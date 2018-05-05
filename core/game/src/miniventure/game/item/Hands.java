@@ -59,8 +59,8 @@ public class Hands {
 		this.count = count;
 	}
 	
-	public boolean addItem(@NotNull Item other) {
-		if(item instanceof HandItem)
+	public boolean addItem(@NotNull Item other, @NotNull Inventory inv) {
+		if(item instanceof HandItem && inv.canFit(other))
 			item = other;
 		else if(item.equals(other) && count < item.getMaxStackSize())
 			count++;
@@ -73,13 +73,16 @@ public class Hands {
 	public void reset() { setItem(new HandItem(), 1); }
 	
 	public void clearItem(Inventory inv) {
+		Item item = this.item;
+		int count = this.count;
+		reset();
 		if(inv != null && count > 0 && !(item instanceof HandItem)) {
 			int added = inv.addItem(item, count);
 			if(added != count)
 				dropStack(new ItemStack(item, count - added));
 		}
 		
-		reset();
+		//reset();
 	}
 	
 	void dropStack(@NotNull ItemStack stack) {}

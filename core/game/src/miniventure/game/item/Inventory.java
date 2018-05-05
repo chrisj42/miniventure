@@ -106,6 +106,13 @@ public class Inventory {
 		return count - left;
 	}
 	
+	public boolean canFit(Item item) {
+		boolean success = addItem(item, 1, false) == 1;
+		if(success)
+			removeItem(item, 1, true);
+		return success;
+	}
+	
 	public boolean hasItem(Item item) { return hasItem(item, 1); }
 	public boolean hasItem(Item item, int count) { return countItem(item) >= count; }
 	

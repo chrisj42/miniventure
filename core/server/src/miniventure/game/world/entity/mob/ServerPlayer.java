@@ -143,7 +143,7 @@ public class ServerPlayer extends ServerMob implements Player {
 	
 	public boolean takeItem(@NotNull Item item) {
 		boolean success;
-		if(hands.addItem(item))
+		if(hands.addItem(item, inventory))
 			success = true;
 		else
 			success = inventory.addItem(item, 1) == 1;
