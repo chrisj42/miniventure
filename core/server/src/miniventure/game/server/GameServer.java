@@ -419,8 +419,8 @@ public class GameServer implements GameProtocol {
 				area.merge(c.getBounds());
 		}
 		
-		Array<Entity> entities = level.getOverlappingEntities(area, player);
-		EntityValidation validation = new EntityValidation(level.getDepth(), entities.shrink());
+		//Array<Entity> entities = level.getOverlappingEntities(area, player);
+		EntityValidation validation = new EntityValidation(level, area, player);
 		pData.connection.sendTCP(validation);
 	}
 	

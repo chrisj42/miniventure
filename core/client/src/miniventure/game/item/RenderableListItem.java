@@ -37,10 +37,10 @@ abstract class RenderableListItem extends Button {
 					return false;
 				
 				switch(keycode) {
-					case Keys.RIGHT: table.moveFocus(1, 0); return true;
-					case Keys.LEFT: table.moveFocus(-1, 0); return true;
-					case Keys.UP: table.moveFocus(0, 1); return true;
-					case Keys.DOWN: table.moveFocus(0, -1); return true;
+					case Keys.RIGHT: table.moveFocusX(1); return true;
+					case Keys.LEFT: table.moveFocusX(-1); return true;
+					case Keys.UP: table.moveFocusY(-1); return true;
+					case Keys.DOWN: table.moveFocusY(1); return true;
 					
 					case Keys.ENTER: select(idx); return true;
 					

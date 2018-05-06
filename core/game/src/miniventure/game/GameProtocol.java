@@ -29,8 +29,10 @@ import miniventure.game.world.tile.Tile.TileData;
 import miniventure.game.world.tile.Tile.TileTag;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
 import com.esotericsoftware.kryo.Kryo;
 
 public interface GameProtocol {
@@ -287,14 +289,16 @@ public interface GameProtocol {
 		public final Point[] chunks;
 		
 		private EntityValidation() { this(0, null, null); }
-		public EntityValidation(int levelDepth, Entity[] entities) {
-			this(levelDepth, new int[entities.length], new Point[entities.length]);
-			for(int i = 0; i < entities.length; i++) {
-				ids[i] = entities[i].getId();
-				Level level = entities[i].getLevel();
-				if(level == null || level.getDepth() != levelDepth)
-					throw new IllegalArgumentException("Entity "+entities[i]+" in entity array of entity validation is not on the specified level, "+levelDepth+"; its level is "+level+".");
-				chunks[i] = Chunk.getCoords(entities[i].getCenter());
+		public EntityValidation(Level level, Rectangle area, Entity... excluded) {
+			this.levelDepth = level.getDepth();
+			
+			Array<Entity> entities = level.getOverlappingEntities(area, excluded);
+			ids = new int[entities.size];
+			chunks = new Point[entities.size];
+			
+			for(int i = 0; i < entities.size; i++) {
+				ids[i] = entities.get(i).getId();
+				chunks[i] = Chunk.getCoords(entities.get(i).getCenter());
 			}
 		}
 		public EntityValidation(int levelDepth, int[] ids, Point[] chunks) {

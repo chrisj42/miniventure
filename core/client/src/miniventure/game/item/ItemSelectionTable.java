@@ -35,6 +35,7 @@ public class ItemSelectionTable extends VerticalFlowGroup {
 	//private final Actor[][] tableEntries;
 	
 	private int selectionIndex = 0;
+	private final int cellsPerColumn, numColumns, totalSlots;
 	
 	public ItemSelectionTable(RenderableListItem[] listItems) {
 		this(listItems, listItems.length);
@@ -48,12 +49,13 @@ public class ItemSelectionTable extends VerticalFlowGroup {
 	public ItemSelectionTable(RenderableListItem[] listItems, int slots, float maxHeight) {
 		super(5);
 		//super(GameCore.getSkin());
+		totalSlots = slots;
 		
 		// configure the height to be something that equalizes the slots in as few columns as possible.
 		float cellHeight = SLOT_HEIGHT + getSpacing();
 		float maxPerColumn = (int) (maxHeight / cellHeight);
-		float numColumns = MathUtils.ceil(slots / maxPerColumn);
-		int cellsPerColumn = MathUtils.ceil(slots / numColumns);
+		numColumns = MathUtils.ceil(slots / maxPerColumn);
+		cellsPerColumn = MathUtils.ceil(slots / (float)numColumns);
 		
 		setHeight(cellHeight * cellsPerColumn);
 		
@@ -112,12 +114,25 @@ public class ItemSelectionTable extends VerticalFlowGroup {
 	
 	public RenderableListItem getSelected() { return listItems.length == 0 ? null : listItems[selectionIndex]; }
 	
-	public void moveFocus(int xd, int yd) {
-		int newSelection = selectionIndex - yd;
-		if(newSelection < 0)
-			newSelection = listItems.length - ((-newSelection) % listItems.length);
-		newSelection = newSelection % listItems.length;
-		moveFocus(newSelection);
+	public void moveFocusX(int amt) {
+		int xPos = selectionIndex / cellsPerColumn;
+		int yPos = selectionIndex % cellsPerColumn;
+		int newPos;
+		do {
+			xPos = MyUtils.mod(xPos+amt, numColumns);
+			newPos = xPos * cellsPerColumn + yPos;
+		} while(newPos >= listItems.length);
+		moveFocus(newPos);
+	}
+	public void moveFocusY(int amt) {
+		int xPos = selectionIndex / cellsPerColumn;
+		int yPos = selectionIndex % cellsPerColumn;
+		int newPos;
+		do {
+			yPos = MyUtils.mod(yPos+amt, cellsPerColumn);
+			newPos = xPos * cellsPerColumn + yPos;
+		} while(newPos >= listItems.length);
+		moveFocus(newPos);
 	}
 	
 	public void moveFocus(int index) {

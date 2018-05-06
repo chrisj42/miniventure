@@ -197,4 +197,9 @@ public class MyUtils {
 	}
 	
 	public static void delay(int milliDelay, Action action) { new DelayedAction(milliDelay, action).start(); }
+	
+	public static int mod(int num, int mod) { return (num % mod + mod) % mod; }
+	public static float mod(float num, float mod) { return (num % mod + mod) % mod; }
+	//public static long mod(long num, long mod) { return (num % mod + mod) % mod; }
+	//public static double mod(double num, double mod) { return (num % mod + mod) % mod; }
 }
