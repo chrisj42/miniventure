@@ -49,7 +49,7 @@ public class ItemSelectionTable extends VerticalFlowGroup {
 		
 		this.listItems = listItems;
 		
-		setDebug(true);
+		//setDebug(true);
 		/*
 			Have a text label at the top that displays the name of the currently selected item.
 			
