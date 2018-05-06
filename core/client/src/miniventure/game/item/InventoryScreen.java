@@ -2,10 +2,8 @@ package miniventure.game.item;
 
 import miniventure.game.client.ClientCore;
 import miniventure.game.screen.MenuScreen;
-import miniventure.game.util.MyUtils;
 
 import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.utils.Align;
@@ -41,11 +39,6 @@ public class InventoryScreen extends MenuScreen {
 		
 		setKeyboardFocus(items.length == 0 ? getRoot() : items[0]);
 		//setKeyboardFocus(vGroup.getChildren().size > 0 ? vGroup.getChildren().get(0) : getRoot());
-	}
-	
-	@Override
-	protected void drawTable(Batch batch, float parentAlpha) {
-		MyUtils.fillRect(table.getX(), table.getY(), table.getWidth(), table.getHeight(), .2f, .4f, 1f, parentAlpha, batch);
 	}
 	
 	@Override

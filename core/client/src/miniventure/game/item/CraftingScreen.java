@@ -24,6 +24,8 @@ import org.jetbrains.annotations.NotNull;
 
 public class CraftingScreen extends MenuScreen {
 	
+	private static final Color background = new Color(.2f, .4f, 1f, 1);
+	
 	private final Recipe[] recipes;
 	private final Inventory playerInv;
 	
@@ -31,8 +33,22 @@ public class CraftingScreen extends MenuScreen {
 	private final ItemSelectionTable table;
 	
 	private final ItemStackDisplay invCount = new ItemStackDisplay();
-	private final VerticalGroup inInv = new VerticalGroup();
-	private final VerticalGroup costs = new VerticalGroup();
+	private final VerticalGroup inInv = new OpaqueVerticalGroup(background);
+	private final VerticalGroup costs = new OpaqueVerticalGroup(background);
+	
+	private static class OpaqueVerticalGroup extends VerticalGroup {
+		private final Color color;
+		
+		public OpaqueVerticalGroup(Color color) {
+			this.color = color;
+		}
+		
+		@Override
+		public void draw(Batch batch, float parentAlpha) {
+			MyUtils.fillRect(getX(), getY(), getWidth(), getHeight(), color.cpy().mul(1, 1, 1, parentAlpha), batch);
+			super.draw(batch, parentAlpha);
+		}
+	}
 	
 	public CraftingScreen(Recipe[] recipes, Inventory playerInventory) {
 		this.recipes = recipes;
@@ -51,10 +67,11 @@ public class CraftingScreen extends MenuScreen {
 		inInv.space(5);
 		inInv.addActor(new Label("In inventory:", GameCore.getSkin()));
 		inInv.addActor(invCount);
-		addActor(inInv);
 		
 		costs.columnAlign(Align.left);
 		costs.space(5);
+		
+		addActor(inInv);
 		addActor(costs);
 		
 		refreshCanCraft();
@@ -82,13 +99,6 @@ public class CraftingScreen extends MenuScreen {
 	
 	@Override
 	public boolean usesWholeScreen() { return false; }
-	
-	@Override
-	protected void drawTable(Batch batch, float parentAlpha) {
-		MyUtils.fillRect(table.getX(), table.getY(), table.getWidth(), table.getHeight(), .2f, .4f, 1f, parentAlpha, batch);
-		MyUtils.fillRect(costs.getX(), costs.getY(), costs.getPrefWidth(), costs.getPrefHeight(), .2f, .4f, 1f, parentAlpha, batch);
-		MyUtils.fillRect(inInv.getX(), inInv.getY(), inInv.getPrefWidth(), inInv.getPrefHeight(), .2f, .4f, 1f, parentAlpha, batch);
-	}
 	
 	private void setHighlightedRecipe(Recipe recipe) {
 		inInv.removeActor(invCount);
@@ -173,19 +183,22 @@ public class CraftingScreen extends MenuScreen {
 	private class ItemStackDisplay extends Widget {
 		private ItemStack item;
 		private Color backgroundColor = new Color(.2f, .4f, 1f, 1f);
+		private float width, height;
 		
 		public ItemStackDisplay() {}
 		public ItemStackDisplay(@NotNull Item item, int count) {
-			this.item = new ItemStack(item, count);
+			setItem(new ItemStack(item, count));
 		}
 		
 		public void setItem(ItemStack item) {
 			this.item = item;
-			setSize(item.item.getRenderWidth() + 10, item.item.getRenderHeight() + 10);
+			width = item.item.getRenderWidth() + 10;
+			height = item.item.getRenderHeight() + 10;
+			setSize(width, height);
 		}
 		
-		@Override public float getPrefWidth() { return item.item.getRenderWidth(); }
-		@Override public float getPrefHeight() { return item.item.getRenderHeight(); }
+		@Override public float getPrefWidth() { return width; }
+		@Override public float getPrefHeight() { return height; }
 		
 		@Override
 		public void draw(Batch batch, float parentAlpha) {
