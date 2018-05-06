@@ -3,11 +3,9 @@ package miniventure.game.item;
 import miniventure.game.util.MyUtils;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Widget;
 import com.kotcrab.vis.ui.layout.VerticalFlowGroup;
 
 public class ItemSelectionTable extends VerticalFlowGroup {
@@ -27,7 +25,7 @@ public class ItemSelectionTable extends VerticalFlowGroup {
 		Actually... should I make a class that is specifically one column? I actually like that idea... it won't have a background, just the background for the individual items, and empty cells.
 	 */
 	
-	private static final float SLOT_WIDTH = Item.ICON_SIZE*2, SLOT_HEIGHT = RenderableListItem.MAX_HEIGHT;
+	//private static final float SLOT_WIDTH = Item.ICON_SIZE*2, SLOT_HEIGHT = RenderableListItem.MAX_HEIGHT;
 	
 	private final RenderableListItem[] listItems;
 	//private final VisLabel selectedItemLabel;
@@ -35,27 +33,21 @@ public class ItemSelectionTable extends VerticalFlowGroup {
 	//private final Actor[][] tableEntries;
 	
 	private int selectionIndex = 0;
-	private final int cellsPerColumn, numColumns, totalSlots;
+	private final int cellsPerColumn, numColumns;
 	
 	public ItemSelectionTable(RenderableListItem[] listItems) {
-		this(listItems, listItems.length);
-	}
-	public ItemSelectionTable(RenderableListItem[] listItems, int slots) {
-		this(listItems, slots, Gdx.graphics.getHeight());
+		this(listItems, Gdx.graphics.getHeight());
 	}
 	public ItemSelectionTable(RenderableListItem[] listItems, float maxHeight) {
-		this(listItems, listItems.length, maxHeight);
-	}
-	public ItemSelectionTable(RenderableListItem[] listItems, int slots, float maxHeight) {
 		super(5);
 		//super(GameCore.getSkin());
-		totalSlots = slots;
+		//System.out.println("item selection table of "+ Arrays.toString(listItems));
 		
 		// configure the height to be something that equalizes the slots in as few columns as possible.
-		float cellHeight = SLOT_HEIGHT + getSpacing();
+		float cellHeight = RenderableListItem.MAX_HEIGHT + getSpacing();
 		float maxPerColumn = (int) (maxHeight / cellHeight);
-		numColumns = MathUtils.ceil(slots / maxPerColumn);
-		cellsPerColumn = MathUtils.ceil(slots / (float)numColumns);
+		numColumns = Math.max(1, MathUtils.ceil(listItems.length / maxPerColumn));
+		cellsPerColumn = Math.max(1, MathUtils.ceil(listItems.length / (float)numColumns));
 		
 		setHeight(cellHeight * cellsPerColumn);
 		
@@ -71,37 +63,11 @@ public class ItemSelectionTable extends VerticalFlowGroup {
 			sorting can be manual, or through a couple presets.
 			
 		 */
-		//int numColumns = (int) (maxWidth / SLOT_WIDTH);
-		//int numRows = MathUtils.ceilPositive(listItems.length*1f / numColumns);
-		//tableEntries = new Actor[numRows][];
 		
-		//selectedItemLabel = new VisLabel("(no item)");
-		
-		//int rowCount = 0, total = 0;
-		
-		// first row is different
-		//addActor(selectedItemLabel);
-		//row().colspan(numColumns);
-		
-		/*while(total < slots) {
-			//if(rowCount == 0)
-			//	tableEntries[getRows()] = new Actor[Math.min(listItems.length - total, numColumns)];
-			
-			add(total < listItems.length ? listItems[total] : new EmptySlot());
-			//tableEntries[getRows()][rowCount] = c.getActor();
-			rowCount++; total++;
-			if((rowCount+1) * SLOT_WIDTH > maxWidth)
-				row().size(SLOT_WIDTH, SLOT_HEIGHT).space(10).uniform();
-		}*/
-		for(int i = 0; i < slots; i++) {
-			if(i >= listItems.length)
-				addActor(new EmptySlot());
-			else
-				addActor(listItems[i]);
+		for(RenderableListItem listItem: listItems) {
+			addActor(listItem);
+			listItem.setTable(this);
 		}
-		
-		for(RenderableListItem item: listItems)
-			item.setTable(this);
 		
 		pack();
 	}
@@ -112,7 +78,7 @@ public class ItemSelectionTable extends VerticalFlowGroup {
 		super.draw(batch, parentAlpha);
 	}
 	
-	public RenderableListItem getSelected() { return listItems.length == 0 ? null : listItems[selectionIndex]; }
+	//public RenderableListItem getSelected() { return listItems.length == 0 ? null : listItems[selectionIndex]; }
 	
 	public void moveFocusX(int amt) {
 		int xPos = selectionIndex / cellsPerColumn;
@@ -141,20 +107,5 @@ public class ItemSelectionTable extends VerticalFlowGroup {
 		if(stage != null)
 			stage.setKeyboardFocus(listItems[index]);
 		selectionIndex = index;
-	}
-	
-	private static class EmptySlot extends Widget {
-		public EmptySlot() {
-			
-		}
-		
-		@Override public float getPrefWidth() { return SLOT_WIDTH; }
-		@Override public float getPrefHeight() { return SLOT_HEIGHT; }
-		
-		@Override
-		public void draw(Batch batch, float parentAlpha) {
-			super.draw(batch, parentAlpha);
-			MyUtils.fillRect(getX(), getY(), SLOT_WIDTH, SLOT_HEIGHT, Color.TEAL, batch);
-		}
 	}
 }

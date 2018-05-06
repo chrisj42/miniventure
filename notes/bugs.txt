@@ -6,3 +6,7 @@ player jumps back whenever walking into an entity that is moving toward it, when
 
 player position becomes a bit spazzy occasionally, and it takes a little bit for it to go back to normal.
 
+UI doesn't scale right. Whenever the window size changes, I need to remake the UI, and call resize on all the conponents. Or revalidate them somehow.
+
+fix the buffer overflow. I need to find out why it's trying to send so many packets, and/or what packets it's trying to send, and buffer it better. Perhaps it is getting hung up on the numerous chunk load packages..? No, that doesn't make sense, the number of chunks loaded doesn't change... what would be affected when you zoom out..?
+

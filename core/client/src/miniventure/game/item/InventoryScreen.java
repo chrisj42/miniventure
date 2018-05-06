@@ -1,9 +1,13 @@
 package miniventure.game.item;
 
 import miniventure.game.client.ClientCore;
+import miniventure.game.item.Hands.HandItem;
 import miniventure.game.screen.MenuScreen;
+import miniventure.game.util.MyUtils;
 
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.utils.Align;
@@ -18,12 +22,15 @@ public class InventoryScreen extends MenuScreen {
 		this.inventory = inventory;
 		this.hands = hands;
 		
-		InventoryItem[] items = new InventoryItem[inventory.getFilledSlots()];
-		for(int i = 0; i < items.length; i++)
-			items[i] = new InventoryItem(inventory.getItemAt(i), i);
+		InventoryItem[] items = new InventoryItem[inventory.getSlots()];
+		for(int i = 0; i < items.length; i++) {
+			if(i < inventory.getFilledSlots())
+				items[i] = new InventoryItem(inventory.getItemAt(i), i);
+			else
+				items[i] = new EmptySlot(i);
 			//vGroup.addActor(new InventoryItem(inventory.getItemAt(i), i));
-		
-		table = new ItemSelectionTable(items, inventory.getSlots());
+		}
+		table = new ItemSelectionTable(items);
 		
 		addActor(table);
 		table.setPosition(getWidth()/2, getHeight()/2, Align.center);
@@ -67,6 +74,28 @@ public class InventoryScreen extends MenuScreen {
 		@Override
 		protected int getStackSize(int idx) {
 			return inventory.getStackSizeAt(idx);
+		}
+	}
+	
+	private class EmptySlot extends InventoryItem {
+		EmptySlot(int idx) {
+			super(new HandItem(), idx);
+		}
+		
+		@Override
+		public void select(int idx) {
+			hands.clearItem(inventory);
+			ClientCore.setScreen(null);
+		}
+		
+		@Override
+		protected int getStackSize(int idx) { return 1; }
+		@Override protected boolean showName() { return false; }
+		
+		@Override
+		public void draw(Batch batch, float parentAlpha) {
+			MyUtils.fillRect(getX(), getY(), getWidth(), getHeight(), Color.TEAL.cpy().mul(1, 1, 1, parentAlpha), batch);
+			super.draw(batch, parentAlpha);
 		}
 	}
 }

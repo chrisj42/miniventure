@@ -72,6 +72,7 @@ abstract class RenderableListItem extends Button {
 	abstract void select(int idx);
 	
 	protected abstract int getStackSize(int idx);
+	protected boolean showName() { return true; }
 	
 	@Override public float getPrefWidth() { return width; }
 	@Override public float getPrefHeight() { return height; }
@@ -81,8 +82,11 @@ abstract class RenderableListItem extends Button {
 		if(getStage().getKeyboardFocus() == this)
 			MyUtils.fillRect(getX(), getY(), getPrefWidth(), getPrefHeight(), .8f, .8f, .8f, 0.5f*parentAlpha, batch);
 		
-		item.drawItem(getStackSize(idx), batch, getX()+5, getY()+5, getItemTextColor(), true);
+		item.drawItem(getStackSize(idx), batch, getX()+5, getY()+5, getItemTextColor(), showName());
 	}
 	
 	protected Color getItemTextColor() { return Color.WHITE; }
+	
+	@Override
+	public String toString() { return "Renderable "+item; }
 }

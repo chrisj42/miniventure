@@ -1,5 +1,6 @@
 package miniventure.game.item;
 
+import miniventure.game.item.Hands.HandItem;
 import miniventure.game.util.MyUtils;
 
 import com.badlogic.gdx.utils.Array;
@@ -35,7 +36,7 @@ public class Inventory {
 	public int addItem(Item item, int count) { return addItem(item, count, true); }
 	public int addItem(Item item, int count, boolean addToTop) { return addItem(item, count, addToTop, true); }
 	private int addItem(Item item, int count, boolean addToTop, boolean checkMustFit) {
-		if(item.getName().equalsIgnoreCase("hand")) {
+		if(item instanceof HandItem) {
 			System.out.println("attempted addition of hand item");
 			Thread.dumpStack();
 			return 0;

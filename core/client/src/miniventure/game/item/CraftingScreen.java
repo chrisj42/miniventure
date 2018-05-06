@@ -50,15 +50,35 @@ public class CraftingScreen extends MenuScreen {
 		}
 	}
 	
+	private static class CraftableRecipe {
+		private Recipe recipe;
+		private boolean canCraft;
+		CraftableRecipe(Recipe r, Inventory inv) {
+			this.recipe = r;
+			canCraft = r.canCraft(inv);
+		}
+	}
+	
 	public CraftingScreen(Recipe[] recipes, Inventory playerInventory) {
 		this.recipes = recipes;
 		this.playerInv = playerInventory;
 		
-		list = new CraftableItem[recipes.length];
+		CraftableRecipe[] recipeCache = new CraftableRecipe[recipes.length];
+		for(int i = 0; i < recipeCache.length; i++)
+			recipeCache[i] = new CraftableRecipe(recipes[i], playerInventory);
+		
+		Arrays.sort(recipeCache, (r1, r2) -> {
+			if(r1.canCraft == r2.canCraft) return 0;
+			if(r1.canCraft) return -1;
+			return 1;
+		});
+		
+		list = new CraftableItem[recipeCache.length];
 		for(int i = 0; i < list.length; i++) {
-			list[i] = new CraftableItem(recipes[i], i);
-			//table.addActor(list[i]);
+			list[i] = new CraftableItem(recipeCache[i].recipe, i);
 		}
+		
+		refreshCanCraft();
 		
 		table = new ItemSelectionTable(list);
 		addActor(table);
@@ -67,20 +87,12 @@ public class CraftingScreen extends MenuScreen {
 		inInv.space(5);
 		inInv.addActor(new Label("In inventory:", GameCore.getSkin()));
 		inInv.addActor(invCount);
+		addActor(inInv);
 		
 		costs.columnAlign(Align.left);
 		costs.space(5);
-		
-		addActor(inInv);
 		addActor(costs);
 		
-		refreshCanCraft();
-		
-		Arrays.sort(list, (r1, r2) -> {
-			if(r1.canCraft == r2.canCraft) return 0;
-			if(r1.canCraft) return -1;
-			return 1;
-		});
 		
 		table.setPosition(0, getHeight(), Align.topLeft);
 		table.pack();
@@ -94,7 +106,7 @@ public class CraftingScreen extends MenuScreen {
 			}
 		});
 		
-		setKeyboardFocus(table.getChildren().size > 0 ? table.getChildren().get(0) : getRoot());
+		setKeyboardFocus(list.length == 0 ? getRoot() : list[0]);
 	}
 	
 	@Override
@@ -115,10 +127,6 @@ public class CraftingScreen extends MenuScreen {
 		
 		inInv.setPosition(table.getPrefWidth() + 10, getHeight() - inInv.getHeight());
 		costs.setPosition(table.getPrefWidth() + 10, getHeight() - inInv.getHeight() - 10 - costs.getHeight());
-		
-		/*System.out.println("menu bounds: " + new Rectangle(table.getX(), table.getY(), table.getPrefWidth(), table.getPrefHeight()));
-		System.out.println("count bounds: " + new Rectangle(inInv.getX(), inInv.getY(), inInv.getPrefWidth(), inInv.getPrefHeight()));
-		System.out.println("costs bounds: " + new Rectangle(costs.getX(), costs.getY(), costs.getPrefWidth(), costs.getPrefHeight()));*/
 	}
 	
 	private void refreshCanCraft() {
