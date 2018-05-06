@@ -47,6 +47,8 @@ public class ChatScreen extends MenuScreen {
 	public ChatScreen(boolean timeOutMessages) {
 		useTimer = timeOutMessages;
 		
+		addActor(vGroup);
+		
 		vGroup.align(Align.topLeft);
 		vGroup.columnAlign(Align.left);
 		vGroup.space(5);

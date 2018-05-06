@@ -6,6 +6,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Widget;
 import com.kotcrab.vis.ui.layout.VerticalFlowGroup;
 
@@ -96,6 +97,11 @@ public class ItemSelectionTable extends VerticalFlowGroup {
 			else
 				addActor(listItems[i]);
 		}
+		
+		for(RenderableListItem item: listItems)
+			item.setTable(this);
+		
+		pack();
 	}
 	
 	@Override
@@ -116,7 +122,9 @@ public class ItemSelectionTable extends VerticalFlowGroup {
 	
 	public void moveFocus(int index) {
 		index %= listItems.length;
-		getStage().setKeyboardFocus(listItems[index]);
+		Stage stage = getStage();
+		if(stage != null)
+			stage.setKeyboardFocus(listItems[index]);
 		selectionIndex = index;
 	}
 	

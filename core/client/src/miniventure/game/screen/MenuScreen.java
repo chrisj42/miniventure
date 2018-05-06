@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
@@ -25,7 +24,6 @@ public class MenuScreen extends Stage {
 	
 	private MenuScreen parent;
 	protected VerticalGroup vGroup;
-	protected Table table;
 	
 	public MenuScreen() {
 		super(new ExtendViewport(GameCore.DEFAULT_SCREEN_WIDTH, GameCore.DEFAULT_SCREEN_HEIGHT), GameCore.getBatch());
@@ -37,20 +35,8 @@ public class MenuScreen extends Stage {
 			}
 		};
 		
-		table = new Table() {
-			@Override
-			public void draw(Batch batch, float parentAlpha) {
-				drawTable(batch, parentAlpha);
-				super.draw(batch, parentAlpha);
-			}
-		};
-		
 		vGroup.space(10);
-		vGroup.setOrigin(Align.topLeft);
 		vGroup.setPosition(getWidth()/2, getHeight()*2/3, Align.center);
-		
-		table.setPosition(getWidth()/2, getHeight()*2/3, Align.center);
-		addActor(vGroup);
 	}
 	
 	// called when the menu is focused, the first time and any subsequent times.

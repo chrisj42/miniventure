@@ -11,6 +11,7 @@ public class RespawnScreen extends MenuScreen {
 	
 	public RespawnScreen() {
 		super();
+		addActor(vGroup);
 		
 		vGroup.addActor(new VisLabel("You died!"));
 		

@@ -25,17 +25,9 @@ public class InventoryScreen extends MenuScreen {
 			items[i] = new InventoryItem(inventory.getItemAt(i), i);
 			//vGroup.addActor(new InventoryItem(inventory.getItemAt(i), i));
 		
-		vGroup.remove();
 		table = new ItemSelectionTable(items, inventory.getSlots());
 		
-		for(InventoryItem item: items)
-			item.setTable(table);
-		
 		addActor(table);
-		table.setOrigin(Align.right);
-		//table.columnAlign(Align.left);
-		//table.align(Align.center);
-		table.pack();
 		table.setPosition(getWidth()/2, getHeight()/2, Align.center);
 		
 		getRoot().addListener(new InputListener() {

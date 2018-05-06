@@ -11,6 +11,8 @@ public class ErrorScreen extends MenuScreen {
 	
 	public ErrorScreen(String error) {
 		
+		addActor(vGroup);
+		
 		vGroup.addActor(new VisLabel(error));
 		
 		vGroup.space(50);

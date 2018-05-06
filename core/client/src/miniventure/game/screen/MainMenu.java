@@ -17,6 +17,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.kotcrab.vis.ui.widget.VisLabel;
@@ -25,6 +26,8 @@ import com.kotcrab.vis.ui.widget.VisTextButton;
 public class MainMenu extends MenuScreen {
 	
 	private boolean dialog = false;
+	
+	private final Table table;
 	
 	private final DisplayLevel backgroundLevel;
 	private final LevelViewport levelView;
@@ -38,6 +41,7 @@ public class MainMenu extends MenuScreen {
 		
 		ClientWorld world = ClientCore.getWorld();
 		
+		table = new Table();
 		addLabel("Welcome to Miniventure!", 20);
 		addLabel("You are playing version " + GameCore.VERSION, 15);
 		
@@ -51,7 +55,8 @@ public class MainMenu extends MenuScreen {
 			}
 		});
 		
-		vGroup.remove();
+		table.setPosition(getWidth()/2, getHeight()*2/3, Align.center);
+		
 		addActor(table);
 		table.add(button);
 		
@@ -84,7 +89,6 @@ public class MainMenu extends MenuScreen {
 		VisTextButton helpBtn = makeButton("Instructions", () -> ClientCore.setScreen(new InstructionsScreen()));
 		table.add(helpBtn).row();
 		
-		table.setOrigin(Align.top);
 		table.setPosition(getWidth()/2, getHeight()/2);
 		
 		// setup level scrolling in background

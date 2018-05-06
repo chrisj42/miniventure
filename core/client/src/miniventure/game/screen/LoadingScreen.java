@@ -23,7 +23,7 @@ public class LoadingScreen extends MenuScreen implements ProgressLogger {
 	private Stack<VisLabel> messageLabels = new Stack<>();
 	
 	public LoadingScreen() {
-		
+		addActor(vGroup);
 	}
 	
 	@Override

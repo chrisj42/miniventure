@@ -28,6 +28,7 @@ public class CraftingScreen extends MenuScreen {
 	private final Inventory playerInv;
 	
 	private final CraftableItem[] list;
+	private final ItemSelectionTable table;
 	
 	private final ItemStackDisplay invCount = new ItemStackDisplay();
 	private final VerticalGroup inInv = new VerticalGroup();
@@ -40,17 +41,18 @@ public class CraftingScreen extends MenuScreen {
 		list = new CraftableItem[recipes.length];
 		for(int i = 0; i < list.length; i++) {
 			list[i] = new CraftableItem(recipes[i], i);
-			vGroup.addActor(list[i]);
+			//table.addActor(list[i]);
 		}
 		
-		inInv.setOrigin(Align.top);
+		table = new ItemSelectionTable(list);
+		addActor(table);
+		
 		inInv.columnAlign(Align.left);
 		inInv.space(5);
 		inInv.addActor(new Label("In inventory:", GameCore.getSkin()));
 		inInv.addActor(invCount);
 		addActor(inInv);
 		
-		costs.setOrigin(Align.top);
 		costs.columnAlign(Align.left);
 		costs.space(5);
 		addActor(costs);
@@ -63,9 +65,8 @@ public class CraftingScreen extends MenuScreen {
 			return 1;
 		});
 		
-		vGroup.columnAlign(Align.left);
-		vGroup.setPosition(0, getHeight()-vGroup.getPrefHeight());
-		vGroup.pack();
+		table.setPosition(0, getHeight(), Align.topLeft);
+		table.pack();
 		
 		getRoot().addListener(new InputListener() {
 			@Override
@@ -76,7 +77,7 @@ public class CraftingScreen extends MenuScreen {
 			}
 		});
 		
-		setKeyboardFocus(vGroup.getChildren().size > 0 ? vGroup.getChildren().get(0) : getRoot());
+		setKeyboardFocus(table.getChildren().size > 0 ? table.getChildren().get(0) : getRoot());
 	}
 	
 	@Override
@@ -84,7 +85,7 @@ public class CraftingScreen extends MenuScreen {
 	
 	@Override
 	protected void drawTable(Batch batch, float parentAlpha) {
-		MyUtils.fillRect(vGroup.getX(), vGroup.getY(), vGroup.getWidth(), vGroup.getHeight(), .2f, .4f, 1f, parentAlpha, batch);
+		MyUtils.fillRect(table.getX(), table.getY(), table.getWidth(), table.getHeight(), .2f, .4f, 1f, parentAlpha, batch);
 		MyUtils.fillRect(costs.getX(), costs.getY(), costs.getPrefWidth(), costs.getPrefHeight(), .2f, .4f, 1f, parentAlpha, batch);
 		MyUtils.fillRect(inInv.getX(), inInv.getY(), inInv.getPrefWidth(), inInv.getPrefHeight(), .2f, .4f, 1f, parentAlpha, batch);
 	}
@@ -102,10 +103,10 @@ public class CraftingScreen extends MenuScreen {
 		inInv.pack();
 		costs.pack();
 		
-		inInv.setPosition(vGroup.getPrefWidth() + 10, getHeight() - inInv.getHeight());
-		costs.setPosition(vGroup.getPrefWidth() + 10, getHeight() - inInv.getHeight() - 10 - costs.getHeight());
+		inInv.setPosition(table.getPrefWidth() + 10, getHeight() - inInv.getHeight());
+		costs.setPosition(table.getPrefWidth() + 10, getHeight() - inInv.getHeight() - 10 - costs.getHeight());
 		
-		/*System.out.println("menu bounds: " + new Rectangle(vGroup.getX(), vGroup.getY(), vGroup.getPrefWidth(), vGroup.getPrefHeight()));
+		/*System.out.println("menu bounds: " + new Rectangle(table.getX(), table.getY(), table.getPrefWidth(), table.getPrefHeight()));
 		System.out.println("count bounds: " + new Rectangle(inInv.getX(), inInv.getY(), inInv.getPrefWidth(), inInv.getPrefHeight()));
 		System.out.println("costs bounds: " + new Rectangle(costs.getX(), costs.getY(), costs.getPrefWidth(), costs.getPrefHeight()));*/
 	}
