@@ -30,7 +30,7 @@ public class InventoryScreen extends MenuScreen {
 				items[i] = new EmptySlot(i);
 			//vGroup.addActor(new InventoryItem(inventory.getItemAt(i), i));
 		}
-		table = new ItemSelectionTable(items);
+		table = new ItemSelectionTable(items, getHeight());
 		
 		addActor(table);
 		table.setPosition(getWidth()/2, getHeight()/2, Align.center);

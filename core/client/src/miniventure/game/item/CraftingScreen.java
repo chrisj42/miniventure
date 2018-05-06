@@ -80,7 +80,7 @@ public class CraftingScreen extends MenuScreen {
 		
 		refreshCanCraft();
 		
-		table = new ItemSelectionTable(list);
+		table = new ItemSelectionTable(list, getHeight());
 		addActor(table);
 		
 		inInv.columnAlign(Align.left);

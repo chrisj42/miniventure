@@ -2,7 +2,6 @@ package miniventure.game.item;
 
 import miniventure.game.util.MyUtils;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -35,9 +34,6 @@ public class ItemSelectionTable extends VerticalFlowGroup {
 	private int selectionIndex = 0;
 	private final int cellsPerColumn, numColumns;
 	
-	public ItemSelectionTable(RenderableListItem[] listItems) {
-		this(listItems, Gdx.graphics.getHeight());
-	}
 	public ItemSelectionTable(RenderableListItem[] listItems, float maxHeight) {
 		super(5);
 		//super(GameCore.getSkin());
