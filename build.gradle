@@ -2,7 +2,7 @@ allprojects {
 	apply plugin: "java"
 	apply plugin: "idea"
 	
-	version = '1.4.5'
+	version = '1.4.6'
 	ext {
 		appName = "miniventure"
 		gdxVersion = '1.9.8'

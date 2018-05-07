@@ -24,7 +24,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
 public class GameCore {
 	
-	public static final Version VERSION = new Version("1.4.5");
+	public static final Version VERSION = new Version("1.4.6");
 	
 	public static final int DEFAULT_SCREEN_WIDTH = 800;
 	public static final int DEFAULT_SCREEN_HEIGHT = 450;
