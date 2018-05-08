@@ -147,7 +147,7 @@ public class MyUtils {
 	public static <T> boolean notNull(T obj) { return obj != null; }
 	
 	@SuppressWarnings("unchecked")
-	public static <RT, PT> RT[] mapArray(PT[] startValues, Class<RT> returnType, ValueMonoFunction<RT, PT> mapper) {
+	public static <PT, RT> RT[] mapArray(PT[] startValues, Class<RT> returnType, ValueMonoFunction<PT, RT> mapper) {
 		RT[] endValues = (RT[]) java.lang.reflect.Array.newInstance(returnType, startValues.length);
 		
 		for(int i = 0; i < startValues.length; i++)

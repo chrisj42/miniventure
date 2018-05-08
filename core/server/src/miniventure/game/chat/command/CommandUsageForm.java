@@ -14,7 +14,7 @@ public class CommandUsageForm {
 	final boolean restricted;
 	final String usage;
 	final String details;
-	final ValueMonoFunction<Boolean, ServerPlayer> executorCheck;
+	final ValueMonoFunction<ServerPlayer, Boolean> executorCheck;
 	private final Argument[] args;
 	private final ExecutionBehavior executionBehavior;
 	
@@ -22,7 +22,7 @@ public class CommandUsageForm {
 	CommandUsageForm(boolean restricted, String usage, String details, ExecutionBehavior executionBehavior, Argument... args) {
 		this(restricted, usage, details, executor -> true, executionBehavior, args);
 	}
-	CommandUsageForm(boolean restricted, String usage, String details, ValueMonoFunction<Boolean, ServerPlayer> executorCheck, ExecutionBehavior executionBehavior, Argument... args) {
+	CommandUsageForm(boolean restricted, String usage, String details, ValueMonoFunction<ServerPlayer, Boolean> executorCheck, ExecutionBehavior executionBehavior, Argument... args) {
 		this.restricted = restricted;
 		this.usage = usage;
 		this.details = details;

@@ -46,10 +46,10 @@ public abstract class UpdateProperty extends TileProperty {
 	public static class DelayedUpdate extends UpdateProperty {
 		
 		private final float delay;
-		private final ValueMonoFunction<Boolean, Tile> actionCondition;
+		private final ValueMonoFunction<Tile, Boolean> actionCondition;
 		private final VoidMonoFunction<Tile> action;
 		
-		public DelayedUpdate(@NotNull TileType tileType, float delay, ValueMonoFunction<Boolean, Tile> actionCondition, VoidMonoFunction<Tile> action) {
+		public DelayedUpdate(@NotNull TileType tileType, float delay, ValueMonoFunction<Tile, Boolean> actionCondition, VoidMonoFunction<Tile> action) {
 			super(tileType);
 			this.delay = delay;
 			this.actionCondition = actionCondition;

@@ -9,9 +9,9 @@ public class TouchListener extends TileProperty {
 	
 	//TouchListener DO_NOTHING = entity -> {};
 	
-	private final ValueTriFunction<Boolean, Entity, Tile, Boolean> onTouch;
+	private final ValueTriFunction<Entity, Tile, Boolean, Boolean> onTouch;
 	
-	TouchListener(@NotNull TileType tileType, ValueTriFunction<Boolean, Entity, Tile, Boolean> onTouch) {
+	TouchListener(@NotNull TileType tileType, ValueTriFunction<Entity, Tile, Boolean, Boolean> onTouch) {
 		super(tileType);
 		this.onTouch = onTouch;
 	}

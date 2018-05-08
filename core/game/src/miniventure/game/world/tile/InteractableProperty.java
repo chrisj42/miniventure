@@ -9,9 +9,9 @@ import org.jetbrains.annotations.Nullable;
 
 public class InteractableProperty extends TileProperty {
 	
-	private final ValueTriFunction<Boolean, Player, Item, Tile> interaction;
+	private final ValueTriFunction<Player, Item, Tile, Boolean> interaction;
 	
-	public InteractableProperty(@NotNull TileType type, ValueTriFunction<Boolean, Player, Item, Tile> interaction) {
+	public InteractableProperty(@NotNull TileType type, ValueTriFunction<Player, Item, Tile, Boolean> interaction) {
 		super(type);
 		this.interaction = interaction;
 	}

@@ -9,9 +9,9 @@ public class SolidProperty extends TileProperty {
 	
 	public static SolidProperty get(@NotNull TileType tileType, boolean solid) { return new SolidProperty(tileType, e -> !solid); }
 	
-	private final ValueMonoFunction<Boolean, Entity> permeable;
+	private final ValueMonoFunction<Entity, Boolean> permeable;
 	
-	SolidProperty(@NotNull TileType tileType, ValueMonoFunction<Boolean, Entity> permeable) {
+	SolidProperty(@NotNull TileType tileType, ValueMonoFunction<Entity, Boolean> permeable) {
 		super(tileType);
 		
 		this.permeable = permeable;
