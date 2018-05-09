@@ -71,8 +71,6 @@ public class ItemSelectionTable extends VerticalFlowGroup {
 					case Keys.UP: moveFocusY(-1); return true;
 					case Keys.DOWN: moveFocusY(1); return true;
 					
-					//case Keys.ENTER: selectAction.onSelect(itemSlots[selectionIndex]); return true;
-					
 					default: return false;
 				}
 			}
@@ -153,9 +151,6 @@ public class ItemSelectionTable extends VerticalFlowGroup {
 	
 	public void moveFocus(int index) {
 		index %= itemSlots.length;
-		//Stage stage = getStage();
-		//if(stage != null)
-		//	stage.setKeyboardFocus(itemSlots[index]);
 		setSelection(index);
 	}
 }

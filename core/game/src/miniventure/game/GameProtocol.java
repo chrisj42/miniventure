@@ -455,7 +455,6 @@ public interface GameProtocol {
 	}*/
 	
 	// sent by client to drop an item from the inventory
-	// TODO Add that key control; Q, probably. Shift-Q will send a sequence of drop requests that will drop every item equal to the selected item.
 	class ItemDropRequest {
 		public final String[] stackData;
 		

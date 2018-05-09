@@ -88,7 +88,6 @@ public class Inventory {
 	}
 	
 	private void checkIndex(int idx) {
-		//if(idx >= items.length) throw new IndexOutOfBoundsException("cannot access index " + idx + " of "+slots+"-slot inventory.");
 		if(idx >= items.length) throw new IndexOutOfBoundsException("cannot access inventory index " + idx + "; inventory only contains " + items.length + " items.");
 	}
 	

@@ -61,9 +61,6 @@ public class GameScreen {
 		
 		levelView.handleInput();
 		
-		//if(ClientCore.input.pressingKey(Keys.R) && Gdx.input.isKeyPressed(Keys.SHIFT_LEFT))
-		//	GameCore.getWorld().createWorld(0, 0);
-		
 		if(Gdx.input.isKeyPressed(Keys.CONTROL_LEFT) && ClientCore.input.pressingKey(Keys.T))
 			ClientCore.getClient().send(DatalessRequest.Tile); // debug
 		

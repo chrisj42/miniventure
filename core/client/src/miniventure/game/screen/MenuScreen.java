@@ -15,12 +15,6 @@ import com.kotcrab.vis.ui.widget.VisTextButton;
 
 public class MenuScreen extends Stage {
 	
-	/*
-		So! This class uses Scene2D. I think I'll have GameCore hold instances of each type of screen... or, perhaps, of each stage. When a menu is created, the stage is fetched, and the new instance configures the labels to its needs.
-		
-		/// IDEA How about I have MenuScreen be an interface; or make another interface that MenuScreen implements. The idea is that I can have displays that don't use Scene2D (like the the loading screen, or level transitions if that's a thing), since they don't have options.
-	 */
-	
 	private MenuScreen parent;
 	protected VerticalGroup vGroup;
 	

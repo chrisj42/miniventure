@@ -23,7 +23,6 @@ public class CraftingScreen extends MenuScreen {
 	
 	private static final Color background = new Color(.2f, .4f, 1f, 1);
 	
-	//private final Recipe[] recipes;
 	private final Inventory playerInv;
 	
 	private final CraftableItem[] list;
@@ -62,7 +61,6 @@ public class CraftingScreen extends MenuScreen {
 	}
 	
 	public CraftingScreen(Recipe[] recipes, Inventory playerInventory) {
-		//this.recipes = recipes;
 		this.playerInv = playerInventory;
 		
 		CraftableRecipe[] recipeCache = new CraftableRecipe[recipes.length];
@@ -138,7 +136,6 @@ public class CraftingScreen extends MenuScreen {
 		});
 		
 		setKeyboardFocus(table);
-		//setKeyboardFocus(list.length == 0 ? getRoot() : list[0]);
 	}
 	
 	@Override
@@ -149,7 +146,7 @@ public class CraftingScreen extends MenuScreen {
 			refreshCanCraft();
 		
 		// tell server about the attempt
-		ClientCore.getClient().send(new CraftRequest(item.recipeIndex));
+		ClientCore.getClient().send(new CraftRequest(item.getRecipeIndex()));
 	}
 	
 	private void setHighlightedRecipe(Recipe recipe) {
@@ -197,33 +194,4 @@ public class CraftingScreen extends MenuScreen {
 		
 		public int getRecipeIndex() { return recipeIndex; }
 	}
-	
-	
-	/*private class ItemStackDisplay extends Widget {
-		private ItemStack item;
-		private Color backgroundColor = new Color(.2f, .4f, 1f, 1f);
-		private float width, height;
-		
-		public ItemStackDisplay() {}
-		public ItemStackDisplay(@NotNull Item item, int count) {
-			setItem(new ItemStack(item, count));
-		}
-		
-		public void setItem(ItemStack item) {
-			this.item = item;
-			width = ItemRenderStrategy.FULL.getWidth(item.item) + 10;
-			height = ItemRenderStrategy.FULL.getWidth(item.item) + 10;
-			setSize(width, height);
-		}
-		
-		@Override public float getPrefWidth() { return width; }
-		@Override public float getPrefHeight() { return height; }
-		
-		@Override
-		public void draw(Batch batch, float parentAlpha) {
-			if(backgroundColor != null)
-				MyUtils.fillRect(getX(), getY(), getWidth(), getHeight(), backgroundColor, batch);
-			item.item.drawItem(item.count, batch, getX()+5, getY()+5);
-		}
-	}*/
 }

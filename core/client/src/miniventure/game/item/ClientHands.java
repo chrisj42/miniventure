@@ -53,33 +53,12 @@ public class ClientHands extends Hands {
 		}
 	}
 	
-	/*public void drawGui(Batch batch, float x, float y) {
-		hotbarTable.setPosition(x, y);
-		//hotbarTable.draw(batch, 1);
-		*//*for(int i = 0; i < getSlots(); i++) {
-			Item item = getItemAt(i);
-			MyUtils.fillRect(x, y, item.getRenderWidth(), RenderableListItem.MAX_HEIGHT, Color.DARK_GRAY, batch);
-			item.drawItem(getItemCount(i), batch, x, y, Color.WHITE, !(item instanceof HandItem));
-			if(i == getSelection())
-				MyUtils.fillRect(x, y, item.getRenderWidth(), RenderableListItem.MAX_HEIGHT, RenderableListItem.selectionColor, batch);
-			y += RenderableListItem.MAX_HEIGHT;
-		}*//*
-	}*/
-	
 	private class HotbarSlot extends ItemStackSlot {
 		private final Inventory inventory;
 		
 		public HotbarSlot(int idx, Inventory inventory) {
 			super(idx, false, getItemAt(idx), 1, Color.DARK_GRAY);
 			this.inventory = inventory;
-			/*addListener(new InputListener() {
-				@Override
-				public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-					//System.out.println("entering hotbar slot "+idx);
-				}
-				
-				
-			});*/
 			// FIXME I can't seem to prevent clicks on the hotbar from propagating to the game screen and moving the player...
 			addListener(new ClickListener() {
 				@Override

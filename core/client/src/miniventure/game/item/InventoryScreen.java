@@ -81,7 +81,7 @@ public class InventoryScreen extends MenuScreen {
 		addActor(table);
 		table.setPosition(getWidth(), getHeight(), Align.topRight);
 		
-		setKeyboardFocus(table/*items.length == 0 ? getRoot() : items[0]*/);
+		setKeyboardFocus(table);
 	}
 	
 	@Override
@@ -93,36 +93,4 @@ public class InventoryScreen extends MenuScreen {
 	}
 	
 	private Item getSelectedItem() { return inventory.getItemAt(table.getSelection()); }
-	/*private class InventoryItem extends RenderableListItem {
-		InventoryItem(Item item, int idx) {
-			super(item, idx);
-		}
-		
-		@Override
-		void keyDown(InputEvent event, int keycode) {
-			
-		} 
-		
-		*//*@Override
-		void select(int idx) {
-			ItemStack stack = inventory.removeItemAt(idx);
-			//hands.clearItems(inventory); // just in case.
-			hands.setItem(stack.item, stack.count);
-			ClientCore.setScreen(null);
-		}*//*
-	}
-	
-	private class EmptySlot extends InventoryItem {
-		EmptySlot(int idx) {
-			super(new HandItem(), idx);
-		}
-		
-		@Override protected boolean showName() { return false; }
-		
-		@Override
-		public void draw(Batch batch, float parentAlpha) {
-			MyUtils.fillRect(getX(), getY(), getWidth(), getHeight(), Color.TEAL, parentAlpha, batch);
-			super.draw(batch, parentAlpha);
-		}
-	}*/
 }

@@ -63,10 +63,7 @@ public class ItemSlot extends Actor {
 	}
 	public Color getTextColor() { return textColor; }
 	
-	//@Override
 	public float getPrefWidth() { return prefWidth; }
-	//@Override
-	//public float getPrefHeight() { return HEIGHT; }
 	
 	@Override public void draw(Batch batch, float parentAlpha) {
 		super.draw(batch, parentAlpha);

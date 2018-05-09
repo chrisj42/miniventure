@@ -65,28 +65,7 @@ public abstract class Item {
 	// this is called after all interaction attempts.
 	public void interact(Player player) {} // interact reflexively.
 	
-	// private float renderWidth;
-	// private float renderHeight;
-	// private boolean initializedWidth = false;
-	// private boolean initializedHeight = false;
-	
 	void renderIconExtras(Batch batch, float x, float y) {}
-	
-	/*public float getRenderHeight() {
-		if(!initializedHeight) {
-			renderHeight = Math.max(texture.height, GameCore.getTextLayout(name).height);
-			initializedHeight = true;
-		}
-		return renderHeight;
-	}
-	
-	public float getRenderWidth() {
-		if(!initializedWidth) {
-			renderWidth = texture.width + 10 + GameCore.getTextLayout(name).width;
-			initializedWidth = true;
-		}
-		return renderWidth;
-	}*/
 	
 	@Override
 	public boolean equals(Object other) {
