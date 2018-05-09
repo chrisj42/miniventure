@@ -117,9 +117,11 @@ public class ClientLevel extends Level {
 	@Override
 	protected ClientTile createTile(int x, int y, TileType[] types, String[] data) { return new ClientTile(this, x, y, types, data); }
 	
-	@Override public ClientTile getTile(float x, float y) {
+	@Override
+	public ClientTile getTile(float x, float y) { return getTile(x, y, false); }
+	public ClientTile getTile(float x, float y, boolean loadIfNull) {
 		ClientTile tile = (ClientTile) super.getTile(x, y);
-		if(tile == null)
+		if(tile == null && loadIfNull)
 			loadChunk(Chunk.getCoords(x, y));
 		
 		return tile;

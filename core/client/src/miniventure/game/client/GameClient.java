@@ -192,7 +192,7 @@ public class GameClient implements GameProtocol {
 						
 						if(chunkLoaded && !entityLoaded) {
 							//System.out.println("client requesting entity due to validation");
-							client.sendTCP(new EntityRequest(list.ids[i]));
+							send(new EntityRequest(list.ids[i]));
 						}
 						if(entityLoaded && !chunkLoaded) {
 							//System.out.println("client unloading entity due to validation");
