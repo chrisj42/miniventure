@@ -23,13 +23,15 @@ public class CraftingScreen extends MenuScreen {
 	
 	private static final Color background = new Color(.2f, .4f, 1f, 1);
 	
-	private final Recipe[] recipes;
+	//private final Recipe[] recipes;
 	private final Inventory playerInv;
 	
 	private final CraftableItem[] list;
 	private final ItemSelectionTable table;
 	
-	private final ItemStackSlot invCount = new ItemStackSlot(true, null, 0, null);
+	private final ItemStackSlot invCount = new ItemStackSlot(true, null, 0, null) {
+		@Override protected boolean showCount() { return getItem() != null; }
+	};
 	private final VerticalGroup inInv = new OpaqueVerticalGroup(background);
 	private final VerticalGroup costs = new OpaqueVerticalGroup(background);
 	
@@ -51,19 +53,21 @@ public class CraftingScreen extends MenuScreen {
 	private static class CraftableRecipe {
 		private Recipe recipe;
 		private boolean canCraft;
-		CraftableRecipe(Recipe r, Inventory inv) {
+		private int index;
+		CraftableRecipe(int arrayIndex, Recipe r, Inventory inv) {
+			this.index = arrayIndex;
 			this.recipe = r;
 			canCraft = r.canCraft(inv);
 		}
 	}
 	
 	public CraftingScreen(Recipe[] recipes, Inventory playerInventory) {
-		this.recipes = recipes;
+		//this.recipes = recipes;
 		this.playerInv = playerInventory;
 		
 		CraftableRecipe[] recipeCache = new CraftableRecipe[recipes.length];
 		for(int i = 0; i < recipeCache.length; i++)
-			recipeCache[i] = new CraftableRecipe(recipes[i], playerInventory);
+			recipeCache[i] = new CraftableRecipe(i, recipes[i], playerInventory);
 		
 		Arrays.sort(recipeCache, (r1, r2) -> {
 			if(r1.canCraft == r2.canCraft) return 0;
@@ -73,12 +77,12 @@ public class CraftingScreen extends MenuScreen {
 		
 		list = new CraftableItem[recipeCache.length];
 		for(int i = 0; i < list.length; i++) {
-			CraftableItem craftEntry = new CraftableItem(recipeCache[i].recipe, i);
+			CraftableItem craftEntry = new CraftableItem(recipeCache[i].recipe, i, recipeCache[i].index);
 			list[i] = craftEntry;
 			craftEntry.addListener(new ClickListener() {
 				@Override
 				public void clicked(InputEvent e, float x, float y) {
-					craft(craftEntry.getSlotIndex());
+					craft(craftEntry);
 				}
 			});
 			craftEntry.addListener(new InputListener() {
@@ -102,7 +106,7 @@ public class CraftingScreen extends MenuScreen {
 			@Override
 			public boolean keyDown (InputEvent event, int keycode) {
 				if(keycode == Keys.ENTER) {
-					craft(table.getSelection());
+					craft(list[table.getSelection()]);
 					return true;
 				}
 				return false;
@@ -140,12 +144,12 @@ public class CraftingScreen extends MenuScreen {
 	@Override
 	public boolean usesWholeScreen() { return false; }
 	
-	private void craft(int index) {
-		if(list[index].recipe.tryCraft(playerInv))
+	private void craft(CraftableItem item) {
+		if(item.recipe.tryCraft(playerInv) != null)
 			refreshCanCraft();
 		
 		// tell server about the attempt
-		ClientCore.getClient().send(new CraftRequest(index));
+		ClientCore.getClient().send(new CraftRequest(item.recipeIndex));
 	}
 	
 	private void setHighlightedRecipe(Recipe recipe) {
@@ -179,24 +183,19 @@ public class CraftingScreen extends MenuScreen {
 		
 		private final Recipe recipe;
 		private boolean canCraft;
+		private final int recipeIndex;
 		
-		private CraftableItem(Recipe recipe, int idx) {
+		private CraftableItem(Recipe recipe, int idx, int recipeIndex) {
 			super(idx, true, recipe.getResult().item, recipe.getResult().count);
 			this.recipe = recipe;
+			this.recipeIndex = recipeIndex;
 			canCraft = recipe.canCraft(playerInv);
-			
-			/*addListener(new FocusListener() {
-				@Override
-				public void keyboardFocusChanged(FocusEvent event, Actor actor, boolean focused) {
-					if(focused)
-						setHighlightedRecipe(recipe);
-				}
-			});*/
 		}
 		
 		@Override
 		public Color getTextColor() { return canCraft ? Color.WHITE : Color.RED; }
 		
+		public int getRecipeIndex() { return recipeIndex; }
 	}
 	
 	

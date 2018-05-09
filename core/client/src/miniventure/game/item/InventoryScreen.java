@@ -3,6 +3,7 @@ package miniventure.game.item;
 import miniventure.game.client.ClientCore;
 import miniventure.game.screen.MenuScreen;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -16,10 +17,10 @@ public class InventoryScreen extends MenuScreen {
 	private static final Color backgroundColor = Color.TEAL;
 	
 	private final Inventory inventory;
-	private final Hands hands;
+	private final ClientHands hands;
 	private ItemSelectionTable table;
 	
-	public InventoryScreen(Inventory inventory, Hands hands) {
+	public InventoryScreen(Inventory inventory, ClientHands hands) {
 		this.inventory = inventory;
 		this.hands = hands;
 		
@@ -54,6 +55,10 @@ public class InventoryScreen extends MenuScreen {
 					return true;
 				}
 				
+				if(keycode == Keys.Q) {
+					hands.dropInvItems(getSelectedItem(), Gdx.input.isKeyPressed(Keys.SHIFT_LEFT));
+				}
+				
 				return false;
 			}
 		});
@@ -84,8 +89,10 @@ public class InventoryScreen extends MenuScreen {
 	
 	private void swapSelections() {
 		hands.swapItem(inventory, table.getSelection(), hands.getSelection());
-		table.updateSelected(inventory.getItemAt(table.getSelection()));
+		table.updateSelected(getSelectedItem());
 	}
+	
+	private Item getSelectedItem() { return inventory.getItemAt(table.getSelection()); }
 	/*private class InventoryItem extends RenderableListItem {
 		InventoryItem(Item item, int idx) {
 			super(item, idx);

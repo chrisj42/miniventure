@@ -204,7 +204,7 @@ public class GameServer implements GameProtocol {
 				forPacket(object, ItemDropRequest.class, drop -> {
 					ItemStack stack = ItemStack.load(drop.stackData);
 					int removed = 0;
-					while(removed < stack.count && client.getInventory().removeItem(stack.item) || client.getHands().removeItem(stack.item))
+					while(removed < stack.count && client.getHands().removeItem(stack.item))
 						removed++;
 					ServerLevel level = client.getLevel();
 					if(level == null) return;
@@ -227,7 +227,7 @@ public class GameServer implements GameProtocol {
 					// so, we need to check the sent over inventory and hotbar data, and make sure that all the items in the sent over match all the items of the server player. 
 					Inventory inv = client.getInventory();
 					Hands hotbar = client.getHands();
-					Array<Item> items = new Array<>();
+					Array<Item> items = new Array<>(Item.class);
 					items.addAll(inv.getItems());
 					items.addAll(hotbar.getItems());
 					
@@ -235,15 +235,38 @@ public class GameServer implements GameProtocol {
 					inv.loadItems(update.inventory);
 					hotbar.loadItems(update.hotbar);
 					
-					// TODO still need to go through the inventory and hotbar to make sure that they match what was there before, before sending it back to the client.
+					for(Item item: inv.getItems()) {
+						if(!items.contains(item, false)) {
+							// client sent over item that the server doesn't have
+							inv.removeItem(item);
+						}
+						else items.removeValue(item, false);
+					}
+					for(Item item: hotbar.getItems()) {
+						if(!items.contains(item, false)) {
+							// client sent over item that the server doesn't have
+							hotbar.removeItem(item);
+						}
+						else items.removeValue(item, false);
+					}
 					
+					// now check for any remaining items that the server had, but not the client, and add them back
+					for(Item item: items.shrink()) {
+						hotbar.addItem(item);
+					}
 					
 					connection.sendTCP(new InventoryUpdate(client));
 				});
 				
 				forPacket(object, CraftRequest.class, req -> {
 					Recipe recipe = Recipes.recipes[req.recipeIndex];
-					recipe.tryCraft(client.getInventory());
+					Item[] left = recipe.tryCraft(client.getHands());
+					if(left != null) {
+						ServerLevel level = client.getLevel();
+						if(level != null)
+							for(Item item : left)
+								level.dropItem(item, client.getPosition(), null);
+					}
 					connection.sendTCP(new InventoryUpdate(client));
 				});
 				

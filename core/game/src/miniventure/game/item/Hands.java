@@ -16,11 +16,21 @@ public class Hands extends Inventory {
 	
 	@Override
 	public boolean addItem(Item item) {
-		if(getCount(item) == 0 || !inventory.addItem(item))
+		if(super.getCount(item) == 0 || !inventory.addItem(item))
 			return super.addItem(item);
 		else
 			return true; // was added to inventory instead
 	}
+	
+	@Override
+	public boolean removeItem(Item item) {
+		if(inventory.removeItem(item))
+			return true;
+		return super.removeItem(item);
+	}
+	
+	@Override
+	public int getCount(Item item) { return super.getCount(item) + inventory.getCount(item); }
 	
 	public void setSelection(int idx) { selection = idx; }
 	public int getSelection() { return selection; }

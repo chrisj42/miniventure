@@ -1,5 +1,8 @@
 package miniventure.game.item;
 
+import miniventure.game.GameProtocol.ItemDropRequest;
+import miniventure.game.client.ClientCore;
+
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -39,6 +42,15 @@ public class ClientHands extends Hands {
 		super.loadItems(allData);
 		for(int i = 0; i < getSlots(); i++)
 			hotbarTable.update(i, getItemAt(i));
+	}
+	
+	public void dropInvItems(Item item, boolean all) {
+		if(!(item instanceof HandItem)) {
+			int count = all ? getCount(item) : 1;
+			for(int i = 0; i < count; i++)
+				removeItem(item);
+			ClientCore.getClient().send(new ItemDropRequest(new ItemStack(item, count)));
+		}
 	}
 	
 	/*public void drawGui(Batch batch, float x, float y) {
@@ -87,13 +99,10 @@ public class ClientHands extends Hands {
 		public int getCount() {
 			//if(ClientCore.getScreen() instanceof InventoryScreen)
 			//	return 0; // don't show counts when inventory screen is open..?
-			final int invCount = inventory.getCount(this.getItem());
-			final int handCount = ClientHands.this.getCount(getItem());
-			if(invCount == 0) return 0;
-			return invCount + handCount;
-			//if(ClientHands.this.getCount(getItem()) <= 1)
-			//	return count;
-			// split the count into multiple parts
+			if(inventory.getCount(this.getItem()) == 0)
+				return 0;
+			
+			return ClientHands.this.getCount(getItem()); // includes both inventory and hotbar
 		}
 	}
 }

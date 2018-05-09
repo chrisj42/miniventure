@@ -41,10 +41,12 @@ public class ItemStackSlot extends ItemSlot {
 		return this;
 	}
 	
+	protected boolean showCount() { return getItem() != null && getCount() > 0; }
+	
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
 		super.draw(batch, parentAlpha);
-		if(getItem() != null && getCount() > 0) {
+		if(showCount()) {
 			BitmapFont font = GameCore.getFont();
 			font.setColor(getTextColor());
 			font.draw(batch, getCount() + "", getX() + 2, getY() + 2 + font.getLineHeight());

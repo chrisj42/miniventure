@@ -1,6 +1,9 @@
 package miniventure.game.item;
 
+import com.badlogic.gdx.utils.Array;
+
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class Recipe {
 	
@@ -26,19 +29,23 @@ public class Recipe {
 		return true;
 	}
 	
-	public boolean tryCraft(Inventory inv) {
+	// returns any items that couldn't be added to the inventory, or null if the inventory doesn't have the items required for crafting.
+	@Nullable
+	public Item[] tryCraft(Inventory inv) {
 		if(!canCraft(inv))
-			return false;
+			return null;
+		
+		Array<Item> leftover = new Array<>(Item.class);
 		
 		for(ItemStack cost: costs) 
 			for(int i = 0; i < cost.count; i++)
 				inv.removeItem(cost.item);
 		
-		for(int i = 0; i < result.count; i++)
-			inv.addItem(result.item);
+		for(int i = 0; i < result.count; i++) {
+			if(!inv.addItem(result.item))
+				leftover.add(result.item);
+		}
 		
-		// TODO possibly check to make sure all items could be put in inventory?
-		
-		return true;
+		return leftover.shrink();
 	}
 }

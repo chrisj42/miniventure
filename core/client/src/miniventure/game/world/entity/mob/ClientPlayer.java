@@ -186,8 +186,10 @@ public class ClientPlayer extends ClientEntity implements Player {
 			ClientCore.setScreen(new InventoryScreen(inventory, hands));
 		}
 		else if(ClientCore.input.pressingKey(Input.Keys.Z))
-			ClientCore.setScreen(new CraftingScreen(Recipes.recipes, inventory));
-		
+			ClientCore.setScreen(new CraftingScreen(Recipes.recipes, hands));
+		else if(ClientCore.input.pressingKey(Input.Keys.Q)) {
+			hands.dropInvItems(hands.getSelectedItem(), Gdx.input.isKeyPressed(Keys.SHIFT_LEFT));
+		}
 	}
 	
 	@Override
