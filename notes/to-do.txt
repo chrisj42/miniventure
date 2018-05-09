@@ -1,11 +1,5 @@
 next steps, for sure:
 
-- give command
-- better menu creation system, perhaps make something over scene2D
-- make menu lists scrollable
-- flesh out item drop class
-- 
-later
 - make menus with new menu system, including world creation menu and world loading menu
 - actually do saving to and loading from file when loading worlds and world chunks (and entities) in server.
 - auto-updater
@@ -19,10 +13,6 @@ Items are... well, not in the best shape. I need to try and make them better.
 
 ****
 
-flesh out the item drop class, to allow drops with random drop count, and such.
-
-****
-
 save system.
 
 ****
@@ -32,7 +22,7 @@ command to give items to a player
 
 ****
 
-command tab auto-complete system.
+command tab auto-complete system, that works for parameters, not just command names
 
 ****
 
