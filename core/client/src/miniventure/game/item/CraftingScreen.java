@@ -78,11 +78,7 @@ public class CraftingScreen extends MenuScreen {
 			craftEntry.addListener(new ClickListener() {
 				@Override
 				public void clicked(InputEvent e, float x, float y) {
-					if(craftEntry.recipe.tryCraft(playerInv))
-						refreshCanCraft();
-					
-					// tell server about the attempt
-					ClientCore.getClient().send(new CraftRequest(craftEntry.getSlotIndex()));
+					craft(craftEntry.getSlotIndex());
 				}
 			});
 			craftEntry.addListener(new InputListener() {
@@ -102,6 +98,16 @@ public class CraftingScreen extends MenuScreen {
 				CraftingScreen.this.setHighlightedRecipe(list[index].recipe);
 			}
 		};
+		table.addListener(new InputListener() {
+			@Override
+			public boolean keyDown (InputEvent event, int keycode) {
+				if(keycode == Keys.ENTER) {
+					craft(table.getSelection());
+					return true;
+				}
+				return false;
+			}
+		});
 		addActor(table);
 		
 		inInv.columnAlign(Align.left);
@@ -133,6 +139,14 @@ public class CraftingScreen extends MenuScreen {
 	
 	@Override
 	public boolean usesWholeScreen() { return false; }
+	
+	private void craft(int index) {
+		if(list[index].recipe.tryCraft(playerInv))
+			refreshCanCraft();
+		
+		// tell server about the attempt
+		ClientCore.getClient().send(new CraftRequest(index));
+	}
 	
 	private void setHighlightedRecipe(Recipe recipe) {
 		inInv.removeActor(invCount);
