@@ -42,6 +42,7 @@ public class ServerPlayer extends ServerMob implements Player {
 		super("player", Stat.Health.initial);
 		
 		this.name = name;
+		inventory = new Inventory(INV_SIZE);
 		hands = new ServerHands(this);
 		reset();
 	}
@@ -60,7 +61,7 @@ public class ServerPlayer extends ServerMob implements Player {
 		//stats.put(Stat.Armor, Integer.parseInt(data[3]));
 		
 		inventory.loadItems(MyUtils.parseLayeredString(data[3]));
-		hands.loadItem(MyUtils.parseLayeredString(data[4]));
+		hands.loadItems(MyUtils.parseLayeredString(data[4]));
 	}
 	
 	@Override
@@ -87,8 +88,8 @@ public class ServerPlayer extends ServerMob implements Player {
 		
 		super.reset();
 		
+		inventory.reset();
 		hands.reset();
-		inventory = new Inventory(INV_SIZE, hands);
 	}
 	
 	public int getStat(@NotNull Stat stat) {
@@ -142,18 +143,13 @@ public class ServerPlayer extends ServerMob implements Player {
 	public Inventory getInventory() { return inventory; }
 	
 	public boolean takeItem(@NotNull Item item) {
-		boolean success;
-		if(hands.addItem(item, inventory))
-			success = true;
-		else
-			success = inventory.addItem(item, 1) == 1;
-		
-		if(success) {
+		if(hands.addItem(item)) {
 			ServerCore.getServer().playEntitySound("pickup", this, false);
 			ServerCore.getServer().sendToPlayer(this, new InventoryUpdate(this));
+			return true;
 		}
 		
-		return success;
+		return false;
 	}
 	
 	@NotNull
@@ -181,7 +177,7 @@ public class ServerPlayer extends ServerMob implements Player {
 		if(!hands.hasUsableItem()) return; // only ever not true for attacks in the same frame or if not enough stamina
 		
 		Level level = getLevel();
-		Item heldItem = hands.getUsableItem();
+		Item heldItem = hands.getSelectedItem();
 		
 		boolean success = false;
 		for(WorldObject obj: getInteractionQueue()) {
@@ -208,7 +204,7 @@ public class ServerPlayer extends ServerMob implements Player {
 	public void interact() {
 		if(!hands.hasUsableItem()) return;
 		
-		Item heldItem = hands.getUsableItem();
+		Item heldItem = hands.getSelectedItem();
 		
 		boolean success = false;
 		for(WorldObject obj: getInteractionQueue()) {

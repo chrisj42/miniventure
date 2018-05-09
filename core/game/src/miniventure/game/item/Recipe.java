@@ -31,9 +31,13 @@ public class Recipe {
 			return false;
 		
 		for(ItemStack cost: costs) 
-			inv.removeItem(cost.item, cost.count);
+			for(int i = 0; i < cost.count; i++)
+				inv.removeItem(cost.item);
 		
-		inv.addItem(result.item, result.count);
+		for(int i = 0; i < result.count; i++)
+			inv.addItem(result.item);
+		
+		// TODO possibly check to make sure all items could be put in inventory?
 		
 		return true;
 	}

@@ -7,10 +7,7 @@ import miniventure.game.texture.TextureHolder;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -41,7 +38,6 @@ public abstract class Item {
 	@NotNull public TextureHolder getTexture() { return texture; }
 	@NotNull public String getName() { return name; }
 	@NotNull public ItemType getType() { return type; }
-	public int getMaxStackSize() { return 1; } // by default
 	public int getStaminaUsage() { return 1; } // default; note that without a successful attack or interaction, no stamina is lost.
 	
 	public abstract String[] save();
@@ -69,40 +65,14 @@ public abstract class Item {
 	// this is called after all interaction attempts.
 	public void interact(Player player) {} // interact reflexively.
 	
-	private float renderWidth;
-	private float renderHeight;
-	private boolean initializedWidth = false;
-	private boolean initializedHeight = false;
+	// private float renderWidth;
+	// private float renderHeight;
+	// private boolean initializedWidth = false;
+	// private boolean initializedHeight = false;
 	
-	public void drawItem(int stackSize, Batch batch, float x, float y) {
-		drawItem(stackSize, batch, x, y, Color.WHITE);
-	}
-	//public void drawItem(int stackSize, Batch batch, float x, float y, Color textColor) {
-	public void drawItem(int stackSize, Batch batch, float x, float y, Color textColor) { drawItem(stackSize, batch, x, y, textColor, true); }
-	public void drawItem(int stackSize, Batch batch, float x, float y, Color textColor, boolean drawName) {
-		TextureRegion texture = this.texture.texture;
-		
-		float width = texture.getRegionWidth();
-		//float height = texture.getRegionHeight();
-		float tx = x + Math.max(0, (ICON_SIZE - texture.getRegionWidth())/2);
-		
-		Color prev = batch.getColor();
-		batch.setColor(Color.BLACK);
-		batch.draw(texture, tx-2, y-2);
-		batch.setColor(prev);
-		batch.draw(texture, tx, y);
-		
-		BitmapFont font = GameCore.getFont();
-		font.setColor(textColor);
-		
-		float textOff = font.getCapHeight() + font.getAscent();
-		if(stackSize > 1)
-			font.draw(batch, stackSize+"", x+1, y+textOff-font.getDescent());
-		if(drawName)
-			font.draw(batch, name, x+width+10, y+(getRenderHeight()+textOff)/2);
-	}
+	void renderIconExtras(Batch batch, float x, float y) {}
 	
-	public float getRenderHeight() {
+	/*public float getRenderHeight() {
 		if(!initializedHeight) {
 			renderHeight = Math.max(texture.height, GameCore.getTextLayout(name).height);
 			initializedHeight = true;
@@ -116,7 +86,7 @@ public abstract class Item {
 			initializedWidth = true;
 		}
 		return renderWidth;
-	}
+	}*/
 	
 	@Override
 	public boolean equals(Object other) {

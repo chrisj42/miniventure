@@ -106,25 +106,14 @@ public class MyUtils {
 	}
 	
 	public static void fillRect(Rectangle rect, Color c, Batch batch) {
-		fillRect(rect.x, rect.y, rect.width, rect.height, c.r, c.g, c.b, c.a, batch);
+		fillRect(rect.x, rect.y, rect.width, rect.height, c, batch);
 	}
-	public static void fillRect(float x, float y, Color c, Batch batch) {
-		fillRect(x, y, c.r, c.g, c.b, c.a, batch);
-	}
+	public static void fillRect(float x, float y, float width, float height, Color c, float alpha, Batch batch) { fillRect(x, y, width, height, c.cpy().mul(1, 1, 1, alpha), batch); }
 	public static void fillRect(float x, float y, float width, float height, Color c, Batch batch) {
-		fillRect(x, y, width, height, c.r, c.g, c.b, c.a, batch);
-	}
-	public static void fillRect(float x, float y, float width, float height, float r, float g, float b, float a, Batch batch) {
-		Color c = batch.getColor();
-		batch.setColor(r, g, b, a);
+		Color prev = batch.getColor();
+		batch.setColor(c);
 		batch.draw(GameCore.icons.get("white").texture, x, y, width, height);
-		batch.setColor(c);
-	}
-	public static void fillRect(float x, float y, float r, float g, float b, float a, Batch batch) {
-		Color c = batch.getColor();
-		batch.setColor(r, g, b, a);
-		batch.draw(GameCore.icons.get("white").texture, x, y);
-		batch.setColor(c);
+		batch.setColor(prev);
 	}
 	
 	public static <T> void reverseStack(Stack<T> stack) {
@@ -180,12 +169,12 @@ public class MyUtils {
 	}
 	
 	@SafeVarargs
+	@SuppressWarnings("unchecked")
 	public static <T> T[] arrayJoin(Class<T> clazz, T[]... arrays) {
 		int length = 0;
 		for(T[] ar: arrays)
 			length += ar.length;
 		
-		//noinspection unchecked
 		T[] joined = (T[]) java.lang.reflect.Array.newInstance(clazz, length);
 		int offset = 0;
 		for(T[] ar: arrays) {

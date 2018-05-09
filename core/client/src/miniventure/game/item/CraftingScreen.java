@@ -16,11 +16,8 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
-import com.badlogic.gdx.scenes.scene2d.ui.Widget;
-import com.badlogic.gdx.scenes.scene2d.utils.FocusListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
-
-import org.jetbrains.annotations.NotNull;
 
 public class CraftingScreen extends MenuScreen {
 	
@@ -32,7 +29,7 @@ public class CraftingScreen extends MenuScreen {
 	private final CraftableItem[] list;
 	private final ItemSelectionTable table;
 	
-	private final ItemStackDisplay invCount = new ItemStackDisplay();
+	private final ItemStackSlot invCount = new ItemStackSlot(true, null, 0, null);
 	private final VerticalGroup inInv = new OpaqueVerticalGroup(background);
 	private final VerticalGroup costs = new OpaqueVerticalGroup(background);
 	
@@ -41,11 +38,12 @@ public class CraftingScreen extends MenuScreen {
 		
 		public OpaqueVerticalGroup(Color color) {
 			this.color = color;
+			pad(5);
 		}
 		
 		@Override
 		public void draw(Batch batch, float parentAlpha) {
-			MyUtils.fillRect(getX(), getY(), getWidth(), getHeight(), color.cpy().mul(1, 1, 1, parentAlpha), batch);
+			MyUtils.fillRect(getX(), getY(), getWidth(), getHeight(), color, parentAlpha, batch);
 			super.draw(batch, parentAlpha);
 		}
 	}
@@ -75,12 +73,35 @@ public class CraftingScreen extends MenuScreen {
 		
 		list = new CraftableItem[recipeCache.length];
 		for(int i = 0; i < list.length; i++) {
-			list[i] = new CraftableItem(recipeCache[i].recipe, i);
+			CraftableItem craftEntry = new CraftableItem(recipeCache[i].recipe, i);
+			list[i] = craftEntry;
+			craftEntry.addListener(new ClickListener() {
+				@Override
+				public void clicked(InputEvent e, float x, float y) {
+					if(craftEntry.recipe.tryCraft(playerInv))
+						refreshCanCraft();
+					
+					// tell server about the attempt
+					ClientCore.getClient().send(new CraftRequest(craftEntry.getSlotIndex()));
+				}
+			});
+			craftEntry.addListener(new InputListener() {
+				@Override
+				public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+					table.setSelection(craftEntry.getSlotIndex());
+				}
+			});
 		}
 		
 		refreshCanCraft();
 		
-		table = new ItemSelectionTable(list, getHeight());
+		table = new ItemSelectionTable(list, getHeight()) {
+			@Override
+			public void setSelection(int index) {
+				super.setSelection(index);
+				CraftingScreen.this.setHighlightedRecipe(list[index].recipe);
+			}
+		};
 		addActor(table);
 		
 		inInv.columnAlign(Align.left);
@@ -100,13 +121,14 @@ public class CraftingScreen extends MenuScreen {
 		getRoot().addListener(new InputListener() {
 			@Override
 			public boolean keyDown (InputEvent event, int keycode) {
-				if(keycode == Keys.Z)
+				if(keycode == Keys.Z || keycode == Keys.ESCAPE)
 					ClientCore.setScreen(null);
 				return true;
 			}
 		});
 		
-		setKeyboardFocus(list.length == 0 ? getRoot() : list[0]);
+		setKeyboardFocus(table);
+		//setKeyboardFocus(list.length == 0 ? getRoot() : list[0]);
 	}
 	
 	@Override
@@ -114,15 +136,18 @@ public class CraftingScreen extends MenuScreen {
 	
 	private void setHighlightedRecipe(Recipe recipe) {
 		inInv.removeActor(invCount);
-		invCount.setItem(new ItemStack(recipe.getResult().item, playerInv.countItem(recipe.getResult().item)));
+		invCount.setItem(recipe.getResult().item);
+		invCount.setCount(playerInv.getCount(invCount.getItem()));
 		inInv.addActor(invCount);
 		
 		costs.clearChildren();
 		costs.addActor(new Label("Costs:", GameCore.getSkin()));
 		for(ItemStack cost: recipe.getCosts())
-			costs.addActor(new ItemStackDisplay(cost.item, cost.count));
+			costs.addActor(new ItemStackSlot(true, cost.item, cost.count, null));
 		
+		inInv.invalidate();
 		inInv.pack();
+		costs.invalidate();
 		costs.pack();
 		
 		inInv.setPosition(table.getPrefWidth() + 10, getHeight() - inInv.getHeight());
@@ -132,63 +157,36 @@ public class CraftingScreen extends MenuScreen {
 	private void refreshCanCraft() {
 		for(CraftableItem item: list)
 			item.canCraft = item.recipe.canCraft(playerInv);
-		if(invCount.item != null)
-			invCount.setItem(new ItemStack(invCount.item.item, playerInv.countItem(invCount.item.item)));
+		if(invCount.getItem() != null)
+			invCount.setCount(playerInv.getCount(invCount.getItem()));
 	}
 	
-	private class CraftableItem extends RenderableListItem {
+	private class CraftableItem extends ItemStackSlot {
 		
 		private final Recipe recipe;
 		private boolean canCraft;
 		
 		private CraftableItem(Recipe recipe, int idx) {
-			super(recipe.getResult().item, idx);
+			super(idx, true, recipe.getResult().item, recipe.getResult().count);
 			this.recipe = recipe;
 			canCraft = recipe.canCraft(playerInv);
 			
-			addListener(new FocusListener() {
+			/*addListener(new FocusListener() {
 				@Override
 				public void keyboardFocusChanged(FocusEvent event, Actor actor, boolean focused) {
 					if(focused)
 						setHighlightedRecipe(recipe);
 				}
-			});
+			});*/
 		}
 		
 		@Override
-		void keyDown(InputEvent event, int keycode) {
-			if(keycode == Keys.ESCAPE || keycode == Keys.Z)
-				ClientCore.setScreen(null);
-		}
+		public Color getTextColor() { return canCraft ? Color.WHITE : Color.RED; }
 		
-		@Override
-		void select(int idx) {
-			if(recipe.tryCraft(playerInv))
-				refreshCanCraft();
-			
-			// tell server about the attempt
-			ClientCore.getClient().send(new CraftRequest(idx));
-		}
-		
-		@Override
-		protected int getStackSize(int idx) {
-			return recipe.getResult().count;
-		}
-		
-		@Override
-		protected Color getItemTextColor() {
-			return canCraft ? Color.WHITE : Color.RED;
-		}
-		
-		/*@Override
-		public void draw(Batch batch, float parentAlpha) {
-			System.out.println("rendering crafting item, width = " + getWidth());
-			super.draw(batch, parentAlpha);
-		}*/
 	}
 	
 	
-	private class ItemStackDisplay extends Widget {
+	/*private class ItemStackDisplay extends Widget {
 		private ItemStack item;
 		private Color backgroundColor = new Color(.2f, .4f, 1f, 1f);
 		private float width, height;
@@ -200,8 +198,8 @@ public class CraftingScreen extends MenuScreen {
 		
 		public void setItem(ItemStack item) {
 			this.item = item;
-			width = item.item.getRenderWidth() + 10;
-			height = item.item.getRenderHeight() + 10;
+			width = ItemRenderStrategy.FULL.getWidth(item.item) + 10;
+			height = ItemRenderStrategy.FULL.getWidth(item.item) + 10;
 			setSize(width, height);
 		}
 		
@@ -214,5 +212,5 @@ public class CraftingScreen extends MenuScreen {
 				MyUtils.fillRect(getX(), getY(), getWidth(), getHeight(), backgroundColor, batch);
 			item.item.drawItem(item.count, batch, getX()+5, getY()+5);
 		}
-	}
+	}*/
 }

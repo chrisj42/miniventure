@@ -19,7 +19,9 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -28,6 +30,7 @@ public class GameScreen {
 	@NotNull private final LevelViewport levelView;
 	
 	private SpriteBatch batch = GameCore.getBatch();
+	private Stage guiStage;
 	
 	private final OrthographicCamera uiCamera;
 	
@@ -35,6 +38,7 @@ public class GameScreen {
 	
 	public GameScreen() {
 		uiCamera = new OrthographicCamera();
+		guiStage = new Stage(new ExtendViewport(GameCore.DEFAULT_SCREEN_WIDTH, GameCore.DEFAULT_SCREEN_HEIGHT, uiCamera), batch);
 		
 		levelView = new LevelViewport(batch, uiCamera);
 		
@@ -44,7 +48,10 @@ public class GameScreen {
 		chatScreen = new ChatScreen(false);
 	}
 	
-	void dispose() { levelView.dispose(); }
+	void dispose() {
+		levelView.dispose();
+		guiStage.dispose();
+	}
 	
 	private boolean dialog = false;
 	public void handleInput(@NotNull ClientPlayer player) {
@@ -86,6 +93,8 @@ public class GameScreen {
 		batch.begin();
 		renderGui(mainPlayer, level);
 		batch.end();
+		guiStage.act(Gdx.graphics.getDeltaTime());
+		guiStage.draw();
 		
 		if(!(ClientCore.getScreen() instanceof ChatScreen)) {
 			chatOverlay.act(Gdx.graphics.getDeltaTime());
@@ -142,4 +151,6 @@ public class GameScreen {
 	}
 	
 	void resize(int width, int height) { levelView.resize(width, height); }
+	
+	public Stage getGuiStage() { return guiStage; }
 }

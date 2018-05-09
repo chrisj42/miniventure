@@ -18,6 +18,9 @@ public enum ItemType {
 	Resource(data -> ResourceItem.valueOf(data[0]).get()),
 	
 	Misc(data -> {
+		// The data all items has the item type as the first entry. This item type expects the next data string to be an encoded array of the enclosing classes needed to reach the class you're trying to reach, such as a HandItem. If the class is top-level, then the encoded array should just be the name of the class.
+		// the static load method of the found class is then called with any remaining parameters from the original data array, past the first two.
+		
 		try {
 			String[] enclosingClasses = MyUtils.parseLayeredString(data[0]);
 			Class<?> clazz = Class.forName(ItemType.class.getPackage().getName()+"."+enclosingClasses[0]);

@@ -234,7 +234,7 @@ public class ChatScreen extends MenuScreen {
 			if(timeLeft < MESSAGE_FADE_TIME)
 				alpha *= (timeLeft / MESSAGE_FADE_TIME);
 			
-			MyUtils.fillRect(getX(), getY(), ChatScreen.this.getWidth()/2, getHeight()+(connect?vGroup.getSpace():0), BACKGROUND.cpy().mul(1, 1, 1, alpha), batch);
+			MyUtils.fillRect(getX(), getY(), ChatScreen.this.getWidth()/2, getHeight()+(connect?vGroup.getSpace():0), BACKGROUND, alpha, batch);
 			
 			super.draw(batch, alpha);
 		}

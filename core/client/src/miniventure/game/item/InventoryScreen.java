@@ -1,18 +1,19 @@
 package miniventure.game.item;
 
 import miniventure.game.client.ClientCore;
-import miniventure.game.item.Hands.HandItem;
 import miniventure.game.screen.MenuScreen;
-import miniventure.game.util.MyUtils;
 
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 
 public class InventoryScreen extends MenuScreen {
+	
+	private static final Color backgroundColor = Color.TEAL;
 	
 	private final Inventory inventory;
 	private final Hands hands;
@@ -22,59 +23,86 @@ public class InventoryScreen extends MenuScreen {
 		this.inventory = inventory;
 		this.hands = hands;
 		
-		InventoryItem[] items = new InventoryItem[inventory.getSlots()];
+		ItemSlot[] items = new ItemSlot[inventory.getSlots()];
 		for(int i = 0; i < items.length; i++) {
-			if(i < inventory.getFilledSlots())
-				items[i] = new InventoryItem(inventory.getItemAt(i), i);
-			else
-				items[i] = new EmptySlot(i);
-			//vGroup.addActor(new InventoryItem(inventory.getItemAt(i), i));
+			items[i] = new ItemSlot(i, true, inventory.getItemAt(i), backgroundColor);
 		}
-		table = new ItemSelectionTable(items, getHeight());
 		
-		addActor(table);
-		table.setPosition(getWidth()/2, getHeight()/2, Align.center);
-		
-		getRoot().addListener(new InputListener() {
+		table = new ItemSelectionTable(items, getHeight()) {
+			@Override
+			public void onUpdate() {
+				table.setPosition(InventoryScreen.this.getWidth(), InventoryScreen.this.getHeight(), Align.topRight);
+			}
+		};
+		table.addListener(new InputListener() {
 			@Override
 			public boolean keyDown (InputEvent event, int keycode) {
-				if(keycode == Keys.E)
+				int hotbarSlots = hands.getSlots();
+				if(keycode >= Keys.NUM_1 && keycode <= Keys.NUM_1+hotbarSlots-1) {
+					int slot = keycode - Keys.NUM_1;
+					hands.setSelection(slot);
+					return true;
+				}
+				
+				if(keycode == Keys.ENTER) {
+					swapSelections();
+					return true;
+				}
+				
+				if(keycode == Keys.E || keycode == Keys.ESCAPE) {
 					ClientCore.setScreen(null);
-				return true;
+					return true;
+				}
+				
+				return false;
 			}
 		});
 		
-		setKeyboardFocus(items.length == 0 ? getRoot() : items[0]);
-		//setKeyboardFocus(vGroup.getChildren().size > 0 ? vGroup.getChildren().get(0) : getRoot());
+		for(ItemSlot slot: items) {
+			slot.addListener(new InputListener() {
+				@Override
+				public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+					table.setSelection(slot.getSlotIndex());
+				}
+			});
+			slot.addListener(new ClickListener() {
+				@Override
+				public void clicked (InputEvent event, float x, float y) {
+					swapSelections();
+				}
+			});
+		}
+		
+		addActor(table);
+		table.setPosition(getWidth(), getHeight(), Align.topRight);
+		
+		setKeyboardFocus(table/*items.length == 0 ? getRoot() : items[0]*/);
 	}
 	
 	@Override
 	public boolean usesWholeScreen() { return false; }
 	
-	
-	private class InventoryItem extends RenderableListItem {
+	private void swapSelections() {
+		hands.swapItem(inventory, table.getSelection(), hands.getSelection());
+		table.updateSelected(inventory.getItemAt(table.getSelection()));
+	}
+	/*private class InventoryItem extends RenderableListItem {
 		InventoryItem(Item item, int idx) {
 			super(item, idx);
 		}
 		
 		@Override
 		void keyDown(InputEvent event, int keycode) {
-			if(keycode == Keys.E || keycode == Keys.ESCAPE)
-				ClientCore.setScreen(null);
+			
 		} 
 		
-		@Override
+		*//*@Override
 		void select(int idx) {
 			ItemStack stack = inventory.removeItemAt(idx);
-			hands.clearItem(inventory); // just in case.
+			//hands.clearItems(inventory); // just in case.
 			hands.setItem(stack.item, stack.count);
 			ClientCore.setScreen(null);
-		}
-		
-		@Override
-		protected int getStackSize(int idx) {
-			return inventory.getStackSizeAt(idx);
-		}
+		}*//*
 	}
 	
 	private class EmptySlot extends InventoryItem {
@@ -82,20 +110,12 @@ public class InventoryScreen extends MenuScreen {
 			super(new HandItem(), idx);
 		}
 		
-		@Override
-		public void select(int idx) {
-			hands.clearItem(inventory);
-			ClientCore.setScreen(null);
-		}
-		
-		@Override
-		protected int getStackSize(int idx) { return 1; }
 		@Override protected boolean showName() { return false; }
 		
 		@Override
 		public void draw(Batch batch, float parentAlpha) {
-			MyUtils.fillRect(getX(), getY(), getWidth(), getHeight(), Color.TEAL.cpy().mul(1, 1, 1, parentAlpha), batch);
+			MyUtils.fillRect(getX(), getY(), getWidth(), getHeight(), Color.TEAL, parentAlpha, batch);
 			super.draw(batch, parentAlpha);
 		}
-	}
+	}*/
 }

@@ -212,7 +212,7 @@ public class GameClient implements GameProtocol {
 				forPacket(object, InventoryUpdate.class, newInv -> {
 					if(player == null) return;
 					player.getInventory().loadItems(newInv.inventory);
-					player.getHands().loadItem(newInv.heldItemStack);
+					player.getHands().loadItems(newInv.hotbar);
 				});
 				
 				forPacket(object, PositionUpdate.class, newPos -> {

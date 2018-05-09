@@ -183,6 +183,9 @@ public class ClientWorld extends WorldManager {
 		PositionUpdate newPos = data.playerData.positionUpdate;
 		mainPlayer.moveTo(newPos.x, newPos.y, newPos.z);
 		
+		gameScreen.getGuiStage().clear();
+		gameScreen.getGuiStage().addActor(mainPlayer.getHands().getHotbarTable());
+		
 		this.mainPlayer = mainPlayer;
 		
 		Level level = getLevel(newPos.levelDepth);

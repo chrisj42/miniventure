@@ -45,8 +45,6 @@ public class ToolItem extends Item {
 		this.durability = durability;
 	}
 	
-	@Override public int getMaxStackSize() { return 1; }
-	
 	public ToolType getToolType() { return toolType; }
 	public Material getMaterial() { return material; }
 	
@@ -68,8 +66,8 @@ public class ToolItem extends Item {
 	}
 	
 	@Override
-	public void drawItem(int stackSize, Batch batch, float x, float y, Color textColor) {
-		super.drawItem(stackSize, batch, x, y, textColor);
+	public void renderIconExtras(Batch batch, float x, float y) {
+		super.renderIconExtras(batch, x, y);
 		
 		if(durability == material.maxDurability) return; // no bar
 		

@@ -14,6 +14,9 @@ import miniventure.game.chat.InfoMessageBuilder;
 import miniventure.game.chat.InfoMessageLine;
 import miniventure.game.chat.MessageBuilder;
 import miniventure.game.chat.command.Command;
+import miniventure.game.item.Hands;
+import miniventure.game.item.Inventory;
+import miniventure.game.item.Item;
 import miniventure.game.item.ItemStack;
 import miniventure.game.item.Recipe;
 import miniventure.game.item.Recipes;
@@ -199,7 +202,9 @@ public class GameServer implements GameProtocol {
 				
 				forPacket(object, ItemDropRequest.class, drop -> {
 					ItemStack stack = ItemStack.load(drop.stackData);
-					int removed = client.getInventory().removeItem(stack);
+					int removed = 0;
+					while(removed < stack.count && client.getInventory().removeItem(stack.item) || client.getHands().removeItem(stack.item))
+						removed++;
 					ServerLevel level = client.getLevel();
 					if(level == null) return;
 					// get target pos, which is one tile in front of player.
@@ -209,14 +214,29 @@ public class GameServer implements GameProtocol {
 						level.dropItem(stack.item.copy(), client.getPosition(), targetPos);
 				});
 				
-				forPacket(object, HeldItemRequest.class, handItem -> {
-					ItemStack stack = ItemStack.load(handItem.stackData);
+				forPacket(object, InventoryUpdate.class, update -> {
+					//ItemStack stack = ItemStack.load(handItem.stackData);
 					//System.out.println("server received held item request: "+stack);
-					client.getHands().clearItem(client.getInventory());
+					//client.getHands().clearItems(client.getInventory());
 					//System.out.println("server player inventory: "+Arrays.toString(p.getInventory().save()));
-					int count = client.getInventory().removeItem(stack);
+					/*int count = client.getInventory().removeItem(stack);
 					if(count > 0)
-						client.getHands().setItem(stack.item, count);
+						client.getHands().setItem(stack.item, count);*/
+					
+					// so, we need to check the sent over inventory and hotbar data, and make sure that all the items in the sent over match all the items of the server player. 
+					Inventory inv = client.getInventory();
+					Hands hotbar = client.getHands();
+					Array<Item> items = new Array<>();
+					items.addAll(inv.getItems());
+					items.addAll(hotbar.getItems());
+					
+					// clear inventory and hand of items, load given items, and add them one by one
+					inv.loadItems(update.inventory);
+					hotbar.loadItems(update.hotbar);
+					
+					// TODO still need to go through the inventory and hotbar to make sure that they match what was there before, before sending it back to the client.
+					
+					
 					connection.sendTCP(new InventoryUpdate(client));
 				});
 				

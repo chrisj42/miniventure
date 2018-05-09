@@ -25,6 +25,7 @@ import miniventure.game.world.entity.mob.MobAnimationController.AnimationState;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
@@ -67,10 +68,10 @@ public class ClientPlayer extends ClientEntity implements Player {
 		
 		dir = Direction.DOWN;
 		
-		hands = new ClientHands(this);
-		inventory = new Inventory(INV_SIZE, hands); // no must-fit because that is handled by the server
+		inventory = new Inventory(INV_SIZE); // no must-fit because that is handled by the server
+		hands = new ClientHands(inventory);
 		
-		hands.loadItem(data.inventory.heldItemStack);
+		hands.loadItems(data.inventory.hotbar);
 		inventory.loadItems(data.inventory.inventory);
 		
 		Stat.load(data.stats, this.stats);
@@ -127,10 +128,10 @@ public class ClientPlayer extends ClientEntity implements Player {
 		
 		
 		Vector2 inputDir = new Vector2();
-		if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) inputDir.x--;
-		if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) inputDir.x++;
-		if(Gdx.input.isKeyPressed(Input.Keys.UP)) inputDir.y++;
-		if(Gdx.input.isKeyPressed(Input.Keys.DOWN)) inputDir.y--;
+		if(Gdx.input.isKeyPressed(Keys.LEFT)) inputDir.x--;
+		if(Gdx.input.isKeyPressed(Keys.RIGHT)) inputDir.x++;
+		if(Gdx.input.isKeyPressed(Keys.UP)) inputDir.y++;
+		if(Gdx.input.isKeyPressed(Keys.DOWN)) inputDir.y--;
 		
 		inputDir.nor();
 		
@@ -175,9 +176,13 @@ public class ClientPlayer extends ClientEntity implements Player {
 		
 		hands.resetItemUsage();
 		
+		for(int i = 0; i < hands.getSlots(); i++)
+			if(Gdx.input.isKeyJustPressed(Keys.NUM_1+i))
+				hands.setSelection(i);
+		
 		if(ClientCore.input.pressingKey(Input.Keys.E)) {
 			// do nothing here; instead, tell the server to set the held item once selected (aka on inventory menu exit). The inventory should be up to date already, generally speaking.
-			hands.clearItem(inventory);
+			//hands.clearItems(inventory);
 			ClientCore.setScreen(new InventoryScreen(inventory, hands));
 		}
 		else if(ClientCore.input.pressingKey(Input.Keys.Z))
@@ -218,7 +223,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 		drawStat(Stat.Stamina, canvas.x, hold.y, batch, hold);
 		drawStat(Stat.Hunger, canvas.x, hold.y, batch, hold);
 		
-		hands.getUsableItem().drawItem(hands.getCount(), batch, hold.x+20, 8);
+		hands.getHotbarTable().setPosition(hold.x+20, 8);
 	}
 	
 	private Vector2 renderBar(Stat stat, float x, float y, SpriteBatch batch) { return renderBar(stat, x, y, batch, 0); }

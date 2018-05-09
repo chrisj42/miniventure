@@ -15,6 +15,7 @@ public class InstructionsScreen extends MenuScreen {
 			"Use mouse or arrow keys to move around.",
 			"C to attack, V to interact.",
 			"E to open your inventory, Z to craft items.",
+			"1,2,3 keys (or click) to select hotbar items.",
 			"+ and - keys to zoom in and out.",
 			"Press \"t\" to chat with other players, and \"/\" to use commands.",
 			"(Hint: use the up key to repeat messages, and tab to autocomplete command names.)"

@@ -9,7 +9,7 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.HashMap;
 
 import miniventure.game.GameCore;
-import miniventure.game.GameProtocol.HeldItemRequest;
+import miniventure.game.GameProtocol.InventoryUpdate;
 import miniventure.game.GameProtocol.Message;
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.item.InventoryScreen;
@@ -21,6 +21,7 @@ import miniventure.game.util.MyUtils;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
@@ -114,7 +115,7 @@ public class ClientCore extends ApplicationAdapter {
 	public static void setScreen(@Nullable MenuScreen screen) {
 		if(menuScreen instanceof InventoryScreen) {
 			//System.out.println("sending held item request to server for "+clientWorld.getMainPlayer().getHands().getUsableItem());
-			getClient().send(new HeldItemRequest(clientWorld.getMainPlayer().getHands()));
+			getClient().send(new InventoryUpdate(clientWorld.getMainPlayer()));
 		}
 		
 		if(menuScreen instanceof MainMenu && screen instanceof ErrorScreen)
@@ -129,7 +130,12 @@ public class ClientCore extends ApplicationAdapter {
 		
 		menuScreen = screen;
 		if(menuScreen != null) menuScreen.focus();
-		Gdx.input.setInputProcessor(menuScreen == null ? input : menuScreen);
+		if(gameScreen == null) {
+			Gdx.input.setInputProcessor(menuScreen == null ? input : menuScreen);
+		}
+		else {
+			Gdx.input.setInputProcessor(menuScreen == null ? new InputMultiplexer(gameScreen.getGuiStage(), input) : new InputMultiplexer(menuScreen, gameScreen.getGuiStage()));
+		}
 		input.reset();
 	}
 	public static void backToParentScreen() {

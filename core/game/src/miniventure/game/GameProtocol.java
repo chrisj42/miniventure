@@ -439,20 +439,21 @@ public interface GameProtocol {
 	}
 	
 	// sent by client to let the server know that a new held item has been selected from the inventory.
-	class HeldItemRequest {
+	/*class HeldItemRequest {
 		public final String[] stackData;
 		
 		private HeldItemRequest() { this((String[])null); }
-		public HeldItemRequest(Hands hands) { this(new ItemStack(hands.getUsableItem(), hands.getCount())); }
+		public HeldItemRequest(Hands hands) { this(new ItemStack(hands.getSelectedItem(), hands.getCount(hands.getSelectedItem()))); }
 		public HeldItemRequest(ItemStack stack) {
 			this(stack.save());
 		}
 		public HeldItemRequest(String[] stackData) {
 			this.stackData = stackData;
 		}
-	}
+	}*/
 	
 	// sent by client to drop an item from the inventory
+	// TODO Add that key control; Q, probably. Shift-Q will send a sequence of drop requests that will drop every item equal to the selected item.
 	class ItemDropRequest {
 		public final String[] stackData;
 		
@@ -477,14 +478,14 @@ public interface GameProtocol {
 	// sent by server to update clients' inventory, after dropping items and attacking/interacting.
 	class InventoryUpdate {
 		public final String[] inventory;
-		public final String[] heldItemStack;
+		public final String[] hotbar;
 		
 		private InventoryUpdate() { this((String[])null, null); }
 		public InventoryUpdate(Player player) { this(player.getInventory(), player.getHands()); }
 		public InventoryUpdate(Inventory inv, Hands hands) { this(inv.save(), hands.save()); }
-		public InventoryUpdate(String[] inventory, String[] heldItemStack) {
+		public InventoryUpdate(String[] inventory, String[] hotbar) {
 			this.inventory = inventory;
-			this.heldItemStack = heldItemStack;
+			this.hotbar = hotbar;
 		}
 	}
 	
