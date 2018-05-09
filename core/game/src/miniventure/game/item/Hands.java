@@ -23,7 +23,7 @@ public class Hands extends Inventory {
 	}
 	
 	public void setSelection(int idx) { selection = idx; }
-	protected int getSelection() { return selection; }
+	public int getSelection() { return selection; }
 	
 	void swapItem(Inventory inv, int invIdx, int hotbarIdx) {
 		Item item = inv.replaceItemAt(invIdx, getItemAt(hotbarIdx));

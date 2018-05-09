@@ -77,6 +77,8 @@ public class Inventory {
 	Item replaceItemAt(int idx, Item item) {
 		checkIndex(idx);
 		// okay to replace with hand item.
+		if(item == null)
+			item = hand;
 		
 		Item cur = items[idx];
 		itemCounter.removeInstance(cur);

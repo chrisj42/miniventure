@@ -196,6 +196,7 @@ public class GameServer implements GameProtocol {
 						connection.sendTCP(new PositionUpdate(client)); // fix the player's position
 					
 					client.setDirection(r.dir);
+					client.getHands().setSelection(r.hotbarIndex);
 					if(r.attack) client.attack();
 					else client.interact();
 				}

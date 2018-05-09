@@ -394,12 +394,14 @@ public interface GameProtocol {
 		public final boolean attack;
 		public final PositionUpdate playerPosition;
 		public final Direction dir;
+		public final int hotbarIndex;
 		
-		private InteractRequest() { this(false, null, null); }
-		public InteractRequest(boolean attack, PositionUpdate playerPosition, Direction dir) {
+		private InteractRequest() { this(false, null, null, 0); }
+		public InteractRequest(boolean attack, PositionUpdate playerPosition, Direction dir, int hotbarIndex) {
 			this.attack = attack;
 			this.playerPosition = playerPosition;
 			this.dir = dir;
+			this.hotbarIndex = hotbarIndex;
 		}
 	}
 	

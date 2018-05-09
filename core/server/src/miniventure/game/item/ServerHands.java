@@ -48,6 +48,8 @@ public class ServerHands extends Hands {
 				dropItem(newItem); // if there was a new item, and it couldn't be picked up, then the count is not decreased.
 			}
 		}*/
+		if(newItem == null && player.getInventory().removeItem(item))
+			newItem = item.copy();
 		replaceItemAt(getSelection(), newItem);
 		
 		ServerCore.getServer().sendToPlayer(player, new InventoryUpdate(player.getInventory(), player.getHands()));

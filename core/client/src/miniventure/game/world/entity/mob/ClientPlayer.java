@@ -166,9 +166,9 @@ public class ClientPlayer extends ClientEntity implements Player {
 		
 		if(!isKnockedBack()) {
 			if(ClientCore.input.pressingKey(Input.Keys.C))
-				ClientCore.getClient().send(new InteractRequest(true, new PositionUpdate(this), getDirection()));
+				ClientCore.getClient().send(new InteractRequest(true, new PositionUpdate(this), getDirection(), hands.getSelection()));
 			else if(ClientCore.input.pressingKey(Input.Keys.V))
-				ClientCore.getClient().send(new InteractRequest(false, new PositionUpdate(this), getDirection()));
+				ClientCore.getClient().send(new InteractRequest(false, new PositionUpdate(this), getDirection(), hands.getSelection()));
 		}
 		//if(Gdx.input.isKeyPressed(Input.Keys.C) || Gdx.input.isKeyPressed(Input.Keys.V))
 		//	animator.requestState(AnimationState.ATTACK);

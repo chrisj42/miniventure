@@ -173,7 +173,7 @@ public class ServerPlayer extends ServerMob implements Player {
 	}
 	
 	public void attack() {
-		//System.out.println("server player attacking; dir="+getDirection()+", pos="+getPosition(true));
+		//System.out.println("server player attacking; item = "+hands.getSelectedItem());
 		if(!hands.hasUsableItem()) return; // only ever not true for attacks in the same frame or if not enough stamina
 		
 		Level level = getLevel();
@@ -202,6 +202,7 @@ public class ServerPlayer extends ServerMob implements Player {
 	}
 	
 	public void interact() {
+		//System.out.println("server player interacting; item = "+hands.getSelectedItem());
 		if(!hands.hasUsableItem()) return;
 		
 		Item heldItem = hands.getSelectedItem();
