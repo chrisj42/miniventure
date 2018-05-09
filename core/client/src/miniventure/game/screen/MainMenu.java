@@ -100,8 +100,8 @@ public class MainMenu extends MenuScreen {
 		LevelGenerator generator = new LevelGenerator(MathUtils.random.nextLong(), 100, 60, 8, 6);
 		backgroundLevel = new DisplayLevel(generator);
 		
-		Vector2 halfSize = new Vector2(levelView.getViewWidth(), levelView.getViewHeight()).scl(0.5f);
-		cameraPos = new Vector2(MathUtils.random(halfSize.x, backgroundLevel.getWidth()-halfSize.x), MathUtils.random(halfSize.y, backgroundLevel.getHeight()-halfSize.y));
+		Vector2 size = new Vector2(levelView.getViewWidth(), levelView.getViewHeight());//.scl(0.5f);
+		cameraPos = new Vector2(MathUtils.random(size.x, backgroundLevel.getWidth()-size.x), MathUtils.random(size.y, backgroundLevel.getHeight()-size.y));
 		
 		cameraDir = new Vector2().setLength(PAN_SPEED).setToRandomDirection().setLength(PAN_SPEED);
 		
