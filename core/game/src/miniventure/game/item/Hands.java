@@ -16,10 +16,15 @@ public class Hands extends Inventory {
 	
 	@Override
 	public boolean addItem(Item item) {
-		if(super.getCount(item) == 0 || !inventory.addItem(item))
-			return super.addItem(item);
-		else
-			return true; // was added to inventory instead
+		if(super.getCount(item) == 0) {
+			if(!super.addItem(item))
+				return inventory.addItem(item);
+		} else {
+			if(!inventory.addItem(item))
+				return super.addItem(item);
+		}
+		
+		return true; // first of the two choices succeeded
 	}
 	
 	@Override

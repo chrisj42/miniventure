@@ -49,7 +49,7 @@ public class DestructibleProperty extends TileProperty {
 		this(tileType, new ItemDrop(TileItem.get(tileType)), damageConditions);
 	}
 	// above, but custom single item drop
-	DestructibleProperty(@NotNull TileType tileType, ItemDrop drop, DamageConditionCheck... damageConditions) {
+	DestructibleProperty(@NotNull TileType tileType, @NotNull ItemDrop drop, DamageConditionCheck... damageConditions) {
 		this(tileType, 1, new PreferredTool[0], damageConditions, new ItemDrop[] {drop});
 	}
 	

@@ -11,6 +11,7 @@ import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.MapFunction;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.tile.AnimationProperty.AnimationType;
+import miniventure.game.world.tile.DestructibleProperty.DestructibleBuilder;
 import miniventure.game.world.tile.DestructibleProperty.PreferredTool;
 import miniventure.game.world.tile.DestructibleProperty.RequiredTool;
 
@@ -40,7 +41,7 @@ public enum TileType {
 	
 	GRASS((tileType, map) -> {
 		map.put(Solid, SolidProperty.get(tileType, false));
-		map.put(Attack, new DestructibleProperty(tileType, (ItemDrop)null, new RequiredTool(ToolType.Shovel)));
+		map.put(Attack, new DestructibleBuilder(tileType, 1, false).require(new RequiredTool(ToolType.Shovel)).make());
 		map.put(Overlap, new OverlapProperty(tileType, true));
 		map.put(Tick, new SpreadTickProperty(tileType, (newType, tile) -> tile.replaceTile(newType), DIRT));
 	}),
