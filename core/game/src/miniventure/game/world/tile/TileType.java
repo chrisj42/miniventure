@@ -54,7 +54,7 @@ public enum TileType {
 	
 	STONE((tileType, map) -> {
 		map.put(Solid, SolidProperty.get(tileType, true));
-		map.put(Attack, new DestructibleProperty(tileType, 20, new PreferredTool(ToolType.Pickaxe, 5)));
+		map.put(Attack, new DestructibleProperty(tileType, 40, new PreferredTool(ToolType.Pickaxe, 5)));
 	}),
 	
 	WOOD_WALL(((tileType, map) -> {
@@ -100,14 +100,14 @@ public enum TileType {
 	
 	CACTUS((tileType, map) -> {
 		map.put(Solid, SolidProperty.get(tileType, true));
-		map.put(Attack, new DestructibleProperty(tileType, 7, null));
+		map.put(Attack, new DestructibleProperty(tileType, 12, null));
 		map.put(Render, new AnimationProperty(tileType, false, AnimationType.SINGLE_FRAME));
 		map.put(Touch, new TouchListener(tileType, (e, t, initial) -> e.attackedBy(t, null, 1)));
 	}),
 	
 	TREE((tileType, map) -> {
 		map.put(Solid, SolidProperty.get(tileType, true));
-		map.put(Attack, new DestructibleProperty(tileType, 10, new PreferredTool(ToolType.Axe, 2), new ItemDrop(ResourceItem.Log.get()/*, 1, 2, 0.25f*/), new ItemDrop(FoodItem.Apple.get(), 0, 2, 0.2f)));
+		map.put(Attack, new DestructibleProperty(tileType, 24, new PreferredTool(ToolType.Axe, 2), new ItemDrop(ResourceItem.Log.get()/*, 1, 2, 0.25f*/), new ItemDrop(FoodItem.Apple.get(), 0, 2, 0.2f)));
 		map.put(Render, new AnimationProperty(tileType, false, AnimationType.SINGLE_FRAME));
 		map.put(Connect, new ConnectionProperty(tileType, true));
 	});
