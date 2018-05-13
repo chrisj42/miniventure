@@ -35,6 +35,7 @@ public class GameScreen {
 	private final OrthographicCamera uiCamera;
 	
 	final ChatScreen chatOverlay, chatScreen;
+	private boolean showDebug = false;
 	
 	public GameScreen() {
 		uiCamera = new OrthographicCamera();
@@ -61,7 +62,10 @@ public class GameScreen {
 		
 		levelView.handleInput();
 		
-		if(Gdx.input.isKeyPressed(Keys.CONTROL_LEFT) && ClientCore.input.pressingKey(Keys.T))
+		if(Gdx.input.isKeyPressed(Keys.SHIFT_LEFT) && ClientCore.input.pressingKey(Keys.D))
+			showDebug = !showDebug;
+		
+		if(showDebug && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT) && ClientCore.input.pressingKey(Keys.T))
 			ClientCore.getClient().send(DatalessRequest.Tile); // debug
 		
 		else if(ClientCore.input.pressingKey(Keys.T)) {
@@ -123,6 +127,7 @@ public class GameScreen {
 		// draw UI for current item, and stats
 		mainPlayer.drawGui(new Rectangle(0, 0, uiCamera.viewportWidth, uiCamera.viewportHeight), batch);
 		
+		if(!showDebug) return;
 		
 		// a list of text to display in the upper left, for debug purposes
 		Array<String> debugInfo = new Array<>(); 
@@ -138,7 +143,8 @@ public class GameScreen {
 		Tile interactTile = level.getClosestTile(mainPlayer.getInteractionRect());
 		debugInfo.add("Looking at: " + (interactTile == null ? "Null" : interactTile.toLocString().replace("Client", "")));
 		
-		debugInfo.add("Entities in level: " + level.getEntityCount()+"/"+level.getEntityCap());
+		debugInfo.add("Mobs in level: " + level.getMobCount()+"/"+level.getMobCap());
+		debugInfo.add("Total Entities: " + level.getEntityCount());
 		
 		debugInfo.add("Time: " + TimeOfDay.getTimeString(ClientCore.getWorld().getDaylightOffset()));
 		

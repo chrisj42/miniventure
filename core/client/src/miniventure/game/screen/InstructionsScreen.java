@@ -20,7 +20,9 @@ public class InstructionsScreen extends MenuScreen {
 			"With the inventory open, click or press enter on an inventory item to swap it with the selected hotbar item.",
 			"+ and - keys to zoom in and out.",
 			"Press \"t\" to chat with other players, and \"/\" to use commands.",
-			"(Hint: use the up key to repeat messages, and tab to autocomplete command names.)"
+			"(Hint: use the up key to repeat messages, and tab to autocomplete command names.)",
+			"",
+			"Toggle Debug display: Shift-D"
 		});
 		//"(press b to show/hide chunk boundaries)",
 		VisLabel instructions = new VisLabel(String.join(System.lineSeparator(), lines.items));
