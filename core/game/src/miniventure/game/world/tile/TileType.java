@@ -107,7 +107,7 @@ public enum TileType {
 	
 	TREE((tileType, map) -> {
 		map.put(Solid, SolidProperty.get(tileType, true));
-		map.put(Attack, new DestructibleProperty(tileType, 10, new PreferredTool(ToolType.Axe, 2), new ItemDrop(ResourceItem.Log.get(), 1, 2, 0.25f), new ItemDrop(FoodItem.Apple.get(), 0, 2, 0.2f)));
+		map.put(Attack, new DestructibleProperty(tileType, 10, new PreferredTool(ToolType.Axe, 2), new ItemDrop(ResourceItem.Log.get()/*, 1, 2, 0.25f*/), new ItemDrop(FoodItem.Apple.get(), 0, 2, 0.2f)));
 		map.put(Render, new AnimationProperty(tileType, false, AnimationType.SINGLE_FRAME));
 		map.put(Connect, new ConnectionProperty(tileType, true));
 	});
