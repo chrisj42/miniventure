@@ -186,6 +186,8 @@ public class ServerLevel extends Level {
 	private void spawnMob(ServerMob mob, Tile[] tiles) {
 		if(tiles.length == 0) throw new IllegalArgumentException("Tile array for spawning mobs must have at least one tile in it. (tried to spawn mob "+mob+")");
 		
+		if(!mob.maySpawn()) return;
+		
 		Tile spawnTile;
 		if(tiles.length == 1)
 			spawnTile = tiles[0];
@@ -215,6 +217,7 @@ public class ServerLevel extends Level {
 		if(!getWorld().isKeepAlive(mob))
 			spawnMob(mob, getOverlappingTiles(spawnArea).toArray(Tile.class));
 		else {
+			if(!mob.maySpawn()) return; // if it can't spawn now at all, then don't try.
 			int x, y;
 			TileType type;
 			do {

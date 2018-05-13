@@ -214,6 +214,7 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 	
 	public void die() { remove(); }
 	
+	public boolean maySpawn() { return true; }
 	public boolean maySpawn(TileType type) {
 		return type == TileType.GRASS || type == TileType.DIRT || type == TileType.SAND;
 	}
