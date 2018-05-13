@@ -6,6 +6,7 @@ import miniventure.game.util.Version;
 import miniventure.game.world.entity.EntityRenderer.TextRenderer;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
@@ -19,6 +20,7 @@ public class TextParticle extends BounceEntity implements Particle {
 	public TextParticle(@NotNull String text, @NotNull Color main) { this(text, main, Color.BLACK); }
 	public TextParticle(@NotNull String text, @NotNull Color main, @NotNull Color shadow) {
 		super(null, 2f);
+		scaleVelocity(MathUtils.random(0.5f, 2.5f));
 		this.text = text;
 		this.main = main;
 		this.shadow = shadow;

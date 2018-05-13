@@ -132,7 +132,8 @@ public class ServerLevel extends Level {
 			dropItem(item, dropPos, targetPos);
 	}
 	
-	public void dropItem(@NotNull Item item, @NotNull Vector2 dropPos, @Nullable Vector2 targetPos) {
+	public void dropItem(@NotNull Item item, @NotNull Vector2 dropPos, @Nullable Vector2 targetPos) { dropItem(item, false, dropPos, targetPos); }
+	public void dropItem(@NotNull Item item, boolean delayPickup, @NotNull Vector2 dropPos, @Nullable Vector2 targetPos) {
 		
 		/* this drops the itemEntity at the given coordinates, with the given direction (random if null).
 		 	However, if the given coordinates reside within a solid tile, the adjacent tiles are checked.
@@ -174,9 +175,9 @@ public class ServerLevel extends Level {
 		if(targetPos == null)
 			dropDir = new Vector2().setToRandomDirection();
 		else
-			dropDir = targetPos.sub(dropPos);
+			dropDir = targetPos.cpy().sub(dropPos);
 		
-		ie = new ItemEntity(item, dropDir);
+		ie = new ItemEntity(item, dropDir, delayPickup);
 		
 		ie.moveTo(this, dropPos);
 		getWorld().setEntityLevel(ie, this);

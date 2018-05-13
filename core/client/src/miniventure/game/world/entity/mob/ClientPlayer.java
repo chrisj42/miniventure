@@ -123,7 +123,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 		animator.progressAnimation(delta);
 	}
 	
-	private float lastWalkTime = 0;
+	//private float lastWalkTime = 0;
 	public void handleInput(Vector2 mouseInput) {
 		
 		
@@ -182,7 +182,6 @@ public class ClientPlayer extends ClientEntity implements Player {
 		
 		if(ClientCore.input.pressingKey(Input.Keys.E)) {
 			// do nothing here; instead, tell the server to set the held item once selected (aka on inventory menu exit). The inventory should be up to date already, generally speaking.
-			//hands.clearItems(inventory);
 			ClientCore.setScreen(new InventoryScreen(inventory, hands));
 		}
 		else if(ClientCore.input.pressingKey(Input.Keys.Z))

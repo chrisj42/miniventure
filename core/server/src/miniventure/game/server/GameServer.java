@@ -191,7 +191,6 @@ public class GameServer implements GameProtocol {
 				
 				if(object instanceof InteractRequest) {
 					InteractRequest r = (InteractRequest) object;
-					//System.out.println("server received interaction request; dir="+r.dir+", pos="+r.playerPosition.toString(world));
 					if(r.playerPosition.variesFrom(client))
 						connection.sendTCP(new PositionUpdate(client)); // fix the player's position
 					
@@ -210,20 +209,12 @@ public class GameServer implements GameProtocol {
 					if(level == null) return;
 					// get target pos, which is one tile in front of player.
 					Vector2 targetPos = client.getCenter();
-					targetPos.add(client.getDirection().getVector()); // adds 1 in the direction of the player.
+					targetPos.add(client.getDirection().getVector().scl(2)); // adds 2 in the direction of the player.
 					for(int i = 0; i < removed; i++)
-						level.dropItem(stack.item.copy(), client.getPosition(), targetPos);
+						level.dropItem(stack.item.copy(), true, client.getCenter(), targetPos);
 				});
 				
 				forPacket(object, InventoryUpdate.class, update -> {
-					//ItemStack stack = ItemStack.load(handItem.stackData);
-					//System.out.println("server received held item request: "+stack);
-					//client.getHands().clearItems(client.getInventory());
-					//System.out.println("server player inventory: "+Arrays.toString(p.getInventory().save()));
-					/*int count = client.getInventory().removeItem(stack);
-					if(count > 0)
-						client.getHands().setItem(stack.item, count);*/
-					
 					// so, we need to check the sent over inventory and hotbar data, and make sure that all the items in the sent over match all the items of the server player. 
 					Inventory inv = client.getInventory();
 					Hands hotbar = client.getHands();

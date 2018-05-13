@@ -2,8 +2,8 @@ package miniventure.game.world.entity.particle;
 
 import java.util.Arrays;
 
-import miniventure.game.util.blinker.FrameBlinker;
 import miniventure.game.util.Version;
+import miniventure.game.util.blinker.FrameBlinker;
 import miniventure.game.world.Level;
 import miniventure.game.world.entity.ServerEntity;
 
@@ -25,7 +25,6 @@ public abstract class BounceEntity extends ServerEntity {
 	
 	private Vector3 velocity; // in tiles / second.
 	private float time; // the current time relative to the creation of this item entity. used as the current position along the "x-axis".
-	//private FrameBlinker blinker;
 	
 	private float lastBounceTime; // used to halt the entity once it starts bouncing a lot really quickly.
 	
@@ -35,9 +34,7 @@ public abstract class BounceEntity extends ServerEntity {
 		if(goalDir == null)
 			goalDir = new Vector2().setToRandomDirection();
 		
-		//blinker = new FrameBlinker(1, 1, false);
-		
-		velocity = new Vector3(goalDir.cpy().nor().scl(MathUtils.random(0.5f, 2.5f)), MathUtils.random(8f, 12f));
+		velocity = new Vector3(goalDir, MathUtils.random(8f, 12f));
 		
 		setBlinker(lifetime * BLINK_THRESHOLD, false, new FrameBlinker(1, 1, false));
 	}
@@ -53,7 +50,6 @@ public abstract class BounceEntity extends ServerEntity {
 		time = Float.parseFloat(data[4]);
 		lastBounceTime = Float.parseFloat(data[5]);
 		
-		//blinker = new FrameBlinker(1, 1, false);
 		setBlinker(lifetime * BLINK_THRESHOLD, false, new FrameBlinker(1, 1, false));
 	}
 	
@@ -72,6 +68,8 @@ public abstract class BounceEntity extends ServerEntity {
 		
 		return data;
 	}
+	
+	protected void scaleVelocity(float amt) { velocity.scl(amt, amt, 1); }
 	
 	float getTime() { return time; }
 	
