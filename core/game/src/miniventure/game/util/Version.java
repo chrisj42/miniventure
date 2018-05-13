@@ -49,6 +49,6 @@ public class Version implements Comparable<Version> {
 	
 	@Override
 	public String toString() {
-		return make+"."+major+(minor<0?" official":", pre-release "+minor);
+		return make+"."+major+(minor<0?" Official":", Pre-Release "+minor);
 	}
 }
