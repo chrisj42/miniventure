@@ -38,6 +38,9 @@ public class ClientEntity extends Entity {
 	@Nullable @Override
 	public ClientLevel getLevel() { return (ClientLevel) super.getLevel(); }
 	
+	@Override
+	public boolean isMob() { return cutHeight; } // this is probably a bad idea but currently it is exactly the value I'm looking for...
+	
 	@NotNull @Override
 	public Rectangle getBounds() {
 		Rectangle bounds = super.getBounds();

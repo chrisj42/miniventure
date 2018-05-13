@@ -14,11 +14,10 @@ import miniventure.game.util.Version;
 import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
+import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.entity.particle.Particle;
 import miniventure.game.world.tile.Tile;
 
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
@@ -51,6 +50,9 @@ public abstract class ServerEntity extends Entity {
 	
 	@Override @Nullable
 	public ServerLevel getLevel() { return getWorld().getEntityLevel(this); }
+	
+	@Override
+	public boolean isMob() { return this instanceof Mob; }
 	
 	@Override
 	public void update(float delta) {

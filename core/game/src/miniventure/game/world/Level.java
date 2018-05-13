@@ -14,7 +14,6 @@ import miniventure.game.world.tile.TileType;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
@@ -27,12 +26,13 @@ public abstract class Level {
 	@NotNull private final WorldManager world;
 	protected final SynchronizedAccessor<Map<Point, Chunk>> loadedChunks = new SynchronizedAccessor<>(Collections.synchronizedMap(new HashMap<>()));
 	protected int tileCount;
+	private int mobCount;
 	
 	// this is to track when entities go in and out of chunks
 	protected final HashMap<Entity, Point> entityChunks = new HashMap<>();
 	
 	/** @noinspection FieldCanBeLocal*/
-	private int entityCap = 6; // per chunk
+	private int mobCap = 3; // per chunk
 	
 	//protected Level(@NotNull WorldManager world) { this(world, 0, 0, 0); }
 	protected Level(@NotNull WorldManager world, int depth, int width, int height) {
@@ -55,7 +55,8 @@ public abstract class Level {
 	public int getHeight() { return height; }
 	public int getDepth() { return depth; }
 	@NotNull public WorldManager getWorld() { return world; }
-	public int getEntityCap() { return entityCap*getLoadedChunkCount(); }
+	public int getMobCap() { return mobCap *getLoadedChunkCount(); }
+	public int getMobCount() { return mobCount; }
 	public int getEntityCount() { return world.getEntityCount(this); }
 	
 	public Entity[] getEntities() { return world.getEntities(this); }
@@ -131,8 +132,13 @@ public abstract class Level {
 	}
 	
 	public void updateEntities(Entity[] entities, float delta) {
-		for(Entity e: entities)
+		int mobs = 0;
+		for(Entity e: entities) {
 			e.update(delta);
+			if(e.isMob())
+				mobs++;
+		}
+		this.mobCount = mobs;
 	}
 	
 	@Nullable

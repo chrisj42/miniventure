@@ -50,6 +50,8 @@ public abstract class Entity implements WorldObject {
 	@Override @Nullable
 	public Level getLevel() { return world.getEntityLevel(this); }
 	
+	public abstract boolean isMob();
+	
 	/// this is called only to remove an entity completely from the game, not to change levels.
 	public void remove() {
 		world.deregisterEntity(eid);

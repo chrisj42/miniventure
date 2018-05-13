@@ -26,7 +26,6 @@ import miniventure.game.world.tile.TileType;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
@@ -121,7 +120,7 @@ public class ServerLevel extends Level {
 		// update entities
 		updateEntities(entities, delta);
 		
-		if(entities.length < getEntityCap() && MathUtils.randomBoolean(0.01f))
+		if(entities.length < getMobCap() && MathUtils.randomBoolean(0.01f))
 			spawnMob(new MobAi(AiType.values[MathUtils.random(AiType.values.length-1)]));
 	}
 	
