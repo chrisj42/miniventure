@@ -3,10 +3,13 @@ package miniventure.game.world.entity.mob;
 import java.util.Arrays;
 
 import miniventure.game.item.Item;
+import miniventure.game.server.ServerCore;
 import miniventure.game.util.Version;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.ServerLevel;
+import miniventure.game.world.TimeOfDay;
 import miniventure.game.world.WorldObject;
+import miniventure.game.world.entity.Entity;
 
 import com.badlogic.gdx.utils.Array;
 
@@ -67,11 +70,12 @@ public class MobAi extends ServerMob {
 	
 	public AiType getType() { return aiType; }
 	
-	protected void setMovePattern(@NotNull MovementPattern pattern) { movePattern = pattern; }
+	//protected void setMovePattern(@NotNull MovementPattern pattern) { movePattern = pattern; }
 	protected void setMovePattern(@NotNull MovementPattern pattern, float duration) {
 		tempMovePattern = pattern;
 		tempTimeLeft = duration;
 	}
+	MovementPattern curMovePattern() { return tempMovePattern == null ? movePattern : tempMovePattern; }
 	
 	@Override
 	public void update(float delta) {
@@ -82,13 +86,19 @@ public class MobAi extends ServerMob {
 		if(tempTimeLeft <= 0 && tempMovePattern != null)
 			tempMovePattern = null;
 		
-		move((tempMovePattern == null ? movePattern : tempMovePattern).move(delta, this));
+		move(curMovePattern().move(delta, this));
 	}
 	
 	@Override
 	public boolean attackedBy(WorldObject obj, @Nullable Item attackItem, int damage) {
 		if(aiType.onHit != null) aiType.onHit.onHit(this, obj, attackItem);
 		return super.attackedBy(obj, attackItem, damage);
+	}
+	
+	@Override
+	public boolean touchedBy(Entity other) {
+		if(aiType.onTouch != null) return aiType.onTouch.onTouch(this, other);
+		return super.touchedBy(other);
 	}
 	
 	@Override
@@ -99,5 +109,12 @@ public class MobAi extends ServerMob {
 				level.dropItems(drop, this, null);
 		
 		super.die();
+	}
+	
+	@Override
+	public boolean maySpawn() {
+		if(!aiType.daySpawn && TimeOfDay.getTimeOfDay(ServerCore.getWorld().getDaylightOffset()) != TimeOfDay.Night)
+			return false;
+		return super.maySpawn();
 	}
 }

@@ -7,23 +7,27 @@ import org.jetbrains.annotations.Nullable;
 
 public enum AiType {
 	
-	Pig(8, new WanderingPattern(), HitReaction.FLEE/*, new ItemDrop()*/), // later, drops pork food item.
+	Pig(8, true, new WanderingPattern(), HitReaction.FLEE, null/*, new ItemDrop()*/), // later, drops pork food item.
 	
-	Cow(12, new WanderingPattern(), null),
+	Cow(12, true, new WanderingPattern(), null, null),
 	
-	Crocodile(18, new WanderingPattern(), HitReaction.CHASE),
+	Crocodile(18, true, new WanderingPattern(), HitReaction.CHASE, TouchReaction.attackPlayer(2)),
 	
-	Zombie(15, new PursuePattern(FollowBehavior.NEAREST_PLAYER), null);
+	Zombie(15, false, new PursuePattern(FollowBehavior.NEAREST_PLAYER), null, TouchReaction.attackPlayer(1));
 	
 	final int health;
+	final boolean daySpawn;
 	final MovementPattern defaultPattern;
 	final HitReaction onHit;
+	final TouchReaction onTouch;
 	final ItemDrop[] deathDrops;
 	
-	AiType(int health, MovementPattern defaultPattern, @Nullable HitReaction onHit, ItemDrop... deathDrops) {
+	AiType(int health, boolean daySpawn, MovementPattern defaultPattern, @Nullable HitReaction onHit, @Nullable TouchReaction onTouch, ItemDrop... deathDrops) {
 		this.health = health;
+		this.daySpawn = daySpawn;
 		this.defaultPattern = defaultPattern;
 		this.onHit = onHit;
+		this.onTouch = onTouch;
 		this.deathDrops = deathDrops;
 	}
 	
