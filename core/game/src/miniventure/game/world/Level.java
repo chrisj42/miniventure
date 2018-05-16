@@ -19,7 +19,7 @@ import com.badlogic.gdx.utils.Array;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class Level {
+public abstract class Level implements Taggable<Level> {
 	
 	private final int depth, width, height;
 	
@@ -313,4 +313,19 @@ public abstract class Level {
 	
 	@Override
 	public String toString() { return getClass().getSimpleName()+"(depth="+depth+")"; }
+	
+	@Override
+	public LevelTag getTag() { return new LevelTag(depth); }
+	
+	public static class LevelTag implements Tag<Level> {
+		
+		private final int depth;
+		
+		public LevelTag(int depth) { this.depth = depth; }
+		
+		@Override
+		public Level getObject(WorldManager world) {
+			return world.getLevel(depth);
+		}
+	}
 }

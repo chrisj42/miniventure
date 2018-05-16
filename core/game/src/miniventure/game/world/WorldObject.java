@@ -10,7 +10,7 @@ import com.badlogic.gdx.math.Vector2;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public interface WorldObject extends Boundable {
+public interface WorldObject extends Boundable, Taggable<WorldObject> {
 	
 	@NotNull WorldManager getWorld();
 	
@@ -32,10 +32,4 @@ public interface WorldObject extends Boundable {
 	boolean touchedBy(Entity entity);
 	
 	void touching(Entity entity);
-	
-	interface Tag<T extends WorldObject> {
-		T getObject(WorldManager world);
-	}
-	
-	Tag getTag();
 }
