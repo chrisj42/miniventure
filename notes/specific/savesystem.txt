@@ -1,0 +1,24 @@
+Global/Preferences Data:
+
+- pick default save locations for world data, and for global preferences
+- allow both locations to be customized (keep a bool for if the path is set manually, as a checkbox probably; this is in case the location changes later)
+- have a global preferences menu that allows you to set things like default username, default world save location (global preferences stored here).
+
+
+
+How to save world data:
+
+Pretty easy, overall; world data will be stored by level first, then by chunk, and then within each chunk you have the tiles and entities within that chunk.
+The tile data format is probably already made, it's probably the way that tiles are sent across from server to client.
+The same is likely true for entities.
+
+
+
+How to tracks clients:
+
+	It was suggested that each server keeps a local repo of user profiles. when a user provides a username, the server checks if it exists. If not, it asks you to create a password, and then logs you in as a new player. If the user does already exist, it asks for a password, and if it matches the one in its folder, then it logs the player back in where they left off.
+	Improvements: ask if you're a new or returning user first.
+	This is a nice idea, but it's bound to get annoying with probably different usernames per server, and also terribly insecure and probably overall a bad idea, as people will be entering in what they take as passwords, which is just begging to be abused.
+	
+	I really think perhaps I should just figure out, or ask Shylor about, how to store the data in an online server. It seems like a much better alternative.
+	
