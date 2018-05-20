@@ -17,6 +17,7 @@ import miniventure.game.world.Level;
 import miniventure.game.world.Point;
 import miniventure.game.world.Taggable.Tag;
 import miniventure.game.world.WorldManager;
+import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.Entity.EntityTag;
@@ -408,10 +409,10 @@ public interface GameProtocol {
 	// sent by server to tell clients to use blinking rendering.
 	class Hurt {
 		public final float power; // this is 0 to 1, used to determine knockback. (It's really the percent of health taken off.)
-		public final Tag source, target;
+		public final Tag<? extends WorldObject> source, target;
 		
 		private Hurt() { this(null, null, 0); }
-		public Hurt(Tag source, Tag target, float healthPercent) {
+		public Hurt(Tag<? extends WorldObject> source, Tag<? extends WorldObject> target, float healthPercent) {
 			this.source = source;
 			this.target = target;
 			this.power = healthPercent;
