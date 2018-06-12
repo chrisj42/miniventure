@@ -10,6 +10,7 @@ import java.util.List;
 
 import miniventure.game.chat.MessageBuilder;
 import miniventure.game.server.ServerCore;
+import miniventure.game.util.MyUtils;
 import miniventure.game.world.entity.mob.ServerPlayer;
 
 import org.jetbrains.annotations.Nullable;
@@ -38,10 +39,7 @@ public class CommandInputParser implements Runnable {
 			String input = "";
 			try {
 				while(shouldRun && !in.ready()) {
-					try {
-						Thread.sleep(5);
-					} catch(InterruptedException ignored) {
-					}
+					MyUtils.sleep(5);
 				}
 				if(!shouldRun) break;
 				input = in.readLine();

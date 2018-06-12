@@ -7,6 +7,7 @@ import miniventure.game.client.ClientCore;
 import miniventure.game.client.ClientWorld;
 import miniventure.game.client.DisplayLevel;
 import miniventure.game.client.LevelViewport;
+import miniventure.game.util.VersionInfo;
 import miniventure.game.world.TimeOfDay;
 import miniventure.game.world.levelgen.LevelGenerator;
 
@@ -20,8 +21,11 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
+import com.kotcrab.vis.ui.widget.LinkLabel.LinkLabelStyle;
 import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisTextButton;
+
+import org.jetbrains.annotations.NotNull;
 
 public class MainMenu extends MenuScreen {
 	
@@ -42,12 +46,16 @@ public class MainMenu extends MenuScreen {
 		ClientWorld world = ClientCore.getWorld();
 		
 		table = new Table();
+		// table.setDebug(true);
 		addLabel("Welcome to Miniventure!", 20);
-		addLabel("You are playing version " + GameCore.VERSION, 15);
+		addLabel("You are playing version " + GameCore.VERSION, 25);
 		
-		VisTextButton button = new VisTextButton("Play");
+		VisLabel updateLabel = addLabel("Checking for higher versions...", 45);
+		setVersionUpdateLabel(updateLabel);
 		
-		button.addListener(new ClickListener() {
+		VisTextButton playButton = new VisTextButton("Play");
+		
+		playButton.addListener(new ClickListener() {
 			@Override
 			public void clicked(InputEvent e, float x, float y) {
 				if(dialog) return;
@@ -55,10 +63,8 @@ public class MainMenu extends MenuScreen {
 			}
 		});
 		
-		table.setPosition(getWidth()/2, getHeight()*2/3, Align.center);
-		
-		addActor(table);
-		table.add(button);
+		table.add(playButton).spaceBottom(20);
+		table.row();
 		
 		VisTextButton joinBtn = new VisTextButton("Join Server");
 		joinBtn.addListener(new ClickListener() {
@@ -82,14 +88,13 @@ public class MainMenu extends MenuScreen {
 			}
 		});
 		
-		table.row();
-		table.add(joinBtn);
-		table.row().space(20);
+		table.add(joinBtn).spaceBottom(20).row();
 		
 		VisTextButton helpBtn = makeButton("Instructions", () -> ClientCore.setScreen(new InstructionsScreen()));
-		table.add(helpBtn).row();
+		table.add(helpBtn).spaceBottom(20).row();
 		
-		table.setPosition(getWidth()/2, getHeight()/2);
+		addActor(table);
+		table.setPosition(getWidth()/2, getHeight()/2, Align.center);
 		
 		// setup level scrolling in background
 		
@@ -139,9 +144,40 @@ public class MainMenu extends MenuScreen {
 		
 		return vel;
 	}
-		
-	private void addLabel(String msg, int spacing) {
-		table.add(new VisLabel(msg, new LabelStyle(GameCore.getFont(), Color.WHITE)));
-		table.row().space(spacing);
+	
+	@NotNull
+	private VisLabel addLabel(String msg, int spacing) {
+		VisLabel label = makeLabel(msg);
+		table.add(label).spaceBottom(spacing);
+		table.row();
+		return label;
+	}
+	
+	@NotNull
+	private VisLabel makeLabel(String text) {
+		return new VisLabel(text, new LabelStyle(GameCore.getFont(), Color.WHITE));
+	}
+	
+	private void setVersionUpdateLabel(VisLabel label) {
+		if(!GameCore.determinedLatestVersion()) {
+			// return a "loading" label that will be replaced once the version check completes.
+			new Thread(() -> {
+				GameCore.getLatestVersion();
+				setVersionUpdateLabel(label);
+			}).start();
+		}
+		else {
+			// add a message saying you have the latest version, or a hyperlink message to the newest jar file.
+			VersionInfo latestVersion = GameCore.getLatestVersion();
+			if(latestVersion.version.compareTo(GameCore.VERSION) > 0) // link new version
+				table.getCell(label).setActor(new MyLinkLabel("Miniventure " + latestVersion.releaseName + " Now Available! Click here to download.", latestVersion.assetUrl, new LinkLabelStyle(GameCore.getFont(), Color.SKY, new ColorRect(Color.SKY))));
+			else if(latestVersion.releaseName.length() > 0)
+				label.setText("You have the latest version.");
+			else
+				label.setText("Connection failed, could not check for updates.");
+			
+			table.pack();
+			table.setPosition(getWidth()/2, getHeight()/2, Align.center);
+		}
 	}
 }

@@ -4,6 +4,8 @@ import java.util.Arrays;
 
 import miniventure.game.GameCore;
 import miniventure.game.chat.command.CommandInputParser;
+import miniventure.game.util.MyUtils;
+import miniventure.game.util.VersionInfo;
 
 public class ServerCore {
 	
@@ -35,6 +37,13 @@ public class ServerCore {
 		}
 		else {
 			System.out.println("server ready");
+			if(!GameCore.determinedLatestVersion())
+				System.out.println("Checking for newer versions...");
+			VersionInfo info = GameCore.getLatestVersion();
+			if(info.version.compareTo(GameCore.VERSION) > 0) {
+				// there's a newer version
+				System.out.println("Newer game version found: "+info.version+". Download the jar file here: "+info.assetUrl);
+			}
 			run();
 		}
 	}
@@ -95,9 +104,7 @@ public class ServerCore {
 			
 			lastNow = now;
 			
-			try {
-				Thread.sleep(10);
-			} catch(InterruptedException ignored) {}
+			MyUtils.sleep(10);
 		}
 		
 		commandParser.end();

@@ -191,4 +191,11 @@ public class MyUtils {
 	public static float mod(float num, float mod) { return (num % mod + mod) % mod; }
 	//public static long mod(long num, long mod) { return (num % mod + mod) % mod; }
 	//public static double mod(double num, double mod) { return (num % mod + mod) % mod; }
+	
+	public static void sleep(int millis) {
+		try {
+			Thread.sleep(millis);
+		} catch (InterruptedException ignored) {
+		}
+	}
 }

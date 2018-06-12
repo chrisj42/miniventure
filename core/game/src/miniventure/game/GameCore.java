@@ -5,6 +5,7 @@ import java.util.HashMap;
 import miniventure.game.texture.TextureAtlasHolder;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.Version;
+import miniventure.game.util.VersionInfo;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl.LwjglFiles;
@@ -21,6 +22,12 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas.TextureAtlasData.Region;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.JsonNode;
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
+
+import org.jetbrains.annotations.NotNull;
 
 public class GameCore {
 	
@@ -136,4 +143,30 @@ public class GameCore {
 	}
 	
 	public static float getElapsedProgramTime() { return (System.nanoTime() - START_TIME)/1E9f; }
+	
+	
+	private static VersionInfo latestVersion = null;
+	
+	public static boolean determinedLatestVersion() { return latestVersion != null; }
+	@NotNull
+	public static VersionInfo getLatestVersion() {
+		if(latestVersion != null)
+			return latestVersion;
+		
+		// fetch the latest version from github
+		try {
+			HttpResponse<JsonNode> response = Unirest.get("https://api.github.com/repos/chrisj42/miniventure/releases").asJson();
+			if(response.getStatus() != 200) {
+				System.err.println("version request returned status code "+response.getStatus()+": "+response.getStatusText());
+				System.err.println("response body: "+response.getBody());
+				return latestVersion = new VersionInfo(VERSION, "", "");
+			}
+			else {
+				return latestVersion = new VersionInfo(response.getBody().getArray().getJSONObject(0));
+			}
+		} catch(UnirestException e) {
+			e.printStackTrace();
+			return latestVersion = new VersionInfo(VERSION, "", "");
+		}
+	}
 }

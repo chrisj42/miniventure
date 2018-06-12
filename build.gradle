@@ -9,6 +9,7 @@ allprojects {
 		box2DLightsVersion = '1.4'
 		ashleyVersion = '1.7.3'
 		aiVersion = '1.8.0'
+		unirestVersion = '1.4.9'
 	}
 	
 	repositories {
@@ -27,26 +28,24 @@ project(":core:game") {
 		compile "com.badlogicgames.gdx:gdx:$gdxVersion"
 		compile "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
 		compile "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
-		compile "com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion"
-		compile "com.badlogicgames.ashley:ashley:$ashleyVersion"
+		//compile "com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion"
+		//compile "com.badlogicgames.ashley:ashley:$ashleyVersion"
 		compile "net.openhft:zero-allocation-hashing:0.8"
-		compile "com.kotcrab.vis:vis-ui:1.4.0"
 		compile "com.esotericsoftware:kryonet:2.22.0-RC1"
+		compile "com.mashape.unirest:unirest-java:$unirestVersion"
 	}
 }
 
 project(":core:client") {
 	dependencies {
 		compile project(":core:game")
-		compile "com.badlogicgames.gdx:gdx:$gdxVersion"
-		compile "com.esotericsoftware:kryonet:2.22.0-RC1"
+		compile "com.kotcrab.vis:vis-ui:1.4.0"
 	}
 }
 
 project(":core:server") {
 	dependencies {
 		compile project(":core:game")
-		compile "com.esotericsoftware:kryonet:2.22.0-RC1"
 	}
 }
 

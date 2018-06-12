@@ -1,33 +1,15 @@
 package miniventure.game.screen;
 
-import miniventure.game.util.MyUtils;
-
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 
-public class ColorBackground implements Drawable {
+public class ColorBackground extends ColorDrawable {
 	
-	private Color color;
 	private Actor actor;
 	
 	public ColorBackground(Actor actor, Color color) {
-		this.color = color;
+		super(color);
 		this.actor = actor;
-	}
-	
-	@Override
-	public void draw(Batch batch, float x, float y, float width, float height) {
-		MyUtils.fillRect(x, y, width, height, color.cpy().mul(batch.getColor()), batch);
-	}
-	
-	public Color getColor() {
-		return color;
-	}
-	
-	public void setColor(Color color) {
-		this.color = color;
 	}
 	
 	public Actor getActor() {
@@ -44,9 +26,7 @@ public class ColorBackground implements Drawable {
 	}
 	
 	@Override
-	public void setLeftWidth(float leftWidth) {
-		
-	}
+	public void setLeftWidth(float leftWidth) { }
 	
 	@Override
 	public float getRightWidth() {
@@ -54,9 +34,7 @@ public class ColorBackground implements Drawable {
 	}
 	
 	@Override
-	public void setRightWidth(float rightWidth) {
-		
-	}
+	public void setRightWidth(float rightWidth) { }
 	
 	@Override
 	public float getTopHeight() {
@@ -64,9 +42,7 @@ public class ColorBackground implements Drawable {
 	}
 	
 	@Override
-	public void setTopHeight(float topHeight) {
-		
-	}
+	public void setTopHeight(float topHeight) { }
 	
 	@Override
 	public float getBottomHeight() {
@@ -74,9 +50,7 @@ public class ColorBackground implements Drawable {
 	}
 	
 	@Override
-	public void setBottomHeight(float bottomHeight) {
-		
-	}
+	public void setBottomHeight(float bottomHeight) { }
 	
 	@Override
 	public float getMinWidth() {
@@ -84,9 +58,7 @@ public class ColorBackground implements Drawable {
 	}
 	
 	@Override
-	public void setMinWidth(float minWidth) {
-		
-	}
+	public void setMinWidth(float minWidth) { }
 	
 	@Override
 	public float getMinHeight() {
@@ -94,7 +66,5 @@ public class ColorBackground implements Drawable {
 	}
 	
 	@Override
-	public void setMinHeight(float minHeight) {
-		
-	}
+	public void setMinHeight(float minHeight) { }
 }

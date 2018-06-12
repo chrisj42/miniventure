@@ -1,8 +1,7 @@
-next steps, for sure:
+next steps:
 
 - make menus with new menu system, including world creation menu and world loading menu
 - actually do saving to and loading from file when loading worlds and world chunks (and entities) in server.
-- auto-updater
 
 ---------
 to-do list
