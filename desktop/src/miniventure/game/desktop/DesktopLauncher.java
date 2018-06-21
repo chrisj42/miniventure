@@ -12,7 +12,7 @@ public class DesktopLauncher {
 	/**
 	 * Main method for run the application
 	 * 
-	 * @param args
+	 * @param args arguments of application
 	 */
 	public static void main (String[] args) {
 		boolean server = false;
