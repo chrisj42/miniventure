@@ -1,5 +1,11 @@
+---
+
 mob sprites, tool sprites, furnace, loom, fishing, floor tiles including carpets, chests, ores in the middle of rock formations.
 Note that item sprites should be 16x16.
+
+---
+
+If you try to craft something, and you have multiple, different items which satisfy the requirements, a window will pop up asking you which of the items you want to use.
 
 ---
 
