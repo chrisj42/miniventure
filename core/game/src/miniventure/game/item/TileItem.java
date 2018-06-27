@@ -21,7 +21,7 @@ public class TileItem extends Item {
 	private static final HashMap<TileType, TileItem> items = new HashMap<>();
 	
 	private static final TileType[] groundTypes = new TileType[] {
-		TileType.GRASS, TileType.DIRT, TileType.SAND
+		TileType.GRASS, TileType.DIRT, TileType.SAND, TileType.STONE_FLOOR
 	};
 	
 	private static void addItem(TileType result, TileType... canPlaceOn) {

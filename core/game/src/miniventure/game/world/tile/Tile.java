@@ -251,12 +251,7 @@ public class Tile implements WorldObject {
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {}
 	
 	
-	public void tick() {
-		for(TileType type: tileTypes) {// goes from bottom to top
-			if(!(type == getType() && getProp(type, TilePropertyType.Transition).playingAnimation(this))) // only update main tile if not transitioning.
-				getProp(type, TilePropertyType.Tick).tick(this);
-		}
-	}
+	public void tick() {}
 	
 	public boolean update(float delta, boolean initial) {
 		TransitionProperty transProp = getProp(getType(), TilePropertyType.Transition);

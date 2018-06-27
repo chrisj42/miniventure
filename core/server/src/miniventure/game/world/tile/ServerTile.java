@@ -31,6 +31,14 @@ public class ServerTile extends Tile {
 	}
 	
 	@Override
+	public void tick() {
+		for(TileType type: getTypes()) {// goes from bottom to top
+			if(!(type == getType() && getProp(type, TilePropertyType.Transition).playingAnimation(this))) // only update main tile if not transitioning.
+				getProp(type, TilePropertyType.Tick).tick(this);
+		}
+	}
+	
+	@Override
 	public boolean update(float delta, boolean initial) {
 		boolean shouldUpdate = super.update(delta, initial);
 		TileType startType = getType();

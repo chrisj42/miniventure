@@ -43,7 +43,7 @@ public enum TileType {
 		map.put(Solid, SolidProperty.get(tileType, false));
 		map.put(Attack, new DestructibleBuilder(tileType, 1, false).require(new RequiredTool(ToolType.Shovel)).make());
 		map.put(Overlap, new OverlapProperty(tileType, true));
-		map.put(Tick, new SpreadTickProperty(tileType, (newType, tile) -> tile.replaceTile(newType), DIRT));
+		map.put(Tick, new SpreadTickProperty(tileType, (newType, tile) -> tile.addTile(newType), DIRT));
 	}),
 	
 	WATER((tileType, map) -> {
@@ -60,6 +60,7 @@ public enum TileType {
 	STONE_FLOOR((tileType, map) -> {
 		map.put(Solid, SolidProperty.get(tileType, false));
 		map.put(Attack, new DestructibleProperty(tileType, new RequiredTool(ToolType.Pickaxe)));
+		map.put(Connect, new ConnectionProperty(tileType, true));
 	}),
 	
 	WOOD_WALL(((tileType, map) -> {
