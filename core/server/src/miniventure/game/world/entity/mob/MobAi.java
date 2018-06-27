@@ -41,7 +41,7 @@ public class MobAi extends ServerMob {
 	private float tempTimeLeft = 0;
 	
 	public MobAi(@NotNull AiType aiType) {
-		super("mob", aiType.health);
+		super(aiType.name().toLowerCase(), aiType.health);
 		this.aiType = aiType;
 		this.itemDrops = aiType.deathDrops;
 		this.movePattern = aiType.defaultPattern.copy();

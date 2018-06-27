@@ -3,4 +3,5 @@
 	v1:
 		+ Added an update checker
 		* Fixed a bunch of bugs
+		+ Added pig sprites
 		

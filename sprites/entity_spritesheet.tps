@@ -4,9 +4,7 @@
         <key>fileFormatVersion</key>
         <int>4</int>
         <key>texturePackerVersion</key>
-        <string>4.6.2</string>
-        <key>fileName</key>
-        <string>/home/chris/Documents/minicraft/miniventure/sprites/entity_spritesheet.tps</string>
+        <string>4.8.1</string>
         <key>autoSDSettings</key>
         <array>
             <struct type="AutoSDSettings">
@@ -129,22 +127,6 @@
                 <uint>1</uint>
             </struct>
         </struct>
-        <key>andEngine</key>
-        <struct type="AndEngine">
-            <key>minFilter</key>
-            <enum type="AndEngine::MinFilter">Linear</enum>
-            <key>packageName</key>
-            <string>Texture</string>
-            <key>wrap</key>
-            <struct type="AndEngineWrap">
-                <key>s</key>
-                <enum type="AndEngineWrap::Wrap">Clamp</enum>
-                <key>t</key>
-                <enum type="AndEngineWrap::Wrap">Clamp</enum>
-            </struct>
-            <key>magFilter</key>
-            <enum type="AndEngine::MagFilter">MagLinear</enum>
-        </struct>
         <key>dataFileNames</key>
         <map type="GFileNameMap">
             <key>data</key>
@@ -199,18 +181,30 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
-            <key type="filename">entity-sprites/mob/idle-down_1.png</key>
-            <key type="filename">entity-sprites/mob/idle-left_1.png</key>
-            <key type="filename">entity-sprites/mob/idle-right_1.png</key>
-            <key type="filename">entity-sprites/mob/idle-up_1.png</key>
-            <key type="filename">entity-sprites/mob/walk-down_1.png</key>
-            <key type="filename">entity-sprites/mob/walk-down_2.png</key>
-            <key type="filename">entity-sprites/mob/walk-left_1.png</key>
-            <key type="filename">entity-sprites/mob/walk-left_2.png</key>
-            <key type="filename">entity-sprites/mob/walk-right_1.png</key>
-            <key type="filename">entity-sprites/mob/walk-right_2.png</key>
-            <key type="filename">entity-sprites/mob/walk-up_1.png</key>
-            <key type="filename">entity-sprites/mob/walk-up_2.png</key>
+            <key type="filename">entity-sprites/cow/idle-down_1.png</key>
+            <key type="filename">entity-sprites/cow/idle-left_1.png</key>
+            <key type="filename">entity-sprites/cow/idle-right_1.png</key>
+            <key type="filename">entity-sprites/cow/idle-up_1.png</key>
+            <key type="filename">entity-sprites/cow/walk-down_1.png</key>
+            <key type="filename">entity-sprites/cow/walk-down_2.png</key>
+            <key type="filename">entity-sprites/cow/walk-left_1.png</key>
+            <key type="filename">entity-sprites/cow/walk-left_2.png</key>
+            <key type="filename">entity-sprites/cow/walk-right_1.png</key>
+            <key type="filename">entity-sprites/cow/walk-right_2.png</key>
+            <key type="filename">entity-sprites/cow/walk-up_1.png</key>
+            <key type="filename">entity-sprites/cow/walk-up_2.png</key>
+            <key type="filename">entity-sprites/crocodile/idle-down_1.png</key>
+            <key type="filename">entity-sprites/crocodile/idle-left_1.png</key>
+            <key type="filename">entity-sprites/crocodile/idle-right_1.png</key>
+            <key type="filename">entity-sprites/crocodile/idle-up_1.png</key>
+            <key type="filename">entity-sprites/crocodile/walk-down_1.png</key>
+            <key type="filename">entity-sprites/crocodile/walk-down_2.png</key>
+            <key type="filename">entity-sprites/crocodile/walk-left_1.png</key>
+            <key type="filename">entity-sprites/crocodile/walk-left_2.png</key>
+            <key type="filename">entity-sprites/crocodile/walk-right_1.png</key>
+            <key type="filename">entity-sprites/crocodile/walk-right_2.png</key>
+            <key type="filename">entity-sprites/crocodile/walk-up_1.png</key>
+            <key type="filename">entity-sprites/crocodile/walk-up_2.png</key>
             <key type="filename">entity-sprites/player/idle-down_1.png</key>
             <key type="filename">entity-sprites/player/idle-left_1.png</key>
             <key type="filename">entity-sprites/player/idle-right_1.png</key>
@@ -223,6 +217,18 @@
             <key type="filename">entity-sprites/player/walk-right_2.png</key>
             <key type="filename">entity-sprites/player/walk-up_1.png</key>
             <key type="filename">entity-sprites/player/walk-up_2.png</key>
+            <key type="filename">entity-sprites/zombie/idle-down_1.png</key>
+            <key type="filename">entity-sprites/zombie/idle-left_1.png</key>
+            <key type="filename">entity-sprites/zombie/idle-right_1.png</key>
+            <key type="filename">entity-sprites/zombie/idle-up_1.png</key>
+            <key type="filename">entity-sprites/zombie/walk-down_1.png</key>
+            <key type="filename">entity-sprites/zombie/walk-down_2.png</key>
+            <key type="filename">entity-sprites/zombie/walk-left_1.png</key>
+            <key type="filename">entity-sprites/zombie/walk-left_2.png</key>
+            <key type="filename">entity-sprites/zombie/walk-right_1.png</key>
+            <key type="filename">entity-sprites/zombie/walk-right_2.png</key>
+            <key type="filename">entity-sprites/zombie/walk-up_1.png</key>
+            <key type="filename">entity-sprites/zombie/walk-up_2.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -319,6 +325,58 @@
                 <rect>8,8,16,16</rect>
                 <key>scale9Paddings</key>
                 <rect>8,8,16,16</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">entity-sprites/pig/idle-down_1.png</key>
+            <key type="filename">entity-sprites/pig/idle-up_1.png</key>
+            <key type="filename">entity-sprites/pig/walk-down_1.png</key>
+            <key type="filename">entity-sprites/pig/walk-down_2.png</key>
+            <key type="filename">entity-sprites/pig/walk-down_3.png</key>
+            <key type="filename">entity-sprites/pig/walk-down_4.png</key>
+            <key type="filename">entity-sprites/pig/walk-down_5.png</key>
+            <key type="filename">entity-sprites/pig/walk-down_6.png</key>
+            <key type="filename">entity-sprites/pig/walk-up_1.png</key>
+            <key type="filename">entity-sprites/pig/walk-up_2.png</key>
+            <key type="filename">entity-sprites/pig/walk-up_3.png</key>
+            <key type="filename">entity-sprites/pig/walk-up_4.png</key>
+            <key type="filename">entity-sprites/pig/walk-up_5.png</key>
+            <key type="filename">entity-sprites/pig/walk-up_6.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>5,7,10,13</rect>
+                <key>scale9Paddings</key>
+                <rect>5,7,10,13</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">entity-sprites/pig/idle-left_1.png</key>
+            <key type="filename">entity-sprites/pig/idle-right_1.png</key>
+            <key type="filename">entity-sprites/pig/walk-left_1.png</key>
+            <key type="filename">entity-sprites/pig/walk-left_2.png</key>
+            <key type="filename">entity-sprites/pig/walk-left_3.png</key>
+            <key type="filename">entity-sprites/pig/walk-left_4.png</key>
+            <key type="filename">entity-sprites/pig/walk-left_5.png</key>
+            <key type="filename">entity-sprites/pig/walk-left_6.png</key>
+            <key type="filename">entity-sprites/pig/walk-right_1.png</key>
+            <key type="filename">entity-sprites/pig/walk-right_2.png</key>
+            <key type="filename">entity-sprites/pig/walk-right_3.png</key>
+            <key type="filename">entity-sprites/pig/walk-right_4.png</key>
+            <key type="filename">entity-sprites/pig/walk-right_5.png</key>
+            <key type="filename">entity-sprites/pig/walk-right_6.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>7,7,15,13</rect>
+                <key>scale9Paddings</key>
+                <rect>7,7,15,13</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
