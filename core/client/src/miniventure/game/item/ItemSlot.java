@@ -84,7 +84,7 @@ public class ItemSlot extends Actor {
 				font.setColor(getTextColor());
 				float yo = font.getDescent();
 				yo = yo + (getHeight() - font.getDescent() + font.getCapHeight() + font.getAscent()) / 2;
-				font.draw(batch, item.getName(), getX()+Item.ICON_SIZE+2+SPACING+ XPADDING, getY()+yo+YPADDING);
+				font.draw(batch, item.getName().replace("_", " "), getX()+Item.ICON_SIZE+2+SPACING+ XPADDING, getY()+yo+YPADDING);
 			}
 		}
 	}

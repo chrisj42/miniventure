@@ -24,13 +24,16 @@ public class MyUtils {
 	}
 	
 	public static String toTitleCase(String string) {
-		String[] words = string.split(" ");
+		return toTitleCase(toTitleCase(string, ""), "_");
+	}
+	public static String toTitleCase(String string, String delimiter) {
+		String[] words = string.split(delimiter);
 		for(int i = 0; i < words.length; i++) {
 			if(words[i].length() == 0) continue;
 			words[i] = words[i].substring(0, 1).toUpperCase() + words[i].substring(1).toLowerCase();
 		}
 		
-		return String.join(" ", words);
+		return String.join(delimiter, words);
 	}
 	
 	public static String encodeStringArray(String... strings) { return encodeStringArray(strings, '(', ')',','); }
