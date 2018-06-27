@@ -4,9 +4,7 @@
         <key>fileFormatVersion</key>
         <int>4</int>
         <key>texturePackerVersion</key>
-        <string>4.6.3</string>
-        <key>fileName</key>
-        <string>/home/chris/Documents/minicraft/miniventure/sprites/tile_spritesheet.tps</string>
+        <string>4.8.1</string>
         <key>autoSDSettings</key>
         <array>
             <struct type="AutoSDSettings">
@@ -273,6 +271,53 @@
             <key type="filename">tile-sprites/sand/o17.png</key>
             <key type="filename">tile-sprites/sand/o18.png</key>
             <key type="filename">tile-sprites/stone/00.png</key>
+            <key type="filename">tile-sprites/stone_floor/00.png</key>
+            <key type="filename">tile-sprites/stone_floor/01.png</key>
+            <key type="filename">tile-sprites/stone_floor/02.png</key>
+            <key type="filename">tile-sprites/stone_floor/03.png</key>
+            <key type="filename">tile-sprites/stone_floor/04.png</key>
+            <key type="filename">tile-sprites/stone_floor/05.png</key>
+            <key type="filename">tile-sprites/stone_floor/06.png</key>
+            <key type="filename">tile-sprites/stone_floor/07.png</key>
+            <key type="filename">tile-sprites/stone_floor/08.png</key>
+            <key type="filename">tile-sprites/stone_floor/09.png</key>
+            <key type="filename">tile-sprites/stone_floor/10.png</key>
+            <key type="filename">tile-sprites/stone_floor/11.png</key>
+            <key type="filename">tile-sprites/stone_floor/12.png</key>
+            <key type="filename">tile-sprites/stone_floor/13.png</key>
+            <key type="filename">tile-sprites/stone_floor/14.png</key>
+            <key type="filename">tile-sprites/stone_floor/15.png</key>
+            <key type="filename">tile-sprites/stone_floor/16.png</key>
+            <key type="filename">tile-sprites/stone_floor/17.png</key>
+            <key type="filename">tile-sprites/stone_floor/18.png</key>
+            <key type="filename">tile-sprites/stone_floor/19.png</key>
+            <key type="filename">tile-sprites/stone_floor/20.png</key>
+            <key type="filename">tile-sprites/stone_floor/21.png</key>
+            <key type="filename">tile-sprites/stone_floor/22.png</key>
+            <key type="filename">tile-sprites/stone_floor/23.png</key>
+            <key type="filename">tile-sprites/stone_floor/24.png</key>
+            <key type="filename">tile-sprites/stone_floor/25.png</key>
+            <key type="filename">tile-sprites/stone_floor/26.png</key>
+            <key type="filename">tile-sprites/stone_floor/27.png</key>
+            <key type="filename">tile-sprites/stone_floor/28.png</key>
+            <key type="filename">tile-sprites/stone_floor/29.png</key>
+            <key type="filename">tile-sprites/stone_floor/30.png</key>
+            <key type="filename">tile-sprites/stone_floor/31.png</key>
+            <key type="filename">tile-sprites/stone_floor/32.png</key>
+            <key type="filename">tile-sprites/stone_floor/33.png</key>
+            <key type="filename">tile-sprites/stone_floor/34.png</key>
+            <key type="filename">tile-sprites/stone_floor/35.png</key>
+            <key type="filename">tile-sprites/stone_floor/36.png</key>
+            <key type="filename">tile-sprites/stone_floor/37.png</key>
+            <key type="filename">tile-sprites/stone_floor/38.png</key>
+            <key type="filename">tile-sprites/stone_floor/39.png</key>
+            <key type="filename">tile-sprites/stone_floor/40.png</key>
+            <key type="filename">tile-sprites/stone_floor/41.png</key>
+            <key type="filename">tile-sprites/stone_floor/42.png</key>
+            <key type="filename">tile-sprites/stone_floor/43.png</key>
+            <key type="filename">tile-sprites/stone_floor/44.png</key>
+            <key type="filename">tile-sprites/stone_floor/45.png</key>
+            <key type="filename">tile-sprites/stone_floor/46.png</key>
             <key type="filename">tile-sprites/stone_wall/00.png</key>
             <key type="filename">tile-sprites/tree/00.png</key>
             <key type="filename">tile-sprites/tree/01.png</key>

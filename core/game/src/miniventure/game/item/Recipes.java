@@ -58,6 +58,10 @@ public class Recipes {
 		
 		new Recipe(TileItem.get(TileType.STONE_WALL),
 			new ItemStack(TileItem.get(TileType.STONE), 3)
+		),
+		
+		new Recipe(TileItem.get(TileType.STONE_FLOOR),
+			new ItemStack(TileItem.get(TileType.STONE), 1)
 		)
 	};
 }

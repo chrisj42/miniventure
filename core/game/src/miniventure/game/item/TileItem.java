@@ -40,6 +40,8 @@ public class TileItem extends Item {
 		
 		items.put(TileType.DOOR_CLOSED, new TileItem("Door", GameCore.tileAtlas.findRegion("door_closed/00"), TileType.DOOR_CLOSED, groundTypes));
 		items.put(TileType.DOOR_OPEN, items.get(TileType.DOOR_CLOSED));
+		
+		addItem(TileType.STONE_FLOOR, TileType.HOLE/*, TileType.DIRT*/);
 	}
 	
 	@NotNull
