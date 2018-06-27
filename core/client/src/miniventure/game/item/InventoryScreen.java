@@ -1,5 +1,6 @@
 package miniventure.game.item;
 
+import miniventure.game.GameProtocol.ItemDropRequest;
 import miniventure.game.client.ClientCore;
 import miniventure.game.screen.MenuScreen;
 
@@ -56,7 +57,18 @@ public class InventoryScreen extends MenuScreen {
 				}
 				
 				if(keycode == Keys.Q) {
-					hands.dropInvItems(getSelectedItem(), Gdx.input.isKeyPressed(Keys.SHIFT_LEFT));
+					if(Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)) {
+						Item item = getSelectedItem();
+						hands.dropInvItems(item, true);
+						Item[] items = inventory.getItems();
+						for(int i = 0; i < items.length; i++)
+							table.update(i, items[i]);
+					} else {
+						// remove the highlighted item only
+						Item removed = inventory.replaceItemAt(table.getSelection(), new HandItem());
+						ClientCore.getClient().send(new ItemDropRequest(new ItemStack(removed, 1)));
+						table.updateSelected(getSelectedItem());
+					}
 				}
 				
 				return false;
