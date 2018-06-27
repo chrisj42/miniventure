@@ -1,0 +1,48 @@
+Note: make sprites/ui folder.
+
+Use RelPos like before, but treat menu items and menus similarly. That is, if you want to group items in a list, then you group them in a type of group, with a RelPos. These groups can also be grouped, each with a RelPos.
+
+The only little issue here is keyboard focus. That actually shouldn't be an issue, though: the focus will start on the main group, and then you can choose a subgroup with the arrow keys, and you can press enter to select one. At that point, the keys traverse the subgroup's groups. Escape moves the focus out one. This progresses until you reach menu items, though technically it could progress further.
+
+Any of these components could be made not focusable, in which case the focus selection will skip over them.
+
+Within a given group, focus travels in a sensible direction; if horizontal, then left/right keys; if vertical, then up/down keys; if grid, then both.
+
+The main thing I have to worry about, then, is making sure the user knows when something is out of focus.
+
+
+
+Basic class structure / inheritance:
+
+- Component extends Actor: selectable, relpos positioning, parent component, onselect, background rendering, size, input management
+
+- Container extends Component - child components, layout of child components, hotkeys. Input used to select a child component. Note, if only one child component is selectable, then it is automatically selected. If no child components are selectable, then the container is not selectable either.
+
+- Label extends Component - displays a string.
+- Button extends Container - contains label, has onselect action. Has render state for pressed and not pressed.
+- TextField extends Component - contains a field of text you can type in.
+- OptionPicker extends Component - can select one of a list of options.
+
+- Labeler extends Container - adds a label next to a component (takes a string, RelPos, and component; or default RelPos to LEFT).
+
+
+Key presses: component can specify hotkeys that will activate them in the hierarchy when a child component has focus, and doesn't use the event
+
+
+Component render method: has batch, configured to component pos offset if poss.
+Also has alpha, to fade out components that are not active.
+Outline will be drawn around currently selected component, unless the component specifies not to be outlined, in which case it will remain on the parent.
+
+When a container is highlighted, all child components render at full opacity. It is only once the container is selected that the sibling components lose opacity.
+If a container only has one selectable component, then the non-selectable sibling components should not lose opacity when the one is selected.
+
+
+
+
+notes from feature todo list:
+
+Improve UI system? Might scrap Scene2D. This also includes making a font for miniventure. And a background for menus and item lists. An options menu with music/sound volume and controls wouldn't be a bad idea. This will include an option to choose control style: keyboard only, or keyboard and mouse. The controls submenu will differ depending on this choice.
+Another thing to consider here: integrated tutorial? Displays general controls on world start. Can disable tutorials in the options menu.
+Note that the tutorial would not only consist of telling the controls, but it would also explain what to do to some degree. It would popup at key moments, triggered by trying to start a tile blueprint, or placing down furniture... It might just display a message over various entities/tiles though.
+One last thing this ought to include: health bars for tiles. They show up when you deal damage, and stay for a second or so after you stop before disappearing.
+Credits menu!

@@ -1,3 +1,6 @@
+mob sprites, tool sprites, furnace, loom, fishing, floor tiles including carpets, chests, ores in the middle of rock formations.
+Note that item sprites should be 16x16.
+
 ---
 
 failed interaction animation - player should show indication of failed interaction.
@@ -5,6 +8,18 @@ failed interaction animation - player should show indication of failed interacti
 ---
 
 Add a highlight to whatever the player *will* interact with if the attack or interact keys are pressed. Maybe overlay the sprite with a translucent white color.
+
+---
+
+backpacks, to allow for extra storage on your person. They function as extra inventory from the exact slot that they are put in. They can also be categorized, so only certain items can be placed inside. It might make sense for this to be represented as a piece if furniture, just so putting it down doesn't have the possibility of it disappearing with all your items, relatively quickly. And btw, having backpacks means chests cannot be stored in your inventory if they have anything in them.
+
+---
+
+ice tile
+
+---
+
+farming, and more foods like apples, ‎different meats, bread, rice, ‎soups and pastries. maybe other crops too.
 
 ---
 

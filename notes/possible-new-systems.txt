@@ -1,3 +1,5 @@
+An integrated tutorial for first-time players. Pops up at key points to tell you how to do certain things. Consists of text being drawn places on screen, maybe some arrows, and highlighted screen areas.
+
 ****
 
 why not give the player an animation holding items? Or better, use the item's sprite, and just draw it in the player's hand, in each of the player's positions. It's a possible idea, but I'm skeptical.
@@ -9,7 +11,16 @@ Dither effect around the edges, perhaps.
 
 ****
 
-Make a way to be sure I'm seeing what the server is seeing.
+spells?
+
+****
+
+lasers as a form of energy transport. Wiring could be a thing too, I suppose.
+
+****
+
+level system; note that levels will not solely be identified by depth (though the core ones will), levels can also be tied to a portal of sorts, like a house door or something. I just need a way to identify them more easily...
+Then again, maybe I won't need a level system, if I play my cards right with level gen...
 
 ****
 

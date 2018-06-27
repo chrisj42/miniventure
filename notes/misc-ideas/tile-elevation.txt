@@ -1,0 +1,20 @@
+Elevation system, aka new tile layout system. All tiles consist of a base, ground, and surface type. You cannot have one without the one below. So maybe instead I'll just store a list of types per tile..?
+
+Base is usually sedimentary rock, but can be empty or a stair down, or ladder down.
+
+Above base can be air, and if so, but base is sed rock, then liquids will flow onto the tile.
+Otherwise, the ground can be dirt, sand, grass, water, lava. Or wood planks or stuff.
+
+Surface tiles are things that are really above the ground, and as such you tend not to be able to walk on them. This includes trees, stone, walls, and actually stairs or ladders up, vs stairs and ladders down which are considered part of the base layer.
+
+Side result: it wouldn't make sense for a base tile to have anything under it but HOLE.
+All ground tiles should always have the same tiles under them. Unless... I can use data somehow... For things like pipes. 
+
+Just a note, I probably will want to rename what I call a HOLE now, a PIT instead. Because holes bring you to lower levels.
+
+I can probably keep a lot of the current tile handling, escpecially when it comes to rendering, because base tiles are only rendered if there is no ground tile. In order to know whether to call a tile ground, base, or surface, when it is attempted to be placed, I'll probably have a tile property for that.
+
+
+Another feature, this more relating to the concept of "elevation"; could I possibly make something that would make sense for water to flow one way or another? The system above puts all water at the same "height", so it doesn't do the job very well... But I wonder if I could have, like, water on sand, vs water on dirt, or on a hole... etc. It would really be nice, because then I could have more use for water, and make watermills. Pipes I can probably do anyway...
+
+... I wonder if I *should* allow liquid to go down holes and stairs and such, to other levels...

@@ -1,0 +1,69 @@
+To improve hotbar selection: when you select an item in your inventory, you then get to select a hotbar slot to swap it with. Highlighting changes to tell you which is active. Tutorial text the first time.
+
+Try and make miniventure more realistic, for example, instead of being able to hold a bunch of logs in the inventory, which a normal person couldn't hope to lug around, I could make trees fall into a log tile, which can then be chopped for wood chips, which *can* be picked up.
+
+- add moose
+    - deals two hearts of damage
+    - ‎charges in straight line at the player on sight for a distance
+    - ‎drops meat and sometimes bone from the antlers, replacing skeletons.
+    - ‎could have a charging animation
+    - ‎only spawns in forest biome
+
+Add sheep.
+    - good source of wool
+    - ‎their own meat (same preset but different name and texture)
+
+
+Note, I should add a system for tiles so they don't have to constantly determine their sprites, because I'm pretty sure that's quite inefficient. You determine one sprite (or one animation), and keep it that way until the tile or its adjacent tiles are updated.
+
+
+Add "equip" slots for armor... And abilities? Add a skill tree! Needs experience.
+
+Add tech system
+    - UI section
+    - ‎lasers and more
+    - ‎electricity
+    - ‎generators
+    - 
+
+Bigger maps? Smaller biomes? Hmm...
+Boats could happen. They could take stamina too.
+
+Add tile elevation? You can enter a hole tile, provided you have a rope, or ladder, or something. Then the tile is walkable. I'd have to have an upwards sort of rope too, though. But given that, the hole tile defines "levels". Above the hole, you can have ground tiles like sand, dirt, grass, or maybe others, later. Pipes, maybe. But I think I could have the one ground type work fine. I mean, grass could give way to dirt, but sand has to be a straight hole. This gives the dilemma of water, however...
+Maybe... maybe water goes on top of sand..? But then, how would it flow? Oh I know! Two hole tiles. A hole that you can walk in, that appears under most tiles, but then to dig that, you need to hit it with a shovel many times. Maybe call it "sedimentary rock". Then, it will be dug out, and you can't stand in this hole. Water also can't flow into it, and you can't put anything into it either. It's just a hole, that you can put a rope ladder into and go down to the next level. On the floor below, tiles with a hole above them will appear illuminated. You can have further levels, and two rope ladders on the same tile. When you approach a rope ladder, there's a little menu to choose up or down, and you just press the up or down key to choose. Each level you go down, the illumination on tiles with holes above gets darker and darker. On the lowest level, the normal hole reveals a different type of rock, this one being unbreakable.
+
+I could also just have stairs be craftable, using the system below of on-tile placement perhaps. That way you could not have an up and down on the same level. Of course that could work with rope ladders as well. Perhaps rope ladders will take stamina to use, but stairs won't take hardly any.
+
+Speaking of stamina, I could change it up so it functions a bit differently. Instead of a few stamina that recharge quickly, I could have a lot of stamina, that don't recharge quite so fast, so that I could have more range in how much stamina something takes.
+
+At one point, you find a way to get up onto and use the clouds. Or, you just build up, and maybe the clouds are like a special level or something. Idk. Maybe it's ten stories up? Anyway, you can only build a floor above a level if it has a supportive tile underneath, at most 2 tiles away. 
+
+
+Could use a spellbook. It's kind of like an item... When you interact with it in your hand, it opens a menu to choose a spell. Attack to select, interact again to cancel. When you attack with the book, you will use the last selected spell.
+Spells ought to cost something, but I'm not sure what. It could cost lapis or something, but I think it would be cool if you had to charge the book at a table or something. An alternative is that you must have enougb lapis in your inventory to use the spell.
+Btw, the lapis should have to be converted to something else first, like mana, so it takes commitment.
+
+
+Perhaps there should be two sorts if item entities. One type disappears quickly, and the other type lasts a lot longer. The second type could be for most valuable items. Idk if I really wanna do this though... I'm sure there are better ways.
+
+
+Make pregenerated structures.
+
+
+- add torch entrance sprites (and general tile enter/exit animations... As well as tile transitions..?)
+- inc hits for wood tools, and decrease for stone; generally revise durability + damage multipliers
+
+For later:
+- maybe have beds where monsters can wake you up, but tents prevent that
+- maybe make system to allow solid tiles to have custom hitboxes
+- maybe make system to cache tile animations until the tile is updated, to save on CPU time
+
+
+Add little icons in a corner of the screen that show what button to press to attack and interact, and what will happen when you press those buttons, like placing a tile, attacking a mob, sleeping in a bed, etc.
+
+
+There could be an intelligence system. Along with, idk, reading books, you can gain intelligence for certain topics by beating certain bosses, thereby unlocking certain crafting recipes.
+Or maybe, the bosses unlock the certain skills, and then you have to practice them to get better and unlock more recipies regarding that skill.
+
+Add leads
+

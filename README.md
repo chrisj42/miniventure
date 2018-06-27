@@ -7,12 +7,10 @@ As of now, miniventure is still very new and doesn't have many features, but it'
   - Random level generation based on perlin noise
   - Sprite animations and smooth tile transitions
   - basic tool crafting and interactions
-  
-Current goals include:
-  - Adding more mobs
-  - Adding more tiles
-  - Adding more items
-  - Making a level system
+  - an update-checker that tells you when there's a new update available, and gives you the link.
+
+If you want to know what some of the current goals are in terms of development, check out the files in notes/next-projects.
+
 
 Note: for those goals about adding stuff, it's sort of dependent on whether I have any art to depict said stuff... and I suck at art. :P So, if anyone out there is interested in making some sprites for the game, it would be greatly apprecieated. :D
 
