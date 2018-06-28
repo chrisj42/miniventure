@@ -33,21 +33,21 @@ cow/idle-up
   index: 1
 cow/walk-down
   rotate: false
-  xy: 228, 478
+  xy: 238, 206
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
   index: 1
 cow/walk-down
   rotate: false
-  xy: 254, 478
+  xy: 236, 240
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
   index: 2
 cow/walk-left
   rotate: false
-  xy: 280, 192
+  xy: 236, 270
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
@@ -61,7 +61,7 @@ cow/walk-left
   index: 2
 cow/walk-right
   rotate: false
-  xy: 238, 206
+  xy: 236, 300
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
@@ -75,14 +75,14 @@ cow/walk-right
   index: 2
 cow/walk-up
   rotate: false
-  xy: 306, 192
+  xy: 236, 330
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
   index: 1
 cow/walk-up
   rotate: false
-  xy: 332, 192
+  xy: 238, 360
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
@@ -117,21 +117,21 @@ crocodile/idle-up
   index: 1
 crocodile/walk-down
   rotate: false
-  xy: 228, 478
+  xy: 238, 206
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
   index: 1
 crocodile/walk-down
   rotate: false
-  xy: 254, 478
+  xy: 236, 240
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
   index: 2
 crocodile/walk-left
   rotate: false
-  xy: 280, 192
+  xy: 236, 270
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
@@ -145,7 +145,7 @@ crocodile/walk-left
   index: 2
 crocodile/walk-right
   rotate: false
-  xy: 238, 206
+  xy: 236, 300
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
@@ -159,14 +159,14 @@ crocodile/walk-right
   index: 2
 crocodile/walk-up
   rotate: false
-  xy: 306, 192
+  xy: 236, 330
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
   index: 1
 crocodile/walk-up
   rotate: false
-  xy: 332, 192
+  xy: 238, 360
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
@@ -614,280 +614,280 @@ particle/slash-up
   index: 7
 pig/idle-down
   rotate: false
-  xy: 70, 464
-  size: 20, 27
-  orig: 20, 27
+  xy: 228, 478
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: 1
 pig/idle-left
   rotate: false
-  xy: 280, 134
-  size: 29, 27
-  orig: 29, 27
+  xy: 268, 134
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: 1
 pig/idle-right
   rotate: false
-  xy: 311, 134
-  size: 29, 27
-  orig: 29, 27
+  xy: 302, 134
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: 1
 pig/idle-up
   rotate: false
-  xy: 488, 196
-  size: 20, 26
-  orig: 20, 26
+  xy: 336, 134
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: 1
 pig/walk-down
   rotate: false
-  xy: 70, 464
-  size: 20, 27
-  orig: 20, 27
+  xy: 228, 478
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: 1
 pig/walk-down
   rotate: false
-  xy: 435, 136
-  size: 20, 27
-  orig: 20, 27
+  xy: 370, 134
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: 2
 pig/walk-down
-  rotate: false
-  xy: 488, 138
-  size: 20, 27
-  orig: 20, 27
-  offset: 0, 0
-  index: 3
-pig/walk-down
-  rotate: false
-  xy: 70, 464
-  size: 20, 27
-  orig: 20, 27
-  offset: 0, 0
-  index: 4
-pig/walk-down
-  rotate: false
-  xy: 435, 165
-  size: 20, 27
-  orig: 20, 27
-  offset: 0, 0
-  index: 5
-pig/walk-down
-  rotate: false
-  xy: 488, 167
-  size: 20, 27
-  orig: 20, 27
-  offset: 0, 0
-  index: 6
-pig/walk-left
-  rotate: false
-  xy: 342, 134
-  size: 29, 27
-  orig: 29, 27
-  offset: 0, 0
-  index: 1
-pig/walk-left
-  rotate: false
-  xy: 373, 134
-  size: 29, 27
-  orig: 29, 27
-  offset: 0, 0
-  index: 2
-pig/walk-left
   rotate: false
   xy: 404, 136
-  size: 29, 27
-  orig: 29, 27
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 3
+pig/walk-down
+  rotate: false
+  xy: 228, 478
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 4
+pig/walk-down
+  rotate: false
+  xy: 438, 138
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 5
+pig/walk-down
+  rotate: false
+  xy: 472, 138
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 6
+pig/walk-left
+  rotate: false
+  xy: 268, 168
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 1
+pig/walk-left
+  rotate: false
+  xy: 302, 168
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 2
+pig/walk-left
+  rotate: false
+  xy: 336, 168
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: 3
 pig/walk-left
   rotate: false
-  xy: 280, 134
-  size: 29, 27
-  orig: 29, 27
+  xy: 268, 134
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: 4
 pig/walk-left
   rotate: false
-  xy: 457, 138
-  size: 29, 27
-  orig: 29, 27
+  xy: 370, 168
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: 5
 pig/walk-left
   rotate: false
-  xy: 280, 163
-  size: 29, 27
-  orig: 29, 27
+  xy: 404, 170
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: 6
 pig/walk-right
   rotate: false
-  xy: 311, 163
-  size: 29, 27
-  orig: 29, 27
+  xy: 438, 172
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: 1
 pig/walk-right
   rotate: false
-  xy: 342, 163
-  size: 29, 27
-  orig: 29, 27
+  xy: 472, 172
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: 2
 pig/walk-right
   rotate: false
-  xy: 373, 163
-  size: 29, 27
-  orig: 29, 27
+  xy: 268, 202
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: 3
 pig/walk-right
   rotate: false
-  xy: 311, 134
-  size: 29, 27
-  orig: 29, 27
+  xy: 302, 134
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: 4
 pig/walk-right
   rotate: false
-  xy: 404, 165
-  size: 29, 27
-  orig: 29, 27
+  xy: 302, 202
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: 5
 pig/walk-right
   rotate: false
-  xy: 457, 167
-  size: 29, 27
-  orig: 29, 27
+  xy: 336, 202
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: 6
 pig/walk-up
   rotate: false
-  xy: 488, 196
-  size: 20, 26
-  orig: 20, 26
+  xy: 336, 134
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: 1
 pig/walk-up
   rotate: false
-  xy: 488, 224
-  size: 20, 26
-  orig: 20, 26
+  xy: 370, 202
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: 2
 pig/walk-up
   rotate: false
-  xy: 384, 224
-  size: 20, 26
-  orig: 20, 26
+  xy: 404, 204
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: 3
 pig/walk-up
   rotate: false
-  xy: 406, 224
-  size: 20, 26
-  orig: 20, 26
+  xy: 438, 206
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: 4
 pig/walk-up
   rotate: false
-  xy: 428, 226
-  size: 20, 26
-  orig: 20, 26
+  xy: 472, 206
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: 5
 pig/walk-up
   rotate: false
-  xy: 406, 224
-  size: 20, 26
-  orig: 20, 26
+  xy: 438, 206
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: 6
 player/idle-down
   rotate: false
-  xy: 358, 192
+  xy: 262, 240
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
   index: 1
 player/idle-left
   rotate: false
-  xy: 384, 194
+  xy: 262, 270
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
   index: 1
 player/idle-right
   rotate: false
-  xy: 410, 194
+  xy: 262, 300
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
   index: 1
 player/idle-up
   rotate: false
-  xy: 436, 196
+  xy: 262, 330
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
   index: 1
 player/walk-down
   rotate: false
-  xy: 462, 196
+  xy: 288, 236
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
   index: 1
 player/walk-down
   rotate: false
-  xy: 280, 222
+  xy: 314, 236
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
   index: 2
 player/walk-left
   rotate: false
-  xy: 238, 236
+  xy: 340, 236
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
   index: 1
 player/walk-left
   rotate: false
-  xy: 384, 194
+  xy: 262, 270
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
   index: 2
 player/walk-right
   rotate: false
-  xy: 306, 222
+  xy: 366, 236
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
   index: 1
 player/walk-right
   rotate: false
-  xy: 410, 194
+  xy: 262, 300
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
   index: 2
 player/walk-up
   rotate: false
-  xy: 332, 222
+  xy: 392, 238
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
   index: 1
 player/walk-up
   rotate: false
-  xy: 358, 222
+  xy: 418, 240
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
@@ -922,21 +922,21 @@ zombie/idle-up
   index: 1
 zombie/walk-down
   rotate: false
-  xy: 228, 478
+  xy: 238, 206
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
   index: 1
 zombie/walk-down
   rotate: false
-  xy: 254, 478
+  xy: 236, 240
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
   index: 2
 zombie/walk-left
   rotate: false
-  xy: 280, 192
+  xy: 236, 270
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
@@ -950,7 +950,7 @@ zombie/walk-left
   index: 2
 zombie/walk-right
   rotate: false
-  xy: 238, 206
+  xy: 236, 300
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
@@ -964,14 +964,14 @@ zombie/walk-right
   index: 2
 zombie/walk-up
   rotate: false
-  xy: 306, 192
+  xy: 236, 330
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
   index: 1
 zombie/walk-up
   rotate: false
-  xy: 332, 192
+  xy: 238, 360
   size: 24, 28
   orig: 24, 28
   offset: 0, 0
