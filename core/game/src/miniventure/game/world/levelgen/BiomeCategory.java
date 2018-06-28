@@ -8,13 +8,21 @@ public enum BiomeCategory {
 		Biome.OCEAN+"_1"
 	),
 	
+	MID(
+		Biome.PLAINS+"_7",
+		Biome.OCEAN+"_1",
+		Biome.FOREST+"_3"
+	),
+	
 	DRY(
-		Biome.DESERT+"_1",
+		Biome.DESERT+"_2",
 		Biome.PLAINS+"_4",
-		Biome.FOREST+"_2"
+		Biome.FOREST+"_1"
 	),
 	
 	ROCKY(
+		Biome.MOUNTAIN+"_1",
+		Biome.CANYON+"_2",
 		Biome.MOUNTAIN+"_1"
 	);
 	

@@ -15,11 +15,13 @@ enum Biome {
 	
 	DESERT(SAND+"_15", CACTUS+"_1", SAND+"_5"),
 	
-	MOUNTAIN(STONE+"_1"),
+	MOUNTAIN(STONE+"_30"/*, TREE_PINE+"_1", STONE+"_5"*/),
 	
-	PLAINS(GRASS+"_8", TREE_CARTOON +"_1", GRASS+"_2"),
+	CANYON(STONE+"_20", GRASS+"_10", TREE_PINE+"_1", GRASS+"_10", STONE+"_20"),
 	
-	FOREST(GRASS+"_2", TREE_CARTOON +"_1", GRASS+"_2");
+	PLAINS(GRASS+"_24", TREE_CARTOON +"_3", GRASS+"_12", STONE+"_2"),
+	
+	FOREST(TREE_POOF+"_1", GRASS+"_2", TREE_DARK +"_6");
 	
 	@NotNull private final EnumFetcher<TileType> tileFetcher;
 	
@@ -28,6 +30,9 @@ enum Biome {
 		put(SAND, DIRT);
 		put(CACTUS, SAND);
 		put(TREE_CARTOON, GRASS);
+		put(TREE_PINE, GRASS);
+		put(TREE_DARK, GRASS);
+		put(TREE_POOF, GRASS);
 		put(DIRT, HOLE);
 		put(GRASS, DIRT);
 		put(STONE, DIRT);

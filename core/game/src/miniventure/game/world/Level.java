@@ -21,6 +21,8 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class Level implements Taggable<Level> {
 	
+	public static final int X_LOAD_RADIUS = 4, Y_LOAD_RADIUS = 2;
+	
 	private final int depth, width, height;
 	
 	@NotNull private final WorldManager world;
@@ -87,7 +89,7 @@ public abstract class Level implements Taggable<Level> {
 		
 		if(curChunk != null) {
 			// load any new chunks surrounding the given entity
-			for(Point p : getAreaChunkCoords(entity.getCenter(), 1, false, true)) {
+			for(Point p : getAreaChunkCoords(entity.getCenter(), X_LOAD_RADIUS, Y_LOAD_RADIUS, false, true)) {
 				//System.out.println("loading chunk on "+world+" at "+p);
 				loadChunk(p);
 			}
@@ -98,7 +100,7 @@ public abstract class Level implements Taggable<Level> {
 		// check for any chunks that no longer need to be loaded
 		Array<Point> chunkCoords = new Array<>(loadedChunks.<Point[]>get(chunks -> chunks.keySet().toArray(new Point[chunks.size()])));
 		for(WorldObject obj: world.getKeepAlives(this)) // remove loaded chunks in radius
-			chunkCoords.removeAll(getAreaChunkCoords(obj.getCenter(), 2, true, false), false);
+			chunkCoords.removeAll(getAreaChunkCoords(obj.getCenter(), X_LOAD_RADIUS+1, Y_LOAD_RADIUS+1, true, false), false);
 		
 		// chunkCoords now contains all chunks which have no nearby keepAlive object, so they should be unloaded.
 		for(Point chunkCoord: chunkCoords) {
@@ -245,16 +247,16 @@ public abstract class Level implements Taggable<Level> {
 	}
 	
 	// chunkRadius is in chunks.
-	public Array<Point> getAreaChunkCoords(Vector2 tilePos, int chunkRadius, boolean loaded, boolean unloaded) {
-		return getAreaChunkCoords(tilePos.x, tilePos.y, chunkRadius, loaded, unloaded);
+	public Array<Point> getAreaChunkCoords(Vector2 tilePos, int chunkRadiusX, int chunkRadiusY, boolean loaded, boolean unloaded) {
+		return getAreaChunkCoords(tilePos.x, tilePos.y, chunkRadiusX, chunkRadiusY, loaded, unloaded);
 	}
-	public Array<Point> getAreaChunkCoords(float x, float y, int radius, boolean loaded, boolean unloaded) {
-		return getAreaChunkCoords(Chunk.getCoord(x), Chunk.getCoord(y), radius, loaded, unloaded);
+	public Array<Point> getAreaChunkCoords(float x, float y, int radiusX, int radiusY, boolean loaded, boolean unloaded) {
+		return getAreaChunkCoords(Chunk.getCoord(x), Chunk.getCoord(y), radiusX, radiusY, loaded, unloaded);
 	}
-	public Array<Point> getAreaChunkCoords(int chunkX, int chunkY, int radius, boolean loaded, boolean unloaded) {
+	public Array<Point> getAreaChunkCoords(int chunkX, int chunkY, int radiusX, int radiusY, boolean loaded, boolean unloaded) {
 		Array<Point> chunkCoords = new Array<>();
-		for(int x = chunkX - radius; x <= chunkX + radius; x++) {
-			for (int y = chunkY - radius; y <= chunkY + radius; y++) {
+		for(int x = chunkX - radiusX; x <= chunkX + radiusX; x++) {
+			for (int y = chunkY - radiusY; y <= chunkY + radiusY; y++) {
 				if (chunkExists(x, y)) {
 					Point p = new Point(x, y);
 					boolean isLoaded = isChunkLoaded(p);

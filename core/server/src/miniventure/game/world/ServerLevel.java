@@ -240,11 +240,11 @@ public class ServerLevel extends Level {
 	}
 	
 	// note that asking for unloaded chunks will load them.
-	public Array<Chunk> getAreaChunks(Vector2 tilePos, int radius, boolean loaded, boolean unloaded) {
-		return getAreaChunks(Chunk.getCoords(tilePos), radius, loaded, unloaded);
+	public Array<Chunk> getAreaChunks(Vector2 tilePos, int radiusX, int radiusY, boolean loaded, boolean unloaded) {
+		return getAreaChunks(Chunk.getCoords(tilePos), radiusX, radiusY, loaded, unloaded);
 	}
-	public Array<Chunk> getAreaChunks(Point chunkCoords, int radius, boolean loaded, boolean unloaded) {
-		Array<Point> coords = getAreaChunkCoords(chunkCoords.x, chunkCoords.y, radius, loaded, unloaded);
+	public Array<Chunk> getAreaChunks(Point chunkCoords, int radiusX, int radiusY, boolean loaded, boolean unloaded) {
+		Array<Point> coords = getAreaChunkCoords(chunkCoords.x, chunkCoords.y, radiusX, radiusY, loaded, unloaded);
 		Array<Chunk> chunks = new Array<>(false, coords.size, Chunk.class);
 		for(Point p: coords) {
 			if(!isChunkLoaded(p)) loadChunk(p);

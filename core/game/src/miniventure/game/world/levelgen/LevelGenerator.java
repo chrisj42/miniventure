@@ -15,6 +15,7 @@ public class LevelGenerator {
 		Biome.MOUNTAIN+"_3",
 		Biome.PLAINS+"_1"*/
 		BiomeCategory.WET+"_2",
+		BiomeCategory.MID+"_3",
 		BiomeCategory.DRY+"_5",
 		BiomeCategory.ROCKY+"_3"
 	);
@@ -28,7 +29,7 @@ public class LevelGenerator {
 	public LevelGenerator(long seed, int biomeSize, int detailSize) { this(seed, 0, 0, biomeSize, detailSize); }
 	public LevelGenerator(long seed, int width, int height, int biomeSize, int detailSize) {
 		Random seedPicker = new Random(seed); // I wonder what would happen if I used a hash function for this, and just used the seed to get another long, and then use that, and so forth...
-		categoryNoise = new Coherent2DNoiseFunction(seedPicker.nextLong(), 48);
+		categoryNoise = new Coherent2DNoiseFunction(seedPicker.nextLong(), 96);
 		biomeNoise = new Coherent2DNoiseFunction(seedPicker.nextLong(), biomeSize);
 		detailNoise = new Coherent2DNoiseFunction(seedPicker.nextLong(), detailSize);
 		

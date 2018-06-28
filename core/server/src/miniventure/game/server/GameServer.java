@@ -118,7 +118,7 @@ public class GameServer implements GameProtocol {
 						ServerPlayer player = world.addPlayer(name);
 						connectionToPlayerDataMap.put(connection, new PlayerData(connection, player));
 						playerToConnectionMap.put(player, connection);
-						Array<Chunk> playerChunks = level.getAreaChunks(player.getCenter(), 1, true, true);
+						Array<Chunk> playerChunks = level.getAreaChunks(player.getCenter(), Level.X_LOAD_RADIUS, Level.Y_LOAD_RADIUS, true, true);
 						connection.sendTCP(new LevelData(level));
 						Rectangle entityRect = null;
 						for(Chunk chunk: playerChunks) {
@@ -447,7 +447,7 @@ public class GameServer implements GameProtocol {
 		
 		
 		Rectangle area = null;
-		for(Chunk c: level.getAreaChunks(player.getCenter(), 2, true, false)) {
+		for(Chunk c: level.getAreaChunks(player.getCenter(), Level.X_LOAD_RADIUS+1, Level.Y_LOAD_RADIUS+1, true, false)) {
 			if(area == null)
 				area = c.getBounds();
 			else

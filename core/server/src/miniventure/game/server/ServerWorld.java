@@ -106,7 +106,7 @@ public class ServerWorld extends WorldManager {
 	@Override
 	public void createWorld(int width, int height) {
 		worldLoaded = false;
-		levelGenerator = new LevelGenerator(MathUtils.random.nextLong(), width, height, 32, 6);
+		levelGenerator = new LevelGenerator(MathUtils.random.nextLong(), width, height, 64, 8);
 		
 		ProgressPrinter logger = new ProgressPrinter();
 		
