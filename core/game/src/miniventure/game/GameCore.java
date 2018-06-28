@@ -36,6 +36,8 @@ public class GameCore {
 	public static final int DEFAULT_SCREEN_WIDTH = 800;
 	public static final int DEFAULT_SCREEN_HEIGHT = 450;
 	
+	public static boolean debug = false;
+	
 	private static final long START_TIME = System.nanoTime();
 	
 	public static final float SOUND_RADIUS = 10; // 10 tiles

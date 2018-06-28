@@ -10,9 +10,12 @@ import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 public class DesktopLauncher {
 	public static void main (String[] args) {
 		boolean server = false;
-		for(String arg: args)
+		for(String arg: args) {
 			if(arg.equalsIgnoreCase("--server"))
 				server = true;
+			if(arg.equalsIgnoreCase("--debug"))
+				GameCore.debug = true;
+		}
 		
 		if(server) {
 			ServerCore.main(args);

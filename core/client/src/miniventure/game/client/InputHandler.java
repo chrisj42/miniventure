@@ -6,6 +6,7 @@ import java.util.HashSet;
 import miniventure.game.GameCore;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
 
 public class InputHandler implements InputProcessor {
@@ -44,14 +45,24 @@ public class InputHandler implements InputProcessor {
 		keyPresses.clear();
 	}
 	
+	/**
+	 * Used to check if a given key is currently being pressed. This method differs from Gdx.input.isKeyJustPressed in that it will repeat the press event at regular intervals, after an initial larger delay.
+	 * 
+	 * @param keycode the keycode of the key to check
+	 * @return Whether the given key has just been pressed, either physically, or programmatically for repetition.
+	 */
 	public boolean pressingKey(int keycode) {
-		return !ClientCore.hasMenu() && (Gdx.input.isKeyJustPressed(keycode) || pressedKeys.contains(keycode));
+		return Gdx.input.isKeyJustPressed(keycode) || pressedKeys.contains(keycode);
 	}
 	
 	
 	@Override
 	public boolean keyDown(int keycode) {
 		keyPresses.put(keycode, GameCore.getElapsedProgramTime());
+		if(Gdx.input.isKeyPressed(Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Keys.SHIFT_RIGHT))
+			if(Gdx.input.isKeyJustPressed(Keys.D) && Gdx.input.isKeyPressed(Keys.TAB) ||
+				Gdx.input.isKeyJustPressed(Keys.TAB) && Gdx.input.isKeyPressed(Keys.D))
+				GameCore.debug = !GameCore.debug; // toggle debug mode
 		return false;
 	}
 	

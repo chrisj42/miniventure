@@ -61,7 +61,7 @@ public class GameScreen {
 		player.handleInput(getMouseInput());
 		
 		boolean shift = Gdx.input.isKeyPressed(Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Keys.SHIFT_RIGHT);
-		if(shift && Gdx.input.isKeyJustPressed(Keys.S)) {
+		if(shift && GameCore.debug && Gdx.input.isKeyJustPressed(Keys.S)) {
 			String newSpeed = JOptionPane.showInputDialog("Enter new Player Speed:", player.getSpeed());
 			try {
 				float value = Float.parseFloat(newSpeed);
@@ -71,27 +71,29 @@ public class GameScreen {
 		
 		levelView.handleInput();
 		
-		if(shift && ClientCore.input.pressingKey(Keys.D))
-			showDebug = !showDebug;
+		if(shift && Gdx.input.isKeyJustPressed(Keys.D) && !Gdx.input.isKeyPressed(Keys.TAB))
+		showDebug = !showDebug;
 		
-		if(showDebug && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT) && ClientCore.input.pressingKey(Keys.T))
+		if(shift && ClientCore.input.pressingKey(Keys.T))
 			ClientCore.getClient().send(DatalessRequest.Tile); // debug
 		
-		else if(ClientCore.input.pressingKey(Keys.T)) {
-			chatScreen.focus("");
-		}
-		else if(ClientCore.input.pressingKey(Keys.SLASH)) {
-			chatScreen.focus("/");
-		}
-		
-		else if(ClientCore.input.pressingKey(Keys.ESCAPE)) {
-			dialog = true;
-			new Thread(() -> {
-				int choice = JOptionPane.showConfirmDialog(null, "Leave Server?", "Confirmation", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-				if(choice == JOptionPane.YES_OPTION)
-					Gdx.app.postRunnable(() -> ClientCore.getWorld().exitWorld());
-				dialog = false;
-			}).start();
+		if(!ClientCore.hasMenu()) {
+			
+			if(!shift && ClientCore.input.pressingKey(Keys.T))
+				chatScreen.focus("");
+			
+			else if(ClientCore.input.pressingKey(Keys.SLASH))
+				chatScreen.focus("/");
+			
+			else if(ClientCore.input.pressingKey(Keys.ESCAPE)) {
+				dialog = true;
+				new Thread(() -> {
+					int choice = JOptionPane.showConfirmDialog(null, "Leave Server?", "Confirmation", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+					if(choice == JOptionPane.YES_OPTION)
+						Gdx.app.postRunnable(() -> ClientCore.getWorld().exitWorld());
+					dialog = false;
+				}).start();
+			}
 		}
 	}
 	
@@ -136,10 +138,21 @@ public class GameScreen {
 		// draw UI for current item, and stats
 		mainPlayer.drawGui(new Rectangle(0, 0, uiCamera.viewportWidth, uiCamera.viewportHeight), batch);
 		
-		if(!showDebug) return;
+		if(!showDebug) {
+			if(GameCore.debug) {
+				BitmapFont f = GameCore.getFont();
+				f.setColor(Color.ORANGE);
+				f.draw(batch, "Debug Mode ENABLED", 0, uiCamera.viewportHeight - 5);
+			}
+			return;
+		}
 		
 		// a list of text to display in the upper left, for debug purposes
-		Array<String> debugInfo = new Array<>(); 
+		Array<String> debugInfo = new Array<>();
+		
+		if(GameCore.debug)
+			debugInfo.add("Debug Mode ENABLED");
+		
 		debugInfo.add("Version " + GameCore.VERSION);
 		
 		// player coordinates, for debug
@@ -158,8 +171,12 @@ public class GameScreen {
 		debugInfo.add("Time: " + TimeOfDay.getTimeString(ClientCore.getWorld().getDaylightOffset()));
 		
 		BitmapFont font = GameCore.getFont();
-		for(int i = 0; i < debugInfo.size; i++)
-			font.draw(batch, debugInfo.get(i), 0, uiCamera.viewportHeight-5-15*i);
+		if(GameCore.debug) font.setColor(Color.ORANGE);
+		for(int i = 0; i < debugInfo.size; i++) {
+			if(GameCore.debug && i == 1)
+				font.setColor(Color.WHITE);
+			font.draw(batch, debugInfo.get(i), 0, uiCamera.viewportHeight - 5 - 15 * i);
+		}
 	}
 	
 	void resize(int width, int height) { levelView.resize(width, height); }

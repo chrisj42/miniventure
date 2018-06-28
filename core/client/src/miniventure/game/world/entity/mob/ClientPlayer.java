@@ -166,7 +166,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 		
 		getStatEvo(StaminaSystem.class).isMoving = !moveDist.isZero();
 		
-		if(!isKnockedBack()) {
+		if(!isKnockedBack() && !ClientCore.hasMenu()) {
 			if(ClientCore.input.pressingKey(Input.Keys.C))
 				ClientCore.getClient().send(new InteractRequest(true, new PositionUpdate(this), getDirection(), hands.getSelection()));
 			else if(ClientCore.input.pressingKey(Input.Keys.V))
@@ -182,14 +182,15 @@ public class ClientPlayer extends ClientEntity implements Player {
 			if(Gdx.input.isKeyJustPressed(Keys.NUM_1+i))
 				hands.setSelection(i);
 		
-		if(ClientCore.input.pressingKey(Keys.E)) {
-			// do nothing here; instead, tell the server to set the held item once selected (aka on inventory menu exit). The inventory should be up to date already, generally speaking.
-			ClientCore.setScreen(new InventoryScreen(inventory, hands));
-		}
-		else if(ClientCore.input.pressingKey(Keys.Z))
-			ClientCore.setScreen(new CraftingScreen(Recipes.recipes, hands));
-		else if(ClientCore.input.pressingKey(Keys.Q)) {
-			hands.dropInvItems(hands.getSelectedItem(), Gdx.input.isKeyPressed(Keys.SHIFT_LEFT));
+		if(!ClientCore.hasMenu()) {
+			if(ClientCore.input.pressingKey(Keys.E)) {
+				// do nothing here; instead, tell the server to set the held item once selected (aka on inventory menu exit). The inventory should be up to date already, generally speaking.
+				ClientCore.setScreen(new InventoryScreen(inventory, hands));
+			} else if(ClientCore.input.pressingKey(Keys.Z))
+				ClientCore.setScreen(new CraftingScreen(Recipes.recipes, hands));
+			else if(ClientCore.input.pressingKey(Keys.Q)) {
+				hands.dropInvItems(hands.getSelectedItem(), Gdx.input.isKeyPressed(Keys.SHIFT_LEFT));
+			}
 		}
 	}
 	

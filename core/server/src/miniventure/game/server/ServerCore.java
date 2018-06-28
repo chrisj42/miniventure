@@ -1,6 +1,7 @@
 package miniventure.game.server;
 
 import java.util.Arrays;
+import java.util.List;
 
 import miniventure.game.GameCore;
 import miniventure.game.chat.command.CommandInputParser;
@@ -18,14 +19,25 @@ public class ServerCore {
 	public static CommandInputParser getCommandInput() { return commandParser; }
 	
 	public static void main(String[] args) {
-		boolean success = args.length == 3 && args[0].equalsIgnoreCase("--server");
+		args = MyUtils.mapArray(args, String.class, String::toLowerCase);
+		List<String> argList = Arrays.asList(args);
+		
+		int sizeIdx = argList.indexOf("--server") + 1;
+		boolean success = sizeIdx > 0 && args.length > sizeIdx+1;
+		
+		if(argList.contains("--debug"))
+			GameCore.debug = true;
 		
 		if(success) {
-			GameCore.initNonGdx();
-			
-			System.out.println("loading server world...");
 			try {
-				initServer(Integer.parseInt(args[1]), Integer.parseInt(args[2]), true);
+				int width = Integer.parseInt(args[sizeIdx]);
+				int height = Integer.parseInt(args[sizeIdx+1]);
+				
+				GameCore.initNonGdx();
+				
+				System.out.println("loading server world...");
+				
+				initServer(width, height, true);
 			} catch(NumberFormatException ex) {
 				success = false;
 			}
