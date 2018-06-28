@@ -2,6 +2,7 @@ package miniventure.game.util;
 
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Stack;
 
 import miniventure.game.GameCore;
@@ -196,6 +197,15 @@ public class MyUtils {
 	//public static long mod(long num, long mod) { return (num % mod + mod) % mod; }
 	//public static double mod(double num, double mod) { return (num % mod + mod) % mod; }
 	
+	public static String plural(int count) { return count == 1 ? "" : "s"; }
+	public static String plural(int count, String word) { return plural(count, word, ""); }
+	public static String plural(int count, String word, String suffix) {
+		return String.valueOf(count) + ' ' +
+			(count != 1 && word.endsWith("y") ? word.substring(0, word.length() - 1) : word) +
+			(count == 1 ? "" : word.endsWith("s") ? "es" : word.endsWith("y") ? "ies" : "s") +
+			suffix;
+	}
+	
 	public static void sleep(int millis) {
 		try {
 			Thread.sleep(millis);
@@ -205,10 +215,20 @@ public class MyUtils {
 	
 	public static void dumpAllStackTraces() {
 		Map<Thread, StackTraceElement[]> traces = Thread.getAllStackTraces();
-		for(Thread thread: traces.keySet()) {
-			System.out.println("for thread "+thread+":");
-			for(StackTraceElement element: traces.get(thread))
-				System.out.println("\t"+element);
-		}
+		System.out.println(Thread.activeCount()+" Threads running");
+		
+		InstanceCounter<ThreadGroup> groups = new InstanceCounter<>();
+		for(Thread t: traces.keySet())
+			groups.add(t.getThreadGroup());
+		
+		System.out.println(traces.size()+" Threads total in "+groups.size()+" ThreadGroups:");
+		for(Entry<ThreadGroup, Integer> entry: groups.entrySet())
+			System.out.println('\t'+plural(entry.getValue(), "Thread", ": "+ entry.getKey()));
+		
+		traces.forEach((thread, elements) -> {
+			System.out.println("for " + thread + ":");
+			for(StackTraceElement element: elements)
+				System.out.println("\t" + element);
+		});
 	}
 }
