@@ -80,6 +80,9 @@ public class ClientPlayer extends ClientEntity implements Player {
 		knockbackController = new KnockbackController(this);
 	}
 	
+	public float getSpeed() { return moveSpeed; }
+	public void setSpeed(float speed) { moveSpeed = speed; }
+	
 	@Override
 	public Integer[] saveStats() { return Stat.save(stats); }
 	
@@ -125,7 +128,6 @@ public class ClientPlayer extends ClientEntity implements Player {
 	
 	//private float lastWalkTime = 0;
 	public void handleInput(Vector2 mouseInput) {
-		
 		
 		Vector2 inputDir = new Vector2();
 		if(Gdx.input.isKeyPressed(Keys.LEFT)) inputDir.x--;
@@ -180,13 +182,13 @@ public class ClientPlayer extends ClientEntity implements Player {
 			if(Gdx.input.isKeyJustPressed(Keys.NUM_1+i))
 				hands.setSelection(i);
 		
-		if(ClientCore.input.pressingKey(Input.Keys.E)) {
+		if(ClientCore.input.pressingKey(Keys.E)) {
 			// do nothing here; instead, tell the server to set the held item once selected (aka on inventory menu exit). The inventory should be up to date already, generally speaking.
 			ClientCore.setScreen(new InventoryScreen(inventory, hands));
 		}
-		else if(ClientCore.input.pressingKey(Input.Keys.Z))
+		else if(ClientCore.input.pressingKey(Keys.Z))
 			ClientCore.setScreen(new CraftingScreen(Recipes.recipes, hands));
-		else if(ClientCore.input.pressingKey(Input.Keys.Q)) {
+		else if(ClientCore.input.pressingKey(Keys.Q)) {
 			hands.dropInvItems(hands.getSelectedItem(), Gdx.input.isKeyPressed(Keys.SHIFT_LEFT));
 		}
 	}

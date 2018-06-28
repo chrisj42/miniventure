@@ -60,9 +60,18 @@ public class GameScreen {
 		
 		player.handleInput(getMouseInput());
 		
+		boolean shift = Gdx.input.isKeyPressed(Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Keys.SHIFT_RIGHT);
+		if(shift && Gdx.input.isKeyJustPressed(Keys.S)) {
+			String newSpeed = JOptionPane.showInputDialog("Enter new Player Speed:", player.getSpeed());
+			try {
+				float value = Float.parseFloat(newSpeed);
+				player.setSpeed(value);
+			} catch(NumberFormatException ignored) {}
+		}
+		
 		levelView.handleInput();
 		
-		if(Gdx.input.isKeyPressed(Keys.SHIFT_LEFT) && ClientCore.input.pressingKey(Keys.D))
+		if(shift && ClientCore.input.pressingKey(Keys.D))
 			showDebug = !showDebug;
 		
 		if(showDebug && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT) && ClientCore.input.pressingKey(Keys.T))
