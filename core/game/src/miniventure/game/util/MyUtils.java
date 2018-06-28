@@ -1,6 +1,7 @@
 package miniventure.game.util;
 
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Stack;
 
 import miniventure.game.GameCore;
@@ -199,6 +200,15 @@ public class MyUtils {
 		try {
 			Thread.sleep(millis);
 		} catch (InterruptedException ignored) {
+		}
+	}
+	
+	public static void dumpAllStackTraces() {
+		Map<Thread, StackTraceElement[]> traces = Thread.getAllStackTraces();
+		for(Thread thread: traces.keySet()) {
+			System.out.println("for thread "+thread+":");
+			for(StackTraceElement element: traces.get(thread))
+				System.out.println("\t"+element);
 		}
 	}
 }
