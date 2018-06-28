@@ -7,6 +7,8 @@ import miniventure.game.client.ClientCore;
 import miniventure.game.client.ClientWorld;
 import miniventure.game.client.DisplayLevel;
 import miniventure.game.client.LevelViewport;
+import miniventure.game.screen.InfoScreen.CreditsScreen;
+import miniventure.game.screen.InfoScreen.InstructionsScreen;
 import miniventure.game.util.VersionInfo;
 import miniventure.game.world.TimeOfDay;
 import miniventure.game.world.levelgen.LevelGenerator;
@@ -92,6 +94,12 @@ public class MainMenu extends MenuScreen {
 		
 		VisTextButton helpBtn = makeButton("Instructions", () -> ClientCore.setScreen(new InstructionsScreen()));
 		table.add(helpBtn).spaceBottom(20).row();
+		
+		VisTextButton creditsBtn = makeButton("Credits", () -> ClientCore.setScreen(new CreditsScreen()));
+		table.add(creditsBtn).spaceBottom(20).row();
+		
+		VisTextButton exitBtn = makeButton("Quit", () -> Gdx.app.exit());
+		table.add(exitBtn).row();
 		
 		addActor(table);
 		table.setPosition(getWidth()/2, getHeight()/2, Align.center);
