@@ -19,9 +19,9 @@ enum Biome {
 	
 	CANYON(STONE+"_20", GRASS+"_10", TREE_PINE+"_1", GRASS+"_10", STONE+"_20"),
 	
-	PLAINS(GRASS+"_24", TREE_CARTOON +"_3", GRASS+"_12", STONE+"_2"),
+	PLAINS(TREE_CARTOON +"_2", GRASS+"_18", STONE+"_1"),
 	
-	FOREST(TREE_POOF+"_1", GRASS+"_2", TREE_DARK +"_6");
+	FOREST(GRASS+"_3", TREE_POOF+"_6");
 	
 	@NotNull private final EnumFetcher<TileType> tileFetcher;
 	
