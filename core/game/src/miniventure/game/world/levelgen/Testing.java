@@ -16,7 +16,7 @@ class Testing {
 	private static final HashMap<TileType, Color> tileMap = new HashMap<>();
 	static {
 		tileMap.put(TileType.WATER, Color.BLUE);
-		tileMap.put(TileType.TREE, Color.GREEN.darker().darker());
+		tileMap.put(TileType.TREE_CARTOON, Color.GREEN.darker().darker());
 		tileMap.put(TileType.CACTUS, Color.GREEN.darker());
 		tileMap.put(TileType.GRASS, Color.GREEN);
 		tileMap.put(TileType.STONE, Color.GRAY);

@@ -24,3 +24,8 @@ Then again, maybe I won't need a level system, if I play my cards right with lev
 
 ****
 
+Underwater world / biome: requires scuba suit to access. Can dive under in ocean biomes, and explore. Coral, new enemies, etc.
+
+****
+
+Character customization
