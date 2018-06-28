@@ -271,7 +271,7 @@ public class GameServer implements GameProtocol {
 					Level level = client.getLevel();
 					if(level != null) {
 						Tile t = level.getClosestTile(client.getInteractionRect());
-						connection.sendTCP(new Message(t==null?null:t.toLocString(), Color.WHITE));
+						connection.sendTCP(new Message(client+" looking at "+(t==null?null:t.toLocString()), Color.WHITE));
 					}
 				}
 				
