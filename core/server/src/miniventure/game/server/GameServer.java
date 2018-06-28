@@ -14,6 +14,7 @@ import miniventure.game.chat.InfoMessageBuilder;
 import miniventure.game.chat.InfoMessageLine;
 import miniventure.game.chat.MessageBuilder;
 import miniventure.game.chat.command.Command;
+import miniventure.game.chat.command.CommandInputParser;
 import miniventure.game.item.Hands;
 import miniventure.game.item.Inventory;
 import miniventure.game.item.Item;
@@ -277,7 +278,7 @@ public class GameServer implements GameProtocol {
 				
 				forPacket(object, Message.class, msg -> {
 					//System.out.println("server: executing command "+msg.msg);
-					ServerCore.getCommandInput().executeCommand(msg.msg, client, clientData.toClientOut, clientData.toClientErr);
+					CommandInputParser.executeCommand(msg.msg, client, clientData.toClientOut, clientData.toClientErr);
 					InfoMessage output = clientData.toClientOut.flushMessage();
 					if(output != null)
 						connection.sendTCP(output);

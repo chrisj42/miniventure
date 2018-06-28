@@ -56,15 +56,17 @@ public class CommandInputParser implements Runnable {
 	}
 	
 	// a null player indicates that it is from the server console.
-	public void executeCommand(String input, @Nullable ServerPlayer executor, MessageBuilder out, MessageBuilder err) {
+	public static void executeCommand(String input, @Nullable ServerPlayer executor, MessageBuilder out, MessageBuilder err) {
 		if(input.length() == 0) return;
 		
-		List<String> args = new ArrayList<>();
+		List<String> args = new ArrayList<>(input.split(" ").length);
 		
-		StringBuilder arg = new StringBuilder();
+		StringBuilder arg = new StringBuilder(input.length());
 		boolean escaped = false;
 		boolean quoted = false;
-		for(char c: input.toCharArray()) {
+		char[] chars = input.toCharArray();
+		for(int i = 0; i < chars.length; i++) {
+			char c = chars[i];
 			if(escaped) {
 				arg.append(c);
 				escaped = false;
@@ -82,7 +84,7 @@ public class CommandInputParser implements Runnable {
 			
 			if(c == ' ' && !quoted) {
 				args.add(arg.toString());
-				arg = new StringBuilder();
+				arg = new StringBuilder(input.length()-i);
 				continue;
 			}
 			

@@ -27,7 +27,7 @@ public class DesktopLauncher {
 			new LwjglApplication(new ClientCore((width, height, callback) -> {
 				ServerCore.initServer(width, height, false);
 				// server running, and world loaded; now, get the server world updating
-				new Thread(ServerCore::run, "Miniventure Server").start();
+				new Thread(new ThreadGroup("server"), ServerCore::run, "Miniventure Server").start();
 				callback.act(); // ready to connect
 				
 			}), config);
