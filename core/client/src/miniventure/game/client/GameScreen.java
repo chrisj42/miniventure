@@ -114,7 +114,7 @@ public class GameScreen {
 		}
 	}
 	
-	private Vector2 getMouseInput() {
+	private static Vector2 getMouseInput() {
 		if(Gdx.input.isTouched()) {
 			
 			Vector2 mousePos = new Vector2(Gdx.input.getX(), Gdx.input.getY());
