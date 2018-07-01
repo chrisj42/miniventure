@@ -1,0 +1,28 @@
+TileTypeRenderer
+
+- is opaque or not
+- get connection animation for a given tile
+- get overlap animation for a given tile
+
+- make all animations once, at tiletype creation.
+- use the given data (NO DEFAULTS):
+	- connection sprites
+		- Multiple? (if no, don't bother to calculate later on...)
+		- tiles to connect to? 
+		- are animated? if so, framerate?
+		- if certain ones have special framerates/animations, specify them individually; the first one is a "default".
+	
+	- overlap sprites
+		- exist?
+		- render style? (aka animated? framerate?)
+	
+	- transition animations (ani data extends AnimationData)
+		- name of each one
+		- req'd other tiles
+		- animation duration
+		- optional playmode
+	
+
+RenderStyle
+	- PlayMode and framerate
+	- or, use premade SINGLE_FRAME

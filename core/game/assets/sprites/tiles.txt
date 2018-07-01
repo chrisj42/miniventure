@@ -3,77 +3,77 @@ size: 1024, 1024
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
-cactus/00
+cactus/c00
   rotate: false
   xy: 2, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-dirt/00
+dirt/c00
   rotate: false
   xy: 38, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-door_closed/00
+door_closed/c00
   rotate: false
   xy: 74, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-door_open/00
+door_open/c00
   rotate: false
   xy: 110, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-door_open/close
+door_open/tclose
   rotate: false
   xy: 146, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 1
-door_open/close
+door_open/tclose
   rotate: false
   xy: 182, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 2
-door_open/close
+door_open/tclose
   rotate: false
   xy: 218, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 3
-door_open/open
+door_open/topen
   rotate: false
   xy: 218, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 1
-door_open/open
+door_open/topen
   rotate: false
   xy: 182, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 2
-door_open/open
+door_open/topen
   rotate: false
   xy: 146, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 3
-grass/00
+grass/c00
   rotate: false
   xy: 254, 2
   size: 32, 32
@@ -213,336 +213,336 @@ grass/o18
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/00
+hole/c00
   rotate: false
   xy: 974, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/01
+hole/c01
   rotate: false
   xy: 2, 38
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/02
+hole/c02
   rotate: false
   xy: 38, 38
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/03
+hole/c03
   rotate: false
   xy: 74, 38
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/04
+hole/c04
   rotate: false
   xy: 110, 38
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/05
+hole/c05
   rotate: false
   xy: 146, 38
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/06
+hole/c06
   rotate: false
   xy: 182, 38
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/07
+hole/c07
   rotate: false
   xy: 218, 38
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/08
+hole/c08
   rotate: false
   xy: 254, 38
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/09
+hole/c09
   rotate: false
   xy: 290, 38
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/10
+hole/c10
   rotate: false
   xy: 326, 38
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/11
+hole/c11
   rotate: false
   xy: 362, 38
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/12
+hole/c12
   rotate: false
   xy: 398, 38
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/13
+hole/c13
   rotate: false
   xy: 434, 38
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/14
+hole/c14
   rotate: false
   xy: 470, 38
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/15
+hole/c15
   rotate: false
   xy: 506, 38
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/16
+hole/c16
   rotate: false
   xy: 542, 38
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/17
+hole/c17
   rotate: false
   xy: 578, 38
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/18
+hole/c18
   rotate: false
   xy: 614, 38
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/19
+hole/c19
   rotate: false
   xy: 650, 38
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/20
+hole/c20
   rotate: false
   xy: 686, 38
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/21
+hole/c21
   rotate: false
   xy: 722, 38
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/22
+hole/c22
   rotate: false
   xy: 758, 38
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/23
+hole/c23
   rotate: false
   xy: 794, 38
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/24
+hole/c24
   rotate: false
   xy: 830, 38
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/25
+hole/c25
   rotate: false
   xy: 866, 38
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/26
+hole/c26
   rotate: false
   xy: 902, 38
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/27
+hole/c27
   rotate: false
   xy: 938, 38
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/28
+hole/c28
   rotate: false
   xy: 974, 38
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/29
+hole/c29
   rotate: false
   xy: 2, 74
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/30
+hole/c30
   rotate: false
   xy: 38, 74
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/31
+hole/c31
   rotate: false
   xy: 74, 74
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/32
+hole/c32
   rotate: false
   xy: 110, 74
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/33
+hole/c33
   rotate: false
   xy: 146, 74
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/34
+hole/c34
   rotate: false
   xy: 182, 74
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/35
+hole/c35
   rotate: false
   xy: 218, 74
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/36
+hole/c36
   rotate: false
   xy: 254, 74
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/37
+hole/c37
   rotate: false
   xy: 290, 74
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/38
+hole/c38
   rotate: false
   xy: 326, 74
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/39
+hole/c39
   rotate: false
   xy: 362, 74
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/40
+hole/c40
   rotate: false
   xy: 398, 74
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/41
+hole/c41
   rotate: false
   xy: 434, 74
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/42
+hole/c42
   rotate: false
   xy: 470, 74
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/43
+hole/c43
   rotate: false
   xy: 506, 74
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/44
+hole/c44
   rotate: false
   xy: 542, 74
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/45
+hole/c45
   rotate: false
   xy: 578, 74
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-hole/46
+hole/c46
   rotate: false
   xy: 614, 74
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-sand/00
+sand/c00
   rotate: false
   xy: 650, 74
   size: 32, 32
@@ -682,1736 +682,1736 @@ sand/o18
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone/00
+stone/c00
   rotate: false
   xy: 362, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/00
+stone_floor/c00
   rotate: false
   xy: 398, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/01
+stone_floor/c01
   rotate: false
   xy: 434, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/02
+stone_floor/c02
   rotate: false
   xy: 470, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/03
+stone_floor/c03
   rotate: false
   xy: 506, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/04
+stone_floor/c04
   rotate: false
   xy: 398, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/05
+stone_floor/c05
   rotate: false
   xy: 542, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/06
+stone_floor/c06
   rotate: false
   xy: 470, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/07
+stone_floor/c07
   rotate: false
   xy: 578, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/08
+stone_floor/c08
   rotate: false
   xy: 614, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/09
+stone_floor/c09
   rotate: false
   xy: 506, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/10
+stone_floor/c10
   rotate: false
   xy: 434, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/11
+stone_floor/c11
   rotate: false
   xy: 650, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/12
+stone_floor/c12
   rotate: false
   xy: 686, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/13
+stone_floor/c13
   rotate: false
   xy: 506, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/14
+stone_floor/c14
   rotate: false
   xy: 434, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/15
+stone_floor/c15
   rotate: false
   xy: 578, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/16
+stone_floor/c16
   rotate: false
   xy: 722, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/17
+stone_floor/c17
   rotate: false
   xy: 614, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/18
+stone_floor/c18
   rotate: false
   xy: 542, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/19
+stone_floor/c19
   rotate: false
   xy: 650, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/20
+stone_floor/c20
   rotate: false
   xy: 758, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/21
+stone_floor/c21
   rotate: false
   xy: 614, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/22
+stone_floor/c22
   rotate: false
   xy: 542, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/23
+stone_floor/c23
   rotate: false
   xy: 578, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/24
+stone_floor/c24
   rotate: false
   xy: 794, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/25
+stone_floor/c25
   rotate: false
   xy: 686, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/26
+stone_floor/c26
   rotate: false
   xy: 542, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/27
+stone_floor/c27
   rotate: false
   xy: 650, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/28
+stone_floor/c28
   rotate: false
   xy: 830, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/29
+stone_floor/c29
   rotate: false
   xy: 686, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/30
+stone_floor/c30
   rotate: false
   xy: 542, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/31
+stone_floor/c31
   rotate: false
   xy: 722, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/32
+stone_floor/c32
   rotate: false
   xy: 794, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/33
+stone_floor/c33
   rotate: false
   xy: 758, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/34
+stone_floor/c34
   rotate: false
   xy: 722, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/35
+stone_floor/c35
   rotate: false
   xy: 722, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/36
+stone_floor/c36
   rotate: false
   xy: 794, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/37
+stone_floor/c37
   rotate: false
   xy: 830, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/38
+stone_floor/c38
   rotate: false
   xy: 758, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/39
+stone_floor/c39
   rotate: false
   xy: 722, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/40
+stone_floor/c40
   rotate: false
   xy: 794, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/41
+stone_floor/c41
   rotate: false
   xy: 758, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/42
+stone_floor/c42
   rotate: false
   xy: 758, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/43
+stone_floor/c43
   rotate: false
   xy: 794, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/44
+stone_floor/c44
   rotate: false
   xy: 830, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/45
+stone_floor/c45
   rotate: false
   xy: 830, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_floor/46
+stone_floor/c46
   rotate: false
   xy: 830, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-stone_wall/00
+stone_wall/c00
   rotate: false
   xy: 866, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-torch/00
+torch/c00
   rotate: false
   xy: 902, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 1
-torch/00
+torch/c00
   rotate: false
   xy: 938, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 2
-torch/00
+torch/c00
   rotate: false
   xy: 974, 110
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 3
-torch/enter
+torch/tenter
   rotate: false
   xy: 2, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 0
-torch/enter
+torch/tenter
   rotate: false
   xy: 38, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 1
-torch/enter
+torch/tenter
   rotate: false
   xy: 74, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 2
-torch/enter
+torch/tenter
   rotate: false
   xy: 110, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 3
-tree_cartoon/00
+tree_cartoon/c00
   rotate: false
   xy: 146, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/01
+tree_cartoon/c01
   rotate: false
   xy: 146, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/02
+tree_cartoon/c02
   rotate: false
   xy: 146, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/03
+tree_cartoon/c03
   rotate: false
   xy: 146, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/04
+tree_cartoon/c04
   rotate: false
   xy: 146, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/05
+tree_cartoon/c05
   rotate: false
   xy: 146, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/06
+tree_cartoon/c06
   rotate: false
   xy: 146, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/07
+tree_cartoon/c07
   rotate: false
   xy: 146, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/08
+tree_cartoon/c08
   rotate: false
   xy: 146, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/09
+tree_cartoon/c09
   rotate: false
   xy: 146, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/10
+tree_cartoon/c10
   rotate: false
   xy: 146, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/11
+tree_cartoon/c11
   rotate: false
   xy: 182, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/12
+tree_cartoon/c12
   rotate: false
   xy: 218, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/13
+tree_cartoon/c13
   rotate: false
   xy: 254, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/14
+tree_cartoon/c14
   rotate: false
   xy: 290, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/15
+tree_cartoon/c15
   rotate: false
   xy: 146, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/16
+tree_cartoon/c16
   rotate: false
   xy: 146, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/17
+tree_cartoon/c17
   rotate: false
   xy: 146, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/18
+tree_cartoon/c18
   rotate: false
   xy: 146, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/19
+tree_cartoon/c19
   rotate: false
   xy: 182, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/20
+tree_cartoon/c20
   rotate: false
   xy: 218, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/21
+tree_cartoon/c21
   rotate: false
   xy: 254, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/22
+tree_cartoon/c22
   rotate: false
   xy: 290, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/23
+tree_cartoon/c23
   rotate: false
   xy: 290, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/24
+tree_cartoon/c24
   rotate: false
   xy: 182, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/25
+tree_cartoon/c25
   rotate: false
   xy: 218, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/26
+tree_cartoon/c26
   rotate: false
   xy: 254, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/27
+tree_cartoon/c27
   rotate: false
   xy: 326, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/28
+tree_cartoon/c28
   rotate: false
   xy: 362, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/29
+tree_cartoon/c29
   rotate: false
   xy: 398, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/30
+tree_cartoon/c30
   rotate: false
   xy: 434, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/31
+tree_cartoon/c31
   rotate: false
   xy: 146, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/32
+tree_cartoon/c32
   rotate: false
   xy: 182, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/33
+tree_cartoon/c33
   rotate: false
   xy: 218, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/34
+tree_cartoon/c34
   rotate: false
   xy: 254, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/35
+tree_cartoon/c35
   rotate: false
   xy: 290, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/36
+tree_cartoon/c36
   rotate: false
   xy: 326, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/37
+tree_cartoon/c37
   rotate: false
   xy: 362, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/38
+tree_cartoon/c38
   rotate: false
   xy: 398, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/39
+tree_cartoon/c39
   rotate: false
   xy: 434, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/40
+tree_cartoon/c40
   rotate: false
   xy: 470, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/41
+tree_cartoon/c41
   rotate: false
   xy: 506, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/42
+tree_cartoon/c42
   rotate: false
   xy: 542, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/43
+tree_cartoon/c43
   rotate: false
   xy: 578, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/44
+tree_cartoon/c44
   rotate: false
   xy: 614, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/45
+tree_cartoon/c45
   rotate: false
   xy: 650, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/46
+tree_cartoon/c46
   rotate: false
   xy: 686, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/00
+tree_dark/c00
   rotate: false
   xy: 722, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/01
+tree_dark/c01
   rotate: false
   xy: 722, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/02
+tree_dark/c02
   rotate: false
   xy: 722, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/03
+tree_dark/c03
   rotate: false
   xy: 722, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/04
+tree_dark/c04
   rotate: false
   xy: 722, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/05
+tree_dark/c05
   rotate: false
   xy: 722, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/06
+tree_dark/c06
   rotate: false
   xy: 722, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/07
+tree_dark/c07
   rotate: false
   xy: 722, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/08
+tree_dark/c08
   rotate: false
   xy: 722, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/09
+tree_dark/c09
   rotate: false
   xy: 722, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/10
+tree_dark/c10
   rotate: false
   xy: 722, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/11
+tree_dark/c11
   rotate: false
   xy: 758, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/12
+tree_dark/c12
   rotate: false
   xy: 794, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/13
+tree_dark/c13
   rotate: false
   xy: 830, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/14
+tree_dark/c14
   rotate: false
   xy: 866, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/15
+tree_dark/c15
   rotate: false
   xy: 722, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/16
+tree_dark/c16
   rotate: false
   xy: 722, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/17
+tree_dark/c17
   rotate: false
   xy: 722, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/18
+tree_dark/c18
   rotate: false
   xy: 722, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/19
+tree_dark/c19
   rotate: false
   xy: 758, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/20
+tree_dark/c20
   rotate: false
   xy: 794, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/21
+tree_dark/c21
   rotate: false
   xy: 830, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/22
+tree_dark/c22
   rotate: false
   xy: 866, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/23
+tree_dark/c23
   rotate: false
   xy: 866, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/24
+tree_dark/c24
   rotate: false
   xy: 758, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/25
+tree_dark/c25
   rotate: false
   xy: 794, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/26
+tree_dark/c26
   rotate: false
   xy: 830, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/27
+tree_dark/c27
   rotate: false
   xy: 902, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/28
+tree_dark/c28
   rotate: false
   xy: 938, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/29
+tree_dark/c29
   rotate: false
   xy: 974, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/30
+tree_dark/c30
   rotate: false
   xy: 2, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/31
+tree_dark/c31
   rotate: false
   xy: 722, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/32
+tree_dark/c32
   rotate: false
   xy: 758, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/33
+tree_dark/c33
   rotate: false
   xy: 794, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/34
+tree_dark/c34
   rotate: false
   xy: 830, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/35
+tree_dark/c35
   rotate: false
   xy: 866, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/36
+tree_dark/c36
   rotate: false
   xy: 902, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/37
+tree_dark/c37
   rotate: false
   xy: 938, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/38
+tree_dark/c38
   rotate: false
   xy: 974, 146
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/39
+tree_dark/c39
   rotate: false
   xy: 2, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/40
+tree_dark/c40
   rotate: false
   xy: 38, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/41
+tree_dark/c41
   rotate: false
   xy: 74, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/42
+tree_dark/c42
   rotate: false
   xy: 110, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/43
+tree_dark/c43
   rotate: false
   xy: 146, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/44
+tree_dark/c44
   rotate: false
   xy: 182, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/45
+tree_dark/c45
   rotate: false
   xy: 218, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/46
+tree_dark/c46
   rotate: false
   xy: 254, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/00
+tree_pine/c00
   rotate: false
   xy: 290, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/01
+tree_pine/c01
   rotate: false
   xy: 290, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/02
+tree_pine/c02
   rotate: false
   xy: 290, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/03
+tree_pine/c03
   rotate: false
   xy: 290, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/04
+tree_pine/c04
   rotate: false
   xy: 290, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/05
+tree_pine/c05
   rotate: false
   xy: 290, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/06
+tree_pine/c06
   rotate: false
   xy: 290, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/07
+tree_pine/c07
   rotate: false
   xy: 290, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/08
+tree_pine/c08
   rotate: false
   xy: 290, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/09
+tree_pine/c09
   rotate: false
   xy: 290, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/10
+tree_pine/c10
   rotate: false
   xy: 290, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/11
+tree_pine/c11
   rotate: false
   xy: 326, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/12
+tree_pine/c12
   rotate: false
   xy: 362, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/13
+tree_pine/c13
   rotate: false
   xy: 398, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/14
+tree_pine/c14
   rotate: false
   xy: 434, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/15
+tree_pine/c15
   rotate: false
   xy: 290, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/16
+tree_pine/c16
   rotate: false
   xy: 290, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/17
+tree_pine/c17
   rotate: false
   xy: 290, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/18
+tree_pine/c18
   rotate: false
   xy: 290, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/19
+tree_pine/c19
   rotate: false
   xy: 326, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/20
+tree_pine/c20
   rotate: false
   xy: 362, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/21
+tree_pine/c21
   rotate: false
   xy: 398, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/22
+tree_pine/c22
   rotate: false
   xy: 434, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/23
+tree_pine/c23
   rotate: false
   xy: 434, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/24
+tree_pine/c24
   rotate: false
   xy: 326, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/25
+tree_pine/c25
   rotate: false
   xy: 362, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/26
+tree_pine/c26
   rotate: false
   xy: 398, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/27
+tree_pine/c27
   rotate: false
   xy: 470, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/28
+tree_pine/c28
   rotate: false
   xy: 506, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/29
+tree_pine/c29
   rotate: false
   xy: 542, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/30
+tree_pine/c30
   rotate: false
   xy: 578, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/31
+tree_pine/c31
   rotate: false
   xy: 290, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/32
+tree_pine/c32
   rotate: false
   xy: 326, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/33
+tree_pine/c33
   rotate: false
   xy: 362, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/34
+tree_pine/c34
   rotate: false
   xy: 398, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/35
+tree_pine/c35
   rotate: false
   xy: 434, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/36
+tree_pine/c36
   rotate: false
   xy: 470, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/37
+tree_pine/c37
   rotate: false
   xy: 506, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/38
+tree_pine/c38
   rotate: false
   xy: 542, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/39
+tree_pine/c39
   rotate: false
   xy: 578, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/40
+tree_pine/c40
   rotate: false
   xy: 614, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/41
+tree_pine/c41
   rotate: false
   xy: 650, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/42
+tree_pine/c42
   rotate: false
   xy: 686, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/43
+tree_pine/c43
   rotate: false
   xy: 722, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/44
+tree_pine/c44
   rotate: false
   xy: 758, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/45
+tree_pine/c45
   rotate: false
   xy: 794, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/46
+tree_pine/c46
   rotate: false
   xy: 830, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/00
+tree_poof/c00
   rotate: false
   xy: 866, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/01
+tree_poof/c01
   rotate: false
   xy: 866, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/02
+tree_poof/c02
   rotate: false
   xy: 866, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/03
+tree_poof/c03
   rotate: false
   xy: 866, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/04
+tree_poof/c04
   rotate: false
   xy: 866, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/05
+tree_poof/c05
   rotate: false
   xy: 866, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/06
+tree_poof/c06
   rotate: false
   xy: 866, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/07
+tree_poof/c07
   rotate: false
   xy: 866, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/08
+tree_poof/c08
   rotate: false
   xy: 866, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/09
+tree_poof/c09
   rotate: false
   xy: 866, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/10
+tree_poof/c10
   rotate: false
   xy: 866, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/11
+tree_poof/c11
   rotate: false
   xy: 902, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/12
+tree_poof/c12
   rotate: false
   xy: 938, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/13
+tree_poof/c13
   rotate: false
   xy: 974, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/14
+tree_poof/c14
   rotate: false
   xy: 2, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/15
+tree_poof/c15
   rotate: false
   xy: 866, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/16
+tree_poof/c16
   rotate: false
   xy: 866, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/17
+tree_poof/c17
   rotate: false
   xy: 866, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/18
+tree_poof/c18
   rotate: false
   xy: 866, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/19
+tree_poof/c19
   rotate: false
   xy: 902, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/20
+tree_poof/c20
   rotate: false
   xy: 938, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/21
+tree_poof/c21
   rotate: false
   xy: 974, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/22
+tree_poof/c22
   rotate: false
   xy: 2, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/23
+tree_poof/c23
   rotate: false
   xy: 2, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/24
+tree_poof/c24
   rotate: false
   xy: 902, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/25
+tree_poof/c25
   rotate: false
   xy: 938, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/26
+tree_poof/c26
   rotate: false
   xy: 974, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/27
+tree_poof/c27
   rotate: false
   xy: 38, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/28
+tree_poof/c28
   rotate: false
   xy: 74, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/29
+tree_poof/c29
   rotate: false
   xy: 110, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/30
+tree_poof/c30
   rotate: false
   xy: 146, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/31
+tree_poof/c31
   rotate: false
   xy: 866, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/32
+tree_poof/c32
   rotate: false
   xy: 902, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/33
+tree_poof/c33
   rotate: false
   xy: 938, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/34
+tree_poof/c34
   rotate: false
   xy: 974, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/35
+tree_poof/c35
   rotate: false
   xy: 2, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/36
+tree_poof/c36
   rotate: false
   xy: 38, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/37
+tree_poof/c37
   rotate: false
   xy: 74, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/38
+tree_poof/c38
   rotate: false
   xy: 110, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/39
+tree_poof/c39
   rotate: false
   xy: 146, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/40
+tree_poof/c40
   rotate: false
   xy: 182, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/41
+tree_poof/c41
   rotate: false
   xy: 218, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/42
+tree_poof/c42
   rotate: false
   xy: 254, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/43
+tree_poof/c43
   rotate: false
   xy: 290, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/44
+tree_poof/c44
   rotate: false
   xy: 326, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/45
+tree_poof/c45
   rotate: false
   xy: 362, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/46
+tree_poof/c46
   rotate: false
   xy: 398, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-water/00
+water/c00
   rotate: false
   xy: 434, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 1
-water/00
+water/c00
   rotate: false
   xy: 470, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 2
-water/00
+water/c00
   rotate: false
   xy: 506, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 3
-water/00
+water/c00
   rotate: false
   xy: 542, 218
   size: 32, 32
@@ -7073,7 +7073,7 @@ water/o18
   orig: 32, 32
   offset: 0, 0
   index: 35
-wood_wall/00
+wood_wall/c00
   rotate: false
   xy: 110, 542
   size: 32, 32

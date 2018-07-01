@@ -10,11 +10,11 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 
-class TileTouchCheck {
+public class TileTouchCheck {
 	
 	private static final int MATCH = 1, NOMATCH = -1, SKIP = 0;
 	
-	static final TileTouchCheck[] connectionChecks = getTileChecks(GameCore.tileConnectionAtlas);
+	public static final TileTouchCheck[] connectionChecks = getTileChecks(GameCore.tileConnectionAtlas);
 	
 	private static TileTouchCheck[] getTileChecks(TextureAtlas atlas) {
 		if(atlas == null) return new TileTouchCheck[0];
@@ -59,7 +59,7 @@ class TileTouchCheck {
 		}
 	}
 	
-	boolean checkMatch(boolean[] aroundMatches) {
+	public boolean checkMatch(boolean[] aroundMatches) {
 		if(aroundMatches.length != map.length)
 			throw new IllegalArgumentException("tile type array must be of equal size to map array; "+aroundMatches.length+"!="+map.length);
 		

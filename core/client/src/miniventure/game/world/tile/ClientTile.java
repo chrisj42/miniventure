@@ -40,7 +40,6 @@ public class ClientTile extends Tile {
 		for(int x = -1; x <= 1; x++) {
 			for (int y = -1; y <= 1; y++) {
 				Tile oTile = t.getLevel().getTile(t.x + x, t.y + y);
-				//if(x == 0 && y == 0) {if(oTile != this) throw new IllegalStateException("Level reference or position of Tile " + this + " is faulty; Level "+level+" returns Tile " + oTile + " at position "+this.x+","+this.y+"."); aroundTypes[idx] = new TileType[0]; }
 				if(x == 0 && y == 0)
 					aroundTypes[idx] = new TileType[0];
 				else
@@ -65,6 +64,7 @@ public class ClientTile extends Tile {
 		Boolean[] model = new Boolean[9];
 		Arrays.fill(model, Boolean.FALSE);
 		for(int i = 0; i < aroundTypes.length; i++) {
+			if(i == 4) continue; // skip the center
 			for (TileType oType : aroundTypes[i]) { // doesn't matter the order.
 				if(!t.getProp(oType, TilePropertyType.Overlap).canOverlap()) continue; // the type can't even overlap anyway.
 				//if(TileType.tileSorter.compare(mainTypes[firstIdx], oType) >= 0) continue; // the type is lower than the lowest *visible* main type.
