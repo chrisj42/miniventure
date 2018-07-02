@@ -1,18 +1,13 @@
 package miniventure.game.world.tile.newtile;
 
 import miniventure.game.item.Item;
-import miniventure.game.texture.TextureHolder;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.particle.Particle;
-import miniventure.game.world.tile.AnimationProperty;
-import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.newtile.data.DataMap;
 import miniventure.game.world.tile.newtile.data.DataTag;
 import miniventure.game.world.tile.newtile.render.TileTypeRenderer;
-
-import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

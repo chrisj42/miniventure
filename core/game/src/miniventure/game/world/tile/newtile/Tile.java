@@ -1,7 +1,8 @@
-package miniventure.game.world.tile;
+package miniventure.game.world.tile.newtile;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Stack;
 
 import miniventure.game.item.Item;
@@ -40,9 +41,10 @@ public class Tile implements WorldObject {
 	 */
 	
 	public static final int SIZE = 32;
-	private static final TileType baseType = TileType.values[0];
+	private static final TileType baseType = TileType.HOLE;
 	
-	private Stack<TileType> tileTypes = new Stack<>(); // using a for each loop for iteration will go from the bottom of the stack to the top.
+	// TODO use a TileStack instead.
+	private LinkedList<TileType> tileTypes = new LinkedList<>(); // using a for each loop for iteration will go from the bottom of the stack to the top.
 	
 	@NotNull private Level level;
 	protected final int x, y;
@@ -60,46 +62,10 @@ public class Tile implements WorldObject {
 			tileTypes.push(type);
 	}
 	
+	public TileType getGroundType() { return tileTypes }
 	public TileType getType() { return tileTypes.peek(); }
-	TileType[] getTypes() { return tileTypes.toArray(new TileType[tileTypes.size()]); }
+	public TileType[] getTypes() { return tileTypes.toArray(new TileType[tileTypes.size()]); }
 	boolean hasType(TileType type) { return tileTypes.contains(type); }
-	
-	String getData(TilePropertyType propertyType, TileType type, int propDataIndex) {
-		return data[getIndex(type, propertyType, propDataIndex)];
-	}
-	
-	void setData(TilePropertyType propertyType, TileType type, int propDataIndex, String data) {
-		this.data[getIndex(type, propertyType, propDataIndex)] = data;
-	}
-	
-	private int getIndex(TileType type, TilePropertyType propertyType, int propDataIndex) {
-		if(!tileTypes.contains(type))
-			throw new IllegalArgumentException("Tile " + this + " does not have a " + type + " type, cannot fetch the data index.");
-		
-		type.checkDataAccess(propertyType, propDataIndex);
-		
-		int offset = 0;
-		
-		for(int i = tileTypes.size()-1; i >= 0; i--) {
-			TileType cur = tileTypes.get(i);
-			if(!type.equals(cur))
-				offset += cur.getDataLength();
-			else
-				break;
-		}
-		
-		return type.getPropDataIndex(propertyType) + propDataIndex + offset;
-	}
-	
-	<T extends TileProperty> T getProp(TileType tileType, TilePropertyType<T> propertyType) {
-		return getWorld().getTilePropertyFetcher().getProp(propertyType, tileType);
-	}
-	
-	<T extends TileProperty> T getProp(TileType tileType, TilePropertyType<? super T> propertyType, Class<T> asClass) {
-		return getWorld().getTilePropertyFetcher().getProp(propertyType, tileType, asClass);
-	}
-	
-	
 	
 	
 	@NotNull @Override
@@ -122,6 +88,7 @@ public class Tile implements WorldObject {
 		
 		moveEntities(newType);
 		
+		// TODO remake using DataMaps
 		String[] newData = newType.getInitialData();
 		String[] fullData = new String[data.length + newData.length];
 		System.arraycopy(data, 0, fullData, newData.length, data.length); // copy old data to end of data
@@ -131,7 +98,8 @@ public class Tile implements WorldObject {
 		tileTypes.push(newType);
 		
 		// check for an entrance animation
-		getProp(newType, TilePropertyType.Transition).tryStartAnimation(this, prevType);
+		// TODO Transition animations
+		//getProp(newType, TilePropertyType.Transition).tryStartAnimation(this, prevType);
 		// we don't use the return value because transition or not, there's nothing we need to do. :P
 		
 		return true;
@@ -196,13 +164,13 @@ public class Tile implements WorldObject {
 		// the above should always return true, btw, because we already checked with the same conditional a few lines up.
 	}
 	
-	private void moveEntities(TileType newType) {
+	private void moveEntities(TileLayer newType) {
 		// check for entities that will not be allowed on the new tile, and move them to the closest adjacent tile they are allowed on.
 		HashSet<Tile> surroundingTileSet = getAdjacentTiles(true);
 		Tile[] surroundingTiles = surroundingTileSet.toArray(new Tile[surroundingTileSet.size()]);
 		for(Entity entity: level.getOverlappingEntities(getBounds())) {
 			// for each entity, check if it can walk on the new tile type. If not, fetch the surrounding tiles, remove those the entity can't walk on, and then fetch the closest tile of the remaining ones.
-			if(getProp(newType, TilePropertyType.Solid).isPermeableBy(entity)) continue; // no worries for this entity.
+			if(newType.isPermeableBy(entity)) continue; // no worries for this entity.
 			
 			Array<Tile> aroundTiles = new Array<>(surroundingTiles);
 			for(int i = 0; i < aroundTiles.size; i++) {

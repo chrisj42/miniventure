@@ -2,9 +2,7 @@ package miniventure.game.world.tile.newtile.data;
 
 import java.lang.reflect.InvocationTargetException;
 
-import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.ValueMonoFunction;
-import miniventure.game.world.tile.newtile.TileType;
 
 public final class DataTag<T> {
 	
@@ -12,21 +10,10 @@ public final class DataTag<T> {
 		
 		- it is expected that all given value types can be converted to a String with toString, and have a constructor that takes a single String.
 		
-		- This class is used for both TileLayer ID data, and Tile-specific data. They will be separate DataMaps, but they will but be DataMaps nonetheless.
+		- This class is used for both TileLayer ID data, and Tile-specific data. They will be separate DataMaps, but they will be DataMaps nonetheless.
 	 */
 	
-	// Booleans
-	public static final DataTag<Boolean> Permeable = new DataTag<>(Boolean.class);
-	public static final DataTag<Boolean> Overlap = new DataTag<>(Boolean.class);
-	public static final DataTag<Boolean> Opaque = new DataTag<>(Boolean.class);
-	
-	public static final DataTag<Float> LightRadius = new DataTag<>(Float.class);
-	
-	public static final DataTag<TileType[]> Connections = new DataTag<>(
-		types -> MyUtils.encodeStringArray(MyUtils.<TileType, String>mapArray(types, String.class, Enum::name)), 
-		data -> MyUtils.mapArray(MyUtils.parseLayeredString(data), TileType.class, TileType::valueOf)
-	);
-	
+	private static int counter = 0;
 	
 	// Tile-specific
 	
@@ -42,13 +29,14 @@ public final class DataTag<T> {
 	
 	
 	
-	
+	private final int ordinal;
 	private final ValueMonoFunction<T, String> valueWriter;
 	private final ValueMonoFunction<String, T> valueParser;
 	
 	private DataTag(ValueMonoFunction<T, String> valueWriter, ValueMonoFunction<String, T> valueParser) {
 		this.valueWriter = valueWriter;
 		this.valueParser = valueParser;
+		ordinal = counter++;
 	}
 	
 	private DataTag(Class<T> valueClass) {
@@ -66,4 +54,12 @@ public final class DataTag<T> {
 	public String serialize(T value) { return valueWriter.get(value); }
 	public T deserialize(String data) { return valueParser.get(data); }
 	
+	@Override
+	public boolean equals(Object other) {
+		if(!(other instanceof DataTag)) return false;
+		return ordinal == ((DataTag)other).ordinal;
+	}
+	
+	@Override
+	public int hashCode() { return ordinal; }
 }

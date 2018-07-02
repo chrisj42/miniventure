@@ -65,7 +65,7 @@ public class ServerLevel extends Level {
 	public void onTileUpdate(ServerTile tile) {
 		ServerCore.getServer().broadcast(new TileUpdate(tile), this);
 		
-		List<Tile> tiles = Arrays.asList(getAreaTiles(tile.getLocation(), 1, true).shrink());
+		HashSet<Tile> tiles = getAreaTiles(tile.getLocation(), 1, true);
 		
 		synchronized (newTileUpdates) {
 			newTileUpdates.addAll(tiles);
@@ -155,8 +155,8 @@ public class ServerLevel extends Level {
 		
 		if(!closest.isPermeableBy(ie)) {
 			// we need to look around for a tile that the item *can* be placed on.
-			Array<Tile> adjacent = closest.getAdjacentTiles(true);
-			Boundable.sortByDistance(adjacent, targetPos == null ? dropPos : targetPos);
+			HashSet<Tile> adjacent = closest.getAdjacentTiles(true);
+			Boundable.sortByDistance(new Array<>(adjacent.toArray(new Tile[adjacent.size()])), targetPos == null ? dropPos : targetPos);
 			for(Tile adj: adjacent) {
 				if(adj.isPermeableBy(ie)) {
 					closest = adj;

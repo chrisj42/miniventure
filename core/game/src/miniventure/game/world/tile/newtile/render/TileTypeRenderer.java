@@ -1,12 +1,12 @@
 package miniventure.game.world.tile.newtile.render;
 
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.HashMap;
 
 import miniventure.game.GameCore;
 import miniventure.game.texture.TextureHolder;
-import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.newtile.TileLayer;
+import miniventure.game.util.RelPos;
 import miniventure.game.world.tile.newtile.TileType;
 
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -68,13 +68,14 @@ public class TileTypeRenderer {
 	
 	// whenever a tile changes its TileType stack in any way, all 9 tiles around it re-fetch their overlap and main animations. Then they keep that stack of animations until the next fetch.
 	
-	public Animation<TextureHolder> getConnectionSprite(TileLayer[][] aroundTypes) {
-		return connectionManager.getConnectionSprite(aroundTypes);
+	// gets the sprite for when this tiletype is surrounded by the given types.
+	public Animation<TextureHolder> getConnectionSprite(EnumSet<TileType>[] aroundTypes) {
+		return connectionManager.getConnectionSprite(tileType, aroundTypes);
 	}
 	
-	
-	public Animation<TextureHolder> getOverlapSpriteFor(Tile tile, int layerIndex, Boolean[] aroundMatches) {
-		
+	// gets the overlap sprite (sides + any isolated corners) for this tiletype overlapping a tile at the given positions.
+	public Array<Animation<TextureHolder>> getOverlapSprites(EnumSet<RelPos> overlapPositions) {
+		return overlapManager.getOverlapSprites(tileType, overlapPositions);
 	}
 	
 }

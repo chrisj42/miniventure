@@ -28,4 +28,6 @@ public enum TileType {
 	public boolean checkMatch(DataMap tileData, TileLayer other) {
 		return other.getType() == this;
 	}
+	
+	
 }

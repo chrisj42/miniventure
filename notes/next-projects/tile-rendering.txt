@@ -1,3 +1,35 @@
+Tiles have a stack of types. But, the stack only goes down until a "ground" tile type. Then, any tile types below must be represented in the ground tile type's data.
+
+Examples of ground type tiletypes: Hole, Grass, Sand, Dirt.
+Ground tiletypes are opaque. They are always rendered behind all entities.
+
+Water is a Fluid type. Fluid types only render part of the sprites of entities on them, because they are "in" the fluid.
+
+Stone, Trees, Cactus, Door, Walls, etc. are Surface types. They render after other tiles, and after entities above them; but before entities below them.
+
+Note that this will require a little change in entity rendering, as well as Surface type tile rendering; sprites must specify a Z "depth" to their sprites. This allows the sprite to be halfway up the tile, minus half the depth, so whatever's in the sprite appears centered on the tile. The hitbox remains unchanged, so you can walk behind the sprite, to a degree.
+
+Applied to entities, this means that you can also walk behind entities to a degree, and appear on top of them a bit.
+
+
+
+
+
+Tile class has method to re-fetch all of its sprites.
+
+The "fetch" goes like this:
+
+ - get all layer types in 3x3 that are NOT under an opaque layer, and sort (while also keeping separate Sets of each tile's types)
+ - find highest opaque tile in main
+ - for each layer from highest opaque to top in main:
+ 	- add layer
+ 	- check for overlaps in total that go above cur layer AND below next layer (or next layer is null); add each overlap in sequence
+
+
+
+
+
+
 TileTypeRenderer
 
 - is opaque or not

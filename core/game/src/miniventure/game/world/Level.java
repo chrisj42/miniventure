@@ -2,6 +2,7 @@ package miniventure.game.world;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import miniventure.game.util.MyUtils;
@@ -229,19 +230,17 @@ public abstract class Level implements Taggable<Level> {
 		return objects;
 	}
 	
-	public Array<Tile> getAreaTiles(Point tilePos, int radius, boolean includeCenter) { return getAreaTiles(tilePos.x, tilePos.y, radius, includeCenter); }
-	public Array<Tile> getAreaTiles(int x, int y, int radius, boolean includeCenter) {
-		Array<Tile> tiles = new Array<>();
-		for(int xo = Math.max(0, x-radius); xo <= Math.min(getWidth()-1, x+radius); xo++) {
-			for(int yo = Math.max(0, y-radius); yo <= Math.min(getHeight()-1, y+radius); yo++) {
-				Tile t = getTile(xo, yo);
-				if(t != null)
-					tiles.add(t);
-			}
-		}
+	public HashSet<Tile> getAreaTiles(Point tilePos, int radius, boolean includeCenter) { return getAreaTiles(tilePos.x, tilePos.y, radius, includeCenter); }
+	public HashSet<Tile> getAreaTiles(int x, int y, int radius, boolean includeCenter) {
+		
+		HashSet<Tile> tiles = new HashSet<>();
+		for(int xo = Math.max(0, x-radius); xo <= Math.min(getWidth()-1, x+radius); xo++)
+			for(int yo = Math.max(0, y-radius); yo <= Math.min(getHeight()-1, y+radius); yo++)
+				tiles.add(getTile(xo, yo));
+		tiles.remove(null);
 		
 		if(!includeCenter)
-			tiles.removeValue(getTile(x, y), true);
+			tiles.remove(getTile(x, y));
 		
 		return tiles;
 	}

@@ -38,7 +38,7 @@ class SpreadProperty {
 	}
 	
 	public void spread(Tile tile) {
-		Array<Tile> around = tile.getAdjacentTiles(false);
+		HashSet<Tile> around = tile.getAdjacentTiles(false);
 		//around.shuffle();
 		for(Tile t: around) {
 			if(replaces.contains(t.getType())) {

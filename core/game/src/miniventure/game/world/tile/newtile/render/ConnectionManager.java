@@ -7,11 +7,12 @@ import java.util.HashMap;
 
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.world.tile.TileTouchCheck;
-import miniventure.game.world.tile.newtile.TileLayer;
 import miniventure.game.world.tile.newtile.TileType;
 
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.utils.Array;
+
+import org.jetbrains.annotations.NotNull;
 
 public class ConnectionManager {
 	
@@ -31,26 +32,26 @@ public class ConnectionManager {
 		return this;
 	}
 	
-	public Animation<TextureHolder> getConnectionSprite(TileLayer[][] aroundTypes) {
-		TileLayer type = aroundTypes[1][1];
+	
+	/// Checks the given aroundTypes for all types 
+	@NotNull
+	public Animation<TextureHolder> getConnectionSprite(@NotNull TileType type, EnumSet<TileType>[] aroundTypes) {
+		//TileLayer type = aroundTypes[1][1];
 		
 		if(connectingTypes.size() == 0)
-			return renderStyle.getAnimation(tileAnimations.get(type.getType()).get("00"));
+			return renderStyle.getAnimation(tileAnimations.get(type).get("00"));
 		
 		boolean[] tileConnections = new boolean[9];
 		
 		for(int i = 0; i < aroundTypes.length; i++) {
-			// find the top opaque one
+			// check if each surrounding tile has something in the connectingTypes array
 			boolean connects = false;
-			for(int ti = aroundTypes[i].length - 1; ti >= 0; ti--) {
-				if(connectingTypes.contains(aroundTypes[i][ti].getType())) {
+			for(TileType aroundType: aroundTypes[i]) {
+				if(connectingTypes.contains(aroundType)) {
 					connects = true;
 					break;
 				}
-				if(aroundTypes[i][ti].getRenderer().isOpaque()) // the type also doesn't connect, at this point.
-					break; // lower tiles are irrelevant.
 			}
-			
 			tileConnections[i] = connects;
 		}
 		
@@ -62,7 +63,7 @@ public class ConnectionManager {
 			}
 		}
 		
-		return overrides.getOrDefault(spriteIdx, renderStyle).getAnimation(tileAnimations.get(type.getType()).get((spriteIdx<10?"0":"")+spriteIdx));
+		return overrides.getOrDefault(spriteIdx, renderStyle).getAnimation(tileAnimations.get(type).get((spriteIdx<10?"0":"")+spriteIdx));
 	}
 	
 }
