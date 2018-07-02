@@ -1,16 +1,16 @@
-package miniventure.game.world.tile.newtile.render;
+package miniventure.game.world.tile.newtile;
 
 import java.util.EnumMap;
 import java.util.HashMap;
 
 import miniventure.game.texture.TextureHolder;
-import miniventure.game.world.tile.newtile.TileType;
+import miniventure.game.world.tile.newtile.TileType.TileTypeEnum;
 
 import com.badlogic.gdx.utils.Array;
 
 public class TransitionManager {
 	
-	static EnumMap<TileType, HashMap<String, Array<TextureHolder>>> tileAnimations = new EnumMap<>(TileType.class);
+	static EnumMap<TileTypeEnum, HashMap<String, Array<TextureHolder>>> tileAnimations = new EnumMap<>(TileTypeEnum.class);
 	
 	private final HashMap<String, TransitionAnimation> entranceAnimations = new HashMap<>();
 	private final HashMap<String, TransitionAnimation> exitAnimations = new HashMap<>();

@@ -1,4 +1,4 @@
-package miniventure.game.world.tile.newtile.render;
+package miniventure.game.world.tile.newtile;
 
 import miniventure.game.texture.TextureHolder;
 

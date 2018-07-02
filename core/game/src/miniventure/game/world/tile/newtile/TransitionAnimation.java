@@ -1,6 +1,4 @@
-package miniventure.game.world.tile.newtile.render;
-
-import miniventure.game.world.tile.newtile.TileType;
+package miniventure.game.world.tile.newtile;
 
 import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 
