@@ -110,6 +110,18 @@ public class TransitionManager {
 		return animation.getAnimation(tileAnimations.get(tileType).get(name));
 	}
 	
+	public float getTimeRemaining(@NotNull Tile tile) {
+		if(!playingAnimation(tile)) return 0;
+		TransitionAnimation curTransition = getAnimationStyle(tile.getDataMap(tileType));
+		if(curTransition == null)
+			return 0;
+		
+		float start = tile.getDataMap(tileType).get(DataTag.TransitionStart);
+		float now = tile.getWorld().getGameTime();
+		float duration = curTransition.time;
+		return duration - (now - start);
+	}
+	
 	private boolean isTransitionMode(@NotNull Tile tile, TransitionMode mode) { return tile.getDataMap(tileType).getOrDefault(DataTag.TransitionMode, TransitionMode.NONE) == mode; }
 	
 	public boolean playingAnimation(@NotNull Tile tile) { return !isTransitionMode(tile, TransitionMode.NONE); }

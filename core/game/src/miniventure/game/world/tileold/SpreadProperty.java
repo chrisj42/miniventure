@@ -3,12 +3,11 @@ package miniventure.game.world.tileold;
 import java.util.Arrays;
 import java.util.HashSet;
 
-import com.badlogic.gdx.utils.Array;
-
 import org.jetbrains.annotations.NotNull;
 
 class SpreadProperty {
 	
+	@FunctionalInterface
 	interface TileReplaceBehavior {
 		void spreadType(TileType newType, Tile tile);
 	}

@@ -2,6 +2,7 @@ package miniventure.game;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Objects;
 
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.chat.InfoMessageLine;
@@ -354,7 +355,7 @@ public interface GameProtocol {
 		public boolean variesFrom(Vector3 pos, Integer levelDepth) { return variesFrom(new Vector2(pos.x, pos.y), levelDepth); }
 		public boolean variesFrom(Vector2 pos, Integer levelDepth) {
 			if(pos.dst(x, y) > 0.25) return true;
-			return !MyUtils.nullablesAreEqual(levelDepth, this.levelDepth);
+			return !Objects.equals(levelDepth, this.levelDepth);
 		}
 		
 		public Vector3 getPos() { return new Vector3(x, y, z); }

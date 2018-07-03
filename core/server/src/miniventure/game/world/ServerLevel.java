@@ -1,11 +1,6 @@
 package miniventure.game.world;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import miniventure.game.GameProtocol.EntityAddition;
 import miniventure.game.GameProtocol.EntityRemoval;
@@ -56,7 +51,7 @@ public class ServerLevel extends Level {
 		super.entityMoved(entity);
 		Point newChunk = entityChunks.get(entity);
 		
-		if(!MyUtils.nullablesAreEqual(prevChunk, newChunk)) {
+		if(!Objects.equals(prevChunk, newChunk)) {
 			//	System.out.println("Server broadcasting entity "+(newChunk==null?"removal":"addition")+": "+entity);
 			if(newChunk != null)
 				ServerCore.getServer().broadcast(new EntityAddition(entity), this);

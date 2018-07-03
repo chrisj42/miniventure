@@ -5,7 +5,7 @@ import miniventure.game.item.TileItem;
 import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolItem.Material;
 import miniventure.game.item.ToolType;
-import miniventure.game.util.MyUtils;
+import miniventure.game.util.ArrayUtils;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.WorldObject;
 
@@ -100,7 +100,7 @@ public class DestructibleProperty extends TileProperty {
 			if(replace || this.preferredTools.length == 0)
 				this.preferredTools = preferredTools;
 			else if(preferredTools.length > 0)
-				this.preferredTools = MyUtils.arrayJoin(PreferredTool.class, this.preferredTools, preferredTools);
+				this.preferredTools = ArrayUtils.arrayJoin(PreferredTool.class, this.preferredTools, preferredTools);
 			return this;
 		}
 		
@@ -109,7 +109,7 @@ public class DestructibleProperty extends TileProperty {
 			if(replace || this.damageConditions.length == 0)
 				this.damageConditions = damageConditions;
 			else if(damageConditions.length > 0)
-				this.damageConditions = MyUtils.arrayJoin(DamageConditionCheck.class, this.damageConditions, damageConditions);
+				this.damageConditions = ArrayUtils.arrayJoin(DamageConditionCheck.class, this.damageConditions, damageConditions);
 			return this;
 		}
 		
@@ -125,7 +125,7 @@ public class DestructibleProperty extends TileProperty {
 			if(replace || this.drops.length == 0)
 				this.drops = drops;
 			else if(drops.length > 0)
-				this.drops = MyUtils.arrayJoin(ItemDrop.class, this.drops, drops);
+				this.drops = ArrayUtils.arrayJoin(ItemDrop.class, this.drops, drops);
 			return this;
 		}
 		

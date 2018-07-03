@@ -116,9 +116,6 @@ public class ClientLevel extends Level {
 	}
 	
 	@Override
-	protected ClientTile createTile(int x, int y, TileTypeEnum[] types, DataMap[] data) { return new ClientTile(this, x, y, types, data); }
-	
-	@Override
 	public ClientTile getTile(float x, float y) { return getTile(x, y, false); }
 	public ClientTile getTile(float x, float y, boolean loadIfNull) {
 		ClientTile tile = (ClientTile) super.getTile(x, y);

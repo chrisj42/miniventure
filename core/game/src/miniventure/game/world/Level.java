@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.SynchronizedAccessor;
@@ -28,12 +29,12 @@ public abstract class Level implements Taggable<Level> {
 	private final int depth, width, height;
 	
 	@NotNull private final WorldManager world;
-	protected final SynchronizedAccessor<Map<Point, Chunk>> loadedChunks = new SynchronizedAccessor<>(Collections.synchronizedMap(new HashMap<>()));
-	protected int tileCount;
+	final SynchronizedAccessor<Map<Point, Chunk>> loadedChunks = new SynchronizedAccessor<>(Collections.synchronizedMap(new HashMap<>(X_LOAD_RADIUS*2*Y_LOAD_RADIUS*2)));
+	//private int tileCount;
 	private int mobCount;
 	
 	// this is to track when entities go in and out of chunks
-	protected final HashMap<Entity, Point> entityChunks = new HashMap<>();
+	final HashMap<Entity, Point> entityChunks = new HashMap<>(X_LOAD_RADIUS*2*Y_LOAD_RADIUS*2);
 	
 	/** @noinspection FieldCanBeLocal*/
 	private int mobCap = 3; // per chunk
@@ -73,9 +74,9 @@ public abstract class Level implements Taggable<Level> {
 	
 	public synchronized void entityMoved(Entity entity) {
 		Point prevChunk = entityChunks.get(entity);
-		Point curChunk = entity.getLevel() != this ? null : Chunk.getCoords(entity.getCenter());
+		Point curChunk = !this.equals(entity.getLevel()) ? null : Chunk.getCoords(entity.getCenter());
 		
-		if(MyUtils.nullablesAreEqual(prevChunk, curChunk)) return;
+		if(Objects.equals(prevChunk, curChunk)) return;
 		//System.out.println(world+" entity "+entity+" changed chunk, from "+prevChunk+" to "+curChunk);
 		
 		if(curChunk == null)
@@ -110,7 +111,7 @@ public abstract class Level implements Taggable<Level> {
 			if(chunk == null) continue; // shouldn't happen, but just in case
 			
 			// decrease tile count by number of tiles in chunk
-			tileCount -= chunk.width * chunk.height;
+			//tileCount -= chunk.width * chunk.height;
 			// get all entities in the chunk, and remove them from the game (later they'll be saved instead)
 			Array<Entity> entities = getOverlappingEntities(new Rectangle(chunkCoord.x * Chunk.SIZE, chunkCoord.y * Chunk.SIZE, chunk.width, chunk.height));
 			for(Entity e: entities)
@@ -303,7 +304,7 @@ public abstract class Level implements Taggable<Level> {
 	protected abstract void unloadChunk(Point chunkCoord);
 	
 	public void loadChunk(Chunk newChunk) {
-		tileCount += newChunk.width * newChunk.height;
+		//tileCount += newChunk.width * newChunk.height;
 		putLoadedChunk(new Point(newChunk.chunkX, newChunk.chunkY), newChunk);
 	}
 	

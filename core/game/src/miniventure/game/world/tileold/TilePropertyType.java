@@ -2,7 +2,7 @@ package miniventure.game.world.tileold;
 
 import java.util.HashMap;
 
-import miniventure.game.world.tile.AnimationProperty.AnimationType;
+import miniventure.game.world.tileold.AnimationProperty.AnimationType;
 
 // PT is the class required.
 public final class TilePropertyType<PT extends TileProperty> {

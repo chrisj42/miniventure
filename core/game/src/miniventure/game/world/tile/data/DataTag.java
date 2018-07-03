@@ -1,5 +1,6 @@
 package miniventure.game.world.tile.data;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
@@ -7,6 +8,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeMap;
 
+import miniventure.game.util.ArrayUtils;
+import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.ValueMonoFunction;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 import miniventure.game.world.tile.TransitionManager.TransitionMode;
@@ -41,17 +44,17 @@ public final class DataTag<T> implements Comparable<DataTag<?>> {
 	
 	// Update
 	public static final DataTag<Float> LastUpdate = new DataTag<>(Float.class);
-	
+	public static final DataTag<Float[]> UpdateTimers = new DataTag<>(Float[].class);
 	
 	
 	
 	/* --- ENUMERATION SETUP --- */
 	
 	
-	private static final HashMap<String, DataTag<?>> nameToValue = new HashMap<>();
+	private static final HashMap<String, DataTag<?>> nameToValue = new HashMap<>(7);
 	private static final TreeMap<DataTag<?>, String> valueToName = new TreeMap<>();
 	static {
-		ArrayList<Field> enumTypes = new ArrayList<>(8);
+		ArrayList<Field> enumTypes = new ArrayList<>(7);
 		
 		// WARNING: getDeclaredFields makes no guarantee that the fields are returned in order of declaration.
 		// So, I'll store the values in a TreeMap.
@@ -89,13 +92,26 @@ public final class DataTag<T> implements Comparable<DataTag<?>> {
 	private final ValueMonoFunction<String, T> valueParser;
 	
 	private DataTag(ValueMonoFunction<T, String> valueWriter, ValueMonoFunction<String, T> valueParser) {
+		ordinal = nextOrdinal();
 		this.valueWriter = valueWriter;
 		this.valueParser = valueParser;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private DataTag(final Class<T> arrayValueClass, final ValueMonoFunction<Object, String> valueWriter, final ValueMonoFunction<String, Object> valueParser) {
 		ordinal = nextOrdinal();
+		if(arrayValueClass.isArray()) {
+			this.valueWriter = ar -> ArrayUtils.deepToString(ar, MyUtils::encodeStringArray, valueWriter);
+			this.valueParser = data -> (T) parseArray(arrayValueClass.getComponentType(), valueParser, data);
+		}
+		else {
+			this.valueWriter = (ValueMonoFunction<T, String>) valueWriter;
+			this.valueParser = (ValueMonoFunction<String, T>) valueParser;
+		}
 	}
 	
 	private DataTag(final Class<T> valueClass) {
-		this(String::valueOf, data -> {
+		this(valueClass, String::valueOf, data -> {
 			if(Enum.class.isAssignableFrom(valueClass))
 				return Enum.valueOf(Enum.class.asSubclass(valueClass), data);
 			
@@ -105,6 +121,20 @@ public final class DataTag<T> implements Comparable<DataTag<?>> {
 				throw new TypeNotPresentException(valueClass.getTypeName(), e);
 			}
 		});
+	}
+	
+	@SuppressWarnings("unchecked")
+	private static <T> T[] parseArray(Class<T> componentType, ValueMonoFunction<String, Object> valueParser, String data) {
+		String[] dataArray = MyUtils.parseLayeredString(data);
+		T[] ar = (T[]) Array.newInstance(componentType, dataArray.length);
+		for(int i = 0; i < dataArray.length; i++) {
+			if(componentType.isArray())
+				ar[i] = (T) parseArray(componentType.getComponentType(), valueParser, dataArray[i]);
+			else
+				ar[i] = (T) valueParser.get(dataArray[i]);
+		}
+		
+		return ar;
 	}
 	
 	public DataEntry<T> as(T value) { return new DataEntry<>(this, value); }

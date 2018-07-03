@@ -1,6 +1,6 @@
 package miniventure.game.world.tileold;
 
-import miniventure.game.world.tile.SpreadProperty.TileReplaceBehavior;
+import miniventure.game.world.tileold.SpreadProperty.TileReplaceBehavior;
 
 import org.jetbrains.annotations.NotNull;
 

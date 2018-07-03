@@ -1,7 +1,7 @@
 package miniventure.game.world.tileold;
 
-import miniventure.game.world.tile.SpreadProperty.TileReplaceBehavior;
-import miniventure.game.world.tile.UpdateProperty.DelayedUpdate;
+import miniventure.game.world.tileold.SpreadProperty.TileReplaceBehavior;
+import miniventure.game.world.tileold.UpdateProperty.DelayedUpdate;
 
 import org.jetbrains.annotations.NotNull;
 

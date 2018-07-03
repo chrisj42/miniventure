@@ -5,6 +5,7 @@ import java.util.List;
 
 import miniventure.game.GameCore;
 import miniventure.game.chat.command.CommandInputParser;
+import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.VersionInfo;
 
@@ -19,7 +20,7 @@ public class ServerCore {
 	public static CommandInputParser getCommandInput() { return commandParser; }
 	
 	public static void main(String[] args) {
-		args = MyUtils.mapArray(args, String.class, String::toLowerCase);
+		args = ArrayUtils.mapArray(args, String.class, String::toLowerCase);
 		List<String> argList = Arrays.asList(args);
 		
 		int sizeIdx = argList.indexOf("--server") + 1;

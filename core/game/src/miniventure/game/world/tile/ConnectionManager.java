@@ -37,8 +37,6 @@ public class ConnectionManager {
 	/// Checks the given aroundTypes for all types 
 	@NotNull
 	public Animation<TextureHolder> getConnectionSprite(EnumSet<TileTypeEnum>[] aroundTypes) {
-		//TileLayer type = aroundTypes[1][1];
-		
 		if(connectingTypes.size() == 0)
 			return renderStyle.getAnimation(tileAnimations.get(type).get("00"));
 		

@@ -1,5 +1,6 @@
 package miniventure.game.world.tile;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -89,7 +90,7 @@ public class TileTypeRenderer {
 	}
 	
 	// gets the overlap sprite (sides + any isolated corners) for this tiletype overlapping a tile at the given positions.
-	public Array<Animation<TextureHolder>> getOverlapSprites(EnumSet<RelPos> overlapPositions) {
+	public ArrayList<Animation<TextureHolder>> getOverlapSprites(EnumSet<RelPos> overlapPositions) {
 		return overlapManager.getOverlapSprites(overlapPositions);
 	}
 	

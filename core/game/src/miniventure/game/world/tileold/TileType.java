@@ -10,10 +10,10 @@ import miniventure.game.item.ToolType;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.MapFunction;
 import miniventure.game.world.ItemDrop;
-import miniventure.game.world.tile.AnimationProperty.AnimationType;
-import miniventure.game.world.tile.DestructibleProperty.DestructibleBuilder;
-import miniventure.game.world.tile.DestructibleProperty.PreferredTool;
-import miniventure.game.world.tile.DestructibleProperty.RequiredTool;
+import miniventure.game.world.tileold.AnimationProperty.AnimationType;
+import miniventure.game.world.tileold.DestructibleProperty.DestructibleBuilder;
+import miniventure.game.world.tileold.DestructibleProperty.PreferredTool;
+import miniventure.game.world.tileold.DestructibleProperty.RequiredTool;
 
 import com.badlogic.gdx.utils.Array;
 

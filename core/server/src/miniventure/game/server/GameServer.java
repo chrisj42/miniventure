@@ -21,7 +21,7 @@ import miniventure.game.item.Item;
 import miniventure.game.item.ItemStack;
 import miniventure.game.item.Recipe;
 import miniventure.game.item.Recipes;
-import miniventure.game.util.MyUtils;
+import miniventure.game.util.ArrayUtils;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.Level;
@@ -31,7 +31,6 @@ import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.mob.ServerPlayer;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.TileType;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 import com.badlogic.gdx.graphics.Color;
@@ -306,7 +305,7 @@ public class GameServer implements GameProtocol {
 						matches.sort(String::compareToIgnoreCase);
 						
 						if(request.tabIndex < 0)
-							connection.sendTCP(new Message(MyUtils.arrayToString(matches.shrink(), "", "", ", "), Color.WHITE));
+							connection.sendTCP(new Message(ArrayUtils.arrayToString(matches.shrink(), "", "", ", "), Color.WHITE));
 						else {
 							// actually autocomplete
 							connection.sendTCP(new TabResponse(request.manualText, matches.get(request.tabIndex % matches.size)));

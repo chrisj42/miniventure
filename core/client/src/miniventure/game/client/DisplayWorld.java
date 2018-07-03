@@ -3,13 +3,13 @@ package miniventure.game.client;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
-import miniventure.game.world.tile.TilePropertyFetcher;
+import miniventure.game.world.tile.TileEnumMapper;
 
 import com.badlogic.gdx.utils.Array;
 
 public class DisplayWorld extends WorldManager {
 	
-	public DisplayWorld() { super(new TilePropertyFetcher(prop -> prop)); }
+	public DisplayWorld() { super(new TileEnumMapper<>(prop -> prop)); }
 	
 	@Override
 	protected boolean doDaylightCycle() {

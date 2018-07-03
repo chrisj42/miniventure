@@ -1,11 +1,12 @@
 package miniventure.game.world.tile;
 
-import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.HashSet;
+import java.util.*;
+import java.util.Map.Entry;
 
 import miniventure.game.item.Item;
+import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.RelPos;
 import miniventure.game.world.Level;
 import miniventure.game.world.Point;
 import miniventure.game.world.WorldManager;
@@ -15,6 +16,7 @@ import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 import miniventure.game.world.tile.data.DataMap;
 
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -85,7 +87,7 @@ public class Tile implements WorldObject {
 		
 		moveEntities(newType);
 		
-		tileStack.pushLayer(newType);
+		tileStack.addLayer(newType);
 		dataMaps.put(newType.getEnumType(), newType.getInitialData());
 		
 		// check for an entrance animation
@@ -104,7 +106,7 @@ public class Tile implements WorldObject {
 				return true; // don't actually break the tile yet (but still signal for update)
 		}
 		
-		TileType prevType = tileStack.popLayer();
+		TileType prevType = tileStack.removeLayer();
 		
 		if(prevType != null) {
 			dataMaps.remove(prevType.getEnumType());

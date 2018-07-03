@@ -49,7 +49,7 @@ public class TileType {
 	 */
 	
 	TileType(@NotNull TileTypeEnum enumType, DestructionManager destructionManager, TileTypeRenderer renderer) {
-		this(enumType, destructionManager, renderer, new UpdateManager());
+		this(enumType, destructionManager, renderer, new UpdateManager(enumType));
 	}
 	TileType(@NotNull TileTypeEnum enumType, DestructionManager destructionManager, TileTypeRenderer renderer, UpdateManager updateManager) {
 		this.enumType = enumType;

@@ -15,31 +15,31 @@ public class TileStack {
 	
 	// For now, TileStacks cannot have multiple of the same TileType.
 	
-	// top tile is first, bottom tile is last.
+	// bottom tile is first, top tile is last.
 	private LinkedList<TileType> stack = new LinkedList<>();
 	private LinkedList<TileType> groundStack = new LinkedList<>(); // ground tiles only
 	
-	public TileStack(@NotNull WorldManager world) { pushLayer(baseType.getTileType(world)); }
+	public TileStack(@NotNull WorldManager world) { addLayer(baseType.getTileType(world)); }
 	public TileStack(TileType[] types) {
 		for(TileType type: types)
-			pushLayer(type);
+			addLayer(type);
 	}
 	public TileStack(@NotNull WorldManager world, TileTypeEnum[] enumTypes) {
 		for(TileTypeEnum type: enumTypes)
-			pushLayer(type.getTileType(world));
+			addLayer(type.getTileType(world));
 	}
 	
 	public int size() { return stack.size(); }
 	
-	public TileType getTopLayer() { return stack.peek(); }
-	public TileType getGroundType() { return stack.peekLast(); }
+	public TileType getTopLayer() { return stack.peekLast(); }
+	public TileType getGroundType() { return groundStack.peekLast(); }
 	
 	public TileType[] getTypes() { return getTypes(false); }
 	public TileType[] getTypes(boolean includeCovered) {
 		if(includeCovered)
 			return stack.toArray(new TileType[stack.size()]);
 		else {
-			List<TileType> typeList = stack.subList(0, stack.indexOf(groundStack.peekFirst())+1);
+			List<TileType> typeList = stack.subList(stack.indexOf(groundStack.peekLast()), stack.size()-1);
 			return typeList.toArray(new TileType[typeList.size()]);
 		}
 	}
@@ -68,15 +68,15 @@ public class TileStack {
 	private int clamp(int idx) { return clamp(idx, true); }
 	private int clamp(int idx, boolean doClamp) { return doClamp ? Math.max(Math.min(idx, size()-1), 0) : idx; }
 	
-	void pushLayer(TileType newLayer) {
-		stack.push(newLayer);
+	void addLayer(TileType newLayer) {
+		stack.addLast(newLayer);
 		// TODO check if layer is a ground type, and if so, add it to the ground type stack.
 	}
 	
 	@Nullable
-	TileType popLayer() {
+	TileType removeLayer() {
 		if(stack.size() == 1) return null;
-		TileType layer = stack.pop();
+		TileType layer = stack.removeLast();
 		// TODO if layer is a ground type, remove it from the ground stack
 		return layer;
 	}
