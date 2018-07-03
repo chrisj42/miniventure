@@ -15,13 +15,13 @@ import miniventure.game.world.tile.TileType;
 class Testing {
 	private static final HashMap<TileType, Color> tileMap = new HashMap<>();
 	static {
-		tileMap.put(TileType.WATER, Color.BLUE);
-		tileMap.put(TileType.TREE_CARTOON, Color.GREEN.darker().darker());
-		tileMap.put(TileType.CACTUS, Color.GREEN.darker());
-		tileMap.put(TileType.GRASS, Color.GREEN);
-		tileMap.put(TileType.STONE, Color.GRAY);
-		tileMap.put(TileType.SAND, Color.YELLOW);
-		//tileMap.put(TileType.DIRT, Color.ORANGE.darker().darker());
+		tileMap.put(TileTypeEnum.WATER, Color.BLUE);
+		tileMap.put(TileTypeEnum.TREE_CARTOON, Color.GREEN.darker().darker());
+		tileMap.put(TileTypeEnum.CACTUS, Color.GREEN.darker());
+		tileMap.put(TileTypeEnum.GRASS, Color.GREEN);
+		tileMap.put(TileTypeEnum.STONE, Color.GRAY);
+		tileMap.put(TileTypeEnum.SAND, Color.YELLOW);
+		//tileMap.put(TileTypeEnum.DIRT, Color.ORANGE.darker().darker());
 	}
 	
 	private static void displayLevelVisually(int width, int height, int scale) {

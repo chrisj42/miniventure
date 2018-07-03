@@ -5,9 +5,13 @@ Steps still to do:
 		- removing old tile package and putting new package in its place
 		- make tile class fetch sprites once instead of constantly, and have method to invalidate them so they can be refetched.
 		- 
+		- make TransitionAnimation update the next-soonest time to update a tile
 	- ground TileTypes
 	- server-only and client-only tile behavior / properties.
 
+
+Updating
+	Tiles are updated based on a map of "duration until update" per tile in the level class. The update method is called when the duration goes at or below zero. Because of this, the level can't pass a "delta". So, if a delta is needed, the tile will have to store the previous time itself.
 
 
 Something else I *could* do... is make the tilesystem just like the entity system. With the same universal initialization constructors. Compare things using instanceof. List TileType classes instead of constants. Just saying it's a possibility...

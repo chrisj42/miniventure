@@ -1,15 +1,11 @@
 package miniventure.game.client;
 
-import java.util.HashMap;
-
 import miniventure.game.world.Chunk;
 import miniventure.game.world.ClientLevel;
 import miniventure.game.world.Level;
 import miniventure.game.world.Point;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.levelgen.LevelGenerator;
-import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.TileType;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
@@ -43,13 +39,8 @@ public class DisplayLevel extends Level {
 	}
 	
 	@Override
-	protected Tile createTile(int x, int y, TileType[] types, String[] data) {
-		return new DisplayTile(this, x, y, types, data);
-	}
-	
-	@Override
 	protected void loadChunk(Point chunkCoord) {
-		loadChunk(new Chunk(chunkCoord.x, chunkCoord.y, this, generator.generateChunk(chunkCoord.x, chunkCoord.y)));
+		loadChunk(new Chunk(chunkCoord.x, chunkCoord.y, this, generator.generateChunk(chunkCoord.x, chunkCoord.y), (x, y, types) -> new DisplayTile(this, x, y, types)));
 	}
 	
 	@Override

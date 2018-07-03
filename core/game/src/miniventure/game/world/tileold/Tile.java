@@ -1,8 +1,8 @@
-package miniventure.game.world.tile;
+package miniventure.game.world.tileold;
 
 import java.util.Arrays;
-import java.util.EnumMap;
 import java.util.HashSet;
+import java.util.Stack;
 
 import miniventure.game.item.Item;
 import miniventure.game.util.MyUtils;
@@ -12,8 +12,6 @@ import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Player;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
-import miniventure.game.world.tile.data.DataMap;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
@@ -42,23 +40,67 @@ public class Tile implements WorldObject {
 	 */
 	
 	public static final int SIZE = 32;
+	private static final TileType baseType = TileType.values[0];
 	
-	private TileStack tileStack;
+	private Stack<TileType> tileTypes = new Stack<>(); // using a for each loop for iteration will go from the bottom of the stack to the top.
 	
 	@NotNull private Level level;
 	protected final int x, y;
-	private EnumMap<TileTypeEnum, DataMap> dataMaps;
+	private String[] data;
 	
 	// the TileType array is ALWAYS expected in order of bottom to top.
-	protected Tile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, @Nullable DataMap[] dataMaps) {
+	protected Tile(@NotNull Level level, int x, int y, @NotNull TileType[] types, @NotNull String[] data) {
 		this.level = level;
 		this.x = x;
 		this.y = y;
 		
-		tileStack = new TileStack(getWorld(), types);
-		for(int i = 0; i < types.length; i++)
-			this.dataMaps.put(types[i], dataMaps == null ? types[i].getTileType(level.getWorld()).getInitialData() : dataMaps[i]);
+		this.data = data;
+		// because this is the first type, we need to establish all the tiles under it.
+		for(TileType type: types)
+			tileTypes.push(type);
 	}
+	
+	public TileType getType() { return tileTypes.peek(); }
+	TileType[] getTypes() { return tileTypes.toArray(new TileType[tileTypes.size()]); }
+	boolean hasType(TileType type) { return tileTypes.contains(type); }
+	
+	String getData(TilePropertyType propertyType, TileType type, int propDataIndex) {
+		return data[getIndex(type, propertyType, propDataIndex)];
+	}
+	
+	void setData(TilePropertyType propertyType, TileType type, int propDataIndex, String data) {
+		this.data[getIndex(type, propertyType, propDataIndex)] = data;
+	}
+	
+	private int getIndex(TileType type, TilePropertyType propertyType, int propDataIndex) {
+		if(!tileTypes.contains(type))
+			throw new IllegalArgumentException("Tile " + this + " does not have a " + type + " type, cannot fetch the data index.");
+		
+		type.checkDataAccess(propertyType, propDataIndex);
+		
+		int offset = 0;
+		
+		for(int i = tileTypes.size()-1; i >= 0; i--) {
+			TileType cur = tileTypes.get(i);
+			if(!type.equals(cur))
+				offset += cur.getDataLength();
+			else
+				break;
+		}
+		
+		return type.getPropDataIndex(propertyType) + propDataIndex + offset;
+	}
+	
+	<T extends TileProperty> T getProp(TileType tileType, TilePropertyType<T> propertyType) {
+		return getWorld().getTilePropertyFetcher().getProp(propertyType, tileType);
+	}
+	
+	<T extends TileProperty> T getProp(TileType tileType, TilePropertyType<? super T> propertyType, Class<T> asClass) {
+		return getWorld().getTilePropertyFetcher().getProp(propertyType, tileType, asClass);
+	}
+	
+	
+	
 	
 	@NotNull @Override
 	public WorldManager getWorld() { return level.getWorld(); }
@@ -71,25 +113,25 @@ public class Tile implements WorldObject {
 	
 	public Point getLocation() { return new Point(x, y); }
 	
-	
-	public TileType getType() { return tileStack.getTopLayer(); }
-	public TileStack getTypeStack() { return tileStack; }
-	
-	public DataMap getDataMap() { return getDataMap(getType().getEnumType()); }
-	public DataMap getDataMap(TileType tileType) { return getDataMap(tileType.getEnumType()); }
-	public DataMap getDataMap(TileTypeEnum tileType) { return dataMaps.get(tileType); }
-	
-	
 	public boolean addTile(@NotNull TileType newType) { return addTile(newType, getType()); }
 	private boolean addTile(@NotNull TileType newType, @NotNull TileType prevType) {
+		// first, check to see if the newType can validly be placed on the current type.
+		if(newType == getType()
+			|| newType.compareTo(getType()) <= 0)
+			return false;
 		
 		moveEntities(newType);
 		
-		tileStack.pushLayer(newType);
-		dataMaps.put(newType.getEnumType(), newType.getInitialData());
+		String[] newData = newType.getInitialData();
+		String[] fullData = new String[data.length + newData.length];
+		System.arraycopy(data, 0, fullData, newData.length, data.length); // copy old data to end of data
+		System.arraycopy(newData, 0, fullData, 0, newData.length); // copy new data to front of data
+		data = fullData;
+		
+		tileTypes.push(newType);
 		
 		// check for an entrance animation
-		newType.getRenderer().transitionManager.tryStartAnimation(this, prevType);
+		getProp(newType, TilePropertyType.Transition).tryStartAnimation(this, prevType);
 		// we don't use the return value because transition or not, there's nothing we need to do. :P
 		
 		return true;
@@ -99,20 +141,25 @@ public class Tile implements WorldObject {
 	boolean breakTile(boolean checkForExitAnim) {
 		if(checkForExitAnim) {
 			TileType type = getType();
-			if(type.getRenderer().transitionManager.tryStartAnimation(this, tileStack.getLayerFromBottom(1, true), false))
+			if(getProp(type, TilePropertyType.Transition).tryStartAnimation(this, tileTypes.size() == 1 ? type : tileTypes.elementAt(tileTypes.size()-2), false))
 				// transitioning successful
 				return true; // don't actually break the tile yet (but still signal for update)
 		}
 		
-		TileType prevType = tileStack.popLayer();
+		TileType prevType = tileTypes.pop();
 		
-		if(prevType != null) {
-			dataMaps.remove(prevType.getEnumType());
+		String[] newData = new String[data.length - prevType.getDataLength()];
+		System.arraycopy(data, prevType.getDataLength(), newData, 0, newData.length);
+		data = newData;
+		
+		if(tileTypes.size() == 0)
+			addTile(baseType);
+		else {
 			moveEntities(getType());
 			return true;
 		}
 		
-		return false; // cannot break this tile any further.
+		return false; // addTile does the update
 	}
 	
 	boolean replaceTile(@NotNull TileType newType) {
@@ -125,19 +172,21 @@ public class Tile implements WorldObject {
 		 */
 		
 		TileType type = getType();
-		TileType underType = tileStack.size() == 1 ? type : tileStack.getLayerFromBottom(1);
+		TileType underType = tileTypes.size() == 1 ? type : tileTypes.elementAt(tileTypes.size()-2);
 		
-		if(newType.equals(type)) {
+		if(newType == type) {
 			// just reset the data
-			dataMaps.put(type.getEnumType(), type.getInitialData());
+			String[] initData = type.getInitialData();
+			if(initData.length > 0)
+				System.arraycopy(initData, 0, data, data.length-initData.length, initData.length);
 			return true;
 		}
 		
 		// check that the new type can be placed on the type that was under the previous type
-		if(newType.getEnumType().compareTo(underType.getEnumType()) <= 0)
+		if(newType.compareTo(underType) <= 0)
 			return false; // cannot replace tile
 		
-		if(type.getRenderer().transitionManager.tryStartAnimation(this, newType, true))
+		if(getProp(type, TilePropertyType.Transition).tryStartAnimation(this, newType, true))
 			// there is an exit animation; it needs to be played. So let that happen, the tile will be replaced later
 			return true; // can replace (but will do it in a second)
 		
@@ -153,11 +202,11 @@ public class Tile implements WorldObject {
 		Tile[] surroundingTiles = surroundingTileSet.toArray(new Tile[surroundingTileSet.size()]);
 		for(Entity entity: level.getOverlappingEntities(getBounds())) {
 			// for each entity, check if it can walk on the new tile type. If not, fetch the surrounding tiles, remove those the entity can't walk on, and then fetch the closest tile of the remaining ones.
-			if(newType.isPermeableBy(entity)) continue; // no worries for this entity.
+			if(getProp(newType, TilePropertyType.Solid).isPermeableBy(entity)) continue; // no worries for this entity.
 			
 			Array<Tile> aroundTiles = new Array<>(surroundingTiles);
 			for(int i = 0; i < aroundTiles.size; i++) {
-				if(!aroundTiles.get(i).getType().isPermeableBy(entity)) {
+				if(!getProp(aroundTiles.get(i).getType(), TilePropertyType.Solid).isPermeableBy(entity)) {
 					aroundTiles.removeIndex(i);
 					i--;
 				}
@@ -202,60 +251,69 @@ public class Tile implements WorldObject {
 	@Override
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {}
 	
-	public void updateSprites() {}
 	
-	public float update() {
-		if(getType().getRenderer().transitionManager.playingExitAnimation(this))
+	public void tick() {}
+	
+	public boolean update(float delta, boolean initial) {
+		TransitionProperty transProp = getProp(getType(), TilePropertyType.Transition);
+		if(transProp.playingAnimation(this) && !transProp.isEntranceAnim(this))
 			// playing exit anim; no more updates
-			return 0;
+			return false;
 		
-		return getType().update(this);
+		boolean update;
+		
+		if(initial)
+			update = getProp(getType(), TilePropertyType.Update).firstUpdate(this);
+		else
+			update = getProp(getType(), TilePropertyType.Update).update(delta, this);
+		
+		return update;
 	}
 	
 	@Override
 	public float getLightRadius() {
 		float maxRadius = 0;
-		for(TileType type: tileStack.getTypes())
-			maxRadius = Math.max(maxRadius, type.getLightRadius());
+		for(TileType type: tileTypes)
+			maxRadius = Math.max(maxRadius, getProp(type, TilePropertyType.Light).getLightRadius());
 		
 		return maxRadius;
 	}
 	
 	@Override
 	public boolean isPermeableBy(Entity e) {
-		return getType().isPermeableBy(e);
+		return getProp(getType(), TilePropertyType.Solid).isPermeableBy(e);
 	}
 	
 	@Override
 	public boolean attackedBy(WorldObject obj, @Nullable Item item, int damage) {
-		if(getType().getRenderer().transitionManager.playingExitAnimation(this))
+		if(getProp(getType(), TilePropertyType.Transition).playingExitAnimation(this))
 			return false;
-		return getType().attacked(this, obj, item, damage);
+		return getProp(getType(), TilePropertyType.Attack).tileAttacked(this, obj, item, damage);
 	}
 	
 	@Override
 	public boolean interactWith(Player player, @Nullable Item heldItem) {
-		if(getType().getRenderer().transitionManager.playingExitAnimation(this))
+		if(getProp(getType(), TilePropertyType.Transition).playingExitAnimation(this))
 			return false;
-		return getType().interact(this, player, heldItem);
+		return getProp(getType(), TilePropertyType.Interact).interact(player, heldItem, this);
 	}
 	
 	@Override
 	public boolean touchedBy(Entity entity) {
-		if(getType().getRenderer().transitionManager.playingExitAnimation(this))
+		if(getProp(getType(), TilePropertyType.Transition).playingExitAnimation(this))
 			return false;
-		return getType().touched(this, entity, true);
+		return getProp(getType(), TilePropertyType.Touch).touchedBy(entity, this, true);
 	}
 	
 	@Override
 	public void touching(Entity entity) {
-		if(getType().getRenderer().transitionManager.playingExitAnimation(this))
+		if(getProp(getType(), TilePropertyType.Transition).playingExitAnimation(this))
 			return;
-		getType().touched(this, entity, false);
+		getProp(getType(), TilePropertyType.Touch).touchedBy(entity, this, false);
 	}
 	
 	@Override
-	public String toString() { return getType()+" Tile"; }
+	public String toString() { return getType().getName()+" Tile"; }
 	
 	public String toLocString() { return (x-level.getWidth()/2)+","+(y-level.getHeight()/2)+" ("+toString()+")"; }
 	
@@ -267,7 +325,7 @@ public class Tile implements WorldObject {
 	}
 	
 	@Override
-	public int hashCode() { return Point.javaPointHashCode(x, y) + level.getDepth() * 17; }
+	public int hashCode() { return new Point(x, y).hashCode() + level.getDepth() * 17; }
 	
 	// I can use the string encoder and string parser in MyUtils to encode the tile data in a way so that I can always re-parse the encoded array. I can use this internally to, with other things, whenever I need to encode a list of objects and don't want to worry about finding the delimiter symbol in string somewhere I don't expect.
 	
@@ -281,42 +339,33 @@ public class Tile implements WorldObject {
 			this.data = data;
 		}
 		public TileData(Tile tile) {
-			TileTypeEnum[] tileTypes = tile.getTypeStack().getEnumTypes(true);
+			this.data = Arrays.copyOf(tile.data, tile.data.length);
+			
+			TileType[] tileTypes = tile.getTypes();
 			typeOrdinals = new int[tileTypes.length];
 			for(int i = 0; i < tileTypes.length; i++) {
-				TileTypeEnum type = tileTypes[i];
+				TileType type = tileTypes[i];
 				typeOrdinals[i] = type.ordinal();
+				//for(TilePropertyInstance prop: tile.getWorld().getTilePropertyFetcher().getProperties(type))
+				//	prop.configureDataForSave(tile);
 			}
-			
-			this.data = new String[tileTypes.length];
-			for(int i = 0; i < data.length; i++)
-				data[i] = tile.dataMaps.get(tileTypes[i]).serialize();
-		}
-		
-		public TileTypeEnum[] getTypes() { return getTypes(typeOrdinals); }
-		public static TileTypeEnum[] getTypes(int[] typeOrdinals) {
-			TileTypeEnum[] types = new TileTypeEnum[typeOrdinals.length];
-			for(int i = 0; i < types.length; i++) {
-				types[i] = TileTypeEnum.values(typeOrdinals[i]);
-			}
-			return types;
-		}
-		
-		public DataMap[] getDataMaps() { return getDataMaps(data); }
-		public static DataMap[] getDataMaps(String[] data) {
-			DataMap[] maps = new DataMap[data.length];
-			for(int i = 0; i < data.length; i++)
-				maps[i] = DataMap.deserialize(data[i]);
-			return maps;
 		}
 		
 		public void apply(Tile tile) {
-			TileTypeEnum[] types = getTypes();
+			TileType[] types = new TileType[typeOrdinals.length];
+			String[] data = Arrays.copyOf(this.data, this.data.length);
+			for(int i = 0; i < types.length; i++) {
+				types[i] = TileType.values[typeOrdinals[i]];
+				//for(TilePropertyInstance prop: tile.getWorld().getTilePropertyFetcher().getProperties(types[i]))
+				//	prop.configureDataForLoad(tile);
+			}
 			
-			tile.tileStack = new TileStack(tile.getWorld(), types);
-			tile.dataMaps.clear();
-			for(int i = 0; i < data.length; i++)
-				tile.dataMaps.put(types[i], DataMap.deserialize(data[i]));
+			Stack<TileType> typeStack = new Stack<>();
+			for(TileType type: types)
+				typeStack.push(type);
+			
+			tile.tileTypes = typeStack;
+			tile.data = data;
 		}
 	}
 	

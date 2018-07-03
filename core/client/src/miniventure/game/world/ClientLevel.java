@@ -13,7 +13,8 @@ import miniventure.game.world.entity.particle.Particle;
 import miniventure.game.world.tile.ClientTile;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.Tile.TileData;
-import miniventure.game.world.tile.TileType;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.data.DataMap;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
@@ -115,7 +116,7 @@ public class ClientLevel extends Level {
 	}
 	
 	@Override
-	protected ClientTile createTile(int x, int y, TileType[] types, String[] data) { return new ClientTile(this, x, y, types, data); }
+	protected ClientTile createTile(int x, int y, TileTypeEnum[] types, DataMap[] data) { return new ClientTile(this, x, y, types, data); }
 	
 	@Override
 	public ClientTile getTile(float x, float y) { return getTile(x, y, false); }

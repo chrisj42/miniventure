@@ -6,6 +6,8 @@ import java.util.TreeMap;
 
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.world.ClientLevel;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.data.DataMap;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
@@ -17,10 +19,13 @@ public class ClientTile extends Tile {
 	
 	@NotNull private ClientLevel level;
 	
-	public ClientTile(@NotNull ClientLevel level, int x, int y, @NotNull TileType[] types, String[] data) {
+	public ClientTile(@NotNull ClientLevel level, int x, int y, @NotNull TileTypeEnum[] types, DataMap[] data) {
 		super(level, x, y, types, data);
 		this.level = level;
 	}
+	
+	@NotNull @Override
+	public ClientLevel getLevel() { return level; }
 	
 	@Override
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
@@ -33,6 +38,8 @@ public class ClientTile extends Tile {
 				So, before drawing an overlap, check that the current center is supposed to be drawn under it.
 		 */
 		
+		// TODO Redo this method. Getting close to finishing!
+		
 		if(t.getLevel().getTile(t.x, t.y) == null) return; // cannot render if there are no tiles.
 		
 		TileType[][] aroundTypes = new TileType[9][];
@@ -43,17 +50,17 @@ public class ClientTile extends Tile {
 				if(x == 0 && y == 0)
 					aroundTypes[idx] = new TileType[0];
 				else
-					aroundTypes[idx] = oTile != null ? oTile.getTypes() : new TileType[0];
+					aroundTypes[idx] = oTile != null ? oTile.getTypeStack().getTypes() : new TileType[0];
 				idx++;
 			}
 		}
 		
 		Array<TextureHolder> sprites = new Array<>();
 		
-		TileType[] mainTypes = t.getTypes();
+		TileType[] mainTypes = t.getTypeStack().getTypes();
 		int firstIdx = 0;
 		for(int i = mainTypes.length-1; i >= 0; i--) {
-			if(t.getProp(mainTypes[i], TilePropertyType.Render).isOpaque()) {
+			if(mainTypes[i].getRenderer().isOpaque()) {
 				firstIdx = i;
 				break;
 			}
@@ -66,7 +73,7 @@ public class ClientTile extends Tile {
 		for(int i = 0; i < aroundTypes.length; i++) {
 			if(i == 4) continue; // skip the center
 			for (TileType oType : aroundTypes[i]) { // doesn't matter the order.
-				if(!t.getProp(oType, TilePropertyType.Overlap).canOverlap()) continue; // the type can't even overlap anyway.
+				//if(!oType.getRenderer().canOverlap()) continue; // the type can't even overlap anyway.
 				//if(TileType.tileSorter.compare(mainTypes[firstIdx], oType) >= 0) continue; // the type is lower than the lowest *visible* main type.
 				overlappingTypes.putIfAbsent(oType, Arrays.copyOf(model, model.length));
 				overlappingTypes.get(oType)[i] = true;
@@ -95,6 +102,11 @@ public class ClientTile extends Tile {
 	}
 	
 	@Override
-	public String toString() { return getType().getName()+" ClientTile"; }
+	public void updateSprites() {
+		
+	}
+	
+	@Override
+	public String toString() { return getType().getEnumType()+" ClientTile"; }
 	
 }

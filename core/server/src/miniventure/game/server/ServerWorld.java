@@ -12,11 +12,8 @@ import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.ServerPlayer;
 import miniventure.game.world.levelgen.LevelGenerator;
-import miniventure.game.world.tile.DestructibleProperty;
-import miniventure.game.world.tile.ServerDestructibleProperty;
-import miniventure.game.world.tile.ServerTransitionProperty;
-import miniventure.game.world.tile.TilePropertyFetcher;
-import miniventure.game.world.tile.TransitionProperty;
+import miniventure.game.world.tile.ServerTileType;
+import miniventure.game.world.tile.TileEnumMapper;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -47,14 +44,7 @@ public class ServerWorld extends WorldManager {
 	private final HashSet<WorldObject> keepAlives = new HashSet<>(); // always keep chunks around these objects loaded.
 	
 	public ServerWorld(boolean standalone) {
-		super(new TilePropertyFetcher((instanceTemplate -> {
-			if(instanceTemplate instanceof DestructibleProperty)
-				return new ServerDestructibleProperty((DestructibleProperty)instanceTemplate);
-			if(instanceTemplate instanceof TransitionProperty)
-				return new ServerTransitionProperty((TransitionProperty)instanceTemplate);
-			
-			return instanceTemplate;
-		})));
+		super(new TileEnumMapper<>(ServerTileType::new));
 		
 		server = new GameServer(standalone);
 		server.startServer();
@@ -217,7 +207,7 @@ public class ServerWorld extends WorldManager {
 	public Array<WorldObject> getKeepAlives(@NotNull Level level) {
 		Array<WorldObject> keepAlives = new Array<>();
 		for(WorldObject obj: this.keepAlives)
-			if(obj.getLevel() == level)
+			if(level.equals(obj.getLevel()))
 				keepAlives.add(obj);
 		
 		return keepAlives;

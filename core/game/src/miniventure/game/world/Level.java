@@ -10,7 +10,8 @@ import miniventure.game.util.SynchronizedAccessor;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.TileType;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.data.DataMap;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
@@ -297,8 +298,6 @@ public abstract class Level implements Taggable<Level> {
 		
 		return true;
 	}
-	
-	protected abstract Tile createTile(int x, int y, TileType[] types, String[] data);
 	
 	protected abstract void loadChunk(Point chunkCoord);
 	protected abstract void unloadChunk(Point chunkCoord);

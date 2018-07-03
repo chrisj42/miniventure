@@ -32,6 +32,7 @@ import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.mob.ServerPlayer;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileType;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;
@@ -469,7 +470,7 @@ public class GameServer implements GameProtocol {
 		else
 			playGenericSound("entity/"+soundName, source.getCenter());
 	}
-	public void playTileSound(String soundName, Tile tile, TileType type) {
+	public void playTileSound(String soundName, Tile tile, TileTypeEnum type) {
 		//playGenericSound("tile/"+type+"/"+soundName, tile.getCenter());
 		playGenericSound("tile/"+soundName, tile.getCenter());
 	}
