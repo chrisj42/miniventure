@@ -15,9 +15,9 @@ public class TileType {
 	
 	public enum TileTypeEnum {
 		
-		HOLE(type -> new TileType(type, new DataMap(), DestructionManager.INDESTRUCTIBLE(type), new TileTypeRenderer(type, true, new ConnectionManager(type, RenderStyle.SINGLE_FRAME/*, TileTypeEnum.WATER*/))));
+		HOLE(type -> new TileType(type, DestructionManager.INDESTRUCTIBLE(type), new TileTypeRenderer(type, true, new ConnectionManager(type, RenderStyle.SINGLE_FRAME/*, TileTypeEnum.WATER*/))));
 		
-		final TileType tileType;
+		final TileType tileType; // TODO have a World TileType fetcher that replaces TileTypes with with their specialized Server / Client equivalents. This field is private, and instead there's a method here that takes a WorldManager.
 		
 		TileTypeEnum(ValueMonoFunction<TileTypeEnum, TileType> typeFetcher) {
 			tileType = typeFetcher.get(this);
@@ -29,7 +29,6 @@ public class TileType {
 	
 	
 	private final TileTypeEnum enumType;
-	private final DataMap idMap; // holds identity info; not tile-specific
 	private final DestructionManager destructionManager;
 	private final TileTypeRenderer renderer;
 	
@@ -42,13 +41,14 @@ public class TileType {
 			
 	 */
 	
-	TileType(@NotNull TileTypeEnum enumType, DataMap idMap, DestructionManager destructionManager, TileTypeRenderer renderer) {
+	TileType(@NotNull TileTypeEnum enumType, DestructionManager destructionManager, TileTypeRenderer renderer) {
 		this.enumType = enumType;
-		this.idMap = new DataMap(idMap);
 		this.destructionManager = destructionManager;
 		
 		this.renderer = renderer;
 	}
+	
+	public DataMap getInitialData() { return new DataMap(); }
 	
 	public TileTypeEnum getEnumType() { return enumType; }
 	
@@ -92,10 +92,10 @@ public class TileType {
 	public boolean interact(@NotNull Tile tile, Player player, @Nullable Item item) { return false; }
 	
 	public boolean attacked(@NotNull Tile tile, WorldObject source, @Nullable Item item, int damage) {
-		// Gonna have to figure out how to use DestructibleProperty
-		return false;
+		return destructionManager.tileAttacked(tile, source, item, damage);
 	}
 	
+	public boolean touched(@NotNull Tile tile, Entity entity, boolean initial) { return false; }
 	
 	@Override
 	public final boolean equals(Object other) {

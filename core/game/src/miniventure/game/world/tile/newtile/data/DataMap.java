@@ -2,6 +2,7 @@ package miniventure.game.world.tile.newtile.data;
 
 import java.util.HashMap;
 
+import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.ValueMonoFunction;
 
 public class DataMap {
@@ -23,7 +24,14 @@ public class DataMap {
 		return (T) map.put(key, value);
 	}
 	
-	private <T> T get(DataTag<T> tag) {
+	public <T> T remove(DataTag<T> tag) {
+		//noinspection unchecked
+		return (T) map.remove(tag);
+	}
+	
+	public void clear() { map.clear(); }
+	
+	public <T> T get(DataTag<T> tag) {
 		//noinspection unchecked
 		return (T) map.get(tag);
 	}
@@ -55,4 +63,25 @@ public class DataMap {
 	}
 	
 	private <T> DataEntry<T> getEntry(DataTag<T> tag) { return new DataEntry<>(tag, get(tag)); }
+	
+	
+	public String serialize() {
+		String[] entries = new String[map.size()];
+		
+		int i = 0;
+		for(DataEntry<?> entry: getEntries())
+			entries[i++] = entry.serialize();
+		
+		return MyUtils.encodeStringArray(entries);
+	}
+	
+	public static DataMap deserialize(String alldata) {
+		String[] data = MyUtils.parseLayeredString(alldata);
+		
+		DataEntry<?>[] entries = new DataEntry[data.length];
+		for(int i = 0; i < entries.length; i++)
+			entries[i] = DataEntry.deserialize(data[i]);
+		
+		return new DataMap(entries);
+	}
 }

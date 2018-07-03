@@ -1,8 +1,8 @@
 package miniventure.game.world.tile.newtile;
 
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.HashSet;
-import java.util.Stack;
 
 import miniventure.game.item.Item;
 import miniventure.game.util.MyUtils;
@@ -42,27 +42,23 @@ public class Tile implements WorldObject {
 	 */
 	
 	public static final int SIZE = 32;
-	private static final TileType baseType = TileTypeEnum.HOLE.tileType;
 	
 	private TileStack tileStack;
 	
 	@NotNull private Level level;
 	protected final int x, y;
-	//private String[] data;
-	private DataMap data;
+	private EnumMap<TileTypeEnum, DataMap> dataMaps;
 	
 	// the TileType array is ALWAYS expected in order of bottom to top.
-	protected Tile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, @NotNull DataMap data) {
+	protected Tile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, @NotNull DataMap[] dataMaps) {
 		this.level = level;
 		this.x = x;
 		this.y = y;
 		
-		this.data = data;
 		tileStack = new TileStack(types);
+		for(int i = 0; i < types.length; i++)
+			this.dataMaps.put(types[i], dataMaps[i]);
 	}
-	
-	public TileStack getTypeStack() { return tileStack; }
-	public TileType getType() { return tileStack.getTopLayer(); }
 	
 	@NotNull @Override
 	public WorldManager getWorld() { return level.getWorld(); }
@@ -75,16 +71,25 @@ public class Tile implements WorldObject {
 	
 	public Point getLocation() { return new Point(x, y); }
 	
+	
+	public TileType getType() { return tileStack.getTopLayer(); }
+	public TileStack getTypeStack() { return tileStack; }
+	
+	public DataMap getDataMap() { return getDataMap(getType().getEnumType()); }
+	public DataMap getDataMap(TileType tileType) { return getDataMap(tileType.getEnumType()); }
+	public DataMap getDataMap(TileTypeEnum tileType) { return dataMaps.get(tileType); }
+	
+	
 	public boolean addTile(@NotNull TileType newType) { return addTile(newType, getType()); }
-	private boolean addTile(@NotNull TileType newLayer, @NotNull TileType prevLayer) {
+	private boolean addTile(@NotNull TileType newType, @NotNull TileType prevType) {
 		
-		moveEntities(newLayer);
+		moveEntities(newType);
 		
-		tileStack.pushLayer(newLayer);
+		tileStack.pushLayer(newType);
+		dataMaps.put(newType.getEnumType(), newType.getInitialData());
 		
 		// check for an entrance animation
-		// TODO Transition animations
-		//newLayer.tryStartAnimation(this, prevLayer);
+		newType.getRenderer().transitionManager.tryStartAnimation(this, prevType);
 		// we don't use the return value because transition or not, there's nothing we need to do. :P
 		
 		return true;
@@ -94,23 +99,20 @@ public class Tile implements WorldObject {
 	boolean breakTile(boolean checkForExitAnim) {
 		if(checkForExitAnim) {
 			TileType type = getType();
-			//if(type.tryStartAnimation(this, tileStack.size() == 1 ? type : tileStack.elementAt(tileStack.size()-2), false))
+			if(type.getRenderer().transitionManager.tryStartAnimation(this, tileStack.getLayerFromBottom(1, true), false))
 				// transitioning successful
 				return true; // don't actually break the tile yet (but still signal for update)
 		}
 		
 		TileType prevType = tileStack.popLayer();
 		
-		// String[] newData = new String[data.length - prevType.getDataLength()];
-		// System.arraycopy(data, prevType.getDataLength(), newData, 0, newData.length);
-		// data = newData;
-		
 		if(prevType != null) {
+			dataMaps.remove(prevType.getEnumType());
 			moveEntities(getType());
 			return true;
 		}
 		
-		return false; // addTile does the update
+		return false; // cannot break this tile any further.
 	}
 	
 	boolean replaceTile(@NotNull TileType newType) {
@@ -127,9 +129,7 @@ public class Tile implements WorldObject {
 		
 		if(newType.equals(type)) {
 			// just reset the data
-			// String[] initData = type.getInitialData();
-			// if(initData.length > 0)
-			// 	System.arraycopy(initData, 0, data, data.length-initData.length, initData.length);
+			dataMaps.put(type.getEnumType(), type.getInitialData());
 			return true;
 		}
 		
@@ -137,7 +137,7 @@ public class Tile implements WorldObject {
 		if(newType.getEnumType().compareTo(underType.getEnumType()) <= 0)
 			return false; // cannot replace tile
 		
-		if(type.tryStartAnimation(this, newType, true))
+		if(type.getRenderer().transitionManager.tryStartAnimation(this, newType, true))
 			// there is an exit animation; it needs to be played. So let that happen, the tile will be replaced later
 			return true; // can replace (but will do it in a second)
 		
@@ -206,8 +206,7 @@ public class Tile implements WorldObject {
 	public void tick() {}
 	
 	public boolean update(float delta, boolean initial) {
-		TransitionProperty transProp = getType();
-		if(transProp.playingAnimation(this) && !transProp.isEntranceAnim(this))
+		if(getType().getRenderer().transitionManager.playingExitAnimation(this))
 			// playing exit anim; no more updates
 			return false;
 		
@@ -237,30 +236,30 @@ public class Tile implements WorldObject {
 	
 	@Override
 	public boolean attackedBy(WorldObject obj, @Nullable Item item, int damage) {
-		if(getType().playingExitAnimation(this))
+		if(getType().getRenderer().transitionManager.playingExitAnimation(this))
 			return false;
-		return getType().tileAttacked(this, obj, item, damage);
+		return getType().attacked(this, obj, item, damage);
 	}
 	
 	@Override
 	public boolean interactWith(Player player, @Nullable Item heldItem) {
-		if(getType().playingExitAnimation(this))
+		if(getType().getRenderer().transitionManager.playingExitAnimation(this))
 			return false;
-		return getType().interact(player, heldItem, this);
+		return getType().interact(this, player, heldItem);
 	}
 	
 	@Override
 	public boolean touchedBy(Entity entity) {
-		if(getType().playingExitAnimation(this))
+		if(getType().getRenderer().transitionManager.playingExitAnimation(this))
 			return false;
-		return getType().touchedBy(entity, this, true);
+		return getType().touched(this, entity, true);
 	}
 	
 	@Override
 	public void touching(Entity entity) {
-		if(getType().playingExitAnimation(this))
+		if(getType().getRenderer().transitionManager.playingExitAnimation(this))
 			return;
-		getType().touchedBy(entity, this, false);
+		getType().touched(this, entity, false);
 	}
 	
 	@Override
@@ -290,16 +289,16 @@ public class Tile implements WorldObject {
 			this.data = data;
 		}
 		public TileData(Tile tile) {
-			this.data = Arrays.copyOf(tile.data, tile.data.length);
-			
-			TileTypeEnum[] tileTypes = tile.getTypeStack().getEnumTypes();
+			TileTypeEnum[] tileTypes = tile.getTypeStack().getEnumTypes(true);
 			typeOrdinals = new int[tileTypes.length];
 			for(int i = 0; i < tileTypes.length; i++) {
 				TileTypeEnum type = tileTypes[i];
 				typeOrdinals[i] = type.ordinal();
-				//for(TilePropertyInstance prop: tile.getWorld().getTilePropertyFetcher().getProperties(type))
-				//	prop.configureDataForSave(tile);
 			}
+			
+			this.data = new String[tileTypes.length];
+			for(int i = 0; i < data.length; i++)
+				data[i] = tile.dataMaps.get(tileTypes[i]).serialize();
 		}
 		
 		public void apply(Tile tile) {
@@ -307,12 +306,12 @@ public class Tile implements WorldObject {
 			String[] data = Arrays.copyOf(this.data, this.data.length);
 			for(int i = 0; i < types.length; i++) {
 				types[i] = TileTypeEnum.values(typeOrdinals[i]);
-				//for(TilePropertyInstance prop: tile.getWorld().getTilePropertyFetcher().getProperties(types[i]))
-				//	prop.configureDataForLoad(tile);
 			}
 			
 			tile.tileStack = new TileStack(types);
-			tile.data = data;
+			tile.dataMaps.clear();
+			for(int i = 0; i < data.length; i++)
+				tile.dataMaps.put(types[i], DataMap.deserialize(data[i]));
 		}
 	}
 	

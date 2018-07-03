@@ -48,13 +48,16 @@ public class TileTypeRenderer {
 	private final boolean isOpaque;
 	private final ConnectionManager connectionManager;
 	private final OverlapManager overlapManager;
-	private final TransitionManager transitionManager;
+	final TransitionManager transitionManager;
 	
+	public TileTypeRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque) {
+		this(tileType, isOpaque, new ConnectionManager(tileType, RenderStyle.SINGLE_FRAME));
+	}
 	public TileTypeRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque, ConnectionManager connectionManager) {
 		this(tileType, isOpaque, connectionManager, OverlapManager.NONE(tileType));
 	}
 	public TileTypeRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque, ConnectionManager connectionManager, OverlapManager overlapManager) {
-		this(tileType, isOpaque, connectionManager, overlapManager, new TransitionManager());
+		this(tileType, isOpaque, connectionManager, overlapManager, new TransitionManager(tileType));
 	}
 	public TileTypeRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque, ConnectionManager connectionManager, OverlapManager overlapManager, TransitionManager transitionManager) {
 		this.tileType = tileType;
@@ -70,8 +73,10 @@ public class TileTypeRenderer {
 	// whenever a tile changes its TileTypeEnum stack in any way, all 9 tiles around it re-fetch their overlap and main animations. Then they keep that stack of animations until the next fetch.
 	
 	// gets the sprite for when this tiletype is surrounded by the given types.
-	public Animation<TextureHolder> getConnectionSprite(EnumSet<TileTypeEnum>[] aroundTypes) {
-		// TODO check for current transition
+	public Animation<TextureHolder> getConnectionSprite(@NotNull Tile tile, EnumSet<TileTypeEnum>[] aroundTypes) {
+		if(transitionManager.playingAnimation(tile))
+			return transitionManager.getTransitionSprite(tile);
+		
 		return connectionManager.getConnectionSprite(aroundTypes);
 	}
 	

@@ -76,7 +76,7 @@ public class TransitionProperty extends TileProperty {
 					found = true;
 			
 			if(found) {
-				tile.setData(Transition, tileType, Data.ANIM.idx, i+"");
+				tile.setData(Transition, tileType, Data.ANIM.idx, String.valueOf(i));
 				tile.setData(Transition, tileType, Data.TILE.idx, (!isEntering && addNext ? other.name() : "")); // if removing, this specifies the tile to add after removal
 				tile.setData(Transition, tileType, Data.TIME.idx, "0");
 				return true;
@@ -105,7 +105,7 @@ public class TransitionProperty extends TileProperty {
 		
 		float timeElapsed = Float.parseFloat(tile.getData(Transition, tileType, Data.TIME.idx));
 		timeElapsed += delta;
-		tile.setData(Transition, tileType, Data.TIME.idx, timeElapsed+"");
+		tile.setData(Transition, tileType, Data.TIME.idx, String.valueOf(timeElapsed));
 		
 		TransitionAnimation anim = animations[Integer.parseInt(tile.getData(Transition, tileType, Data.ANIM.idx))];
 		

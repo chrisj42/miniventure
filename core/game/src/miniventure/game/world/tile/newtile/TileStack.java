@@ -1,6 +1,7 @@
 package miniventure.game.world.tile.newtile;
 
 import java.util.LinkedList;
+import java.util.List;
 
 import miniventure.game.world.tile.newtile.TileType.TileTypeEnum;
 
@@ -9,10 +10,15 @@ import org.jetbrains.annotations.Nullable;
 
 public class TileStack {
 	
+	private static final TileType baseType = TileTypeEnum.HOLE.tileType;
+	
+	// For now, TileStacks cannot have multiple of the same TileType.
+	
 	// top tile is first, bottom tile is last.
 	private LinkedList<TileType> stack = new LinkedList<>();
+	private LinkedList<TileType> groundStack = new LinkedList<>(); // ground tiles only
 	
-	public TileStack() { stack.push(TileTypeEnum.HOLE.tileType); }
+	public TileStack() { pushLayer(baseType); }
 	public TileStack(TileType[] types) {
 		for(TileType type: types)
 			pushLayer(type);
@@ -27,11 +33,21 @@ public class TileStack {
 	public TileType getTopLayer() { return stack.peek(); }
 	public TileType getGroundType() { return stack.peekLast(); }
 	
-	public TileType[] getTypes() { return stack.toArray(new TileType[stack.size()]); }
-	public TileTypeEnum[] getEnumTypes() {
-		TileTypeEnum[] types = new TileTypeEnum[stack.size()];
+	public TileType[] getTypes() { return getTypes(false); }
+	public TileType[] getTypes(boolean includeCovered) {
+		if(includeCovered)
+			return stack.toArray(new TileType[stack.size()]);
+		else {
+			List<TileType> typeList = stack.subList(0, stack.indexOf(groundStack.peekFirst())+1);
+			return typeList.toArray(new TileType[typeList.size()]);
+		}
+	}
+	public TileTypeEnum[] getEnumTypes() { return getEnumTypes(false); }
+	public TileTypeEnum[] getEnumTypes(boolean includeCovered) {
+		TileType[] tileTypes = getTypes(includeCovered);
+		TileTypeEnum[] types = new TileTypeEnum[tileTypes.length];
 		for(int i = 0; i < types.length; i++)
-			types[i] = stack.get(i).getEnumType();
+			types[i] = tileTypes[i].getEnumType();
 		return types;
 	}
 	
@@ -43,23 +59,24 @@ public class TileStack {
 		return false;
 	}
 	
-	public TileType getLayerFromTop(int offset) { return stack.get(offset); }
-	public TileType getLayerFromBottom(int offset) { return stack.get(size()-1-offset); }
+	public TileType getLayerFromTop(int offset) { return getLayerFromTop(offset, false); }
+	public TileType getLayerFromTop(int offset, boolean clamp) { return stack.get(clamp(offset, clamp)); }
+	public TileType getLayerFromBottom(int offset) { return getLayerFromBottom(offset, false); }
+	public TileType getLayerFromBottom(int offset, boolean clamp) { return stack.get(clamp(size()-1-offset, clamp)); }
 	
-	public void pushLayer(TileType newLayer) {
-		// TODO later, check if the new layer is a ground layer; if so, then add this stack to the data of the new layer, clear it, and add the new layer to the now empty stack.
-		
+	private int clamp(int idx) { return clamp(idx, true); }
+	private int clamp(int idx, boolean doClamp) { return doClamp ? Math.max(Math.min(idx, size()-1), 0) : idx; }
+	
+	void pushLayer(TileType newLayer) {
 		stack.push(newLayer);
+		// TODO check if layer is a ground type, and if so, add it to the ground type stack.
 	}
 	
 	@Nullable
-	public TileType popLayer() {
-		// In the future, return null if the stack only has a hole tile, meaning it has just a ground tile and that tile doesn't have a substack in its data.
+	TileType popLayer() {
+		if(stack.size() == 1) return null;
 		TileType layer = stack.pop();
-		if(stack.size() == 0) {
-			// TODO check layer's data map for lower stack; only do below if none found.
-			stack.push(TileTypeEnum.HOLE.tileType);
-		}
+		// TODO if layer is a ground type, remove it from the ground stack
 		return layer;
 	}
 }
