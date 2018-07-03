@@ -102,7 +102,7 @@ public final class DataTag<T> implements Comparable<DataTag<?>> {
 		ordinal = nextOrdinal();
 		if(arrayValueClass.isArray()) {
 			this.valueWriter = ar -> ArrayUtils.deepToString(ar, MyUtils::encodeStringArray, valueWriter);
-			this.valueParser = data -> (T) parseArray(arrayValueClass.getComponentType(), valueParser, data);
+			this.valueParser = getValueParser(arrayValueClass, valueParser);
 		}
 		else {
 			this.valueWriter = (ValueMonoFunction<T, String>) valueWriter;
@@ -110,8 +110,22 @@ public final class DataTag<T> implements Comparable<DataTag<?>> {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	private DataTag(final Class<T> valueClass) {
-		this(valueClass, String::valueOf, data -> {
+		this(valueClass, String::valueOf, (ValueMonoFunction<String, Object>) getValueParser(valueClass));
+	}
+	
+	@SuppressWarnings("unchecked")
+	private static <T> ValueMonoFunction<String, T> getValueParser(Class<T> valueClass, ValueMonoFunction<String, Object> baseValueParser) {
+		return data -> {
+			if(valueClass.isArray())
+				return (T) parseArray(valueClass.getComponentType(), baseValueParser, data);
+			
+			return (T) baseValueParser.get(data);
+		};
+	}
+	private static <T> ValueMonoFunction<String, T> getValueParser(Class<T> valueClass) {
+		return getValueParser(valueClass, data -> {
 			if(Enum.class.isAssignableFrom(valueClass))
 				return Enum.valueOf(Enum.class.asSubclass(valueClass), data);
 			
@@ -124,15 +138,12 @@ public final class DataTag<T> implements Comparable<DataTag<?>> {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private static <T> T[] parseArray(Class<T> componentType, ValueMonoFunction<String, Object> valueParser, String data) {
+	private static <T> T[] parseArray(Class<T> componentType, ValueMonoFunction<String, Object> baseValueParser, String data) {
 		String[] dataArray = MyUtils.parseLayeredString(data);
+		ValueMonoFunction<String, T> valueParser = getValueParser(componentType, baseValueParser);
 		T[] ar = (T[]) Array.newInstance(componentType, dataArray.length);
-		for(int i = 0; i < dataArray.length; i++) {
-			if(componentType.isArray())
-				ar[i] = (T) parseArray(componentType.getComponentType(), valueParser, dataArray[i]);
-			else
-				ar[i] = (T) valueParser.get(dataArray[i]);
-		}
+		for(int i = 0; i < dataArray.length; i++)
+			ar[i] = valueParser.get(dataArray[i]);
 		
 		return ar;
 	}
