@@ -110,7 +110,7 @@ public class MainMenu extends MenuScreen {
 		TimeOfDay time = TimeOfDay.values[MathUtils.random(TimeOfDay.values.length-1)];
 		lightOverlay = TimeOfDay.getSkyColor(time.getStartOffsetSeconds());
 		
-		LevelGenerator generator = new LevelGenerator(MathUtils.random.nextLong(), 100, 60, 8, 6);
+		LevelGenerator generator = new LevelGenerator(MathUtils.random.nextLong(), 30, 20, 8, 6); // 100, 60
 		backgroundLevel = new DisplayLevel(generator);
 		
 		Vector2 size = new Vector2(levelView.getViewWidth(), levelView.getViewHeight());//.scl(0.5f);

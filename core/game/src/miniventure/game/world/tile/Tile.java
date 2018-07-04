@@ -47,7 +47,7 @@ public class Tile implements WorldObject {
 	
 	private TileStack tileStack;
 	
-	@NotNull private Level level;
+	@NotNull private final Level level;
 	protected final int x, y;
 	private EnumMap<TileTypeEnum, DataMap> dataMaps = new EnumMap<>(TileTypeEnum.class);
 	
@@ -257,7 +257,7 @@ public class Tile implements WorldObject {
 	}
 	
 	@Override
-	public String toString() { return getType()+" Tile"; }
+	public String toString() { return getType().getName()+' '+getClass().getSimpleName(); }
 	
 	public String toLocString() { return (x-level.getWidth()/2)+","+(y-level.getHeight()/2)+" ("+toString()+")"; }
 	

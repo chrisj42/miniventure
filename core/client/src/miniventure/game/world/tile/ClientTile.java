@@ -17,8 +17,4 @@ public class ClientTile extends RenderTile {
 	
 	@NotNull @Override
 	public ClientLevel getLevel() { return level; }
-	
-	@Override
-	public String toString() { return getType().getEnumType()+" ClientTile"; }
-	
 }

@@ -92,14 +92,6 @@ public class OverlapManager {
 		
 		for(Tile aroundTile: aroundTiles) {
 			TileType[] types = aroundTile.getTypeStack().getTypes(!excludeCovered);
-			if(excludeCovered) {
-				for(int i = types.length - 1; i > 0; i--) {
-					if(types[i].getRenderer().isOpaque()) {
-						types = Arrays.copyOfRange(types, i, types.length);
-						break;
-					}
-				}
-			}
 			
 			Point thisPos = tile.getLocation();
 			Point otherPos = aroundTile.getLocation();

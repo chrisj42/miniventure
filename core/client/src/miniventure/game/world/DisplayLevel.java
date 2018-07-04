@@ -37,15 +37,6 @@ public class DisplayLevel extends Level {
 	}
 	
 	@Override
-	public void loadChunk(Chunk newChunk) {
-		super.loadChunk(newChunk);
-		// queue all contained tiles for update
-		for(Tile[] row: newChunk.getTiles())
-			for(Tile tile: row)
-				tile.updateSprites();
-	}
-	
-	@Override
 	protected void loadChunk(Point chunkCoord) {
 		loadChunk(new Chunk(chunkCoord.x, chunkCoord.y, this, generator.generateChunk(chunkCoord.x, chunkCoord.y), (x, y, types) -> new DisplayTile(this, x, y, types)));
 	}

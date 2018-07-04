@@ -40,7 +40,7 @@ public class TileTypeRenderer {
 			}
 			
 			animationMap.computeIfAbsent(tileType, k -> new HashMap<>());
-			animationMap.get(tileType).computeIfAbsent(spriteID, k -> new Array<>());
+			animationMap.get(tileType).computeIfAbsent(spriteID, k -> new Array<>(TextureHolder.class));
 			animationMap.get(tileType).get(spriteID).add(region);
 		}
 	}
@@ -82,7 +82,7 @@ public class TileTypeRenderer {
 	// whenever a tile changes its TileTypeEnum stack in any way, all 9 tiles around it re-fetch their overlap and main animations. Then they keep that stack of animations until the next fetch.
 	
 	// gets the sprite for when this tiletype is surrounded by the given types.
-	public Animation<TextureHolder> getConnectionSprite(@NotNull Tile tile, EnumSet<TileTypeEnum>[] aroundTypes) {
+	public Animation<TextureHolder> getConnectionSprite(@NotNull Tile tile, EnumMap<RelPos, EnumSet<TileTypeEnum>> aroundTypes) {
 		if(transitionManager.playingAnimation(tile))
 			return transitionManager.getTransitionSprite(tile);
 		

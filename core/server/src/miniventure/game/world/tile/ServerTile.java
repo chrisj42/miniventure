@@ -42,8 +42,5 @@ public class ServerTile extends Tile {
 	}
 	
 	@Override
-	public String toString() { return getType().getEnumType()+" ServerTile"; }
-	
-	@Override
 	public boolean equals(Object other) { return other instanceof ServerTile && super.equals(other); }
 }

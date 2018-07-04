@@ -13,11 +13,13 @@ public enum RelPos {
 	}
 	
 	public int getX() { return x; }
-	public int getY() { return y; }
+	public int getY() { return -y; }
 	
-	private static RelPos[] values = RelPos.values();
+	public static final RelPos[] values = RelPos.values();
+	public static RelPos values(int ordinal) { return values[ordinal]; }
 	
 	public static RelPos get(int x, int y) {
+		y = -y;
 		if(x < -1) x = -1;
 		if(x > 1) x = 1;
 		if(y < -1) y = -1;
@@ -35,8 +37,8 @@ public enum RelPos {
 		// to do counter-clockwise, negate x, then flip x/y
 		
 		// get x/y
-		int x = getX();
-		int y = getY();
+		int x = this.x;
+		int y = this.y;
 		
 		// do rotation
 		if(!clockwise)

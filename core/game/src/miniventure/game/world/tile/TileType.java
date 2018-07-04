@@ -32,7 +32,7 @@ public class TileType {
 		
 		WATER(type -> new LiquidTileType(type, true, DestructionManager.INDESTRUCTIBLE(type), new TileTypeRenderer(type, true, new ConnectionManager(type, new RenderStyle(PlayMode.LOOP_RANDOM, 0.2f)), new OverlapManager(type, new RenderStyle(1/24f))), new UpdateManager(type, new SpreadUpdateAction(type, 0.33f, (newType, tile) -> tile.addTile(newType), HOLE)))),
 		
-		STONE(type -> new SurfaceTileType(type, false, new DestructionManager(type, 40, new PreferredTool(ToolType.Pickaxe, 5)), new TileTypeRenderer(type, true, new ConnectionManager(type, RenderStyle.SINGLE_FRAME, type)))),
+		STONE(type -> new SurfaceTileType(type, false, new DestructionManager(type, 40, new PreferredTool(ToolType.Pickaxe, 5)), new TileTypeRenderer(type, true, new ConnectionManager(type, RenderStyle.SINGLE_FRAME)))),
 		
 		STONE_FLOOR(type -> new FloorTile(type, ToolType.Pickaxe)),
 		
@@ -115,6 +115,7 @@ public class TileType {
 	public DataMap getInitialData() { return new DataMap(); }
 	
 	public TileTypeEnum getEnumType() { return enumType; }
+	public String getName() { return enumType.name(); }
 	
 	public float getLightRadius() { return lightRadius; }
 	

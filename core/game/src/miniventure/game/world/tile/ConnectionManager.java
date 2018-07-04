@@ -6,6 +6,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 
 import miniventure.game.texture.TextureHolder;
+import miniventure.game.util.RelPos;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -36,22 +37,22 @@ public class ConnectionManager {
 	
 	/// Checks the given aroundTypes for all types 
 	@NotNull
-	public Animation<TextureHolder> getConnectionSprite(EnumSet<TileTypeEnum>[] aroundTypes) {
+	public Animation<TextureHolder> getConnectionSprite(EnumMap<RelPos, EnumSet<TileTypeEnum>> aroundTypes) {
 		if(connectingTypes.size() == 0)
 			return renderStyle.getAnimation(tileAnimations.get(type).get("00"));
 		
-		boolean[] tileConnections = new boolean[9];
+		EnumMap<RelPos, Boolean> tileConnections = new EnumMap<>(RelPos.class);
 		
-		for(int i = 0; i < aroundTypes.length; i++) {
+		for(RelPos rp: RelPos.values) {
 			// check if each surrounding tile has something in the connectingTypes array
 			boolean connects = false;
-			for(TileTypeEnum aroundType: aroundTypes[i]) {
+			for(TileTypeEnum aroundType: aroundTypes.get(rp)) {
 				if(connectingTypes.contains(aroundType)) {
 					connects = true;
 					break;
 				}
 			}
-			tileConnections[i] = connects;
+			tileConnections.put(rp, connects);
 		}
 		
 		int spriteIdx = 0;

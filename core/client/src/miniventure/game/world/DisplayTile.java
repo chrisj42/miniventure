@@ -11,7 +11,4 @@ class DisplayTile extends RenderTile {
 		super(level, x, y, types, null);
 	}
 	
-	@Override
-	public String toString() { return getType().getEnumType()+" DisplayTile"; }
-	
 }

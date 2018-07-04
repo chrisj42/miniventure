@@ -1,5 +1,6 @@
 package miniventure.game.world.tile;
 
+import java.util.EnumMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -39,7 +40,7 @@ public class TileStack {
 		if(includeCovered)
 			return stack.toArray(new TileType[stack.size()]);
 		else {
-			List<TileType> typeList = stack.subList(stack.indexOf(opaqueStack.peekLast()), stack.size()-1);
+			List<TileType> typeList = stack.subList(stack.indexOf(opaqueStack.peekLast()), stack.size());
 			return typeList.toArray(new TileType[typeList.size()]);
 		}
 	}
@@ -51,6 +52,15 @@ public class TileStack {
 			types[i] = tileTypes[i].getEnumType();
 		return types;
 	}
+	
+	/*public EnumMap<TileTypeEnum, TileType> getTypeMap() { return getTypeMap(false); }
+	public EnumMap<TileTypeEnum, TileType> getTypeMap(boolean includeCovered) {
+		EnumMap<TileTypeEnum, TileType> map = new EnumMap<>(TileTypeEnum.class);
+		TileType[] tileTypes = getTypes(includeCovered);
+		for(TileType type: tileTypes)
+			map.put(type.getEnumType(), type);
+		return map;
+	}*/
 	
 	public boolean hasType(@NotNull TileType type) {
 		for(TileType layer: stack)

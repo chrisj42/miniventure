@@ -306,6 +306,26 @@ public abstract class Level implements Taggable<Level> {
 	public void loadChunk(Chunk newChunk) {
 		//tileCount += newChunk.width * newChunk.height;
 		putLoadedChunk(new Point(newChunk.chunkX, newChunk.chunkY), newChunk);
+		
+		// queue all contained tiles for update
+		Tile[][] tiles = newChunk.getTiles();
+		for(int i = 0; i < tiles.length; i++) {
+			for(int j = 0; j < tiles[i].length; j++) {
+				Tile t = tiles[i][j];
+				t.updateSprites();
+				// update the tiles in adjacent chunks
+				int oi = i == 0 ? -1 : i == tiles.length-1 ? 1 : 0;
+				int oj = j == 0 ? -1 : j == tiles[i].length-1 ? 1 : 0;
+				if(oi != 0) tryUpdate(t, oi, 0); // left/right side
+				if(oj != 0) tryUpdate(t, 0, oj); // above/below
+				if(oi != 0 && oj != 0) tryUpdate(t, oi, oj); // corner
+			}
+		}
+	}
+	private void tryUpdate(Tile ref, int ox, int oy) {
+		Point p = ref.getLocation();
+		Tile tile = getTile(p.x+ox, p.y+oy);
+		if(tile != null) tile.updateSprites();
 	}
 	
 	@Override
