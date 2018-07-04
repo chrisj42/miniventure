@@ -17,7 +17,9 @@ import miniventure.game.screen.ErrorScreen;
 import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
+import miniventure.game.util.Action;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.function.VoidMonoFunction;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -45,7 +47,7 @@ public class ClientCore extends ApplicationAdapter {
 	
 	private final ServerStarter serverStarter;
 	
-	public static final UncaughtExceptionHandler exceptionHandler = (thread, throwable) -> {
+	public static final VoidMonoFunction<Throwable> exceptionNotifier = throwable -> {
 		StringWriter string = new StringWriter();
 		PrintWriter printer = new PrintWriter(string);
 		throwable.printStackTrace(printer);
@@ -54,6 +56,21 @@ public class ClientCore extends ApplicationAdapter {
 		errorDisplay.setEditable(false);
 		JOptionPane.showMessageDialog(null, errorDisplay, "An error has occurred", JOptionPane.ERROR_MESSAGE);
 	};
+	
+	public static final UncaughtExceptionHandler exceptionHandler = (thread, throwable) -> {
+		exceptionNotifier.act(throwable);
+		
+		throwable.printStackTrace();
+	};
+	
+	/*public static final void wrapex(Action a) {
+		try {
+			a.act();
+		} catch(Throwable t) {
+			exceptionHandler.uncaughtException(Thread.currentThread(), t);
+			throw t;
+		}
+	}*/
 	
 	public ClientCore(ServerStarter serverStarter) {
 		this.serverStarter = serverStarter;
@@ -91,25 +108,17 @@ public class ClientCore extends ApplicationAdapter {
 	
 	@Override
 	public void render() {
-		try {
-			input.update();
-			
-			if (clientWorld != null && clientWorld.worldLoaded())
-				clientWorld.update(Gdx.graphics.getDeltaTime()); // renders as well
-			
-			hasMenu = menuScreen != null;
-			
-			if (menuScreen != null)
-				menuScreen.act();
-			if (menuScreen != null)
-				menuScreen.draw();
-		} catch(Throwable t) {
-			//System.out.println("running threads: " + Thread.activeCount());
-			
-			exceptionHandler.uncaughtException(Thread.currentThread(), t);
-			
-			throw t;
-		}
+		input.update();
+		
+		if (clientWorld != null && clientWorld.worldLoaded())
+			clientWorld.update(Gdx.graphics.getDeltaTime()); // renders as well
+		
+		hasMenu = menuScreen != null;
+		
+		if (menuScreen != null)
+			menuScreen.act();
+		if (menuScreen != null)
+			menuScreen.draw();
 	}
 	
 	public static void setScreen(@Nullable MenuScreen screen) {
