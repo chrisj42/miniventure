@@ -1,14 +1,19 @@
 package miniventure.game.world.tile;
 
 import miniventure.game.item.Item;
+import miniventure.game.item.ToolType;
 import miniventure.game.util.function.ValueMonoFunction;
 import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.particle.Particle;
+import miniventure.game.world.tile.DestructionManager.PreferredTool;
+import miniventure.game.world.tile.DestructionManager.RequiredTool;
 import miniventure.game.world.tile.data.DataMap;
 import miniventure.game.world.tile.data.DataTag;
+
+import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -17,24 +22,65 @@ public class TileType {
 	
 	public enum TileTypeEnum {
 		
-		HOLE(type -> new GroundTileType(type, DestructionManager.INDESTRUCTIBLE(type), new TileTypeRenderer(type, true, new ConnectionManager(type, RenderStyle.SINGLE_FRAME/*, TileTypeEnum.WATER*/))));
+		HOLE(type -> new GroundTileType(type, false, DestructionManager.INDESTRUCTIBLE(type), new TileTypeRenderer(type, true, new ConnectionManager(type, RenderStyle.SINGLE_FRAME/*, TileTypeEnum.WATER*/)))),
 		
-		private final TileType tileType;
+		DIRT(type -> new GroundTileType(type, true, new DestructionManager(type, new RequiredTool(ToolType.Shovel)), new TileTypeRenderer(type, true))),
 		
-		TileTypeEnum(ValueMonoFunction<TileTypeEnum, TileType> typeFetcher) {
-			tileType = typeFetcher.get(this);
+		SAND(type -> new GroundTileType(type, true, new DestructionManager(type, new RequiredTool(ToolType.Shovel)), new TileTypeRenderer(type, true, new ConnectionManager(type, RenderStyle.SINGLE_FRAME), new OverlapManager(type, RenderStyle.SINGLE_FRAME)))),
+		
+		GRASS(type -> new GroundTileType(type, true, new DestructionManager.DestructibleBuilder(type, 1, false).require(new RequiredTool(ToolType.Shovel)).make(), new TileTypeRenderer(type, true, new ConnectionManager(type, RenderStyle.SINGLE_FRAME), new OverlapManager(type, RenderStyle.SINGLE_FRAME)), new UpdateManager(type, new SpreadUpdateAction(type, 10, 45, (newType, tile) -> tile.addTile(newType), DIRT)))),
+		
+		WATER(type -> new LiquidTileType(type, true, DestructionManager.INDESTRUCTIBLE(type), new TileTypeRenderer(type, true, new ConnectionManager(type, new RenderStyle(PlayMode.LOOP_RANDOM, 0.2f)), new OverlapManager(type, new RenderStyle(1/24f))), new UpdateManager(type, new SpreadUpdateAction(type, 0.33f, (newType, tile) -> tile.addTile(newType), HOLE)))),
+		
+		STONE(type -> new SurfaceTileType(type, false, new DestructionManager(type, 40, new PreferredTool(ToolType.Pickaxe, 5)), new TileTypeRenderer(type, true, new ConnectionManager(type, RenderStyle.SINGLE_FRAME, type)))),
+		
+		STONE_FLOOR(type -> new FloorTile(type, ToolType.Pickaxe)),
+		
+		WOOD_WALL(type -> new WallTile(type, 20, new PreferredTool(ToolType.Axe, 3))),
+		
+		STONE_WALL(type -> new WallTile(type, 40, new PreferredTool(ToolType.Pickaxe, 5))),
+		
+		DOOR_OPEN(DoorTile::getOpenDoor),
+		
+		DOOR_CLOSED(DoorTile::getClosedDoor),
+		
+		TORCH(type -> new SurfaceTileType(type, true, 2, new DestructionManager(type), new TileTypeRenderer(type, false, new ConnectionManager(type, new RenderStyle(1/12f)), OverlapManager.NONE(type), new TransitionManager(type).addEntranceAnimations(new TransitionAnimation("enter", 3/12f))), new UpdateManager(type))),
+		
+		CACTUS(type -> new SurfaceTileType(type, false, new DestructionManager(type, 12, null), new TileTypeRenderer(type, false)) {
+			@Override
+			public boolean touched(@NotNull Tile tile, Entity entity, boolean initial) {
+				return entity.attackedBy(tile, null, 1);
+			}
+		}),
+		
+		TREE_CARTOON(TreeTile::new),
+		TREE_DARK(TreeTile::new),
+		TREE_PINE(TreeTile::new),
+		TREE_POOF(TreeTile::new);
+		
+		@NotNull private final ValueMonoFunction<TileTypeEnum, TileType> tileTypeFetcher;
+		private TileType tileType;
+		
+		TileTypeEnum(@NotNull ValueMonoFunction<TileTypeEnum, TileType> typeFetcher) {
+			tileTypeFetcher = typeFetcher;
 		}
 		
 		private static final TileTypeEnum[] values = values();
+		
 		public static TileTypeEnum values(int ordinal) { return values[ordinal]; }
 		
+		public static void init() {}
+		
 		public TileType getTileType(@NotNull WorldManager world) {
+			if(tileType == null)
+				tileType = tileTypeFetcher.get(this);
 			return world.getTileTypeFetcher().mapValue(this, tileType);
 		}
 	}
 	
-	
 	private final TileTypeEnum enumType;
+	final boolean walkable;
+	final float lightRadius;
 	final DestructionManager destructionManager;
 	final TileTypeRenderer renderer;
 	final UpdateManager updateManager;
@@ -48,11 +94,19 @@ public class TileType {
 			
 	 */
 	
-	TileType(@NotNull TileTypeEnum enumType, DestructionManager destructionManager, TileTypeRenderer renderer) {
-		this(enumType, destructionManager, renderer, new UpdateManager(enumType));
+	/*TileType(@NotNull TileTypeEnum enumType, DestructionManager destructionManager, TileTypeRenderer renderer) {
+		this(enumType, false, destructionManager, renderer);
+	}*/
+	protected TileType(@NotNull TileTypeEnum enumType, boolean walkable, DestructionManager destructionManager, TileTypeRenderer renderer) {
+		this(enumType, walkable, destructionManager, renderer, new UpdateManager(enumType));
 	}
-	TileType(@NotNull TileTypeEnum enumType, DestructionManager destructionManager, TileTypeRenderer renderer, UpdateManager updateManager) {
+	protected TileType(@NotNull TileTypeEnum enumType, boolean walkable, DestructionManager destructionManager, TileTypeRenderer renderer, UpdateManager updateManager) {
+		this(enumType, walkable, 0, destructionManager, renderer, updateManager);
+	}
+	protected TileType(@NotNull TileTypeEnum enumType, boolean walkable, float lightRadius, DestructionManager destructionManager, TileTypeRenderer renderer, UpdateManager updateManager) {
 		this.enumType = enumType;
+		this.walkable = walkable;
+		this.lightRadius = lightRadius;
 		this.destructionManager = destructionManager;
 		this.renderer = renderer;
 		this.updateManager = updateManager;
@@ -62,11 +116,11 @@ public class TileType {
 	
 	public TileTypeEnum getEnumType() { return enumType; }
 	
-	public float getLightRadius() { return 0; }
+	public float getLightRadius() { return lightRadius; }
 	
 	public TileTypeRenderer getRenderer() { return renderer; }
 	
-	public boolean isPermeableBy(Entity e) { return e instanceof Particle; }
+	public boolean isPermeableBy(Entity e) { return e instanceof Particle || walkable; }
 	
 	/*
 		Some update methods. All methods have Tile param in addition to whatever listed.

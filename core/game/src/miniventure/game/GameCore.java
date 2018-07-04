@@ -6,6 +6,7 @@ import miniventure.game.texture.TextureAtlasHolder;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.Version;
 import miniventure.game.util.VersionInfo;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl.LwjglFiles;
@@ -73,6 +74,8 @@ public class GameCore {
 		//noinspection ConstantConditions
 		for(AtlasRegion region: iconAtlas.getRegions())
 			icons.put(region.name, new TextureHolder(region));
+		
+		TileTypeEnum.init();
 	}
 	
 	public static void initNonGdx() {
@@ -92,6 +95,8 @@ public class GameCore {
 		tileAtlas = new TextureAtlasHolder(tileData);
 		for(Region region: iconData.getRegions())
 			icons.put(region.name, new TextureHolder(region));
+		
+		TileTypeEnum.init();
 	}
 	
 	public static void dispose () {

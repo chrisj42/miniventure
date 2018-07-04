@@ -38,7 +38,7 @@ public class TileItem extends Item {
 		addItem(TileTypeEnum.GRASS, TileTypeEnum.DIRT);
 		addItem(TileTypeEnum.STONE, TileTypeEnum.DIRT);
 		
-		items.put(TileTypeEnum.DOOR_CLOSED, new TileItem("Door", GameCore.tileAtlas.findRegion("door_closed/00"), TileTypeEnum.DOOR_CLOSED, groundTypes));
+		items.put(TileTypeEnum.DOOR_CLOSED, new TileItem("Door", GameCore.tileAtlas.findRegion("door_closed/c00"), TileTypeEnum.DOOR_CLOSED, groundTypes));
 		items.put(TileTypeEnum.DOOR_OPEN, items.get(TileTypeEnum.DOOR_CLOSED));
 		
 		addItem(TileTypeEnum.STONE_FLOOR, TileTypeEnum.HOLE/*, TileTypeEnum.DIRT*/);
@@ -55,7 +55,7 @@ public class TileItem extends Item {
 	@Nullable private TileTypeEnum[] canPlaceOn;
 	
 	private TileItem(@NotNull TileTypeEnum type, @Nullable TileTypeEnum... canPlaceOn) {
-		this(MyUtils.toTitleCase(type.name()), GameCore.tileAtlas.findRegion(type.name().toLowerCase()+"/00"), type, canPlaceOn); // so, if the placeOn is null, then...
+		this(MyUtils.toTitleCase(type.name()), GameCore.tileAtlas.findRegion(type.name().toLowerCase()+"/c00"), type, canPlaceOn); // so, if the placeOn is null, then...
 	}
 	
 	private TileItem(String name, AtlasRegion texture, @NotNull TileTypeEnum result, @Nullable TileTypeEnum... placeOn) { this(name, new TextureHolder(texture, Tile.SIZE, Tile.SIZE), result, placeOn); }

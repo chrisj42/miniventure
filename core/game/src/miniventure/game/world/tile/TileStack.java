@@ -17,7 +17,7 @@ public class TileStack {
 	
 	// bottom tile is first, top tile is last.
 	private LinkedList<TileType> stack = new LinkedList<>();
-	private LinkedList<GroundTileType> groundStack = new LinkedList<>(); // ground tiles only
+	private LinkedList<TileType> opaqueStack = new LinkedList<>(); // opaque tiles only
 	
 	public TileStack(@NotNull WorldManager world) { addLayer(baseType.getTileType(world)); }
 	public TileStack(TileType[] types) {
@@ -32,14 +32,14 @@ public class TileStack {
 	public int size() { return stack.size(); }
 	
 	public TileType getTopLayer() { return stack.peekLast(); }
-	public GroundTileType getGroundType() { return groundStack.peekLast(); }
+	public TileType getLowestVisibleLayer() { return opaqueStack.peekLast(); }
 	
 	public TileType[] getTypes() { return getTypes(false); }
 	public TileType[] getTypes(boolean includeCovered) {
 		if(includeCovered)
 			return stack.toArray(new TileType[stack.size()]);
 		else {
-			List<TileType> typeList = stack.subList(stack.indexOf(groundStack.peekLast()), stack.size()-1);
+			List<TileType> typeList = stack.subList(stack.indexOf(opaqueStack.peekLast()), stack.size()-1);
 			return typeList.toArray(new TileType[typeList.size()]);
 		}
 	}
@@ -70,16 +70,16 @@ public class TileStack {
 	
 	void addLayer(TileType newLayer) {
 		stack.addLast(newLayer);
-		if(newLayer instanceof GroundTileType)
-			groundStack.add((GroundTileType)newLayer);
+		if(newLayer.getRenderer().isOpaque())
+			opaqueStack.add(newLayer);
 	}
 	
 	@Nullable
 	TileType removeLayer() {
 		if(stack.size() == 1) return null;
 		TileType layer = stack.removeLast();
-		if(layer instanceof GroundTileType)
-			groundStack.remove(layer);
+		if(layer.getRenderer().isOpaque())
+			opaqueStack.remove(layer);
 		return layer;
 	}
 }

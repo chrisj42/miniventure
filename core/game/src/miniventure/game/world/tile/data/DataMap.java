@@ -19,20 +19,20 @@ public class DataMap {
 	}
 	
 	public <T> T put(DataEntry<T> entry) { return put(entry.key, entry.value); }
+	@SuppressWarnings("unchecked")
 	public <T> T put(DataTag<T> key, T value) {
-		//noinspection unchecked
 		return (T) map.put(key, value);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public <T> T remove(DataTag<T> tag) {
-		//noinspection unchecked
 		return (T) map.remove(tag);
 	}
 	
 	public void clear() { map.clear(); }
 	
+	@SuppressWarnings("unchecked")
 	public <T> T get(DataTag<T> tag) {
-		//noinspection unchecked
 		return (T) map.get(tag);
 	}
 	public <T, U extends T> T getOrDefault(DataTag<T> tag, U defaultValue) {

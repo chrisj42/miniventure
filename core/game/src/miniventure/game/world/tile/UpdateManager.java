@@ -1,7 +1,5 @@
 package miniventure.game.world.tile;
 
-import java.util.Arrays;
-
 import miniventure.game.util.function.ValueFunction;
 import miniventure.game.util.function.VoidMonoFunction;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
@@ -12,9 +10,19 @@ import org.jetbrains.annotations.NotNull;
 
 public class UpdateManager {
 	
-	@FunctionalInterface
+	/*
+		Update Actions have:
+			- an action they do on update
+			- a period to wait before that update happens
+			- a way to signal what that wait period is, that is only requested once per update cycle
+	 */
+	
 	interface UpdateAction {
-		float update(@NotNull Tile tile, float delta, ValueFunction<Float> deltaCacheFetcher, VoidMonoFunction<Float> deltaCacheSetter);
+		void update(@NotNull Tile tile, ValueFunction<String> dataCacheFetcher, VoidMonoFunction<String> dataCacheSetter);
+		
+		boolean canUpdate(@NotNull Tile tile);
+		
+		float getDelta(@NotNull Tile tile);
 	}
 	
 	private final TileTypeEnum tileType;
@@ -29,16 +37,32 @@ public class UpdateManager {
 		float minWait = 0;
 		DataMap dataMap = tile.getDataMap(tileType);
 		Float[] deltas = dataMap.getOrDefaultAndPut(DataTag.UpdateTimers, new Float[actions.length]);
+		String[] datas = dataMap.getOrDefaultAndPut(DataTag.UpdateActionCaches, new String[actions.length]);
 		for(int i = 0; i < actions.length; i++) {
-			UpdateAction action = actions[i];
-			final int idx = i;
-			float wait = action.update(tile, delta, () -> deltas[idx], value -> deltas[idx] = value);
+			float wait;
+			if(!actions[i].canUpdate(tile)) {
+				wait = 0f;
+			}
+			else if(deltas[i] == 0f) {
+				wait = actions[i].getDelta(tile);
+			}
+			else {
+				deltas[i] -= delta;
+				if(deltas[i] <= 0) {
+					UpdateAction action = actions[i];
+					final int idx = i;
+					action.update(tile, () -> datas[idx], value -> datas[idx] = value);
+					wait = action.getDelta(tile);
+				} else wait = 0;
+			}
+			deltas[i] = wait;
 			if(wait > 0) {
 				if(minWait == 0)
 					minWait = wait;
 				else
 					minWait = Math.min(minWait, wait);
 			}
+			
 		}
 		
 		TransitionManager man = tileType.getTileType(tile.getWorld()).getRenderer().transitionManager;

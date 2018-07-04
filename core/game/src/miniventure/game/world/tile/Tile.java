@@ -49,7 +49,7 @@ public class Tile implements WorldObject {
 	
 	@NotNull private Level level;
 	protected final int x, y;
-	private EnumMap<TileTypeEnum, DataMap> dataMaps;
+	private EnumMap<TileTypeEnum, DataMap> dataMaps = new EnumMap<>(TileTypeEnum.class);
 	
 	// the TileType array is ALWAYS expected in order of bottom to top.
 	protected Tile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, @Nullable DataMap[] dataMaps) {
@@ -345,5 +345,5 @@ public class Tile implements WorldObject {
 	}
 	
 	@Override
-	public Tag getTag() { return new TileTag(this); }
+	public Tag<Tile> getTag() { return new TileTag(this); }
 }

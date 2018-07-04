@@ -25,7 +25,7 @@ public class ConnectionManager {
 	public ConnectionManager(@NotNull TileTypeEnum type, RenderStyle renderStyle, TileTypeEnum... connectingTypes) {
 		this.type = type;
 		this.renderStyle = renderStyle;
-		this.connectingTypes = EnumSet.copyOf(Arrays.asList(connectingTypes));
+		this.connectingTypes = connectingTypes.length == 0 ? EnumSet.noneOf(TileTypeEnum.class) : EnumSet.copyOf(Arrays.asList(connectingTypes));
 	}
 	
 	public ConnectionManager overrideSprite(int spriteIndex, RenderStyle newStyle) {

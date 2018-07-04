@@ -1,12 +1,15 @@
 package miniventure.game.world.tile;
 
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashSet;
 
 import miniventure.game.util.function.ValueFunction;
 import miniventure.game.util.function.VoidMonoFunction;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 import miniventure.game.world.tile.UpdateManager.UpdateAction;
+
+import com.badlogic.gdx.math.MathUtils;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -18,45 +21,25 @@ class SpreadUpdateAction implements UpdateAction {
 	}
 	
 	private final TileTypeEnum tileType;
-	private final float spreadDelay;
+	private final ValueFunction<Float> spreadDelayFetcher;
 	private final TileReplaceBehavior replaceBehavior;
-	private final HashSet<TileTypeEnum> replaces;
+	private final EnumSet<TileTypeEnum> replaces;
 	
 	SpreadUpdateAction(@NotNull TileTypeEnum tileType, float spreadDelay, TileReplaceBehavior replaceBehavior, TileTypeEnum... replaces) {
+		this(tileType, () -> spreadDelay, replaceBehavior, replaces);
+	}
+	SpreadUpdateAction(@NotNull TileTypeEnum tileType, float spreadDelayMin, float spreadDelayMax, TileReplaceBehavior replaceBehavior, TileTypeEnum... replaces) {
+		this(tileType, () -> MathUtils.random(spreadDelayMin, spreadDelayMax), replaceBehavior, replaces);
+	}
+	SpreadUpdateAction(@NotNull TileTypeEnum tileType, ValueFunction<Float> spreadDelayFetcher, TileReplaceBehavior replaceBehavior, TileTypeEnum... replaces) {
 		this.tileType = tileType;
-		this.spreadDelay = spreadDelay;
+		this.spreadDelayFetcher = spreadDelayFetcher;
 		this.replaceBehavior = replaceBehavior;
-		this.replaces = new HashSet<>(Arrays.asList(replaces));
+		this.replaces = EnumSet.copyOf(Arrays.asList(replaces));
 	}
 	
 	@Override
-	public float update(@NotNull Tile tile, float delta, ValueFunction<Float> deltaCacheFetcher, VoidMonoFunction<Float> deltaCacheSetter) {
-		if(!canSpread(tile)) {
-			deltaCacheSetter.act(0f);
-			return 0;
-		}
-		
-		float totalDelta = deltaCacheFetcher.get() + delta;
-		if(totalDelta >= spreadDelay) {
-			spread(tile);
-			deltaCacheSetter.act(0f);
-			return canSpread(tile) ? spreadDelay : 0;
-		}
-		
-		// not enough time passed for spread. save current delta and return remaining time needed.
-		deltaCacheSetter.act(totalDelta);
-		return spreadDelay - totalDelta;
-	}
-	
-	public boolean canSpread(Tile tile) {
-		for(Tile t: tile.getAdjacentTiles(false))
-			if(replaces.contains(t.getType().getEnumType()))
-				return true;
-		
-		return false;
-	}
-	
-	public void spread(Tile tile) {
+	public void update(@NotNull Tile tile, ValueFunction<String> dataCacheFetcher, VoidMonoFunction<String> dataCacheSetter) {
 		HashSet<Tile> around = tile.getAdjacentTiles(false);
 		//around.shuffle();
 		for(Tile t: around) {
@@ -65,6 +48,20 @@ class SpreadUpdateAction implements UpdateAction {
 				//break;
 			}
 		}
+	}
+	
+	@Override
+	public boolean canUpdate(@NotNull Tile tile) {
+		for(Tile t: tile.getAdjacentTiles(false))
+			if(replaces.contains(t.getType().getEnumType()))
+				return true;
+		
+		return false;
+	}
+	
+	@Override
+	public float getDelta(@NotNull Tile tile) {
+		return spreadDelayFetcher.get();
 	}
 	
 }

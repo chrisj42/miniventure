@@ -10,10 +10,10 @@ import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Random;
 
-import miniventure.game.world.tile.TileType;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 class Testing {
-	private static final HashMap<TileType, Color> tileMap = new HashMap<>();
+	private static final HashMap<TileTypeEnum, Color> tileMap = new HashMap<>();
 	static {
 		tileMap.put(TileTypeEnum.WATER, Color.BLUE);
 		tileMap.put(TileTypeEnum.TREE_CARTOON, Color.GREEN.darker().darker());
@@ -29,7 +29,7 @@ class Testing {
 	}
 	private static void displayLevelVisually(int width, int height, int scale, long seed) {
 		LevelGenerator gen = new LevelGenerator(seed, 0, 0, 32, 6);
-		TileType[][][] tiles = gen.generateTiles(0, 0, width, height);
+		TileTypeEnum[][][] tiles = gen.generateTiles(0, 0, width, height);
 		
 		Color[][] colors = new Color[width][height];
 		for(int x = 0; x < tiles.length; x++)
