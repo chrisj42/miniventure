@@ -69,7 +69,7 @@ public class TileType {
 		
 		public static TileTypeEnum values(int ordinal) { return values[ordinal]; }
 		
-		public static void init() {}
+		public static void init() { DataTag.init(); }
 		
 		public TileType getTileType(@NotNull WorldManager world) {
 			if(tileType == null)

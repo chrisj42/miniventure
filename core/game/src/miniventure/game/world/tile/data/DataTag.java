@@ -5,17 +5,19 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.TreeMap;
 
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.function.ValueBiFunction;
 import miniventure.game.util.function.ValueMonoFunction;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 import miniventure.game.world.tile.TransitionManager.TransitionMode;
 
 import org.jetbrains.annotations.NotNull;
 
+@SuppressWarnings("unchecked")
 public final class DataTag<T> implements Comparable<DataTag<?>> {
 	
 	/* Some notes:
@@ -29,6 +31,10 @@ public final class DataTag<T> implements Comparable<DataTag<?>> {
 	
 	private static int counter = 0;
 	private static synchronized int nextOrdinal() { return counter++; }
+	
+	private static final DataTag<?>[] values = new DataTag[8];
+	public static DataTag<?>[] values() { return Arrays.copyOf(values, values.length); }
+	private static final String[] names = new String[values.length];
 	
 	
 	/* --- ENUMERATION VALUES --- */
@@ -52,10 +58,9 @@ public final class DataTag<T> implements Comparable<DataTag<?>> {
 	/* --- ENUMERATION SETUP --- */
 	
 	
-	private static final HashMap<String, DataTag<?>> nameToValue = new HashMap<>(7);
-	private static final TreeMap<DataTag<?>, String> valueToName = new TreeMap<>();
+	private static final HashMap<String, DataTag<?>> nameToValue = new HashMap<>(values.length);
 	static {
-		ArrayList<Field> enumTypes = new ArrayList<>(7);
+		ArrayList<Field> enumTypes = new ArrayList<>(values.length);
 		
 		// WARNING: getDeclaredFields makes no guarantee that the fields are returned in order of declaration.
 		// So, I'll store the values in a TreeMap.
@@ -71,17 +76,13 @@ public final class DataTag<T> implements Comparable<DataTag<?>> {
 			e.printStackTrace();
 		}
 		
-		nameToValue.forEach((name, value) -> valueToName.put(value, name));
+		nameToValue.forEach((name, value) -> names[value.ordinal] = name);
 	}
 	
-	@SuppressWarnings("unchecked")
-	public static DataTag<?>[] values() { return valueToName.keySet().toArray(new DataTag[valueToName.size()]); }
 	public static DataTag<?> valueOf(String str) { return nameToValue.get(str); }
 	
-	public static final DataTag<?>[] values = values();
-	
 	private final int ordinal;
-	public String name() { return valueToName.get(this); }
+	public String name() { return names[ordinal]; }
 	public int ordinal() { return ordinal; }
 	
 	
@@ -94,57 +95,72 @@ public final class DataTag<T> implements Comparable<DataTag<?>> {
 	
 	private DataTag(ValueMonoFunction<T, String> valueWriter, ValueMonoFunction<String, T> valueParser) {
 		ordinal = nextOrdinal();
+		values[ordinal] = this;
+		System.out.println("prepared data tag "+this);
 		this.valueWriter = valueWriter;
 		this.valueParser = valueParser;
 	}
 	
-	@SuppressWarnings("unchecked")
-	private DataTag(final Class<T> arrayValueClass, final ValueMonoFunction<Object, String> valueWriter, final ValueMonoFunction<String, Object> valueParser) {
-		ordinal = nextOrdinal();
-		if(arrayValueClass.isArray()) {
-			this.valueWriter = ar -> ArrayUtils.deepToString(ar, MyUtils::encodeStringArray, valueWriter);
-			this.valueParser = getValueParser(arrayValueClass, valueParser);
-		}
-		else {
-			this.valueWriter = (ValueMonoFunction<T, String>) valueWriter;
-			this.valueParser = (ValueMonoFunction<String, T>) valueParser;
-		}
-	}
-	
-	@SuppressWarnings("unchecked")
 	private DataTag(final Class<T> valueClass) {
-		this(valueClass, String::valueOf, (ValueMonoFunction<String, Object>) getValueParser(valueClass));
-	}
-	
-	@SuppressWarnings("unchecked")
-	private static <T> ValueMonoFunction<String, T> getValueParser(Class<T> valueClass, ValueMonoFunction<String, Object> baseValueParser) {
-		return data -> {
-			if(valueClass.isArray())
-				return (T) parseArray(valueClass.getComponentType(), baseValueParser, data);
+		ordinal = nextOrdinal();
+		values[ordinal] = this;
+		
+		this.valueWriter = getValueWriter(valueClass, String::valueOf);
+		this.valueParser = getValueParser(valueClass, (data, baseClass) -> {
+			if(Enum.class.isAssignableFrom(baseClass))
+				return Enum.valueOf(baseClass.asSubclass(Enum.class), data);
 			
-			return (T) baseValueParser.get(data);
-		};
-	}
-	private static <T> ValueMonoFunction<String, T> getValueParser(Class<T> valueClass) {
-		return getValueParser(valueClass, data -> {
-			if(Enum.class.isAssignableFrom(valueClass))
-				return Enum.valueOf(Enum.class.asSubclass(valueClass), data);
+			if(baseClass.isPrimitive()) {
+				// primitive type...
+				if(baseClass.equals(char.class)) {
+					// this one is a little different
+					return data.charAt(0);
+				}
+				
+				Object obj = Array.newInstance(baseClass, 0);
+				Object[] ar = ArrayUtils.boxArray(obj);
+				Class<?> boxedClass = ar.getClass().getComponentType();
+				try {
+					return boxedClass.getMethod("parse"+MyUtils.toTitleCase(baseClass.toString()), String.class).invoke(null, data);
+				} catch(IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+					throw new RuntimeException("primitive type "+baseClass+" could not be instantiated; boxed "+boxedClass+" does not contain a parse"+boxedClass.getSimpleName()+'('+String.class.getName()+") method.", e);
+				}
+			}
 			
 			try {
-				return valueClass.getConstructor(String.class).newInstance(data);
+				return baseClass.getConstructor(String.class).newInstance(data);
 			} catch(InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-				throw new TypeNotPresentException(valueClass.getTypeName(), e);
+				throw new TypeNotPresentException(baseClass.getTypeName(), e);
 			}
 		});
 	}
 	
-	@SuppressWarnings("unchecked")
-	private static <T> T[] parseArray(Class<T> componentType, ValueMonoFunction<String, Object> baseValueParser, String data) {
+	@FunctionalInterface
+	interface ClassParser<T> extends ValueBiFunction<String, Class<T>, T> {}
+	
+	private static <T> ValueMonoFunction<T, String> getValueWriter(Class<T> valueClass, ValueMonoFunction<Object, String> baseParser) {
+		if(valueClass.isArray())
+			return ar -> ArrayUtils.deepToString(ar, MyUtils::encodeStringArray, baseParser);
+		return (ValueMonoFunction<T, String>) baseParser;
+	}
+	
+	private static <T, B> ValueMonoFunction<String, T> getValueParser(Class<T> valueClass, ClassParser<B> baseValueParser) {
+		if(valueClass.isArray())
+			return (ValueMonoFunction<String, T>) getArrayParser(valueClass.getComponentType(), baseValueParser);
+		// T == B
+		return data -> ((ClassParser<T>)baseValueParser).get(data, valueClass);
+	}
+	
+	private static <C, B> ValueMonoFunction<String, B> getArrayParser(Class<C> componentType, ClassParser<B> baseValueParser) {
+		ValueMonoFunction<String, C> componentParser = getValueParser(componentType, baseValueParser);
+		return data -> parseArray(componentType, componentParser, data);
+	}
+	
+	private static <C, A> A parseArray(Class<C> componentType, ValueMonoFunction<String, C> componentParser, String data) {
 		String[] dataArray = MyUtils.parseLayeredString(data);
-		ValueMonoFunction<String, T> valueParser = getValueParser(componentType, baseValueParser);
-		T[] ar = (T[]) Array.newInstance(componentType, dataArray.length);
+		A ar = (A) Array.newInstance(componentType, dataArray.length);
 		for(int i = 0; i < dataArray.length; i++)
-			ar[i] = valueParser.get(dataArray[i]);
+			Array.set(ar, i, componentParser.get(dataArray[i]));
 		
 		return ar;
 	}
@@ -168,4 +184,9 @@ public final class DataTag<T> implements Comparable<DataTag<?>> {
 	public int compareTo(@NotNull DataTag<?> o) {
 		return Integer.compare(ordinal, o.ordinal);
 	}
+	
+	@Override
+	public String toString() { return name()==null?String.valueOf(ordinal):name(); }
+	
+	public static void init() {}
 }

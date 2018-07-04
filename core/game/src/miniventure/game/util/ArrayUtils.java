@@ -67,7 +67,7 @@ public final class ArrayUtils {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <T> T[] boxPrimitiveArray(Class<T> clazz, int length, ValueMonoFunction<Integer, T> valueFetcher) {
+	public static <T> T[] fetchArray(Class<T> clazz, int length, ValueMonoFunction<Integer, T> valueFetcher) {
 		T[] ar = (T[]) Array.newInstance(clazz, length);
 		for(int i = 0; i < ar.length; i++)
 			ar[i] = valueFetcher.get(i);
@@ -80,21 +80,21 @@ public final class ArrayUtils {
 		if (ar instanceof Object[])
 			objAr = (Object[]) ar;
 		else if (ar instanceof byte[])
-			objAr = boxPrimitiveArray(Byte.class, ((byte[]) ar).length, i -> ((byte[]) ar)[i]);
+			objAr = fetchArray(Byte.class, ((byte[]) ar).length, i -> ((byte[]) ar)[i]);
 		else if (ar instanceof short[])
-			objAr = boxPrimitiveArray(Short.class, ((short[]) ar).length, i -> ((short[]) ar)[i]);
+			objAr = fetchArray(Short.class, ((short[]) ar).length, i -> ((short[]) ar)[i]);
 		else if (ar instanceof int[])
-			objAr = boxPrimitiveArray(Integer.class, ((int[]) ar).length, i -> ((int[]) ar)[i]);
+			objAr = fetchArray(Integer.class, ((int[]) ar).length, i -> ((int[]) ar)[i]);
 		else if (ar instanceof long[])
-			objAr = boxPrimitiveArray(Long.class, ((long[]) ar).length, i -> ((long[]) ar)[i]);
+			objAr = fetchArray(Long.class, ((long[]) ar).length, i -> ((long[]) ar)[i]);
 		else if (ar instanceof char[])
-			objAr = boxPrimitiveArray(Character.class, ((char[]) ar).length, i -> ((char[]) ar)[i]);
+			objAr = fetchArray(Character.class, ((char[]) ar).length, i -> ((char[]) ar)[i]);
 		else if (ar instanceof float[])
-			objAr = boxPrimitiveArray(Float.class, ((float[]) ar).length, i -> ((float[]) ar)[i]);
+			objAr = fetchArray(Float.class, ((float[]) ar).length, i -> ((float[]) ar)[i]);
 		else if (ar instanceof double[])
-			objAr = boxPrimitiveArray(Double.class, ((double[]) ar).length, i -> ((double[]) ar)[i]);
+			objAr = fetchArray(Double.class, ((double[]) ar).length, i -> ((double[]) ar)[i]);
 		else if (ar instanceof boolean[])
-			objAr = boxPrimitiveArray(Boolean.class, ((boolean[]) ar).length, i -> ((boolean[]) ar)[i]);
+			objAr = fetchArray(Boolean.class, ((boolean[]) ar).length, i -> ((boolean[]) ar)[i]);
 		else
 			throw new IllegalArgumentException("argument is not an array: "+ar);
 		
