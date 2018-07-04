@@ -102,6 +102,9 @@ public final class ArrayUtils {
 	}
 	
 	public static String deepToString(Object obj, ValueMonoFunction<String[], String> stringArrayJoiner, ValueMonoFunction<Object, String> stringifier) {
+		if(obj == null)
+			return "null";
+		
 		if(!obj.getClass().isArray())
 			return stringifier.get(obj);
 		

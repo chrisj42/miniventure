@@ -62,7 +62,7 @@ public class RenderTile extends Tile {
 				for(TileType type: aroundTypes)
 					typeMaps[idx].put(type.getEnumType(), type);
 				allTypes.putAll(typeMaps[idx]);
-				typeSets[idx] = EnumSet.copyOf(typeMaps[idx].keySet());
+				typeSets[idx] = typeMaps[idx].size() == 0 ? EnumSet.noneOf(TileTypeEnum.class) : EnumSet.copyOf(typeMaps[idx].keySet());
 				
 				idx++;
 			}

@@ -1,11 +1,9 @@
-package miniventure.game.client;
+package miniventure.game.world;
 
-import miniventure.game.world.Chunk;
-import miniventure.game.world.ClientLevel;
-import miniventure.game.world.Level;
-import miniventure.game.world.Point;
+import miniventure.game.client.DisplayWorld;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.levelgen.LevelGenerator;
+import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
@@ -36,6 +34,15 @@ public class DisplayLevel extends Level {
 	@Override
 	public void render(Rectangle renderSpace, SpriteBatch batch, float delta, Vector2 posOffset) {
 		ClientLevel.render(getOverlappingTiles(renderSpace), new Array<>(Entity.class), batch, delta, posOffset);
+	}
+	
+	@Override
+	public void loadChunk(Chunk newChunk) {
+		super.loadChunk(newChunk);
+		// queue all contained tiles for update
+		for(Tile[] row: newChunk.getTiles())
+			for(Tile tile: row)
+				tile.updateSprites();
 	}
 	
 	@Override

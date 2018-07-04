@@ -5,7 +5,7 @@ import javax.swing.JOptionPane;
 import miniventure.game.GameCore;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.ClientWorld;
-import miniventure.game.client.DisplayLevel;
+import miniventure.game.world.DisplayLevel;
 import miniventure.game.client.LevelViewport;
 import miniventure.game.screen.InfoScreen.CreditsScreen;
 import miniventure.game.screen.InfoScreen.InstructionsScreen;

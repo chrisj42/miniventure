@@ -70,6 +70,15 @@ public class ServerLevel extends Level {
 		}
 	}
 	
+	@Override
+	public void loadChunk(Chunk newChunk) {
+		super.loadChunk(newChunk);
+		// queue all contained tiles for update
+		for(Tile[] row: newChunk.getTiles())
+			for(Tile tile: row)
+				onTileUpdate((ServerTile) tile);
+	}
+	
 	public void update(Entity[] entities, float delta) {
 		if(getLoadedChunkCount() == 0) return;
 		

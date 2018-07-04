@@ -319,6 +319,8 @@ public class Tile implements WorldObject {
 			tile.dataMaps.clear();
 			for(int i = 0; i < data.length; i++)
 				tile.dataMaps.put(types[i], DataMap.deserialize(data[i]));
+			
+			tile.updateSprites();
 		}
 	}
 	

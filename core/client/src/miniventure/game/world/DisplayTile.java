@@ -1,4 +1,4 @@
-package miniventure.game.client;
+package miniventure.game.world;
 
 import miniventure.game.world.tile.RenderTile;
 import miniventure.game.world.tile.TileType.TileTypeEnum;

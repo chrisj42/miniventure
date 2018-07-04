@@ -117,7 +117,8 @@ public class GameServer implements GameProtocol {
 					ServerLevel level = world.getLevel(0);
 					if(level != null) {
 						ServerPlayer player = world.addPlayer(name);
-						connectionToPlayerDataMap.put(connection, new PlayerData(connection, player));
+						PlayerData playerData = new PlayerData(connection, player);
+						connectionToPlayerDataMap.put(connection, playerData);
 						playerToConnectionMap.put(player, connection);
 						Array<Chunk> playerChunks = level.getAreaChunks(player.getCenter(), Level.X_LOAD_RADIUS, Level.Y_LOAD_RADIUS, true, true);
 						connection.sendTCP(new LevelData(level));
@@ -132,7 +133,7 @@ public class GameServer implements GameProtocol {
 						
 						System.out.println("Server: new player successfully connected: "+player.getName());
 						
-						connectionToPlayerDataMap.get(connection).validationTimer.start();
+						playerData.validationTimer.start();
 						
 						broadcast(new Message(player.getName()+" joined the server.", Color.ORANGE), false, player);
 					}

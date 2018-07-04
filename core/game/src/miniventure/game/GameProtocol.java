@@ -41,7 +41,7 @@ public interface GameProtocol {
 	
 	int PORT = 8405;
 	int writeBufferSize = 16384*3;
-	int objectBufferSize = 16384;
+	int objectBufferSize = 16384*2;
 	
 	boolean lag = false;
 	int lagMin = lag?10:0, lagMax = lag?100:0;
