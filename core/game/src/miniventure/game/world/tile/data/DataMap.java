@@ -41,6 +41,15 @@ public class DataMap {
 		else
 			return get(tag);
 	}
+	// fetches the value for the given key. If there is no key, the default value is added for it and returned.
+	public <T, U extends T> T getOrDefaultAndPut(DataTag<T> tag, U defaultValue) {
+		if(!map.containsKey(tag)) {
+			map.put(tag, defaultValue);
+			return defaultValue;
+		}
+		else
+			return get(tag);
+	}
 	public <T, U> U computeFrom(DataTag<T> tag, ValueMonoFunction<T, U> mapper, U defaultValue) {
 		if(!map.containsKey(tag))
 			return defaultValue;

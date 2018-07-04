@@ -17,9 +17,9 @@ public class TileType {
 	
 	public enum TileTypeEnum {
 		
-		HOLE(type -> new TileType(type, DestructionManager.INDESTRUCTIBLE(type), new TileTypeRenderer(type, true, new ConnectionManager(type, RenderStyle.SINGLE_FRAME/*, TileTypeEnum.WATER*/))));
+		HOLE(type -> new GroundTileType(type, DestructionManager.INDESTRUCTIBLE(type), new TileTypeRenderer(type, true, new ConnectionManager(type, RenderStyle.SINGLE_FRAME/*, TileTypeEnum.WATER*/))));
 		
-		private final TileType tileType; // TODO have a World TileType fetcher that replaces TileTypes with with their specialized Server / Client equivalents. This field is private, and instead there's a method here that takes a WorldManager.
+		private final TileType tileType;
 		
 		TileTypeEnum(ValueMonoFunction<TileTypeEnum, TileType> typeFetcher) {
 			tileType = typeFetcher.get(this);

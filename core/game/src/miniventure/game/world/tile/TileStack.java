@@ -17,7 +17,7 @@ public class TileStack {
 	
 	// bottom tile is first, top tile is last.
 	private LinkedList<TileType> stack = new LinkedList<>();
-	private LinkedList<TileType> groundStack = new LinkedList<>(); // ground tiles only
+	private LinkedList<GroundTileType> groundStack = new LinkedList<>(); // ground tiles only
 	
 	public TileStack(@NotNull WorldManager world) { addLayer(baseType.getTileType(world)); }
 	public TileStack(TileType[] types) {
@@ -32,7 +32,7 @@ public class TileStack {
 	public int size() { return stack.size(); }
 	
 	public TileType getTopLayer() { return stack.peekLast(); }
-	public TileType getGroundType() { return groundStack.peekLast(); }
+	public GroundTileType getGroundType() { return groundStack.peekLast(); }
 	
 	public TileType[] getTypes() { return getTypes(false); }
 	public TileType[] getTypes(boolean includeCovered) {
@@ -70,14 +70,16 @@ public class TileStack {
 	
 	void addLayer(TileType newLayer) {
 		stack.addLast(newLayer);
-		// TODO check if layer is a ground type, and if so, add it to the ground type stack.
+		if(newLayer instanceof GroundTileType)
+			groundStack.add((GroundTileType)newLayer);
 	}
 	
 	@Nullable
 	TileType removeLayer() {
 		if(stack.size() == 1) return null;
 		TileType layer = stack.removeLast();
-		// TODO if layer is a ground type, remove it from the ground stack
+		if(layer instanceof GroundTileType)
+			groundStack.remove(layer);
 		return layer;
 	}
 }

@@ -1,6 +1,12 @@
 package miniventure.game.world.tile;
 
+import java.util.Arrays;
+
+import miniventure.game.util.function.ValueFunction;
+import miniventure.game.util.function.VoidMonoFunction;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.data.DataMap;
+import miniventure.game.world.tile.data.DataTag;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -8,9 +14,8 @@ public class UpdateManager {
 	
 	@FunctionalInterface
 	interface UpdateAction {
-		float update(@NotNull Tile tile, float delta);
+		float update(@NotNull Tile tile, float delta, ValueFunction<Float> deltaCacheFetcher, VoidMonoFunction<Float> deltaCacheSetter);
 	}
-	
 	
 	private final TileTypeEnum tileType;
 	private final UpdateAction[] actions;
@@ -22,8 +27,12 @@ public class UpdateManager {
 	
 	public float update(@NotNull Tile tile, float delta) {
 		float minWait = 0;
-		for(UpdateAction action: actions) {
-			float wait = action.update(tile, delta);
+		DataMap dataMap = tile.getDataMap(tileType);
+		Float[] deltas = dataMap.getOrDefaultAndPut(DataTag.UpdateTimers, new Float[actions.length]);
+		for(int i = 0; i < actions.length; i++) {
+			UpdateAction action = actions[i];
+			final int idx = i;
+			float wait = action.update(tile, delta, () -> deltas[idx], value -> deltas[idx] = value);
 			if(wait > 0) {
 				if(minWait == 0)
 					minWait = wait;

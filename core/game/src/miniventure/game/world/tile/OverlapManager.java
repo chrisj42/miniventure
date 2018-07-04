@@ -1,6 +1,7 @@
 package miniventure.game.world.tile;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -83,18 +84,22 @@ public class OverlapManager {
 	
 	
 	public static EnumMap<TileTypeEnum, EnumSet<RelPos>> mapTileTypesAround(@NotNull Tile tile) { return mapTileTypesAround(tile, true); }
-	// Exclude covered means that tile types beneath ground layers won't be included.
-	// TODO make "include covered" mode where it checks through the ground layer's datamap to get the TileLayers underneath. I'll probably have a DataTag for a TileStack, that ground tiles have. This will contain the tiles up until another ground type, which has a datamap... etc.
+	/** @noinspection SameParameterValue*/ // Exclude covered means that tile types beneath ground layers won't be included.
 	private static EnumMap<TileTypeEnum, EnumSet<RelPos>> mapTileTypesAround(@NotNull Tile tile, boolean excludeCovered) {
 		EnumMap<TileTypeEnum, EnumSet<RelPos>> typeMap = new EnumMap<>(TileTypeEnum.class);
 		
 		HashSet<Tile> aroundTiles = tile.getAdjacentTiles(true);
 		
 		for(Tile aroundTile: aroundTiles) {
-			// TO-DO in the future, I'll fetch a TileStack and just get the root from it.
-			// but... there are non-ground tiles which can be opaque, so I can't base it off that.
-			// FIXME I'm just going to assume that I want to go through all tiles. This has yet to be figured out / decided on.
-			TileType[] types = aroundTile.getTypeStack().getTypes();
+			TileType[] types = aroundTile.getTypeStack().getTypes(!excludeCovered);
+			if(excludeCovered) {
+				for(int i = types.length - 1; i > 0; i--) {
+					if(types[i].getRenderer().isOpaque()) {
+						types = Arrays.copyOfRange(types, i, types.length);
+						break;
+					}
+				}
+			}
 			
 			Point thisPos = tile.getLocation();
 			Point otherPos = aroundTile.getLocation();
