@@ -1,10 +1,5 @@
 package miniventure.game.world.tile;
 
-import miniventure.game.world.tile.DestructionManager;
-import miniventure.game.world.tile.TileType;
-import miniventure.game.world.tile.TileTypeRenderer;
-import miniventure.game.world.tile.UpdateManager;
-
 import org.jetbrains.annotations.NotNull;
 
 public class GroundTileType extends TileType {

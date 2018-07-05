@@ -1,12 +1,10 @@
 package miniventure.game.world.tile;
 
-import java.util.*;
-import java.util.Map.Entry;
+import java.util.EnumMap;
+import java.util.HashSet;
 
 import miniventure.game.item.Item;
-import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
-import miniventure.game.util.RelPos;
 import miniventure.game.world.Level;
 import miniventure.game.world.Point;
 import miniventure.game.world.WorldManager;
@@ -16,7 +14,6 @@ import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 import miniventure.game.world.tile.data.DataMap;
 
-import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;

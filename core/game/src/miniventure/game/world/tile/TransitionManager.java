@@ -8,7 +8,6 @@ import miniventure.game.world.tile.TileType.TileTypeEnum;
 import miniventure.game.world.tile.data.DataMap;
 import miniventure.game.world.tile.data.DataTag;
 
-import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
@@ -97,7 +96,7 @@ public class TransitionManager {
 		return false;
 	}
 	
-	Animation<TextureHolder> getTransitionSprite(@NotNull Tile tile) {
+	TileAnimation<TextureHolder> getTransitionSprite(@NotNull Tile tile) {
 		DataMap dataMap = tile.getDataMap(tileType);
 		
 		TransitionMode mode = dataMap.get(DataTag.TransitionMode);

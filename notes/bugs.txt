@@ -3,10 +3,12 @@ Item selection legit *sucks*.
 "tp playername" crashes game when used on client
 
 UI doesn't scale right. Whenever the window size changes, I need to remake the UI, and call resize on all the conponents. Or revalidate them somehow.
+About that: the main menu is also aligned wrong; the anchor isn't in the right place.
+The char screen sometimes causes an uncaught internal exception when formatting. -_-
 
 if you exit to the main menu, you cannot start another world without restarting the application; the server won't connect. Maybe there are some threads I forgot to close..? Or maybe it has something to do with already having initialized once?
+Actually, sometimes you can...
 
 player jumps back whenever walking into an entity that is moving toward it, when the server is remote. I'm pretty sure this is due to the delay between server updates and the server updating the client. The client thinks it can move somewhere, because the server hasn't had a chance to tell it otherwise, so it tries to move. The server then corrects it, causing the "jump-back".
 
 player position becomes a bit spazzy occasionally, and it takes a little bit for it to go back to normal.
-Maybe this is due to syncing the walkDist when both the client and server update it?

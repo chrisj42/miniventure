@@ -22,17 +22,71 @@ public class TileType {
 	
 	public enum TileTypeEnum {
 		
-		HOLE(type -> new GroundTileType(type, false, DestructionManager.INDESTRUCTIBLE(type), new TileTypeRenderer(type, true, new ConnectionManager(type, RenderStyle.SINGLE_FRAME/*, TileTypeEnum.WATER*/)))),
+		HOLE(type -> new GroundTileType(type, false,
+			DestructionManager.INDESTRUCTIBLE(type),
+			
+			new TileTypeRenderer(type, true,
+				new ConnectionManager(type, RenderStyle.SINGLE_FRAME, TileTypeEnum.valueOf("WATER"))
+			)
+		)),
 		
-		DIRT(type -> new GroundTileType(type, true, new DestructionManager(type, new RequiredTool(ToolType.Shovel)), new TileTypeRenderer(type, true))),
+		DIRT(type -> new GroundTileType(type, true,
+			new DestructionManager(type, new RequiredTool(ToolType.Shovel)),
+			
+			new TileTypeRenderer(type, true)
+		)),
 		
-		SAND(type -> new GroundTileType(type, true, new DestructionManager(type, new RequiredTool(ToolType.Shovel)), new TileTypeRenderer(type, true, new ConnectionManager(type, RenderStyle.SINGLE_FRAME), new OverlapManager(type, RenderStyle.SINGLE_FRAME)))),
+		SAND(type -> new GroundTileType(type, true,
+			new DestructionManager(type, new RequiredTool(ToolType.Shovel)),
+			
+			new TileTypeRenderer(type, true,
+				new OverlapManager(type, RenderStyle.SINGLE_FRAME)
+			))
+		),
 		
-		GRASS(type -> new GroundTileType(type, true, new DestructionManager.DestructibleBuilder(type, 1, false).require(new RequiredTool(ToolType.Shovel)).make(), new TileTypeRenderer(type, true, new ConnectionManager(type, RenderStyle.SINGLE_FRAME), new OverlapManager(type, RenderStyle.SINGLE_FRAME)), new UpdateManager(type, new SpreadUpdateAction(type, 10, 45, (newType, tile) -> tile.addTile(newType), DIRT)))),
+		GRASS(type -> new GroundTileType(type, true,
+			new DestructionManager.DestructibleBuilder(type, 1, false)
+				.require(new RequiredTool(ToolType.Shovel))
+				.make(),
+			
+			new TileTypeRenderer(type, true,
+				new OverlapManager(type, RenderStyle.SINGLE_FRAME)
+			),
+			new UpdateManager(type,
+				new SpreadUpdateAction(type, 10, 45,
+					(newType, tile) -> tile.addTile(newType),
+					DIRT
+				)
+			)
+		)),
 		
-		WATER(type -> new LiquidTileType(type, true, DestructionManager.INDESTRUCTIBLE(type), new TileTypeRenderer(type, true, new ConnectionManager(type, new RenderStyle(PlayMode.LOOP_RANDOM, 0.2f)), new OverlapManager(type, new RenderStyle(1/24f))), new UpdateManager(type, new SpreadUpdateAction(type, 0.33f, (newType, tile) -> tile.addTile(newType), HOLE)))),
+		SNOW(type -> new GroundTileType(type, true,
+			new DestructionManager(type, new RequiredTool(ToolType.Shovel)),
+			
+			new TileTypeRenderer(type, true,
+				new OverlapManager(type, RenderStyle.SINGLE_FRAME)
+			)
+		)),
 		
-		STONE(type -> new SurfaceTileType(type, false, new DestructionManager(type, 40, new PreferredTool(ToolType.Pickaxe, 5)), new TileTypeRenderer(type, true, new ConnectionManager(type, RenderStyle.SINGLE_FRAME)))),
+		WATER(type -> new LiquidTileType(type, true,
+			DestructionManager.INDESTRUCTIBLE(type),
+			
+			new TileTypeRenderer(type, true,
+				new ConnectionManager(type, new RenderStyle(PlayMode.LOOP_RANDOM, 0.2f)),
+				new OverlapManager(type, new RenderStyle(true, 1/24f))
+			),
+			new UpdateManager(type,
+				new SpreadUpdateAction(type, 0.33f, (newType, tile) -> tile.addTile(newType), HOLE)
+			)
+		)),
+		
+		STONE(type -> new SurfaceTileType(type, false,
+			new DestructionManager(type, 40,
+				new PreferredTool(ToolType.Pickaxe, 5)
+			),
+			
+			new TileTypeRenderer(type, true)
+		)),
 		
 		STONE_FLOOR(type -> new FloorTile(type, ToolType.Pickaxe)),
 		
@@ -44,9 +98,24 @@ public class TileType {
 		
 		DOOR_CLOSED(DoorTile::getClosedDoor),
 		
-		TORCH(type -> new SurfaceTileType(type, true, 2, new DestructionManager(type), new TileTypeRenderer(type, false, new ConnectionManager(type, new RenderStyle(1/12f)), OverlapManager.NONE(type), new TransitionManager(type).addEntranceAnimations(new TransitionAnimation("enter", 3/12f))), new UpdateManager(type))),
+		TORCH(type -> new SurfaceTileType(type, true, 2,
+			new DestructionManager(type),
+			
+			new TileTypeRenderer(type, false,
+				new ConnectionManager(type, new RenderStyle(1/12f)),
+				OverlapManager.NONE(type),
+				new TransitionManager(type)
+					.addEntranceAnimations(new TransitionAnimation("enter", 3/12f))
+			),
+			new UpdateManager(type)
+		)),
 		
-		CACTUS(type -> new SurfaceTileType(type, false, new DestructionManager(type, 12, null), new TileTypeRenderer(type, false)) {
+		CACTUS(type -> new SurfaceTileType(type, false,
+			new DestructionManager(type, 12, null),
+			
+			new TileTypeRenderer(type, false)
+			
+		) {
 			@Override
 			public boolean touched(@NotNull Tile tile, Entity entity, boolean initial) {
 				return entity.attackedBy(tile, null, 1);
@@ -57,6 +126,8 @@ public class TileType {
 		TREE_DARK(TreeTile::new),
 		TREE_PINE(TreeTile::new),
 		TREE_POOF(TreeTile::new);
+		
+		
 		
 		@NotNull private final ValueMonoFunction<TileTypeEnum, TileType> tileTypeFetcher;
 		private TileType tileType;

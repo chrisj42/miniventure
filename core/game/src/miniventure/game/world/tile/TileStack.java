@@ -1,6 +1,5 @@
 package miniventure.game.world.tile;
 
-import java.util.EnumMap;
 import java.util.LinkedList;
 import java.util.List;
 

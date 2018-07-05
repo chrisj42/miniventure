@@ -13,9 +13,14 @@ import org.jetbrains.annotations.Nullable;
 public class DoorTile extends SurfaceTileType {
 	
 	static DoorTile getOpenDoor(@NotNull TileTypeEnum enumType) {
-		return new DoorTile(enumType, true, new DestructionManager(enumType, new ItemDrop(TileItem.get(TileTypeEnum.DOOR_CLOSED)), new RequiredTool(ToolType.Axe)), new TransitionManager(enumType)
-			.addEntranceAnimations(new TransitionAnimation("open", 3/24f, TileTypeEnum.DOOR_CLOSED))
-			.addExitAnimations(new TransitionAnimation("close", 3/24f, TileTypeEnum.DOOR_CLOSED))
+		return new DoorTile(enumType, true,
+			new DestructionManager(enumType,
+				new ItemDrop(TileItem.get(TileTypeEnum.DOOR_CLOSED)),
+				new RequiredTool(ToolType.Axe)
+			),
+			new TransitionManager(enumType)
+				.addEntranceAnimations(new TransitionAnimation("open", 3/24f, TileTypeEnum.DOOR_CLOSED))
+				.addExitAnimations(new TransitionAnimation("close", 3/24f, TileTypeEnum.DOOR_CLOSED))
 		) {
 			@Override
 			public boolean interact(@NotNull Tile tile, Player player, @Nullable Item item) {
@@ -36,6 +41,13 @@ public class DoorTile extends SurfaceTileType {
 	}
 	
 	private DoorTile(@NotNull TileTypeEnum enumType, boolean walkable, DestructionManager destructionManager, TransitionManager transitionManager) {
-		super(enumType, walkable, destructionManager, new TileTypeRenderer(enumType, false, new ConnectionManager(enumType, RenderStyle.SINGLE_FRAME), OverlapManager.NONE(enumType), transitionManager));
+		super(enumType, walkable,
+			destructionManager,
+			
+			new TileTypeRenderer(enumType, false,
+				new ConnectionManager(enumType, RenderStyle.SINGLE_FRAME),
+				OverlapManager.NONE(enumType),
+				transitionManager)
+		);
 	}
 }

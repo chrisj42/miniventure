@@ -7,7 +7,6 @@ import miniventure.game.GameProtocol.EntityAddition;
 import miniventure.game.GameProtocol.EntityRemoval;
 import miniventure.game.GameProtocol.WorldData;
 import miniventure.game.ProgressPrinter;
-import miniventure.game.util.MyUtils;
 import miniventure.game.world.*;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ServerEntity;

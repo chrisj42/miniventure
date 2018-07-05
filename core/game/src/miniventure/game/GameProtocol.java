@@ -9,7 +9,6 @@ import miniventure.game.chat.InfoMessageLine;
 import miniventure.game.item.Hands;
 import miniventure.game.item.Inventory;
 import miniventure.game.item.ItemStack;
-import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
 import miniventure.game.world.Boundable;
 import miniventure.game.world.Chunk;

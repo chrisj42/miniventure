@@ -70,8 +70,8 @@ public class ServerPlayer extends ServerMob implements Player {
 		
 		data.add(new String[] {
 			name,
-			getStat(Stat.Hunger)+"",
-			getStat(Stat.Stamina)+"",
+			String.valueOf(getStat(Stat.Hunger)),
+			String.valueOf(getStat(Stat.Stamina)),
 			MyUtils.encodeStringArray(inventory.save()),
 			MyUtils.encodeStringArray(hands.save())
 		});
@@ -109,7 +109,7 @@ public class ServerPlayer extends ServerMob implements Player {
 			if(stat == Stat.Hunger && change > 0) {
 				Level level = getLevel();
 				if(level != null)
-					level.addEntity(new TextParticle(amt + "", Color.CORAL), getCenter(), true);
+					level.addEntity(new TextParticle(String.valueOf(amt), Color.CORAL), getCenter(), true);
 			}
 		}
 		

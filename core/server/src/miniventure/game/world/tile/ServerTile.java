@@ -2,7 +2,6 @@ package miniventure.game.world.tile;
 
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
-import miniventure.game.world.tile.data.DataMap;
 
 import org.jetbrains.annotations.NotNull;
 

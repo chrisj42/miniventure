@@ -4,4 +4,6 @@
 		+ Added an update checker
 		* Fixed a bunch of bugs
 		+ Added pig sprites
+	v2:
+		* Major Tilesystem overhaul, though you won't notice unless you look at the code. It makes it easier to have multiple variations of a tile.
 		

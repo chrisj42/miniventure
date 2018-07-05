@@ -121,7 +121,7 @@ public abstract class EntityRenderer {
 		
 		@Override
 		protected String[] save() {
-			return new String[] {animationName, duration+"", isFrameDuration+"", loopAnimation+""};
+			return new String[] {animationName, String.valueOf(duration), String.valueOf(isFrameDuration), String.valueOf(loopAnimation)};
 		}
 		
 		public String getName() { return animationName; }
@@ -262,8 +262,8 @@ public abstract class EntityRenderer {
 		protected String[] save() {
 			return new String[] {
 				MyUtils.encodeStringArray(EntityRenderer.serialize(mainRenderer)),
-				initialDuration +"",
-				blinkFirst+"",
+				String.valueOf(initialDuration),
+				String.valueOf(blinkFirst),
 				MyUtils.encodeStringArray(blinker.save())
 			};
 		}

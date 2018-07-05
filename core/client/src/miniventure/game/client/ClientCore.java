@@ -17,7 +17,6 @@ import miniventure.game.screen.ErrorScreen;
 import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
-import miniventure.game.util.Action;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.VoidMonoFunction;
 

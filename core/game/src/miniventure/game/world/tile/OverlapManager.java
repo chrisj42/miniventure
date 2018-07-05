@@ -1,7 +1,6 @@
 package miniventure.game.world.tile;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -12,7 +11,6 @@ import miniventure.game.util.RelPos;
 import miniventure.game.world.Point;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 
-import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
@@ -45,8 +43,8 @@ public class OverlapManager {
 	
 	/// Boolean[] says if the overlappingType is present in each of the surrounding tiles.
 	// don't call this method with a typeToOverlap that this overlappingType isn't meant to overlap.
-	public ArrayList<Animation<TextureHolder>> getOverlapSprites(EnumSet<RelPos> ovLayout) {
-		ArrayList<Animation<TextureHolder>> animations = new ArrayList<>();
+	public ArrayList<TileAnimation<TextureHolder>> getOverlapSprites(EnumSet<RelPos> ovLayout) {
+		ArrayList<TileAnimation<TextureHolder>> animations = new ArrayList<>();
 		
 		if(renderStyle == null && overrides.size() == 0)
 			return animations;

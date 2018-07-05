@@ -3,7 +3,6 @@ package miniventure.game.world;
 import miniventure.game.client.DisplayWorld;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.levelgen.LevelGenerator;
-import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;

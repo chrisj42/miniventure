@@ -5,11 +5,11 @@ import javax.swing.JOptionPane;
 import miniventure.game.GameCore;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.ClientWorld;
-import miniventure.game.world.DisplayLevel;
 import miniventure.game.client.LevelViewport;
 import miniventure.game.screen.InfoScreen.CreditsScreen;
 import miniventure.game.screen.InfoScreen.InstructionsScreen;
 import miniventure.game.util.VersionInfo;
+import miniventure.game.world.DisplayLevel;
 import miniventure.game.world.TimeOfDay;
 import miniventure.game.world.levelgen.LevelGenerator;
 

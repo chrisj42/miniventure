@@ -1,10 +1,8 @@
 package miniventure.game.world;
 
-import miniventure.game.util.function.ValueMonoFunction;
 import miniventure.game.util.function.ValueTriFunction;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.Tile.TileData;
-import miniventure.game.world.tile.TileType;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 import miniventure.game.world.tile.data.DataMap;
 

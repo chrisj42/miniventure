@@ -5,7 +5,6 @@ import java.util.Arrays;
 
 import miniventure.game.item.ToolItem.Material;
 import miniventure.game.util.MyUtils;
-import miniventure.game.world.tile.TileType;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 public enum ItemType {

@@ -10,7 +10,6 @@ import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.RelPos;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 
-import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
@@ -58,6 +57,9 @@ public class TileTypeRenderer {
 	public TileTypeRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque, ConnectionManager connectionManager) {
 		this(tileType, isOpaque, connectionManager, OverlapManager.NONE(tileType));
 	}
+	public TileTypeRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque, OverlapManager overlapManager) {
+		this(tileType, isOpaque, new ConnectionManager(tileType, RenderStyle.SINGLE_FRAME), overlapManager);
+	}
 	public TileTypeRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque, ConnectionManager connectionManager, OverlapManager overlapManager) {
 		this(tileType, isOpaque, connectionManager, overlapManager, new TransitionManager(tileType));
 	}
@@ -82,7 +84,7 @@ public class TileTypeRenderer {
 	// whenever a tile changes its TileTypeEnum stack in any way, all 9 tiles around it re-fetch their overlap and main animations. Then they keep that stack of animations until the next fetch.
 	
 	// gets the sprite for when this tiletype is surrounded by the given types.
-	public Animation<TextureHolder> getConnectionSprite(@NotNull Tile tile, EnumMap<RelPos, EnumSet<TileTypeEnum>> aroundTypes) {
+	public TileAnimation<TextureHolder> getConnectionSprite(@NotNull Tile tile, EnumMap<RelPos, EnumSet<TileTypeEnum>> aroundTypes) {
 		if(transitionManager.playingAnimation(tile))
 			return transitionManager.getTransitionSprite(tile);
 		
@@ -90,7 +92,7 @@ public class TileTypeRenderer {
 	}
 	
 	// gets the overlap sprite (sides + any isolated corners) for this tiletype overlapping a tile at the given positions.
-	public ArrayList<Animation<TextureHolder>> getOverlapSprites(EnumSet<RelPos> overlapPositions) {
+	public ArrayList<TileAnimation<TextureHolder>> getOverlapSprites(EnumSet<RelPos> overlapPositions) {
 		return overlapManager.getOverlapSprites(overlapPositions);
 	}
 	

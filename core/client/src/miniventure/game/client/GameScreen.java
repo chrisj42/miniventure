@@ -3,7 +3,6 @@ package miniventure.game.client;
 import javax.swing.JOptionPane;
 
 import miniventure.game.GameCore;
-import miniventure.game.GameProtocol.DatalessRequest;
 import miniventure.game.screen.ChatScreen;
 import miniventure.game.world.ClientLevel;
 import miniventure.game.world.Level;

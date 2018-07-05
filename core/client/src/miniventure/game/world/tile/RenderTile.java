@@ -1,7 +1,10 @@
 package miniventure.game.world.tile;
 
-import java.util.*;
-import java.util.Map.Entry;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.NavigableMap;
+import java.util.TreeMap;
 
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.RelPos;
@@ -9,7 +12,6 @@ import miniventure.game.world.Level;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 import miniventure.game.world.tile.data.DataMap;
 
-import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 
@@ -17,9 +19,9 @@ import org.jetbrains.annotations.NotNull;
 
 public class RenderTile extends Tile {
 	
-	private ArrayList<Animation<TextureHolder>> spriteStack;
-	private ArrayList<String> spriteNames;
-	private final HashMap<String, Float> animationDeltas = new HashMap<>(16);
+	private ArrayList<TileAnimation<TextureHolder>> spriteStack;
+	//private ArrayList<String> spriteNames;
+	//private final HashMap<String, Float> animationDeltas = new HashMap<>(16);
 	
 	private final Object spriteLock = new Object();
 	
@@ -35,11 +37,11 @@ public class RenderTile extends Tile {
 			if(spriteStack == null) return; // cannot render if there are no sprites.
 			
 			for(int i = 0; i < spriteStack.size(); i++) {
-				Animation<TextureHolder> animation = spriteStack.get(i);
-				String name = spriteNames.get(i);
-				float timeSinceLastUpdate = animationDeltas.get(name) + delta;
-				batch.draw(animation.getKeyFrame(timeSinceLastUpdate).texture, (x - posOffset.x) * SIZE, (y - posOffset.y) * SIZE);
-				animationDeltas.put(name, timeSinceLastUpdate);
+				TileAnimation<TextureHolder> animation = spriteStack.get(i);
+				//String name = spriteNames.get(i);
+				//float timeSinceLastUpdate = animationDeltas.get(name) + delta;
+				batch.draw(animation.getKeyFrame(this).texture, (x - posOffset.x) * SIZE, (y - posOffset.y) * SIZE);
+				//animationDeltas.put(name, timeSinceLastUpdate);
 			}
 		}
 	}
@@ -70,8 +72,8 @@ public class RenderTile extends Tile {
 		}
 		
 		// all tile types have been fetched. Now accumulate the sprites.
-		ArrayList<Animation<TextureHolder>> spriteStack = new ArrayList<>(16);
-		ArrayList<String> spriteNames = new ArrayList<>(16);
+		ArrayList<TileAnimation<TextureHolder>> spriteStack = new ArrayList<>(16);
+		//ArrayList<String> spriteNames = new ArrayList<>(16);
 		
 		// get overlap data, in case it's needed
 		//EnumMap<TileTypeEnum, EnumSet<RelPos>> typePositions = OverlapManager.mapTileTypesAround(this);
@@ -83,9 +85,9 @@ public class RenderTile extends Tile {
 			TileType prev = types[i-1];
 			
 			// add connection sprite (or transition) for prev
-			Animation<TextureHolder> animation = prev.getRenderer().getConnectionSprite(this, typesAtPositions);
+			TileAnimation<TextureHolder> animation = prev.getRenderer().getConnectionSprite(this, typesAtPositions);
 			spriteStack.add(animation);
-			spriteNames.add(animation.getKeyFrames()[0].name);
+			//spriteNames.add(animation.getKeyFrames()[0].name);
 			
 			// check for overlaps that are above prev AND below cur
 			NavigableMap<TileTypeEnum, TileType> overlapMap;
@@ -96,10 +98,10 @@ public class RenderTile extends Tile {
 			
 			if(overlapMap.size() > 0) { // add found overlaps
 				overlapMap.forEach((enumType, tileType) -> {
-					ArrayList<Animation<TextureHolder>> sprites = tileType.getRenderer().getOverlapSprites(typePositions.get(enumType));
-					for(Animation<TextureHolder> sprite: sprites) {
+					ArrayList<TileAnimation<TextureHolder>> sprites = tileType.getRenderer().getOverlapSprites(typePositions.get(enumType));
+					for(TileAnimation<TextureHolder> sprite: sprites) {
 						spriteStack.add(sprite);
-						spriteNames.add(sprite.getKeyFrames()[0].name);
+						//spriteNames.add(sprite.getKeyFrames()[0].name);
 					}
 				});
 			}
@@ -118,11 +120,11 @@ public class RenderTile extends Tile {
 		
 		synchronized (spriteLock) {
 			this.spriteStack = spriteStack;
-			this.spriteNames = spriteNames;
-			
-			animationDeltas.keySet().retainAll(spriteNames);
-			for(String name: spriteNames)
-				animationDeltas.putIfAbsent(name, 0f);
+			// this.spriteNames = spriteNames;
+			//
+			// animationDeltas.keySet().retainAll(spriteNames);
+			// for(String name: spriteNames)
+			// 	animationDeltas.putIfAbsent(name, 0f);
 		}
 	}
 }

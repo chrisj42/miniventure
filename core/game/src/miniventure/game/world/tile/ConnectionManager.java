@@ -9,7 +9,6 @@ import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.RelPos;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 
-import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
@@ -37,7 +36,7 @@ public class ConnectionManager {
 	
 	/// Checks the given aroundTypes for all types 
 	@NotNull
-	public Animation<TextureHolder> getConnectionSprite(EnumMap<RelPos, EnumSet<TileTypeEnum>> aroundTypes) {
+	public TileAnimation<TextureHolder> getConnectionSprite(EnumMap<RelPos, EnumSet<TileTypeEnum>> aroundTypes) {
 		if(connectingTypes.size() == 0)
 			return renderStyle.getAnimation(tileAnimations.get(type).get("00"));
 		

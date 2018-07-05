@@ -2,31 +2,37 @@ package miniventure.game.world.tile;
 
 import miniventure.game.texture.TextureHolder;
 
-import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 import com.badlogic.gdx.utils.Array;
 
 public class RenderStyle {
 	
-	public static final RenderStyle SINGLE_FRAME = new RenderStyle(PlayMode.NORMAL, 0);
+	static final RenderStyle SINGLE_FRAME = new RenderStyle(PlayMode.NORMAL, 0);
 	
 	private final PlayMode playMode;
 	final float time;
 	private final boolean isFrameTime;
 	
-	public RenderStyle(float frameTime) { this(frameTime, true); }
-	public RenderStyle(float time, boolean isFrameTime) { this(PlayMode.LOOP, time, isFrameTime); }
-	public RenderStyle(PlayMode playMode, float frameTime) { this(playMode, frameTime, true); }
-	public RenderStyle(PlayMode playMode, float time, boolean isFrameTime) {
+	private final boolean sync;
+	
+	RenderStyle(float frameTime) { this(false, frameTime, true); }
+	RenderStyle(boolean sync, float frameTime) { this(sync, frameTime, true); }
+	RenderStyle(float time, boolean isFrameTime) { this(PlayMode.LOOP, time, isFrameTime); }
+	RenderStyle(boolean sync, float time, boolean isFrameTime) { this(PlayMode.LOOP, sync, time, isFrameTime); }
+	RenderStyle(PlayMode playMode, float frameTime) { this(playMode, false, frameTime, true); }
+	RenderStyle(PlayMode playMode, boolean sync, float frameTime) { this(playMode, sync, frameTime, true); }
+	RenderStyle(PlayMode playMode, float time, boolean isFrameTime) { this(playMode, false, time, isFrameTime); }
+	RenderStyle(PlayMode playMode, boolean sync, float time, boolean isFrameTime) {
 		this.playMode = playMode;
+		this.sync = sync;
 		this.time = time;
 		this.isFrameTime = isFrameTime;
 	}
 	
-	public Animation<TextureHolder> getAnimation(Array<TextureHolder> frames) {
+	TileAnimation<TextureHolder> getAnimation(Array<TextureHolder> frames) {
 		if(time == 0)
-			return new Animation<>(1, frames.get(0));
-		
-		return new Animation<>(isFrameTime ? time : time/frames.size, frames, playMode);
+			return new TileAnimation<>(sync, 1, frames.get(0));
+		else
+			return new TileAnimation<>(sync, isFrameTime ? time : time / frames.size, frames, playMode);
 	}
 }

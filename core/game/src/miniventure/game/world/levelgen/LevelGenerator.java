@@ -3,7 +3,6 @@ package miniventure.game.world.levelgen;
 import java.util.Random;
 
 import miniventure.game.world.Chunk;
-import miniventure.game.world.tile.TileType;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 public class LevelGenerator {
