@@ -25,7 +25,7 @@ public class TileType {
 	public enum TileTypeEnum {
 		
 		HOLE(type -> new TileType(type, true,
-			new DataMap(PropertyTag.Swim.as(new SwimAnimation(type))),
+			new DataMap(PropertyTag.Swim.as(new SwimAnimation(type, 0.75f))),
 			
 			DestructionManager.INDESTRUCTIBLE(type),
 			

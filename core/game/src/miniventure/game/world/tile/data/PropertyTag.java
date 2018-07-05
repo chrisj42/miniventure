@@ -8,7 +8,6 @@ import java.util.HashMap;
 
 import miniventure.game.util.function.ValueMonoFunction;
 import miniventure.game.world.tile.SwimAnimation;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 public class PropertyTag<T> extends DataTag<T> {
 	
@@ -26,10 +25,7 @@ public class PropertyTag<T> extends DataTag<T> {
 	public static final PropertyTag<Float> LightRadius = new PropertyTag<>(Float.class);
 	public static final PropertyTag<Float> SpeedRatio = new PropertyTag<>(Float.class);
 	public static final PropertyTag<Float> ZOffset = new PropertyTag<>(Float.class);
-	public static final PropertyTag<SwimAnimation> Swim = new PropertyTag<>(
-		ani -> ani.tileType.name(),
-		data -> new SwimAnimation(TileTypeEnum.valueOf(data))
-	);
+	public static final PropertyTag<SwimAnimation> Swim = new PropertyTag<>(SwimAnimation::serialize, SwimAnimation::deserialize);
 	
 	
 	/* --- ENUMERATION SETUP --- */

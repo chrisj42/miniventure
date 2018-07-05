@@ -38,7 +38,7 @@ public class ClientEntity extends Entity {
 	@Override
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
 		super.render(batch, delta, posOffset);
-		boolean swim = false;
+		float drawableHeight = 1;
 		if(!particle) {
 			Tile closest = getClosestTile();
 			if(closest != null) {
@@ -46,11 +46,11 @@ public class ClientEntity extends Entity {
 				if(swimAnimation != null) {
 					Vector2 pos = getCenter().sub(posOffset).sub(0, getSize().y / 2).scl(Tile.SIZE);
 					swimAnimation.drawSwimAnimation(batch, pos, getWorld());
-					swim = true;
+					drawableHeight = swimAnimation.drawableHeight;
 				}
 			}
 		}
-		getRenderer().render((x-posOffset.x) * Tile.SIZE, (y+z - posOffset.y) * Tile.SIZE, batch, swim);
+		getRenderer().render((x-posOffset.x) * Tile.SIZE, (y+z - posOffset.y) * Tile.SIZE, batch, drawableHeight);
 	}
 	
 	@NotNull @Override
@@ -111,5 +111,5 @@ public class ClientEntity extends Entity {
 	}
 	
 	@Override
-	public String toString() { return super.toString()+"-" + descriptor/* + " at " + getPosition(true)*/; }
+	public String toString() { return super.toString()+'-'+descriptor/* + " at " + getPosition(true)*/; }
 }

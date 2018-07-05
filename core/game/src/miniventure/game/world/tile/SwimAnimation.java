@@ -18,9 +18,12 @@ public class SwimAnimation {
 	
 	private final TileAnimation<TextureHolder> swim;
 	public final TileTypeEnum tileType;
+	public final float drawableHeight;
 	
-	public SwimAnimation(@NotNull TileTypeEnum enumType) {
+	public SwimAnimation(@NotNull TileTypeEnum enumType) { this(enumType, 0.5f); }
+	public SwimAnimation(@NotNull TileTypeEnum enumType, float drawableHeight) {
 		this.tileType = enumType;
+		this.drawableHeight = drawableHeight;
 		
 		swimAnimations.computeIfAbsent(enumType, k ->
 			new TileAnimation<>(false, 1/16f, 
@@ -34,5 +37,14 @@ public class SwimAnimation {
 	public void drawSwimAnimation(@NotNull Batch batch, @NotNull Vector2 center, @NotNull WorldManager world) {
 		TextureHolder tex = swim.getKeyFrame(world);
 		batch.draw(tex.texture, center.x-tex.width/2, center.y-tex.height/2);
+	}
+	
+	public String serialize() {
+		return tileType.name()+','+drawableHeight;
+	}
+	
+	public static SwimAnimation deserialize(String data) {
+		String[] parts = data.split(",");
+		return new SwimAnimation(TileTypeEnum.valueOf(parts[0]), Float.parseFloat(parts[1]));
 	}
 }

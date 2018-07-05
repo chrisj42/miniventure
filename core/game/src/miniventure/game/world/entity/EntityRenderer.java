@@ -32,7 +32,7 @@ public abstract class EntityRenderer {
 	public void update(float delta) { elapsedTime += delta; }
 	//public void reset() { elapsedTime = 0; }
 	
-	public abstract void render(float x, float y, Batch batch, boolean swim);
+	public abstract void render(float x, float y, Batch batch, float drawableHeight);
 	
 	public abstract Vector2 getSize();
 	
@@ -65,7 +65,7 @@ public abstract class EntityRenderer {
 		public String getName() { return spriteName; }
 		
 		@Override
-		public void render(float x, float y, Batch batch, boolean swim) { batch.draw(sprite.texture.split(sprite.width, swim?sprite.height/2:sprite.height)[0][0], x, y); }
+		public void render(float x, float y, Batch batch, float drawableHeight) { batch.draw(sprite.texture.split(sprite.width, (int)(sprite.height*drawableHeight))[0][0], x, y); }
 		
 		@Override
 		public Vector2 getSize() { return new Vector2(sprite.width, sprite.height); }
@@ -129,9 +129,9 @@ public abstract class EntityRenderer {
 		private TextureHolder getSprite() { return animation.getKeyFrame(super.elapsedTime, loopAnimation); }
 		
 		@Override
-		public void render(float x, float y, Batch batch, boolean swim) {
+		public void render(float x, float y, Batch batch, float drawableHeight) {
 			TextureHolder sprite = getSprite();
-			batch.draw(sprite.texture.split(sprite.width, swim?sprite.height/2:sprite.height)[0][0], x, y); // TODO make new TextureRegion that only draws the upper half of the sprite when swim is true; or, find a way to clip off the bottom of the sprite. Possibly using render modes..?
+			batch.draw(sprite.texture.split(sprite.width, (int)(sprite.height*drawableHeight))[0][0], x, y);
 		}
 		
 		@Override
@@ -188,10 +188,10 @@ public abstract class EntityRenderer {
 		public void setDirection(@NotNull Direction dir) { this.dir = dir; }
 		
 		@Override
-		public void render(float x, float y, Batch batch, boolean swim) {
+		public void render(float x, float y, Batch batch, float drawableHeight) {
 			AnimationRenderer renderer = animations.get(dir);
 			((EntityRenderer)renderer).elapsedTime = super.elapsedTime;
-			renderer.render(x, y, batch, swim);
+			renderer.render(x, y, batch, drawableHeight);
 		}
 		
 		@Override
@@ -224,7 +224,7 @@ public abstract class EntityRenderer {
 		protected String[] save() { return new String[] {text, main.toString(), shadow.toString()}; }
 		
 		@Override
-		public void render(float x, float y, Batch batch, boolean swim) {
+		public void render(float x, float y, Batch batch, float drawableHeight) {
 			BitmapFont font = GameCore.getFont();
 			font.setColor(shadow);
 			font.draw(batch, text, x-1, y+1, 0, Align.center, false);
@@ -282,9 +282,9 @@ public abstract class EntityRenderer {
 		}
 		
 		@Override
-		public void render(float x, float y, Batch batch, boolean swim) {
+		public void render(float x, float y, Batch batch, float drawableHeight) {
 			if(!blinkerActive() || blinker.shouldRender())
-				mainRenderer.render(x, y, batch, swim);
+				mainRenderer.render(x, y, batch, drawableHeight);
 		}
 		
 		@Override
@@ -293,7 +293,7 @@ public abstract class EntityRenderer {
 	
 	
 	public static final EntityRenderer BLANK = new EntityRenderer() {
-		@Override public void render(float x, float y, Batch batch, boolean swim) {}
+		@Override public void render(float x, float y, Batch batch, float drawableHeight) {}
 		@Override public Vector2 getSize() { return new Vector2(); }
 		@Override protected String[] save() { return new String[0]; }
 	};
