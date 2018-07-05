@@ -36,7 +36,7 @@ public class UpdateManager {
 	public float update(@NotNull Tile tile, float delta) {
 		float minWait = 0;
 		DataMap dataMap = tile.getDataMap(tileType);
-		Float[] deltas = dataMap.getOrDefaultAndPut(DataTag.UpdateTimers, new Float[actions.length]);
+		float[] deltas = dataMap.getOrDefaultAndPut(DataTag.UpdateTimers, new float[actions.length]);
 		String[] datas = dataMap.getOrDefaultAndPut(DataTag.UpdateActionCaches, new String[actions.length]);
 		for(int i = 0; i < actions.length; i++) {
 			float wait;

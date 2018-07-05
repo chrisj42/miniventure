@@ -50,7 +50,7 @@ public final class DataTag<T> implements Comparable<DataTag<?>> {
 	
 	// Update
 	public static final DataTag<Float> LastUpdate = new DataTag<>(Float.class);
-	public static final DataTag<Float[]> UpdateTimers = new DataTag<>(Float[].class);
+	public static final DataTag<float[]> UpdateTimers = new DataTag<>(float[].class);
 	public static final DataTag<String[]> UpdateActionCaches = new DataTag<>(String[].class);
 	
 	
