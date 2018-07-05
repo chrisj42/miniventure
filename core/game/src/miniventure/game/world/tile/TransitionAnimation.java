@@ -1,8 +1,8 @@
 package miniventure.game.world.tile;
 
-import java.util.Arrays;
 import java.util.EnumSet;
 
+import miniventure.game.util.MyUtils;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
@@ -17,7 +17,7 @@ public class TransitionAnimation extends RenderStyle {
 		super(playMode, duration, false);
 		
 		this.name = name;
-		this.triggerTypes = EnumSet.copyOf(Arrays.asList(triggerTypes));
+		this.triggerTypes = MyUtils.enumSet(triggerTypes);
 		// if triggertypes is empty, then anything triggers it
 	}
 	

@@ -183,8 +183,8 @@ public abstract class Entity implements WorldObject {
 		return amt;
 	}
 	
-	void touchTile(Tile tile) {}
-	void touchEntity(Entity entity) {}
+	abstract void touchTile(Tile tile);
+	abstract void touchEntity(Entity entity);
 	
 	public void moveTo(@NotNull Level level, @NotNull Vector2 pos) { moveTo(level, pos.x, pos.y); }
 	public void moveTo(@NotNull Level level, float x, float y) {
@@ -200,7 +200,7 @@ public abstract class Entity implements WorldObject {
 		this.x = x;
 		this.y = y;
 		
-		if(level == getLevel())
+		if(level.equals(getLevel()))
 			level.entityMoved(this);
 		else
 			world.setEntityLevel(this, level);

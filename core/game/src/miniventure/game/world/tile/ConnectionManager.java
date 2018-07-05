@@ -1,11 +1,11 @@
 package miniventure.game.world.tile;
 
-import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
 
 import miniventure.game.texture.TextureHolder;
+import miniventure.game.util.MyUtils;
 import miniventure.game.util.RelPos;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 
@@ -25,7 +25,7 @@ public class ConnectionManager {
 	public ConnectionManager(@NotNull TileTypeEnum type, RenderStyle renderStyle, TileTypeEnum... connectingTypes) {
 		this.type = type;
 		this.renderStyle = renderStyle;
-		this.connectingTypes = connectingTypes.length == 0 ? EnumSet.noneOf(TileTypeEnum.class) : EnumSet.copyOf(Arrays.asList(connectingTypes));
+		this.connectingTypes = MyUtils.enumSet(connectingTypes);
 	}
 	
 	public ConnectionManager overrideSprite(int spriteIndex, RenderStyle newStyle) {

@@ -72,9 +72,8 @@ public class OverlapManager {
 		if(ovLayout.contains(RelPos.BOTTOM_LEFT)  && bits[3] == 0 && bits[0] == 0) indexes.add(3); // 0
 		for(Integer idx: indexes) {
 			RenderStyle renderStyle = overrides.getOrDefault(idx, this.renderStyle);
-			if(renderStyle == null)
-				continue;
-			animations.add(renderStyle.getAnimation(tileAnimations.get(type).get((idx < 10 ? "0" : "") + idx)));
+			if(renderStyle != null)
+				animations.add(renderStyle.getAnimation(tileAnimations.get(type).get((idx < 10 ? "0" : "") + idx)));
 		}
 		
 		return animations;

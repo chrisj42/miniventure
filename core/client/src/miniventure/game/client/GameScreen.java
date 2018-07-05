@@ -73,13 +73,17 @@ public class GameScreen {
 		if(shift && Gdx.input.isKeyJustPressed(Keys.D) && !Gdx.input.isKeyPressed(Keys.TAB))
 			showDebug = !showDebug;
 		
-		/*if(shift && ClientCore.input.pressingKey(Keys.T)) {
-			ClientCore.getClient().send(DatalessRequest.Tile); // debug
+		if(shift && ClientCore.input.pressingKey(Keys.T)) {
+			//ClientCore.getClient().send(DatalessRequest.Tile); // debug
 			ClientPlayer p = ClientCore.getWorld().getMainPlayer();
 			try {
-				p.getLevel().getClosestTile(p.getCenter()).updateSprites();
+				//noinspection ConstantConditions
+				Tile t = p.getLevel().getClosestTile(p.getCenter());
+				t.updateSprites();
+				for(Tile o: t.getAdjacentTiles(true))
+					o.updateSprites();
 			} catch(NullPointerException ignored) {}
-		}*/
+		}
 		
 		if(!ClientCore.hasMenu()) {
 			if(!shift && ClientCore.input.pressingKey(Keys.T))

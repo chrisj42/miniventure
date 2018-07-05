@@ -2,6 +2,7 @@ package miniventure.game.world;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -12,6 +13,7 @@ import miniventure.game.world.entity.Entity;
 import miniventure.game.world.tile.ClientTile;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.Tile.TileData;
+import miniventure.game.world.tile.data.PropertyTag;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
@@ -67,7 +69,7 @@ public class ClientLevel extends Level {
 				objects.add(e);
 		}
 		for(Tile t: tiles) {
-			if(t.getType().getRenderer().getZOffset() > 0) // permeable by player instead
+			if(t.getType().hasProperty(PropertyTag.ZOffset)) // TODO instead, use "not permeable by player"
 				objects.add(t);
 			else
 				under.add(t);
@@ -112,13 +114,19 @@ public class ClientLevel extends Level {
 	@SuppressWarnings("unchecked")
 	private void applyTileUpdates() {
 		Entry<ClientTile, TileData>[] tilesToUpdate;
+		HashSet<Tile> spriteUpdates = new HashSet<>();
 		synchronized (tileUpdates) {
 			tilesToUpdate = tileUpdates.entrySet().toArray((Entry<ClientTile, TileData>[]) new Entry[tileUpdates.size()]);
 			tileUpdates.clear();
 		}
 		for(Entry<ClientTile, TileData> entry: tilesToUpdate) {
 			entry.getValue().apply(entry.getKey());
+			spriteUpdates.add(entry.getKey());
+			spriteUpdates.addAll(entry.getKey().getAdjacentTiles(true));
 		}
+		
+		for(Tile t: spriteUpdates)
+			t.updateSprites();
 	}
 	
 	public void serverUpdate(ClientTile tile, TileData data) {

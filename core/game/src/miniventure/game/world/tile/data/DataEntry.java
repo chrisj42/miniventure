@@ -1,25 +1,34 @@
 package miniventure.game.world.tile.data;
 
-public class DataEntry<T> {
+import java.lang.reflect.InvocationTargetException;
+
+class DataEntry<T, D extends DataTag<T>> {
 	
-	public final DataTag<T> key;
-	public final T value;
+	final D key;
+	final T value;
 	
-	public DataEntry(DataTag<T> dataTag, T value) {
+	DataEntry(D dataTag, T value) {
 		this.key = dataTag;
 		this.value = value;
 	}
 	
-	public String serialize() {
+	String serialize() {
 		return key.name()+','+key.serialize(value);
 	}
 	
-	public static DataEntry<?> deserialize(String data) {
+	@SuppressWarnings("unchecked")
+	static <D extends DataTag<?>> DataEntry<?, D> deserialize(String data, Class<D> tagClass) {
 		String key = data.substring(0, data.indexOf(','));
 		String value = data.substring(data.indexOf(',')+1);
 		
-		DataTag<?> tag = DataTag.valueOf(key);
+		D tag;
+		try {
+			//noinspection JavaReflectionMemberAccess
+			tag = (D) tagClass.getMethod("valueOf", String.class).invoke(null, key);
+		} catch(IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+			throw new IllegalStateException("All classes extending DataTag must have a static valueOf(String) method that returns an instance of the class; "+tagClass+" does not.");
+		}
 		
-		return tag.asSerial(value);
+		return (DataEntry<?, D>) tag.serialEntry(value);
 	}
 }

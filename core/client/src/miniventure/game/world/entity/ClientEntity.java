@@ -7,8 +7,9 @@ import miniventure.game.util.blinker.FrameBlinker;
 import miniventure.game.world.ClientLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Mob;
-import miniventure.game.world.tile.LiquidTileType;
+import miniventure.game.world.tile.SwimAnimation;
 import miniventure.game.world.tile.Tile;
+import miniventure.game.world.tile.data.PropertyTag;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
@@ -25,16 +26,13 @@ public class ClientEntity extends Entity {
 	private final String descriptor;
 	private final boolean cutHeight;
 	
-	private ClientEntity(int eid, boolean particle, boolean permeable, @NotNull EntityRenderer renderer, String descriptor, boolean cutHeight) {
-		super(ClientCore.getWorld(), eid);
-		this.particle = particle;
-		this.permeable = permeable;
-		this.descriptor = descriptor;
-		this.cutHeight = cutHeight;
-		setRenderer(renderer);
-	}
 	public ClientEntity(EntityAddition data) {
-		this(data.eid, data.particle, data.permeable, EntityRenderer.deserialize(data.spriteUpdate.rendererData), data.descriptor, data.cutHeight);
+		super(ClientCore.getWorld(), data.eid);
+		this.particle = data.particle;
+		this.permeable = data.permeable;
+		this.descriptor = data.descriptor;
+		this.cutHeight = data.cutHeight;
+		setRenderer(EntityRenderer.deserialize(data.spriteUpdate.rendererData));
 	}
 	
 	@Override
@@ -43,10 +41,13 @@ public class ClientEntity extends Entity {
 		boolean swim = false;
 		if(!particle) {
 			Tile closest = getClosestTile();
-			if(closest != null && closest.getType() instanceof LiquidTileType) {
-				Vector2 pos = getCenter().sub(posOffset).sub(0, getSize().y / 2).scl(Tile.SIZE);
-				((LiquidTileType) closest.getType()).drawSwimAnimation(batch, pos, getWorld());
-				swim = true;
+			if(closest != null) {
+				SwimAnimation swimAnimation = closest.getType().getPropertyOrDefault(PropertyTag.Swim, null);
+				if(swimAnimation != null) {
+					Vector2 pos = getCenter().sub(posOffset).sub(0, getSize().y / 2).scl(Tile.SIZE);
+					swimAnimation.drawSwimAnimation(batch, pos, getWorld());
+					swim = true;
+				}
 			}
 		}
 		getRenderer().render((x-posOffset.x) * Tile.SIZE, (y+z - posOffset.y) * Tile.SIZE, batch, swim);
@@ -81,7 +82,12 @@ public class ClientEntity extends Entity {
 	public boolean move(Vector2 moveDist, boolean validate) { return move(moveDist.x, moveDist.y, validate); }
 	public boolean move(Vector3 moveDist, boolean validate) { return move(moveDist.x, moveDist.y, moveDist.z, validate); }
 	public boolean move(float xd, float yd, boolean validate) { return move(xd, yd, this.z, validate); }
+	@Override
 	public boolean move(float xd, float yd, float zd) { return move(xd, yd, zd, false); }
+	
+	@Override void touchTile(Tile tile) {}
+	@Override void touchEntity(Entity entity) {}
+	
 	public boolean move(float xd, float yd, float zd, boolean validate) {
 		if(validate)
 			return super.move(xd, yd, zd);

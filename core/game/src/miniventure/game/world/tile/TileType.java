@@ -10,8 +10,10 @@ import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.particle.Particle;
 import miniventure.game.world.tile.DestructionManager.PreferredTool;
 import miniventure.game.world.tile.DestructionManager.RequiredTool;
+import miniventure.game.world.tile.SpreadUpdateAction.FloatFetcher;
+import miniventure.game.world.tile.data.CacheTag;
 import miniventure.game.world.tile.data.DataMap;
-import miniventure.game.world.tile.data.DataTag;
+import miniventure.game.world.tile.data.PropertyTag;
 
 import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 
@@ -22,56 +24,62 @@ public class TileType {
 	
 	public enum TileTypeEnum {
 		
-		HOLE(type -> new GroundTileType(type, false,
+		HOLE(type -> new TileType(type, true,
+			new DataMap(PropertyTag.Swim.as(new SwimAnimation(type))),
+			
 			DestructionManager.INDESTRUCTIBLE(type),
 			
-			new TileTypeRenderer(type, true, 0,
-				new ConnectionManager(type, RenderStyle.SINGLE_FRAME, TileTypeEnum.valueOf("WATER"))
+			new TileTypeRenderer(type, true,
+				new ConnectionManager(type, RenderStyle.SINGLE_FRAME, type, TileTypeEnum.valueOf("WATER"))
 			)
 		)),
 		
-		DIRT(type -> new GroundTileType(type, true,
+		DIRT(type -> new TileType(type, true,
 			new DestructionManager(type, new RequiredTool(ToolType.Shovel)),
 			
 			new TileTypeRenderer(type, true)
 		)),
 		
-		SAND(type -> new GroundTileType(type, true,
+		SAND(type -> new TileType(type, true,
 			new DestructionManager(type, new RequiredTool(ToolType.Shovel)),
 			
-			new TileTypeRenderer(type, true, 0,
+			new TileTypeRenderer(type, true,
 				new OverlapManager(type, RenderStyle.SINGLE_FRAME)
 			))
 		),
 		
-		GRASS(type -> new GroundTileType(type, true,
+		GRASS(type -> new TileType(type, true, new DataMap(),
 			new DestructionManager.DestructibleBuilder(type, 1, false)
 				.require(new RequiredTool(ToolType.Shovel))
 				.make(),
 			
-			new TileTypeRenderer(type, true, 0,
+			new TileTypeRenderer(type, true,
 				new OverlapManager(type, RenderStyle.SINGLE_FRAME)
 			),
+			
 			new UpdateManager(type,
-				new SpreadUpdateAction(type, 10, 45,
+				new SpreadUpdateAction(type, FloatFetcher.random(2, 10, 20), .9f,
 					(newType, tile) -> tile.addTile(newType),
 					DIRT
 				)
 			)
 		)),
 		
-		SNOW(type -> new GroundTileType(type, true,
+		SNOW(type -> new TileType(type, true,
 			new DestructionManager(type, new RequiredTool(ToolType.Shovel)),
 			
-			new TileTypeRenderer(type, true,0,
+			new TileTypeRenderer(type, true,
 				new OverlapManager(type, RenderStyle.SINGLE_FRAME)
 			)
 		)),
 		
-		WATER(type -> new LiquidTileType(type, true,
+		WATER(type -> new TileType(type, true,
+			new DataMap(PropertyTag.SpeedRatio.as(0.6f))
+			.add(PropertyTag.Swim.as(new SwimAnimation(type))),
+			
 			DestructionManager.INDESTRUCTIBLE(type),
 			
-			new TileTypeRenderer(type, true, 0,
+			new TileTypeRenderer(type, true,
 				new ConnectionManager(type, new RenderStyle(PlayMode.LOOP_RANDOM, 0.2f)),
 				new OverlapManager(type, new RenderStyle(true, 1/24f))
 			),
@@ -80,7 +88,7 @@ public class TileType {
 			)
 		)),
 		
-		STONE(type -> new SurfaceTileType(type, false,
+		STONE(type -> new TileType(type, false,
 			new DestructionManager(type, 40,
 				new PreferredTool(ToolType.Pickaxe, 5)
 			),
@@ -98,19 +106,20 @@ public class TileType {
 		
 		DOOR_CLOSED(DoorTile::getClosedDoor),
 		
-		TORCH(type -> new SurfaceTileType(type, true, 2,
+		TORCH(type -> new TileType(type, true,
+			new DataMap(PropertyTag.LightRadius.as(2f)),
+			
 			new DestructionManager(type),
 			
-			new TileTypeRenderer(type, false, 0,
+			new TileTypeRenderer(type, false,
 				new ConnectionManager(type, new RenderStyle(1/12f)),
 				OverlapManager.NONE(type),
 				new TransitionManager(type)
 					.addEntranceAnimations(new TransitionAnimation("enter", 3/12f))
-			),
-			new UpdateManager(type)
+			)
 		)),
 		
-		CACTUS(type -> new SurfaceTileType(type, false,
+		CACTUS(type -> new TileType(type, false,
 			new DestructionManager(type, 12, null),
 			
 			new TileTypeRenderer(type, false)
@@ -140,7 +149,11 @@ public class TileType {
 		
 		public static TileTypeEnum values(int ordinal) { return values[ordinal]; }
 		
-		public static void init() { DataTag.init(); }
+		/** @noinspection StaticMethodReferencedViaSubclass*/
+		public static void init() {
+			CacheTag.init();
+			PropertyTag.init();
+		}
 		
 		public TileType getTileType(@NotNull WorldManager world) {
 			if(tileType == null)
@@ -150,8 +163,8 @@ public class TileType {
 	}
 	
 	private final TileTypeEnum enumType;
+	final DataMap propertyMap;
 	final boolean walkable;
-	final float lightRadius;
 	final DestructionManager destructionManager;
 	final TileTypeRenderer renderer;
 	final UpdateManager updateManager;
@@ -169,15 +182,15 @@ public class TileType {
 		this(enumType, false, destructionManager, renderer);
 	}*/
 	protected TileType(@NotNull TileTypeEnum enumType, boolean walkable, DestructionManager destructionManager, TileTypeRenderer renderer) {
-		this(enumType, walkable, destructionManager, renderer, new UpdateManager(enumType));
+		this(enumType, walkable, new DataMap(), destructionManager, renderer);
 	}
-	protected TileType(@NotNull TileTypeEnum enumType, boolean walkable, DestructionManager destructionManager, TileTypeRenderer renderer, UpdateManager updateManager) {
-		this(enumType, walkable, 0, destructionManager, renderer, updateManager);
+	protected TileType(@NotNull TileTypeEnum enumType, boolean walkable, DataMap propertyMap, DestructionManager destructionManager, TileTypeRenderer renderer) {
+		this(enumType, walkable, propertyMap, destructionManager, renderer, new UpdateManager(enumType));
 	}
-	protected TileType(@NotNull TileTypeEnum enumType, boolean walkable, float lightRadius, DestructionManager destructionManager, TileTypeRenderer renderer, UpdateManager updateManager) {
+	protected TileType(@NotNull TileTypeEnum enumType, boolean walkable, DataMap propertyMap, DestructionManager destructionManager, TileTypeRenderer renderer, UpdateManager updateManager) {
 		this.enumType = enumType;
 		this.walkable = walkable;
-		this.lightRadius = lightRadius;
+		this.propertyMap = propertyMap;
 		this.destructionManager = destructionManager;
 		this.renderer = renderer;
 		this.updateManager = updateManager;
@@ -185,10 +198,14 @@ public class TileType {
 	
 	public DataMap getInitialData() { return new DataMap(); }
 	
+	public boolean hasProperty(PropertyTag<?> tag) { return propertyMap.contains(tag); }
+	
+	public <T> T getPropertyOrDefault(PropertyTag<T> tag, T defaultValue) {
+		return propertyMap.getOrDefault(tag, defaultValue);
+	}
+	
 	public TileTypeEnum getEnumType() { return enumType; }
 	public String getName() { return enumType.name(); }
-	
-	public float getLightRadius() { return lightRadius; }
 	
 	public TileTypeRenderer getRenderer() { return renderer; }
 	
@@ -222,9 +239,9 @@ public class TileType {
 		DataMap dataMap = tile.getDataMap(this);
 		
 		float now = tile.getWorld().getGameTime();
-		float lastUpdate = dataMap.getOrDefault(DataTag.LastUpdate, now);
+		float lastUpdate = dataMap.getOrDefault(CacheTag.LastUpdate, now);
 		float delta = now - lastUpdate;
-		dataMap.put(DataTag.LastUpdate, now);
+		dataMap.put(CacheTag.LastUpdate, now);
 		
 		return updateManager.update(tile, delta);
 	}

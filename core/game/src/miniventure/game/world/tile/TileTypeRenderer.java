@@ -34,7 +34,8 @@ public class TileTypeRenderer {
 			else if(prefix.equals("t"))
 				animationMap = TransitionManager.tileAnimations;
 			else {
-				System.err.println("Unknown Tile Sprite Frame for "+tileType+": "+prefix+spriteID);
+				if(!(prefix+spriteID).equals("swim"))
+					System.err.println("Unknown Tile Sprite Frame for "+tileType+": "+prefix+spriteID);
 				continue;
 			}
 			
@@ -47,30 +48,25 @@ public class TileTypeRenderer {
 	
 	private final TileTypeEnum tileType;
 	private final boolean isOpaque;
-	private final float zOffset;
 	private final ConnectionManager connectionManager;
 	private final OverlapManager overlapManager;
 	final TransitionManager transitionManager;
 	
 	public TileTypeRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque) {
-		this(tileType, isOpaque, 0);
+		this(tileType, isOpaque, new ConnectionManager(tileType, RenderStyle.SINGLE_FRAME));
 	}
-	public TileTypeRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque, float zOffset) {
-		this(tileType, isOpaque, zOffset, new ConnectionManager(tileType, RenderStyle.SINGLE_FRAME));
+	public TileTypeRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque, ConnectionManager connectionManager) {
+		this(tileType, isOpaque, connectionManager, OverlapManager.NONE(tileType));
 	}
-	public TileTypeRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque, float zOffset, ConnectionManager connectionManager) {
-		this(tileType, isOpaque, zOffset, connectionManager, OverlapManager.NONE(tileType));
+	public TileTypeRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque, OverlapManager overlapManager) {
+		this(tileType, isOpaque, new ConnectionManager(tileType, RenderStyle.SINGLE_FRAME), overlapManager);
 	}
-	public TileTypeRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque, float zOffset, OverlapManager overlapManager) {
-		this(tileType, isOpaque, zOffset, new ConnectionManager(tileType, RenderStyle.SINGLE_FRAME), overlapManager);
+	public TileTypeRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque, ConnectionManager connectionManager, OverlapManager overlapManager) {
+		this(tileType, isOpaque, connectionManager, overlapManager, new TransitionManager(tileType));
 	}
-	public TileTypeRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque, float zOffset, ConnectionManager connectionManager, OverlapManager overlapManager) {
-		this(tileType, isOpaque, zOffset, connectionManager, overlapManager, new TransitionManager(tileType));
-	}
-	public TileTypeRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque, float zOffset, ConnectionManager connectionManager, OverlapManager overlapManager, TransitionManager transitionManager) {
+	public TileTypeRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque, ConnectionManager connectionManager, OverlapManager overlapManager, TransitionManager transitionManager) {
 		this.tileType = tileType;
 		this.isOpaque = isOpaque;
-		this.zOffset = zOffset;
 		this.connectionManager = connectionManager;
 		this.overlapManager = overlapManager;
 		this.transitionManager = transitionManager;
@@ -79,14 +75,12 @@ public class TileTypeRenderer {
 	public TileTypeRenderer(@NotNull TileTypeRenderer model, @Nullable ConnectionManager connectionManager, @Nullable OverlapManager overlapManager, @Nullable TransitionManager transitionManager) {
 		this.tileType = model.tileType;
 		isOpaque = model.isOpaque;
-		zOffset = model.zOffset;
 		this.connectionManager = connectionManager == null ? model.connectionManager : connectionManager;
 		this.overlapManager = overlapManager == null ? model.overlapManager : overlapManager;
 		this.transitionManager = transitionManager == null ? model.transitionManager : transitionManager;
 	}
 	
 	public boolean isOpaque() { return isOpaque; }
-	public float getZOffset() { return zOffset; }
 	
 	// whenever a tile changes its TileTypeEnum stack in any way, all 9 tiles around it re-fetch their overlap and main animations. Then they keep that stack of animations until the next fetch.
 	

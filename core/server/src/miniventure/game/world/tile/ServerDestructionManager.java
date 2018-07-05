@@ -7,8 +7,8 @@ import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.particle.ActionParticle;
 import miniventure.game.world.entity.particle.TextParticle;
+import miniventure.game.world.tile.data.CacheTag;
 import miniventure.game.world.tile.data.DataMap;
-import miniventure.game.world.tile.data.DataTag;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -32,7 +32,7 @@ public class ServerDestructionManager extends DestructionManager {
 			
 			DataMap dataMap = tile.getDataMap(tileType);
 			
-			int health = totalHealth > 1 ? dataMap.getOrDefaultAndPut(DataTag.Health, totalHealth) : 1;
+			int health = totalHealth > 1 ? dataMap.getOrDefaultAndPut(CacheTag.Health, totalHealth) : 1;
 			health -= damage;
 			if(totalHealth > 1)
 				tile.getLevel().addEntity(new TextParticle(String.valueOf(damage)), tile.getCenter(), true);
@@ -42,7 +42,7 @@ public class ServerDestructionManager extends DestructionManager {
 				for(ItemDrop drop: drops)
 					((ServerLevel)tile.getLevel()).dropItems(drop, tile, attacker);
 			} else {
-				dataMap.put(DataTag.Health, health);
+				dataMap.put(CacheTag.Health, health);
 				ServerCore.getServer().playTileSound("hit", tile, tileType);
 			}
 			

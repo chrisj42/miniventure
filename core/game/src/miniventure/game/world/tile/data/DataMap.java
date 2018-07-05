@@ -9,16 +9,22 @@ public class DataMap {
 	
 	private final HashMap<DataTag<?>, Object> map = new HashMap<>();
 	
-	public DataMap(DataEntry<?>... entries) { chainAdd(entries); }
+	public DataMap() {}
+	public DataMap(DataEntry<?, ?> entry) { add(entry); }
+	public DataMap(DataEntry<?, ?>[] entries) { addAll(entries); }
 	public DataMap(DataMap model) { this(model.getEntries()); }
 	
-	public DataMap chainAdd(DataEntry<?>... entries) {
-		for(DataEntry<?> e: entries)
-			put(e);
+	public DataMap add(DataEntry<?, ?> entry) {
+		put(entry);
+		return this;
+	}
+	public DataMap addAll(DataEntry<?, ?>[] entries) {
+		for(DataEntry<?, ?> e: entries)
+			add(e);
 		return this;
 	}
 	
-	public <T> T put(DataEntry<T> entry) { return put(entry.key, entry.value); }
+	public <T> T put(DataEntry<T, ?> entry) { return put(entry.key, entry.value); }
 	@SuppressWarnings("unchecked")
 	public <T> T put(DataTag<T> key, T value) {
 		return (T) map.put(key, value);
@@ -31,24 +37,26 @@ public class DataMap {
 	
 	public void clear() { map.clear(); }
 	
+	public boolean contains(DataTag<?> tag) { return map.containsKey(tag); }
+	
 	@SuppressWarnings("unchecked")
 	public <T> T get(DataTag<T> tag) {
 		return (T) map.get(tag);
 	}
+	
 	public <T, U extends T> T getOrDefault(DataTag<T> tag, U defaultValue) {
-		if(!map.containsKey(tag))
-			return defaultValue;
-		else
-			return get(tag);
+		T val;
+		return (val = get(tag)) == null ? defaultValue : val;
 	}
 	// fetches the value for the given key. If there is no key, the default value is added for it and returned.
 	public <T, U extends T> T getOrDefaultAndPut(DataTag<T> tag, U defaultValue) {
-		if(!map.containsKey(tag)) {
-			map.put(tag, defaultValue);
+		T val = get(tag);
+		if(val == null) {
+			put(tag, defaultValue);
 			return defaultValue;
 		}
 		else
-			return get(tag);
+			return val;
 	}
 	public <T, U> U computeFrom(DataTag<T> tag, ValueMonoFunction<T, U> mapper, U defaultValue) {
 		if(!map.containsKey(tag))
@@ -62,8 +70,8 @@ public class DataMap {
 		return asClass.cast(get(tag));
 	}
 	
-	public DataEntry<?>[] getEntries() {
-		DataEntry<?>[] entries = new DataEntry[map.size()];
+	public DataEntry<?, ?>[] getEntries() {
+		DataEntry<?, ?>[] entries = new DataEntry[map.size()];
 		int i = 0;
 		for(DataTag<?> tag: map.keySet())
 			entries[i++] = getEntry(tag);
@@ -71,25 +79,25 @@ public class DataMap {
 		return entries;
 	}
 	
-	private <T> DataEntry<T> getEntry(DataTag<T> tag) { return new DataEntry<>(tag, get(tag)); }
+	private <T, D extends DataTag<T>> DataEntry<T, D> getEntry(D tag) { return new DataEntry<>(tag, get(tag)); }
 	
 	
 	public String serialize() {
 		String[] entries = new String[map.size()];
 		
 		int i = 0;
-		for(DataEntry<?> entry: getEntries())
+		for(DataEntry<?, ?> entry: getEntries())
 			entries[i++] = entry.serialize();
 		
 		return MyUtils.encodeStringArray(entries);
 	}
 	
-	public static DataMap deserialize(String alldata) {
+	public static <D extends DataTag<?>> DataMap deserialize(String alldata, Class<D> tagClass) {
 		String[] data = MyUtils.parseLayeredString(alldata);
 		
-		DataEntry<?>[] entries = new DataEntry[data.length];
+		DataEntry<?, ?>[] entries = new DataEntry[data.length];
 		for(int i = 0; i < entries.length; i++)
-			entries[i] = DataEntry.deserialize(data[i]);
+			entries[i] = DataEntry.deserialize(data[i], tagClass);
 		
 		return new DataMap(entries);
 	}

@@ -56,7 +56,7 @@
         <key>jxrCompressionLevel</key>
         <uint>0</uint>
         <key>ditherType</key>
-        <enum type="SettingsBase::DitherType">NearestNeighbour</enum>
+        <enum type="SettingsBase::DitherType">PngQuantLow</enum>
         <key>backgroundColor</key>
         <uint>0</uint>
         <key>libGdx</key>
@@ -82,7 +82,7 @@
         <key>atfFormats</key>
         <string></string>
         <key>textureFormat</key>
-        <enum type="SettingsBase::TextureFormat">png</enum>
+        <enum type="SettingsBase::TextureFormat">png8</enum>
         <key>borderPadding</key>
         <uint>0</uint>
         <key>maxTextureSize</key>
@@ -258,6 +258,7 @@
             <key type="filename">tile-sprites/hole/c44.png</key>
             <key type="filename">tile-sprites/hole/c45.png</key>
             <key type="filename">tile-sprites/hole/c46.png</key>
+            <key type="filename">tile-sprites/hole/swim.png</key>
             <key type="filename">tile-sprites/sand/c00.png</key>
             <key type="filename">tile-sprites/sand/o00.png</key>
             <key type="filename">tile-sprites/sand/o01.png</key>

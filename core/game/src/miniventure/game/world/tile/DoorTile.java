@@ -10,7 +10,7 @@ import miniventure.game.world.tile.DestructionManager.RequiredTool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class DoorTile extends SurfaceTileType {
+public class DoorTile extends TileType {
 	
 	static DoorTile getOpenDoor(@NotNull TileTypeEnum enumType) {
 		return new DoorTile(enumType, true,
@@ -44,7 +44,7 @@ public class DoorTile extends SurfaceTileType {
 		super(enumType, walkable,
 			destructionManager,
 			
-			new TileTypeRenderer(enumType, false, 0,
+			new TileTypeRenderer(enumType, false,
 				new ConnectionManager(enumType, RenderStyle.SINGLE_FRAME),
 				OverlapManager.NONE(enumType),
 				transitionManager)

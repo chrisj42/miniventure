@@ -3,8 +3,8 @@ package miniventure.game.world.tile;
 import miniventure.game.util.function.ValueFunction;
 import miniventure.game.util.function.VoidMonoFunction;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.data.CacheTag;
 import miniventure.game.world.tile.data.DataMap;
-import miniventure.game.world.tile.data.DataTag;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -36,8 +36,8 @@ public class UpdateManager {
 	public float update(@NotNull Tile tile, float delta) {
 		float minWait = 0;
 		DataMap dataMap = tile.getDataMap(tileType);
-		float[] deltas = dataMap.getOrDefaultAndPut(DataTag.UpdateTimers, new float[actions.length]);
-		String[] datas = dataMap.getOrDefaultAndPut(DataTag.UpdateActionCaches, new String[actions.length]);
+		float[] deltas = dataMap.getOrDefaultAndPut(CacheTag.UpdateTimers, new float[actions.length]);
+		String[] datas = dataMap.getOrDefaultAndPut(CacheTag.UpdateActionCaches, new String[actions.length]);
 		for(int i = 0; i < actions.length; i++) {
 			float wait;
 			if(!actions[i].canUpdate(tile)) {

@@ -32,16 +32,16 @@ public class ItemDrop {
 	
 	
 	private int getItemsDropped() { return getItemsDropped(minCount, maxCount); }
+	
 	private int getItemsDropped(int min, int max) {
-		if(min == max) return min;
-		
-		int halfSize = (max-min+1)/2;
-		if(MathUtils.random() >= 1-bias) // right side
-			min += halfSize;
-		else // left side
-			max -= halfSize;
-		
-		return getItemsDropped(min, max);
+		while(min != max) {
+			int halfSize = (max - min + 1) / 2;
+			if(MathUtils.random() >= 1 - bias) // right side
+				min += halfSize;
+			else // left side
+				max -= halfSize;
+		}
+		return min;
 	}
 	
 	public Item[] getDroppedItems() {

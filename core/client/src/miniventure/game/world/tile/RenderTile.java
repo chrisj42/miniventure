@@ -7,10 +7,12 @@ import java.util.NavigableMap;
 import java.util.TreeMap;
 
 import miniventure.game.texture.TextureHolder;
+import miniventure.game.util.MyUtils;
 import miniventure.game.util.RelPos;
 import miniventure.game.world.Level;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 import miniventure.game.world.tile.data.DataMap;
+import miniventure.game.world.tile.data.PropertyTag;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
@@ -41,7 +43,7 @@ public class RenderTile extends Tile {
 				TileAnimation<TextureHolder> animation = spriteStack.get(i);
 				//String name = spriteNames.get(i);
 				//float timeSinceLastUpdate = animationDeltas.get(name) + delta;
-				batch.draw(animation.getKeyFrame(getWorld()).texture, (x - posOffset.x) * SIZE, (y - posOffset.y+typeStack.get(i).getRenderer().getZOffset()) * SIZE);
+				batch.draw(animation.getKeyFrame(getWorld()).texture, (x - posOffset.x) * SIZE, (y - posOffset.y+typeStack.get(i).getPropertyOrDefault(PropertyTag.ZOffset, 0f)) * SIZE);
 				//animationDeltas.put(name, timeSinceLastUpdate);
 			}
 		}
@@ -69,7 +71,7 @@ public class RenderTile extends Tile {
 				typePositions.get(type.getEnumType()).add(rp);
 			}
 			allTypes.putAll(typeMap);
-			typesAtPositions.put(rp, typeMap.size() == 0 ? EnumSet.noneOf(TileTypeEnum.class) : EnumSet.copyOf(typeMap.keySet()));
+			typesAtPositions.put(rp, MyUtils.enumSet(typeMap.keySet()));
 		}
 		
 		// all tile types have been fetched. Now accumulate the sprites.

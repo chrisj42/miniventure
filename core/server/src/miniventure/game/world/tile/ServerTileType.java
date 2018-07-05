@@ -14,7 +14,7 @@ public class ServerTileType extends TileType {
 	private final TileType model;
 	
 	public ServerTileType(@NotNull TileType model) {
-		super(model.getEnumType(), model.walkable, model.lightRadius, new ServerDestructionManager(model.destructionManager), new ServerTileRenderer(model.renderer), model.updateManager);
+		super(model.getEnumType(), model.walkable, model.propertyMap, new ServerDestructionManager(model.destructionManager), new ServerTileRenderer(model.renderer), model.updateManager);
 		this.model = model;
 	}
 	
@@ -26,11 +26,6 @@ public class ServerTileType extends TileType {
 	@Override
 	public TileTypeEnum getEnumType() {
 		return model.getEnumType();
-	}
-	
-	@Override
-	public float getLightRadius() {
-		return model.getLightRadius();
 	}
 	
 	@Override

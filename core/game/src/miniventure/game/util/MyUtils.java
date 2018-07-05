@@ -1,9 +1,13 @@
 package miniventure.game.util;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import miniventure.game.GameCore;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -163,5 +167,18 @@ public final class MyUtils {
 			for(StackTraceElement element: elements)
 				System.out.println("\t" + element);
 		});
+	}
+	
+	public static <E extends Enum<E>> EnumSet<E> enumSet(Class<E> clazz, Collection<E> collection) {
+		return collection.size() == 0 ? EnumSet.noneOf(clazz) : EnumSet.copyOf(collection);
+	}
+	public static <E extends Enum<E>> EnumSet<E> enumSet(Class<E> clazz, E[] items) {
+		return items.length == 0 ? EnumSet.noneOf(clazz) : EnumSet.copyOf(Arrays.asList(items));
+	}
+	public static EnumSet<TileTypeEnum> enumSet(Collection<TileTypeEnum> collection) {
+		return enumSet(TileTypeEnum.class, collection);
+	}
+	public static EnumSet<TileTypeEnum> enumSet(TileTypeEnum[] items) {
+		return enumSet(TileTypeEnum.class, items);
 	}
 }

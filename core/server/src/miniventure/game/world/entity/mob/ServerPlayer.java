@@ -23,7 +23,6 @@ import miniventure.game.world.tile.Tile;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
@@ -128,8 +127,8 @@ public class ServerPlayer extends ServerMob implements Player {
 		hands.resetItemUsage();
 	}
 	
-	public boolean moveTo(float x, float y, float z) { return moveTo(new Vector3(x, y, z)); }
-	public boolean moveTo(Vector3 pos) { return move(pos.cpy().sub(getLocation())); }
+	// public boolean moveTo(float x, float y, float z) { return moveTo(new Vector3(x, y, z)); }
+	// public boolean moveTo(Vector3 pos) { return move(pos.cpy().sub(getLocation())); }
 	
 	@Override
 	public Integer[] saveStats() { return Stat.save(stats); }

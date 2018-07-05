@@ -12,7 +12,9 @@ import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.data.CacheTag;
 import miniventure.game.world.tile.data.DataMap;
+import miniventure.game.world.tile.data.PropertyTag;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
@@ -208,14 +210,22 @@ public class Tile implements WorldObject {
 			// playing exit anim; no more updates
 			return 0;
 		
-		return getType().update(this);
+		float min = 0;
+		for(TileType type: getTypeStack().getTypes()) {
+			float wait = type.update(this);
+			if(min == 0)
+				min = wait;
+			else if(wait != 0)
+				min = Math.min(wait, min);
+		}
+		return min;
 	}
 	
 	@Override
 	public float getLightRadius() {
 		float maxRadius = 0;
 		for(TileType type: tileStack.getTypes())
-			maxRadius = Math.max(maxRadius, type.getLightRadius());
+			maxRadius = Math.max(maxRadius, type.getPropertyOrDefault(PropertyTag.LightRadius, 0f));
 		
 		return maxRadius;
 	}
@@ -305,7 +315,7 @@ public class Tile implements WorldObject {
 		public static DataMap[] getDataMaps(String[] data) {
 			DataMap[] maps = new DataMap[data.length];
 			for(int i = 0; i < data.length; i++)
-				maps[i] = DataMap.deserialize(data[i]);
+				maps[i] = DataMap.deserialize(data[i], CacheTag.class);
 			return maps;
 		}
 		
@@ -315,9 +325,7 @@ public class Tile implements WorldObject {
 			tile.tileStack = new TileStack(tile.getWorld(), types);
 			tile.dataMaps.clear();
 			for(int i = 0; i < data.length; i++)
-				tile.dataMaps.put(types[i], DataMap.deserialize(data[i]));
-			
-			tile.updateSprites();
+				tile.dataMaps.put(types[i], DataMap.deserialize(data[i], CacheTag.class));
 		}
 	}
 	
