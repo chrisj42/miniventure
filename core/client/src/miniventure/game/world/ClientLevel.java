@@ -9,7 +9,6 @@ import miniventure.game.GameProtocol.ChunkRequest;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.ClientWorld;
 import miniventure.game.world.entity.Entity;
-import miniventure.game.world.entity.particle.Particle;
 import miniventure.game.world.tile.ClientTile;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.Tile.TileData;
@@ -59,30 +58,34 @@ public class ClientLevel extends Level {
 		// pass the offset vector to all objects being rendered.
 		
 		Array<WorldObject> objects = new Array<>();
-		Array<WorldObject> surface = new Array<>();
-		surface.addAll(entities);
-		for(Tile t: tiles) {
-			if(t.getType().getRenderer().getZOffset() > 0) // permiable by player instead
-				surface.add(t);
+		Array<WorldObject> under = new Array<>(); // ground tiles
+		Array<WorldObject> over = new Array<>();
+		for(Entity e: entities) {
+			if(e.isParticle())
+				over.add(e);
 			else
+				objects.add(e);
+		}
+		for(Tile t: tiles) {
+			if(t.getType().getRenderer().getZOffset() > 0) // permeable by player instead
 				objects.add(t);
+			else
+				under.add(t);
 		}
 		
 		// first, ground tiles
 		// then, entities and surface tiles, higher y first
+		// then particles
 		
 		// entities second
-		surface.sort((e1, e2) -> {
-			if(e1 instanceof Particle && !(e2 instanceof Particle))
-				return 1;
-			if(!(e1 instanceof Particle) && e2 instanceof Particle)
-				return -1;
-			return Float.compare(e2.getCenter().y, e1.getCenter().y);
-		});
+		objects.sort((e1, e2) -> Float.compare(e2.getCenter().y, e1.getCenter().y));
 		//objects.addAll(entities);
-		objects.addAll(surface);
 		
+		for(WorldObject obj: under)
+			obj.render(batch, delta, posOffset);
 		for(WorldObject obj: objects)
+			obj.render(batch, delta, posOffset);
+		for(WorldObject obj: over)
 			obj.render(batch, delta, posOffset);
 	}
 	

@@ -25,6 +25,7 @@ import miniventure.game.world.entity.EntityRenderer;
 import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.mob.Player.Stat;
+import miniventure.game.world.entity.particle.Particle;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.Tile.TileData;
 import miniventure.game.world.tile.Tile.TileTag;
@@ -219,17 +220,19 @@ public interface GameProtocol {
 		public final PositionUpdate positionUpdate;
 		public final SpriteUpdate spriteUpdate;
 		public final int eid;
+		public final boolean particle;
 		public final boolean permeable;
 		public final String descriptor;
 		public final boolean cutHeight;
 		
-		private EntityAddition() { this(0, null, null, false, "Blank entity", false); }
+		private EntityAddition() { this(0, null, null, false, false, "Blank entity", false); }
 		public EntityAddition(Entity e) { this(e, e.getClass().getSimpleName().replace("Server", "")); }
-		public EntityAddition(Entity e, String descriptor) { this(e.getId(), new PositionUpdate(e), new SpriteUpdate(e), e.isPermeable(), descriptor, e instanceof Mob); }
-		public EntityAddition(int eid, PositionUpdate positionUpdate, SpriteUpdate spriteUpdate, boolean permeable, String descriptor, boolean cutHeight) {
+		public EntityAddition(Entity e, String descriptor) { this(e.getId(), new PositionUpdate(e), new SpriteUpdate(e), e instanceof Particle, e.isPermeable(), descriptor, e instanceof Mob); }
+		public EntityAddition(int eid, PositionUpdate positionUpdate, SpriteUpdate spriteUpdate, boolean particle, boolean permeable, String descriptor, boolean cutHeight) {
 			this.eid = eid;
 			this.positionUpdate = positionUpdate;
 			this.spriteUpdate = spriteUpdate;
+			this.particle = particle;
 			this.permeable = permeable;
 			this.descriptor = descriptor;
 			this.cutHeight = cutHeight;

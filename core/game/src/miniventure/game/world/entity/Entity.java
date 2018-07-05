@@ -7,8 +7,6 @@ import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.EntityRenderer.BlinkRenderer;
 import miniventure.game.world.entity.mob.Player;
-import miniventure.game.world.entity.particle.Particle;
-import miniventure.game.world.tile.LiquidTileType;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -53,6 +51,7 @@ public abstract class Entity implements WorldObject {
 	public Level getLevel() { return world.getEntityLevel(this); }
 	
 	public abstract boolean isMob();
+	public abstract boolean isParticle();
 	
 	/// this is called only to remove an entity completely from the game, not to change levels.
 	public void remove() {
@@ -79,17 +78,6 @@ public abstract class Entity implements WorldObject {
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
 		renderer.update(delta);
 		if(blinker != null) blinker.update(delta);
-		
-		boolean swim = false;
-		if(!(this instanceof Particle)) {
-			Tile closest = getClosestTile();
-			if(closest != null && closest.getType() instanceof LiquidTileType) {
-				Vector2 pos = getCenter().sub(posOffset).sub(0, getSize().y / 2).scl(Tile.SIZE);
-				((LiquidTileType) closest.getType()).drawSwimAnimation(batch, pos, world);
-				swim = true;
-			}
-		}
-		getRenderer().render((x-posOffset.x) * Tile.SIZE, (y+z - posOffset.y) * Tile.SIZE, batch, swim);
 	}
 	
 	protected Rectangle getUnscaledBounds() {

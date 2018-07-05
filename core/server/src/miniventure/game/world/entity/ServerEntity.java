@@ -53,6 +53,8 @@ public abstract class ServerEntity extends Entity {
 	
 	@Override
 	public boolean isMob() { return this instanceof Mob; }
+	@Override
+	public boolean isParticle() { return this instanceof Particle; }
 	
 	@Override
 	public void update(float delta) {

@@ -7,7 +7,10 @@ import miniventure.game.util.blinker.FrameBlinker;
 import miniventure.game.world.ClientLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Mob;
+import miniventure.game.world.tile.LiquidTileType;
+import miniventure.game.world.tile.Tile;
 
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -17,19 +20,36 @@ import org.jetbrains.annotations.Nullable;
 
 public class ClientEntity extends Entity {
 	
+	private final boolean particle;
 	private final boolean permeable;
 	private final String descriptor;
 	private final boolean cutHeight;
 	
-	private ClientEntity(int eid, boolean permeable, @NotNull EntityRenderer renderer, String descriptor, boolean cutHeight) {
+	private ClientEntity(int eid, boolean particle, boolean permeable, @NotNull EntityRenderer renderer, String descriptor, boolean cutHeight) {
 		super(ClientCore.getWorld(), eid);
+		this.particle = particle;
 		this.permeable = permeable;
 		this.descriptor = descriptor;
 		this.cutHeight = cutHeight;
 		setRenderer(renderer);
 	}
 	public ClientEntity(EntityAddition data) {
-		this(data.eid, data.permeable, EntityRenderer.deserialize(data.spriteUpdate.rendererData), data.descriptor, data.cutHeight);
+		this(data.eid, data.particle, data.permeable, EntityRenderer.deserialize(data.spriteUpdate.rendererData), data.descriptor, data.cutHeight);
+	}
+	
+	@Override
+	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
+		super.render(batch, delta, posOffset);
+		boolean swim = false;
+		if(!particle) {
+			Tile closest = getClosestTile();
+			if(closest != null && closest.getType() instanceof LiquidTileType) {
+				Vector2 pos = getCenter().sub(posOffset).sub(0, getSize().y / 2).scl(Tile.SIZE);
+				((LiquidTileType) closest.getType()).drawSwimAnimation(batch, pos, getWorld());
+				swim = true;
+			}
+		}
+		getRenderer().render((x-posOffset.x) * Tile.SIZE, (y+z - posOffset.y) * Tile.SIZE, batch, swim);
 	}
 	
 	@NotNull @Override
@@ -40,6 +60,8 @@ public class ClientEntity extends Entity {
 	
 	@Override
 	public boolean isMob() { return cutHeight; } // this is probably a bad idea but currently it is exactly the value I'm looking for...
+	@Override
+	public boolean isParticle() { return particle; }
 	
 	@NotNull @Override
 	public Rectangle getBounds() {

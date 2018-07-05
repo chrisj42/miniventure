@@ -32,7 +32,7 @@ public class ServerDestructionManager extends DestructionManager {
 			
 			DataMap dataMap = tile.getDataMap(tileType);
 			
-			int health = totalHealth > 1 ? dataMap.get(DataTag.Health) : 1;
+			int health = totalHealth > 1 ? dataMap.getOrDefaultAndPut(DataTag.Health, totalHealth) : 1;
 			health -= damage;
 			if(totalHealth > 1)
 				tile.getLevel().addEntity(new TextParticle(String.valueOf(damage)), tile.getCenter(), true);
@@ -42,7 +42,7 @@ public class ServerDestructionManager extends DestructionManager {
 				for(ItemDrop drop: drops)
 					((ServerLevel)tile.getLevel()).dropItems(drop, tile, attacker);
 			} else {
-				
+				dataMap.put(DataTag.Health, health);
 				ServerCore.getServer().playTileSound("hit", tile, tileType);
 			}
 			
