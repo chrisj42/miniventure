@@ -10,7 +10,7 @@ public class FloorTile extends GroundTileType {
 		super(enumType, true,
 			new DestructionManager(enumType, new RequiredTool(toolType)),
 			
-			new TileTypeRenderer(enumType, true,
+			new TileTypeRenderer(enumType, true, 0,
 				new ConnectionManager(enumType, RenderStyle.SINGLE_FRAME, enumType)
 			)
 		);

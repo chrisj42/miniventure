@@ -7,6 +7,7 @@ import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.EntityRenderer.BlinkRenderer;
 import miniventure.game.world.entity.mob.Player;
+import miniventure.game.world.tile.LiquidTileType;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -78,8 +79,14 @@ public abstract class Entity implements WorldObject {
 		renderer.update(delta);
 		if(blinker != null) blinker.update(delta);
 		
-		//System.out.println("rendering entity "+this+" at "+getPosition(true));
-		getRenderer().render((x-posOffset.x) * Tile.SIZE, (y+z - posOffset.y) * Tile.SIZE, batch);
+		Tile closest = getClosestTile();
+		boolean swim = false;
+		if(closest != null && closest.getType() instanceof LiquidTileType) {
+			Vector2 pos = getCenter().sub(posOffset).sub(0, getSize().y/2).scl(Tile.SIZE);
+			((LiquidTileType) closest.getType()).drawSwimAnimation(batch, pos, world);
+			swim = true;
+		}
+		getRenderer().render((x-posOffset.x) * Tile.SIZE, (y+z - posOffset.y) * Tile.SIZE, batch, swim);
 	}
 	
 	protected Rectangle getUnscaledBounds() {

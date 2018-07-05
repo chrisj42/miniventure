@@ -6,4 +6,5 @@
 		+ Added pig sprites
 	v2:
 		* Major Tilesystem overhaul, though you won't notice unless you look at the code. It makes it easier to have multiple variations of a tile.
+		+ Added animation for being in water
 		

@@ -50,6 +50,13 @@ public interface Boundable {
 		return sorted.get(0);
 	}
 	
+	@Nullable
+	default Tile getClosestTile() {
+		Level level = getLevel();
+		if(level == null) return null;
+		return level.getClosestTile(getCenter());
+	}
+	
 	/** @noinspection UnusedReturnValue*/
 	static <E extends WorldObject> Array<E> sortByDistance(@NotNull Array<E> objects, @NotNull Vector2 pos) {
 		objects.sort((o1, o2) -> {

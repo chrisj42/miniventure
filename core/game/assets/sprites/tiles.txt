@@ -7213,9 +7213,37 @@ water/o18
   orig: 32, 32
   offset: 0, 0
   index: 35
-wood_wall/c00
+water/swim
   rotate: false
   xy: 830, 542
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 1
+water/swim
+  rotate: false
+  xy: 866, 542
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 2
+water/swim
+  rotate: false
+  xy: 902, 542
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 3
+water/swim
+  rotate: false
+  xy: 866, 542
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 4
+wood_wall/c00
+  rotate: false
+  xy: 938, 542
   size: 32, 32
   orig: 32, 32
   offset: 0, 0

@@ -44,7 +44,7 @@ public class DoorTile extends SurfaceTileType {
 		super(enumType, walkable,
 			destructionManager,
 			
-			new TileTypeRenderer(enumType, false,
+			new TileTypeRenderer(enumType, false, 0,
 				new ConnectionManager(enumType, RenderStyle.SINGLE_FRAME),
 				OverlapManager.NONE(enumType),
 				transitionManager)

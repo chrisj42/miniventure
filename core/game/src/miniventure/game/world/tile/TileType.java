@@ -25,7 +25,7 @@ public class TileType {
 		HOLE(type -> new GroundTileType(type, false,
 			DestructionManager.INDESTRUCTIBLE(type),
 			
-			new TileTypeRenderer(type, true,
+			new TileTypeRenderer(type, true, 0,
 				new ConnectionManager(type, RenderStyle.SINGLE_FRAME, TileTypeEnum.valueOf("WATER"))
 			)
 		)),
@@ -39,7 +39,7 @@ public class TileType {
 		SAND(type -> new GroundTileType(type, true,
 			new DestructionManager(type, new RequiredTool(ToolType.Shovel)),
 			
-			new TileTypeRenderer(type, true,
+			new TileTypeRenderer(type, true, 0,
 				new OverlapManager(type, RenderStyle.SINGLE_FRAME)
 			))
 		),
@@ -49,7 +49,7 @@ public class TileType {
 				.require(new RequiredTool(ToolType.Shovel))
 				.make(),
 			
-			new TileTypeRenderer(type, true,
+			new TileTypeRenderer(type, true, 0,
 				new OverlapManager(type, RenderStyle.SINGLE_FRAME)
 			),
 			new UpdateManager(type,
@@ -63,7 +63,7 @@ public class TileType {
 		SNOW(type -> new GroundTileType(type, true,
 			new DestructionManager(type, new RequiredTool(ToolType.Shovel)),
 			
-			new TileTypeRenderer(type, true,
+			new TileTypeRenderer(type, true,0,
 				new OverlapManager(type, RenderStyle.SINGLE_FRAME)
 			)
 		)),
@@ -71,7 +71,7 @@ public class TileType {
 		WATER(type -> new LiquidTileType(type, true,
 			DestructionManager.INDESTRUCTIBLE(type),
 			
-			new TileTypeRenderer(type, true,
+			new TileTypeRenderer(type, true, 0,
 				new ConnectionManager(type, new RenderStyle(PlayMode.LOOP_RANDOM, 0.2f)),
 				new OverlapManager(type, new RenderStyle(true, 1/24f))
 			),
@@ -101,7 +101,7 @@ public class TileType {
 		TORCH(type -> new SurfaceTileType(type, true, 2,
 			new DestructionManager(type),
 			
-			new TileTypeRenderer(type, false,
+			new TileTypeRenderer(type, false, 0,
 				new ConnectionManager(type, new RenderStyle(1/12f)),
 				OverlapManager.NONE(type),
 				new TransitionManager(type)

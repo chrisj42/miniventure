@@ -1211,6 +1211,10 @@
             <key type="filename">tile-sprites/water/o18_33.png</key>
             <key type="filename">tile-sprites/water/o18_34.png</key>
             <key type="filename">tile-sprites/water/o18_35.png</key>
+            <key type="filename">tile-sprites/water/swim_01.png</key>
+            <key type="filename">tile-sprites/water/swim_02.png</key>
+            <key type="filename">tile-sprites/water/swim_03.png</key>
+            <key type="filename">tile-sprites/water/swim_04.png</key>
             <key type="filename">tile-sprites/wood_wall/c00.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>

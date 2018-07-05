@@ -20,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 public class RenderTile extends Tile {
 	
 	private ArrayList<TileAnimation<TextureHolder>> spriteStack;
+	private ArrayList<TileType> typeStack;
 	//private ArrayList<String> spriteNames;
 	//private final HashMap<String, Float> animationDeltas = new HashMap<>(16);
 	
@@ -40,7 +41,7 @@ public class RenderTile extends Tile {
 				TileAnimation<TextureHolder> animation = spriteStack.get(i);
 				//String name = spriteNames.get(i);
 				//float timeSinceLastUpdate = animationDeltas.get(name) + delta;
-				batch.draw(animation.getKeyFrame(this).texture, (x - posOffset.x) * SIZE, (y - posOffset.y) * SIZE);
+				batch.draw(animation.getKeyFrame(getWorld()).texture, (x - posOffset.x) * SIZE, (y - posOffset.y+typeStack.get(i).getRenderer().getZOffset()) * SIZE);
 				//animationDeltas.put(name, timeSinceLastUpdate);
 			}
 		}
@@ -73,6 +74,7 @@ public class RenderTile extends Tile {
 		
 		// all tile types have been fetched. Now accumulate the sprites.
 		ArrayList<TileAnimation<TextureHolder>> spriteStack = new ArrayList<>(16);
+		ArrayList<TileType> typeStack = new ArrayList<>(16);
 		//ArrayList<String> spriteNames = new ArrayList<>(16);
 		
 		// get overlap data, in case it's needed
@@ -87,6 +89,7 @@ public class RenderTile extends Tile {
 			// add connection sprite (or transition) for prev
 			TileAnimation<TextureHolder> animation = prev.getRenderer().getConnectionSprite(this, typesAtPositions);
 			spriteStack.add(animation);
+			typeStack.add(prev);
 			//spriteNames.add(animation.getKeyFrames()[0].name);
 			
 			// check for overlaps that are above prev AND below cur
@@ -101,6 +104,7 @@ public class RenderTile extends Tile {
 					ArrayList<TileAnimation<TextureHolder>> sprites = tileType.getRenderer().getOverlapSprites(typePositions.get(enumType));
 					for(TileAnimation<TextureHolder> sprite: sprites) {
 						spriteStack.add(sprite);
+						typeStack.add(tileType);
 						//spriteNames.add(sprite.getKeyFrames()[0].name);
 					}
 				});
@@ -120,6 +124,7 @@ public class RenderTile extends Tile {
 		
 		synchronized (spriteLock) {
 			this.spriteStack = spriteStack;
+			this.typeStack = typeStack;
 			// this.spriteNames = spriteNames;
 			//
 			// animationDeltas.keySet().retainAll(spriteNames);
