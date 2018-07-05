@@ -172,7 +172,7 @@ public abstract class Level implements Taggable<Level> {
 		int maxY = Math.min(getHeight(), (int) (rect.y + rect.height));
 		
 		for(int x = minX; x <= maxX; x++) {
-			for (int y = minY; y <= maxY; y++) {
+			for (int y = maxY; y >= minY; y--) {
 				overlappingTiles.add(new Point(x, y));
 			}
 		}

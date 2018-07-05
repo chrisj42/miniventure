@@ -59,17 +59,28 @@ public class ClientLevel extends Level {
 		// pass the offset vector to all objects being rendered.
 		
 		Array<WorldObject> objects = new Array<>();
-		objects.addAll(tiles); // tiles first
+		Array<WorldObject> surface = new Array<>();
+		surface.addAll(entities);
+		for(Tile t: tiles) {
+			if(t.getType().getRenderer().getZOffset() > 0) // permiable by player instead
+				surface.add(t);
+			else
+				objects.add(t);
+		}
+		
+		// first, ground tiles
+		// then, entities and surface tiles, higher y first
 		
 		// entities second
-		entities.sort((e1, e2) -> {
+		surface.sort((e1, e2) -> {
 			if(e1 instanceof Particle && !(e2 instanceof Particle))
 				return 1;
 			if(!(e1 instanceof Particle) && e2 instanceof Particle)
 				return -1;
 			return Float.compare(e2.getCenter().y, e1.getCenter().y);
 		});
-		objects.addAll(entities);
+		//objects.addAll(entities);
+		objects.addAll(surface);
 		
 		for(WorldObject obj: objects)
 			obj.render(batch, delta, posOffset);
