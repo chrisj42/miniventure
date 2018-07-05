@@ -1,6 +1,7 @@
 package miniventure.game.client;
 
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 import java.io.PrintWriter;
@@ -53,7 +54,8 @@ public class ClientCore extends ApplicationAdapter {
 		
 		JTextArea errorDisplay = new JTextArea(string.toString());
 		errorDisplay.setEditable(false);
-		JOptionPane.showMessageDialog(null, errorDisplay, "An error has occurred", JOptionPane.ERROR_MESSAGE);
+		JScrollPane errorPane = new JScrollPane(errorDisplay);
+		JOptionPane.showMessageDialog(null, errorPane, "An error has occurred", JOptionPane.ERROR_MESSAGE);
 	};
 	
 	public static final UncaughtExceptionHandler exceptionHandler = (thread, throwable) -> {
