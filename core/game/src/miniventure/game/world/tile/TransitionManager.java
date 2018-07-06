@@ -50,12 +50,12 @@ public class TransitionManager {
 	}
 	
 	
-	@Nullable
+	/*@Nullable
 	private TransitionAnimation getAnimationStyle(DataMap dataMap) {
 		TransitionMode mode = dataMap.getOrDefault(CacheTag.TransitionMode, TransitionMode.NONE);
 		String name = dataMap.get(CacheTag.TransitionName);
 		return getAnimationStyle(mode, name);
-	}
+	}*/
 	@Nullable
 	private TransitionAnimation getAnimationStyle(TransitionMode mode, String name) {
 		TransitionAnimation animation = null;
@@ -83,9 +83,11 @@ public class TransitionManager {
 			if(animation.isTriggerType(other)) {
 				DataMap dataMap = tile.getDataMap();
 				dataMap.put(CacheTag.TransitionName, animation.name);
-				dataMap.put(CacheTag.TransitionStart, tile.getWorld().getGameTime());
+				float start = tile.getWorld().getGameTime();
+				System.out.println("starting transition for "+tile.toLocString()+" at "+start);
+				dataMap.put(CacheTag.TransitionStart, start);
 				dataMap.put(CacheTag.TransitionMode, isEntering ? TransitionMode.ENTERING : TransitionMode.EXITING);
-				if(!isEntering && addNext)
+				if(addNext)
 					dataMap.put(CacheTag.TransitionTile, other.getEnumType());
 				else
 					dataMap.remove(CacheTag.TransitionTile);
@@ -106,10 +108,10 @@ public class TransitionManager {
 		if(animation == null)
 			throw new IllegalStateException("Cannot get transition sprite when not transitioning.");
 		
-		return animation.getAnimation(tileAnimations.get(tileType).get(name));
+		return animation.getAnimation(tileType, name, tileAnimations);
 	}
 	
-	public float getTimeRemaining(@NotNull Tile tile) {
+	/*public float getTimeRemaining(@NotNull Tile tile) {
 		if(!playingAnimation(tile)) return 0;
 		TransitionAnimation curTransition = getAnimationStyle(tile.getDataMap(tileType));
 		if(curTransition == null)
@@ -119,41 +121,53 @@ public class TransitionManager {
 		float now = tile.getWorld().getGameTime();
 		float duration = curTransition.time;
 		return duration - (now - start);
+	}*/
+	
+	void resetAnimation(@NotNull Tile tile) {
+		DataMap map = tile.getDataMap(tileType);
+		map.put(CacheTag.TransitionStart, tile.getWorld().getGameTime());
 	}
 	
-	private boolean isTransitionMode(@NotNull Tile tile, TransitionMode mode) { return tile.getDataMap(tileType).getOrDefault(CacheTag.TransitionMode, TransitionMode.NONE) == mode; }
+	private boolean isTransitionMode(@NotNull Tile tile, TransitionMode mode) {
+		DataMap map = tile.getDataMap(tileType);
+		return map.getOrDefault(CacheTag.TransitionMode, TransitionMode.NONE) == mode;
+	}
 	
 	public boolean playingAnimation(@NotNull Tile tile) { return !isTransitionMode(tile, TransitionMode.NONE); }
 	public boolean playingEntranceAnimation(@NotNull Tile tile) { return isTransitionMode(tile, TransitionMode.ENTERING); }
 	public boolean playingExitAnimation(@NotNull Tile tile) { return isTransitionMode(tile, TransitionMode.EXITING); }
 	
-	public void tryFinishAnimation(@NotNull Tile tile) {
-		if(!playingAnimation(tile)) return;
-		
+	public float tryFinishAnimation(@NotNull Tile tile) {
 		DataMap dataMap = tile.getDataMap(tileType);
+		
+		TransitionAnimation anim = getAnimationStyle(dataMap.get(CacheTag.TransitionMode), dataMap.get(CacheTag.TransitionName));
+		
+		if(anim == null)
+			return 0;
 		
 		float now = tile.getWorld().getGameTime();
 		float prev = dataMap.get(CacheTag.TransitionStart);
 		float timeElapsed = now - prev;
 		
-		TransitionMode mode = dataMap.get(CacheTag.TransitionMode);
-		TransitionAnimation anim = getAnimationStyle(dataMap);
-		
-		if(anim != null && timeElapsed > anim.getDuration()) {
-			dataMap.remove(CacheTag.TransitionMode);
-			dataMap.remove(CacheTag.TransitionStart);
-			dataMap.remove(CacheTag.TransitionName);
-			
-			// if entering, no action required. if removing, remove the current tile from the stack, specifying not to check for an exit animation. If removing, and there is data for a tile type, then add that tile type.
-			
-			if(mode == TransitionMode.EXITING) {
-				tile.breakTile(false);
-				TileTypeEnum nextType = dataMap.getOrDefault(CacheTag.TransitionTile, null);
-				if(nextType != null)
-					tile.addTile(nextType.getTileType(tile.getWorld()));
-			}
-			
-			dataMap.remove(CacheTag.TransitionTile);
+		if(timeElapsed < anim.getDuration()) {
+			System.out.println("attempted finish animation failed. time elapsed: "+timeElapsed+", total duration: "+anim.getDuration()+". now="+now+", prev="+prev);
+			return anim.getDuration() - timeElapsed;
 		}
+		
+		
+		TransitionMode mode = dataMap.remove(CacheTag.TransitionMode);
+		dataMap.remove(CacheTag.TransitionStart);
+		dataMap.remove(CacheTag.TransitionName);
+		TileTypeEnum nextType = dataMap.remove(CacheTag.TransitionTile);
+		
+		// if entering, no action required. if removing, remove the current tile from the stack, specifying not to check for an exit animation. If removing, and there is data for a tile type, then add that tile type.
+		
+		if(mode == TransitionMode.EXITING) {
+			tile.breakTile(false);
+			if(nextType != null)
+				tile.addTile(nextType.getTileType(tile.getWorld()));
+		}
+		
+		return 0;
 	}
 }

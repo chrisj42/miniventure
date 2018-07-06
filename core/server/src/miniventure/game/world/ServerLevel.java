@@ -11,6 +11,7 @@ import miniventure.game.util.MyUtils;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.AiType;
 import miniventure.game.world.entity.mob.MobAi;
+import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.mob.ServerMob;
 import miniventure.game.world.entity.particle.ItemEntity;
 import miniventure.game.world.levelgen.LevelGenerator;
@@ -18,6 +19,7 @@ import miniventure.game.world.tile.ServerTile;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -29,7 +31,8 @@ import org.jetbrains.annotations.Nullable;
 /** @noinspection EqualsAndHashcode*/
 public class ServerLevel extends Level {
 	
-	private static final float percentTilesUpdatedPerSecond = 0.02f; // this represents the percent of the total number of tiles in the map that are updated per second.
+	//private static final float TILE_REFRESH_INTERVAL = 500; // every this many seconds, all tiles within the below radius of any keep-alive is updated.
+	//private static final int TILE_REFRESH_RADIUS = 4; // the radius mentioned above.
 	
 	private final Set<Tile> newTileUpdates = Collections.synchronizedSet(new HashSet<>());
 	private final HashMap<Tile, Float> tileUpdateQueue = new HashMap<>();
@@ -58,6 +61,9 @@ public class ServerLevel extends Level {
 		}
 	}
 	
+	@Override
+	public void render(Rectangle renderSpace, SpriteBatch batch, float delta, Vector2 posOffset) {}
+	
 	public void onTileUpdate(ServerTile tile) {
 		ServerCore.getServer().broadcast(new TileUpdate(tile), this);
 		
@@ -68,35 +74,9 @@ public class ServerLevel extends Level {
 		}
 	}
 	
-	/*@Override
-	public void loadChunk(Chunk newChunk) {
-		super.loadChunk(newChunk);
-		// queue all contained tiles for update
-		for(Tile[] row: newChunk.getTiles())
-			for(Tile tile: row)
-				onTileUpdate((ServerTile) tile);
-	}*/
-	
+	//private float updateAllDelta = 0;
 	public void update(Entity[] entities, float delta) {
 		if(getLoadedChunkCount() == 0) return;
-		
-		// tiles updated
-		/*float tilesPerSecond = percentTilesUpdatedPerSecond * tileCount;
-		float secondsPerTile = 1 / tilesPerSecond;
-		timeCache += delta;
-		
-		int tilesToTick = (int) (tilesPerSecond * timeCache);
-		//System.out.println("server ticking "+tilesToTick+" tiles (tiles updated / sec: "+tilesPerSecond+", sec/tile: "+secondsPerTile+" time cache = "+timeCache+")");
-		timeCache -= tilesToTick * secondsPerTile; // subtract time that could be "used"; not all can be used each cycle due to integer math.
-		
-		Chunk[] chunks = getLoadedChunkArray();
-		for(int i = 0; i < tilesToTick; i++) {
-			Chunk chunk = chunks[MathUtils.random(chunks.length-1)];
-			int x = MathUtils.random(chunk.width-1);
-			int y = MathUtils.random(chunk.height-1);
-			Tile t = chunk.getTile(x, y);
-			if(t != null) t.tick();
-		}*/
 		
 		// update the tiles in the queue
 		
@@ -107,8 +87,38 @@ public class ServerLevel extends Level {
 			newTileUpdates.clear();
 		}
 		
+		/*if(tilesToUpdate.size() > 0) {
+			System.out.println("update method; tiles to update: " + tilesToUpdate.size());
+			System.out.println(tilesToUpdate);
+		}*/
+		
+		/*updateAllDelta += delta;
+		if(updateAllDelta >= TILE_REFRESH_INTERVAL) {
+			updateAllDelta %= TILE_REFRESH_INTERVAL;
+			for(WorldObject o: getWorld().getKeepAlives(this)) {
+				if(o instanceof Tile)
+					tilesToUpdate.add((Tile)o);
+				else {
+					Tile t = o.getClosestTile();
+					if(t != null)
+						tilesToUpdate.addAll(getAreaTiles(t.getLocation(), TILE_REFRESH_RADIUS, true));
+				}
+			}
+		}*/
+		
+		/*
+			What should happen when updating a tile:
+				- tile gets changed
+				- called through onTileUpdate
+				- 
+				
+			queued tiles... are those that said they could be updated, but it hasn't been long enough.
+		 */
+		
 		// go over the old queued tiles, and decrement their update timers; for any that reach zero, remove them from the waiting list, and add them to the tiles to update.
 		Iterator<Map.Entry<Tile, Float>> iter = tileUpdateQueue.entrySet().iterator();
+		// if(tileUpdateQueue.size() > 0)
+		// 	System.out.println("going through tile update queue... "+tileUpdateQueue.size()+" tiles");
 		while(iter.hasNext()) {
 			Map.Entry<Tile, Float> entry = iter.next();
 			if(tilesToUpdate.contains(entry.getKey())) {
@@ -219,7 +229,7 @@ public class ServerLevel extends Level {
 	public void spawnMob(ServerMob mob) {
 		// only spawns on loaded chunks
 		Array<Tile> tiles = new Array<>(false, getLoadedChunkCount() * Chunk.SIZE * Chunk.SIZE, Tile.class);
-		for(Chunk chunk: loadedChunks.get(Map::values))
+		for(Chunk chunk: loadedChunks.get(map -> map.values().toArray(new Chunk[map.size()])))
 			for(Tile[] chunkTiles: chunk.getTiles())
 				tiles.addAll(chunkTiles);
 		

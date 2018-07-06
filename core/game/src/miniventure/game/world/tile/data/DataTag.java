@@ -34,7 +34,6 @@ public abstract class DataTag<T> implements Comparable<DataTag<?>> {
 	private final ValueMonoFunction<String, T> valueParser;
 	
 	DataTag(ValueMonoFunction<T, String> valueWriter, ValueMonoFunction<String, T> valueParser) {
-		System.out.println("prepared data tag "+this);
 		this.valueWriter = valueWriter;
 		this.valueParser = valueParser;
 	}

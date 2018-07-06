@@ -35,7 +35,7 @@ public class SwimAnimation {
 	}
 	
 	public void drawSwimAnimation(@NotNull Batch batch, @NotNull Vector2 center, @NotNull WorldManager world) {
-		TextureHolder tex = swim.getKeyFrame(world);
+		TextureHolder tex = swim.getKeyFrame(world.getGameTime());
 		batch.draw(tex.texture, center.x-tex.width/2, center.y-tex.height/2);
 	}
 	

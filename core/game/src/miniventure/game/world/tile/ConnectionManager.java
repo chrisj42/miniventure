@@ -38,7 +38,7 @@ public class ConnectionManager {
 	@NotNull
 	public TileAnimation<TextureHolder> getConnectionSprite(EnumMap<RelPos, EnumSet<TileTypeEnum>> aroundTypes) {
 		if(connectingTypes.size() == 0)
-			return renderStyle.getAnimation(tileAnimations.get(type).get("00"));
+			return renderStyle.getAnimation(type, "00", tileAnimations);
 		
 		EnumMap<RelPos, Boolean> tileConnections = new EnumMap<>(RelPos.class);
 		
@@ -62,7 +62,7 @@ public class ConnectionManager {
 			}
 		}
 		
-		return overrides.getOrDefault(spriteIdx, renderStyle).getAnimation(tileAnimations.get(type).get((spriteIdx<10?"0":"")+spriteIdx));
+		return overrides.getOrDefault(spriteIdx, renderStyle).getAnimation(type, (spriteIdx<10?"0":"")+spriteIdx, tileAnimations);
 	}
 	
 }

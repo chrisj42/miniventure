@@ -1,11 +1,7 @@
 package miniventure.game.world.tile;
 
-import miniventure.game.world.WorldManager;
-
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.utils.Array;
-
-import org.jetbrains.annotations.NotNull;
 
 public class TileAnimation<T> extends Animation<T> {
 	
@@ -26,8 +22,10 @@ public class TileAnimation<T> extends Animation<T> {
 		if(sync) startTime = 0;
 	}
 	
-	public T getKeyFrame(@NotNull WorldManager world) {
-		float time = world.getGameTime();
+	boolean startedNonSync() { return startTime >= 0; }
+	
+	public T getKeyFrame(Tile tile) {
+		float time = tile.getWorld().getGameTime();
 		if(startTime < 0)
 			startTime = time;
 		

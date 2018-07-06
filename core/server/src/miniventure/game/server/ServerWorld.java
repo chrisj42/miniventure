@@ -7,6 +7,9 @@ import miniventure.game.GameProtocol.EntityAddition;
 import miniventure.game.GameProtocol.EntityRemoval;
 import miniventure.game.GameProtocol.WorldData;
 import miniventure.game.ProgressPrinter;
+import miniventure.game.item.ToolItem;
+import miniventure.game.item.ToolItem.Material;
+import miniventure.game.item.ToolType;
 import miniventure.game.world.*;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ServerEntity;
@@ -170,6 +173,7 @@ public class ServerWorld extends WorldManager {
 		
 		respawnPlayer(player);
 		
+		player.getInventory().addItem(new ToolItem(ToolType.Shovel, Material.Gem));
 		return player;
 	}
 	

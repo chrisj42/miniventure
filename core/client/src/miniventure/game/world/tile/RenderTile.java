@@ -23,6 +23,7 @@ public class RenderTile extends Tile {
 	
 	private ArrayList<TileAnimation<TextureHolder>> spriteStack;
 	private ArrayList<TileType> typeStack;
+	private boolean updateSprites;
 	//private ArrayList<String> spriteNames;
 	//private final HashMap<String, Float> animationDeltas = new HashMap<>(16);
 	
@@ -36,24 +37,27 @@ public class RenderTile extends Tile {
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
 		if(getLevel().getTile(x, y) == null) return; // cannot render if there are no tiles.
 		
+		// cannot render if there are no sprites.
+		if(spriteStack == null || updateSprites)
+			compileSprites();
+		
 		synchronized (spriteLock) {
-			if(spriteStack == null) return; // cannot render if there are no sprites.
-			
 			for(int i = 0; i < spriteStack.size(); i++) {
 				TileAnimation<TextureHolder> animation = spriteStack.get(i);
-				//String name = spriteNames.get(i);
-				//float timeSinceLastUpdate = animationDeltas.get(name) + delta;
-				batch.draw(animation.getKeyFrame(getWorld()).texture, (x - posOffset.x) * SIZE, (y - posOffset.y+typeStack.get(i).getPropertyOrDefault(PropertyTag.ZOffset, 0f)) * SIZE);
-				//animationDeltas.put(name, timeSinceLastUpdate);
+				//typeStack.get(i).getRenderer().transitionManager.tryFinishAnimation(this);
+				batch.draw(animation.getKeyFrame(this).texture, (x - posOffset.x) * SIZE, (y - posOffset.y + typeStack.get(i).getPropertyOrDefault(PropertyTag.ZOffset, 0f)) * SIZE);
 			}
 		}
 	}
 	
-	/** @noinspection ObjectAllocationInLoop*/
 	@Override
-	@SuppressWarnings("unchecked")
 	public void updateSprites() {
-		super.updateSprites();
+		updateSprites = true;
+	}
+	
+	/** @noinspection ObjectAllocationInLoop*/
+	@SuppressWarnings("unchecked")
+	private void compileSprites() {
 		TreeMap<TileTypeEnum, TileType> allTypes = new TreeMap<>(); // overlap
 		EnumMap<RelPos, EnumSet<TileTypeEnum>> typesAtPositions = new EnumMap<>(RelPos.class); // connection
 		EnumMap<TileTypeEnum, EnumSet<RelPos>> typePositions = new EnumMap<>(TileTypeEnum.class); // overlap
@@ -127,11 +131,7 @@ public class RenderTile extends Tile {
 		synchronized (spriteLock) {
 			this.spriteStack = spriteStack;
 			this.typeStack = typeStack;
-			// this.spriteNames = spriteNames;
-			//
-			// animationDeltas.keySet().retainAll(spriteNames);
-			// for(String name: spriteNames)
-			// 	animationDeltas.putIfAbsent(name, 0f);
+			updateSprites = false;
 		}
 	}
 }

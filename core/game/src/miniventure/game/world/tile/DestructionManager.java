@@ -43,7 +43,7 @@ public class DestructionManager {
 	}
 	// above, but custom drop
 	DestructionManager(@NotNull TileTypeEnum tileType, int totalHealth, PreferredTool preferredTool, ItemDrop... drops) {
-		this(tileType, totalHealth, new PreferredTool[] {preferredTool}, new DamageConditionCheck[0], drops);
+		this(tileType, totalHealth, preferredTool == null ? new PreferredTool[0] : new PreferredTool[] {preferredTool}, new DamageConditionCheck[0], drops);
 	}
 	
 	// for those that are one-shot, and have certain damage conditions, and drop a tile item

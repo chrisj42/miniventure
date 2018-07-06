@@ -24,7 +24,7 @@ import com.badlogic.gdx.utils.Array;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class Tile implements WorldObject {
+public abstract class Tile implements WorldObject {
 	
 	/*
 		So. The client, in terms of properties, doesn't have to worry about tile interaction properties. It always sends a request to the server when interactions should occur.
@@ -45,6 +45,7 @@ public class Tile implements WorldObject {
 	public static final int SIZE = 32;
 	
 	private TileStack tileStack;
+	private final Object dataLock = new Object();
 	
 	@NotNull private final Level level;
 	protected final int x, y;
@@ -57,8 +58,9 @@ public class Tile implements WorldObject {
 		this.y = y;
 		
 		tileStack = new TileStack(getWorld(), types);
-		for(int i = 0; i < types.length; i++)
+		for(int i = 0; i < types.length; i++) {
 			this.dataMaps.put(types[i], dataMaps == null ? types[i].getTileType(level.getWorld()).getInitialData() : dataMaps[i]);
+		}
 	}
 	
 	@NotNull @Override
@@ -78,7 +80,11 @@ public class Tile implements WorldObject {
 	
 	public DataMap getDataMap() { return getDataMap(getType().getEnumType()); }
 	public DataMap getDataMap(TileType tileType) { return getDataMap(tileType.getEnumType()); }
-	public DataMap getDataMap(TileTypeEnum tileType) { return dataMaps.get(tileType); }
+	public DataMap getDataMap(TileTypeEnum tileType) {
+		synchronized (dataLock) {
+			return dataMaps.get(tileType);
+		}
+	}
 	
 	
 	public boolean addTile(@NotNull TileType newType) { return addTile(newType, getType()); }
@@ -100,7 +106,7 @@ public class Tile implements WorldObject {
 	boolean breakTile(boolean checkForExitAnim) {
 		if(checkForExitAnim) {
 			TileType type = getType();
-			if(type.getRenderer().transitionManager.tryStartAnimation(this, tileStack.getLayerFromBottom(1, true), false))
+			if(type.getRenderer().transitionManager.tryStartAnimation(this, tileStack.getLayerFromTop(1, true), false))
 				// transitioning successful
 				return true; // don't actually break the tile yet (but still signal for update)
 		}
@@ -200,16 +206,9 @@ public class Tile implements WorldObject {
 		}
 	}
 	
-	@Override
-	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {}
-	
-	public void updateSprites() {}
+	public abstract void updateSprites();
 	
 	public float update() {
-		if(getType().getRenderer().transitionManager.playingExitAnimation(this))
-			// playing exit anim; no more updates
-			return 0;
-		
 		float min = 0;
 		for(TileType type: getTypeStack().getTypes()) {
 			float wait = type.update(this);
@@ -290,16 +289,18 @@ public class Tile implements WorldObject {
 			this.data = data;
 		}
 		public TileData(Tile tile) {
-			TileTypeEnum[] tileTypes = tile.getTypeStack().getEnumTypes(true);
-			typeOrdinals = new int[tileTypes.length];
-			for(int i = 0; i < tileTypes.length; i++) {
-				TileTypeEnum type = tileTypes[i];
-				typeOrdinals[i] = type.ordinal();
+			synchronized (tile.dataLock) {
+				TileTypeEnum[] tileTypes = tile.getTypeStack().getEnumTypes(true);
+				typeOrdinals = new int[tileTypes.length];
+				for(int i = 0; i < tileTypes.length; i++) {
+					TileTypeEnum type = tileTypes[i];
+					typeOrdinals[i] = type.ordinal();
+				}
+				
+				this.data = new String[tileTypes.length];
+				for(int i = 0; i < data.length; i++)
+					data[i] = tile.dataMaps.get(tileTypes[i]).serialize();
 			}
-			
-			this.data = new String[tileTypes.length];
-			for(int i = 0; i < data.length; i++)
-				data[i] = tile.dataMaps.get(tileTypes[i]).serialize();
 		}
 		
 		public TileTypeEnum[] getTypes() { return getTypes(typeOrdinals); }
@@ -321,11 +322,14 @@ public class Tile implements WorldObject {
 		
 		public void apply(Tile tile) {
 			TileTypeEnum[] types = getTypes();
+			DataMap[] maps = getDataMaps();
 			
-			tile.tileStack = new TileStack(tile.getWorld(), types);
-			tile.dataMaps.clear();
-			for(int i = 0; i < data.length; i++)
-				tile.dataMaps.put(types[i], DataMap.deserialize(data[i], CacheTag.class));
+			synchronized (tile.dataLock) {
+				tile.tileStack = new TileStack(tile.getWorld(), types);
+				tile.dataMaps.clear();
+				for(int i = 0; i < data.length; i++)
+					tile.dataMaps.put(types[i], maps[i]);
+			}
 		}
 	}
 	

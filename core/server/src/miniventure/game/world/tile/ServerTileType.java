@@ -47,4 +47,7 @@ public class ServerTileType extends TileType {
 	public boolean touched(@NotNull Tile tile, Entity entity, boolean initial) {
 		return model.touched(tile, entity, initial);
 	}
+	
+	@Override
+	public String toString() { return model.toString()+"(Server)"; }
 }

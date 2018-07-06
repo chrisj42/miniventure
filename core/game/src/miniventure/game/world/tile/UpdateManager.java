@@ -34,42 +34,34 @@ public class UpdateManager {
 	}
 	
 	public float update(@NotNull Tile tile, float delta) {
+		// if playing an exit animation, then don't update the tile.
+		TransitionManager man = tileType.getTileType(tile.getWorld()).getRenderer().transitionManager;
+		if(man.playingExitAnimation(tile))
+			return man.tryFinishAnimation(tile);
+		
 		float minWait = 0;
 		DataMap dataMap = tile.getDataMap(tileType);
 		float[] deltas = dataMap.getOrDefaultAndPut(CacheTag.UpdateTimers, new float[actions.length]);
 		String[] datas = dataMap.getOrDefaultAndPut(CacheTag.UpdateActionCaches, new String[actions.length]);
 		for(int i = 0; i < actions.length; i++) {
-			float wait;
-			if(!actions[i].canUpdate(tile)) {
-				wait = 0f;
-			}
-			else if(deltas[i] == 0f) {
-				wait = actions[i].getDelta(tile);
-			}
+			if(!actions[i].canUpdate(tile))
+				deltas[i] = 0;
+			else if(deltas[i] == 0)
+				deltas[i] = actions[i].getDelta(tile);
 			else {
 				deltas[i] -= delta;
 				if(deltas[i] <= 0) {
 					UpdateAction action = actions[i];
 					final int idx = i;
 					action.update(tile, () -> datas[idx], value -> datas[idx] = value);
-					wait = action.getDelta(tile);
-				} else wait = 0;
-			}
-			deltas[i] = wait;
-			if(wait > 0) {
-				if(minWait == 0)
-					minWait = wait;
-				else
-					minWait = Math.min(minWait, wait);
+					deltas[i] = 0;
+				}
 			}
 			
-		}
-		
-		TransitionManager man = tileType.getTileType(tile.getWorld()).getRenderer().transitionManager;
-		if(man.playingAnimation(tile)) {
-			float wait = man.getTimeRemaining(tile);
-			if(wait > 0)
-				minWait = Math.min(minWait, wait);
+			if(minWait == 0)
+				minWait = deltas[i];
+			else if(deltas[i] != 0)
+				minWait = Math.min(minWait, deltas[i]);
 		}
 		
 		return minWait;

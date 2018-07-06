@@ -2,6 +2,10 @@ package miniventure.game.world.tile;
 
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.TransitionManager.TransitionMode;
+
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector2;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -32,13 +36,24 @@ public class ServerTile extends Tile {
 		return success;
 	}
 	
-	@Override
+	@Override public void render(SpriteBatch batch, float delta, Vector2 posOffset) {}
+	@Override public void updateSprites() {}
+	
+	/*@Override
 	public float update() {
 		float nextUpdate = super.update();
-		getType().getRenderer().transitionManager.tryFinishAnimation(this);
-		updateSprites();
-		return nextUpdate;
-	}
+		
+		if(getType().getRenderer().transitionManager.playingExitAnimation(this)) {
+			float transRemain = getType().getRenderer().transitionManager.tryFinishAnimation(this);
+			if(nextUpdate == 0)
+				nextUpdate = transRemain;
+			else if(transRemain != 0)
+				nextUpdate = Math.min(transRemain, nextUpdate);
+			
+			if(transRemain == 0) // animation finished!
+				
+		}
+	}*/
 	
 	@Override
 	public boolean equals(Object other) { return other instanceof ServerTile && super.equals(other); }

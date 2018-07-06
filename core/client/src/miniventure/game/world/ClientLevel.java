@@ -44,6 +44,7 @@ public class ClientLevel extends Level {
 		super.pruneLoadedChunks();
 	}
 	
+	@Override
 	public void render(Rectangle renderSpace, SpriteBatch batch, float delta, Vector2 posOffset) {
 		applyTileUpdates();
 		

@@ -73,7 +73,7 @@ public class OverlapManager {
 		for(Integer idx: indexes) {
 			RenderStyle renderStyle = overrides.getOrDefault(idx, this.renderStyle);
 			if(renderStyle != null)
-				animations.add(renderStyle.getAnimation(tileAnimations.get(type).get((idx < 10 ? "0" : "") + idx)));
+				animations.add(renderStyle.getAnimation(type, (idx<10?"0":"")+idx, tileAnimations));
 		}
 		
 		return animations;

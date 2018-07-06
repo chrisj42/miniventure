@@ -17,4 +17,9 @@ public class ClientTile extends RenderTile {
 	
 	@NotNull @Override
 	public ClientLevel getLevel() { return level; }
+	
+	@Override public boolean addTile(@NotNull TileType newType) { return false; }
+	@Override boolean breakTile() { return false; }
+	@Override boolean breakTile(boolean checkForExitAnim) { return false; }
+	@Override boolean replaceTile(@NotNull TileType newType) { return false; }
 }

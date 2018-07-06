@@ -120,8 +120,7 @@ public abstract class Level implements Taggable<Level> {
 		}
 	}
 	
-	public void render(Rectangle renderSpace, SpriteBatch batch, float delta, Vector2 posOffset) {
-	}
+	public abstract void render(Rectangle renderSpace, SpriteBatch batch, float delta, Vector2 posOffset);
 	
 	public void addEntity(Entity e, Vector2 pos, boolean center) { addEntity(e, pos.x, pos.y, center); }
 	public void addEntity(Entity e, float x, float y, boolean center) {

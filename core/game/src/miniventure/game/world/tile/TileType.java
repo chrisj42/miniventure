@@ -2,6 +2,7 @@ package miniventure.game.world.tile;
 
 import miniventure.game.item.Item;
 import miniventure.game.item.ToolType;
+import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.ValueMonoFunction;
 import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
@@ -58,7 +59,7 @@ public class TileType {
 			),
 			
 			new UpdateManager(type,
-				new SpreadUpdateAction(type, FloatFetcher.random(2, 10, 20), .9f,
+				new SpreadUpdateAction(type, FloatFetcher.random(5, 30, 60), .95f,
 					(newType, tile) -> tile.addTile(newType),
 					DIRT
 				)
@@ -261,4 +262,7 @@ public class TileType {
 	}
 	@Override
 	public final int hashCode() { return enumType.hashCode(); }
+	
+	@Override
+	public String toString() { return MyUtils.toTitleCase(enumType.name()); }
 }

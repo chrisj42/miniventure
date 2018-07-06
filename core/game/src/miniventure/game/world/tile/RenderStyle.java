@@ -1,19 +1,25 @@
 package miniventure.game.world.tile;
 
+import java.util.EnumMap;
+import java.util.HashMap;
+
 import miniventure.game.texture.TextureHolder;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 import com.badlogic.gdx.utils.Array;
+
+import org.jetbrains.annotations.NotNull;
 
 public class RenderStyle {
 	
 	static final RenderStyle SINGLE_FRAME = new RenderStyle(PlayMode.NORMAL, 0);
 	
-	private final PlayMode playMode;
+	final PlayMode playMode;
 	final float time;
 	private final boolean isFrameTime;
 	
-	private final boolean sync;
+	final boolean sync;
 	
 	RenderStyle(float frameTime) { this(false, frameTime, true); }
 	RenderStyle(boolean sync, float frameTime) { this(sync, frameTime, true); }
@@ -29,7 +35,10 @@ public class RenderStyle {
 		this.isFrameTime = isFrameTime;
 	}
 	
-	TileAnimation<TextureHolder> getAnimation(Array<TextureHolder> frames) {
+	TileAnimation<TextureHolder> getAnimation(@NotNull TileTypeEnum tileType, String name, EnumMap<TileTypeEnum, HashMap<String, Array<TextureHolder>>> map) {
+		return getAnimation(tileType, map.get(tileType).get(name));
+	}
+	TileAnimation<TextureHolder> getAnimation(@NotNull TileTypeEnum tileType, Array<TextureHolder> frames) {
 		if(time == 0)
 			return new TileAnimation<>(sync, 1, frames.get(0));
 		else
