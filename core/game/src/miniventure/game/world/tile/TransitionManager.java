@@ -84,7 +84,6 @@ public class TransitionManager {
 				DataMap dataMap = tile.getDataMap();
 				dataMap.put(CacheTag.TransitionName, animation.name);
 				float start = tile.getWorld().getGameTime();
-				System.out.println("starting transition for "+tile.toLocString()+" at "+start);
 				dataMap.put(CacheTag.TransitionStart, start);
 				dataMap.put(CacheTag.TransitionMode, isEntering ? TransitionMode.ENTERING : TransitionMode.EXITING);
 				if(addNext)
@@ -149,10 +148,8 @@ public class TransitionManager {
 		float prev = dataMap.get(CacheTag.TransitionStart);
 		float timeElapsed = now - prev;
 		
-		if(timeElapsed < anim.getDuration()) {
-			System.out.println("attempted finish animation failed. time elapsed: "+timeElapsed+", total duration: "+anim.getDuration()+". now="+now+", prev="+prev);
+		if(timeElapsed < anim.getDuration())
 			return anim.getDuration() - timeElapsed;
-		}
 		
 		
 		TransitionMode mode = dataMap.remove(CacheTag.TransitionMode);

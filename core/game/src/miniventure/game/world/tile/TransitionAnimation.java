@@ -20,7 +20,6 @@ public class TransitionAnimation extends RenderStyle {
 	public TransitionAnimation(String name, float duration, PlayMode playMode, TileTypeEnum... triggerTypes) {
 		super(playMode, duration, false);
 		
-		System.out.println("made transition animation: "+name+", duration = "+time);
 		this.name = name;
 		this.triggerTypes = MyUtils.enumSet(triggerTypes);
 		// if triggertypes is empty, then anything triggers it
@@ -44,12 +43,8 @@ public class TransitionAnimation extends RenderStyle {
 					if(!startedNonSync())
 						man.resetAnimation(tile);
 					float time = man.tryFinishAnimation(tile);
-					if(!man.playingAnimation(tile)) {
-						System.out.println("transition animation for type "+tileType+" on tile "+tile.toLocString()+" has just finished. Updating sprites.");
+					if(!man.playingAnimation(tile))
 						tile.updateSprites();
-					}
-					else
-						System.out.println("transition animation for type "+tileType+" on tile "+tile.toLocString()+" is still running. Time remaining: "+time);
 				}
 				return super.getKeyFrame(tile);
 			}
