@@ -18,7 +18,7 @@ public class TreeTile extends TileType {
 			
 			new DestructionManager(enumType, 24,
 				new PreferredTool(ToolType.Axe, 2),
-				new ItemDrop(ResourceItem.Log.get()/*, 1, 2, 0.25f*/),
+				new ItemDrop(ResourceItem.Log.get(), 1, 2),
 				new ItemDrop(FoodItem.Apple.get(), 0, 2, 0.2f)
 			),
 			

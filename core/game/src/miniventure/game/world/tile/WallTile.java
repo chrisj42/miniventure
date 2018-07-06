@@ -11,7 +11,7 @@ public class WallTile extends TileType {
 		super(enumType, false,
 			new DataMap(PropertyTag.ZOffset.as(0.4f)),
 			new DestructionManager(enumType, health, prefTool),
-			new TileTypeRenderer(enumType, true)
+			new TileTypeRenderer(enumType, false)
 		);
 	}
 }
