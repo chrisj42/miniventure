@@ -1,5 +1,6 @@
 package miniventure.game.world;
 
+import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
 
 import com.badlogic.gdx.graphics.Color;
@@ -21,7 +22,7 @@ public enum TimeOfDay {
 	Dawn(24+7, 1f, new Color(0.8f, 0.4f, 0.45f, 0.7f));
 	
 	public static final TimeOfDay[] values = TimeOfDay.values();
-	public static final String[] names = MyUtils.mapArray(values, String.class, TimeOfDay::name);
+	public static final String[] names = ArrayUtils.mapArray(values, String.class, TimeOfDay::name);
 	
 	public static final float SECONDS_IN_DAY = 60*24 / 3f; // in seconds; four in-game minutes pass for every real-time second. 
 	private static final float REL_START_TIME_OFFSET = 7f; // Essentially, this is when the day starts. this determines when dawn is; this is subtracted from the end time of dawn, and the rest.

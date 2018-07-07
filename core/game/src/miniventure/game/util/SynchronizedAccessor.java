@@ -14,6 +14,7 @@ public class SynchronizedAccessor<T> {
 	
 	
 	private final T obj;
+	//private final Object lock = new Object();
 	
 	public SynchronizedAccessor(T obj) {
 		this.obj = obj;

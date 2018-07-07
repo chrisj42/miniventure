@@ -1,28 +1,53 @@
 package miniventure.game.world.tile;
 
+import java.util.EnumSet;
+
+import miniventure.game.texture.TextureHolder;
+import miniventure.game.util.MyUtils;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
+
+import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
+import com.badlogic.gdx.utils.Array;
+
 import org.jetbrains.annotations.NotNull;
 
-class TransitionAnimation {
+public class TransitionAnimation extends RenderStyle {
 	
-	private final String name;
-	private final boolean isEntrance;
-	private final @NotNull TileType[] reqTiles;
-	private final float frameRate;
-	private float animationTime;
+	final String name;
+	private final EnumSet<TileTypeEnum> triggerTypes;
 	
-	TransitionAnimation(String spriteNameKey, boolean isEntrance, float frameDuration, @NotNull TileType... reqTiles) {
-		this.isEntrance = isEntrance;
-		this.frameRate = frameDuration;
-		this.reqTiles = reqTiles;
-		this.name = spriteNameKey;
+	public TransitionAnimation(String name, float duration, TileTypeEnum... triggerTypes) { this(name, duration, PlayMode.NORMAL, triggerTypes); }
+	public TransitionAnimation(String name, float duration, PlayMode playMode, TileTypeEnum... triggerTypes) {
+		super(playMode, duration, false);
+		
+		this.name = name;
+		this.triggerTypes = MyUtils.enumSet(triggerTypes);
+		// if triggertypes is empty, then anything triggers it
 	}
 	
-	String getName() { return name; }
-	float getFrameRate() { return frameRate; }
-	boolean isEntrance() { return isEntrance; }
-	float getAnimationTime() { return animationTime; }
+	public boolean isTriggerType(TileType type) { return isTriggerType(type.getEnumType()); }
+	public boolean isTriggerType(TileTypeEnum type) {
+		return triggerTypes.size() == 0 || triggerTypes.contains(type);
+	}
 	
-	@NotNull TileType[] getReqTiles() { return reqTiles; }
+	public float getDuration() { return time; }
 	
-	void setAnimationTime(int numFrames) { animationTime = getFrameRate() * numFrames; }
+	@Override
+	TileAnimation<TextureHolder> getAnimation(@NotNull TileTypeEnum tileType, Array<TextureHolder> frames) {
+		return new TileAnimation<TextureHolder>(sync, time/frames.size, frames, playMode) {
+			@Override
+			public TextureHolder getKeyFrame(Tile tile) {
+				// this is for entrance animations on the client, as a way to stop them.
+				TransitionManager man = tile.getType().getRenderer().transitionManager;
+				if(man.playingAnimation(tile)) {
+					if(!startedNonSync())
+						man.resetAnimation(tile);
+					float time = man.tryFinishAnimation(tile);
+					if(!man.playingAnimation(tile))
+						tile.updateSprites();
+				}
+				return super.getKeyFrame(tile);
+			}
+		};
+	}
 }

@@ -1,240 +1,268 @@
 package miniventure.game.world.tile;
 
-import java.util.Arrays;
-import java.util.HashMap;
-
-import miniventure.game.item.FoodItem;
-import miniventure.game.item.ResourceItem;
-import miniventure.game.item.TileItem;
+import miniventure.game.item.Item;
 import miniventure.game.item.ToolType;
 import miniventure.game.util.MyUtils;
-import miniventure.game.util.function.MapFunction;
-import miniventure.game.world.ItemDrop;
-import miniventure.game.world.tile.AnimationProperty.AnimationType;
-import miniventure.game.world.tile.DestructibleProperty.DestructibleBuilder;
-import miniventure.game.world.tile.DestructibleProperty.PreferredTool;
-import miniventure.game.world.tile.DestructibleProperty.RequiredTool;
+import miniventure.game.util.function.ValueMonoFunction;
+import miniventure.game.world.WorldManager;
+import miniventure.game.world.WorldObject;
+import miniventure.game.world.entity.Entity;
+import miniventure.game.world.entity.mob.Player;
+import miniventure.game.world.entity.particle.Particle;
+import miniventure.game.world.tile.DestructionManager.PreferredTool;
+import miniventure.game.world.tile.DestructionManager.RequiredTool;
+import miniventure.game.world.tile.SpreadUpdateAction.FloatFetcher;
+import miniventure.game.world.tile.data.CacheTag;
+import miniventure.game.world.tile.data.DataMap;
+import miniventure.game.world.tile.data.PropertyTag;
 
-import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import static miniventure.game.world.tile.TilePropertyType.*;
-
-public enum TileType {
+public class TileType {
 	
-	HOLE((tileType, map) -> {
-		map.put(Solid, SolidProperty.get(tileType, true));
-		map.put(Connect, new ConnectionProperty(tileType, true, TileType.valueOf("WATER")));
-	}),
+	public enum TileTypeEnum {
+		
+		HOLE(type -> new TileType(type, true,
+			new DataMap(PropertyTag.Swim.as(new SwimAnimation(type, 0.75f))),
+			
+			DestructionManager.INDESTRUCTIBLE(type),
+			
+			new TileTypeRenderer(type, true,
+				new ConnectionManager(type, RenderStyle.SINGLE_FRAME, type, TileTypeEnum.valueOf("WATER"))
+			)
+		)),
+		
+		DIRT(type -> new TileType(type, true,
+			new DestructionManager(type, new RequiredTool(ToolType.Shovel)),
+			
+			new TileTypeRenderer(type, true)
+		)),
+		
+		SAND(type -> new TileType(type, true,
+			new DestructionManager(type, new RequiredTool(ToolType.Shovel)),
+			
+			new TileTypeRenderer(type, true,
+				new OverlapManager(type, RenderStyle.SINGLE_FRAME)
+			))
+		),
+		
+		GRASS(type -> new TileType(type, true, new DataMap(),
+			new DestructionManager.DestructibleBuilder(type, 1, false)
+				.require(new RequiredTool(ToolType.Shovel))
+				.make(),
+			
+			new TileTypeRenderer(type, true,
+				new OverlapManager(type, RenderStyle.SINGLE_FRAME)
+			),
+			
+			new UpdateManager(type,
+				new SpreadUpdateAction(type, FloatFetcher.random(5, 30, 60), .95f,
+					(newType, tile) -> tile.addTile(newType),
+					DIRT
+				)
+			)
+		)),
+		
+		SNOW(type -> new TileType(type, true,
+			new DestructionManager(type, new RequiredTool(ToolType.Shovel)),
+			
+			new TileTypeRenderer(type, true,
+				new OverlapManager(type, RenderStyle.SINGLE_FRAME)
+			)
+		)),
+		
+		WATER(type -> new TileType(type, true,
+			new DataMap(PropertyTag.SpeedRatio.as(0.6f))
+			.add(PropertyTag.Swim.as(new SwimAnimation(type))),
+			
+			DestructionManager.INDESTRUCTIBLE(type),
+			
+			new TileTypeRenderer(type, true,
+				new ConnectionManager(type, new RenderStyle(PlayMode.LOOP_RANDOM, 0.2f)),
+				new OverlapManager(type, new RenderStyle(true, 1/24f))
+			),
+			new UpdateManager(type,
+				new SpreadUpdateAction(type, 0.33f, (newType, tile) -> tile.addTile(newType), HOLE)
+			)
+		)),
+		
+		STONE(type -> new TileType(type, false,
+			new DestructionManager(type, 40,
+				new PreferredTool(ToolType.Pickaxe, 5)
+			),
+			
+			new TileTypeRenderer(type, true)
+		)),
+		
+		STONE_FLOOR(type -> new FloorTile(type, ToolType.Pickaxe)),
+		
+		WOOD_WALL(type -> new WallTile(type, 20, new PreferredTool(ToolType.Axe, 3))),
+		
+		STONE_WALL(type -> new WallTile(type, 40, new PreferredTool(ToolType.Pickaxe, 5))),
+		
+		DOOR_OPEN(DoorTile::getOpenDoor),
+		
+		DOOR_CLOSED(DoorTile::getClosedDoor),
+		
+		TORCH(type -> new TileType(type, true,
+			new DataMap(PropertyTag.LightRadius.as(2f)),
+			
+			new DestructionManager(type),
+			
+			new TileTypeRenderer(type, false,
+				new ConnectionManager(type, new RenderStyle(1/12f)),
+				OverlapManager.NONE(type),
+				new TransitionManager(type)
+					.addEntranceAnimations(new TransitionAnimation("enter", 3/12f))
+			)
+		)),
+		
+		CACTUS(type -> new TileType(type, false,
+			new DestructionManager(type, 12, null),
+			
+			new TileTypeRenderer(type, false)
+			
+		) {
+			@Override
+			public boolean touched(@NotNull Tile tile, Entity entity, boolean initial) {
+				return entity.attackedBy(tile, null, 1);
+			}
+		}),
+		
+		TREE_CARTOON(TreeTile::new),
+		TREE_DARK(TreeTile::new),
+		TREE_PINE(TreeTile::new),
+		TREE_POOF(TreeTile::new);
+		
+		
+		
+		@NotNull private final ValueMonoFunction<TileTypeEnum, TileType> tileTypeFetcher;
+		private TileType tileType;
+		
+		TileTypeEnum(@NotNull ValueMonoFunction<TileTypeEnum, TileType> typeFetcher) {
+			tileTypeFetcher = typeFetcher;
+		}
+		
+		private static final TileTypeEnum[] values = values();
+		
+		public static TileTypeEnum values(int ordinal) { return values[ordinal]; }
+		
+		/** @noinspection StaticMethodReferencedViaSubclass*/
+		public static void init() {
+			CacheTag.init();
+			PropertyTag.init();
+		}
+		
+		public TileType getTileType(@NotNull WorldManager world) {
+			if(tileType == null)
+				tileType = tileTypeFetcher.get(this);
+			return world.getTileTypeFetcher().mapValue(this, tileType);
+		}
+	}
 	
-	DIRT((tileType, map) -> {
-		map.put(Solid, SolidProperty.get(tileType, false));
-		map.put(Attack, new DestructibleProperty(tileType, new RequiredTool(ToolType.Shovel)));
-	}),
-	
-	SAND((tileType, map) -> {
-		map.put(Solid, SolidProperty.get(tileType, false));
-		map.put(Attack, new DestructibleProperty(tileType, new RequiredTool(ToolType.Shovel)));
-		map.put(Overlap, new OverlapProperty(tileType, true));
-	}),
-	
-	GRASS((tileType, map) -> {
-		map.put(Solid, SolidProperty.get(tileType, false));
-		map.put(Attack, new DestructibleBuilder(tileType, 1, false).require(new RequiredTool(ToolType.Shovel)).make());
-		map.put(Overlap, new OverlapProperty(tileType, true));
-		map.put(Tick, new SpreadTickProperty(tileType, (newType, tile) -> tile.addTile(newType), DIRT));
-	}),
-	
-	WATER((tileType, map) -> {
-		map.put(Render, new AnimationProperty(tileType, true, AnimationType.RANDOM, 0.2f, AnimationType.SEQUENCE, 1/24f));
-		map.put(Update, new SpreadUpdateProperty(tileType, 0.33f, (type, tile) -> tile.addTile(type), HOLE));
-		map.put(Overlap, new OverlapProperty(tileType, true));
-	}),
-	
-	STONE((tileType, map) -> {
-		map.put(Solid, SolidProperty.get(tileType, true));
-		map.put(Attack, new DestructibleProperty(tileType, 40, new PreferredTool(ToolType.Pickaxe, 5)));
-	}),
-	
-	STONE_FLOOR((tileType, map) -> {
-		map.put(Solid, SolidProperty.get(tileType, false));
-		map.put(Attack, new DestructibleProperty(tileType, new RequiredTool(ToolType.Pickaxe)));
-		map.put(Connect, new ConnectionProperty(tileType, true));
-	}),
-	
-	WOOD_WALL(((tileType, map) -> {
-		map.put(Solid, SolidProperty.get(tileType, true));
-		map.put(Attack, new DestructibleProperty(tileType, new RequiredTool(ToolType.Axe)));
-	})),
-	
-	STONE_WALL(((tileType, map) -> {
-		map.put(Solid, SolidProperty.get(tileType, true));
-		map.put(Attack, new DestructibleProperty(tileType, new RequiredTool(ToolType.Pickaxe)));
-	})),
-	
-	DOOR_CLOSED((tileType, map) -> {
-		map.put(Solid, SolidProperty.get(tileType, true));
-		map.put(Attack, new DestructibleProperty(tileType, new RequiredTool(ToolType.Axe)));
-		map.put(Render, new AnimationProperty(tileType, true, AnimationType.SINGLE_FRAME));
-		map.put(Interact, new InteractableProperty(tileType, (p, i, t) -> {
-			t.replaceTile(TileType.valueOf("DOOR_OPEN"));
-			return true;
-		}));
-	}),
-	
-	DOOR_OPEN((tileType, map) -> {
-		map.put(Solid, SolidProperty.get(tileType, false));
-		map.put(Render, new AnimationProperty(tileType, false, AnimationType.SINGLE_FRAME));
-		map.put(Transition, new TransitionProperty(tileType, // TODO add sound effects for transitions
-			new TransitionAnimation("open", true, 1/24f, DOOR_CLOSED),
-			new TransitionAnimation("close", false, 1/24f, DOOR_CLOSED)
-		));
-		map.put(Interact, new InteractableProperty(tileType, (p, i, t) -> {
-			t.replaceTile(DOOR_CLOSED);
-			return true;
-		}));
-		map.put(Attack, new DestructibleProperty(tileType, new ItemDrop(TileItem.get(TileType.DOOR_CLOSED)), new RequiredTool(ToolType.Axe)));
-	}),
-	
-	TORCH((tileType, map) -> {
-		map.put(Attack, new DestructibleProperty(tileType));
-		map.put(Light, new LightProperty(tileType, 2));
-		map.put(Render, new AnimationProperty(tileType, false, AnimationType.SEQUENCE, 1/12f));
-		map.put(Transition, new TransitionProperty(tileType, new TransitionAnimation("enter", true, 1/12f)));
-	}),
-	
-	CACTUS((tileType, map) -> {
-		map.put(Solid, SolidProperty.get(tileType, true));
-		map.put(Attack, new DestructibleProperty(tileType, 12, null));
-		map.put(Render, new AnimationProperty(tileType, false, AnimationType.SINGLE_FRAME));
-		map.put(Touch, new TouchListener(tileType, (e, t, initial) -> e.attackedBy(t, null, 1)));
-	}),
-	
-	TREE_CARTOON((tileType, map) -> {
-		map.put(Solid, SolidProperty.get(tileType, true));
-		map.put(Attack, new DestructibleProperty(tileType, 24, new PreferredTool(ToolType.Axe, 2), new ItemDrop(ResourceItem.Log.get()/*, 1, 2, 0.25f*/), new ItemDrop(FoodItem.Apple.get(), 0, 2, 0.2f)));
-		map.put(Render, new AnimationProperty(tileType, false, AnimationType.SINGLE_FRAME));
-		map.put(Connect, new ConnectionProperty(tileType, true));
-	}),
-	
-	TREE_DARK((tileType, map) -> {
-		map.put(Solid, SolidProperty.get(tileType, true));
-		map.put(Attack, new DestructibleProperty(tileType, 24, new PreferredTool(ToolType.Axe, 2), new ItemDrop(ResourceItem.Log.get()/*, 1, 2, 0.25f*/), new ItemDrop(FoodItem.Apple.get(), 0, 2, 0.2f)));
-		map.put(Render, new AnimationProperty(tileType, false, AnimationType.SINGLE_FRAME));
-		map.put(Connect, new ConnectionProperty(tileType, true));
-	}),
-	
-	TREE_PINE((tileType, map) -> {
-		map.put(Solid, SolidProperty.get(tileType, true));
-		map.put(Attack, new DestructibleProperty(tileType, 24, new PreferredTool(ToolType.Axe, 2), new ItemDrop(ResourceItem.Log.get()/*, 1, 2, 0.25f*/), new ItemDrop(FoodItem.Apple.get(), 0, 2, 0.2f)));
-		map.put(Render, new AnimationProperty(tileType, false, AnimationType.SINGLE_FRAME));
-		map.put(Connect, new ConnectionProperty(tileType, true));
-	}),
-	
-	TREE_POOF((tileType, map) -> {
-		map.put(Solid, SolidProperty.get(tileType, true));
-		map.put(Attack, new DestructibleProperty(tileType, 24, new PreferredTool(ToolType.Axe, 2), new ItemDrop(ResourceItem.Log.get()/*, 1, 2, 0.25f*/), new ItemDrop(FoodItem.Apple.get(), 0, 2, 0.2f)));
-		map.put(Render, new AnimationProperty(tileType, false, AnimationType.SINGLE_FRAME));
-		map.put(Connect, new ConnectionProperty(tileType, true));
-	});
-	
-	/*LAVA(() -> new TilePropertyInstance[] {
-		map.put(Touch, new TouchListener(tileType, (e, t) -> e.attackedBy(t, null, 5));
-		map.put(Render, new AnimationProperty.RandomFrame(0.1f);
-	});*/
+	private final TileTypeEnum enumType;
+	final DataMap propertyMap;
+	final boolean walkable;
+	final DestructionManager destructionManager;
+	final TileTypeRenderer renderer;
+	final UpdateManager updateManager;
 	
 	/*
-		Others:
-		wheat, farmland, door, floor, wall, stairs?, sapling, torch, ore, ice, cloud?,
-		laser source, laser, mirror, laser receiver.
+		Renderer
+			- opaque?
+			- connection behavior - 
+			- overlap behavior
+			- transitions - entrance/exit; complete with triggers.
+			
+	 */
+	
+	/*TileType(@NotNull TileTypeEnum enumType, DestructionManager destructionManager, TileTypeRenderer renderer) {
+		this(enumType, false, destructionManager, renderer);
+	}*/
+	protected TileType(@NotNull TileTypeEnum enumType, boolean walkable, DestructionManager destructionManager, TileTypeRenderer renderer) {
+		this(enumType, walkable, new DataMap(), destructionManager, renderer);
+	}
+	protected TileType(@NotNull TileTypeEnum enumType, boolean walkable, DataMap propertyMap, DestructionManager destructionManager, TileTypeRenderer renderer) {
+		this(enumType, walkable, propertyMap, destructionManager, renderer, new UpdateManager(enumType));
+	}
+	protected TileType(@NotNull TileTypeEnum enumType, boolean walkable, DataMap propertyMap, DestructionManager destructionManager, TileTypeRenderer renderer, UpdateManager updateManager) {
+		this.enumType = enumType;
+		this.walkable = walkable;
+		this.propertyMap = propertyMap;
+		this.destructionManager = destructionManager;
+		this.renderer = renderer;
+		this.updateManager = updateManager;
+	}
+	
+	public DataMap getInitialData() { return new DataMap(); }
+	
+	public boolean hasProperty(PropertyTag<?> tag) { return propertyMap.contains(tag); }
+	
+	public <T> T getPropertyOrDefault(PropertyTag<T> tag, T defaultValue) {
+		return propertyMap.getOrDefault(tag, defaultValue);
+	}
+	
+	public TileTypeEnum getEnumType() { return enumType; }
+	public String getName() { return enumType.name(); }
+	
+	public TileTypeRenderer getRenderer() { return renderer; }
+	
+	public boolean isPermeableBy(Entity e) { return e instanceof Particle || walkable; }
+	
+	/*
+		Some update methods. All methods have Tile param in addition to whatever listed.
+		can update:
+		- behavior/state update
+		- (LATER) - sprite update (so it doesn't have to be calculated every frame; animations don't count.)
+		
+		rendering:
+		- get sprite (main/connection)
+		- get overlap sprite on (param TileLayer index, in given tile's layer stack, b/c it won't always be the top TileLayer we're overlapping)
+		
+		interaction:
+		- attacked (param WorldObject source; param item (may be null))
+		- interaction (param player; param item)
+		
 	 */
 	
 	
-	private final HashMap<TilePropertyType, TileProperty> propertyMap = new HashMap<>();
-	
-	private final HashMap<TilePropertyType, Integer> propertyDataIndexes = new HashMap<>();
-	private final HashMap<TilePropertyType, Integer> propertyDataLengths = new HashMap<>();
-	private String[] initialData;
-	
-	interface PropertyAdder {
-		void addProperties(TileType tileType, HashMap<TilePropertyType, TileProperty> map);
+	/**
+	 * Called to update the tile's state in some way, whenever an adjacent tile is updated. It is also called once on tile load to get the first value and determine future calls.
+	 * If this returns a value greater than 0, then it is called after at least the specified amount of time has passed. Otherwise, it won't be updated until an adjacent tile is updated.
+	 * 
+	 * @param tile the tile
+	 * @return how long to wait before next call, or 0 for never (until adjacent tile update)
+	 */ 
+	public float update(@NotNull Tile tile) {
+		DataMap dataMap = tile.getDataMap(this);
+		
+		float now = tile.getWorld().getGameTime();
+		float lastUpdate = dataMap.getOrDefault(CacheTag.LastUpdate, now);
+		float delta = now - lastUpdate;
+		dataMap.put(CacheTag.LastUpdate, now);
+		
+		return updateManager.update(tile, delta);
 	}
 	
-	private final PropertyAdder adder;
 	
-	TileType(@NotNull PropertyAdder adder) {
-		this.adder = adder;
+	public boolean interact(@NotNull Tile tile, Player player, @Nullable Item item) { return false; }
+	
+	public boolean attacked(@NotNull Tile tile, WorldObject source, @Nullable Item item, int damage) {
+		return destructionManager.tileAttacked(tile, source, item, damage);
 	}
 	
-	public static final TileType[] values = TileType.values();
+	public boolean touched(@NotNull Tile tile, Entity entity, boolean initial) { return false; }
 	
-	static {
-		for(TileType type: TileType.values)
-			type.init();
+	@Override
+	public final boolean equals(Object other) {
+		return other instanceof TileType && ((TileType)other).getEnumType().equals(getEnumType());
 	}
+	@Override
+	public final int hashCode() { return enumType.hashCode(); }
 	
-	private void init() {
-		// add the default properties
-		
-		for(TilePropertyType type: TilePropertyType.values)
-			propertyMap.put(type, type.getDefaultInstance(this));
-		
-		// replace the defaults with specified properties
-		adder.addProperties(this, propertyMap);
-		
-		Array<String> initData = new Array<>();
-		
-		for(TilePropertyType propType: propertyMap.keySet()) {
-			TileProperty prop = propertyMap.get(propType);
-			propertyDataIndexes.put(propType, initData.size);
-			String[] propData = prop.getInitialData();
-			propertyDataLengths.put(propType, propData.length);
-			initData.addAll(propData);
-		}
-		
-		initialData = new String[initData.size];
-		for(int i = 0; i < initialData.length; i++)
-			initialData[i] = initData.get(i);
-	}
-	
-	// used in TilePropertyInstanceFetcher to get the property instances.
-	<T extends TileProperty> T getProp(TilePropertyType<T> propertyType, MapFunction<TileProperty> instanceFetcher) {
-		//noinspection unchecked
-		return (T) instanceFetcher.get(propertyMap.get(propertyType));
-	}
-	
-	int getDataLength() { return initialData.length; }
-	String[] getInitialData() { return Arrays.copyOf(initialData, initialData.length); }
-	
-	void checkDataAccess(TilePropertyType propertyType, int propDataIndex) {
-		// technically, the below should never happen, unless it's passed the TilePropertyInstance class or a dynamically generated class, or something, because the propertyMap should have an instance of each implementer of the TilePropertyInstance interface.
-		if(!propertyDataIndexes.containsKey(propertyType))
-			throw new IllegalArgumentException("The specified property type, " + propertyType + ", is not part of the list of property classes for the "+this+" tile type.");
-		
-		if(propDataIndex >= propertyDataLengths.get(propertyType))
-			throw new IllegalArgumentException("Tile property type " + propertyType + ", for the "+this+" tile type, tried to access index past stated length; length="+propertyDataLengths.get(propertyType)+", index="+propDataIndex);
-	}
-	
-	int getPropDataIndex(TilePropertyType type) { return propertyDataIndexes.get(type); }
-	int getPropDataLength(TilePropertyType type) { return propertyDataLengths.get(type); }
-	
-	public String getName() { return MyUtils.toTitleCase(name()); }
-	
-	public static String[] getJoinedInitialData(TileType... types) {
-		int len = 0;
-		for(TileType type: types)
-			len += type.getDataLength();
-		
-		String[] data = new String[len];
-		
-		int offset = 0;
-		for(TileType type: types) {
-			String[] typeData = type.getInitialData();
-			System.arraycopy(typeData, 0, data, offset, typeData.length);
-			offset += typeData.length;
-		}
-		
-		return data;
-	}
+	@Override
+	public String toString() { return MyUtils.toTitleCase(enumType.name()); }
 }

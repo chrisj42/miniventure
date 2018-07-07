@@ -2,13 +2,13 @@ package miniventure.game;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Objects;
 
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.chat.InfoMessageLine;
 import miniventure.game.item.Hands;
 import miniventure.game.item.Inventory;
 import miniventure.game.item.ItemStack;
-import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
 import miniventure.game.world.Boundable;
 import miniventure.game.world.Chunk;
@@ -25,6 +25,7 @@ import miniventure.game.world.entity.EntityRenderer;
 import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.mob.Player.Stat;
+import miniventure.game.world.entity.particle.Particle;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.Tile.TileData;
 import miniventure.game.world.tile.Tile.TileTag;
@@ -40,7 +41,7 @@ public interface GameProtocol {
 	
 	int PORT = 8405;
 	int writeBufferSize = 16384*3;
-	int objectBufferSize = 16384;
+	int objectBufferSize = 16384*2;
 	
 	boolean lag = false;
 	int lagMin = lag?10:0, lagMax = lag?100:0;
@@ -219,17 +220,19 @@ public interface GameProtocol {
 		public final PositionUpdate positionUpdate;
 		public final SpriteUpdate spriteUpdate;
 		public final int eid;
+		public final boolean particle;
 		public final boolean permeable;
 		public final String descriptor;
 		public final boolean cutHeight;
 		
-		private EntityAddition() { this(0, null, null, false, "Blank entity", false); }
+		private EntityAddition() { this(0, null, null, false, false, "Blank entity", false); }
 		public EntityAddition(Entity e) { this(e, e.getClass().getSimpleName().replace("Server", "")); }
-		public EntityAddition(Entity e, String descriptor) { this(e.getId(), new PositionUpdate(e), new SpriteUpdate(e), e.isPermeable(), descriptor, e instanceof Mob); }
-		public EntityAddition(int eid, PositionUpdate positionUpdate, SpriteUpdate spriteUpdate, boolean permeable, String descriptor, boolean cutHeight) {
+		public EntityAddition(Entity e, String descriptor) { this(e.getId(), new PositionUpdate(e), new SpriteUpdate(e), e instanceof Particle, e.isPermeable(), descriptor, e instanceof Mob); }
+		public EntityAddition(int eid, PositionUpdate positionUpdate, SpriteUpdate spriteUpdate, boolean particle, boolean permeable, String descriptor, boolean cutHeight) {
 			this.eid = eid;
 			this.positionUpdate = positionUpdate;
 			this.spriteUpdate = spriteUpdate;
+			this.particle = particle;
 			this.permeable = permeable;
 			this.descriptor = descriptor;
 			this.cutHeight = cutHeight;
@@ -354,7 +357,7 @@ public interface GameProtocol {
 		public boolean variesFrom(Vector3 pos, Integer levelDepth) { return variesFrom(new Vector2(pos.x, pos.y), levelDepth); }
 		public boolean variesFrom(Vector2 pos, Integer levelDepth) {
 			if(pos.dst(x, y) > 0.25) return true;
-			return !MyUtils.nullablesAreEqual(levelDepth, this.levelDepth);
+			return !Objects.equals(levelDepth, this.levelDepth);
 		}
 		
 		public Vector3 getPos() { return new Vector3(x, y, z); }

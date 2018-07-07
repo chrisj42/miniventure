@@ -3,7 +3,6 @@ package miniventure.game.client;
 import javax.swing.JOptionPane;
 
 import miniventure.game.GameCore;
-import miniventure.game.GameProtocol.DatalessRequest;
 import miniventure.game.screen.ChatScreen;
 import miniventure.game.world.ClientLevel;
 import miniventure.game.world.Level;
@@ -72,13 +71,21 @@ public class GameScreen {
 		levelView.handleInput();
 		
 		if(shift && Gdx.input.isKeyJustPressed(Keys.D) && !Gdx.input.isKeyPressed(Keys.TAB))
-		showDebug = !showDebug;
+			showDebug = !showDebug;
 		
-		if(shift && ClientCore.input.pressingKey(Keys.T))
-			ClientCore.getClient().send(DatalessRequest.Tile); // debug
+		if(shift && ClientCore.input.pressingKey(Keys.T)) {
+			//ClientCore.getClient().send(DatalessRequest.Tile); // debug
+			ClientPlayer p = ClientCore.getWorld().getMainPlayer();
+			try {
+				//noinspection ConstantConditions
+				Tile t = p.getLevel().getClosestTile(p.getCenter());
+				t.updateSprites();
+				for(Tile o: t.getAdjacentTiles(true))
+					o.updateSprites();
+			} catch(NullPointerException ignored) {}
+		}
 		
 		if(!ClientCore.hasMenu()) {
-			
 			if(!shift && ClientCore.input.pressingKey(Keys.T))
 				chatScreen.focus("");
 			

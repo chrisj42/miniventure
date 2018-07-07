@@ -198,7 +198,11 @@ public class ChatScreen extends MenuScreen {
 		input.pack();
 		input.setWidth(getWidth()/2);
 		input.setPosition(getWidth() / 2, getHeight() - input.getHeight());
-		vGroup.pack();
+		try {
+			vGroup.pack();
+		} catch(IndexOutOfBoundsException e) {
+			e.printStackTrace();
+		}
 		vGroup.setPosition(getWidth() / 2, input.getY() - 10 - vGroup.getHeight());
 	}
 	

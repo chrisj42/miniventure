@@ -12,6 +12,7 @@ import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.blinker.Blinker;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -32,7 +33,7 @@ public abstract class EntityRenderer {
 	public void update(float delta) { elapsedTime += delta; }
 	//public void reset() { elapsedTime = 0; }
 	
-	public abstract void render(float x, float y, Batch batch);
+	public abstract void render(float x, float y, Batch batch, float drawableHeight);
 	
 	public abstract Vector2 getSize();
 	
@@ -65,7 +66,7 @@ public abstract class EntityRenderer {
 		public String getName() { return spriteName; }
 		
 		@Override
-		public void render(float x, float y, Batch batch) { batch.draw(sprite.texture, x, y); }
+		public void render(float x, float y, Batch batch, float drawableHeight) { batch.draw(sprite.texture.split(sprite.width, (int)(sprite.height*drawableHeight))[0][0], x, y); }
 		
 		@Override
 		public Vector2 getSize() { return new Vector2(sprite.width, sprite.height); }
@@ -121,7 +122,7 @@ public abstract class EntityRenderer {
 		
 		@Override
 		protected String[] save() {
-			return new String[] {animationName, duration+"", isFrameDuration+"", loopAnimation+""};
+			return new String[] {animationName, String.valueOf(duration), String.valueOf(isFrameDuration), String.valueOf(loopAnimation)};
 		}
 		
 		public String getName() { return animationName; }
@@ -129,8 +130,9 @@ public abstract class EntityRenderer {
 		private TextureHolder getSprite() { return animation.getKeyFrame(super.elapsedTime, loopAnimation); }
 		
 		@Override
-		public void render(float x, float y, Batch batch) {
-			batch.draw(getSprite().texture, x, y);
+		public void render(float x, float y, Batch batch, float drawableHeight) {
+			TextureHolder sprite = getSprite();
+			batch.draw(sprite.texture.split(sprite.width, (int)(sprite.height*drawableHeight))[0][0], x, y);
 		}
 		
 		@Override
@@ -187,10 +189,10 @@ public abstract class EntityRenderer {
 		public void setDirection(@NotNull Direction dir) { this.dir = dir; }
 		
 		@Override
-		public void render(float x, float y, Batch batch) {
+		public void render(float x, float y, Batch batch, float drawableHeight) {
 			AnimationRenderer renderer = animations.get(dir);
 			((EntityRenderer)renderer).elapsedTime = super.elapsedTime;
-			renderer.render(x, y, batch);
+			renderer.render(x, y, batch, drawableHeight);
 		}
 		
 		@Override
@@ -210,7 +212,6 @@ public abstract class EntityRenderer {
 			this.text = text;
 			this.main = main;
 			this.shadow = shadow;
-			
 			GlyphLayout layout = GameCore.getTextLayout(text);
 			this.width = layout.width;
 			this.height = layout.height;
@@ -223,7 +224,7 @@ public abstract class EntityRenderer {
 		protected String[] save() { return new String[] {text, main.toString(), shadow.toString()}; }
 		
 		@Override
-		public void render(float x, float y, Batch batch) {
+		public void render(float x, float y, Batch batch, float drawableHeight) {
 			BitmapFont font = GameCore.getFont();
 			font.setColor(shadow);
 			font.draw(batch, text, x-1, y+1, 0, Align.center, false);
@@ -262,8 +263,8 @@ public abstract class EntityRenderer {
 		protected String[] save() {
 			return new String[] {
 				MyUtils.encodeStringArray(EntityRenderer.serialize(mainRenderer)),
-				initialDuration +"",
-				blinkFirst+"",
+				String.valueOf(initialDuration),
+				String.valueOf(blinkFirst),
 				MyUtils.encodeStringArray(blinker.save())
 			};
 		}
@@ -281,9 +282,9 @@ public abstract class EntityRenderer {
 		}
 		
 		@Override
-		public void render(float x, float y, Batch batch) {
+		public void render(float x, float y, Batch batch, float drawableHeight) {
 			if(!blinkerActive() || blinker.shouldRender())
-				mainRenderer.render(x, y, batch);
+				mainRenderer.render(x, y, batch, drawableHeight);
 		}
 		
 		@Override
@@ -292,7 +293,7 @@ public abstract class EntityRenderer {
 	
 	
 	public static final EntityRenderer BLANK = new EntityRenderer() {
-		@Override public void render(float x, float y, Batch batch) {}
+		@Override public void render(float x, float y, Batch batch, float drawableHeight) {}
 		@Override public Vector2 getSize() { return new Vector2(); }
 		@Override protected String[] save() { return new String[0]; }
 	};

@@ -1,22 +1,22 @@
 package miniventure.game.server;
 
 import java.util.HashSet;
+import java.util.Objects;
 
 import miniventure.game.GameProtocol.EntityAddition;
 import miniventure.game.GameProtocol.EntityRemoval;
 import miniventure.game.GameProtocol.WorldData;
 import miniventure.game.ProgressPrinter;
-import miniventure.game.util.MyUtils;
+import miniventure.game.item.ToolItem;
+import miniventure.game.item.ToolItem.Material;
+import miniventure.game.item.ToolType;
 import miniventure.game.world.*;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.ServerPlayer;
 import miniventure.game.world.levelgen.LevelGenerator;
-import miniventure.game.world.tile.DestructibleProperty;
-import miniventure.game.world.tile.ServerDestructibleProperty;
-import miniventure.game.world.tile.ServerTransitionProperty;
-import miniventure.game.world.tile.TilePropertyFetcher;
-import miniventure.game.world.tile.TransitionProperty;
+import miniventure.game.world.tile.ServerTileType;
+import miniventure.game.world.tile.TileEnumMapper;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -47,14 +47,7 @@ public class ServerWorld extends WorldManager {
 	private final HashSet<WorldObject> keepAlives = new HashSet<>(); // always keep chunks around these objects loaded.
 	
 	public ServerWorld(boolean standalone) {
-		super(new TilePropertyFetcher((instanceTemplate -> {
-			if(instanceTemplate instanceof DestructibleProperty)
-				return new ServerDestructibleProperty((DestructibleProperty)instanceTemplate);
-			if(instanceTemplate instanceof TransitionProperty)
-				return new ServerTransitionProperty((TransitionProperty)instanceTemplate);
-			
-			return instanceTemplate;
-		})));
+		super(new TileEnumMapper<>(ServerTileType::new));
 		
 		server = new GameServer(standalone);
 		server.startServer();
@@ -155,7 +148,7 @@ public class ServerWorld extends WorldManager {
 		super.setEntityLevel(e, level);
 		ServerLevel newLevel = getEntityLevel(e);
 		
-		if(!MyUtils.nullablesAreEqual(previous, newLevel)) {
+		if(!Objects.equals(previous, newLevel)) {
 			if(previous != null)
 				server.broadcast(new EntityRemoval(e), previous, (ServerEntity) e);
 			if(newLevel != null)
@@ -180,6 +173,7 @@ public class ServerWorld extends WorldManager {
 		
 		respawnPlayer(player);
 		
+		player.getInventory().addItem(new ToolItem(ToolType.Shovel, Material.Gem));
 		return player;
 	}
 	
@@ -217,7 +211,7 @@ public class ServerWorld extends WorldManager {
 	public Array<WorldObject> getKeepAlives(@NotNull Level level) {
 		Array<WorldObject> keepAlives = new Array<>();
 		for(WorldObject obj: this.keepAlives)
-			if(obj.getLevel() == level)
+			if(level.equals(obj.getLevel()))
 				keepAlives.add(obj);
 		
 		return keepAlives;

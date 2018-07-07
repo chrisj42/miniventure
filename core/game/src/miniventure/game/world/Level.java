@@ -2,14 +2,14 @@ package miniventure.game.world;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 
-import miniventure.game.util.MyUtils;
 import miniventure.game.util.SynchronizedAccessor;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.TileType;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
@@ -26,12 +26,12 @@ public abstract class Level implements Taggable<Level> {
 	private final int depth, width, height;
 	
 	@NotNull private final WorldManager world;
-	protected final SynchronizedAccessor<Map<Point, Chunk>> loadedChunks = new SynchronizedAccessor<>(Collections.synchronizedMap(new HashMap<>()));
-	protected int tileCount;
+	final SynchronizedAccessor<Map<Point, Chunk>> loadedChunks = new SynchronizedAccessor<>(Collections.synchronizedMap(new HashMap<>(X_LOAD_RADIUS*2*Y_LOAD_RADIUS*2)));
+	//private int tileCount;
 	private int mobCount;
 	
 	// this is to track when entities go in and out of chunks
-	protected final HashMap<Entity, Point> entityChunks = new HashMap<>();
+	final HashMap<Entity, Point> entityChunks = new HashMap<>(X_LOAD_RADIUS*2*Y_LOAD_RADIUS*2);
 	
 	/** @noinspection FieldCanBeLocal*/
 	private int mobCap = 3; // per chunk
@@ -71,9 +71,9 @@ public abstract class Level implements Taggable<Level> {
 	
 	public synchronized void entityMoved(Entity entity) {
 		Point prevChunk = entityChunks.get(entity);
-		Point curChunk = entity.getLevel() != this ? null : Chunk.getCoords(entity.getCenter());
+		Point curChunk = !this.equals(entity.getLevel()) ? null : Chunk.getCoords(entity.getCenter());
 		
-		if(MyUtils.nullablesAreEqual(prevChunk, curChunk)) return;
+		if(Objects.equals(prevChunk, curChunk)) return;
 		//System.out.println(world+" entity "+entity+" changed chunk, from "+prevChunk+" to "+curChunk);
 		
 		if(curChunk == null)
@@ -108,7 +108,7 @@ public abstract class Level implements Taggable<Level> {
 			if(chunk == null) continue; // shouldn't happen, but just in case
 			
 			// decrease tile count by number of tiles in chunk
-			tileCount -= chunk.width * chunk.height;
+			//tileCount -= chunk.width * chunk.height;
 			// get all entities in the chunk, and remove them from the game (later they'll be saved instead)
 			Array<Entity> entities = getOverlappingEntities(new Rectangle(chunkCoord.x * Chunk.SIZE, chunkCoord.y * Chunk.SIZE, chunk.width, chunk.height));
 			for(Entity e: entities)
@@ -120,8 +120,7 @@ public abstract class Level implements Taggable<Level> {
 		}
 	}
 	
-	public void render(Rectangle renderSpace, SpriteBatch batch, float delta, Vector2 posOffset) {
-	}
+	public abstract void render(Rectangle renderSpace, SpriteBatch batch, float delta, Vector2 posOffset);
 	
 	public void addEntity(Entity e, Vector2 pos, boolean center) { addEntity(e, pos.x, pos.y, center); }
 	public void addEntity(Entity e, float x, float y, boolean center) {
@@ -172,7 +171,7 @@ public abstract class Level implements Taggable<Level> {
 		int maxY = Math.min(getHeight(), (int) (rect.y + rect.height));
 		
 		for(int x = minX; x <= maxX; x++) {
-			for (int y = minY; y <= maxY; y++) {
+			for (int y = maxY; y >= minY; y--) {
 				overlappingTiles.add(new Point(x, y));
 			}
 		}
@@ -229,19 +228,17 @@ public abstract class Level implements Taggable<Level> {
 		return objects;
 	}
 	
-	public Array<Tile> getAreaTiles(Point tilePos, int radius, boolean includeCenter) { return getAreaTiles(tilePos.x, tilePos.y, radius, includeCenter); }
-	public Array<Tile> getAreaTiles(int x, int y, int radius, boolean includeCenter) {
-		Array<Tile> tiles = new Array<>();
-		for(int xo = Math.max(0, x-radius); xo <= Math.min(getWidth()-1, x+radius); xo++) {
-			for(int yo = Math.max(0, y-radius); yo <= Math.min(getHeight()-1, y+radius); yo++) {
-				Tile t = getTile(xo, yo);
-				if(t != null)
-					tiles.add(t);
-			}
-		}
+	public HashSet<Tile> getAreaTiles(Point tilePos, int radius, boolean includeCenter) { return getAreaTiles(tilePos.x, tilePos.y, radius, includeCenter); }
+	public HashSet<Tile> getAreaTiles(int x, int y, int radius, boolean includeCenter) {
+		
+		HashSet<Tile> tiles = new HashSet<>();
+		for(int xo = Math.max(0, x-radius); xo <= Math.min(getWidth()-1, x+radius); xo++)
+			for(int yo = Math.max(0, y-radius); yo <= Math.min(getHeight()-1, y+radius); yo++)
+				tiles.add(getTile(xo, yo));
+		tiles.remove(null);
 		
 		if(!includeCenter)
-			tiles.removeValue(getTile(x, y), true);
+			tiles.remove(getTile(x, y));
 		
 		return tiles;
 	}
@@ -299,14 +296,32 @@ public abstract class Level implements Taggable<Level> {
 		return true;
 	}
 	
-	protected abstract Tile createTile(int x, int y, TileType[] types, String[] data);
-	
 	protected abstract void loadChunk(Point chunkCoord);
 	protected abstract void unloadChunk(Point chunkCoord);
 	
 	public void loadChunk(Chunk newChunk) {
-		tileCount += newChunk.width * newChunk.height;
+		//tileCount += newChunk.width * newChunk.height;
 		putLoadedChunk(new Point(newChunk.chunkX, newChunk.chunkY), newChunk);
+		
+		// queue all contained tiles for update
+		Tile[][] tiles = newChunk.getTiles();
+		for(int i = 0; i < tiles.length; i++) {
+			for(int j = 0; j < tiles[i].length; j++) {
+				Tile t = tiles[i][j];
+				t.updateSprites();
+				// update the tiles in adjacent chunks
+				int oi = i == 0 ? -1 : i == tiles.length-1 ? 1 : 0;
+				int oj = j == 0 ? -1 : j == tiles[i].length-1 ? 1 : 0;
+				if(oi != 0) tryUpdate(t, oi, 0); // left/right side
+				if(oj != 0) tryUpdate(t, 0, oj); // above/below
+				if(oi != 0 && oj != 0) tryUpdate(t, oi, oj); // corner
+			}
+		}
+	}
+	private void tryUpdate(Tile ref, int ox, int oy) {
+		Point p = ref.getLocation();
+		Tile tile = getTile(p.x+ox, p.y+oy);
+		if(tile != null) tile.updateSprites();
 	}
 	
 	@Override

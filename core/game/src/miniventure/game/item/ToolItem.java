@@ -18,7 +18,7 @@ public class ToolItem extends Item {
 		
 		Iron(250, 4, 5),
 		
-		Gem(800, 8, 6);
+		Gem(800, 8, 0);
 		
 		public final int maxDurability; // the number of uses this level of tool gets.
 		public final int damageMultiplier; // damage done by this tool is multiplied by this number.

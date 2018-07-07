@@ -3,7 +3,7 @@ package miniventure.game.world.levelgen;
 import java.util.Random;
 
 import miniventure.game.world.Chunk;
-import miniventure.game.world.tile.TileType;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 public class LevelGenerator {
 	
@@ -43,7 +43,7 @@ public class LevelGenerator {
 		worldHeight = height;
 	}
 	
-	public TileType[][][] generateChunk(final int x, final int y) {
+	public TileTypeEnum[][][] generateChunk(final int x, final int y) {
 		int width = Chunk.SIZE, height = Chunk.SIZE;
 		if(x * width + width >= worldWidth)
 			width = worldWidth - x*width;
@@ -56,8 +56,8 @@ public class LevelGenerator {
 		return generateTiles(x, y, width, height);
 	}
 	
-	TileType[][][] generateTiles(int x, int y, int width, int height) {
-		TileType[][][] tiles = new TileType[width][height][];
+	TileTypeEnum[][][] generateTiles(int x, int y, int width, int height) {
+		TileTypeEnum[][][] tiles = new TileTypeEnum[width][height][];
 		int xt = x * Chunk.SIZE;
 		int yt = y * Chunk.SIZE;
 		
@@ -71,7 +71,7 @@ public class LevelGenerator {
 		return tiles;
 	}
 	
-	public TileType[] generateTile(int x, int y) {
+	public TileTypeEnum[] generateTile(int x, int y) {
 		if(x < 0 || y < 0 || x >= worldWidth || y >= worldHeight)
 			throw new IllegalArgumentException("Requested tile is outside world bounds; x="+x+", y="+y+". Actual world size: ("+worldWidth+","+worldHeight+")");
 		

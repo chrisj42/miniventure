@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 import miniventure.game.item.ToolItem.Material;
 import miniventure.game.util.MyUtils;
-import miniventure.game.world.tile.TileType;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 public enum ItemType {
 	
@@ -13,7 +13,7 @@ public enum ItemType {
 	
 	Food(data -> FoodItem.valueOf(data[0]).get()),
 	
-	Tile(data -> TileItem.get(TileType.valueOf(data[0]))),
+	Tile(data -> TileItem.get(TileTypeEnum.valueOf(data[0]))),
 	
 	Resource(data -> ResourceItem.valueOf(data[0]).get()),
 	

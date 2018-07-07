@@ -1,8 +1,10 @@
 package miniventure.game.world;
 
+import miniventure.game.util.function.ValueTriFunction;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.Tile.TileData;
-import miniventure.game.world.tile.TileType;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.data.DataMap;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -20,7 +22,7 @@ public class Chunk implements Boundable {
 	public final int width, height;
 	public final int chunkX, chunkY;
 	
-	public Chunk(int chunkX, int chunkY, @NotNull Level level, @NotNull TileType[][][] tileTypes) {
+	public Chunk(int chunkX, int chunkY, @NotNull Level level, @NotNull TileTypeEnum[][][] tileTypes, @NotNull ValueTriFunction<Integer, Integer, TileTypeEnum[], Tile> tileFetcher) {
 		this.level = level;
 		tiles = new Tile[tileTypes.length][];
 		width = tiles.length;
@@ -31,11 +33,11 @@ public class Chunk implements Boundable {
 			tiles[x] = new Tile[tileTypes[x].length];
 			height = Math.max(height, tiles[x].length);
 			for(int y = 0; y < tiles[x].length; y++)
-				tiles[x][y] = level.createTile(chunkX*SIZE + x, chunkY*SIZE + y, tileTypes[x][y], TileType.getJoinedInitialData(tileTypes[x][y]));
+				tiles[x][y] = tileFetcher.get(chunkX*SIZE + x, chunkY*SIZE + y, tileTypes[x][y]);
 		}
 		this.height = height;
 	}
-	public Chunk(@NotNull Level level, @NotNull ChunkData data) {
+	public Chunk(@NotNull Level level, @NotNull ChunkData data, ValueTriFunction<Point, TileTypeEnum[], DataMap[], Tile> tileFetcher) {
 		this.level = level;
 		this.chunkX = data.chunkX;
 		this.chunkY = data.chunkY;
@@ -48,11 +50,7 @@ public class Chunk implements Boundable {
 			height = Math.max(height, tiles[x].length);
 			for(int y = 0; y < tiles[x].length; y++) {
 				TileData tileData = data.tileData[x][y];
-				TileType[] types = new TileType[tileData.typeOrdinals.length];
-				for(int i = 0; i < types.length; i++)
-					types[i] = TileType.values[tileData.typeOrdinals[i]];
-				
-				tiles[x][y] = level.createTile(chunkX * SIZE + x, chunkY * SIZE + y, types, tileData.data);
+				tiles[x][y] = tileFetcher.get(new Point(chunkX * SIZE + x, chunkY * SIZE + y), tileData.getTypes(), tileData.getDataMaps());
 			}
 		}
 		this.height = height;

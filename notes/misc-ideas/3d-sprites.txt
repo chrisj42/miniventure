@@ -1,0 +1,10 @@
+This is towards the goal of making the world more 3D.
+
+Everything will have a position in 3D space. Not, like, actually, like using a 3D camera or anything; but in a abstract way. The hitbox of entities will only be around their feet, instead of their whole sprite.
+
+Tiles will be similar. Some tiles will take up the whole 32x32 in the x/y world plane, and that's fine. That can be specified. But the height won't, it will just be the height of the sprite. Now, where should the sprite be anchored..? X center of the sprite with the x center of the tile, but for Y... I guess that will have to be specified too.
+
+Basically, tile sprites (and entity sprites) will specify a rectangle of pixels in each sprite that serves as its hitbox. Animations will also specify an anchor offset for sprites of different sizes, and whether the distance to the left or right should remain the same, and top or bottom; or the sizes will just be the same.
+
+Maybe multiple rectangles for hitboxes, idk. Though that could get difficult to deal with fast.
+

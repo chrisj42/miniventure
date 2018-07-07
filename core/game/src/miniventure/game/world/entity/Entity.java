@@ -51,6 +51,7 @@ public abstract class Entity implements WorldObject {
 	public Level getLevel() { return world.getEntityLevel(this); }
 	
 	public abstract boolean isMob();
+	public abstract boolean isParticle();
 	
 	/// this is called only to remove an entity completely from the game, not to change levels.
 	public void remove() {
@@ -77,9 +78,6 @@ public abstract class Entity implements WorldObject {
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
 		renderer.update(delta);
 		if(blinker != null) blinker.update(delta);
-		
-		//System.out.println("rendering entity "+this+" at "+getPosition(true));
-		getRenderer().render((x-posOffset.x) * Tile.SIZE, (y+z - posOffset.y) * Tile.SIZE, batch);
 	}
 	
 	protected Rectangle getUnscaledBounds() {
@@ -185,8 +183,8 @@ public abstract class Entity implements WorldObject {
 		return amt;
 	}
 	
-	void touchTile(Tile tile) {}
-	void touchEntity(Entity entity) {}
+	abstract void touchTile(Tile tile);
+	abstract void touchEntity(Entity entity);
 	
 	public void moveTo(@NotNull Level level, @NotNull Vector2 pos) { moveTo(level, pos.x, pos.y); }
 	public void moveTo(@NotNull Level level, float x, float y) {
@@ -202,7 +200,7 @@ public abstract class Entity implements WorldObject {
 		this.x = x;
 		this.y = y;
 		
-		if(level == getLevel())
+		if(level.equals(getLevel()))
 			level.entityMoved(this);
 		else
 			world.setEntityLevel(this, level);

@@ -10,11 +10,11 @@ class EnumFetcher<E extends Enum<E>> {
 	private E[] types;
 	private float[] ranges;
 	
+	@SuppressWarnings("unchecked")
 	EnumFetcher(@NotNull Class<E> clazz, @NotNull String... typesWithOccurrences) {
 		if(typesWithOccurrences.length == 0)
 			throw new IllegalArgumentException("Must specify at least 1 type when creating a TileFetcher.");
 		
-		//noinspection unchecked
 		types = (E[]) Array.newInstance(clazz, typesWithOccurrences.length);
 		ranges = new float[types.length];
 		

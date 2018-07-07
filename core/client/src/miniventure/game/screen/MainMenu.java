@@ -5,11 +5,11 @@ import javax.swing.JOptionPane;
 import miniventure.game.GameCore;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.ClientWorld;
-import miniventure.game.client.DisplayLevel;
 import miniventure.game.client.LevelViewport;
 import miniventure.game.screen.InfoScreen.CreditsScreen;
 import miniventure.game.screen.InfoScreen.InstructionsScreen;
 import miniventure.game.util.VersionInfo;
+import miniventure.game.world.DisplayLevel;
 import miniventure.game.world.TimeOfDay;
 import miniventure.game.world.levelgen.LevelGenerator;
 
@@ -110,7 +110,7 @@ public class MainMenu extends MenuScreen {
 		TimeOfDay time = TimeOfDay.values[MathUtils.random(TimeOfDay.values.length-1)];
 		lightOverlay = TimeOfDay.getSkyColor(time.getStartOffsetSeconds());
 		
-		LevelGenerator generator = new LevelGenerator(MathUtils.random.nextLong(), 100, 60, 8, 6);
+		LevelGenerator generator = new LevelGenerator(MathUtils.random.nextLong(), 30, 20, 8, 6); // 100, 60
 		backgroundLevel = new DisplayLevel(generator);
 		
 		Vector2 size = new Vector2(levelView.getViewWidth(), levelView.getViewHeight());//.scl(0.5f);

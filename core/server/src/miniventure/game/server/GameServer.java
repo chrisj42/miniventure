@@ -21,7 +21,7 @@ import miniventure.game.item.Item;
 import miniventure.game.item.ItemStack;
 import miniventure.game.item.Recipe;
 import miniventure.game.item.Recipes;
-import miniventure.game.util.MyUtils;
+import miniventure.game.util.ArrayUtils;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.Level;
@@ -31,7 +31,7 @@ import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.mob.ServerPlayer;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.TileType;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;
@@ -117,7 +117,8 @@ public class GameServer implements GameProtocol {
 					ServerLevel level = world.getLevel(0);
 					if(level != null) {
 						ServerPlayer player = world.addPlayer(name);
-						connectionToPlayerDataMap.put(connection, new PlayerData(connection, player));
+						PlayerData playerData = new PlayerData(connection, player);
+						connectionToPlayerDataMap.put(connection, playerData);
 						playerToConnectionMap.put(player, connection);
 						Array<Chunk> playerChunks = level.getAreaChunks(player.getCenter(), Level.X_LOAD_RADIUS, Level.Y_LOAD_RADIUS, true, true);
 						connection.sendTCP(new LevelData(level));
@@ -132,7 +133,7 @@ public class GameServer implements GameProtocol {
 						
 						System.out.println("Server: new player successfully connected: "+player.getName());
 						
-						connectionToPlayerDataMap.get(connection).validationTimer.start();
+						playerData.validationTimer.start();
 						
 						broadcast(new Message(player.getName()+" joined the server.", Color.ORANGE), false, player);
 					}
@@ -305,7 +306,7 @@ public class GameServer implements GameProtocol {
 						matches.sort(String::compareToIgnoreCase);
 						
 						if(request.tabIndex < 0)
-							connection.sendTCP(new Message(MyUtils.arrayToString(matches.shrink(), "", "", ", "), Color.WHITE));
+							connection.sendTCP(new Message(ArrayUtils.arrayToString(matches.shrink(), "", "", ", "), Color.WHITE));
 						else {
 							// actually autocomplete
 							connection.sendTCP(new TabResponse(request.manualText, matches.get(request.tabIndex % matches.size)));
@@ -469,7 +470,7 @@ public class GameServer implements GameProtocol {
 		else
 			playGenericSound("entity/"+soundName, source.getCenter());
 	}
-	public void playTileSound(String soundName, Tile tile, TileType type) {
+	public void playTileSound(String soundName, Tile tile, TileTypeEnum type) {
 		//playGenericSound("tile/"+type+"/"+soundName, tile.getCenter());
 		playGenericSound("tile/"+soundName, tile.getCenter());
 	}

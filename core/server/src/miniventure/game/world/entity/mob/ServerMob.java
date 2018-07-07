@@ -17,7 +17,7 @@ import miniventure.game.world.entity.KnockbackController;
 import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.MobAnimationController.AnimationState;
 import miniventure.game.world.entity.particle.TextParticle;
-import miniventure.game.world.tile.TileType;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;
@@ -215,7 +215,7 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 	public void die() { remove(); }
 	
 	public boolean maySpawn() { return true; }
-	public boolean maySpawn(TileType type) {
-		return type == TileType.GRASS || type == TileType.DIRT || type == TileType.SAND;
+	public boolean maySpawn(TileTypeEnum type) {
+		return type == TileTypeEnum.GRASS || type == TileTypeEnum.DIRT || type == TileTypeEnum.SAND;
 	}
 }

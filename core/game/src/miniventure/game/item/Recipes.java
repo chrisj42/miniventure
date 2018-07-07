@@ -1,7 +1,7 @@
 package miniventure.game.item;
 
 import miniventure.game.item.ToolItem.Material;
-import miniventure.game.world.tile.TileType;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 public class Recipes {
 	
@@ -13,7 +13,7 @@ public class Recipes {
 		),
 		
 		new Recipe(new ToolItem(ToolType.Pickaxe, Material.Stone),
-			new ItemStack(TileItem.get(TileType.STONE), 1),
+			new ItemStack(TileItem.get(TileTypeEnum.STONE), 1),
 			new ItemStack(ResourceItem.Log.get(), 1)
 		),
 		
@@ -22,7 +22,7 @@ public class Recipes {
 		),
 		
 		new Recipe(new ToolItem(ToolType.Shovel, Material.Stone),
-			new ItemStack(TileItem.get(TileType.STONE), 2),
+			new ItemStack(TileItem.get(TileTypeEnum.STONE), 2),
 			new ItemStack(ResourceItem.Log.get(), 1)
 		),
 		
@@ -31,7 +31,7 @@ public class Recipes {
 		),
 		
 		new Recipe(new ToolItem(ToolType.Sword, Material.Stone),
-			new ItemStack(TileItem.get(TileType.STONE), 2),
+			new ItemStack(TileItem.get(TileTypeEnum.STONE), 2),
 			new ItemStack(ResourceItem.Log.get(), 1)
 		),
 		
@@ -40,28 +40,28 @@ public class Recipes {
 		),
 		
 		new Recipe(new ToolItem(ToolType.Axe, Material.Stone),
-			new ItemStack(TileItem.get(TileType.STONE), 1),
+			new ItemStack(TileItem.get(TileTypeEnum.STONE), 1),
 			new ItemStack(ResourceItem.Log.get(), 1)
 		),
 		
-		new Recipe(new ItemStack(TileItem.get(TileType.TORCH), 2),
+		new Recipe(new ItemStack(TileItem.get(TileTypeEnum.TORCH), 2),
 			new ItemStack(ResourceItem.Log.get(), 1)
 		),
 		
-		new Recipe(TileItem.get(TileType.DOOR_CLOSED),
+		new Recipe(TileItem.get(TileTypeEnum.DOOR_CLOSED),
 			new ItemStack(ResourceItem.Log.get(), 3)
 		),
 		
-		new Recipe(TileItem.get(TileType.WOOD_WALL),
+		new Recipe(TileItem.get(TileTypeEnum.WOOD_WALL),
 			new ItemStack(ResourceItem.Log.get(), 3)
 		),
 		
-		new Recipe(TileItem.get(TileType.STONE_WALL),
-			new ItemStack(TileItem.get(TileType.STONE), 3)
+		new Recipe(TileItem.get(TileTypeEnum.STONE_WALL),
+			new ItemStack(TileItem.get(TileTypeEnum.STONE), 3)
 		),
 		
-		new Recipe(TileItem.get(TileType.STONE_FLOOR),
-			new ItemStack(TileItem.get(TileType.STONE), 1)
+		new Recipe(TileItem.get(TileTypeEnum.STONE_FLOOR),
+			new ItemStack(TileItem.get(TileTypeEnum.STONE), 1)
 		)
 	};
 }

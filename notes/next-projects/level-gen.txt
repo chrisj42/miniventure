@@ -1,2 +1,5 @@
 improve world gen system. Add world gen menu with some customization options? Like biome size, maybe. And seed. Biomes should be much more prevalent in-game. Biomes should have sound tracks. Maybe make biomes around 50-100 tiles across?
 About biome gen system: should allow more flexibility in terms of what noise maps to use for various tiles, I think.
+
+Would it work out to generate terrain by layer? Like, one tile-type at a time? I wonder... Probably not, tbh. Maybe though. I mean, say you started with dirt, and then put grass and stone on top..? Nah, you want to basically just use the original noise map, better to do it all at once.
+Though, hey, maybe it'll end up being a combination of the two...

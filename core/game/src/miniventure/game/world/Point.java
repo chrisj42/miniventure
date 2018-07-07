@@ -18,8 +18,11 @@ public class Point {
 	}
 	
 	@Override
-	public int hashCode() {
-		return new java.awt.Point(x, y).hashCode();
+	public int hashCode() { return javaPointHashCode(x, y); }
+	
+	public static int javaPointHashCode(int x, int y) {
+		int sum = x + y;
+		return sum * (sum + 1) / 2 + x;
 	}
 	
 	@Override

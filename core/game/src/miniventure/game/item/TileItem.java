@@ -9,7 +9,7 @@ import miniventure.game.util.MyUtils;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.TileType;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 
@@ -18,48 +18,48 @@ import org.jetbrains.annotations.Nullable;
 
 public class TileItem extends Item {
 	
-	private static final HashMap<TileType, TileItem> items = new HashMap<>();
+	private static final HashMap<TileTypeEnum, TileItem> items = new HashMap<>();
 	
-	private static final TileType[] groundTypes = new TileType[] {
-		TileType.GRASS, TileType.DIRT, TileType.SAND, TileType.STONE_FLOOR
+	private static final TileTypeEnum[] groundTypes = new TileTypeEnum[] {
+		TileTypeEnum.GRASS, TileTypeEnum.DIRT, TileTypeEnum.SAND, TileTypeEnum.STONE_FLOOR
 	};
 	
-	private static void addItem(TileType result, TileType... canPlaceOn) {
+	private static void addItem(TileTypeEnum result, TileTypeEnum... canPlaceOn) {
 		items.put(result, new TileItem(result, canPlaceOn));
 	}
 	
 	static {
 		// for example, acorns.
-		// one improvement, btw, could be that in the current system, there can only be one item per tile. You can't have two items that end up producing the same tile. You even search by TileType. I don't necessarily like this...
-		addItem(TileType.TORCH, groundTypes);
+		// one improvement, btw, could be that in the current system, there can only be one item per tile. You can't have two items that end up producing the same tile. You even search by TileTypeEnum. I don't necessarily like this...
+		addItem(TileTypeEnum.TORCH, groundTypes);
 		
-		addItem(TileType.DIRT, TileType.HOLE);
-		addItem(TileType.SAND, TileType.DIRT);
-		addItem(TileType.GRASS, TileType.DIRT);
-		addItem(TileType.STONE, TileType.DIRT);
+		addItem(TileTypeEnum.DIRT, TileTypeEnum.HOLE);
+		addItem(TileTypeEnum.SAND, TileTypeEnum.DIRT);
+		addItem(TileTypeEnum.GRASS, TileTypeEnum.DIRT);
+		addItem(TileTypeEnum.STONE, TileTypeEnum.DIRT);
 		
-		items.put(TileType.DOOR_CLOSED, new TileItem("Door", GameCore.tileAtlas.findRegion("door_closed/00"), TileType.DOOR_CLOSED, groundTypes));
-		items.put(TileType.DOOR_OPEN, items.get(TileType.DOOR_CLOSED));
+		items.put(TileTypeEnum.DOOR_CLOSED, new TileItem("Door", GameCore.tileAtlas.findRegion("door_closed/c00"), TileTypeEnum.DOOR_CLOSED, groundTypes));
+		items.put(TileTypeEnum.DOOR_OPEN, items.get(TileTypeEnum.DOOR_CLOSED));
 		
-		addItem(TileType.STONE_FLOOR, TileType.HOLE/*, TileType.DIRT*/);
+		addItem(TileTypeEnum.STONE_FLOOR, TileTypeEnum.HOLE/*, TileTypeEnum.DIRT*/);
 	}
 	
 	@NotNull
-	public static TileItem get(@NotNull TileType tile) {
+	public static TileItem get(@NotNull TileTypeEnum tile) {
 		if(!items.containsKey(tile))
 			items.put(tile, new TileItem(tile, groundTypes));
 		return items.get(tile).copy();
 	}
 	
-	@NotNull private TileType result;
-	@Nullable private TileType[] canPlaceOn;
+	@NotNull private TileTypeEnum result;
+	@Nullable private TileTypeEnum[] canPlaceOn;
 	
-	private TileItem(@NotNull TileType type, @Nullable TileType... canPlaceOn) {
-		this(MyUtils.toTitleCase(type.name()), GameCore.tileAtlas.findRegion(type.name().toLowerCase()+"/00"), type, canPlaceOn); // so, if the placeOn is null, then...
+	private TileItem(@NotNull TileTypeEnum type, @Nullable TileTypeEnum... canPlaceOn) {
+		this(MyUtils.toTitleCase(type.name()), GameCore.tileAtlas.findRegion(type.name().toLowerCase()+"/c00"), type, canPlaceOn); // so, if the placeOn is null, then...
 	}
 	
-	private TileItem(String name, AtlasRegion texture, @NotNull TileType result, @Nullable TileType... placeOn) { this(name, new TextureHolder(texture, Tile.SIZE, Tile.SIZE), result, placeOn); }
-	private TileItem(String name, TextureHolder texture, @NotNull TileType result, @Nullable TileType... placeOn) {
+	private TileItem(String name, AtlasRegion texture, @NotNull TileTypeEnum result, @Nullable TileTypeEnum... placeOn) { this(name, new TextureHolder(texture, Tile.SIZE, Tile.SIZE), result, placeOn); }
+	private TileItem(String name, TextureHolder texture, @NotNull TileTypeEnum result, @Nullable TileTypeEnum... placeOn) {
 		super(ItemType.Tile, name, texture);
 		this.canPlaceOn = placeOn;
 		this.result = result;
@@ -71,15 +71,15 @@ public class TileItem extends Item {
 			Tile tile = (Tile) obj;
 			boolean canPlace = canPlaceOn == null;
 			if(!canPlace) {
-				for (TileType underType : canPlaceOn) {
-					if(underType == tile.getType()) {
+				for (TileTypeEnum underType : canPlaceOn) {
+					if(underType == tile.getType().getEnumType()) {
 						canPlace = true;
 						break;
 					}
 				}
 			}
 			
-			if(canPlace && tile.addTile(result)) {
+			if(canPlace && tile.addTile(result.getTileType(tile.getWorld()))) {
 				use();
 				return true;
 			}

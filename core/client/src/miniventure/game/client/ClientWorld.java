@@ -19,7 +19,8 @@ import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.ClientPlayer;
-import miniventure.game.world.tile.TilePropertyFetcher;
+import miniventure.game.world.tile.ClientTile;
+import miniventure.game.world.tile.TileEnumMapper;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.Array;
@@ -53,7 +54,7 @@ public class ClientWorld extends WorldManager {
 	private boolean doDaylightCycle = true;
 	
 	ClientWorld(ServerStarter serverStarter, GameScreen gameScreen) {
-		super(new TilePropertyFetcher(instanceTemplate -> instanceTemplate));
+		super(new TileEnumMapper<>(tileType -> tileType));
 		
 		this.serverStarter = serverStarter;
 		this.gameScreen = gameScreen;
@@ -160,7 +161,7 @@ public class ClientWorld extends WorldManager {
 			return;
 		}
 		
-		level.loadChunk(new Chunk(level, data));
+		level.loadChunk(new Chunk(level, data, (p, types, dataMaps) -> new ClientTile(level, p.x, p.y, types, dataMaps)));
 	}
 	
 	

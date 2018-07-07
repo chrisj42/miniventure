@@ -1,29 +1,23 @@
 package miniventure.game.util;
 
-import java.util.LinkedList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Stack;
 
 import miniventure.game.GameCore;
-import miniventure.game.util.function.ValueMonoFunction;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
-import org.jetbrains.annotations.Nullable;
-
-public class MyUtils {
+public final class MyUtils {
 	
 	private MyUtils() {} // can't instantiate
 	
-	
-	public static boolean nullablesAreEqual(@Nullable Object o1, @Nullable Object o2) {
-		if(o1 != null) return o1.equals(o2);
-		return o2 == null;
-	}
 	
 	public static String toTitleCase(String string) {
 		return toTitleCase(toTitleCase(string, ""), "_");
@@ -121,13 +115,6 @@ public class MyUtils {
 		batch.setColor(prev);
 	}
 	
-	public static <T> void reverseStack(Stack<T> stack) {
-		LinkedList<T> list = new LinkedList<>(stack);
-		stack.clear();
-		while(list.size() > 0)
-			stack.push(list.remove(list.size()-1));
-	}
-	
 	public static boolean noException(Action action) {
 		try {
 			action.act();
@@ -139,56 +126,6 @@ public class MyUtils {
 	}
 	
 	public static <T> boolean notNull(T obj) { return obj != null; }
-	
-	@SuppressWarnings("unchecked")
-	public static <PT, RT> RT[] mapArray(PT[] startValues, Class<RT> returnType, ValueMonoFunction<PT, RT> mapper) {
-		RT[] endValues = (RT[]) java.lang.reflect.Array.newInstance(returnType, startValues.length);
-		
-		for(int i = 0; i < startValues.length; i++)
-			endValues[i] = mapper.get(startValues[i]);
-		
-		return endValues;
-	}
-	
-	public static String arrayToString(int[] array, String start, String end, String delimiter) {
-		Integer[] ar = new Integer[array.length];
-		for(int i = 0; i < ar.length; i++)
-			ar[i] = array[i];
-		return arrayToString(ar, start, end, delimiter);
-	}
-	public static String arrayToString(float[] array, String start, String end, String delimiter) {
-		Float[] ar = new Float[array.length];
-		for(int i = 0; i < ar.length; i++)
-			ar[i] = array[i];
-		return arrayToString(ar, start, end, delimiter);
-	}
-	public static String arrayToString(Object[] array, String start, String end, String delimiter) {
-		StringBuilder str = new StringBuilder(start);
-		for(int i = 0; i < array.length; i++) {
-			str.append(array[i]);
-			if(i < array.length-1)
-				str.append(delimiter);
-		}
-		str.append(end);
-		return str.toString();
-	}
-	
-	@SafeVarargs
-	@SuppressWarnings("unchecked")
-	public static <T> T[] arrayJoin(Class<T> clazz, T[]... arrays) {
-		int length = 0;
-		for(T[] ar: arrays)
-			length += ar.length;
-		
-		T[] joined = (T[]) java.lang.reflect.Array.newInstance(clazz, length);
-		int offset = 0;
-		for(T[] ar: arrays) {
-			System.arraycopy(ar, 0, joined, offset, ar.length);
-			offset += ar.length;
-		}
-		
-		return joined;
-	}
 	
 	public static void delay(int milliDelay, Action action) { new DelayedAction(milliDelay, action).start(); }
 	
@@ -230,5 +167,18 @@ public class MyUtils {
 			for(StackTraceElement element: elements)
 				System.out.println("\t" + element);
 		});
+	}
+	
+	public static <E extends Enum<E>> EnumSet<E> enumSet(Class<E> clazz, Collection<E> collection) {
+		return collection.size() == 0 ? EnumSet.noneOf(clazz) : EnumSet.copyOf(collection);
+	}
+	public static <E extends Enum<E>> EnumSet<E> enumSet(Class<E> clazz, E[] items) {
+		return items.length == 0 ? EnumSet.noneOf(clazz) : EnumSet.copyOf(Arrays.asList(items));
+	}
+	public static EnumSet<TileTypeEnum> enumSet(Collection<TileTypeEnum> collection) {
+		return enumSet(TileTypeEnum.class, collection);
+	}
+	public static EnumSet<TileTypeEnum> enumSet(TileTypeEnum[] items) {
+		return enumSet(TileTypeEnum.class, items);
 	}
 }

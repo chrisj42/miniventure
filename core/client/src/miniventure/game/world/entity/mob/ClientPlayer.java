@@ -22,6 +22,8 @@ import miniventure.game.world.entity.ClientEntity;
 import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.KnockbackController;
 import miniventure.game.world.entity.mob.MobAnimationController.AnimationState;
+import miniventure.game.world.tile.Tile;
+import miniventure.game.world.tile.data.PropertyTag;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -147,6 +149,9 @@ public class ClientPlayer extends ClientEntity implements Player {
 		}
 		
 		Vector2 moveDist = inputDir.cpy().scl(moveSpeed*Gdx.graphics.getDeltaTime());
+		Tile closest = getClosestTile();
+		if(closest != null)
+			moveDist.scl(closest.getType().getPropertyOrDefault(PropertyTag.SpeedRatio, 1f));
 		
 		//float elapTime = GameCore.getElapsedProgramTime();
 		if(!moveDist.isZero()) {

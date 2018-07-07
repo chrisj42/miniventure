@@ -1,15 +1,21 @@
 package miniventure.game.world.tile;
 
 import miniventure.game.world.ServerLevel;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.TransitionManager.TransitionMode;
+
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector2;
 
 import org.jetbrains.annotations.NotNull;
 
+/** @noinspection EqualsAndHashcode*/
 public class ServerTile extends Tile {
 	
 	private final ServerLevel level;
 	
-	public ServerTile(@NotNull ServerLevel level, int x, int y, @NotNull TileType[] types, @NotNull String[] data) {
-		super(level, x, y, types, data);
+	public ServerTile(@NotNull ServerLevel level, int x, int y, @NotNull TileTypeEnum[] types) {
+		super(level, x, y, types, null);
 		this.level = level;
 	}
 	
@@ -30,31 +36,25 @@ public class ServerTile extends Tile {
 		return success;
 	}
 	
-	@Override
-	public void tick() {
-		for(TileType type: getTypes()) {// goes from bottom to top
-			if(!(type == getType() && getProp(type, TilePropertyType.Transition).playingAnimation(this))) // only update main tile if not transitioning.
-				getProp(type, TilePropertyType.Tick).tick(this);
-		}
-	}
+	@Override public void render(SpriteBatch batch, float delta, Vector2 posOffset) {}
+	@Override public void updateSprites() {}
 	
-	@Override
-	public boolean update(float delta, boolean initial) {
-		boolean shouldUpdate = super.update(delta, initial);
-		TileType startType = getType();
-		TransitionProperty transProp = getProp(startType, TilePropertyType.Transition);
-		if(transProp.playingAnimation(this)) {
-			transProp.getAnimationFrame(this, delta);
-			shouldUpdate = (startType == getType() && transProp.playingAnimation(this)) || shouldUpdate;
-		}
+	/*@Override
+	public float update() {
+		float nextUpdate = super.update();
 		
-		return shouldUpdate;
-	}
-	
-	@Override
-	public String toString() { return getType().getName()+" ServerTile"; }
+		if(getType().getRenderer().transitionManager.playingExitAnimation(this)) {
+			float transRemain = getType().getRenderer().transitionManager.tryFinishAnimation(this);
+			if(nextUpdate == 0)
+				nextUpdate = transRemain;
+			else if(transRemain != 0)
+				nextUpdate = Math.min(transRemain, nextUpdate);
+			
+			if(transRemain == 0) // animation finished!
+				
+		}
+	}*/
 	
 	@Override
 	public boolean equals(Object other) { return other instanceof ServerTile && super.equals(other); }
-	
 }

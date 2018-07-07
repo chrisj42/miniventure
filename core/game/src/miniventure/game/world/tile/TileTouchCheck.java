@@ -1,6 +1,9 @@
 package miniventure.game.world.tile;
 
+import java.util.EnumMap;
+
 import miniventure.game.GameCore;
+import miniventure.game.util.RelPos;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -10,11 +13,11 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 
-class TileTouchCheck {
+public class TileTouchCheck {
 	
 	private static final int MATCH = 1, NOMATCH = -1, SKIP = 0;
 	
-	static final TileTouchCheck[] connectionChecks = getTileChecks(GameCore.tileConnectionAtlas);
+	public static final TileTouchCheck[] connectionChecks = getTileChecks(GameCore.tileConnectionAtlas);
 	
 	private static TileTouchCheck[] getTileChecks(TextureAtlas atlas) {
 		if(atlas == null) return new TileTouchCheck[0];
@@ -35,39 +38,36 @@ class TileTouchCheck {
 	
 	
 	private final int[] map;
-	private final int width = 3, height = 3;
 	
 	private TileTouchCheck(Pixmap pixelMap, TextureRegion region) {
-		if(this.width != region.getRegionWidth() || this.height != region.getRegionHeight())
-			throw new IllegalArgumentException("TileTouchCheck map regions must be "+width+" by "+height+" pixels. Given region is " +region.getRegionWidth()+" by "+region.getRegionHeight() + " pixels.");
-		map = new int[width * height];
-		int i = -1;
+		if(region.getRegionWidth() != 3 || region.getRegionHeight() != 3)
+			throw new IllegalArgumentException("TileTouchCheck map regions must be 3 by 3 pixels. Given region is " +region.getRegionWidth()+" by "+region.getRegionHeight() + " pixels.");
+		map = new int[RelPos.values().length];
 		// pixmap coordinates have the origin in the top left corner; shift it so it goes from the bottom left instead
-		for (int x = 0; x < width; x++) {
-			for (int y = height-1; y >= 0; y--) {
+		for (int x = 0; x < 3; x++) {
+			for (int y = 0; y < 3; y++) {
 				Color color = new Color(pixelMap.getPixel(region.getRegionX() + x, region.getRegionY() + y));
 				
-				i++;
+				int val;
 				if(color.a == 0) // set to zero, tile doesn't matter
-					map[i] = SKIP;
+					val = SKIP;
 				else if(color.equals(Color.WHITE)) // the tile must be different from the center tile
-					map[i] = NOMATCH;
+					val = NOMATCH;
 				else if(color.equals(Color.BLACK)) // the tile must be equal to the center tile
-					map[i] = MATCH;
+					val = MATCH;
 				else throw new IllegalArgumentException("Provided texture map for TileTouchCheck must be transparent, black, or white; color " + color + " is invalid.");
+				
+				map[RelPos.get(x-1, 1-y).ordinal()] = val;
 			}
 		}
 	}
 	
-	boolean checkMatch(boolean[] aroundMatches) {
-		if(aroundMatches.length != map.length)
-			throw new IllegalArgumentException("tile type array must be of equal size to map array; "+aroundMatches.length+"!="+map.length);
-		
+	public boolean checkMatch(EnumMap<RelPos, Boolean> aroundMatches) {
 		for(int i = 0; i < map.length; i++) {
 			int matchRule = map[i];
 			if(matchRule == SKIP) continue;
 			
-			if(aroundMatches[i] != (matchRule == MATCH)) // if the actual match does not agree with the required match
+			if(aroundMatches.get(RelPos.values(i)) != (matchRule == MATCH)) // if the actual match does not agree with the required match
 				return false;
 		}
 		

@@ -23,4 +23,6 @@ public class TextureHolder {
 		this.height = height;
 	}
 	
+	@Override
+	public String toString() { return "TextureHolder["+name+','+width+'x'+height+", AtlasRegion:"+texture+']'; }
 }
