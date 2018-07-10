@@ -3,3 +3,228 @@ About biome gen system: should allow more flexibility in terms of what noise map
 
 Would it work out to generate terrain by layer? Like, one tile-type at a time? I wonder... Probably not, tbh. Maybe though. I mean, say you started with dirt, and then put grass and stone on top..? Nah, you want to basically just use the original noise map, better to do it all at once.
 Though, hey, maybe it'll end up being a combination of the two...
+
+
+Anyway, let's start.
+I'm going to want to have a number different biomes, let's start by listing them and their properties:
+
+maybe categorically?
+maybe types?
+
+- flat areas
+	- few lakes
+		- lush grasslands
+		- savana
+		- desert
+		- snowy
+	
+	- many lakes
+		- marshlands/swamp
+		
+	- water
+		- deep ocean
+		- shallower ocean, with bits of land here and there
+		- beach
+
+- rivers?
+
+- non flat areas
+	- tree forests
+	- mountains
+		- dense mountains with ores
+		- moutains with rock paths going through rocky terrain
+		- snowy mountains?
+
+
+----
+
+now for organization. The most obvious starting point is a map of elevation. So here's everything organized like that:
+
+- lowest:
+	- deep ocean
+	- shallow ocean
+	- beach
+
+- low:
+	- marshes
+	- plains
+	- sometimes thin forests...
+
+- lakes and rivers?
+
+- medium, higher:
+	- deserts
+	- forests
+	- plains
+
+- high:
+	- mountains with canyons
+	- mountains with ores
+	- rocky hills (rocks you can walk on)
+	- occasional trees in the canyons
+
+- highest:
+	- snowy mountains
+	- snowy trees
+
+
+----
+
+next up, humidity I guess.
+
+most humid:
+	- snow, in high places
+	- oceans, in low places
+	- marshes, in areas a little higher
+	- medium places can have lakes? or that's a detail...
+
+medium humid:
+	- high: rocks
+	- low: ocean
+	- medlow: beach
+	- medium: plains and forests
+
+low humid:
+	- high: rocks
+	- medium: deserts, savannas
+	- low elev: 
+	
+----
+new idea, another map for trees and flowers. Plants, basically.
+
+	- actually... idk.
+
+
+-----
+
+
+how about we go back to my original idea of listing properties of biomes:
+
+- grasslands
+	- elevation: low to medium
+	- humidity: medium
+	- plants: medium
+	
+- deserts:
+	- elev: any
+	- humidity: low to medium. medium = oasis?
+	- plants: very low.
+
+- oceans:
+	- elev: very low
+	- humidity: high
+	- plants: any
+
+- savanna:
+	- elev: any
+	- humidity: low to medhigh
+	- plants: medium
+
+- marshes:
+	- elev: low
+	- humidity: high
+	- plants: high
+
+- mountains (normal):
+	- elev: high
+	- humidity: low to medium
+	- plants: low to medium
+
+- mountain forests:
+	- elev: high
+	- humidity: low to medium
+	- plants: high
+
+- snowy mountains:
+	- elev: high
+	- humidity: high
+	- plants: low to medium
+
+- snowy forests:
+	- elev: high
+	- humidity: high
+	- plants: high
+
+- beach: next to oceans
+
+- mountain canyons:
+	- elev: medhigh to high
+	- humidity: any
+	- plants: any, pref med to high
+
+
+----
+
+I think I'll have each filter have a large noise map and a small noise map. Large is for terrain, small is for details.
+In that vein, let's separate generation into features, and actual terrain types:
+
+- types:
+	- dry(arid)/wet
+	- lush/barren
+	- cold/hot?
+	- flat/hilly
+
+
+- features:
+	- trees
+	- mountains
+	- lakes
+	- rivers
+
+---
+types can overlap; perhaps there is a noise map for each type, almost.
+more-so, I created what I did before: humidity, temperature(?), plants.
+but how to generate those so they end up together in the right ways?
+
+--
+dry, lush: savanna
+wet, lush: marsh
+dry, barren: desert
+hilly, barren: mountains
+wet, flat: ocean
+
+
+-----
+Relations:
+
+- marsh
+	- rare
+	- near oceans / big bodies of water
+	- far from desert? maybe separated from it by savanna?
+
+- snow
+	- high mountains... but not always? Two ways to get snow...
+	- snowy trees...
+
+- desert
+	- very low humidity, far from oceans?
+	- not necessarily close to any mountains
+	
+
+- forests
+	- areas with lots of plants
+	- also.. hilly? idk
+	
+	
+- 
+
+-----
+
+features in the various biomes:
+- rivers
+	- usually made of water
+	- in mountains, they become canyons
+
+- lakes
+	- in deserts, is oasis
+	- in oceans, is island
+
+- trees
+	- 
+
+
+
+----
+
+idea: some forests just mean a tree every few tiles, you usually can walk around them. Few forests (jungles?) are, like, solid trees.
+- I may want to get rid of the tree connection sprites... since I'm spreading things out and all. Besides, the extra trees aren't actually there, so I'm not lying to players anymore. ;)
