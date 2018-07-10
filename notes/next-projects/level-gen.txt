@@ -1,3 +1,29 @@
+here's a thought, for biome generation: multiple stages. And parsing the maps in between. Sure, it would take more processing power, but I bet, if done right, it would make way better maps.
+
+I do like the suggested idea of have a moisture map and elevation map, that's kinda what I have going already. I just didn't know what to put at each elevation / moisture level combination.
+
+It looks like high elevation is all going to be (walkable) rocks, and for places with high moisture, snow on top.
+Perhaps I'll decide what to make into solid rock after deciding on the previous part? Or... maybe there just won't be any solid rocks. Yeah, I'm going to do that.
+
+
+
+Thoughts on gen playground:
+
+in the middle tab, you have a list of "noise maps" that turn the values you get from the noise functions into TileTypes.
+
+You decide what values mean what, and what noise function to get the values from, for each map.
+You can also name them.
+
+When specifing what values mean what, you can give a tiletype, or you can reference another map, which will then be used instead.
+You also have the option of overriding that map's default noise function with a different one, including the one you're using.
+I'll make sure you can't make loops though, at least, loops that will cause infinite recursion.
+
+You start with one "master" noise map, which will be the starting point for generating each tile.
+
+
+
+
+
 improve world gen system. Add world gen menu with some customization options? Like biome size, maybe. And seed. Biomes should be much more prevalent in-game. Biomes should have sound tracks. Maybe make biomes around 50-100 tiles across?
 About biome gen system: should allow more flexibility in terms of what noise maps to use for various tiles, I think.
 
