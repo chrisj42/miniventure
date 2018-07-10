@@ -27,8 +27,8 @@ public class TestPanel extends MyPanel {
 		 */
 		
 		globalPanel = new GlobalPanel(this);
-		noiseFunctionPanel = new ListPanel<>(() -> new NoiseFunctionEditor());
-		noiseMapperPanel = new ListPanel<>(() -> new NoiseMapEditor(this, new NoiseMapper("master", new Coherent2DNoiseFunction(100, 1))));
+		noiseFunctionPanel = new ListPanel<>(NoiseFunctionEditor.class, name -> new NoiseFunctionEditor(new NamedNoiseFunction(name)));
+		noiseMapperPanel = new ListPanel<>(NoiseMapEditor.class, name -> new NoiseMapEditor(this, new NoiseMapper(name, noiseFunctionPanel.getElements()[0].getNoiseFunction())));
 		mapPanel = new MapPanel(this);
 		
 		tabPane = new JTabbedPane();
@@ -40,9 +40,6 @@ public class TestPanel extends MyPanel {
 		globalPanel.setMaximumSize(new Dimension(globalPanel.getMaximumSize().width, globalPanel.getPreferredSize().height));
 		add(globalPanel);
 		add(tabPane);
-		
-		//add(noiseMapperPanel); // TODO this is actually only one noise map... I should be adding a ListPanel *of* these, instead.
-		ready();
 	}
 	
 	public void setFocus(Component component) {

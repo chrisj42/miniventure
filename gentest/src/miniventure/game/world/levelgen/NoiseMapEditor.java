@@ -2,27 +2,28 @@ package miniventure.game.world.levelgen;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
+import javax.swing.Scrollable;
 
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Rectangle;
+import java.util.ArrayList;
 
 import miniventure.game.world.levelgen.NoiseMapper.NoiseMapRegion;
 import miniventure.game.world.levelgen.util.MyPanel;
 
 import org.jetbrains.annotations.NotNull;
 
-public class NoiseMapEditor extends MyPanel implements NamedObject {
+public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 	
 	final TestPanel testPanel;
 	@NotNull private final NoiseMapper noiseMap;
 	private final MapDisplayBar bar;
 	
-	private JPanel regionSelectionPanel;
-	private NoiseMapRegionEditor curRegionEditor = null;
+	// private JPanel regionSelectionPanel;
+	// private NoiseMapRegionEditor curRegionEditor = null;
+	private ArrayList<NoiseMapRegionEditor> regionEditors = new ArrayList<>();
 	
 	public NoiseMapEditor(TestPanel testPanel, @NotNull NoiseMapper noiseMap) {
 		this.testPanel = testPanel;
@@ -34,22 +35,28 @@ public class NoiseMapEditor extends MyPanel implements NamedObject {
 		
 		add(bar);
 		
-		NoiseMapRegion[] regions = noiseMap.getRegions();
-		regionSelectionPanel = new JPanel();
-		JComboBox<NoiseMapRegion> regionSelector = new JComboBox<>(regions);
+		// regionSelectionPanel = new JPanel();
+		// JComboBox<NoiseMapRegion> regionSelector = new JComboBox<>(regions);
 		
 		JButton addBtn = new JButton("Add Region");
 		addBtn.addActionListener(e -> {
 			NoiseMapRegion region = noiseMap.addRegion();
-			regionSelector.removeAllItems();
-			for(NoiseMapRegion r: noiseMap.getRegions())
-				regionSelector.addItem(r);
-			regionSelector.setSelectedItem(region);
+			regionEditors.add(new NoiseMapRegionEditor(NoiseMapEditor.this, region));
+			add(regionEditors.get(regionEditors.size()-1));
+			// regionSelector.removeAllItems();
+			// for(NoiseMapRegion r: noiseMap.getRegions())
+			// 	regionSelector.addItem(r);
+			// regionSelector.setSelectedItem(region);
 			refresh();
 		});
 		add(addBtn);
 		
-		regionSelector.addActionListener(e -> {
+		NoiseMapRegion[] regions = noiseMap.getRegions();
+		for(NoiseMapRegion region: regions) {
+			regionEditors.add(new NoiseMapRegionEditor(this, region));
+			add(regionEditors.get(regionEditors.size()-1));
+		}
+		/*regionSelector.addActionListener(e -> {
 			// I assume this triggers whenever an item is selected
 			if(regionSelector.getSelectedItem() != null) {
 				if(curRegionEditor != null) {
@@ -66,7 +73,7 @@ public class NoiseMapEditor extends MyPanel implements NamedObject {
 		if(regions.length > 0)
 			regionSelector.setSelectedItem(regions[0]);
 		add(regionSelectionPanel);
-		
+		*/
 		/*if(testPanel.getNoiseMapperPanel() != null) {
 			SwingUtilities.invokeLater(() -> {
 				NoiseMapEditor[] editors = testPanel.getNoiseMapperPanel().getElements(NoiseMapEditor.class);
@@ -85,21 +92,46 @@ public class NoiseMapEditor extends MyPanel implements NamedObject {
 		testPanel.refresh();
 	}
 	
-	void noiseMapCreated() {
+	/*void noiseMapCreated() {
 		if(curRegionEditor != null)
 			curRegionEditor.resetNoiseMapSelector();
-	}
+	}*/
 	
 	@Override
-	public void setObjectName(String name) {
+	public void setObjectName(@NotNull String name) {
 		noiseMap.setObjectName(name);
 	}
 	
+	@NotNull
 	@Override
 	public String getObjectName() {
 		return noiseMap.getObjectName();
 	}
 	
+	@Override
+	public Dimension getPreferredScrollableViewportSize() {
+		return getParent().getPreferredSize();
+	}
+	
+	@Override
+	public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
+		return visibleRect.height/10;
+	}
+	
+	@Override
+	public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+		return visibleRect.height/3;
+	}
+	
+	@Override
+	public boolean getScrollableTracksViewportWidth() {
+		return true;
+	}
+	
+	@Override
+	public boolean getScrollableTracksViewportHeight() {
+		return false;
+	}
 	
 	private class MapDisplayBar extends MyPanel {
 		
@@ -111,26 +143,48 @@ public class NoiseMapEditor extends MyPanel implements NamedObject {
 		public Dimension getMinimumSize() { return new Dimension(100, 30); }
 		@Override
 		public Dimension getMaximumSize() { return new Dimension(super.getMaximumSize().width, getMinimumSize().height); }
+		@Override
+		public Dimension getPreferredSize() {
+			Dimension prefSize = super.getPreferredSize();
+			return new Dimension(Math.max(noiseMap.getRegionCount()*2, Math.max(prefSize.width, 700)), prefSize.height);
+		}
 		
 		@Override
 		protected void paintComponent(Graphics g) {
 			super.paintComponent(g);
 			
-			int xOff = 0;
-			for(NoiseMapRegion region: noiseMap.getRegions()) {
-				Color color;
-				if(region.givesTileType())
-					color = region.getTileType().color;
+			NoiseMapRegion[] regions = noiseMap.getRegions();
+			Color[] colors = new Color[regions.length];
+			for(int i = 0; i < regions.length; i++) {
+				Color c;
+				if(regions[i].givesTileType())
+					c = regions[i].getTileType().color;
 				else
-					color = Color.LIGHT_GRAY;
-				g.setColor(color);
-				int width = (int)(getWidth()*region.getSize());
-				g.fillRect(getX()+xOff, getY(), width, getHeight());
-				xOff += width;
+					c = Color.LIGHT_GRAY;
+				colors[i] = c;
+			}
+			
+			float fxOff = 0;
+			int lastOff = 0;
+			System.out.println();
+			System.out.println();
+			for(int i = 0; i < regions.length; i++) {
+				Color c = colors[i];
+				g.setColor(c);
+				float fwidth = getWidth()*regions[i].getSize()/noiseMap.getTotal();
+				int width = Math.max(1, (int)fwidth);
+				int xOff = (int)fxOff;
+				g.fillRect(xOff, 0, width, getHeight());
+				if(width > 1) {
+					g.setColor(Testing.invertColor(Testing.blendColors(i == 0 ? null : colors[i - 1], colors[i], i == colors.length - 1 ? null : colors[i + 1])));
+					g.drawRect(lastOff, 0, width+(xOff-lastOff), getHeight());
+				}
+				fxOff += fwidth;
+				lastOff = xOff+width;
 			}
 			
 			g.setColor(Color.BLACK);
-			g.drawRect(getX(), getY(), getWidth(), getHeight());
+			g.drawRect(0, 0, getWidth()-1, getHeight()-1);
 		}
 	}
 }

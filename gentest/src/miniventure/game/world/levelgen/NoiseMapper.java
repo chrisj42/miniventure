@@ -11,30 +11,35 @@ import org.jetbrains.annotations.NotNull;
 public class NoiseMapper implements NamedObject {
 	
 	@NotNull private String name;
-	private Coherent2DNoiseFunction source;
+	private NamedNoiseFunction source;
 	private ArrayList<NoiseMapRegion> regions;
+	private float total;
 	
-	public NoiseMapper(@NotNull String name, Coherent2DNoiseFunction source) {
+	public NoiseMapper(@NotNull String name, NamedNoiseFunction source) {
 		this.name = name;
 		this.source = source;
 		regions = new ArrayList<>();
 		regions.add(new NoiseMapRegion(1));
 	}
 	
+	int getRegionCount() { return regions.size(); }
 	NoiseMapRegion[] getRegions() { return regions.toArray(new NoiseMapRegion[regions.size()]); }
 	
 	NoiseMapRegion addRegion() {
 		// adds and returns a new region
-		NoiseMapRegion newRegion = new NoiseMapRegion(1f/regions.size());
+		recomputeTotal();
+		NoiseMapRegion newRegion = new NoiseMapRegion(total/regions.size());
 		regions.add(newRegion);
-		recomputeSizes();
+		recomputeTotal();
 		return newRegion;
 	}
+	
+	public float getTotal() { return total; }
 	
 	public TileTypeEnum getTileType(int x, int y) {
 		if(source == null)
 			return null;
-		return getTileType(x, y, source.getValue(x, y));
+		return getTileType(x, y, source.getNoiseFunction().getValue(x, y));
 	}
 	public TileTypeEnum getTileType(int x, int y, float value) {
 		float total = 0;
@@ -53,12 +58,11 @@ public class NoiseMapper implements NamedObject {
 		return null;
 	}
 	
-	void recomputeSizes() {
+	private void recomputeTotal() {
 		float total = 0;
 		for(NoiseMapRegion region: regions)
 			total += region.size;
-		for(NoiseMapRegion region: regions)
-			region.size /= total;
+		this.total = total;
 	}
 	
 	public class NoiseMapRegion {
@@ -80,7 +84,7 @@ public class NoiseMapper implements NamedObject {
 		
 		public void setSize(float size) {
 			this.size = size;
-			recomputeSizes();
+			recomputeTotal();
 		}
 		
 		/*public boolean isValid() {

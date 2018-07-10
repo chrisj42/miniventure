@@ -28,7 +28,6 @@ public class NoiseMapRegionEditor extends MyPanel {
 		sizeField = new FloatField(mapRegion.getSize(), 5);
 		sizeField.addValueListener(val -> {
 			mapRegion.setSize(val);
-			sizeField.setValue(mapRegion.getSize());
 			refresh();
 		});
 		add(sizeField);
@@ -109,7 +108,7 @@ public class NoiseMapRegionEditor extends MyPanel {
 	}
 	
 	private NoiseMapper[] getNoiseMaps() {
-		NoiseMapEditor[] editors = mapEditor.testPanel.getNoiseMapperPanel().getElements(NoiseMapEditor.class);
+		NoiseMapEditor[] editors = mapEditor.testPanel.getNoiseMapperPanel().getElements();
 		System.out.println("mappers: "+editors.length);
 		NoiseMapper[] maps = new NoiseMapper[editors.length-1];
 		int o = 0;

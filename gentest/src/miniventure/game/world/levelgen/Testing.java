@@ -161,4 +161,28 @@ class Testing {
 		frame.pack();
 		frame.setVisible(true);
 	}
+	
+	public static Color blendColors(Color... colors) {
+		if(colors.length == 0) return Color.BLACK;
+		
+		int r=0, g=0, b=0, a=0;
+		int count = 0;
+		for(Color c: colors) {
+			if(c == null) continue;
+			count++;
+			r += c.getRed();
+			g += c.getGreen();
+			b += c.getBlue();
+			a += c.getAlpha();
+		}
+		if(count == 0) return Color.BLACK;
+		r/=count;
+		g/=count;
+		b/=count;
+		a/=count;
+		return new Color(r, g, b, a);
+	}
+	public static Color invertColor(Color c) {
+		return new Color((c.getRed()+128)%255, (c.getGreen()+128)%255, (c.getBlue()+128)%255);
+	}
 }
