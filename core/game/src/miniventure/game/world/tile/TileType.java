@@ -1,5 +1,7 @@
 package miniventure.game.world.tile;
 
+import java.awt.Color;
+
 import miniventure.game.item.Item;
 import miniventure.game.item.ToolType;
 import miniventure.game.util.MyUtils;
@@ -23,9 +25,11 @@ import org.jetbrains.annotations.Nullable;
 
 public class TileType {
 	
+	private static final Color BROWN = new Color(138, 66, 16);
+	
 	public enum TileTypeEnum {
 		
-		HOLE(type -> new TileType(type, true,
+		HOLE(BROWN.darker(), type -> new TileType(type, true,
 			new DataMap(PropertyTag.Swim.as(new SwimAnimation(type, 0.75f))),
 			
 			DestructionManager.INDESTRUCTIBLE(type),
@@ -35,13 +39,13 @@ public class TileType {
 			)
 		)),
 		
-		DIRT(type -> new TileType(type, true,
+		DIRT(BROWN, type -> new TileType(type, true,
 			new DestructionManager(type, new RequiredTool(ToolType.Shovel)),
 			
 			new TileTypeRenderer(type, true)
 		)),
 		
-		SAND(type -> new TileType(type, true,
+		SAND(Color.YELLOW, type -> new TileType(type, true,
 			new DestructionManager(type, new RequiredTool(ToolType.Shovel)),
 			
 			new TileTypeRenderer(type, true,
@@ -49,7 +53,7 @@ public class TileType {
 			))
 		),
 		
-		GRASS(type -> new TileType(type, true, new DataMap(),
+		GRASS(Color.GREEN, type -> new TileType(type, true, new DataMap(),
 			new DestructionManager.DestructibleBuilder(type, 1, false)
 				.require(new RequiredTool(ToolType.Shovel))
 				.make(),
@@ -66,7 +70,7 @@ public class TileType {
 			)
 		)),
 		
-		SNOW(type -> new TileType(type, true,
+		SNOW(Color.WHITE, type -> new TileType(type, true,
 			new DestructionManager(type, new RequiredTool(ToolType.Shovel)),
 			
 			new TileTypeRenderer(type, true,
@@ -74,7 +78,7 @@ public class TileType {
 			)
 		)),
 		
-		WATER(type -> new TileType(type, true,
+		WATER(Color.BLUE, type -> new TileType(type, true,
 			new DataMap(PropertyTag.SpeedRatio.as(0.6f))
 			.add(PropertyTag.Swim.as(new SwimAnimation(type))),
 			
@@ -89,7 +93,7 @@ public class TileType {
 			)
 		)),
 		
-		STONE(type -> new TileType(type, false,
+		STONE(Color.GRAY, type -> new TileType(type, false,
 			new DestructionManager(type, 40,
 				new PreferredTool(ToolType.Pickaxe, 5)
 			),
@@ -97,17 +101,17 @@ public class TileType {
 			new TileTypeRenderer(type, true)
 		)),
 		
-		STONE_FLOOR(type -> new FloorTile(type, ToolType.Pickaxe)),
+		STONE_FLOOR(Color.LIGHT_GRAY, type -> new FloorTile(type, ToolType.Pickaxe)),
 		
-		WOOD_WALL(type -> new WallTile(type, 20, new PreferredTool(ToolType.Axe, 3))),
+		WOOD_WALL(BROWN.brighter(), type -> new WallTile(type, 20, new PreferredTool(ToolType.Axe, 3))),
 		
-		STONE_WALL(type -> new WallTile(type, 40, new PreferredTool(ToolType.Pickaxe, 5))),
+		STONE_WALL(Color.LIGHT_GRAY, type -> new WallTile(type, 40, new PreferredTool(ToolType.Pickaxe, 5))),
 		
-		DOOR_OPEN(DoorTile::getOpenDoor),
+		DOOR_OPEN(BROWN.brighter(), DoorTile::getOpenDoor),
 		
-		DOOR_CLOSED(DoorTile::getClosedDoor),
+		DOOR_CLOSED(BROWN.brighter(), DoorTile::getClosedDoor),
 		
-		TORCH(type -> new TileType(type, true,
+		TORCH(Color.ORANGE, type -> new TileType(type, true,
 			new DataMap(PropertyTag.LightRadius.as(2f)),
 			
 			new DestructionManager(type),
@@ -120,7 +124,7 @@ public class TileType {
 			)
 		)),
 		
-		CACTUS(type -> new TileType(type, false,
+		CACTUS(Color.GREEN.darker().darker(), type -> new TileType(type, false,
 			new DestructionManager(type, 12, null),
 			
 			new TileTypeRenderer(type, false)
@@ -132,17 +136,18 @@ public class TileType {
 			}
 		}),
 		
-		TREE_CARTOON(TreeTile::new),
-		TREE_DARK(TreeTile::new),
-		TREE_PINE(TreeTile::new),
-		TREE_POOF(TreeTile::new);
+		TREE_CARTOON(Color.GREEN.darker(), TreeTile::new),
+		TREE_DARK(Color.GREEN.darker(), TreeTile::new),
+		TREE_PINE(Color.GREEN.darker(), TreeTile::new),
+		TREE_POOF(Color.GREEN.darker(), TreeTile::new);
 		
 		
-		
+		@NotNull public final Color color;
 		@NotNull private final ValueMonoFunction<TileTypeEnum, TileType> tileTypeFetcher;
 		private TileType tileType;
 		
-		TileTypeEnum(@NotNull ValueMonoFunction<TileTypeEnum, TileType> typeFetcher) {
+		TileTypeEnum(@NotNull Color color, @NotNull ValueMonoFunction<TileTypeEnum, TileType> typeFetcher) {
+			this.color = color;
 			tileTypeFetcher = typeFetcher;
 		}
 		
