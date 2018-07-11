@@ -23,7 +23,7 @@ public class FloatField extends ValueField<Float> {
 	protected void onTextChange() {
 		String text = getText();
 		try {
-			lastValidValue = Float.parseFloat(text);
+			lastValidValue = Math.abs(Float.parseFloat(text));
 		} catch(NumberFormatException ignored) {}
 	}
 	
@@ -32,6 +32,7 @@ public class FloatField extends ValueField<Float> {
 	
 	@Override
 	public void setValue(@NotNull Float value) {
+		value = Math.abs(value);
 		super.setValue(value);
 		lastValidValue = value;
 	}

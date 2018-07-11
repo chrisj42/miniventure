@@ -33,6 +33,10 @@ public class NoiseMapper implements NamedObject {
 		recomputeTotal();
 		return newRegion;
 	}
+	void removeRegion(NoiseMapRegion region) {
+		if(regions.remove(region))
+			recomputeTotal();
+	}
 	
 	public float getTotal() { return total; }
 	
@@ -64,6 +68,9 @@ public class NoiseMapper implements NamedObject {
 			total += region.size;
 		this.total = total;
 	}
+	
+	public NamedNoiseFunction getSource() { return source; }
+	public void setSource(NamedNoiseFunction source) { this.source = source; }
 	
 	public class NoiseMapRegion {
 		private float size;

@@ -1,8 +1,6 @@
 package miniventure.game.world.levelgen;
 
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.Scrollable;
+import javax.swing.*;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -21,8 +19,7 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 	@NotNull private final NoiseMapper noiseMap;
 	private final MapDisplayBar bar;
 	
-	// private JPanel regionSelectionPanel;
-	// private NoiseMapRegionEditor curRegionEditor = null;
+	private JComboBox<NamedNoiseFunction> functionSelector;
 	private ArrayList<NoiseMapRegionEditor> regionEditors = new ArrayList<>();
 	
 	public NoiseMapEditor(TestPanel testPanel, @NotNull NoiseMapper noiseMap) {
@@ -35,21 +32,24 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 		
 		add(bar);
 		
-		// regionSelectionPanel = new JPanel();
-		// JComboBox<NoiseMapRegion> regionSelector = new JComboBox<>(regions);
+		JPanel midPanel = new JPanel();
+		
+		functionSelector = new JComboBox<>(new NamedNoiseFunction[] {noiseMap.getSource()});
+		midPanel.add(new JLabel("Source Noise Function:"));
+		midPanel.add(functionSelector);
 		
 		JButton addBtn = new JButton("Add Region");
 		addBtn.addActionListener(e -> {
 			NoiseMapRegion region = noiseMap.addRegion();
+			if(regionEditors.size() == 1)
+				regionEditors.get(0).removeBtn.setEnabled(true);
 			regionEditors.add(new NoiseMapRegionEditor(NoiseMapEditor.this, region));
-			add(regionEditors.get(regionEditors.size()-1));
-			// regionSelector.removeAllItems();
-			// for(NoiseMapRegion r: noiseMap.getRegions())
-			// 	regionSelector.addItem(r);
-			// regionSelector.setSelectedItem(region);
+			add(regionEditors.get(regionEditors.size()-1), getComponentCount()-1);
 			refresh();
 		});
-		add(addBtn);
+		midPanel.add(addBtn);
+		
+		add(midPanel);
 		
 		NoiseMapRegion[] regions = noiseMap.getRegions();
 		for(NoiseMapRegion region: regions) {
@@ -81,11 +81,36 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 					e.noiseMapCreated();
 			});
 		}*/
+		add(Box.createVerticalGlue());
+	}
+	
+	void removeRegion(NoiseMapRegionEditor regionEditor, NoiseMapRegion region) {
+		regionEditors.remove(regionEditor);
+		remove(regionEditor);
+		noiseMap.removeRegion(region);
+		if(regionEditors.size() == 1)
+			regionEditors.get(0).removeBtn.setEnabled(false);
+		refresh();
 	}
 	
 	@NotNull
-	public NoiseMapper getNoiseMap() {
-		return noiseMap;
+	public NoiseMapper getNoiseMap() { return noiseMap; }
+	
+	public NoiseMapRegionEditor[] getRegionEditors() { return regionEditors.toArray(new NoiseMapRegionEditor[regionEditors.size()]); }
+	
+	void resetFunctionSelector() {
+		NoiseFunctionEditor[] noiseFunctionEditors = testPanel.getNoiseFunctionPanel().getElements();
+		NamedNoiseFunction[] noiseFunctions = new NamedNoiseFunction[noiseFunctionEditors.length];
+		
+		for(int i = 0; i < noiseFunctionEditors.length; i++)
+			noiseFunctions[i] = noiseFunctionEditors[i].getNoiseFunction();
+		
+		Object sel = functionSelector.getSelectedItem();
+		functionSelector.removeAllItems();
+		for(NamedNoiseFunction f: noiseFunctions)
+			functionSelector.addItem(f);
+		functionSelector.revalidate();
+		functionSelector.setSelectedItem(sel);
 	}
 	
 	void refresh() {
@@ -133,6 +158,9 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 		return false;
 	}
 	
+	@Override
+	public Dimension getMaximumSize() { return new Dimension(super.getMaximumSize().width, getPreferredSize().height); }
+	
 	private class MapDisplayBar extends MyPanel {
 		
 		MapDisplayBar() {
@@ -140,13 +168,13 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 		}
 		
 		@Override
-		public Dimension getMinimumSize() { return new Dimension(100, 30); }
+		public Dimension getMinimumSize() { return new Dimension(noiseMap.getRegionCount(), 30); }
 		@Override
 		public Dimension getMaximumSize() { return new Dimension(super.getMaximumSize().width, getMinimumSize().height); }
 		@Override
 		public Dimension getPreferredSize() {
 			Dimension prefSize = super.getPreferredSize();
-			return new Dimension(Math.max(noiseMap.getRegionCount()*2, Math.max(prefSize.width, 700)), prefSize.height);
+			return new Dimension(Math.max(noiseMap.getRegionCount()*2, prefSize.width), prefSize.height);
 		}
 		
 		@Override
@@ -166,8 +194,6 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 			
 			float fxOff = 0;
 			int lastOff = 0;
-			System.out.println();
-			System.out.println();
 			for(int i = 0; i < regions.length; i++) {
 				Color c = colors[i];
 				g.setColor(c);

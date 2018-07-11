@@ -39,6 +39,7 @@ public class ValidatedField<T> extends JTextField {
 	
 	@SafeVarargs
 	public ValidatedField(@NotNull StringConverter<T> converter, @NotNull Validator<? super T>... validators) {
+		super(4);
 		this.converter = converter;
 		
 		if(validators.length == 1)

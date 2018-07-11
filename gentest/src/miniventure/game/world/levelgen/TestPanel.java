@@ -2,10 +2,16 @@ package miniventure.game.world.levelgen;
 
 import javax.swing.BoxLayout;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingUtilities;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.event.ContainerAdapter;
+import java.awt.event.ContainerEvent;
+import java.awt.event.ContainerListener;
 
+import miniventure.game.util.Action;
+import miniventure.game.world.levelgen.ListPanel.ElementContainer;
 import miniventure.game.world.levelgen.util.MyPanel;
 
 /**
@@ -29,6 +35,32 @@ public class TestPanel extends MyPanel {
 		globalPanel = new GlobalPanel(this);
 		noiseFunctionPanel = new ListPanel<>(NoiseFunctionEditor.class, name -> new NoiseFunctionEditor(new NamedNoiseFunction(name)));
 		noiseMapperPanel = new ListPanel<>(NoiseMapEditor.class, name -> new NoiseMapEditor(this, new NoiseMapper(name, noiseFunctionPanel.getElements()[0].getNoiseFunction())));
+		
+		Action resetMaps = () -> {
+			for(NoiseMapEditor mapEditor: noiseMapperPanel.getElements())
+				mapEditor.resetFunctionSelector();
+		};
+		noiseFunctionPanel.addContainerListener(new ContainerListener() {
+			@Override public void componentAdded(ContainerEvent e) { resetMaps.act(); }
+			@Override public void componentRemoved(ContainerEvent e) { SwingUtilities.invokeLater(resetMaps::act); }
+		});
+		noiseMapperPanel.addContainerListener(new ContainerListener() {
+			@Override public void componentAdded(ContainerEvent e) {
+				if(e.getChild() instanceof ListPanel.ElementContainer)
+					((NoiseMapEditor)((ListPanel.ElementContainer)e.getChild()).element).resetFunctionSelector();
+			}
+			@Override
+			public void componentRemoved(ContainerEvent e) {
+				SwingUtilities.invokeLater(() -> {
+					System.out.println("removed map");
+					for(NoiseMapEditor mapEditor: noiseMapperPanel.getElements())
+						for(NoiseMapRegionEditor editor: mapEditor.getRegionEditors())
+							editor.resetNoiseMapSelector();
+					refresh();
+				});
+			}
+		});
+		
 		mapPanel = new MapPanel(this);
 		
 		tabPane = new JTabbedPane();

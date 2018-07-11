@@ -1,12 +1,15 @@
 package miniventure.game.world.levelgen;
 
+import javax.swing.JLabel;
 import javax.swing.Scrollable;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
 
+import miniventure.game.world.levelgen.util.IntegerField;
 import miniventure.game.world.levelgen.util.MyPanel;
 import miniventure.game.world.levelgen.util.StickyValidatedField;
+import miniventure.game.world.levelgen.util.StringField;
 import miniventure.game.world.levelgen.util.ValidatedField;
 
 import org.jetbrains.annotations.NotNull;
@@ -15,32 +18,41 @@ class NoiseFunctionEditor extends MyPanel implements NamedObject, Scrollable {
 	
 	private final NamedNoiseFunction noiseFunction;
 	
-	private StickyValidatedField<String> name;
-	private ValidatedField<Integer> numCurves;
+	private IntegerField numCurves;
+	private IntegerField coordsPerValue;
+	private StringField seed;
 	
 	NoiseFunctionEditor(@NotNull NamedNoiseFunction noiseFunction) {
 		this.noiseFunction = noiseFunction;
-		
-		name = new StickyValidatedField<>(noiseFunction.getObjectName(), String::valueOf, String::toString, str -> {
-			if(str.length() == 0) return false;
-			return true; // TODO check for duplicates
+		seed = new StringField("", 10);
+		seed.addValueListener(val -> {
+			try {
+				long s = Long.parseLong(val);
+				noiseFunction.setSeed(s);
+			} catch(NumberFormatException ex) {
+				noiseFunction.setSeed(val);
+			}
 		});
+		add(new JLabel("Seed (blank for random):"));
+		add(seed);
 		
-		numCurves = new ValidatedField<>(Integer::parseInt, ValidatedField.POSITIVE);
+		coordsPerValue = new IntegerField(12, 1);
+		coordsPerValue.addValueListener(noiseFunction::setCoordsPerValue);
+		add(new JLabel("density (higher = bigger areas):"));
+		add(coordsPerValue);
+		
+		numCurves = new IntegerField(2, 1);
+		numCurves.addValueListener(noiseFunction::setCurveCount);
+		add(new JLabel("num curves:"));
+		add(numCurves);
 	}
 	
 	public NamedNoiseFunction getNoiseFunction() { return noiseFunction; }
 	
 	@Override
-	public void setObjectName(@NotNull String name) {
-		this.name.setText(name);
-	}
-	
-	@NotNull
-	@Override
-	public String getObjectName() {
-		return name.getValue();
-	}
+	public void setObjectName(@NotNull String name) { noiseFunction.setObjectName(name); }
+	@Override @NotNull
+	public String getObjectName() { return noiseFunction.getObjectName(); }
 	
 	
 	@Override

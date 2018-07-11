@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 public abstract class ValueField<T> extends JTextField {
 	
-	private Stringifier<T> stringifier;
+	private final Stringifier<T> stringifier;
 	
 	@FunctionalInterface
 	protected interface Stringifier<T> {
@@ -25,18 +25,18 @@ public abstract class ValueField<T> extends JTextField {
 	
 	public ValueField(T value) { this(value, String::valueOf); }
 	public ValueField(T value, Stringifier<T> stringifier) {
-		super();
-		init(value, stringifier);
+		super(stringifier.get(value));
+		this.stringifier = stringifier;
+		init();
 	}
 	public ValueField(T value, int columns) { this(value, columns, String::valueOf); }
 	public ValueField(T value, int columns, Stringifier<T> stringifier) {
 		super(stringifier.get(value), columns);
-		init(value, stringifier);
+		this.stringifier = stringifier;
+		init();
 	}
 	
-	private void init(T value, Stringifier<T> stringifier) {
-		this.stringifier = stringifier;
-		
+	private void init() {
 		addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent e) {
