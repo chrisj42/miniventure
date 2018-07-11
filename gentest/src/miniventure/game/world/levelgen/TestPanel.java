@@ -52,7 +52,7 @@ public class TestPanel extends MyPanel {
 			@Override
 			public void componentRemoved(ContainerEvent e) {
 				SwingUtilities.invokeLater(() -> {
-					System.out.println("removed map");
+					// System.out.println("removed map");
 					for(NoiseMapEditor mapEditor: noiseMapperPanel.getElements())
 						for(NoiseMapRegionEditor editor: mapEditor.getRegionEditors())
 							editor.resetNoiseMapSelector();
@@ -68,6 +68,7 @@ public class TestPanel extends MyPanel {
 		tabPane.addTab("Noise Mappings", noiseMapperPanel);
 		tabPane.addTab("Generated Map", mapPanel);
 		
+		// setFocus(mapPanel);
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		globalPanel.setMaximumSize(new Dimension(globalPanel.getMaximumSize().width, globalPanel.getPreferredSize().height));
 		add(globalPanel);
@@ -75,11 +76,12 @@ public class TestPanel extends MyPanel {
 	}
 	
 	public void setFocus(Component component) {
-		if(tabPane.indexOfTabComponent(component) >= 0) {
+		// System.out.println("index = "+tabPane.indexOfTabComponent(component));
+		// if(tabPane.indexOfTabComponent(component) >= 0) {
 			tabPane.setSelectedComponent(component);
-			revalidate();
-			repaint();
-		}
+			refresh();
+		// }
+		// else System.out.println("component "+component+" is not a tab");
 	}
 	
 	public void refresh() {

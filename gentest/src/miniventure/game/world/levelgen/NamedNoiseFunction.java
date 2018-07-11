@@ -17,14 +17,16 @@ public class NamedNoiseFunction implements NamedObject {
 	public NamedNoiseFunction(@NotNull String name) {
 		this.name = name;
 		curveCount = 2;
-		coordsPerValue = 1;
+		coordsPerValue = 12;
 	}
 	
 	void resetFunction() { noiseFunction = null; }
 	
 	public Coherent2DNoiseFunction getNoiseFunction() {
-		if(noiseFunction == null)
-			noiseFunction = new Coherent2DNoiseFunction(randomSeed?new Random().nextLong():seed, coordsPerValue, curveCount);
+		if(noiseFunction == null) {
+			System.out.println("caching noise function "+this);
+			noiseFunction = new Coherent2DNoiseFunction(randomSeed ? new Random().nextLong() : seed, coordsPerValue, curveCount);
+		}
 		return noiseFunction;
 	}
 	
@@ -47,4 +49,12 @@ public class NamedNoiseFunction implements NamedObject {
 	
 	@Override
 	public String toString() { return getObjectName(); }
+	
+	public int getCoordsPerValue() {
+		return coordsPerValue;
+	}
+	
+	public int getCurveCount() {
+		return curveCount;
+	}
 }

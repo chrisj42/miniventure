@@ -160,6 +160,28 @@ class Testing {
 		frame.add(new TestPanel());
 		frame.pack();
 		frame.setVisible(true);
+		
+		/*Coherent2DNoiseFunction noise = new Coherent2DNoiseFunction(new Random().nextLong(), 100);
+		float max = 0, min = 0, avg = 0;
+		final int xr = 500, yr = 500;
+		for(int x = 0; x < xr; x++) {
+			for(int y = 0; y < yr; y++) {
+				float val = noise.getValue(x, y);
+				//System.out.println("value at coord " + x + ',' + y + ": " + val);
+				if(x == 0 && y == 0) {
+					max = val;
+					min = val;
+				} else {
+					max = Math.max(max, val);
+					min = Math.min(min, val);
+				}
+				avg += val;
+			}
+		}
+		avg /= xr * yr;
+		System.out.println("min val = "+min);
+		System.out.println("max val = "+max);
+		System.out.println("avg val = "+avg);*/
 	}
 	
 	public static Color blendColors(Color... colors) {

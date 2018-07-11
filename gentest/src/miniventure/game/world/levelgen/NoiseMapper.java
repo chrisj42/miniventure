@@ -41,24 +41,32 @@ public class NoiseMapper implements NamedObject {
 	public float getTotal() { return total; }
 	
 	public TileTypeEnum getTileType(int x, int y) {
-		if(source == null)
+		if(source == null) {
+			System.out.println("noise map "+this+" has no source noise function, returning null");
 			return null;
+		}
 		return getTileType(x, y, source.getNoiseFunction().getValue(x, y));
 	}
 	public TileTypeEnum getTileType(int x, int y, float value) {
+		// System.out.println("getting tiletype for value "+value+" at "+x+','+y+" from mapper "+this);
 		float total = 0;
 		for(NoiseMapRegion region: regions) {
-			total += region.size;
-			if(total > value) {
+			float add = region.size/this.total;
+			// System.out.println("checking region "+region+", adding "+add+" to running total of "+total);
+			total += add;
+			if(total >= value) {
 				if(region.givesTileType())
 					return region.getTileType();
 				else if(region.getChainNoiseMapper() != null)
 					return region.getChainNoiseMapper().getTileType(x, y);
-				else
+				else {
+					System.out.println("region "+region+" uses mapper but ref is null, returning null");
 					return null;
+				}
 			}
 		}
 		
+		System.out.println("value "+value+" is not in range of mapper "+this+", total = "+total+"(should be 1); returning null");
 		return null;
 	}
 	
@@ -111,6 +119,7 @@ public class NoiseMapper implements NamedObject {
 		
 		@NotNull
 		public TileTypeEnum getTileType() {
+			// System.out.println("getting type "+tileType);
 			return tileType;
 		}
 		
@@ -127,7 +136,7 @@ public class NoiseMapper implements NamedObject {
 		}
 		
 		@Override
-		public String toString() { return regions.indexOf(this)+" - "+FloatField.format.format(size); }
+		public String toString() { return NoiseMapper.this+" Region #"+regions.indexOf(this)+"; size:"+FloatField.format.format(size); }
 	}
 	
 	@Override

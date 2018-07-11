@@ -36,12 +36,12 @@ class NoiseFunctionEditor extends MyPanel implements NamedObject, Scrollable {
 		add(new JLabel("Seed (blank for random):"));
 		add(seed);
 		
-		coordsPerValue = new IntegerField(12, 1);
+		coordsPerValue = new IntegerField(noiseFunction.getCoordsPerValue(), 1);
 		coordsPerValue.addValueListener(noiseFunction::setCoordsPerValue);
 		add(new JLabel("density (higher = bigger areas):"));
 		add(coordsPerValue);
 		
-		numCurves = new IntegerField(2, 1);
+		numCurves = new IntegerField(noiseFunction.getCurveCount(), 1);
 		numCurves.addValueListener(noiseFunction::setCurveCount);
 		add(new JLabel("num curves:"));
 		add(numCurves);

@@ -1,5 +1,7 @@
 package miniventure.game.world.levelgen;
 
+import java.util.Random;
+
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import net.openhft.hashing.LongHashFunction;
@@ -36,7 +38,7 @@ class Coherent2DNoiseFunction {
 		float bottomHash = interpolate(downLeftHash, downRightHash, xVal - xMin);
 		
 		float totalHash = interpolate(bottomHash, topHash, yVal - yMin);
-		totalHash = (totalHash + 1) / 2;
+		// totalHash = (totalHash + 1) / 2;
 		
 		for(int i = 0; i < numCurves; i++)
 			totalHash = curveCubic(totalHash);
@@ -45,6 +47,7 @@ class Coherent2DNoiseFunction {
 	}
 	
 	private static final Vector2 ref = new Vector2(), diff = new Vector2();
+	private final Random rand = new Random();
 	
 	private float getValueFromRef(int xRef, int yRef, float x, float y) {
 		/*
@@ -56,14 +59,23 @@ class Coherent2DNoiseFunction {
 		// alternate way of getting random dir, I don't like it
 		// MathUtils.random.setSeed(hashFunction.hashInts(new int[] {xRef, yRef}));
 		// ref.setToRandomDirection();
-		ref.x = (int) hashFunction.hashInts(new int[] {xRef, yRef});
+		
+		// way I used for a while
+		/*ref.x = (int) hashFunction.hashInts(new int[] {xRef, yRef});
 		ref.y = (int) hashFunction.hashInts(new int[] {yRef, xRef});
 		ref.nor();
 		
 		diff.set(x, y);
 		diff.sub(xRef, yRef);
-		return ref.dot(diff);
+		return ref.dot(diff);*/
+		
+		rand.setSeed(hashFunction.hashInts(new int[] {xRef, yRef}));
+		return rand.nextFloat();
 	}
+	
+	/*private float dotNor(Vector2 v1, Vector2 v2) {
+		if(v1.)
+	}*/
 	
 	private float interpolate(float a, float b, float weight) {
 		// cubic equation: -2x^3 + 3x^2

@@ -4,6 +4,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 
+import miniventure.game.world.levelgen.util.IntegerField;
 import miniventure.game.world.levelgen.util.MyPanel;
 import miniventure.game.world.levelgen.util.ValidatedField;
 
@@ -17,8 +18,8 @@ public class GlobalPanel extends MyPanel {
 	
 	private ValidatedField<String> seedField;
 	private JCheckBox customSeedOption;
-	private ValidatedField<Integer> widthField; // number only
-	private ValidatedField<Integer> heightField; // number only
+	final IntegerField widthField;
+	final IntegerField heightField;
 	
 	private JButton regenButton;
 	
@@ -41,18 +42,16 @@ public class GlobalPanel extends MyPanel {
 		});
 		seedField.setEditable(customSeedOption.isSelected());
 		
-		widthField = new ValidatedField<>(Integer::parseInt, ValidatedField.NON_NEGATIVE);
-		widthField.setColumns(4);
-		widthField.setText("0");
-		heightField = new ValidatedField<>(Integer::parseInt, ValidatedField.NON_NEGATIVE);
-		heightField.setColumns(4);
-		heightField.setText("0");
+		widthField = new IntegerField(0, 4, 0);
+		heightField = new IntegerField(0, 4, 0);
 		
 		regenButton = new JButton("Regen world");
+		regenButton.addActionListener(e -> {
+			testPanel.setFocus(testPanel.getMapPanel());
+			testPanel.getMapPanel().generate(widthField.getValue(), heightField.getValue());
+		});
 		
 		seedField.addListener(field -> refresh());
-		widthField.addListener(field -> refresh());
-		heightField.addListener(field -> refresh());
 		
 		add(customSeedOption);
 		add(new JLabel("Seed:"));
@@ -65,7 +64,7 @@ public class GlobalPanel extends MyPanel {
 	}
 	
 	private void refresh() {
-		regenButton.setEnabled(widthField.getValid() && heightField.getValid() && seedField.getValid());
+		regenButton.setEnabled(seedField.getValid());
 		revalidate();
 		repaint();
 	}
