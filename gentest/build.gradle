@@ -2,3 +2,15 @@ sourceCompatibility = 1.8
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 sourceSets.main.java.srcDirs = [ "src/" ]
+
+project.ext.mainClassName = "miniventure.game.world.levelgen.Testing"
+
+task dist(type: Jar) {
+	from files(sourceSets.main.output.classesDir)
+	from files(sourceSets.main.output.resourcesDir)
+	from {configurations.compile.collect {zipTree(it)}}
+	
+	manifest {
+		attributes 'Main-Class': project.mainClassName
+	}
+}
