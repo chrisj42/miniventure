@@ -38,7 +38,7 @@ class Coherent2DNoiseFunction {
 		float bottomHash = interpolate(downLeftHash, downRightHash, xVal - xMin);
 		
 		float totalHash = interpolate(bottomHash, topHash, yVal - yMin);
-		// totalHash = (totalHash + 1) / 2;
+		totalHash = (totalHash + 1) / 2;
 		
 		for(int i = 0; i < numCurves; i++)
 			totalHash = curveCubic(totalHash);
@@ -61,16 +61,16 @@ class Coherent2DNoiseFunction {
 		// ref.setToRandomDirection();
 		
 		// way I used for a while
-		/*ref.x = (int) hashFunction.hashInts(new int[] {xRef, yRef});
+		ref.x = (int) hashFunction.hashInts(new int[] {xRef, yRef});
 		ref.y = (int) hashFunction.hashInts(new int[] {yRef, xRef});
 		ref.nor();
 		
 		diff.set(x, y);
 		diff.sub(xRef, yRef);
-		return ref.dot(diff);*/
+		return ref.dot(diff);
 		
-		rand.setSeed(hashFunction.hashInts(new int[] {xRef, yRef}));
-		return rand.nextFloat();
+		// rand.setSeed(hashFunction.hashInts(new int[] {xRef, yRef}));
+		// return rand.nextFloat();
 	}
 	
 	/*private float dotNor(Vector2 v1, Vector2 v2) {

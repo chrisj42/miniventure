@@ -8,9 +8,7 @@ import java.awt.Rectangle;
 
 import miniventure.game.world.levelgen.util.IntegerField;
 import miniventure.game.world.levelgen.util.MyPanel;
-import miniventure.game.world.levelgen.util.StickyValidatedField;
 import miniventure.game.world.levelgen.util.StringField;
-import miniventure.game.world.levelgen.util.ValidatedField;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -33,8 +31,8 @@ class NoiseFunctionEditor extends MyPanel implements NamedObject, Scrollable {
 				noiseFunction.setSeed(val);
 			}
 		});
-		add(new JLabel("Seed (blank for random):"));
-		add(seed);
+		// add(new JLabel("Seed (blank for random):"));
+		// add(seed);
 		
 		coordsPerValue = new IntegerField(noiseFunction.getCoordsPerValue(), 1);
 		coordsPerValue.addValueListener(noiseFunction::setCoordsPerValue);

@@ -6,7 +6,7 @@ import javax.swing.JLabel;
 
 import miniventure.game.world.levelgen.util.IntegerField;
 import miniventure.game.world.levelgen.util.MyPanel;
-import miniventure.game.world.levelgen.util.ValidatedField;
+import miniventure.game.world.levelgen.util.StringField;
 
 /**
  * Contains: global seed selection, world size selection, regen button
@@ -16,7 +16,7 @@ public class GlobalPanel extends MyPanel {
 	
 	private final TestPanel testPanel;
 	
-	private ValidatedField<String> seedField;
+	private StringField seedField;
 	private JCheckBox customSeedOption;
 	final IntegerField widthField;
 	final IntegerField heightField;
@@ -32,16 +32,14 @@ public class GlobalPanel extends MyPanel {
 			- "regen level"	button, which will only be enabled if the settings are valid
 		 */
 		
-		seedField = new ValidatedField<>(String::valueOf, val -> !customSeedOption.isSelected() || val.length() > 0);
-		seedField.setColumns(20);
+		/*seedField = new StringField("This doesn't actually do anything.", 20);
 		customSeedOption = new JCheckBox("Custom Seed", false);
 		customSeedOption.addActionListener(e -> {
 			seedField.setEditable(customSeedOption.isSelected());
-			seedField.revalidateText(false);
 			refresh();
 		});
 		seedField.setEditable(customSeedOption.isSelected());
-		
+		*/
 		widthField = new IntegerField(0, 4, 0);
 		heightField = new IntegerField(0, 4, 0);
 		
@@ -51,11 +49,9 @@ public class GlobalPanel extends MyPanel {
 			testPanel.getMapPanel().generate(widthField.getValue(), heightField.getValue());
 		});
 		
-		seedField.addListener(field -> refresh());
-		
-		add(customSeedOption);
-		add(new JLabel("Seed:"));
-		add(seedField);
+		// add(customSeedOption);
+		// add(new JLabel("Seed:"));
+		// add(seedField);
 		add(new JLabel("World Width:"));
 		add(widthField);
 		add(new JLabel("World Height:"));
@@ -64,7 +60,6 @@ public class GlobalPanel extends MyPanel {
 	}
 	
 	private void refresh() {
-		regenButton.setEnabled(seedField.getValid());
 		revalidate();
 		repaint();
 	}

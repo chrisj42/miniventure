@@ -5,9 +5,9 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.event.*;
 import java.util.HashMap;
 
@@ -18,6 +18,8 @@ import miniventure.game.world.levelgen.util.MyPanel;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 public class MapPanel extends MyPanel implements Runnable {
+	
+	private static final int PIXEL_DENSITY = 3;
 	
 	private final TestPanel testPanel;
 	private boolean gen = false;
@@ -127,17 +129,12 @@ public class MapPanel extends MyPanel implements Runnable {
 		tiles.put(new Point(x, y), type.color);
 	}
 	
-	/*@Override
-	public Dimension getPreferredSize() {
-		Dimension p = super.getPreferredSize();
-		return new Dimension(width, height);
-	}*/
-	
-	
-	
 	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
+		
+		Image buf = createImage(getWidth(), getHeight());
+		Graphics bufg = buf.getGraphics();
 		
 		forEachTile(p -> {
 			if(!tiles.containsKey(p)) {
@@ -146,9 +143,10 @@ public class MapPanel extends MyPanel implements Runnable {
 				else
 					return;
 			}
-			g.setColor(tiles.get(p));
-			g.fillRect(getWidth()/2+p.x-worldOffX, getHeight()/2+p.y-worldOffY, 1, 1);
+			bufg.setColor(tiles.get(p));
+			bufg.fillRect(getWidth()/2+(p.x-worldOffX)*PIXEL_DENSITY, getHeight()/2+(p.y-worldOffY)*PIXEL_DENSITY, PIXEL_DENSITY, PIXEL_DENSITY);
 		});
+		g.drawImage(buf, 0, 0, null);
 	}
 	
 	private void forEachTile(VoidMonoFunction<Point> action) {
@@ -167,9 +165,9 @@ public class MapPanel extends MyPanel implements Runnable {
 	@Override
 	public void run() {
 		inputThread = Thread.currentThread();
-		System.out.println("input thread started");
+		// System.out.println("input thread started");
 		while(run) {
-			MyUtils.sleep(20);
+			MyUtils.sleep(60);
 			
 			if(width < getWidth() && height < getHeight())
 				break;
@@ -186,10 +184,14 @@ public class MapPanel extends MyPanel implements Runnable {
 			if(keyPresses.get(KeyEvent.VK_RIGHT) && width >= getWidth() && worldOffX < width)
 				worldOffX++;
 			
-			if(this.worldOffX != worldOffX || this.worldOffY != worldOffY)
+			if(this.worldOffX != worldOffX || this.worldOffY != worldOffY) {
+				// System.out.println("button pressed");
+				this.worldOffX = worldOffX;
+				this.worldOffY = worldOffY;
 				repaint();
+			}
 		}
 		
-		System.out.println("input thread stopped.");
+		// System.out.println("input thread stopped.");
 	}
 }

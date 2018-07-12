@@ -15,11 +15,10 @@ public class NoiseMapper implements NamedObject {
 	private ArrayList<NoiseMapRegion> regions;
 	private float total;
 	
-	public NoiseMapper(@NotNull String name, NamedNoiseFunction source) {
+	public NoiseMapper(@NotNull String name, @NotNull NamedNoiseFunction source) {
 		this.name = name;
 		this.source = source;
 		regions = new ArrayList<>();
-		regions.add(new NoiseMapRegion(1));
 	}
 	
 	int getRegionCount() { return regions.size(); }
@@ -28,11 +27,23 @@ public class NoiseMapper implements NamedObject {
 	NoiseMapRegion addRegion() {
 		// adds and returns a new region
 		recomputeTotal();
-		NoiseMapRegion newRegion = new NoiseMapRegion(total/regions.size());
-		regions.add(newRegion);
-		recomputeTotal();
+		NoiseMapRegion newRegion = new NoiseMapRegion(TileTypeEnum.GRASS, total/regions.size());
+		addRegion(newRegion);
 		return newRegion;
 	}
+	private void addRegion(NoiseMapRegion region) {
+		regions.add(region);
+		recomputeTotal();
+	}
+	NoiseMapper addRegion(@NotNull TileTypeEnum type, float size) {
+		addRegion(new NoiseMapRegion(type, size));
+		return this;
+	}
+	NoiseMapper addRegion(@NotNull NoiseMapper chainMapper, float size) {
+		addRegion(new NoiseMapRegion(chainMapper, size));
+		return this;
+	}
+	
 	void removeRegion(NoiseMapRegion region) {
 		if(regions.remove(region))
 			recomputeTotal();
@@ -83,14 +94,20 @@ public class NoiseMapper implements NamedObject {
 	public class NoiseMapRegion {
 		private float size;
 		
-		private boolean givesTileType = true;
+		private boolean givesTileType;
 		@NotNull private TileTypeEnum tileType;
 		private NoiseMapper chainNoiseMapper;
 		
-		private NoiseMapRegion(float size) {
+		private NoiseMapRegion(@NotNull TileTypeEnum tileType, float size) {
+			this.tileType = tileType;
 			this.size = size;
-			chainNoiseMapper = null;
-			tileType = TileTypeEnum.GRASS;
+			givesTileType = true;
+		}
+		private NoiseMapRegion(@NotNull NoiseMapper chainMap, float size) {
+			tileType = TileTypeEnum.HOLE;
+			this.chainNoiseMapper = chainMap;
+			this.size = size;
+			givesTileType = false;
 		}
 		
 		public float getSize() {
@@ -101,13 +118,6 @@ public class NoiseMapper implements NamedObject {
 			this.size = size;
 			recomputeTotal();
 		}
-		
-		/*public boolean isValid() {
-			if(givesTileType)
-				return tileType != null;
-			else
-				return chainNoiseMapper != null;
-		}*/
 		
 		public boolean givesTileType() {
 			return givesTileType;

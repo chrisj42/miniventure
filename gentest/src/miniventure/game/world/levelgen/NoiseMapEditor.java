@@ -6,6 +6,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Rectangle;
+import java.awt.event.ItemEvent;
 import java.util.ArrayList;
 
 import miniventure.game.world.levelgen.NoiseMapper.NoiseMapRegion;
@@ -15,15 +16,19 @@ import org.jetbrains.annotations.NotNull;
 
 public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 	
-	final TestPanel testPanel;
+	@NotNull final TestPanel testPanel;
 	@NotNull private final NoiseMapper noiseMap;
 	private final MapDisplayBar bar;
 	
 	private JComboBox<NamedNoiseFunction> functionSelector;
 	private ArrayList<NoiseMapRegionEditor> regionEditors = new ArrayList<>();
 	
-	public NoiseMapEditor(TestPanel testPanel, @NotNull NoiseMapper noiseMap) {
+	public NoiseMapEditor(@NotNull TestPanel testPanel, @NotNull NoiseMapper noiseMap) {
 		this.testPanel = testPanel;
+		
+		if(noiseMap.getRegionCount() == 0)
+			noiseMap.addRegion();
+		
 		this.noiseMap = noiseMap;
 		
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
@@ -34,28 +39,27 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 		
 		JPanel midPanel = new JPanel();
 		
-		functionSelector = new JComboBox<>(new NamedNoiseFunction[] {noiseMap.getSource()});
+		functionSelector = new JComboBox<>();
+		resetFunctionSelector();
+		functionSelector.setSelectedItem(noiseMap.getSource());
+		functionSelector.addItemListener(e -> {
+			if(e.getStateChange() == ItemEvent.SELECTED)
+				noiseMap.setSource((NamedNoiseFunction)e.getItem());
+		});
 		midPanel.add(new JLabel("Source Noise Function:"));
 		midPanel.add(functionSelector);
 		
 		JButton addBtn = new JButton("Add Region");
-		addBtn.addActionListener(e -> {
-			NoiseMapRegion region = noiseMap.addRegion();
-			if(regionEditors.size() == 1)
-				regionEditors.get(0).removeBtn.setEnabled(true);
-			regionEditors.add(new NoiseMapRegionEditor(NoiseMapEditor.this, region));
-			add(regionEditors.get(regionEditors.size()-1), getComponentCount()-1);
-			refresh();
-		});
+		addBtn.addActionListener(e -> addRegion(noiseMap.addRegion(), true));
 		midPanel.add(addBtn);
 		
 		add(midPanel);
 		
-		NoiseMapRegion[] regions = noiseMap.getRegions();
-		for(NoiseMapRegion region: regions) {
-			regionEditors.add(new NoiseMapRegionEditor(this, region));
-			add(regionEditors.get(regionEditors.size()-1));
-		}
+		SwingUtilities.invokeLater(() -> {
+			NoiseMapRegion[] regions = noiseMap.getRegions();
+			for(NoiseMapRegion region: regions)
+				addRegion(region, false);
+		});
 		/*regionSelector.addActionListener(e -> {
 			// I assume this triggers whenever an item is selected
 			if(regionSelector.getSelectedItem() != null) {
@@ -82,6 +86,16 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 			});
 		}*/
 		add(Box.createVerticalGlue());
+	}
+	
+	private void addRegion(@NotNull NoiseMapRegion region, boolean refresh) {
+		if(regionEditors.size() == 1)
+			regionEditors.get(0).removeBtn.setEnabled(true);
+		NoiseMapRegionEditor rEditor = new NoiseMapRegionEditor(this, region);
+		regionEditors.add(rEditor);
+		add(rEditor, getComponentCount()-1);
+		if(refresh)
+			refresh();
 	}
 	
 	void removeRegion(NoiseMapRegionEditor regionEditor, NoiseMapRegion region) {
@@ -181,7 +195,7 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 		protected void paintComponent(Graphics g) {
 			super.paintComponent(g);
 			
-			NoiseMapRegion[] regions = noiseMap.getRegions();
+			/*NoiseMapRegion[] regions = noiseMap.getRegions();
 			Color[] colors = new Color[regions.length];
 			for(int i = 0; i < regions.length; i++) {
 				Color c;
@@ -202,7 +216,7 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 				int xOff = (int)fxOff;
 				g.fillRect(xOff, 0, width, getHeight());
 				if(width > 1) {
-					g.setColor(Testing.invertColor(Testing.blendColors(i == 0 ? null : colors[i - 1], colors[i], i == colors.length - 1 ? null : colors[i + 1])));
+					//g.setColor(Testing.invertColor(Testing.blendColors(i == 0 ? null : colors[i - 1], colors[i], i == colors.length - 1 ? null : colors[i + 1])));
 					g.drawRect(lastOff, 0, width+(xOff-lastOff), getHeight());
 				}
 				fxOff += fwidth;
@@ -210,7 +224,54 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 			}
 			
 			g.setColor(Color.BLACK);
-			g.drawRect(0, 0, getWidth()-1, getHeight()-1);
+			g.drawRect(0, 0, getWidth()-1, getHeight()-1);*/
+			drawBarRegions(g, noiseMap, getWidth(), getHeight(), true, 0);
 		}
+	}
+	
+	private static void drawBarRegions(Graphics g, NoiseMapper noiseMap, final float barWidth, final int barHeight, boolean drawSeparators, final float inherXOff) {
+		NoiseMapRegion[] regions = noiseMap.getRegions();
+		/*Color[] colors = new Color[regions.length];
+		for(int i = 0; i < regions.length; i++) {
+			Color c;
+			if(regions[i].givesTileType())
+				c = regions[i].getTileType().color;
+			else
+				c = Color.LIGHT_GRAY;
+			colors[i] = c;
+		}*/
+		
+		float fxOff = inherXOff;
+		int lastOff = (int)fxOff;
+		for(int i = 0; i < regions.length; i++) {
+			float fwidth = barWidth*regions[i].getSize()/noiseMap.getTotal();
+			
+			int width = Math.max(1, (int)fwidth);
+			int xOff = (int)fxOff;
+			
+			if(!regions[i].givesTileType()) {
+				drawBarRegions(g, regions[i].getChainNoiseMapper(), fwidth, barHeight, false, fxOff);
+			}
+			else {
+				g.setColor(regions[i].getTileType().color);
+				g.fillRect(xOff, 0, width, barHeight);
+				if(drawSeparators && width > 1) {
+					//g.setColor(Testing.invertColor(Testing.blendColors(i == 0 ? null : colors[i - 1], colors[i], i == colors.length - 1 ? null : colors[i + 1])));
+					g.drawRect(lastOff, 0, width+(xOff-lastOff), barHeight);
+				}
+			}
+			fxOff += fwidth;
+			lastOff = xOff+width;
+		}
+		
+		g.setColor(Color.BLACK);
+		g.drawRect((int)inherXOff, 0, (int)barWidth-1, barHeight-1);
+	}
+	
+	static NoiseMapEditor[] getEditorsForAll(TestPanel testPanel, NoiseMapper... maps) {
+		NoiseMapEditor[] editors = new NoiseMapEditor[maps.length];
+		for(int i = 0; i < maps.length; i++)
+			editors[i] = new NoiseMapEditor(testPanel, maps[i]);
+		return editors;
 	}
 }

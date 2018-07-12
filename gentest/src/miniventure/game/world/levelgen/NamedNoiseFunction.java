@@ -14,17 +14,19 @@ public class NamedNoiseFunction implements NamedObject {
 	
 	private Coherent2DNoiseFunction noiseFunction;
 	
-	public NamedNoiseFunction(@NotNull String name) {
+	public NamedNoiseFunction(@NotNull String name) { this(name, 12); }
+	public NamedNoiseFunction(@NotNull String name, int coordsPerValue) { this(name, coordsPerValue, 2); }
+	public NamedNoiseFunction(@NotNull String name, int coordsPerValue, int curveCount) {
 		this.name = name;
-		curveCount = 2;
-		coordsPerValue = 12;
+		this.coordsPerValue = coordsPerValue;
+		this.curveCount = curveCount;
 	}
 	
 	void resetFunction() { noiseFunction = null; }
 	
 	public Coherent2DNoiseFunction getNoiseFunction() {
 		if(noiseFunction == null) {
-			System.out.println("caching noise function "+this);
+			// System.out.println("caching noise function "+this);
 			noiseFunction = new Coherent2DNoiseFunction(randomSeed ? new Random().nextLong() : seed, coordsPerValue, curveCount);
 		}
 		return noiseFunction;

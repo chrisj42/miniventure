@@ -2,8 +2,6 @@ package miniventure.game.world.levelgen.util;
 
 import javax.swing.JPanel;
 
-import java.awt.Color;
-import java.awt.Component;
 import java.awt.Graphics;
 
 public class MyPanel extends JPanel {

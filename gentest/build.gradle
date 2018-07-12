@@ -14,3 +14,5 @@ task dist(type: Jar) {
 		attributes 'Main-Class': project.mainClassName
 	}
 }
+
+dist.dependsOn classes

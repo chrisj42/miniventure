@@ -19,8 +19,8 @@ import org.jetbrains.annotations.NotNull;
 
 public class NoiseMapRegionEditor extends MyPanel {
 	
-	private final NoiseMapEditor mapEditor;
-	private final NoiseMapRegion region;
+	@NotNull private final NoiseMapEditor mapEditor;
+	@NotNull private final NoiseMapRegion region;
 	private final FloatField sizeField;
 	final JButton removeBtn;
 	private final ButtonGroup mapTypeButtonGroup = new ButtonGroup();
@@ -54,11 +54,6 @@ public class NoiseMapRegionEditor extends MyPanel {
 		tileTypeSelector.setSelectedItem(mapRegion.getTileType());
 		
 		noiseMapSelector = new JComboBox<>();
-		noiseMapSelector.addItemListener(e -> {
-			if(e.getStateChange() == ItemEvent.SELECTED)
-				mapRegion.setChainNoiseMapper((NoiseMapper)e.getItem());
-			refresh();
-		});
 		
 		tileTypeBtn = new JRadioButton("TileType");
 		tileTypeBtn.setSelected(mapRegion.givesTileType());
@@ -90,8 +85,15 @@ public class NoiseMapRegionEditor extends MyPanel {
 		mapTypeButtonGroup.add(tileTypeBtn);
 		mapTypeButtonGroup.add(noiseMapBtn);
 		
-		// if(testPanel.getNoiseMapperPanel().getNoiseMaps(this).length == 0)
-		// 	noiseMapBtn.setSelected(false);
+		resetNoiseMapSelector();
+		if(mapRegion.getChainNoiseMapper() != null)
+			noiseMapSelector.setSelectedItem(mapRegion.getChainNoiseMapper());
+		
+		noiseMapSelector.addItemListener(e -> {
+			if(e.getStateChange() == ItemEvent.SELECTED)
+				mapRegion.setChainNoiseMapper((NoiseMapper)e.getItem());
+			refresh();
+		});
 		
 		add(tileTypeBtn);
 		add(noiseMapBtn);
@@ -104,10 +106,10 @@ public class NoiseMapRegionEditor extends MyPanel {
 				tileTypeSelector.setEnabled(false);
 		}
 		
-		if(mapEditor.getNoiseMap().getRegionCount() < 2)
-			noiseMapBtn.setEnabled(false);
-		else
+		/*SwingUtilities.invokeLater(() -> {
+			MyUtils.sleep(100);
 			noiseMapBtn.setEnabled(mapEditor.testPanel.getNoiseMapperPanel().getElementCount() > 1);
+		});*/
 	}
 	
 	private void refresh() {
@@ -115,20 +117,21 @@ public class NoiseMapRegionEditor extends MyPanel {
 	}
 	
 	void resetNoiseMapSelector() {
-		Object sel = noiseMapSelector.getSelectedItem();
 		noiseMapSelector.removeAllItems();
 		for(NoiseMapper map : getNoiseMaps())
 			noiseMapSelector.addItem(map);
-		noiseMapSelector.setSelectedItem(sel);
-		noiseMapBtn.setEnabled(mapEditor.testPanel.getNoiseMapperPanel().getElementCount() > 1);
-		if(!noiseMapBtn.isEnabled() && noiseMapBtn.isSelected())
+		if(!region.givesTileType()) {
+			noiseMapBtn.setSelected(true);
+			noiseMapSelector.setSelectedItem(region.getChainNoiseMapper());
+		} else
 			tileTypeBtn.doClick();
+		noiseMapBtn.setEnabled(mapEditor.testPanel.getNoiseMapperPanel().getElementCount() > 1);
 	}
 	
 	@NotNull
 	private NoiseMapper[] getNoiseMaps() {
 		NoiseMapEditor[] editors = mapEditor.testPanel.getNoiseMapperPanel().getElements();
-		//System.out.println("mappers: "+editors.length);
+		// System.out.println("got "+editors.length+" noise maps for region editor "+this);
 		ArrayList<NoiseMapper> maps = new ArrayList<>();
 		for(NoiseMapEditor editor: editors) {
 			if(editor.equals(mapEditor))

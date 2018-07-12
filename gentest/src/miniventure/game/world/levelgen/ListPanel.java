@@ -17,6 +17,8 @@ import miniventure.game.world.levelgen.util.StringField;
 /**
  * Contains a "list" of "elements" to display that it displays in a certain fashion. toString() is used for titles.
  * @param <E> the "element" type
+ * 
+ * @noinspection WeakerAccess
  */
 public class ListPanel<E extends JComponent & NamedObject & Scrollable> extends MyPanel {
 	
@@ -27,8 +29,7 @@ public class ListPanel<E extends JComponent & NamedObject & Scrollable> extends 
 	private JScrollPane scrollPane;
 	private MyPanel container; // elements are added here
 	
-	@SafeVarargs
-	public ListPanel(Class<E> clazz, ValueMonoFunction<String, E> fetcher, E... elements) {
+	ListPanel(Class<E> clazz, ValueMonoFunction<String, E> fetcher) {
 		this.clazz = clazz;
 		container = new MyPanel();
 		container.setLayout(new BoxLayout(container, BoxLayout.PAGE_AXIS));
@@ -55,11 +56,6 @@ public class ListPanel<E extends JComponent & NamedObject & Scrollable> extends 
 		
 		scrollPane.setColumnHeaderView(addBtn);
 		add(scrollPane);
-		
-		if(elements.length > 0)
-			addElement(elements);
-		else
-			addElement(fetcher.get("master"));
 	}
 	
 	@Override
@@ -77,35 +73,40 @@ public class ListPanel<E extends JComponent & NamedObject & Scrollable> extends 
 		return container.getContainerListeners();
 	}
 	
-	@SafeVarargs
-	public final void addElement(E... elements) {
-		for(E e: elements) {
-			//noinspection ObjectAllocationInLoop
-			ElementContainer ec = new ElementContainer(e);
-			containerMap.put(e, ec);
-			elementList.add(e);
-			container.add(ec, container.getComponentCount()-1);
-		}
+	void addElement(E e) {
+		if(getElementCount() == 1)
+			for(ElementContainer ec: containerMap.values())
+				ec.removeBtn.setEnabled(true);	
+		
+		//noinspection ObjectAllocationInLoop
+		ElementContainer ec = new ElementContainer(e);
+		containerMap.put(e, ec);
+		elementList.add(e);
+		container.add(ec, container.getComponentCount()-1);
+		
 		refresh();
 	}
 	
-	public void removeElement(E e) {
+	void removeElement(E e) {
 		ElementContainer c = containerMap.remove(e);
 		container.remove(c);
 		elementList.remove(e);
+		if(getElementCount() == 1)
+			for(ElementContainer ec: containerMap.values())
+				ec.removeBtn.setEnabled(false);
 		refresh();
 	}
 	
-	public int getElementCount() { return elementList.size(); }
+	int getElementCount() { return elementList.size(); }
 	
 	@SuppressWarnings("unchecked")
-	public E[] getElements() {
+	E[] getElements() {
 		E[] ar = (E[]) Array.newInstance(clazz, elementList.size());
 		elementList.toArray(ar);
 		return ar;
 	}
 	
-	public void refresh() {
+	void refresh() {
 		scrollPane.revalidate();
 		scrollPane.repaint();
 		
@@ -117,32 +118,46 @@ public class ListPanel<E extends JComponent & NamedObject & Scrollable> extends 
 	class ElementContainer extends MyPanel {
 		
 		final E element;
+		private final JButton removeBtn;
 		
 		ElementContainer(E element) {
 			this.element = element;
 			
 			setLayout(new BorderLayout());
-			MyPanel btnPanel = new MyPanel();
-			btnPanel.setLayout(new BoxLayout(btnPanel, BoxLayout.PAGE_AXIS));
-			JButton removeBtn = new JButton("Remove");
+			
+			MyPanel topPanel = new MyPanel();
+			topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.LINE_AXIS));
+			removeBtn = new JButton("Remove");
 			removeBtn.addActionListener(ae -> removeElement(element));
-			btnPanel.add(removeBtn);
-			btnPanel.add(Box.createVerticalGlue());
+			topPanel.add(removeBtn);
+			topPanel.add(Box.createHorizontalStrut(20));
 			
-			add(btnPanel, BorderLayout.WEST);
-			
-			MyPanel mainPanel = new MyPanel();
-			mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.PAGE_AXIS));
-			
-			//System.out.println("name of "+e+": "+e.getObjectName());
 			StringField nameField = new StringField(element.getObjectName(), 30);
 			nameField.setMaximumSize(new Dimension(nameField.getMaximumSize().width, nameField.getPreferredSize().height));
 			//noinspection Convert2MethodRef
 			nameField.addValueListener(val -> element.setObjectName(val));
-			mainPanel.add(nameField);
+			topPanel.add(nameField);
 			
-			mainPanel.add(element);
-			add(mainPanel, BorderLayout.CENTER);
+			topPanel.add(Box.createHorizontalGlue());
+			topPanel.add(Box.createHorizontalStrut(50));
+			
+			add(topPanel, BorderLayout.NORTH);
+			
+			MyPanel bottomPanel = new MyPanel();
+			bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.LINE_AXIS));
+			
+			bottomPanel.add(element);
+			add(bottomPanel, BorderLayout.CENTER);
+			
+			JSeparator sep = new JSeparator(SwingConstants.HORIZONTAL) {
+				@Override
+				public Dimension getPreferredSize() {
+					Dimension s = super.getPreferredSize();
+					s.height += 20;
+					return s;
+				}
+			};
+			add(sep, BorderLayout.SOUTH);
 		}
 		@Override
 		public Dimension getMaximumSize() {
