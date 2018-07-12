@@ -8,6 +8,7 @@ import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.event.ItemEvent;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import miniventure.game.world.levelgen.NoiseMapper.NoiseMapRegion;
 import miniventure.game.world.levelgen.util.MyPanel;
@@ -45,12 +46,16 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 		functionSelector.addItemListener(e -> {
 			if(e.getStateChange() == ItemEvent.SELECTED)
 				noiseMap.setSource((NamedNoiseFunction)e.getItem());
+			// testPanel.getMapPanel().invalidateMaps();
 		});
 		midPanel.add(new JLabel("Source Noise Function:"));
 		midPanel.add(functionSelector);
 		
 		JButton addBtn = new JButton("Add Region");
-		addBtn.addActionListener(e -> addRegion(noiseMap.addRegion(), true));
+		addBtn.addActionListener(e -> {
+			addRegion(noiseMap.addRegion(), true);
+			// testPanel.getMapPanel().invalidateMaps();
+		});
 		midPanel.add(addBtn);
 		
 		add(midPanel);
@@ -101,6 +106,27 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 			functionSelector.addItem(f);
 		functionSelector.revalidate();
 		functionSelector.setSelectedItem(sel);
+	}
+	
+	boolean checkMapForLoops() {
+		for(NoiseMapRegion region: noiseMap.getRegions())
+			if(!region.givesTileType())
+				if(checkMapForLoops(region.getChainNoiseMapper()))
+					return true;
+		
+		return false;
+	}
+	private boolean checkMapForLoops(NoiseMapper map) {
+		if(noiseMap.equals(map))
+			return true;
+		
+		for(NoiseMapRegion region: map.getRegions()) {
+			if(region.givesTileType()) continue;
+			if(checkMapForLoops(region.getChainNoiseMapper()))
+				return true;
+		}
+		
+		return false;
 	}
 	
 	void refresh() {
@@ -165,11 +191,12 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 		@Override
 		protected void paintComponent(Graphics g) {
 			super.paintComponent(g);
-			drawBarRegions(g, noiseMap, getWidth(), getHeight(), true, 0);
+			drawBarRegions(g, noiseMap, getWidth(), getHeight(), true, 0, new HashSet<>());
 		}
 	}
 	
-	private static void drawBarRegions(Graphics g, NoiseMapper noiseMap, final float barWidth, final int barHeight, boolean drawSeparators, final float inherXOff) {
+	
+	private static void drawBarRegions(Graphics g, NoiseMapper noiseMap, final float barWidth, final int barHeight, boolean drawSeparators, final float inherXOff, HashSet<NoiseMapRegion> visitedRegions) {
 		NoiseMapRegion[] regions = noiseMap.getRegions();
 		
 		float fxOff = inherXOff;
@@ -181,7 +208,15 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 			int xOff = (int)fxOff;
 			
 			if(!regions[i].givesTileType()) {
-				drawBarRegions(g, regions[i].getChainNoiseMapper(), fwidth, barHeight, false, fxOff);
+				if(visitedRegions.contains(regions[i])) {
+					g.setColor(Color.RED);
+					g.fillRect(xOff, 0, width, barHeight);
+				}
+				else {
+					visitedRegions.add(regions[i]);
+					drawBarRegions(g, regions[i].getChainNoiseMapper(), fwidth, barHeight, false, fxOff, visitedRegions);
+					visitedRegions.remove(regions[i]);
+				}
 			}
 			else {
 				g.setColor(regions[i].getTileType().color);

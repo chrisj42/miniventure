@@ -9,6 +9,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ItemEvent;
 import java.util.ArrayList;
+import java.util.Objects;
 
 import miniventure.game.world.levelgen.NoiseMapper.NoiseMapRegion;
 import miniventure.game.world.levelgen.util.FloatField;
@@ -41,6 +42,7 @@ public class NoiseMapRegionEditor extends MyPanel {
 		sizeField = new FloatField(mapRegion.getSize(), 5);
 		sizeField.addValueListener(val -> {
 			mapRegion.setSize(val);
+			// mapEditor.testPanel.getMapPanel().invalidateMaps();
 			refresh();
 		});
 		add(sizeField);
@@ -49,6 +51,18 @@ public class NoiseMapRegionEditor extends MyPanel {
 		tileTypeSelector.addItemListener(e -> {
 			if(e.getStateChange() == ItemEvent.SELECTED)
 				mapRegion.setTileType((TileTypeEnum)e.getItem());
+			
+			// mapEditor.testPanel.getMapPanel().invalidateMaps();
+			/*if(source == null) {
+				source = tileTypeSelector;
+				for(NoiseMapEditor editor : mapEditor.testPanel.getNoiseMapperPanel().getElements())
+					if(!NoiseMapRegionEditor.this.mapEditor.equals(editor))
+						for(NoiseMapRegionEditor rEditor : editor.getRegionEditors())
+							rEditor.resetNoiseMapSelector();
+				source = null;
+				refresh();
+			}*/
+			
 			refresh();
 		});
 		tileTypeSelector.setSelectedItem(mapRegion.getTileType());
@@ -58,6 +72,8 @@ public class NoiseMapRegionEditor extends MyPanel {
 		tileTypeBtn = new JRadioButton("TileType");
 		tileTypeBtn.setSelected(mapRegion.givesTileType());
 		tileTypeBtn.addActionListener(e -> {
+			// if(!mapRegion.givesTileType())
+			// 	mapEditor.testPanel.getMapPanel().invalidateMaps();
 			mapRegion.setGivesTileType(true);
 			
 			TileTypeEnum type = mapRegion.getTileType();
@@ -71,6 +87,8 @@ public class NoiseMapRegionEditor extends MyPanel {
 		noiseMapBtn = new JRadioButton("Reference Noise Map");
 		noiseMapBtn.setSelected(!mapRegion.givesTileType());
 		noiseMapBtn.addActionListener(e -> {
+			if(mapRegion.givesTileType())
+				mapEditor.testPanel.getMapPanel().invalidateMaps();
 			mapRegion.setGivesTileType(false);
 			
 			resetNoiseMapSelector();
@@ -89,9 +107,25 @@ public class NoiseMapRegionEditor extends MyPanel {
 		if(mapRegion.getChainNoiseMapper() != null)
 			noiseMapSelector.setSelectedItem(mapRegion.getChainNoiseMapper());
 		
+		// noiseMapSelector.setName(toString()+" Selector");
 		noiseMapSelector.addItemListener(e -> {
-			if(e.getStateChange() == ItemEvent.SELECTED)
-				mapRegion.setChainNoiseMapper((NoiseMapper)e.getItem());
+			if(e.getStateChange() == ItemEvent.SELECTED) {
+				NoiseMapper prev = mapRegion.getChainNoiseMapper();
+				mapRegion.setChainNoiseMapper((NoiseMapper) e.getItem());
+				if(!Objects.equals(prev, mapRegion.getChainNoiseMapper()))
+					mapEditor.testPanel.getMapPanel().invalidateMaps();
+			}
+			// System.out.println(((Component)e.getSource()).getName());
+			/*if(source == null) {
+				source = noiseMapSelector;
+				for(NoiseMapEditor editor : mapEditor.testPanel.getNoiseMapperPanel().getElements())
+					for(NoiseMapRegionEditor rEditor : editor.getRegionEditors())
+						if(!NoiseMapRegionEditor.this.equals(rEditor))
+							rEditor.resetNoiseMapSelector();
+				source = null;
+				refresh();
+			}*/
+			
 			refresh();
 		});
 		
@@ -107,17 +141,18 @@ public class NoiseMapRegionEditor extends MyPanel {
 		}
 	}
 	
-	private void refresh() {
-		mapEditor.refresh();
-	}
+	private static Object source = null;
+	
+	private void refresh() { mapEditor.refresh(); }
 	
 	void resetNoiseMapSelector() {
+		Object sel = noiseMapSelector.getSelectedItem();
 		noiseMapSelector.removeAllItems();
 		for(NoiseMapper map : getNoiseMaps())
 			noiseMapSelector.addItem(map);
+		noiseMapSelector.setSelectedItem(sel/*region.getChainNoiseMapper()*/);
 		if(!region.givesTileType()) {
 			noiseMapBtn.setSelected(true);
-			noiseMapSelector.setSelectedItem(region.getChainNoiseMapper());
 		} else
 			tileTypeBtn.doClick();
 		noiseMapBtn.setEnabled(mapEditor.testPanel.getNoiseMapperPanel().getElementCount() > 1);
@@ -130,11 +165,14 @@ public class NoiseMapRegionEditor extends MyPanel {
 		for(NoiseMapEditor editor: editors) {
 			if(editor.equals(mapEditor))
 				continue;
+			// if(checkMapForLoops(editor.getNoiseMap()))
+			// 	continue;
+					
 			maps.add(editor.getNoiseMap());
 		}
 		return maps.toArray(new NoiseMapper[maps.size()]);
 	}
 	
 	@Override
-	public String toString() { return "RegionEditor["+mapEditor.getObjectName()+": "+region+']'; }
+	public String toString() { return "RegionEditor["+region+']'; }
 }

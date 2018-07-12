@@ -4,6 +4,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 
 import miniventure.game.world.levelgen.util.FloatField;
 import miniventure.game.world.levelgen.util.IntegerField;
@@ -71,6 +72,11 @@ public class GlobalPanel extends MyPanel {
 		
 		regenButton = new JButton("Regen world");
 		regenButton.addActionListener(e -> {
+			if(testPanel.getNoiseMapperPanel().getElements()[0].checkMapForLoops()) {
+				JOptionPane.showMessageDialog(testPanel, "Loop(s) detected in noise maps. You must remove all loops connected to the "+testPanel.getNoiseMapperPanel().getElements()[0].getObjectName()+" noise map before being able to generate the world.", "Infinite Loop Warning", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+			
 			testPanel.setFocus(testPanel.getMapPanel());
 			testPanel.getMapPanel().generate(widthField.getValue(), heightField.getValue());
 		});

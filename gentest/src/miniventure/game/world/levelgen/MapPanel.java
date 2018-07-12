@@ -31,6 +31,7 @@ public class MapPanel extends MyPanel implements Runnable {
 	private int width, height;
 	private int worldOffX, worldOffY;
 	private HashMap<Point, Color> tiles;
+	private boolean mapsValid;
 	
 	private HashMap<Integer, Boolean> keyPresses;
 	
@@ -82,7 +83,8 @@ public class MapPanel extends MyPanel implements Runnable {
 		
 		setFocusable(true);
 		
-		msgLabel = new JLabel("click regen world");
+		msgLabel = new JLabel("click \"regen world\" to generate map.");
+		msgLabel.setVerticalAlignment(SwingConstants.TOP);
 		msgLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		setLayout(new GridLayout(1, 1));
 		add(msgLabel);
@@ -91,12 +93,12 @@ public class MapPanel extends MyPanel implements Runnable {
 	
 	public void generate(int worldWidth, int worldHeight) {
 		tiles.clear();
-		//gen = false;
+		mapsValid = true;
 		int width = worldWidth <= 0 ? LevelGenerator.MAX_WORLD_SIZE : worldWidth;
 		int height = worldHeight <= 0 ? LevelGenerator.MAX_WORLD_SIZE : worldHeight;
 		for(NoiseFunctionEditor editor: testPanel.getNoiseFunctionPanel().getElements())
 			editor.getNoiseFunction().resetFunction();
-		msgLabel.setText("Generating tiles");
+		msgLabel.setText("Generating tiles...");
 		msgLabel.setVisible(true);
 		repaint();
 		SwingUtilities.invokeLater(() -> {
@@ -115,6 +117,7 @@ public class MapPanel extends MyPanel implements Runnable {
 	}
 	
 	private void genTile(HashSet<Point> points) {
+		if(!mapsValid) return;
 		int cnt = 0;
 		for(Point p: points) {
 			genTile(p);
@@ -127,6 +130,7 @@ public class MapPanel extends MyPanel implements Runnable {
 	}
 	private void genTile(Point p) { genTile(p.x, p.y); }
 	private void genTile(int x, int y) {
+		if(!mapsValid) return;
 		TileTypeEnum type = testPanel.getNoiseMapperPanel().getElements()[0].getNoiseMap().getTileType(x, y);
 		tiles.put(new Point(x, y), type.color);
 	}
@@ -188,6 +192,7 @@ public class MapPanel extends MyPanel implements Runnable {
 	}
 	
 	private void queueTiles(HashSet<Point> points) {
+		if(!mapsValid) return;
 		if(points.size() > 0) {
 			synchronized (genLock) {
 				genQueue.addLast(points);
@@ -266,6 +271,15 @@ public class MapPanel extends MyPanel implements Runnable {
 				else
 					MyUtils.sleep(20);
 			}
+		}
+	}
+	
+	void invalidateMaps() {
+		if(mapsValid) {
+			mapsValid = false;
+			msgLabel.setText("<html>Noise map references changed. World must be regenerated to ensure there are no loops.");
+			msgLabel.setVisible(true);
+			repaint();
 		}
 	}
 }
