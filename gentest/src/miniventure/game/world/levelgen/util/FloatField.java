@@ -9,14 +9,17 @@ public class FloatField extends ValueField<Float> {
 	public static final DecimalFormat format = new DecimalFormat("0.###");
 	
 	private float lastValidValue;
+	private final float minVal;
 	
-	public FloatField() { this(0f); }
-	public FloatField(float value) { this(value, 4); }
-	public FloatField(int columns) { this(0f, columns); }
+	public FloatField() { this(0); }
+	public FloatField(float value) { this(value, 3, Float.MIN_VALUE); }
+	public FloatField(float value, float minVal) { this(value, 3, minVal); }
+	public FloatField(int columns) { this(0, columns, Float.MIN_VALUE); }
 	
-	public FloatField(float value, int columns) {
+	public FloatField(float value, int columns, float minVal) {
 		super(value, columns, format::format);
 		this.lastValidValue = value;
+		this.minVal = minVal;
 	}
 	
 	@Override
@@ -32,7 +35,7 @@ public class FloatField extends ValueField<Float> {
 	
 	@Override
 	public void setValue(@NotNull Float value) {
-		value = Math.abs(value);
+		value = Math.max(minVal, value);
 		super.setValue(value);
 		lastValidValue = value;
 	}

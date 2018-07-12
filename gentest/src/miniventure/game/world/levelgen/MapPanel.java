@@ -8,8 +8,12 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.Image;
-import java.awt.event.*;
-import java.util.ArrayList;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -120,13 +124,9 @@ public class MapPanel extends MyPanel implements Runnable {
 			this.height = height;
 			worldOffX = width/2;
 			worldOffY = height/2;
-			HashSet<Point> points = new HashSet<>(200_000);
-			forEachTile(p -> points.add(p));
-			if(points.size() > 0) {
-				synchronized (genLock) {
-					genQueue.addLast(points);
-				}
-			}
+			// HashSet<Point> points = new HashSet<>(200_000);
+			forEachTile(p -> {});
+			// queueTiles(points);
 			// gen = true;
 			msgLabel.setVisible(false);
 			requestFocus();
@@ -138,8 +138,15 @@ public class MapPanel extends MyPanel implements Runnable {
 	}
 	
 	private void genTile(HashSet<Point> points) {
-		for(Point p: points)
+		int cnt = 0;
+		for(Point p: points) {
 			genTile(p);
+			cnt++;
+			if(cnt > 10_000) {
+				repaint();
+				cnt %= 10_000;
+			}
+		}
 	}
 	private void genTile(Point p) { genTile(p.x, p.y); }
 	private void genTile(int x, int y) {
@@ -158,36 +165,67 @@ public class MapPanel extends MyPanel implements Runnable {
 		bufg.setColor(getForeground());
 		final int pixelDensity = testPanel.getGlobalPanel().zoomField.getValue();
 		
-		HashSet<Point> points = new HashSet<>();
+		// HashSet<Point> points = new HashSet<>(5_000);
 		// int[] i = {0};
 		forEachTile(p -> {
-			if(!tiles.containsKey(p)) {
-				points.add(p);
+			/*if(!tiles.containsKey(p)) {
+				// points.add(p);
 				return;
-			}
+			}*/
 			// i[0]++;
 			bufg.setColor(tiles.get(p));
 			bufg.fillRect(getWidth()/2+(p.x-worldOffX)*pixelDensity, getHeight()/2+(p.y-worldOffY)*pixelDensity, pixelDensity, pixelDensity);
 		});
 		// System.out.println("rendered "+i[0]+" tiles");
-		if(points.size() > 0) {
-			synchronized (genLock) {
-				genQueue.addLast(points);
-			}
-		}
+		// queueTiles(points);
 		
 		g.drawImage(buf, 0, 0, null);
 	}
 	
+	private Point getInput() {
+		int x = 0, y = 0;
+		if(keyPresses.get(KeyEvent.VK_UP))
+			y--;
+		if(keyPresses.get(KeyEvent.VK_DOWN))
+			y++;
+		if(keyPresses.get(KeyEvent.VK_LEFT))
+			x--;
+		if(keyPresses.get(KeyEvent.VK_RIGHT))
+			x++;
+		
+		return new Point(x, y);
+	}
+	
 	private void forEachTile(VoidMonoFunction<Point> action) {
-		Point radius = new Point(Math.min(width, getWidth())/2, Math.min(height, getHeight())/2);
+		int zoom = testPanel.getGlobalPanel().zoomField.getValue();
+		Point radius = new Point(Math.min(width, getWidth())/2/zoom, Math.min(height, getHeight())/2/zoom);
+		
+		int spd = testPanel.getGlobalPanel().speedField.getValue();
+		float buffer = testPanel.getGlobalPanel().bufferField.getValue();
+		Point input = getInput();
+		Point bufferRadiusNeg = new Point(radius.x + (int)(spd*buffer*(input.x<0?-input.x:0)), radius.y + (int)(spd*buffer*(input.y<0?-input.y:0)));
+		Point bufferRadiusPos = new Point(radius.x + (int)(spd*buffer*(input.x>0?input.x:0)), radius.y + (int)(spd*buffer*(input.y>0?input.y:0)));
 		// System.out.println("width = "+getWidth()+" height ="+getHeight());
 		// System.out.println("iterating through "+(radius.x*2*radius.y*2)+" tiles");
-		for(int x = -radius.x; x < radius.x; x++) {
-			for(int y = -radius.y; y < radius.y; y++) {
+		HashSet<Point> points = new HashSet<>((bufferRadiusNeg.x+bufferRadiusPos.x)*(bufferRadiusNeg.y+bufferRadiusPos.y)/2);
+		for(int x = -bufferRadiusNeg.x; x < bufferRadiusPos.x; x++) {
+			for(int y = -bufferRadiusNeg.y; y < bufferRadiusPos.y; y++) {
 				Point p = new Point(x + worldOffX, y + worldOffY);
-				if(!(p.x < 0 || p.y < 0 || p.x >= width || p.y >= height))
+				if(!tiles.containsKey(p))
+					points.add(p);
+				else if(!(p.x < 0 || p.y < 0 || p.x >= width || p.y >= height) && Math.abs(x) <= radius.x && Math.abs(y) <= radius.y)
 					action.act(p);
+			}
+		}
+		queueTiles(points);
+	}
+	
+	private void queueTiles(HashSet<Point> points) {
+		if(points.size() > 0) {
+			synchronized (genLock) {
+				genQueue.addLast(points);
+				while(genQueue.size() > testPanel.getGlobalPanel().queueField.getValue())
+					genQueue.pollFirst();
 			}
 		}
 	}
@@ -197,7 +235,7 @@ public class MapPanel extends MyPanel implements Runnable {
 	@Override
 	public void run() {
 		inputThread = Thread.currentThread();
-		System.out.println("input thread started");
+		// System.out.println("input thread started");
 		// int delay = 0;
 		while(run) {
 			MyUtils.sleep(60);
@@ -231,7 +269,7 @@ public class MapPanel extends MyPanel implements Runnable {
 			}*/
 		}
 		
-		System.out.println("input thread stopped.");
+		// System.out.println("input thread stopped.");
 	}
 	
 	private final LinkedList<HashSet<Point>> genQueue = new LinkedList<>();
@@ -252,24 +290,27 @@ public class MapPanel extends MyPanel implements Runnable {
 				run = true;
 			}
 			loader = Thread.currentThread();
-			System.out.println("starting");
+			// System.out.println("starting");
 			run = true;
 			boolean start = false;
 			while(run) {
 				if(genQueue.size() > 0) {
 					if(!start) {
-						System.out.println("starting queue");
+						// System.out.println("starting queue");
 						start = true;
 					}
-					System.out.println(genQueue.size());
+					// System.out.println(genQueue.size());
 					HashSet<Point> points;
 					synchronized (genLock) {
-						points = genQueue.pollFirst();
+						points = genQueue.pollLast();
 					}
-					System.out.println("generating "+points.size()+" tiles");
+					// System.out.println("generating "+points.size()+" tiles");
 					genTile(points);
+					if(tiles.size() > 2_500_000)
+						tiles.clear();
+					// System.out.println(tiles.size());
 					if(genQueue.size() == 0) {
-						System.out.println("gen queue finished");
+						// System.out.println("gen queue finished");
 						start = false;
 					}
 					// 	fin = true;
@@ -282,7 +323,7 @@ public class MapPanel extends MyPanel implements Runnable {
 					MyUtils.sleep(20);
 			}
 			
-			System.out.println("finished");
+			// System.out.println("finished");
 		}
 	}
 }
