@@ -105,11 +105,6 @@ public class NoiseMapRegionEditor extends MyPanel {
 			if(!tileTypeBtn.isSelected())
 				tileTypeSelector.setEnabled(false);
 		}
-		
-		/*SwingUtilities.invokeLater(() -> {
-			MyUtils.sleep(100);
-			noiseMapBtn.setEnabled(mapEditor.testPanel.getNoiseMapperPanel().getElementCount() > 1);
-		});*/
 	}
 	
 	private void refresh() {
@@ -131,7 +126,6 @@ public class NoiseMapRegionEditor extends MyPanel {
 	@NotNull
 	private NoiseMapper[] getNoiseMaps() {
 		NoiseMapEditor[] editors = mapEditor.testPanel.getNoiseMapperPanel().getElements();
-		// System.out.println("got "+editors.length+" noise maps for region editor "+this);
 		ArrayList<NoiseMapper> maps = new ArrayList<>();
 		for(NoiseMapEditor editor: editors) {
 			if(editor.equals(mapEditor))

@@ -27,7 +27,6 @@ import miniventure.game.world.tile.TileType.TileTypeEnum;
 public class MapPanel extends MyPanel implements Runnable {
 	
 	private final TestPanel testPanel;
-	// private boolean gen = false;
 	private final JLabel msgLabel;
 	private int width, height;
 	private int worldOffX, worldOffY;
@@ -69,38 +68,19 @@ public class MapPanel extends MyPanel implements Runnable {
 		addFocusListener(new FocusListener() {
 			@Override public void focusGained(FocusEvent e) {
 				run = true;
-				if((inputThread == null || !inputThread.isAlive())/* && (width >= getWidth() || height >= getHeight())*/)
+				if((inputThread == null || !inputThread.isAlive()))
 					new Thread(MapPanel.this).start();
 				if((loader == null || !loader.isAlive()))
 					new Thread(new TileLoader()).start();
 			}
 			@Override
 			public void focusLost(FocusEvent e) {
-				// gen = false;
-				// msgLabel.setText("click regen world button to restart generation.");
-				// msgLabel.setVisible(true);
 				run = false;
 				revalidate();
 			}
 		});
 		
 		setFocusable(true);
-		
-		/*addComponentListener(new ComponentAdapter() {
-			@Override
-			public void componentResized(ComponentEvent e) {
-				run = false;
-				if(inputThread != null) {
-					try {
-						inputThread.join();
-					} catch(InterruptedException ignored) {
-					}
-				}
-				run = true;
-				if(width >= getWidth() || height >= getHeight())
-					new Thread(MapPanel.this).start();
-			}
-		});*/
 		
 		msgLabel = new JLabel("click regen world");
 		msgLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -124,10 +104,7 @@ public class MapPanel extends MyPanel implements Runnable {
 			this.height = height;
 			worldOffX = width/2;
 			worldOffY = height/2;
-			// HashSet<Point> points = new HashSet<>(200_000);
 			forEachTile(p -> {});
-			// queueTiles(points);
-			// gen = true;
 			msgLabel.setVisible(false);
 			requestFocus();
 			repaint();
@@ -165,19 +142,10 @@ public class MapPanel extends MyPanel implements Runnable {
 		bufg.setColor(getForeground());
 		final int pixelDensity = testPanel.getGlobalPanel().zoomField.getValue();
 		
-		// HashSet<Point> points = new HashSet<>(5_000);
-		// int[] i = {0};
 		forEachTile(p -> {
-			/*if(!tiles.containsKey(p)) {
-				// points.add(p);
-				return;
-			}*/
-			// i[0]++;
 			bufg.setColor(tiles.get(p));
 			bufg.fillRect(getWidth()/2+(p.x-worldOffX)*pixelDensity, getHeight()/2+(p.y-worldOffY)*pixelDensity, pixelDensity, pixelDensity);
 		});
-		// System.out.println("rendered "+i[0]+" tiles");
-		// queueTiles(points);
 		
 		g.drawImage(buf, 0, 0, null);
 	}
@@ -205,8 +173,7 @@ public class MapPanel extends MyPanel implements Runnable {
 		Point input = getInput();
 		Point bufferRadiusNeg = new Point(radius.x + (int)(spd*buffer*(input.x<0?-input.x:0)), radius.y + (int)(spd*buffer*(input.y<0?-input.y:0)));
 		Point bufferRadiusPos = new Point(radius.x + (int)(spd*buffer*(input.x>0?input.x:0)), radius.y + (int)(spd*buffer*(input.y>0?input.y:0)));
-		// System.out.println("width = "+getWidth()+" height ="+getHeight());
-		// System.out.println("iterating through "+(radius.x*2*radius.y*2)+" tiles");
+		
 		HashSet<Point> points = new HashSet<>((bufferRadiusNeg.x+bufferRadiusPos.x)*(bufferRadiusNeg.y+bufferRadiusPos.y)/2);
 		for(int x = -bufferRadiusNeg.x; x < bufferRadiusPos.x; x++) {
 			for(int y = -bufferRadiusNeg.y; y < bufferRadiusPos.y; y++) {
@@ -235,14 +202,8 @@ public class MapPanel extends MyPanel implements Runnable {
 	@Override
 	public void run() {
 		inputThread = Thread.currentThread();
-		// System.out.println("input thread started");
-		// int delay = 0;
 		while(run) {
 			MyUtils.sleep(60);
-			// delay += 60;
-			
-			// if(width < getWidth() && height < getHeight())
-			// 	break;
 			
 			int worldOffX = this.worldOffX;
 			int worldOffY = this.worldOffY;
@@ -258,18 +219,11 @@ public class MapPanel extends MyPanel implements Runnable {
 				worldOffX = Math.min(width, worldOffX + spd);
 			
 			if(this.worldOffX != worldOffX || this.worldOffY != worldOffY) {
-				// System.out.println("button pressed");
 				this.worldOffX = worldOffX;
 				this.worldOffY = worldOffY;
-				// System.out.println("moved to "+worldOffX+','+worldOffY);
 				repaint();
 			}
-			/*if(delay > 500) {
-				delay %= 500;
-			}*/
 		}
-		
-		// System.out.println("input thread stopped.");
 	}
 	
 	private final LinkedList<HashSet<Point>> genQueue = new LinkedList<>();
@@ -290,40 +244,28 @@ public class MapPanel extends MyPanel implements Runnable {
 				run = true;
 			}
 			loader = Thread.currentThread();
-			// System.out.println("starting");
 			run = true;
 			boolean start = false;
 			while(run) {
 				if(genQueue.size() > 0) {
 					if(!start) {
-						// System.out.println("starting queue");
 						start = true;
 					}
-					// System.out.println(genQueue.size());
 					HashSet<Point> points;
 					synchronized (genLock) {
 						points = genQueue.pollLast();
 					}
-					// System.out.println("generating "+points.size()+" tiles");
 					genTile(points);
 					if(tiles.size() > 2_500_000)
 						tiles.clear();
-					// System.out.println(tiles.size());
 					if(genQueue.size() == 0) {
-						// System.out.println("gen queue finished");
 						start = false;
 					}
-					// 	fin = true;
 					repaint();
-					// }
-					// if(fin)
-					// 	MyUtils.sleep(10);
 				}
 				else
 					MyUtils.sleep(20);
 			}
-			
-			// System.out.println("finished");
 		}
 	}
 }

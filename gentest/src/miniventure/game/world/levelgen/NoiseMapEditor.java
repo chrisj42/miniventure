@@ -60,31 +60,7 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 			for(NoiseMapRegion region: regions)
 				addRegion(region, false);
 		});
-		/*regionSelector.addActionListener(e -> {
-			// I assume this triggers whenever an item is selected
-			if(regionSelector.getSelectedItem() != null) {
-				if(curRegionEditor != null) {
-					regionSelectionPanel.remove(curRegionEditor);
-					curRegionEditor = null;
-				}
-				curRegionEditor = new NoiseMapRegionEditor(this, (NoiseMapRegion) regionSelector.getSelectedItem());
-				regionSelectionPanel.add(curRegionEditor);
-				refresh();
-			}
-		});
 		
-		regionSelectionPanel.add(regionSelector);
-		if(regions.length > 0)
-			regionSelector.setSelectedItem(regions[0]);
-		add(regionSelectionPanel);
-		*/
-		/*if(testPanel.getNoiseMapperPanel() != null) {
-			SwingUtilities.invokeLater(() -> {
-				NoiseMapEditor[] editors = testPanel.getNoiseMapperPanel().getElements(NoiseMapEditor.class);
-				for(NoiseMapEditor e : editors)
-					e.noiseMapCreated();
-			});
-		}*/
 		add(Box.createVerticalGlue());
 	}
 	
@@ -130,11 +106,6 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 	void refresh() {
 		testPanel.refresh();
 	}
-	
-	/*void noiseMapCreated() {
-		if(curRegionEditor != null)
-			curRegionEditor.resetNoiseMapSelector();
-	}*/
 	
 	@Override
 	public void setObjectName(@NotNull String name) {
@@ -194,52 +165,12 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 		@Override
 		protected void paintComponent(Graphics g) {
 			super.paintComponent(g);
-			
-			/*NoiseMapRegion[] regions = noiseMap.getRegions();
-			Color[] colors = new Color[regions.length];
-			for(int i = 0; i < regions.length; i++) {
-				Color c;
-				if(regions[i].givesTileType())
-					c = regions[i].getTileType().color;
-				else
-					c = Color.LIGHT_GRAY;
-				colors[i] = c;
-			}
-			
-			float fxOff = 0;
-			int lastOff = 0;
-			for(int i = 0; i < regions.length; i++) {
-				Color c = colors[i];
-				g.setColor(c);
-				float fwidth = getWidth()*regions[i].getSize()/noiseMap.getTotal();
-				int width = Math.max(1, (int)fwidth);
-				int xOff = (int)fxOff;
-				g.fillRect(xOff, 0, width, getHeight());
-				if(width > 1) {
-					//g.setColor(Testing.invertColor(Testing.blendColors(i == 0 ? null : colors[i - 1], colors[i], i == colors.length - 1 ? null : colors[i + 1])));
-					g.drawRect(lastOff, 0, width+(xOff-lastOff), getHeight());
-				}
-				fxOff += fwidth;
-				lastOff = xOff+width;
-			}
-			
-			g.setColor(Color.BLACK);
-			g.drawRect(0, 0, getWidth()-1, getHeight()-1);*/
 			drawBarRegions(g, noiseMap, getWidth(), getHeight(), true, 0);
 		}
 	}
 	
 	private static void drawBarRegions(Graphics g, NoiseMapper noiseMap, final float barWidth, final int barHeight, boolean drawSeparators, final float inherXOff) {
 		NoiseMapRegion[] regions = noiseMap.getRegions();
-		/*Color[] colors = new Color[regions.length];
-		for(int i = 0; i < regions.length; i++) {
-			Color c;
-			if(regions[i].givesTileType())
-				c = regions[i].getTileType().color;
-			else
-				c = Color.LIGHT_GRAY;
-			colors[i] = c;
-		}*/
 		
 		float fxOff = inherXOff;
 		int lastOff = (int)fxOff;
@@ -256,7 +187,6 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 				g.setColor(regions[i].getTileType().color);
 				g.fillRect(xOff, 0, width, barHeight);
 				if(drawSeparators && width > 1) {
-					//g.setColor(Testing.invertColor(Testing.blendColors(i == 0 ? null : colors[i - 1], colors[i], i == colors.length - 1 ? null : colors[i + 1])));
 					g.drawRect(lastOff, 0, width+(xOff-lastOff), barHeight);
 				}
 			}

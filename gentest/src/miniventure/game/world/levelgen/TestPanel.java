@@ -115,7 +115,6 @@ public class TestPanel extends MyPanel {
 			@Override
 			public void componentRemoved(ContainerEvent e) {
 				SwingUtilities.invokeLater(() -> {
-					// System.out.println("removed map");
 					for(NoiseMapEditor mapEditor: noiseMapperPanel.getElements())
 						for(NoiseMapRegionEditor editor: mapEditor.getRegionEditors())
 							editor.resetNoiseMapSelector();
@@ -155,9 +154,6 @@ public class TestPanel extends MyPanel {
 			for(NoiseMapEditor editor: mapEditors)
 				for(NoiseMapRegionEditor rEditor: editor.getRegionEditors())
 					rEditor.resetNoiseMapSelector();
-			
-			
-			// setFocus(mapPanel);
 		});
 	}
 	
