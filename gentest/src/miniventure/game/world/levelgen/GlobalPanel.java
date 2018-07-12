@@ -20,6 +20,8 @@ public class GlobalPanel extends MyPanel {
 	private JCheckBox customSeedOption;
 	final IntegerField widthField;
 	final IntegerField heightField;
+	final IntegerField speedField;
+	final IntegerField zoomField;
 	
 	private JButton regenButton;
 	
@@ -57,6 +59,14 @@ public class GlobalPanel extends MyPanel {
 		add(new JLabel("World Height:"));
 		add(heightField);
 		add(regenButton);
+		
+		speedField = new IntegerField(2, 2, 1);
+		zoomField = new IntegerField(1, 2, 1);
+		zoomField.addValueListener(val -> testPanel.getMapPanel().repaint());
+		add(new JLabel("map scroll speed:"));
+		add(speedField);
+		add(new JLabel("zoom:"));
+		add(zoomField);
 	}
 	
 	private void refresh() {
