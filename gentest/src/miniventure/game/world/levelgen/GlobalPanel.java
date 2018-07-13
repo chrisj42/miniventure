@@ -211,7 +211,7 @@ public class GlobalPanel extends MyPanel {
 			
 			NoiseFunctionEditor[] functionEditors = new NoiseFunctionEditor[functions.length];
 			for(int i = 0; i < functions.length; i++) {
-				functionEditors[i] = new NoiseFunctionEditor(functions[i]);
+				functionEditors[i] = new NoiseFunctionEditor(testPanel, functions[i]);
 				functionEditors[i].seed.setValue(seeds[i]);
 				functionEditors[i].randomSeed.setSelected(randSeeds[i]);
 			}

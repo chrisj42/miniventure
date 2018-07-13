@@ -6,6 +6,7 @@ import javax.swing.JComboBox;
 import javax.swing.JRadioButton;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ItemEvent;
 import java.util.ArrayList;
@@ -52,6 +53,7 @@ public class NoiseMapRegionEditor extends MyPanel {
 		add(sizeField);
 		
 		tileTypeSelector = new JComboBox<>(TileTypeEnum.values());
+		tileTypeSelector.setSelectedItem(mapRegion.getTileType());
 		tileTypeSelector.addItemListener(e -> {
 			if(e.getStateChange() == ItemEvent.SELECTED)
 				mapRegion.setTileType((TileTypeEnum)e.getItem());
@@ -59,7 +61,6 @@ public class NoiseMapRegionEditor extends MyPanel {
 			// mapEditor.testPanel.getMapPanel().invalidateMaps();
 			refresh();
 		});
-		tileTypeSelector.setSelectedItem(mapRegion.getTileType());
 		
 		noiseMapSelector = new JComboBox<>();
 		
@@ -138,6 +139,17 @@ public class NoiseMapRegionEditor extends MyPanel {
 		mapEditor.refresh();
 	}
 	
+	// simply removes and re-adds the given map, if it was there to begin with.
+	void resetNoiseMapSelector(NoiseMapper map) {
+		for(int i = 0; i < noiseMapSelector.getItemCount(); i++) {
+			if(noiseMapSelector.getItemAt(i).equals(map)) {
+				noiseMapSelector.removeItemAt(i);
+				noiseMapSelector.insertItemAt(map, i);
+				refresh();
+				return;
+			}
+		}
+	}
 	void resetNoiseMapSelector() {
 		Object sel = noiseMapSelector.getSelectedItem();
 		noiseMapSelector.removeAllItems();
@@ -165,4 +177,7 @@ public class NoiseMapRegionEditor extends MyPanel {
 	
 	@Override
 	public String toString() { return "RegionEditor["+region+']'; }
+	
+	@Override
+	public Dimension getMaximumSize() { return getPreferredSize(); }
 }

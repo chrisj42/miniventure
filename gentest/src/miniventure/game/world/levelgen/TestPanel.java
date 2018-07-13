@@ -97,7 +97,7 @@ public class TestPanel extends MyPanel {
 		
 		
 		globalPanel = new GlobalPanel(this);
-		noiseFunctionPanel = new ListPanel<>(NoiseFunctionEditor.class, "<html>the value in the seed field will be retained <em>only</em> if \"random seed\" is unchecked.", name -> new NoiseFunctionEditor(new NamedNoiseFunction(name)));
+		noiseFunctionPanel = new ListPanel<>(NoiseFunctionEditor.class, "<html>the value in the seed field will be retained <em>only</em> if \"random seed\" is unchecked.", name -> new NoiseFunctionEditor(this, new NamedNoiseFunction(name)));
 		noiseMapperPanel = new ListPanel<>(NoiseMapEditor.class, null, name -> new NoiseMapEditor(this, new NoiseMapper(name, noiseFunctionPanel.getElements()[0].getNoiseFunction())));
 		
 		Action resetMaps = () -> {
@@ -154,9 +154,9 @@ public class TestPanel extends MyPanel {
 		SwingUtilities.invokeLater(() -> {
 			// add all the editors for the biomes and noise functions from above
 			
-			noiseFunctionPanel.addElement(new NoiseFunctionEditor(categoryNoise));
-			noiseFunctionPanel.addElement(new NoiseFunctionEditor(biomeNoise));
-			noiseFunctionPanel.addElement(new NoiseFunctionEditor(detailNoise));
+			noiseFunctionPanel.addElement(new NoiseFunctionEditor(this, categoryNoise));
+			noiseFunctionPanel.addElement(new NoiseFunctionEditor(this, biomeNoise));
+			noiseFunctionPanel.addElement(new NoiseFunctionEditor(this, detailNoise));
 			
 			NoiseMapEditor[] mapEditors = NoiseMapEditor.getEditorsForAll(this,
 				biomeCategories,

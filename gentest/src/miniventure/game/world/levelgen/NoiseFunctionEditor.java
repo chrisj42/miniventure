@@ -19,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 
 class NoiseFunctionEditor extends MyPanel implements NamedObject, Scrollable {
 	
+	private final TestPanel testPanel;
 	private final NamedNoiseFunction noiseFunction;
 	
 	final JCheckBox randomSeed;
@@ -26,7 +27,8 @@ class NoiseFunctionEditor extends MyPanel implements NamedObject, Scrollable {
 	private final IntegerField numCurves;
 	private final IntegerField coordsPerValue;
 	
-	NoiseFunctionEditor(@NotNull NamedNoiseFunction noiseFunction) {
+	NoiseFunctionEditor(@NotNull TestPanel testPanel, @NotNull NamedNoiseFunction noiseFunction) {
+		this.testPanel = testPanel;
 		this.noiseFunction = noiseFunction;
 		
 		randomSeed = new JCheckBox("Random seed", true);
@@ -85,7 +87,11 @@ class NoiseFunctionEditor extends MyPanel implements NamedObject, Scrollable {
 	}
 	
 	@Override
-	public void setObjectName(@NotNull String name) { noiseFunction.setObjectName(name); }
+	public void setObjectName(@NotNull String name) {
+		noiseFunction.setObjectName(name);
+		for(NoiseMapEditor editor: testPanel.getNoiseMapperPanel().getElements())
+			editor.resetFunctionSelector();
+	}
 	@Override @NotNull
 	public String getObjectName() { return noiseFunction.getObjectName(); }
 	

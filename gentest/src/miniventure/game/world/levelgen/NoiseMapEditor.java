@@ -3,6 +3,7 @@ package miniventure.game.world.levelgen;
 import javax.swing.*;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Rectangle;
@@ -23,6 +24,7 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 	private final MapDisplayBar bar;
 	
 	private JComboBox<NamedNoiseFunction> functionSelector;
+	private final MyPanel regionHolder;
 	private ArrayList<NoiseMapRegionEditor> regionEditors = new ArrayList<>();
 	
 	public NoiseMapEditor(@NotNull TestPanel testPanel, @NotNull NoiseMapper noiseMap) {
@@ -39,7 +41,7 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 		
 		add(bar);
 		
-		JPanel midPanel = new JPanel();
+		JPanel midPanel = new MyPanel();
 		midPanel.setBackground(null);
 		
 		functionSelector = new JComboBox<>();
@@ -62,13 +64,25 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 		
 		add(midPanel);
 		
+		regionHolder = new MyPanel();
+		regionHolder.setBackground(null);
+		regionHolder.setLayout(new BoxLayout(regionHolder, BoxLayout.PAGE_AXIS));
+		add(regionHolder);
+		
+		add(Box.createVerticalGlue());
+		
 		SwingUtilities.invokeLater(() -> {
 			NoiseMapRegion[] regions = noiseMap.getRegions();
 			for(NoiseMapRegion region: regions)
 				addRegion(region, false);
 		});
-		
-		add(Box.createVerticalGlue());
+	}
+	
+	@Override
+	public Component add(Component c) {
+		if(c instanceof JComponent)
+			((JComponent)c).setAlignmentX(CENTER_ALIGNMENT);
+		return super.add(c);
 	}
 	
 	public String getData() {
@@ -88,14 +102,15 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 			regionEditors.get(0).removeBtn.setEnabled(true);
 		NoiseMapRegionEditor rEditor = new NoiseMapRegionEditor(this, region);
 		regionEditors.add(rEditor);
-		add(rEditor, getComponentCount()-1);
+		rEditor.setAlignmentX(LEFT_ALIGNMENT);
+		regionHolder.add(rEditor);
 		if(refresh)
 			refresh();
 	}
 	
 	void removeRegion(NoiseMapRegionEditor regionEditor, NoiseMapRegion region) {
 		regionEditors.remove(regionEditor);
-		remove(regionEditor);
+		regionHolder.remove(regionEditor);
 		noiseMap.removeRegion(region);
 		if(regionEditors.size() == 1)
 			regionEditors.get(0).removeBtn.setEnabled(false);
@@ -145,6 +160,7 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 	
 	void refresh() {
 		NoiseMapEditor[] editors = testPanel.getNoiseMapperPanel().getElements();
+		if(editors.length == 0) return;
 		if(this.equals(editors[0])) {
 			// update the background of the other maps by checking for access
 			ArrayList<NoiseMapper> accessed = new ArrayList<>(editors.length);
@@ -153,15 +169,18 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 				editor.setBackground(accessed.contains(editor.noiseMap) ? null : Color.LIGHT_GRAY);
 			
 			// setBackground(Color.LIGHT_GRAY);
+			testPanel.refresh();
 		}
-		testPanel.refresh();
+		else
+			editors[0].refresh();
 	}
 	
 	private static void addAccessedNoiseMaps(NoiseMapper map, ArrayList<NoiseMapper> accessed) {
 		accessed.add(map);
 		for(NoiseMapRegion region: map.getRegions())
 			if(!region.givesTileType())
-				addAccessedNoiseMaps(region.getChainNoiseMapper(), accessed);
+				if(!accessed.contains(region.getChainNoiseMapper()))
+					addAccessedNoiseMaps(region.getChainNoiseMapper(), accessed);
 	}
 	
 	@Override
@@ -170,6 +189,9 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 	@Override
 	public void setObjectName(@NotNull String name) {
 		noiseMap.setObjectName(name);
+		for(NoiseMapEditor editor: testPanel.getNoiseMapperPanel().getElements())
+			for(NoiseMapRegionEditor rEditor: editor.getRegionEditors())
+				rEditor.resetNoiseMapSelector(noiseMap);
 	}
 	
 	@NotNull
