@@ -2,6 +2,7 @@ package miniventure.game.world.levelgen;
 
 import java.util.ArrayList;
 
+import miniventure.game.util.MyUtils;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 import org.jetbrains.annotations.NotNull;
@@ -154,6 +155,14 @@ public class NoiseMapper implements NamedObject {
 		}
 		
 		public int getIndex() { return regions.indexOf(this); }
+		
+		int move(int amt) {
+			int idx = getIndex();
+			int nidx = MyUtils.clamp(idx+amt, 0, regions.size()-1);
+			regions.remove(idx);
+			regions.add(nidx, this);
+			return nidx;
+		}
 		
 		@Override
 		public String toString() { return NoiseMapper.this+" Region #"+getIndex()+"; size="+size+", givesTile="+givesTileType+", tiletype="+tileType+", chainmapper="+chainNoiseMapper; }

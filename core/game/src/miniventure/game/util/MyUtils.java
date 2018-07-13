@@ -104,6 +104,12 @@ public final class MyUtils {
 		return (num-prevMin)/(prevMax-prevMin) * (newMax-newMin) + newMin;
 	}
 	
+	public static <N extends Comparable<N>> N clamp(N val, N min, N max) {
+		if(val.compareTo(min) < 0) return min;
+		if(val.compareTo(max) > 0) return max;
+		return val;
+	}
+	
 	public static void fillRect(Rectangle rect, Color c, Batch batch) {
 		fillRect(rect.x, rect.y, rect.width, rect.height, c, batch);
 	}

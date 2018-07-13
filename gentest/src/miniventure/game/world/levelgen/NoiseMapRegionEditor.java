@@ -1,5 +1,6 @@
 package miniventure.game.world.levelgen;
 
+import javax.swing.Box;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -23,9 +24,10 @@ import org.jetbrains.annotations.NotNull;
 public class NoiseMapRegionEditor extends MyPanel {
 	
 	@NotNull private final NoiseMapEditor mapEditor;
-	@NotNull private final NoiseMapRegion region;
+	@NotNull final NoiseMapRegion region;
 	private final FloatField sizeField;
 	final JButton removeBtn;
+	private final JButton upBtn, downBtn;
 	private final ButtonGroup mapTypeButtonGroup = new ButtonGroup();
 	private final JRadioButton tileTypeBtn, noiseMapBtn;
 	private final JComboBox<TileTypeEnum> tileTypeSelector;
@@ -43,6 +45,24 @@ public class NoiseMapRegionEditor extends MyPanel {
 		removeBtn.addActionListener(e -> mapEditor.removeRegion(this, mapRegion));
 		removeBtn.setEnabled(mapEditor.getNoiseMap().getRegionCount() > 1);
 		add(removeBtn);
+		
+		add(Box.createHorizontalStrut(10));
+		
+		upBtn = new JButton("UP");
+		upBtn.addActionListener(e -> {
+			region.move(-1);
+			mapEditor.updateRegion(this);
+		});
+		upBtn.setEnabled(region.getIndex() > 0);
+		add(upBtn);
+		
+		downBtn = new JButton("DOWN");
+		downBtn.addActionListener(e -> {
+			region.move(1);
+			mapEditor.updateRegion(this);
+		});
+		downBtn.setEnabled(region.getIndex() < mapEditor.getNoiseMap().getRegionCount()-1);
+		add(downBtn);
 		
 		sizeField = new FloatField(mapRegion.getSize(), 3, 5);
 		sizeField.addValueListener(val -> {
@@ -135,9 +155,14 @@ public class NoiseMapRegionEditor extends MyPanel {
 		);
 	}
 	
-	private void refresh() {
-		mapEditor.refresh();
+	void updateButtons() {
+		int idx = region.getIndex();
+		upBtn.setEnabled(idx > 0);
+		downBtn.setEnabled(idx < mapEditor.getNoiseMap().getRegionCount()-1);
+		// refresh();
 	}
+	
+	private void refresh() { mapEditor.refresh(); }
 	
 	// simply removes and re-adds the given map, if it was there to begin with.
 	void resetNoiseMapSelector(NoiseMapper map) {

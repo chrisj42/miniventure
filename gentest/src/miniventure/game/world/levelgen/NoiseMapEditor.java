@@ -23,9 +23,9 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 	@NotNull private final NoiseMapper noiseMap;
 	private final MapDisplayBar bar;
 	
-	private JComboBox<NamedNoiseFunction> functionSelector;
+	private final JComboBox<NamedNoiseFunction> functionSelector;
 	private final MyPanel regionHolder;
-	private ArrayList<NoiseMapRegionEditor> regionEditors = new ArrayList<>();
+	private final ArrayList<NoiseMapRegionEditor> regionEditors = new ArrayList<>();
 	
 	public NoiseMapEditor(@NotNull TestPanel testPanel, @NotNull NoiseMapper noiseMap) {
 		this.testPanel = testPanel;
@@ -97,6 +97,25 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 		);
 	}
 	
+	void updateRegion(@NotNull NoiseMapRegionEditor editor) {
+		int idx = editor.region.getIndex();
+		if(idx == regionEditors.indexOf(editor)) {
+			System.out.println("index matches: "+idx);
+			return;
+		}
+		regionEditors.remove(editor);
+		regionHolder.remove(editor);
+		
+		regionEditors.add(idx, editor);
+		regionHolder.add(editor, idx);
+		
+		for(NoiseMapRegionEditor r: regionEditors)
+			r.updateButtons();
+		
+		regionHolder.revalidate();
+		regionHolder.repaint();
+	}
+	
 	private void addRegion(@NotNull NoiseMapRegion region, boolean refresh) {
 		if(regionEditors.size() == 1)
 			regionEditors.get(0).removeBtn.setEnabled(true);
@@ -104,6 +123,8 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 		regionEditors.add(rEditor);
 		rEditor.setAlignmentX(LEFT_ALIGNMENT);
 		regionHolder.add(rEditor);
+		if(regionEditors.size() > 1)
+			regionEditors.get(regionEditors.size()-2).updateButtons();
 		if(refresh)
 			refresh();
 	}
@@ -114,6 +135,10 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 		noiseMap.removeRegion(region);
 		if(regionEditors.size() == 1)
 			regionEditors.get(0).removeBtn.setEnabled(false);
+		if(regionEditors.size() > 0) {
+			regionEditors.get(0).updateButtons();
+			regionEditors.get(regionEditors.size() - 1).updateButtons();
+		}
 		refresh();
 	}
 	
