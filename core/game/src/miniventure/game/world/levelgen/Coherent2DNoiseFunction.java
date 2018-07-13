@@ -60,9 +60,8 @@ class Coherent2DNoiseFunction {
 		// MathUtils.random.setSeed(hashFunction.hashInts(new int[] {xRef, yRef}));
 		// ref.setToRandomDirection();
 		
-		// way I used for a while
-		ref.x = (int) hashFunction.hashInts(new int[] {xRef, yRef});
-		ref.y = (int) hashFunction.hashInts(new int[] {yRef, xRef});
+		ref.x = (int) hashFunction.hashInts(new int[] {xRef, yRef, xRef});
+		ref.y = (int) hashFunction.hashInts(new int[] {yRef, xRef, xRef});
 		ref.nor();
 		
 		diff.set(x, y);
