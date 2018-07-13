@@ -7,7 +7,6 @@ import javax.swing.SwingUtilities;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.GridLayout;
-import java.awt.Image;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
@@ -33,7 +32,7 @@ public class MapPanel extends MyPanel implements Runnable {
 	private HashMap<Point, Color> tiles;
 	private boolean mapsValid;
 	
-	private HashMap<Integer, Boolean> keyPresses;
+	private HashSet<Integer> keyPresses;
 	
 	public MapPanel(TestPanel testPanel) {
 		this.testPanel = testPanel;
@@ -46,16 +45,12 @@ public class MapPanel extends MyPanel implements Runnable {
 		
 		tiles = new HashMap<>(Math.min(100_000, width*height));
 		
-		keyPresses = new HashMap<>(4);
-		keyPresses.put(KeyEvent.VK_UP, false);
-		keyPresses.put(KeyEvent.VK_DOWN, false);
-		keyPresses.put(KeyEvent.VK_LEFT, false);
-		keyPresses.put(KeyEvent.VK_RIGHT, false);
+		keyPresses = new HashSet<>(4);
 		
 		addKeyListener(new KeyListener() {
 			@Override
-			public void keyPressed(KeyEvent e) { keyPresses.computeIfPresent(e.getKeyCode(), (k, v) -> true); }
-			@Override public void keyReleased(KeyEvent e) { keyPresses.computeIfPresent(e.getKeyCode(), (k, v) -> false); }
+			public void keyPressed(KeyEvent e) { keyPresses.add(e.getKeyCode()); }
+			@Override public void keyReleased(KeyEvent e) { keyPresses.remove(e.getKeyCode()); }
 			@Override public void keyTyped(KeyEvent e) {}
 		});
 		
@@ -67,20 +62,11 @@ public class MapPanel extends MyPanel implements Runnable {
 		});
 		
 		addFocusListener(new FocusListener() {
-			@Override public void focusGained(FocusEvent e) {
-				run = true;
-				if((inputThread == null || !inputThread.isAlive()))
-					new Thread(MapPanel.this).start();
-				if((loader == null || !loader.isAlive()))
-					new Thread(new TileLoader()).start();
-			}
-			@Override
-			public void focusLost(FocusEvent e) {
-				run = false;
-				revalidate();
-			}
+			@Override public void focusGained(FocusEvent e) { focus(false); }
+			@Override public void focusLost(FocusEvent e) { unfocus(false); }
 		});
 		
+		setDoubleBuffered(true);
 		setFocusable(true);
 		
 		msgLabel = new JLabel("click \"regen world\" to generate map.");
@@ -115,6 +101,20 @@ public class MapPanel extends MyPanel implements Runnable {
 		});
 	}
 	
+	void unfocus(boolean total) {
+		if(total) run = false;
+		keyPresses.clear();
+		// revalidate();
+	}
+	
+	void focus(boolean total) {
+		run = true;
+		if((inputThread == null || !inputThread.isAlive()))
+			new Thread(MapPanel.this).start();
+		if((loader == null || !loader.isAlive()))
+			new Thread(new TileLoader()).start();
+	}
+	
 	private void genTile(HashSet<Point> points) {
 		if(!mapsValid) return;
 		int cnt = 0;
@@ -138,30 +138,30 @@ public class MapPanel extends MyPanel implements Runnable {
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		
-		Image buf = createImage(getWidth(), getHeight());
-		Graphics bufg = buf.getGraphics();
-		bufg.setColor(getBackground());
-		bufg.fillRect(0, 0, getWidth(), getHeight());
-		bufg.setColor(getForeground());
+		// Image buf = createImage(getWidth(), getHeight());
+		// Graphics bufg = buf.getGraphics();
+		// g.setColor(getBackground());
+		// g.fillRect(0, 0, getWidth(), getHeight());
+		// g.setColor(getForeground());
 		final int pixelDensity = testPanel.getGlobalPanel().zoomField.getValue();
 		
 		forEachTile(p -> {
-			bufg.setColor(tiles.get(p));
-			bufg.fillRect(getWidth()/2+(p.x-worldOffX)*pixelDensity, getHeight()/2+(p.y-worldOffY)*pixelDensity, pixelDensity, pixelDensity);
+			g.setColor(tiles.get(p));
+			g.fillRect(getWidth()/2+(p.x-worldOffX)*pixelDensity, getHeight()/2+(p.y-worldOffY)*pixelDensity, pixelDensity, pixelDensity);
 		});
 		
-		g.drawImage(buf, 0, 0, null);
+		// g.drawImage(buf, 0, 0, null);
 	}
 	
 	private Point getInput() {
 		int x = 0, y = 0;
-		if(keyPresses.get(KeyEvent.VK_UP))
+		if(keyPresses.contains(KeyEvent.VK_UP))
 			y--;
-		if(keyPresses.get(KeyEvent.VK_DOWN))
+		if(keyPresses.contains(KeyEvent.VK_DOWN))
 			y++;
-		if(keyPresses.get(KeyEvent.VK_LEFT))
+		if(keyPresses.contains(KeyEvent.VK_LEFT))
 			x--;
-		if(keyPresses.get(KeyEvent.VK_RIGHT))
+		if(keyPresses.contains(KeyEvent.VK_RIGHT))
 			x++;
 		
 		return new Point(x, y);
@@ -213,13 +213,13 @@ public class MapPanel extends MyPanel implements Runnable {
 			int worldOffY = this.worldOffY;
 			int spd = testPanel.getGlobalPanel().speedField.getValue();
 			
-			if(keyPresses.get(KeyEvent.VK_UP) && height >= getHeight() && worldOffY > 0)
+			if(keyPresses.contains(KeyEvent.VK_UP) && height >= getHeight() && worldOffY > 0)
 				worldOffY = Math.max(0, worldOffY - spd);
-			if(keyPresses.get(KeyEvent.VK_DOWN) && height >= getHeight() && worldOffY < height)
+			if(keyPresses.contains(KeyEvent.VK_DOWN) && height >= getHeight() && worldOffY < height)
 				worldOffY = Math.min(height, worldOffY + spd);
-			if(keyPresses.get(KeyEvent.VK_LEFT) && width >= getWidth() && worldOffX > 0)
+			if(keyPresses.contains(KeyEvent.VK_LEFT) && width >= getWidth() && worldOffX > 0)
 				worldOffX = Math.max(0, worldOffX - spd);
-			if(keyPresses.get(KeyEvent.VK_RIGHT) && width >= getWidth() && worldOffX < width)
+			if(keyPresses.contains(KeyEvent.VK_RIGHT) && width >= getWidth() && worldOffX < width)
 				worldOffX = Math.min(width, worldOffX + spd);
 			
 			if(this.worldOffX != worldOffX || this.worldOffY != worldOffY) {

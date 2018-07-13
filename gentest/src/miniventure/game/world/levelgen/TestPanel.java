@@ -8,6 +8,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ContainerEvent;
 import java.awt.event.ContainerListener;
+import java.util.Objects;
 
 import miniventure.game.util.Action;
 import miniventure.game.world.levelgen.util.MyPanel;
@@ -107,6 +108,7 @@ public class TestPanel extends MyPanel {
 			@Override public void componentAdded(ContainerEvent e) { resetMaps.act(); }
 			@Override public void componentRemoved(ContainerEvent e) { SwingUtilities.invokeLater(resetMaps::act); }
 		});
+		noiseFunctionPanel.setName("Noise Function Panel");
 		noiseMapperPanel.addContainerListener(new ContainerListener() {
 			@Override public void componentAdded(ContainerEvent e) {
 				if(e.getChild() instanceof ListPanel.ElementContainer)
@@ -122,13 +124,22 @@ public class TestPanel extends MyPanel {
 				});
 			}
 		});
+		noiseMapperPanel.setName("Noise Mapper Panel");
 		
 		mapPanel = new MapPanel(this);
+		mapPanel.setName("Map Panel");
 		
 		tabPane = new JTabbedPane();
 		tabPane.addTab("Noise Functions", noiseFunctionPanel);
 		tabPane.addTab("Noise Mappings", noiseMapperPanel);
 		tabPane.addTab("Generated Map", mapPanel);
+		
+		tabPane.addChangeListener(e -> {
+			if(Objects.equals(tabPane.getSelectedComponent(), mapPanel))
+				mapPanel.focus(true);
+			else
+				mapPanel.unfocus(true);
+		});
 		
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		globalPanel.setMaximumSize(new Dimension(globalPanel.getMaximumSize().width, globalPanel.getPreferredSize().height));
@@ -156,6 +167,8 @@ public class TestPanel extends MyPanel {
 					rEditor.resetNoiseMapSelector();
 		});
 	}
+	
+	Component getFocus() { return tabPane.getSelectedComponent(); }
 	
 	void setFocus(Component component) {
 		tabPane.setSelectedComponent(component);

@@ -6,6 +6,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
@@ -13,6 +14,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.levelgen.util.FloatField;
@@ -76,11 +78,19 @@ public class GlobalPanel extends MyPanel {
 			testPanel.getMapPanel().generate(widthField.getValue(), heightField.getValue());
 		});
 		
+		ActionListener mapFocus = e -> {
+			if(Objects.equals(testPanel.getFocus(), testPanel.getMapPanel()))
+				testPanel.getMapPanel().requestFocus();
+		};
 		
 		speedField = new IntegerField(5, 2, 1);
+		speedField.addActionListener(mapFocus);
 		zoomField = new IntegerField(2, 2, 1);
+		zoomField.addActionListener(mapFocus);
 		bufferField = new FloatField(3, 2, 0);
+		bufferField.addActionListener(mapFocus);
 		queueField = new IntegerField(3, 2, 1);
+		queueField.addActionListener(mapFocus);
 		
 		
 		saveBtn.addActionListener(e -> {
