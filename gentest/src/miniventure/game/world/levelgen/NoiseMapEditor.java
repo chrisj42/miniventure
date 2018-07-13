@@ -10,6 +10,7 @@ import java.awt.event.ItemEvent;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
+import miniventure.game.util.MyUtils;
 import miniventure.game.world.levelgen.NoiseMapper.NoiseMapRegion;
 import miniventure.game.world.levelgen.util.MyPanel;
 
@@ -68,6 +69,18 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 		});
 		
 		add(Box.createVerticalGlue());
+	}
+	
+	public String getData() {
+		String[] regionData = new String[regionEditors.size()];
+		for(int i = 0; i < regionEditors.size(); i++)
+			regionData[i] = regionEditors.get(i).getData();
+	
+		return MyUtils.encodeStringArray(
+			"name:"+getObjectName(),
+			"function:"+functionSelector.getSelectedIndex(),
+			"regions:"+MyUtils.encodeStringArray(regionData)
+		);
 	}
 	
 	private void addRegion(@NotNull NoiseMapRegion region, boolean refresh) {

@@ -1,11 +1,16 @@
 package miniventure.game.world.levelgen;
 
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.Scrollable;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.util.Random;
 
+import miniventure.game.util.MyUtils;
 import miniventure.game.world.levelgen.util.IntegerField;
 import miniventure.game.world.levelgen.util.MyPanel;
 import miniventure.game.world.levelgen.util.StringField;
@@ -16,36 +21,68 @@ class NoiseFunctionEditor extends MyPanel implements NamedObject, Scrollable {
 	
 	private final NamedNoiseFunction noiseFunction;
 	
-	private IntegerField numCurves;
-	private IntegerField coordsPerValue;
-	private StringField seed;
+	final JCheckBox randomSeed;
+	final StringField seed;
+	private final IntegerField numCurves;
+	private final IntegerField coordsPerValue;
 	
 	NoiseFunctionEditor(@NotNull NamedNoiseFunction noiseFunction) {
 		this.noiseFunction = noiseFunction;
-		seed = new StringField("", 10);
+		
+		randomSeed = new JCheckBox("Random seed", true);
+		add(randomSeed);
+		
+		seed = new StringField("", 20);
 		seed.addValueListener(val -> {
 			try {
 				long s = Long.parseLong(val);
 				noiseFunction.setSeed(s);
 			} catch(NumberFormatException ex) {
-				noiseFunction.setSeed(val);
+				noiseFunction.setSeed(val.hashCode());
 			}
 		});
-		// add(new JLabel("Seed (blank for random):"));
-		// add(seed);
 		
-		coordsPerValue = new IntegerField(noiseFunction.getCoordsPerValue(), 1);
+		seed.addKeyListener(new KeyAdapter() {
+			@Override public void keyTyped(KeyEvent e) { randomSeed.setSelected(false); }
+		});
+		
+		add(new JLabel("Seed:"));
+		add(seed);
+		
+		coordsPerValue = new IntegerField(noiseFunction.getCoordsPerValue(), 3, 1);
 		coordsPerValue.addValueListener(noiseFunction::setCoordsPerValue);
-		add(new JLabel("density (higher = bigger areas):"));
+		add(new JLabel("Size:"));
 		add(coordsPerValue);
 		
-		numCurves = new IntegerField(noiseFunction.getCurveCount(), 1);
+		numCurves = new IntegerField(noiseFunction.getCurveCount(), 2, 1);
 		numCurves.addValueListener(noiseFunction::setCurveCount);
-		add(new JLabel("num curves:"));
+		add(new JLabel("Curves:"));
 		add(numCurves);
 	}
 	
+	public String getData() {
+		return MyUtils.encodeStringArray(
+			"name:"+getObjectName(),
+			"seed:"+seed.getValue(),
+			"random:"+randomSeed.isSelected(),
+			"cpv:"+coordsPerValue.getValue(),
+			"curves:"+numCurves.getValue()
+		);
+	}
+	
 	public NamedNoiseFunction getNoiseFunction() { return noiseFunction; }
+	
+	void generateSeed() {
+		if(seed.getValue().length() == 0)
+			randomSeed.setSelected(true);
+		
+		if(randomSeed.isSelected())
+			seed.setValue(String.valueOf(new Random().nextLong()));
+		
+		noiseFunction.resetFunction();
+		
+		revalidate();
+	}
 	
 	@Override
 	public void setObjectName(@NotNull String name) { noiseFunction.setObjectName(name); }

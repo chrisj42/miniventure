@@ -4,7 +4,6 @@ import javax.swing.*;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.GridLayout;
 import java.awt.event.ContainerListener;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -14,33 +13,30 @@ import miniventure.game.util.function.ValueMonoFunction;
 import miniventure.game.world.levelgen.util.MyPanel;
 import miniventure.game.world.levelgen.util.StringField;
 
+import org.jetbrains.annotations.Nullable;
+
 /**
  * Contains a "list" of "elements" to display that it displays in a certain fashion. toString() is used for titles.
  * @param <E> the "element" type
- * 
- * @noinspection WeakerAccess
  */
 public class ListPanel<E extends JComponent & NamedObject & Scrollable> extends MyPanel {
 	
-	private HashMap<E, ElementContainer> containerMap = new HashMap<>();
-	private ArrayList<E> elementList = new ArrayList<>();
+	private final HashMap<E, ElementContainer> containerMap = new HashMap<>();
+	private final ArrayList<E> elementList = new ArrayList<>();
 	
 	private final Class<E> clazz;
-	private JScrollPane scrollPane;
-	private MyPanel container; // elements are added here
+	private final ValueMonoFunction<String, E> fetcher;
+	private final JScrollPane scrollPane;
+	private final MyPanel container; // elements are added here
 	
-	ListPanel(Class<E> clazz, ValueMonoFunction<String, E> fetcher) {
+	ListPanel(Class<E> clazz, @Nullable String descriptor, ValueMonoFunction<String, E> fetcher) {
 		this.clazz = clazz;
+		this.fetcher = fetcher;
 		container = new MyPanel();
 		container.setLayout(new BoxLayout(container, BoxLayout.PAGE_AXIS));
 		container.add(Box.createVerticalGlue());
 		
-		// JPanel container = new MyPanel();
-		// container.setLayout(new BoxLayout(container, BoxLayout.PAGE_AXIS));
-		// container.add(this.container);
-		// container.add(Box.createVerticalGlue());
-		
-		setLayout(new GridLayout(1, 1));
+		setLayout(new BorderLayout());
 		scrollPane = new JScrollPane(container);
 		
 		String type = clazz.getSimpleName().replace("Noise", "").replace("Editor", "");
@@ -54,8 +50,15 @@ public class ListPanel<E extends JComponent & NamedObject & Scrollable> extends 
 						regionEditor.resetNoiseMapSelector();
 		});
 		
-		scrollPane.setColumnHeaderView(addBtn);
-		add(scrollPane);
+		if(descriptor != null) {
+			JLabel label = new JLabel(descriptor);
+			label.setHorizontalAlignment(SwingConstants.CENTER);
+			scrollPane.setColumnHeaderView(label);
+		}
+		
+		add(addBtn, BorderLayout.NORTH);
+		
+		add(scrollPane, BorderLayout.CENTER);
 	}
 	
 	@Override
@@ -73,7 +76,8 @@ public class ListPanel<E extends JComponent & NamedObject & Scrollable> extends 
 		return container.getContainerListeners();
 	}
 	
-	void addElement(E e) {
+	void addElement(E e) { addElement(e, true); }
+	private void addElement(E e, boolean refresh) {
 		if(getElementCount() == 1)
 			for(ElementContainer ec: containerMap.values())
 				ec.removeBtn.setEnabled(true);	
@@ -84,16 +88,41 @@ public class ListPanel<E extends JComponent & NamedObject & Scrollable> extends 
 		elementList.add(e);
 		container.add(ec, container.getComponentCount()-1);
 		
-		refresh();
+		if(refresh)
+			refresh();
 	}
 	
-	void removeElement(E e) {
+	void removeElement(E e) { removeElement(e, true); }
+	private void removeElement(E e, boolean refresh) {
 		ElementContainer c = containerMap.remove(e);
 		container.remove(c);
 		elementList.remove(e);
 		if(getElementCount() == 1)
 			for(ElementContainer ec: containerMap.values())
 				ec.removeBtn.setEnabled(false);
+		
+		if(refresh)
+			refresh();
+	}
+	
+	void replaceElements(E[] newElements) {
+		for(ElementContainer ec: containerMap.values())
+			container.remove(ec);
+		containerMap.clear();
+		elementList.clear();
+		if(newElements.length < 2) {
+			if(newElements.length == 0)
+				addElement(fetcher.get("default function"), false);
+			else
+				addElement(newElements[0], false);
+			for(ElementContainer ec: containerMap.values())
+				ec.removeBtn.setEnabled(false);
+		}
+		else {
+			for(E e: newElements)
+				addElement(e, false);
+		}
+		
 		refresh();
 	}
 	

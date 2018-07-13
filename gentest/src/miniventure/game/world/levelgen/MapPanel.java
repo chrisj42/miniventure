@@ -96,7 +96,7 @@ public class MapPanel extends MyPanel implements Runnable {
 		int width = worldWidth <= 0 ? LevelGenerator.MAX_WORLD_SIZE : worldWidth;
 		int height = worldHeight <= 0 ? LevelGenerator.MAX_WORLD_SIZE : worldHeight;
 		for(NoiseFunctionEditor editor: testPanel.getNoiseFunctionPanel().getElements())
-			editor.getNoiseFunction().resetFunction();
+			editor.generateSeed();
 		msgLabel.setText("Generating tiles...");
 		msgLabel.setVisible(true);
 		repaint();
@@ -169,7 +169,7 @@ public class MapPanel extends MyPanel implements Runnable {
 	
 	private void forEachTile(VoidMonoFunction<Point> action) {
 		int zoom = testPanel.getGlobalPanel().zoomField.getValue();
-		Point radius = new Point(Math.min(width, getWidth())/2/zoom, Math.min(height, getHeight())/2/zoom);
+		Point radius = new Point(Math.min(width, getWidth()/zoom)/2, Math.min(height, getHeight()/zoom)/2);
 		
 		int spd = testPanel.getGlobalPanel().speedField.getValue();
 		float buffer = testPanel.getGlobalPanel().bufferField.getValue();

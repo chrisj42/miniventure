@@ -2,7 +2,6 @@ package miniventure.game.world.levelgen;
 
 import java.util.ArrayList;
 
-import miniventure.game.world.levelgen.util.FloatField;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 import org.jetbrains.annotations.NotNull;
@@ -42,6 +41,9 @@ public class NoiseMapper implements NamedObject {
 	NoiseMapper addRegion(@NotNull NoiseMapper chainMapper, float size) {
 		addRegion(new NoiseMapRegion(chainMapper, size));
 		return this;
+	}
+	void addRegion(@NotNull TileTypeEnum type, NoiseMapper chainMapper, boolean givesTile, float size) {
+		addRegion(new NoiseMapRegion(type, chainMapper, givesTile, size));
 	}
 	
 	void removeRegion(NoiseMapRegion region) {
@@ -98,6 +100,12 @@ public class NoiseMapper implements NamedObject {
 		@NotNull private TileTypeEnum tileType;
 		private NoiseMapper chainNoiseMapper;
 		
+		private NoiseMapRegion(@NotNull TileTypeEnum type, NoiseMapper chainMapper, boolean givesTile, float size) {
+			this.tileType = type;
+			this.chainNoiseMapper = chainMapper;
+			this.givesTileType = givesTile;
+			this.size = size;
+		}
 		private NoiseMapRegion(@NotNull TileTypeEnum tileType, float size) {
 			this.tileType = tileType;
 			this.size = size;
@@ -148,7 +156,7 @@ public class NoiseMapper implements NamedObject {
 		public int getIndex() { return regions.indexOf(this); }
 		
 		@Override
-		public String toString() { return NoiseMapper.this+" Region #"+getIndex()+"; size:"+FloatField.format.format(size); }
+		public String toString() { return NoiseMapper.this+" Region #"+getIndex()+"; size="+size+", givesTile="+givesTileType+", tiletype="+tileType+", chainmapper="+chainNoiseMapper; }
 	}
 	
 	@Override
