@@ -8,7 +8,7 @@ import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.event.ItemEvent;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedList;
 
 import miniventure.game.world.levelgen.NoiseMapper.NoiseMapRegion;
 import miniventure.game.world.levelgen.util.MyPanel;
@@ -39,6 +39,7 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 		add(bar);
 		
 		JPanel midPanel = new JPanel();
+		midPanel.setBackground(null);
 		
 		functionSelector = new JComboBox<>();
 		resetFunctionSelector();
@@ -130,8 +131,28 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 	}
 	
 	void refresh() {
+		NoiseMapEditor[] editors = testPanel.getNoiseMapperPanel().getElements();
+		if(this.equals(editors[0])) {
+			// update the background of the other maps by checking for access
+			ArrayList<NoiseMapper> accessed = new ArrayList<>(editors.length);
+			addAccessedNoiseMaps(noiseMap, accessed);
+			for(NoiseMapEditor editor: editors)
+				editor.setBackground(accessed.contains(editor.noiseMap) ? null : Color.LIGHT_GRAY);
+			
+			// setBackground(Color.LIGHT_GRAY);
+		}
 		testPanel.refresh();
 	}
+	
+	private static void addAccessedNoiseMaps(NoiseMapper map, ArrayList<NoiseMapper> accessed) {
+		accessed.add(map);
+		for(NoiseMapRegion region: map.getRegions())
+			if(!region.givesTileType())
+				addAccessedNoiseMaps(region.getChainNoiseMapper(), accessed);
+	}
+	
+	@Override
+	public String toString() { return getObjectName()+"-Editor"; }
 	
 	@Override
 	public void setObjectName(@NotNull String name) {
@@ -191,12 +212,12 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 		@Override
 		protected void paintComponent(Graphics g) {
 			super.paintComponent(g);
-			drawBarRegions(g, noiseMap, getWidth(), getHeight(), true, 0, new HashSet<>());
+			drawBarRegions(g, noiseMap, getWidth(), getHeight(), true, 0, new LinkedList<>());
 		}
 	}
 	
 	
-	private static void drawBarRegions(Graphics g, NoiseMapper noiseMap, final float barWidth, final int barHeight, boolean drawSeparators, final float inherXOff, HashSet<NoiseMapRegion> visitedRegions) {
+	private void drawBarRegions(Graphics g, NoiseMapper noiseMap, final float barWidth, final int barHeight, boolean drawSeparators, final float inherXOff, LinkedList<NoiseMapRegion> visitedRegions) {
 		NoiseMapRegion[] regions = noiseMap.getRegions();
 		
 		float fxOff = inherXOff;
@@ -209,11 +230,13 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 			
 			if(!regions[i].givesTileType()) {
 				if(visitedRegions.contains(regions[i])) {
+					// LOOP DETECTED
 					g.setColor(Color.RED);
 					g.fillRect(xOff, 0, width, barHeight);
 				}
 				else {
 					visitedRegions.add(regions[i]);
+					
 					drawBarRegions(g, regions[i].getChainNoiseMapper(), fwidth, barHeight, false, fxOff, visitedRegions);
 					visitedRegions.remove(regions[i]);
 				}

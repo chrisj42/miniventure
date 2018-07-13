@@ -145,8 +145,10 @@ public class NoiseMapper implements NamedObject {
 			this.chainNoiseMapper = chainNoiseMapper;
 		}
 		
+		public int getIndex() { return regions.indexOf(this); }
+		
 		@Override
-		public String toString() { return NoiseMapper.this+" Region #"+regions.indexOf(this)+"; size:"+FloatField.format.format(size); }
+		public String toString() { return NoiseMapper.this+" Region #"+getIndex()+"; size:"+FloatField.format.format(size); }
 	}
 	
 	@Override

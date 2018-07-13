@@ -88,7 +88,6 @@ public class MapPanel extends MyPanel implements Runnable {
 		msgLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		setLayout(new GridLayout(1, 1));
 		add(msgLabel);
-		System.out.println(LevelGenerator.MAX_WORLD_SIZE*LevelGenerator.MAX_WORLD_SIZE);
 	}
 	
 	public void generate(int worldWidth, int worldHeight) {

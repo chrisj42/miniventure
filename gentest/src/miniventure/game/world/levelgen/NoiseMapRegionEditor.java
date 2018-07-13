@@ -32,6 +32,9 @@ public class NoiseMapRegionEditor extends MyPanel {
 	public NoiseMapRegionEditor(@NotNull NoiseMapEditor mapEditor, @NotNull NoiseMapRegion mapRegion) {
 		this.mapEditor = mapEditor;
 		this.region = mapRegion;
+		
+		setBackground(null);
+		
 		removeBtn = new JButton("X");
 		removeBtn.setForeground(Color.RED);
 		removeBtn.setFont(removeBtn.getFont().deriveFont(Font.BOLD, 14f));
@@ -70,6 +73,7 @@ public class NoiseMapRegionEditor extends MyPanel {
 		noiseMapSelector = new JComboBox<>();
 		
 		tileTypeBtn = new JRadioButton("TileType");
+		tileTypeBtn.setOpaque(false);
 		tileTypeBtn.setSelected(mapRegion.givesTileType());
 		tileTypeBtn.addActionListener(e -> {
 			// if(!mapRegion.givesTileType())
@@ -85,6 +89,7 @@ public class NoiseMapRegionEditor extends MyPanel {
 		});
 		
 		noiseMapBtn = new JRadioButton("Reference Noise Map");
+		noiseMapBtn.setOpaque(false);
 		noiseMapBtn.setSelected(!mapRegion.givesTileType());
 		noiseMapBtn.addActionListener(e -> {
 			if(mapRegion.givesTileType())
@@ -141,9 +146,13 @@ public class NoiseMapRegionEditor extends MyPanel {
 		}
 	}
 	
-	private static Object source = null;
+	// private static Object source = null;
 	
-	private void refresh() { mapEditor.refresh(); }
+	// private static final Color trans = new Color(0, 0, 0, 0);
+	private void refresh() {
+		// setBackground(trans);
+		mapEditor.refresh();
+	}
 	
 	void resetNoiseMapSelector() {
 		Object sel = noiseMapSelector.getSelectedItem();
