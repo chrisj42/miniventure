@@ -26,7 +26,7 @@ public class NoiseMapper implements NamedObject {
 	NoiseMapRegion addRegion() {
 		// adds and returns a new region
 		recomputeTotal();
-		NoiseMapRegion newRegion = new NoiseMapRegion(TileTypeEnum.GRASS, total/regions.size());
+		NoiseMapRegion newRegion = new NoiseMapRegion(TileTypeEnum.GRASS, regions.size()==0?1:total/regions.size());
 		addRegion(newRegion);
 		return newRegion;
 	}

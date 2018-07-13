@@ -43,7 +43,7 @@ public class NoiseMapRegionEditor extends MyPanel {
 		removeBtn.setEnabled(mapEditor.getNoiseMap().getRegionCount() > 1);
 		add(removeBtn);
 		
-		sizeField = new FloatField(mapRegion.getSize(), 5);
+		sizeField = new FloatField(mapRegion.getSize(), 3, 5);
 		sizeField.addValueListener(val -> {
 			mapRegion.setSize(val);
 			// mapEditor.testPanel.getMapPanel().invalidateMaps();
