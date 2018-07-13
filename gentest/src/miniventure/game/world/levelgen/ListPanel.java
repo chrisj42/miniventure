@@ -106,8 +106,16 @@ public class ListPanel<E extends JComponent & NamedObject & Scrollable> extends 
 	}
 	
 	void replaceElements(E[] newElements) {
+		ContainerListener[] ls = getContainerListeners();
+		for(ContainerListener l: ls)
+			removeContainerListener(l);
+		
 		for(ElementContainer ec: containerMap.values())
 			container.remove(ec);
+		
+		for(ContainerListener l: ls)
+			addContainerListener(l);
+		
 		containerMap.clear();
 		elementList.clear();
 		if(newElements.length < 2) {

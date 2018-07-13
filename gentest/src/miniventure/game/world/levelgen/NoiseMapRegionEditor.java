@@ -141,10 +141,12 @@ public class NoiseMapRegionEditor extends MyPanel {
 	
 	// simply removes and re-adds the given map, if it was there to begin with.
 	void resetNoiseMapSelector(NoiseMapper map) {
+		Object sel = noiseMapSelector.getSelectedItem();
 		for(int i = 0; i < noiseMapSelector.getItemCount(); i++) {
 			if(noiseMapSelector.getItemAt(i).equals(map)) {
 				noiseMapSelector.removeItemAt(i);
 				noiseMapSelector.insertItemAt(map, i);
+				noiseMapSelector.setSelectedItem(sel);
 				refresh();
 				return;
 			}
