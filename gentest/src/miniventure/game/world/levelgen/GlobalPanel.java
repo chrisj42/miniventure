@@ -257,6 +257,7 @@ public class GlobalPanel extends MyPanel {
 		add(topPanel);
 		add(bottomPanel);
 		mapPanel = bottomPanel;
+		mapPanel.setVisible(false);
 	}
 	
 	private static HashMap<String, String> parseDataList(String[] data) {

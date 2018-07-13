@@ -135,10 +135,15 @@ public class TestPanel extends MyPanel {
 		tabPane.addTab("Generated Map", mapPanel);
 		
 		tabPane.addChangeListener(e -> {
-			if(Objects.equals(tabPane.getSelectedComponent(), mapPanel))
+			if(Objects.equals(tabPane.getSelectedComponent(), mapPanel)) {
+				globalPanel.mapPanel.setVisible(true);
 				mapPanel.focus(true);
-			else
+				refresh();
+			} else {
 				mapPanel.unfocus(true);
+				globalPanel.mapPanel.setVisible(false);
+				refresh();
+			}
 		});
 		
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
