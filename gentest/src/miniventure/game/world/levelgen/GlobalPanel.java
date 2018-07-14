@@ -28,7 +28,7 @@ import miniventure.game.world.tile.TileType.TileTypeEnum;
  */
 public class GlobalPanel extends MyPanel {
 	
-	private static final int VERSION = 1;
+	private static final int VERSION = 2;
 	
 	private final TestPanel testPanel;
 	
@@ -163,6 +163,7 @@ public class GlobalPanel extends MyPanel {
 			}
 			
 			HashMap<String, String> globalData = parseDataList(dataMap.get("global"));
+			int version = new Integer(globalData.get("version"));
 			widthField.setValue(new Integer(globalData.get("width")));
 			heightField.setValue(new Integer(globalData.get("height")));
 			bufferField.setValue(new Float(globalData.get("buffer")));
@@ -203,8 +204,9 @@ public class GlobalPanel extends MyPanel {
 					float size = Float.parseFloat(info.get("size"));
 					boolean givestile = Boolean.valueOf(info.get("givestile"));
 					int chainMapIdx = Integer.parseInt(info.get("chainmap"));
+					int off = version < 2 && chainMapIdx >= i ? 1 : 0;
 					TileTypeEnum tileType = TileTypeEnum.valueOf(info.get("tiletype"));
-					NoiseMapper chainmap = chainMapIdx>=0?maps[chainMapIdx]:null;
+					NoiseMapper chainmap = chainMapIdx>=0?maps[chainMapIdx+off]:null;
 					maps[i].addRegion(tileType, chainmap, givestile, size);
 				}
 			}

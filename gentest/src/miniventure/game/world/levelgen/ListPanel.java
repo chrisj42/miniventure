@@ -4,12 +4,14 @@ import javax.swing.*;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.event.ContainerListener;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import miniventure.game.util.function.ValueMonoFunction;
+import miniventure.game.world.levelgen.util.ButtonMaker;
 import miniventure.game.world.levelgen.util.MyPanel;
 import miniventure.game.world.levelgen.util.StringField;
 
@@ -24,12 +26,14 @@ public class ListPanel<E extends JComponent & NamedObject & Scrollable> extends 
 	private final HashMap<E, ElementContainer> containerMap = new HashMap<>();
 	private final ArrayList<E> elementList = new ArrayList<>();
 	
+	private final TestPanel testPanel;
 	private final Class<E> clazz;
 	private final ValueMonoFunction<String, E> fetcher;
 	private final JScrollPane scrollPane;
 	private final MyPanel container; // elements are added here
 	
-	ListPanel(Class<E> clazz, @Nullable String descriptor, ValueMonoFunction<String, E> fetcher) {
+	ListPanel(TestPanel testPanel, Class<E> clazz, @Nullable String descriptor, ValueMonoFunction<String, E> fetcher) {
+		this.testPanel = testPanel;
 		this.clazz = clazz;
 		this.fetcher = fetcher;
 		container = new MyPanel();
@@ -82,14 +86,17 @@ public class ListPanel<E extends JComponent & NamedObject & Scrollable> extends 
 			for(ElementContainer ec: containerMap.values())
 				ec.removeBtn.setEnabled(true);	
 		
+		elementList.add(e);
 		//noinspection ObjectAllocationInLoop
 		ElementContainer ec = new ElementContainer(e);
 		containerMap.put(e, ec);
-		elementList.add(e);
 		container.add(ec, container.getComponentCount()-1);
 		
-		if(refresh)
+		if(refresh) {
+			for(ElementContainer container: containerMap.values())
+				container.updateButtons();
 			refresh();
+		}
 	}
 	
 	void removeElement(E e) { removeElement(e, true); }
@@ -101,8 +108,11 @@ public class ListPanel<E extends JComponent & NamedObject & Scrollable> extends 
 			for(ElementContainer ec: containerMap.values())
 				ec.removeBtn.setEnabled(false);
 		
-		if(refresh)
+		if(refresh) {
+			for(ElementContainer ec: containerMap.values())
+				ec.updateButtons();
 			refresh();
+		}
 	}
 	
 	void replaceElements(E[] newElements) {
@@ -131,6 +141,9 @@ public class ListPanel<E extends JComponent & NamedObject & Scrollable> extends 
 				addElement(e, false);
 		}
 		
+		for(ElementContainer ec: containerMap.values())
+			ec.updateButtons();
+		
 		refresh();
 	}
 	
@@ -143,7 +156,7 @@ public class ListPanel<E extends JComponent & NamedObject & Scrollable> extends 
 		return ar;
 	}
 	
-	void refresh() {
+	private void refresh() {
 		scrollPane.revalidate();
 		scrollPane.repaint();
 		
@@ -151,11 +164,46 @@ public class ListPanel<E extends JComponent & NamedObject & Scrollable> extends 
 		repaint();
 	}
 	
+	private void moveElement(E e, int idx) {
+		elementList.remove(e);
+		elementList.add(idx, e);
+		
+		ContainerListener[] ls = getContainerListeners();
+		for(ContainerListener l: ls)
+			removeContainerListener(l);
+		
+		container.remove(containerMap.get(e));
+		container.add(containerMap.get(e), idx);
+		
+		for(ContainerListener l: ls)
+			addContainerListener(l);
+		
+		for(ElementContainer ec: containerMap.values())
+			ec.updateButtons();
+		
+		if(clazz == NoiseMapEditor.class)
+			for(NoiseMapEditor editor: testPanel.getNoiseMapperPanel().getElements())
+				for(NoiseMapRegionEditor regionEditor: editor.getRegionEditors())
+					regionEditor.resetNoiseMapSelector();
+		
+		if(clazz == NoiseFunctionEditor.class)
+			for(NoiseMapEditor editor: testPanel.getNoiseMapperPanel().getElements())
+				editor.resetFunctionSelector();
+		
+		refresh();
+	}
 	
 	class ElementContainer extends MyPanel {
 		
 		final E element;
 		private final JButton removeBtn;
+		private final JButton upBtn, downBtn;
+		
+		void updateButtons() {
+			int idx = elementList.indexOf(element);
+			upBtn.setEnabled(idx > 0);
+			downBtn.setEnabled(idx < elementList.size()-1);
+		}
 		
 		ElementContainer(E element) {
 			this.element = element;
@@ -164,9 +212,28 @@ public class ListPanel<E extends JComponent & NamedObject & Scrollable> extends 
 			
 			MyPanel topPanel = new MyPanel();
 			topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.LINE_AXIS));
-			removeBtn = new JButton("Remove");
-			removeBtn.addActionListener(ae -> removeElement(element));
-			topPanel.add(removeBtn);
+			
+			MyPanel btnPanel = new MyPanel(new GridLayout(1, 0));
+			removeBtn = ButtonMaker.removeButton(ae -> removeElement(element));
+			btnPanel.add(removeBtn);
+			
+			// MyPanel btnPanelBottom = new MyPanel(new GridLayout(1, 0));
+			upBtn = ButtonMaker.upButton(e -> {
+				int idx = elementList.indexOf(element);
+				if(idx < 1) return;
+				moveElement(element, idx-1);
+			});
+			btnPanel.add(upBtn);
+			downBtn = ButtonMaker.downButton(e -> {
+				int idx = elementList.indexOf(element);
+				if(idx < 0 || idx == elementList.size()-1) return;
+				moveElement(element, idx+1);
+			});
+			btnPanel.add(downBtn);
+			
+			updateButtons();
+			
+			topPanel.add(btnPanel);
 			topPanel.add(Box.createHorizontalStrut(20));
 			
 			StringField nameField = new StringField(element.getObjectName(), 30);

@@ -162,24 +162,21 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 		functionSelector.setSelectedItem(sel);
 	}
 	
-	boolean checkMapForLoops() {
-		for(NoiseMapRegion region: noiseMap.getRegions())
-			if(!region.givesTileType())
-				if(checkMapForLoops(region.getChainNoiseMapper()))
-					return true;
-		
-		return false;
-	}
-	private boolean checkMapForLoops(NoiseMapper map) {
-		if(noiseMap.equals(map))
+	boolean checkMapForLoops() { return checkMapForLoops(noiseMap, new ArrayList<>(testPanel.getNoiseMapperPanel().getElementCount())); }
+	private static boolean checkMapForLoops(NoiseMapper map, ArrayList<NoiseMapper> visitedMaps) {
+		if(visitedMaps.contains(map)) {
+			System.out.println(map+" contained twice");
 			return true;
+		}
+		visitedMaps.add(map);
 		
 		for(NoiseMapRegion region: map.getRegions()) {
 			if(region.givesTileType()) continue;
-			if(checkMapForLoops(region.getChainNoiseMapper()))
+			if(checkMapForLoops(region.getChainNoiseMapper(), visitedMaps))
 				return true;
 		}
 		
+		visitedMaps.remove(map);
 		return false;
 	}
 	

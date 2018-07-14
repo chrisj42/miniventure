@@ -6,15 +6,14 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JRadioButton;
 
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.event.ItemEvent;
 import java.util.ArrayList;
 import java.util.Objects;
 
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.levelgen.NoiseMapper.NoiseMapRegion;
+import miniventure.game.world.levelgen.util.ButtonMaker;
 import miniventure.game.world.levelgen.util.FloatField;
 import miniventure.game.world.levelgen.util.MyPanel;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
@@ -39,27 +38,24 @@ public class NoiseMapRegionEditor extends MyPanel {
 		
 		setBackground(null);
 		
-		removeBtn = new JButton("X");
-		removeBtn.setForeground(Color.RED);
-		removeBtn.setFont(removeBtn.getFont().deriveFont(Font.BOLD, 14f));
-		removeBtn.addActionListener(e -> mapEditor.removeRegion(this, mapRegion));
+		removeBtn = ButtonMaker.removeButton(e -> mapEditor.removeRegion(this, mapRegion));
 		removeBtn.setEnabled(mapEditor.getNoiseMap().getRegionCount() > 1);
 		add(removeBtn);
 		
 		add(Box.createHorizontalStrut(10));
 		
-		upBtn = new JButton("UP");
-		upBtn.addActionListener(e -> {
+		upBtn = ButtonMaker.upButton(e -> {
 			region.move(-1);
 			mapEditor.updateRegion(this);
+			refresh();
 		});
 		upBtn.setEnabled(region.getIndex() > 0);
 		add(upBtn);
 		
-		downBtn = new JButton("DOWN");
-		downBtn.addActionListener(e -> {
+		downBtn = ButtonMaker.downButton(e -> {
 			region.move(1);
 			mapEditor.updateRegion(this);
+			refresh();
 		});
 		downBtn.setEnabled(region.getIndex() < mapEditor.getNoiseMap().getRegionCount()-1);
 		add(downBtn);
@@ -195,8 +191,8 @@ public class NoiseMapRegionEditor extends MyPanel {
 		NoiseMapEditor[] editors = mapEditor.testPanel.getNoiseMapperPanel().getElements();
 		ArrayList<NoiseMapper> maps = new ArrayList<>();
 		for(NoiseMapEditor editor: editors) {
-			if(editor.equals(mapEditor))
-				continue;
+			// if(editor.equals(mapEditor))
+			// 	continue;
 			maps.add(editor.getNoiseMap());
 		}
 		return maps.toArray(new NoiseMapper[maps.size()]);

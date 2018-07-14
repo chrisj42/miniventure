@@ -1,6 +1,7 @@
 package miniventure.game.world.levelgen;
 
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
@@ -20,10 +21,9 @@ import java.util.LinkedList;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.VoidMonoFunction;
 import miniventure.game.world.Point;
-import miniventure.game.world.levelgen.util.MyPanel;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 
-public class MapPanel extends MyPanel implements Runnable {
+public class MapPanel extends JPanel implements Runnable {
 	
 	private final TestPanel testPanel;
 	private final JLabel msgLabel;
@@ -116,7 +116,7 @@ public class MapPanel extends MyPanel implements Runnable {
 	}
 	
 	private void genTile(HashSet<Point> points) {
-		if(!mapsValid) return;
+		if(!mapsValid || points == null) return;
 		int cnt = 0;
 		for(Point p: points) {
 			genTile(p);

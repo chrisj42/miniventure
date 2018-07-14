@@ -97,8 +97,8 @@ public class TestPanel extends MyPanel {
 		
 		
 		globalPanel = new GlobalPanel(this);
-		noiseFunctionPanel = new ListPanel<>(NoiseFunctionEditor.class, "<html>the value in the seed field will be retained <em>only</em> if \"random seed\" is unchecked.", name -> new NoiseFunctionEditor(this, new NamedNoiseFunction(name)));
-		noiseMapperPanel = new ListPanel<>(NoiseMapEditor.class, null, name -> new NoiseMapEditor(this, new NoiseMapper(name, noiseFunctionPanel.getElements()[0].getNoiseFunction())));
+		noiseFunctionPanel = new ListPanel<>(this, NoiseFunctionEditor.class, "<html>the value in the seed field will be retained <em>only</em> if \"random seed\" is unchecked.", name -> new NoiseFunctionEditor(this, new NamedNoiseFunction(name)));
+		noiseMapperPanel = new ListPanel<>(this, NoiseMapEditor.class, null, name -> new NoiseMapEditor(this, new NoiseMapper(name, noiseFunctionPanel.getElements()[0].getNoiseFunction())));
 		
 		Action resetMaps = () -> {
 			for(NoiseMapEditor mapEditor: noiseMapperPanel.getElements())
@@ -205,6 +205,6 @@ public class TestPanel extends MyPanel {
 	@Override
 	public Dimension getPreferredSize() {
 		Dimension prefSize = super.getPreferredSize();
-		return new Dimension(Math.max(600, prefSize.width), Math.max(500, prefSize.height));
+		return new Dimension(Math.max(700, prefSize.width), Math.max(500, prefSize.height));
 	}
 }
