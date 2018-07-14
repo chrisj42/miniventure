@@ -57,13 +57,13 @@ class Coherent2DNoiseFunction {
 		 */
 		
 		// alternate way of getting random dir, I don't like it
-		// MathUtils.random.setSeed(hashFunction.hashInts(new int[] {xRef, yRef}));
-		// ref.setToRandomDirection();
+		MathUtils.random.setSeed(hashFunction.hashInts(new int[] {xRef, yRef}));
+		ref.setToRandomDirection();
 		
-		ref.x = (int) hashFunction.hashInts(new int[] {xRef, yRef, xRef});
+		/*ref.x = (int) hashFunction.hashInts(new int[] {xRef, yRef, xRef});
 		ref.y = (int) hashFunction.hashInts(new int[] {yRef, xRef, xRef});
 		ref.nor();
-		
+		*/
 		diff.set(x, y);
 		diff.sub(xRef, yRef);
 		return ref.dot(diff);
