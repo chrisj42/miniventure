@@ -1,13 +1,27 @@
 package miniventure.game.world.levelgen.util;
 
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 
 public final class ButtonMaker {
+	
+	private static BufferedImage upArrow;
+	private static BufferedImage downArrow;
+	
+	static {
+		try {
+			upArrow = ImageIO.read(ButtonMaker.class.getResourceAsStream("/up-arrow.png"));
+			downArrow = ImageIO.read(ButtonMaker.class.getResourceAsStream("/down-arrow.png"));
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
 	
 	private ButtonMaker() {}
 	
@@ -22,14 +36,14 @@ public final class ButtonMaker {
 	}
 	
 	public static JButton upButton(ActionListener l) {
-		JButton btn = new JButton(new ImageIcon("up-arrow.png"));
+		JButton btn = new JButton(new ImageIcon(upArrow));
 		if(l != null)
 			btn.addActionListener(l);
 		return btn;
 	}
 	
 	public static JButton downButton(ActionListener l) {
-		JButton btn = new JButton(new ImageIcon("down-arrow.png"));
+		JButton btn = new JButton(new ImageIcon(downArrow));
 		
 		if(l != null)
 			btn.addActionListener(l);

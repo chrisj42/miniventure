@@ -34,21 +34,21 @@ public class TestPanel extends MyPanel {
 		 */
 		
 		
-		NamedNoiseFunction categoryNoise = new NamedNoiseFunction("Category Noise", 96);
-		NamedNoiseFunction biomeNoise = new NamedNoiseFunction("Biome Noise", 64);
-		NamedNoiseFunction detailNoise = new NamedNoiseFunction("Detail Noise", 8);
+		NamedNoiseFunction continentNoise = new NamedNoiseFunction("Continent Noise", 500, 4);
+		NamedNoiseFunction landNoise = new NamedNoiseFunction("Land Noise", 300, 3);
+		NamedNoiseFunction biomeNoise = new NamedNoiseFunction("Biome Noise", 120, 2);
+		NamedNoiseFunction detailNoise = new NamedNoiseFunction("Detail Noise", 12, 2);
+		NamedNoiseFunction islandNoise = new NamedNoiseFunction("Island Noise", 24, 2);
+		NamedNoiseFunction cactusNoise = new NamedNoiseFunction("Cactus Noise", 4, 2);
 		
 		
-		NoiseMapper oceanBiome = new NoiseMapper("Ocean", detailNoise)
-			.addRegion(WATER, 1);
+		NoiseMapper plainsBiome = new NoiseMapper("Plains", detailNoise)
+			.addRegion(GRASS, 8)
+			.addRegion(TREE_CARTOON, 1);
 		
-		NoiseMapper desertBiome = new NoiseMapper("Desert", detailNoise)
-			.addRegion(SAND, 15)
+		NoiseMapper desertBiome = new NoiseMapper("Desert", cactusNoise)
 			.addRegion(CACTUS, 1)
-			.addRegion(SAND, 5);
-		
-		NoiseMapper mountainBiome = new NoiseMapper("Mountains", detailNoise)
-			.addRegion(STONE, 30);
+			.addRegion(SAND, 10);
 		
 		NoiseMapper canyonBiome = new NoiseMapper("Canyons", detailNoise)
 			.addRegion(STONE, 20)
@@ -57,42 +57,44 @@ public class TestPanel extends MyPanel {
 			.addRegion(GRASS, 10)
 			.addRegion(STONE, 20);
 		
-		NoiseMapper plainsBiome = new NoiseMapper("Plains", detailNoise)
-			.addRegion(TREE_CARTOON, 2)
-			.addRegion(GRASS, 18)
+		
+		NoiseMapper mountainBiome = new NoiseMapper("Mountains", biomeNoise)
+			.addRegion(STONE, 1)
+			.addRegion(canyonBiome, 4.5f)
 			.addRegion(STONE, 1);
 		
-		NoiseMapper forestBiome = new NoiseMapper("Forest", detailNoise)
-			.addRegion(GRASS, 3)
-			.addRegion(TREE_POOF, 6);
+		
+		NoiseMapper oceanBiome = new NoiseMapper("Ocean", biomeNoise)
+			.addRegion(WATER, 1);
+		
+		NoiseMapper deepOceanBiome = new NoiseMapper("Deep Ocean", islandNoise)
+			.addRegion(WATER, 10)
+			.addRegion(SAND, 1);
 		
 		
 		
-		NoiseMapper wetBiomes = new NoiseMapper("Wet Biomes", biomeNoise)
-			.addRegion(oceanBiome, 1);
+		NoiseMapper highTerrain = new NoiseMapper("High Terrain", landNoise)
+			.addRegion(desertBiome, 4)
+			.addRegion(plainsBiome, 8)
+			.addRegion(mountainBiome, 6);
 		
-		NoiseMapper midBiomes = new NoiseMapper("Temperate Biomes", biomeNoise)
-			.addRegion(plainsBiome, 7)
+		
+		
+		NoiseMapper landTerrain = new NoiseMapper("Land", continentNoise)
+			.addRegion(highTerrain, 0.9f)
+			.addRegion(SAND, 2);
+		
+		
+		NoiseMapper rivers = new NoiseMapper("Rivers", biomeNoise)
+			.addRegion(landTerrain, 1)
+			.addRegion(WATER, .25f)
+			.addRegion(landTerrain, 1);
+		
+		
+		NoiseMapper biomeCategories = new NoiseMapper("Surface Type", continentNoise)
+			.addRegion(rivers, 1)
 			.addRegion(oceanBiome, 1)
-			.addRegion(forestBiome, 3);
-		
-		NoiseMapper dryBiomes = new NoiseMapper("Dry Biomes", biomeNoise)
-			.addRegion(desertBiome, 2)
-			.addRegion(plainsBiome, 4)
-			.addRegion(forestBiome, 1);
-		
-		NoiseMapper rockyBiomes = new NoiseMapper("Rocky Biomes", biomeNoise)
-			.addRegion(mountainBiome, 1)
-			.addRegion(canyonBiome, 2)
-			.addRegion(mountainBiome, 1);
-		
-		
-		
-		NoiseMapper biomeCategories = new NoiseMapper("Biome Categories", categoryNoise)
-			.addRegion(wetBiomes, 2)
-			.addRegion(midBiomes, 3)
-			.addRegion(dryBiomes, 5)
-			.addRegion(rockyBiomes, 3);
+			.addRegion(deepOceanBiome, 1);
 		
 		
 		
@@ -154,14 +156,16 @@ public class TestPanel extends MyPanel {
 		SwingUtilities.invokeLater(() -> {
 			// add all the editors for the biomes and noise functions from above
 			
-			noiseFunctionPanel.addElement(new NoiseFunctionEditor(this, categoryNoise));
+			noiseFunctionPanel.addElement(new NoiseFunctionEditor(this, continentNoise));
+			noiseFunctionPanel.addElement(new NoiseFunctionEditor(this, landNoise));
 			noiseFunctionPanel.addElement(new NoiseFunctionEditor(this, biomeNoise));
 			noiseFunctionPanel.addElement(new NoiseFunctionEditor(this, detailNoise));
+			noiseFunctionPanel.addElement(new NoiseFunctionEditor(this, islandNoise));
+			noiseFunctionPanel.addElement(new NoiseFunctionEditor(this, cactusNoise));
 			
 			NoiseMapEditor[] mapEditors = NoiseMapEditor.getEditorsForAll(this,
-				biomeCategories,
-				wetBiomes, midBiomes, dryBiomes, rockyBiomes,
-				oceanBiome, desertBiome, mountainBiome, canyonBiome, plainsBiome, forestBiome
+				biomeCategories, rivers, landTerrain, highTerrain, deepOceanBiome,
+				oceanBiome, mountainBiome, canyonBiome, desertBiome, plainsBiome
 			);
 			
 			for(NoiseMapEditor editor: mapEditors)
