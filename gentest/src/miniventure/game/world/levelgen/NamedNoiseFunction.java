@@ -22,10 +22,8 @@ public class NamedNoiseFunction implements NamedObject {
 	void resetFunction() { noiseFunction = null; }
 	
 	public Coherent2DNoiseFunction getNoiseFunction() {
-		if(noiseFunction == null) {
-			// System.out.println("caching noise function "+this);
+		if(noiseFunction == null)
 			noiseFunction = new Coherent2DNoiseFunction(seed, coordsPerValue, curveCount);
-		}
 		return noiseFunction;
 	}
 	

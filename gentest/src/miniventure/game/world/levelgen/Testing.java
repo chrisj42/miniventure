@@ -7,7 +7,6 @@ import javax.swing.WindowConstants;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
@@ -162,7 +161,6 @@ class Testing {
 		frame.pack();
 		
 		frame.setLocationRelativeTo(null);
-		frame.setExtendedState(Frame.MAXIMIZED_BOTH);
 		frame.setVisible(true);
 		
 		/*Coherent2DNoiseFunction noise = new Coherent2DNoiseFunction(new Random().nextLong(), 100);

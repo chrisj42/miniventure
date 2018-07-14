@@ -87,7 +87,7 @@ public class TestPanel extends MyPanel {
 		
 		NoiseMapper rivers = new NoiseMapper("Rivers", biomeNoise)
 			.addRegion(landTerrain, 1)
-			.addRegion(WATER, .25f)
+			.addRegion(WATER, .15f)
 			.addRegion(landTerrain, 1);
 		
 		
@@ -174,7 +174,11 @@ public class TestPanel extends MyPanel {
 			for(NoiseMapEditor editor: mapEditors)
 				for(NoiseMapRegionEditor rEditor: editor.getRegionEditors())
 					rEditor.resetNoiseMapSelector();
+			
+			setFocus(mapPanel);
 		});
+		
+		setFocus(mapPanel);
 	}
 	
 	Component getFocus() { return tabPane.getSelectedComponent(); }

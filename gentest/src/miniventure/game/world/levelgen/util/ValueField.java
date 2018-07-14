@@ -66,6 +66,7 @@ public abstract class ValueField<T> extends JTextField {
 	public void setValue(@NotNull T value) {
 		setText(stringifier.get(value));
 		onTextChange();
+		replace();
 	}
 	
 	public void addValueListener(ValueListener<T> l) { synchronized (listenerLock) {listeners.add(l);} }
