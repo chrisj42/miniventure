@@ -12,13 +12,13 @@ public class ToolItem extends Item {
 	private static final float DURABILITY_BAR_HEIGHT = 4; // 8 pixels.
 	
 	public enum Material {
-		Wood(30, 1, 3),
+		Wood(30, 1, 1),
 		
-		Stone(80, 2, 4),
+		Stone(80, 2, 2),
 		
-		Iron(250, 4, 5),
+		Iron(250, 4, 3),
 		
-		Gem(800, 8, 0);
+		Gem(800, 8, 4);
 		
 		public final int maxDurability; // the number of uses this level of tool gets.
 		public final int damageMultiplier; // damage done by this tool is multiplied by this number.

@@ -3,6 +3,7 @@ package miniventure.game.server;
 import java.util.HashSet;
 import java.util.Objects;
 
+import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.EntityAddition;
 import miniventure.game.GameProtocol.EntityRemoval;
 import miniventure.game.GameProtocol.WorldData;
@@ -173,7 +174,8 @@ public class ServerWorld extends WorldManager {
 		
 		respawnPlayer(player);
 		
-		player.getInventory().addItem(new ToolItem(ToolType.Shovel, Material.Gem));
+		if(GameCore.debug)
+			player.getInventory().addItem(new ToolItem(ToolType.Shovel, Material.Gem));
 		return player;
 	}
 	
