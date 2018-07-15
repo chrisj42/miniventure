@@ -8,6 +8,7 @@ hs_err_pid*
 ## Personal
 /core/*/out/
 /desktop/out/
+/gentest/out/
 notes/ignored/
 
 ## Robovm
