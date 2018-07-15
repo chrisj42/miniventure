@@ -1,4 +1,4 @@
-package miniventure.game.world.levelgen.util;
+package miniventure.gentest.util;
 
 @FunctionalInterface
 public interface ValueListener<T> {

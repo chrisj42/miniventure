@@ -1,4 +1,4 @@
-package miniventure.game.world.levelgen;
+package miniventure.gentest;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -17,9 +17,9 @@ import java.util.List;
 import java.util.Objects;
 
 import miniventure.game.util.MyUtils;
-import miniventure.game.world.levelgen.util.FloatField;
-import miniventure.game.world.levelgen.util.IntegerField;
-import miniventure.game.world.levelgen.util.MyPanel;
+import miniventure.gentest.util.FloatField;
+import miniventure.gentest.util.IntegerField;
+import miniventure.gentest.util.MyPanel;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 /**

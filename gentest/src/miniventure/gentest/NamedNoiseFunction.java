@@ -1,4 +1,6 @@
-package miniventure.game.world.levelgen;
+package miniventure.gentest;
+
+import miniventure.game.world.levelgen.Coherent2DNoiseFunction;
 
 import org.jetbrains.annotations.NotNull;
 

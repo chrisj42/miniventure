@@ -1,4 +1,4 @@
-package miniventure.game.world.levelgen.util;
+package miniventure.gentest.util;
 
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;

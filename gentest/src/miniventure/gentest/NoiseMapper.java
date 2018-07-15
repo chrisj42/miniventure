@@ -1,4 +1,4 @@
-package miniventure.game.world.levelgen;
+package miniventure.gentest;
 
 import java.util.ArrayList;
 

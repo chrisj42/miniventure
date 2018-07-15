@@ -1,4 +1,4 @@
-package miniventure.game.world.levelgen;
+package miniventure.gentest;
 
 import javax.swing.*;
 
@@ -12,8 +12,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 import miniventure.game.util.MyUtils;
-import miniventure.game.world.levelgen.NoiseMapper.NoiseMapRegion;
-import miniventure.game.world.levelgen.util.MyPanel;
+import miniventure.gentest.NoiseMapper.NoiseMapRegion;
+import miniventure.gentest.util.MyPanel;
 
 import org.jetbrains.annotations.NotNull;
 

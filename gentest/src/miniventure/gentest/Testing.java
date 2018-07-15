@@ -1,4 +1,4 @@
-package miniventure.game.world.levelgen;
+package miniventure.gentest;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -12,6 +12,8 @@ import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Random;
 
+import miniventure.game.world.levelgen.Coherent2DNoiseFunction;
+import miniventure.game.world.levelgen.LevelGenerator;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 class Testing {

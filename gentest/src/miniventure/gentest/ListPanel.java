@@ -1,4 +1,4 @@
-package miniventure.game.world.levelgen;
+package miniventure.gentest;
 
 import javax.swing.*;
 
@@ -11,9 +11,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import miniventure.game.util.function.ValueMonoFunction;
-import miniventure.game.world.levelgen.util.ButtonMaker;
-import miniventure.game.world.levelgen.util.MyPanel;
-import miniventure.game.world.levelgen.util.StringField;
+import miniventure.gentest.util.ButtonMaker;
+import miniventure.gentest.util.MyPanel;
+import miniventure.gentest.util.StringField;
 
 import org.jetbrains.annotations.Nullable;
 

@@ -1,4 +1,4 @@
-package miniventure.game.world.levelgen;
+package miniventure.gentest;
 
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
@@ -12,10 +12,10 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 import miniventure.game.util.MyUtils;
-import miniventure.game.world.levelgen.NoiseMapper.NoiseMapRegion;
-import miniventure.game.world.levelgen.util.ButtonMaker;
-import miniventure.game.world.levelgen.util.FloatField;
-import miniventure.game.world.levelgen.util.MyPanel;
+import miniventure.gentest.NoiseMapper.NoiseMapRegion;
+import miniventure.gentest.util.ButtonMaker;
+import miniventure.gentest.util.FloatField;
+import miniventure.gentest.util.MyPanel;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 import org.jetbrains.annotations.NotNull;

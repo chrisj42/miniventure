@@ -1,4 +1,4 @@
-package miniventure.game.world.levelgen;
+package miniventure.gentest;
 
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -11,9 +11,9 @@ import java.awt.event.KeyEvent;
 import java.util.Random;
 
 import miniventure.game.util.MyUtils;
-import miniventure.game.world.levelgen.util.IntegerField;
-import miniventure.game.world.levelgen.util.MyPanel;
-import miniventure.game.world.levelgen.util.StringField;
+import miniventure.gentest.util.IntegerField;
+import miniventure.gentest.util.MyPanel;
+import miniventure.gentest.util.StringField;
 
 import org.jetbrains.annotations.NotNull;
 

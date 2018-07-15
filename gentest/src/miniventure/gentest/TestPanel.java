@@ -1,4 +1,4 @@
-package miniventure.game.world.levelgen;
+package miniventure.gentest;
 
 import javax.swing.BoxLayout;
 import javax.swing.JTabbedPane;
@@ -11,7 +11,7 @@ import java.awt.event.ContainerListener;
 import java.util.Objects;
 
 import miniventure.game.util.Action;
-import miniventure.game.world.levelgen.util.MyPanel;
+import miniventure.gentest.util.MyPanel;
 
 import static miniventure.game.world.tile.TileType.TileTypeEnum.*;
 

@@ -21,7 +21,7 @@ public class LevelGenerator {
 	);
 	
 	// TO-DO I don't really know why, but things get messed up when you go really far out, and have big numbers for your coordinates, even though it's nowhere near the number limit. I want to fix this, but I have no idea how, and I have a feeling that it is going to be more complicated than I think, and I really don't want to deal with it. So, for now, I'm just going to use a considerably smaller value, in the range of 10,000s. It's plenty big, honestly, so it'll just have to do for now until whenever I decide to try and figure out the issue.
-	static final int MAX_WORLD_SIZE = (int) (Math.sqrt(Math.min(Integer.MAX_VALUE, Float.MAX_VALUE)));
+	public static final int MAX_WORLD_SIZE = (int) (Math.sqrt(Math.min(Integer.MAX_VALUE, Float.MAX_VALUE)));
 	
 	private final Coherent2DNoiseFunction categoryNoise, biomeNoise, detailNoise;
 	public final int worldWidth, worldHeight;
@@ -56,7 +56,7 @@ public class LevelGenerator {
 		return generateTiles(x, y, width, height);
 	}
 	
-	TileTypeEnum[][][] generateTiles(int x, int y, int width, int height) {
+	public TileTypeEnum[][][] generateTiles(int x, int y, int width, int height) {
 		TileTypeEnum[][][] tiles = new TileTypeEnum[width][height][];
 		int xt = x * Chunk.SIZE;
 		int yt = y * Chunk.SIZE;

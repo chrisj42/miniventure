@@ -6,20 +6,20 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import net.openhft.hashing.LongHashFunction;
 
-class Coherent2DNoiseFunction {
+public class Coherent2DNoiseFunction {
 	
 	private final LongHashFunction hashFunction;
 	private final float noiseCoordsPerValue;
 	private final int numCurves;
 	
-	Coherent2DNoiseFunction(long seed, int noiseCoordsPerValue) { this(seed, noiseCoordsPerValue, 2); }
-	Coherent2DNoiseFunction(long seed, int noiseCoordsPerValue, int numCurves) {
+	public Coherent2DNoiseFunction(long seed, int noiseCoordsPerValue) { this(seed, noiseCoordsPerValue, 2); }
+	public Coherent2DNoiseFunction(long seed, int noiseCoordsPerValue, int numCurves) {
 		hashFunction = LongHashFunction.xx(seed);
 		this.noiseCoordsPerValue = noiseCoordsPerValue;
 		this.numCurves = numCurves;
 	}
 	
-	float getValue(int x, int y) {
+	public float getValue(int x, int y) {
 		
 		float xVal = x / noiseCoordsPerValue;
 		float yVal = y / noiseCoordsPerValue;

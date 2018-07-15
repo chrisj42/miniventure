@@ -1,4 +1,4 @@
-package miniventure.game.world.levelgen;
+package miniventure.gentest;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.VoidMonoFunction;
 import miniventure.game.world.Point;
+import miniventure.game.world.levelgen.LevelGenerator;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 public class MapPanel extends JPanel implements Runnable {
