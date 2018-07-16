@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Objects;
 
 import miniventure.game.util.MyUtils;
+import miniventure.game.world.levelgen.NamedNoiseFunction;
+import miniventure.game.world.levelgen.NoiseMapper;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 import miniventure.gentest.util.FloatField;
 import miniventure.gentest.util.IntegerField;

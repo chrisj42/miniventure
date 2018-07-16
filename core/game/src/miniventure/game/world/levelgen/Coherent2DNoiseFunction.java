@@ -23,6 +23,30 @@ public class Coherent2DNoiseFunction {
 		
 		float xVal = x / noiseCoordsPerValue;
 		float yVal = y / noiseCoordsPerValue;
+		/*int xRound = MathUtils.floor(xVal);
+		int yRound = MathUtils.floor(yVal);
+		
+		Vector2 minCenter = new Vector2();
+		Vector2 minPos = new Vector2();
+		float minDist = -1;
+		for(int xo = -1; xo <= 1; xo++) {
+			for(int yo = -1; yo <= 1; yo++) {
+				Vector2 center = getPolygonCenter(xRound+xo, yRound+yo);
+				float dist = center.dst(xVal, yVal);
+				if(minDist < 0 || dist < minDist) {
+					minDist = dist;
+					minPos.set(xRound+xo, yRound+yo);
+					minCenter.set(center);
+				}
+			}
+		}
+		
+		// System.out.println("closest center to "+xVal+","+yVal+" is "+minCenter+" from tile pos "+minPos);
+		
+		return minDist;
+		*/
+		// rand.setSeed(hashFunction.hashInts(new int[] {MathUtils.floor(minCenter.x), MathUtils.floor(minCenter.y)}));
+		// return rand.nextFloat();
 		
 		int xMin = MathUtils.floor(xVal);
 		int yMin = MathUtils.floor(yVal);
@@ -46,7 +70,22 @@ public class Coherent2DNoiseFunction {
 		return totalHash;
 	}
 	
+	/*
+		given a tile coordinate:
+			- find polygon it is in
+			- return value of polygon
+		
+		to find polygon:
+			- check all 9 surrounding polygons
+			- find closest center
+		
+		to get value of polygon:
+			- center of polygon is at tile coord shifted by random amount based on coordinate
+			- value of polygon is noise value at center pos
+	 */
+	
 	private static final Vector2 ref = new Vector2(), diff = new Vector2();
+	private static final Vector2 off = new Vector2();
 	private final Random rand = new Random();
 	
 	private float getValueFromRef(int xRef, int yRef, float x, float y) {
@@ -57,13 +96,13 @@ public class Coherent2DNoiseFunction {
 		 */
 		
 		// alternate way of getting random dir, I don't like it
-		MathUtils.random.setSeed(hashFunction.hashInts(new int[] {xRef, yRef}));
-		ref.setToRandomDirection();
+		// rand.setSeed(hashFunction.hashInts(new int[] {xRef, yRef}));
+		// ref.setToRandomDirection();
 		
-		/*ref.x = (int) hashFunction.hashInts(new int[] {xRef, yRef, xRef});
+		ref.x = (int) hashFunction.hashInts(new int[] {xRef, yRef, xRef});
 		ref.y = (int) hashFunction.hashInts(new int[] {yRef, xRef, xRef});
 		ref.nor();
-		*/
+		
 		diff.set(x, y);
 		diff.sub(xRef, yRef);
 		return ref.dot(diff);
@@ -72,9 +111,14 @@ public class Coherent2DNoiseFunction {
 		// return rand.nextFloat();
 	}
 	
-	/*private float dotNor(Vector2 v1, Vector2 v2) {
-		if(v1.)
-	}*/
+	private Vector2 getPolygonCenter(int x, int y) {
+		off.setLength(1);
+		MathUtils.random.setSeed(hashFunction.hashInts(new int[] {x, y}));
+		off.setToRandomDirection();
+		off.add(x, y);
+		// System.out.println("testing polygon at "+x+","+y+"; center="+off);
+		return off;
+	}
 	
 	private float interpolate(float a, float b, float weight) {
 		// cubic equation: -2x^3 + 3x^2

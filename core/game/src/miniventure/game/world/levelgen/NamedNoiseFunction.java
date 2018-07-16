@@ -1,10 +1,10 @@
-package miniventure.gentest;
+package miniventure.game.world.levelgen;
 
 import miniventure.game.world.levelgen.Coherent2DNoiseFunction;
 
 import org.jetbrains.annotations.NotNull;
 
-public class NamedNoiseFunction implements NamedObject {
+public class NamedNoiseFunction {
 	
 	@NotNull private String name;
 	private long seed;
@@ -21,7 +21,7 @@ public class NamedNoiseFunction implements NamedObject {
 		this.curveCount = curveCount;
 	}
 	
-	void resetFunction() { noiseFunction = null; }
+	public void resetFunction() { noiseFunction = null; }
 	
 	public Coherent2DNoiseFunction getNoiseFunction() {
 		if(noiseFunction == null)
@@ -29,19 +29,19 @@ public class NamedNoiseFunction implements NamedObject {
 		return noiseFunction;
 	}
 	
+	public long getSeed() { return seed; }
 	public void setSeed(long seed) { this.seed = seed; }
 	
-	@Override
-	public void setObjectName(@NotNull String name) { this.name = name; }
-	@Override @NotNull
-	public String getObjectName() { return name; }
+	public void setName(@NotNull String name) { this.name = name; }
+	@NotNull
+	public String getName() { return name; }
 	
 	public void setCoordsPerValue(int coordsPerValue) { this.coordsPerValue = coordsPerValue; }
 	
 	public void setCurveCount(int curveCount) { this.curveCount = curveCount; }
 	
 	@Override
-	public String toString() { return getObjectName(); }
+	public String toString() { return getName(); }
 	
 	public int getCoordsPerValue() {
 		return coordsPerValue;

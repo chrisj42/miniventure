@@ -12,7 +12,8 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 import miniventure.game.util.MyUtils;
-import miniventure.gentest.NoiseMapper.NoiseMapRegion;
+import miniventure.game.world.levelgen.NoiseMapper;
+import miniventure.game.world.levelgen.NoiseMapper.NoiseMapRegion;
 import miniventure.gentest.util.ButtonMaker;
 import miniventure.gentest.util.FloatField;
 import miniventure.gentest.util.MyPanel;

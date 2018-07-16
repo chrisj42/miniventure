@@ -11,6 +11,7 @@ import java.awt.event.KeyEvent;
 import java.util.Random;
 
 import miniventure.game.util.MyUtils;
+import miniventure.game.world.levelgen.NamedNoiseFunction;
 import miniventure.gentest.util.IntegerField;
 import miniventure.gentest.util.MyPanel;
 import miniventure.gentest.util.StringField;
@@ -88,12 +89,12 @@ class NoiseFunctionEditor extends MyPanel implements NamedObject, Scrollable {
 	
 	@Override
 	public void setObjectName(@NotNull String name) {
-		noiseFunction.setObjectName(name);
+		noiseFunction.setName(name);
 		for(NoiseMapEditor editor: testPanel.getNoiseMapperPanel().getElements())
 			editor.resetFunctionSelector();
 	}
 	@Override @NotNull
-	public String getObjectName() { return noiseFunction.getObjectName(); }
+	public String getObjectName() { return noiseFunction.getName(); }
 	
 	
 	@Override

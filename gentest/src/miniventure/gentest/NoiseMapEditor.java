@@ -12,7 +12,9 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 import miniventure.game.util.MyUtils;
-import miniventure.gentest.NoiseMapper.NoiseMapRegion;
+import miniventure.game.world.levelgen.NamedNoiseFunction;
+import miniventure.game.world.levelgen.NoiseMapper;
+import miniventure.game.world.levelgen.NoiseMapper.NoiseMapRegion;
 import miniventure.gentest.util.MyPanel;
 
 import org.jetbrains.annotations.NotNull;
@@ -210,7 +212,7 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 	
 	@Override
 	public void setObjectName(@NotNull String name) {
-		noiseMap.setObjectName(name);
+		noiseMap.setName(name);
 		for(NoiseMapEditor editor: testPanel.getNoiseMapperPanel().getElements())
 			for(NoiseMapRegionEditor rEditor: editor.getRegionEditors())
 				rEditor.resetNoiseMapSelector(noiseMap);
@@ -219,7 +221,7 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 	@NotNull
 	@Override
 	public String getObjectName() {
-		return noiseMap.getObjectName();
+		return noiseMap.getName();
 	}
 	
 	@Override

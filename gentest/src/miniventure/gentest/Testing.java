@@ -33,7 +33,7 @@ class Testing {
 		displayLevelVisually(width, height, scale, new Random().nextLong());
 	}
 	private static void displayLevelVisually(int width, int height, int scale, long seed) {
-		LevelGenerator gen = new LevelGenerator(seed, 0, 0, 32, 6);
+		LevelGenerator gen = new LevelGenerator(seed);
 		TileTypeEnum[][][] tiles = gen.generateTiles(0, 0, width, height);
 		
 		Color[][] colors = new Color[width][height];

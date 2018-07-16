@@ -35,6 +35,8 @@ public class MapPanel extends JPanel implements Runnable {
 	
 	private HashSet<Integer> keyPresses;
 	
+	private LevelGenerator generator;
+	
 	public MapPanel(TestPanel testPanel) {
 		this.testPanel = testPanel;
 		
@@ -82,8 +84,12 @@ public class MapPanel extends JPanel implements Runnable {
 		mapsValid = true;
 		int width = worldWidth <= 0 ? LevelGenerator.MAX_WORLD_SIZE : worldWidth;
 		int height = worldHeight <= 0 ? LevelGenerator.MAX_WORLD_SIZE : worldHeight;
-		for(NoiseFunctionEditor editor: testPanel.getNoiseFunctionPanel().getElements())
+		long seed = 0;
+		for(NoiseFunctionEditor editor: testPanel.getNoiseFunctionPanel().getElements()) {
 			editor.generateSeed();
+			seed = editor.getNoiseFunction().getSeed();
+		}
+		final long theseed = seed;
 		msgLabel.setText("Generating tiles...");
 		msgLabel.setVisible(true);
 		repaint();
@@ -92,6 +98,7 @@ public class MapPanel extends JPanel implements Runnable {
 			this.height = height;
 			worldOffX = width/2;
 			worldOffY = height/2;
+			generator = new LevelGenerator(theseed, width, height/*, testPanel.getNoiseMapperPanel().getElements()[0].getNoiseMap()*/);
 			forEachTile((p, rp) -> {});
 			msgLabel.setVisible(false);
 			requestFocus();
@@ -132,7 +139,7 @@ public class MapPanel extends JPanel implements Runnable {
 	private void genTile(Point p) { genTile(p.x, p.y); }
 	private void genTile(int x, int y) {
 		if(!mapsValid) return;
-		TileTypeEnum type = testPanel.getNoiseMapperPanel().getElements()[0].getNoiseMap().getTileType(x, y);
+		TileTypeEnum type = generator.getTileType(x, y);
 		tiles.put(new Point(x, y), type.color);
 	}
 	
@@ -163,6 +170,8 @@ public class MapPanel extends JPanel implements Runnable {
 	}
 	
 	private void forEachTile(VoidBiFunction<Point, Point> action) {
+		if(generator == null) return;
+		
 		int actualZoom = testPanel.getGlobalPanel().zoomField.getValue();
 		float zoom = actualZoom < 0 ? -1f/actualZoom : actualZoom == 0 ? 1 : actualZoom;
 		Point radius = new Point(Math.min(width, (int)(getWidth()/zoom))/2, Math.min(height, (int)(getHeight()/zoom))/2);
@@ -183,10 +192,14 @@ public class MapPanel extends JPanel implements Runnable {
 			int yo = 0;
 			for(int y = -bufferRadiusNeg.y; y < bufferRadiusPos.y; y+=skipZoom) {
 				Point p = new Point(x + worldOffX, y + worldOffY);
-				if(!tiles.containsKey(p))
-					points.add(p);
-				else if(!(p.x < 0 || p.y < 0 || p.x >= width || p.y >= height) && Math.abs(x) <= radius.x && Math.abs(y) <= radius.y)
-					action.act(p, new Point(worldOffX-bufferRadiusNeg.x/skipZoom+xo, worldOffY-bufferRadiusNeg.y/skipZoom+yo));
+				if(!(p.x < 0 || p.y < 0 || p.x >= width || p.y >= height)) {
+					if(!tiles.containsKey(p)) {
+						System.out.println("adding tile "+p+"; width="+width+" height="+height);
+						points.add(p);
+					}
+					else if(Math.abs(x) <= radius.x && Math.abs(y) <= radius.y)
+						action.act(p, new Point(worldOffX - bufferRadiusNeg.x / skipZoom + xo, worldOffY - bufferRadiusNeg.y / skipZoom + yo));
+				}
 				yo++;
 			}
 			xo++;

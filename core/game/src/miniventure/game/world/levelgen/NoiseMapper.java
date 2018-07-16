@@ -1,14 +1,17 @@
-package miniventure.gentest;
+package miniventure.game.world.levelgen;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 
+import com.badlogic.gdx.math.MathUtils;
+
 import org.jetbrains.annotations.NotNull;
 
 // a data class only, not display.
-public class NoiseMapper implements NamedObject {
+public class NoiseMapper {
 	
 	@NotNull private String name;
 	private NamedNoiseFunction source;
@@ -21,10 +24,37 @@ public class NoiseMapper implements NamedObject {
 		regions = new ArrayList<>();
 	}
 	
-	int getRegionCount() { return regions.size(); }
-	NoiseMapRegion[] getRegions() { return regions.toArray(new NoiseMapRegion[regions.size()]); }
+	void setSeedRecursively(Random rand) {
+		getSource().setSeed(rand.nextLong());
+		for(NoiseMapRegion r: regions)
+			if(!r.givesTileType)
+				r.chainNoiseMapper.setSeedRecursively(rand);
+	}
 	
-	NoiseMapRegion addRegion() {
+	void setMaxCPV(int cpv) { setMaxCPV(cpv, getMaxCPV()); }
+	private void setMaxCPV(final int cpv, final int max) {
+		// if the recursive max cpv is less than the given, then do nothing.
+		if(max <= cpv) return;
+		
+		// otherwise, scale the current function cpv with it's current fraction of the max, to the cpv being the max.
+		source.setCoordsPerValue(source.getCoordsPerValue()*cpv/max);
+		for(NoiseMapRegion r: regions)
+			if(!r.givesTileType)
+				r.chainNoiseMapper.setMaxCPV(cpv, max);
+	}
+	
+	private int getMaxCPV() {
+		int max = source.getCoordsPerValue();
+		for(NoiseMapRegion r: regions)
+			if(!r.givesTileType)
+				max = Math.max(max, r.chainNoiseMapper.getMaxCPV());
+		return max;
+	}
+	
+	public int getRegionCount() { return regions.size(); }
+	public NoiseMapRegion[] getRegions() { return regions.toArray(new NoiseMapRegion[regions.size()]); }
+	
+	public NoiseMapRegion addRegion() {
 		// adds and returns a new region
 		recomputeTotal();
 		NoiseMapRegion newRegion = new NoiseMapRegion(TileTypeEnum.GRASS, regions.size()==0?1:total/regions.size());
@@ -35,19 +65,19 @@ public class NoiseMapper implements NamedObject {
 		regions.add(region);
 		recomputeTotal();
 	}
-	NoiseMapper addRegion(@NotNull TileTypeEnum type, float size) {
+	public NoiseMapper addRegion(@NotNull TileTypeEnum type, float size) {
 		addRegion(new NoiseMapRegion(type, size));
 		return this;
 	}
-	NoiseMapper addRegion(@NotNull NoiseMapper chainMapper, float size) {
+	public NoiseMapper addRegion(@NotNull NoiseMapper chainMapper, float size) {
 		addRegion(new NoiseMapRegion(chainMapper, size));
 		return this;
 	}
-	void addRegion(@NotNull TileTypeEnum type, NoiseMapper chainMapper, boolean givesTile, float size) {
+	public void addRegion(@NotNull TileTypeEnum type, NoiseMapper chainMapper, boolean givesTile, float size) {
 		addRegion(new NoiseMapRegion(type, chainMapper, givesTile, size));
 	}
 	
-	void removeRegion(NoiseMapRegion region) {
+	public void removeRegion(NoiseMapRegion region) {
 		if(regions.remove(region))
 			recomputeTotal();
 	}
@@ -65,7 +95,7 @@ public class NoiseMapper implements NamedObject {
 		// System.out.println("getting tiletype for value "+value+" at "+x+','+y+" from mapper "+this);
 		float total = 0;
 		for(NoiseMapRegion region: regions) {
-			float add = region.size/this.total;
+			float add = this.total==0?1:region.size/this.total;
 			// System.out.println("checking region "+region+", adding "+add+" to running total of "+total);
 			total += add;
 			if(total >= value) {
@@ -156,7 +186,7 @@ public class NoiseMapper implements NamedObject {
 		
 		public int getIndex() { return regions.indexOf(this); }
 		
-		int move(int amt) {
+		public int move(int amt) {
 			int idx = getIndex();
 			int nidx = MyUtils.clamp(idx+amt, 0, regions.size()-1);
 			regions.remove(idx);
@@ -168,10 +198,10 @@ public class NoiseMapper implements NamedObject {
 		public String toString() { return NoiseMapper.this+" Region #"+getIndex()+"; size="+size+", givesTile="+givesTileType+", tiletype="+tileType+", chainmapper="+chainNoiseMapper; }
 	}
 	
-	@Override
-	public void setObjectName(@NotNull String name) { this.name = name; }
-	@Override @NotNull
-	public String getObjectName() { return name; }
+	
+	public void setName(@NotNull String name) { this.name = name; }
+	@NotNull
+	public String getName() { return name; }
 	
 	@Override
 	public String toString() { return name; }

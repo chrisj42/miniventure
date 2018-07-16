@@ -2,6 +2,7 @@ package miniventure.game.server;
 
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Random;
 
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.EntityAddition;
@@ -21,6 +22,7 @@ import miniventure.game.world.tile.TileEnumMapper;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
@@ -100,7 +102,7 @@ public class ServerWorld extends WorldManager {
 	@Override
 	public void createWorld(int width, int height) {
 		worldLoaded = false;
-		levelGenerator = new LevelGenerator(MathUtils.random.nextLong(), width, height, 64, 8);
+		levelGenerator = new LevelGenerator(MathUtils.random.nextLong(), width, height);
 		
 		ProgressPrinter logger = new ProgressPrinter();
 		
@@ -194,10 +196,10 @@ public class ServerWorld extends WorldManager {
 			throw new NullPointerException("Surface level found to be null while attempting to spawn player.");
 		
 		// find a good spawn location near the middle of the map
+		Point size = levelGenerator.getSpawnArea();
+		Rectangle spawnBounds = new Rectangle(level.getWidth()/2-size.x/2, level.getHeight()/2-size.y/2, size.x, size.y);
 		
-		Rectangle spawnBounds = new Rectangle(0, 0, Math.min(level.getWidth(), 5*Chunk.SIZE), Math.min(level.getHeight(), 5*Chunk.SIZE));
-		spawnBounds.setCenter(level.getWidth()/2, level.getHeight()/2);
-		
+		// System.out.println("attempting spawn around "+spawnBounds.getCenter(new Vector2()));
 		level.spawnMob(player, spawnBounds);
 	}
 	
