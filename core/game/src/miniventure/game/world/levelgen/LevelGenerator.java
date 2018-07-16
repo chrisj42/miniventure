@@ -4,9 +4,12 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Random;
 
+import miniventure.game.util.MyUtils;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.Point;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
+
+import com.badlogic.gdx.math.Rectangle;
 
 import static miniventure.game.world.tile.TileType.TileTypeEnum.*;
 import static miniventure.game.world.tile.TileType.TileTypeEnum.DIRT;
@@ -20,13 +23,12 @@ public class LevelGenerator {
 	
 	private final NoiseMapper noiseMapper;
 	public final int worldWidth, worldHeight;
+	private final int noiseOffX, noiseOffY;
 	
 	public LevelGenerator(long seed) { this(seed, 0, 0); }
-	public LevelGenerator(long seed, int width, int height) { this(seed, width, height, DEFAULT_MAPPER); }
+	public LevelGenerator(long seed, int width, int height) { this(seed, width, height, DEFAULT_MAPPER()); }
 	public LevelGenerator(long seed, int width, int height, NoiseMapper mapper) {
 		this.noiseMapper = mapper;
-		
-		noiseMapper.setMaxCPV(Math.max(1, Math.max(width, height)/10));
 		
 		if(width < 0 || width > MAX_WORLD_SIZE || height < 0 || height > MAX_WORLD_SIZE)
 			throw new IllegalArgumentException("illegal world size; dimensions of world must be non-negative and not greater than " + MAX_WORLD_SIZE + "; given dimensions: " + width+","+height);
@@ -40,30 +42,39 @@ public class LevelGenerator {
 		boolean valid = false;
 		Random rand = new Random(seed);
 		
-		if(true) return;
-		int tries = 2000;
-		while(!valid && tries > 0) {
-			noiseMapper.setSeedRecursively(rand);
-			tries--;
-			// System.out.println("checking for land: "+tries);
-			
+		Rectangle area = new Rectangle();
+		noiseMapper.setSeedRecursively(rand);
+		getSpawnArea(area);
+		int noiseOff = 0;
+		while(!valid) {
 			// try and find land
-			Point b = getSpawnArea();
-			for(int xo = 0; xo < b.x; xo++) {
-				for(int yo = 0; yo < b.y; yo++) {
-					int x = width/2 + xo;
-					int y = height / 2 + yo;
-					if(getTileType(x, y) != TileTypeEnum.WATER) {
+			for(int xo = 0; xo < area.width; xo++) {
+				for(int yo = 0; yo < area.height; yo++) {
+					if(noiseMapper.getTileType((int)area.x+xo+noiseOff, (int)area.y+yo) != TileTypeEnum.WATER) {
 						valid = true;
 						break;
 					}
 				}
 				if(valid) break;
 			}
+			if(!valid)
+				noiseOff += area.width;
 		}
+		
+		this.noiseOffX = noiseOff;
+		noiseOffY = 0;
 	}
 	
-	public Point getSpawnArea() { return new Point(Math.min(worldWidth/4, 1000), Math.min(worldHeight/4, 1000)); }
+	public Rectangle getSpawnArea(Rectangle rect) {
+		int width = getDim(worldWidth);
+		int height = getDim(worldHeight);
+		return rect.set((worldWidth-width)/2, (worldHeight-height)/2, width, height);
+	}
+	private int getDim(int worldDim) {
+		// the idea here is to go from the spawn area being the whole map at 100 tiles across or less, to the center 1000 tiles after 4000, which is a quarter of the width at that point.
+		float div = MyUtils.mapFloat(MyUtils.clamp(worldDim, 100, worldDim), 100, Math.max(worldDim, 4000), 1, Math.max(4, worldDim/1000));
+		return (int) (worldDim/div);
+	}
 	
 	public TileTypeEnum[][][] generateChunk(final int x, final int y) {
 		int width = Chunk.SIZE, height = Chunk.SIZE;
@@ -97,7 +108,7 @@ public class LevelGenerator {
 		if(x < 0 || y < 0 || x >= worldWidth || y >= worldHeight)
 			throw new IllegalArgumentException("Requested tile is outside world bounds; x="+x+", y="+y+". Actual world size: ("+worldWidth+","+worldHeight+")");
 		
-		return noiseMapper.getTileType(x, y);
+		return noiseMapper.getTileType(x+noiseOffX, y+noiseOffY);
 	}
 	public TileTypeEnum[] generateTile(int x, int y) {
 		return getTile(getTileType(x, y));
@@ -126,8 +137,7 @@ public class LevelGenerator {
 		put(STONE, DIRT);
 	}};
 	
-	private static final NoiseMapper DEFAULT_MAPPER;
-	static {
+	private static NoiseMapper DEFAULT_MAPPER() {
 		
 		NamedNoiseFunction continentNoise = new NamedNoiseFunction("Continent Noise", 500, 0);
 		NamedNoiseFunction landNoise = new NamedNoiseFunction("Land Noise", 300, 3);
@@ -187,6 +197,6 @@ public class LevelGenerator {
 			.addRegion(WATER, .07f)
 			.addRegion(biomeCategories, 1.1f);
 		
-		DEFAULT_MAPPER = rivers;
+		return rivers;
 	}
 }

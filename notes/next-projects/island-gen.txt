@@ -1,0 +1,20 @@
+noise is mainly for island generation, and then once I've got a coordinate for a center of an island (which is a minimum distance away from any other center), then I can use polygons.
+
+
+to identify islands: start by generating tiles until you hit a non-ocean one. Then, begin the sequence...
+
+--- keep track of all non-ocean tile coordinates so they don't have to be regenerated.
+
+- algorithm to follow border of island.
+- if starting with a non-ocean tile, go in a line until you reach the ocean, and then begin the sequence
+
+- follow path
+
+- when enumerating tiles inside islands, just go left to right, top to bottom, between all island tiles. note that a tile must know in which direction there are other island tiles.
+
+- edge tiles should be tracked separately from inner tiles, but also included in inner tile list.
+
+
+----
+
+other way that was suggested: using....hyperplanes? configuring the noise functions in such a way that the different island types don't overlap without going through water first.

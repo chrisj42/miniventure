@@ -84,12 +84,10 @@ public class MapPanel extends JPanel implements Runnable {
 		mapsValid = true;
 		int width = worldWidth <= 0 ? LevelGenerator.MAX_WORLD_SIZE : worldWidth;
 		int height = worldHeight <= 0 ? LevelGenerator.MAX_WORLD_SIZE : worldHeight;
-		long seed = 0;
-		for(NoiseFunctionEditor editor: testPanel.getNoiseFunctionPanel().getElements()) {
+		NoiseFunctionEditor[] functionEditors = testPanel.getNoiseFunctionPanel().getElements();
+		for(NoiseFunctionEditor editor: functionEditors)
 			editor.generateSeed();
-			seed = editor.getNoiseFunction().getSeed();
-		}
-		final long theseed = seed;
+		final long seed = functionEditors[0].getNoiseFunction().getSeed();
 		msgLabel.setText("Generating tiles...");
 		msgLabel.setVisible(true);
 		repaint();
@@ -98,7 +96,7 @@ public class MapPanel extends JPanel implements Runnable {
 			this.height = height;
 			worldOffX = width/2;
 			worldOffY = height/2;
-			generator = new LevelGenerator(theseed, width, height/*, testPanel.getNoiseMapperPanel().getElements()[0].getNoiseMap()*/);
+			generator = new LevelGenerator(seed, width, height, testPanel.getNoiseMapperPanel().getElements()[0].getNoiseMap());
 			forEachTile((p, rp) -> {});
 			msgLabel.setVisible(false);
 			requestFocus();
@@ -179,7 +177,6 @@ public class MapPanel extends JPanel implements Runnable {
 		int skipZoom = actualZoom < 0 ? -actualZoom : 1;
 		
 		
-		
 		int spd = testPanel.getGlobalPanel().speedField.getValue();
 		float buffer = testPanel.getGlobalPanel().bufferField.getValue();
 		Point input = getInput();
@@ -194,7 +191,7 @@ public class MapPanel extends JPanel implements Runnable {
 				Point p = new Point(x + worldOffX, y + worldOffY);
 				if(!(p.x < 0 || p.y < 0 || p.x >= width || p.y >= height)) {
 					if(!tiles.containsKey(p)) {
-						System.out.println("adding tile "+p+"; width="+width+" height="+height);
+						// System.out.println("adding tile "+p+"; width="+width+" height="+height);
 						points.add(p);
 					}
 					else if(Math.abs(x) <= radius.x && Math.abs(y) <= radius.y)

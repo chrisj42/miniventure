@@ -196,10 +196,8 @@ public class ServerWorld extends WorldManager {
 			throw new NullPointerException("Surface level found to be null while attempting to spawn player.");
 		
 		// find a good spawn location near the middle of the map
-		Point size = levelGenerator.getSpawnArea();
-		Rectangle spawnBounds = new Rectangle(level.getWidth()/2-size.x/2, level.getHeight()/2-size.y/2, size.x, size.y);
+		Rectangle spawnBounds = levelGenerator.getSpawnArea(new Rectangle());
 		
-		// System.out.println("attempting spawn around "+spawnBounds.getCenter(new Vector2()));
 		level.spawnMob(player, spawnBounds);
 	}
 	

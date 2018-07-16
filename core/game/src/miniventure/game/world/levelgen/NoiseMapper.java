@@ -1,6 +1,7 @@
 package miniventure.game.world.levelgen;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Random;
 
 import miniventure.game.util.MyUtils;
@@ -25,30 +26,11 @@ public class NoiseMapper {
 	}
 	
 	void setSeedRecursively(Random rand) {
-		getSource().setSeed(rand.nextLong());
+		source.setSeed(rand.nextLong());
+		source.resetFunction();
 		for(NoiseMapRegion r: regions)
 			if(!r.givesTileType)
 				r.chainNoiseMapper.setSeedRecursively(rand);
-	}
-	
-	void setMaxCPV(int cpv) { setMaxCPV(cpv, getMaxCPV()); }
-	private void setMaxCPV(final int cpv, final int max) {
-		// if the recursive max cpv is less than the given, then do nothing.
-		if(max <= cpv) return;
-		
-		// otherwise, scale the current function cpv with it's current fraction of the max, to the cpv being the max.
-		source.setCoordsPerValue(source.getCoordsPerValue()*cpv/max);
-		for(NoiseMapRegion r: regions)
-			if(!r.givesTileType)
-				r.chainNoiseMapper.setMaxCPV(cpv, max);
-	}
-	
-	private int getMaxCPV() {
-		int max = source.getCoordsPerValue();
-		for(NoiseMapRegion r: regions)
-			if(!r.givesTileType)
-				max = Math.max(max, r.chainNoiseMapper.getMaxCPV());
-		return max;
 	}
 	
 	public int getRegionCount() { return regions.size(); }
