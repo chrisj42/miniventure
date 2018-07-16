@@ -2,7 +2,7 @@ package miniventure.game.util;
 
 import java.util.HashMap;
 
-/** @noinspection unchecked*/
+@SuppressWarnings("unchecked")
 public class ClassInstanceMap<T> {
 	
 	private final HashMap<Class<? extends T>, T> classMap;
