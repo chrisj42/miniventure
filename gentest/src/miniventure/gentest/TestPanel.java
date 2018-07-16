@@ -11,6 +11,7 @@ import java.awt.event.ContainerListener;
 import java.util.Objects;
 
 import miniventure.game.util.Action;
+import miniventure.game.world.levelgen.GroupNoiseMapper;
 import miniventure.game.world.levelgen.NamedNoiseFunction;
 import miniventure.game.world.levelgen.NoiseMapper;
 import miniventure.gentest.util.MyPanel;
@@ -36,7 +37,7 @@ public class TestPanel extends MyPanel {
 		 */
 		
 		
-		NamedNoiseFunction continentNoise = new NamedNoiseFunction("Continent Noise", 500, 0);
+		NamedNoiseFunction continentNoise = new NamedNoiseFunction("Continent Noise", 500, 2);
 		NamedNoiseFunction landNoise = new NamedNoiseFunction("Land Noise", 300, 3);
 		NamedNoiseFunction biomeNoise = new NamedNoiseFunction("Biome Noise", 120, 2);
 		NamedNoiseFunction detailNoise = new NamedNoiseFunction("Detail Noise", 12, 2);
@@ -65,6 +66,25 @@ public class TestPanel extends MyPanel {
 			.addRegion(canyonBiome, 4.5f)
 			.addRegion(STONE, 1);
 		
+		NoiseMapper snowBiome = new NoiseMapper("Snow", biomeNoise)
+			.addRegion(SNOW, 1)
+			.addRegion(GRASS, 1)
+			.addRegion(SNOW, 1);
+		
+		NoiseMapper volcanoBiome = new NoiseMapper("Volcano", continentNoise)
+			.addRegion(SAND, 1)
+			.addRegion(DIRT, 1)
+			.addRegion(STONE, 3)
+			.addRegion(TORCH, .5f)
+			.addRegion(STONE, 3)
+			.addRegion(DIRT, 1)
+			.addRegion(SAND, 1);
+		
+		NoiseMapper marshBiome = new NoiseMapper("Marsh", detailNoise)
+			.addRegion(WATER, .75f)
+			.addRegion(DIRT, 1)
+			.addRegion(TREE_DARK, .3f)
+			.addRegion(WATER, .75f);
 		
 		NoiseMapper oceanBiome = new NoiseMapper("Ocean", biomeNoise)
 			.addRegion(WATER, 1);
@@ -75,7 +95,7 @@ public class TestPanel extends MyPanel {
 		
 		
 		
-		NoiseMapper landTerrain = new NoiseMapper("Land", landNoise)
+		NoiseMapper landTerrain = new GroupNoiseMapper("Land", landNoise)
 			.addRegion(desertBiome, 4)
 			.addRegion(plainsBiome, 8)
 			.addRegion(mountainBiome, 6);
@@ -93,6 +113,15 @@ public class TestPanel extends MyPanel {
 			.addRegion(WATER, .07f)
 			.addRegion(biomeCategories, 1.1f);
 		
+		
+		NoiseMapper terrain = new GroupNoiseMapper("Terrain", continentNoise)
+			.addRegion(oceanBiome, 0.1f)
+			.addRegion(desertBiome, .1f)
+			.addRegion(plainsBiome, .1f)
+			.addRegion(mountainBiome, .1f)
+			.addRegion(volcanoBiome, .1f)
+			.addRegion(snowBiome, .1f)
+			.addRegion(marshBiome, .1f);
 		
 		
 		globalPanel = new GlobalPanel(this);
@@ -153,17 +182,10 @@ public class TestPanel extends MyPanel {
 		SwingUtilities.invokeLater(() -> {
 			// add all the editors for the biomes and noise functions from above
 			
-			noiseFunctionPanel.addElement(new NoiseFunctionEditor(this, continentNoise));
-			noiseFunctionPanel.addElement(new NoiseFunctionEditor(this, landNoise));
-			noiseFunctionPanel.addElement(new NoiseFunctionEditor(this, biomeNoise));
-			noiseFunctionPanel.addElement(new NoiseFunctionEditor(this, detailNoise));
-			noiseFunctionPanel.addElement(new NoiseFunctionEditor(this, islandNoise));
-			noiseFunctionPanel.addElement(new NoiseFunctionEditor(this, cactusNoise));
+			for(NamedNoiseFunction function: terrain.getReferencedFunctions())
+				noiseFunctionPanel.addElement(new NoiseFunctionEditor(this, function));
 			
-			NoiseMapEditor[] mapEditors = NoiseMapEditor.getEditorsForAll(this,
-				rivers, biomeCategories, landTerrain, deepOceanBiome,
-				oceanBiome, mountainBiome, canyonBiome, desertBiome, plainsBiome
-			);
+			NoiseMapEditor[] mapEditors = NoiseMapEditor.getEditorsForAll(this, terrain.getReferencedMaps());
 			
 			for(NoiseMapEditor editor: mapEditors)
 				noiseMapperPanel.addElement(editor);

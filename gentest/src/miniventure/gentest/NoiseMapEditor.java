@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 import miniventure.game.util.MyUtils;
+import miniventure.game.world.levelgen.GroupNoiseMapper;
 import miniventure.game.world.levelgen.NamedNoiseFunction;
 import miniventure.game.world.levelgen.NoiseMapper;
 import miniventure.game.world.levelgen.NoiseMapper.NoiseMapRegion;
@@ -44,7 +45,7 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 		add(bar);
 		
 		JPanel midPanel = new MyPanel();
-		midPanel.setBackground(null);
+		midPanel.setBackground(noiseMap instanceof GroupNoiseMapper ? Color.WHITE : null);
 		
 		functionSelector = new JComboBox<>();
 		resetFunctionSelector();
@@ -95,6 +96,7 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 		return MyUtils.encodeStringArray(
 			"name:"+getObjectName(),
 			"function:"+functionSelector.getSelectedIndex(),
+			"isgroup:"+(noiseMap instanceof GroupNoiseMapper),
 			"regions:"+MyUtils.encodeStringArray(regionData)
 		);
 	}

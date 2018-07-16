@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import miniventure.game.util.function.ValueMonoFunction;
+import miniventure.game.world.levelgen.GroupNoiseMapper;
 import miniventure.gentest.util.ButtonMaker;
 import miniventure.gentest.util.MyPanel;
 import miniventure.gentest.util.StringField;
@@ -60,7 +61,21 @@ public class ListPanel<E extends JComponent & NamedObject & Scrollable> extends 
 			scrollPane.setColumnHeaderView(label);
 		}
 		
-		add(addBtn, BorderLayout.NORTH);
+		if(clazz.equals(NoiseMapEditor.class)) {
+			JPanel btnPanel = new MyPanel();
+			btnPanel.add(addBtn);
+			JButton modBtn = new JButton("Add Function Map");
+			modBtn.addActionListener(e -> {
+				addElement(clazz.cast(new NoiseMapEditor(testPanel, new GroupNoiseMapper("Function Map-"+containerMap.size(), testPanel.getNoiseFunctionPanel().getElements()[0].getNoiseFunction()))));
+				for(E elem: elementList)
+					for(NoiseMapRegionEditor regionEditor: ((NoiseMapEditor)elem).getRegionEditors())
+						regionEditor.resetNoiseMapSelector();
+			});
+			btnPanel.add(modBtn);
+			add(btnPanel, BorderLayout.NORTH);
+		}
+		else
+			add(addBtn, BorderLayout.NORTH);
 		
 		add(scrollPane, BorderLayout.CENTER);
 	}

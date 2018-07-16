@@ -6,15 +6,11 @@ import java.util.Random;
 
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Chunk;
-import miniventure.game.world.Point;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 import com.badlogic.gdx.math.Rectangle;
 
 import static miniventure.game.world.tile.TileType.TileTypeEnum.*;
-import static miniventure.game.world.tile.TileType.TileTypeEnum.DIRT;
-import static miniventure.game.world.tile.TileType.TileTypeEnum.GRASS;
-import static miniventure.game.world.tile.TileType.TileTypeEnum.STONE;
 
 public class LevelGenerator {
 	
@@ -27,7 +23,8 @@ public class LevelGenerator {
 	
 	public LevelGenerator(long seed) { this(seed, 0, 0); }
 	public LevelGenerator(long seed, int width, int height) { this(seed, width, height, DEFAULT_MAPPER()); }
-	public LevelGenerator(long seed, int width, int height, NoiseMapper mapper) {
+	public LevelGenerator(long seed, int width, int height, NoiseMapper mapper) { this(seed, width, height, mapper, true); }
+	public LevelGenerator(long seed, int width, int height, NoiseMapper mapper, boolean ensureLand) {
 		this.noiseMapper = mapper;
 		
 		if(width < 0 || width > MAX_WORLD_SIZE || height < 0 || height > MAX_WORLD_SIZE)
@@ -39,11 +36,16 @@ public class LevelGenerator {
 		worldWidth = width;
 		worldHeight = height;
 		
-		boolean valid = false;
-		Random rand = new Random(seed);
+		noiseMapper.setSeedRecursively(new Random(seed));
 		
+		if(!ensureLand) {
+			noiseOffX = 0;
+			noiseOffY = 0;
+			return;
+		}
+		
+		boolean valid = false;
 		Rectangle area = new Rectangle();
-		noiseMapper.setSeedRecursively(rand);
 		getSpawnArea(area);
 		int noiseOff = 0;
 		while(!valid) {

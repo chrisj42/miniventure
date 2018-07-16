@@ -2,12 +2,11 @@ package miniventure.game.world.levelgen;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Random;
 
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
-
-import com.badlogic.gdx.math.MathUtils;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -73,23 +72,15 @@ public class NoiseMapper {
 		}
 		return getTileType(x, y, source.getNoiseFunction().getValue(x, y));
 	}
-	public TileTypeEnum getTileType(int x, int y, float value) {
+	private TileTypeEnum getTileType(int x, int y, float value) {
 		// System.out.println("getting tiletype for value "+value+" at "+x+','+y+" from mapper "+this);
 		float total = 0;
 		for(NoiseMapRegion region: regions) {
 			float add = this.total==0?1:region.size/this.total;
 			// System.out.println("checking region "+region+", adding "+add+" to running total of "+total);
 			total += add;
-			if(total >= value) {
-				if(region.givesTileType())
-					return region.getTileType();
-				else if(region.getChainNoiseMapper() != null)
-					return region.getChainNoiseMapper().getTileType(x, y);
-				else {
-					System.out.println("region "+region+" uses mapper but ref is null, returning null");
-					return null;
-				}
-			}
+			if(total >= value)
+				return region.getTileType(x, y);
 		}
 		
 		System.out.println("value "+value+" is not in range of mapper "+this+", total = "+total+"(should be 1); returning null");
@@ -105,6 +96,48 @@ public class NoiseMapper {
 	
 	public NamedNoiseFunction getSource() { return source; }
 	public void setSource(NamedNoiseFunction source) { this.source = source; }
+	
+	public NamedNoiseFunction[] getReferencedFunctions() {
+		ArrayList<NamedNoiseFunction> functions = new ArrayList<>();
+		HashSet<NoiseMapper> visitedMaps = new HashSet<>();
+		LinkedList<NoiseMapper> nextMaps = new LinkedList<>();
+		
+		nextMaps.add(this);
+		while(nextMaps.size() > 0) {
+			NoiseMapper map = nextMaps.pollFirst();
+			visitedMaps.add(map);
+			
+			if(!functions.contains(map.getSource()))
+				functions.add(map.getSource());
+			
+			for(NoiseMapRegion region: map.regions) {
+				if(region.givesTileType) continue;
+				if(!visitedMaps.contains(region.getChainNoiseMapper()))
+				nextMaps.addLast(region.chainNoiseMapper);
+			}
+		}
+		
+		return functions.toArray(new NamedNoiseFunction[functions.size()]);
+	}
+	
+	public NoiseMapper[] getReferencedMaps() {
+		ArrayList<NoiseMapper> maps = new ArrayList<>();
+		LinkedList<NoiseMapper> nextMaps = new LinkedList<>();
+		
+		nextMaps.add(this);
+		while(nextMaps.size() > 0) {
+			NoiseMapper map = nextMaps.pollFirst();
+			maps.add(map);
+			
+			for(NoiseMapRegion region: map.regions) {
+				if(region.givesTileType) continue;
+				if(!maps.contains(region.getChainNoiseMapper()))
+					nextMaps.addLast(region.chainNoiseMapper);
+			}
+		}
+		
+		return maps.toArray(new NoiseMapper[maps.size()]);
+	}
 	
 	public class NoiseMapRegion {
 		private float size;
@@ -138,6 +171,16 @@ public class NoiseMapper {
 		public void setSize(float size) {
 			this.size = size;
 			recomputeTotal();
+		}
+		
+		TileTypeEnum getTileType(int x, int y) {
+			if(givesTileType)
+				return tileType;
+			if(chainNoiseMapper != null)
+				return chainNoiseMapper.getTileType(x, y);
+			
+			System.out.println("region "+this+" uses mapper but ref is null, returning null");
+			return null;
 		}
 		
 		public boolean givesTileType() {

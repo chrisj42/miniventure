@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Objects;
 
 import miniventure.game.util.MyUtils;
+import miniventure.game.world.levelgen.GroupNoiseMapper;
 import miniventure.game.world.levelgen.NamedNoiseFunction;
 import miniventure.game.world.levelgen.NoiseMapper;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
@@ -195,8 +196,9 @@ public class GlobalPanel extends MyPanel {
 				String name = info.get("name");
 				NamedNoiseFunction function = functions[Integer.parseInt(info.get("function"))];
 				regionData[i] = MyUtils.parseLayeredString(info.get("regions"));
+				boolean isgroup = Boolean.parseBoolean(info.getOrDefault("isgroup", "false"));
 				
-				NoiseMapper map = new NoiseMapper(name, function);
+				NoiseMapper map = isgroup ? new GroupNoiseMapper(name, function) : new NoiseMapper(name, function);
 				maps[i] = map;
 			}
 			

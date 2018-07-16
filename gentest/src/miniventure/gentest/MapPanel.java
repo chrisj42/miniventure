@@ -96,7 +96,7 @@ public class MapPanel extends JPanel implements Runnable {
 			this.height = height;
 			worldOffX = width/2;
 			worldOffY = height/2;
-			generator = new LevelGenerator(seed, width, height, testPanel.getNoiseMapperPanel().getElements()[0].getNoiseMap());
+			generator = new LevelGenerator(seed, width, height, testPanel.getNoiseMapperPanel().getElements()[0].getNoiseMap(), false);
 			forEachTile((p, rp) -> {});
 			msgLabel.setVisible(false);
 			requestFocus();
