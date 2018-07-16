@@ -1,5 +1,6 @@
 package miniventure.game.item;
 
+import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.InventoryUpdate;
 import miniventure.game.server.ServerCore;
 import miniventure.game.world.entity.mob.Player.Stat;
@@ -37,7 +38,8 @@ public class ServerHands extends Hands {
 		//System.out.println("used item "+item);
 		Item newItem = item.resetUsage();
 		
-		player.changeStat(Stat.Stamina, -item.getStaminaUsage());
+		if(!GameCore.debug)
+			player.changeStat(Stat.Stamina, -item.getStaminaUsage());
 		
 		/*if(getSelectedItemCount() == 1 || item instanceof HandItem)
 			setItem(newItem == null ? new HandItem() : newItem, 1);

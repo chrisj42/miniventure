@@ -137,6 +137,7 @@ public class LevelGenerator {
 		put(DIRT, HOLE);
 		put(GRASS, DIRT);
 		put(STONE, DIRT);
+		put(TORCH, DIRT);
 	}};
 	
 	private static NoiseMapper DEFAULT_MAPPER() {
@@ -207,6 +208,7 @@ public class LevelGenerator {
 		NamedNoiseFunction continentNoise = new NamedNoiseFunction("Continent Noise", 500, 2);
 		NamedNoiseFunction biomeNoise = new NamedNoiseFunction("Biome Noise", 120, 2);
 		NamedNoiseFunction detailNoise = new NamedNoiseFunction("Detail Noise", 12, 2);
+		NamedNoiseFunction islandNoise = new NamedNoiseFunction("Island Noise", 24, 2);
 		NamedNoiseFunction cactusNoise = new NamedNoiseFunction("Cactus Noise", 4, 2);
 		
 		
@@ -251,7 +253,7 @@ public class LevelGenerator {
 			.addRegion(TREE_DARK, .3f)
 			.addRegion(WATER, .75f);
 		
-		NoiseMapper oceanBiome = new NoiseMapper("Ocean", biomeNoise)
+		NoiseMapper oceanBiome = new NoiseMapper("Ocean", islandNoise)
 			.addRegion(WATER, 10)
 			.addRegion(SAND, 1);
 		
