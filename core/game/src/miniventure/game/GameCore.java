@@ -22,6 +22,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas.TextureAtlasData;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.TextureAtlasData.Region;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
@@ -36,6 +37,8 @@ public class GameCore {
 	
 	public static final int DEFAULT_SCREEN_WIDTH = 800;
 	public static final int DEFAULT_SCREEN_HEIGHT = 450;
+	
+	public static final float MAX_DELTA = 0.25f; // the maximum time that the game will clamp getDeltaTime to, to prevent huge jumps after a lag spike.
 	
 	public static boolean debug = false;
 	
@@ -111,6 +114,8 @@ public class GameCore {
 		tileConnectionAtlas.dispose();
 		iconAtlas.dispose();
 	}
+	
+	public static float getDeltaTime() { return MathUtils.clamp(Gdx.graphics.getDeltaTime(), 0, MAX_DELTA); }
 	
 	public static GlyphLayout getTextLayout(String text) {
 		if(fontGenerator != null)

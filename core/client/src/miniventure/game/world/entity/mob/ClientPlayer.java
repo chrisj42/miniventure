@@ -148,7 +148,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 			animator.setDirection(dir);
 		}
 		
-		Vector2 moveDist = inputDir.cpy().scl(moveSpeed*Gdx.graphics.getDeltaTime());
+		Vector2 moveDist = inputDir.cpy().scl(moveSpeed*GameCore.getDeltaTime());
 		Tile closest = getClosestTile();
 		if(closest != null)
 			moveDist.scl(closest.getType().getPropertyOrDefault(PropertyTag.SpeedRatio, 1f));
@@ -159,7 +159,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 			
 			animator.requestState(AnimationState.WALK);
 			
-			getStatEvo(HungerSystem.class).addHunger(Gdx.graphics.getDeltaTime() * 0.35f);
+			getStatEvo(HungerSystem.class).addHunger(GameCore.getDeltaTime() * 0.35f);
 			
 			/*if(elapTime - lastWalkTime > 0.25f) {
 				ClientCore.playSound("player/walk");

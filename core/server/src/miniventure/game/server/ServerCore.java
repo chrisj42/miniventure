@@ -9,6 +9,8 @@ import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.VersionInfo;
 
+import com.badlogic.gdx.math.MathUtils;
+
 public class ServerCore {
 	
 	private static ServerWorld serverWorld;
@@ -109,7 +111,7 @@ public class ServerCore {
 			}
 			
 			try {
-				serverWorld.update((now - lastNow) / 1E9f);
+				serverWorld.update(MathUtils.clamp((now - lastNow) / 1E9f, 0, GameCore.MAX_DELTA));
 			} catch(Throwable t) {
 				getServer().stop();
 				throw t;

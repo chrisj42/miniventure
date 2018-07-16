@@ -137,7 +137,7 @@ public class MainMenu extends MenuScreen {
 	public void draw() {
 		levelView.render(cameraPos, lightOverlay, backgroundLevel);
 		
-		cameraPos.add(cameraDir.cpy().scl(Gdx.graphics.getDeltaTime()));
+		cameraPos.add(cameraDir.cpy().scl(GameCore.getDeltaTime()));
 		cameraDir.x = velDir(cameraPos.x, cameraDir.x, levelView.getViewWidth()/2, backgroundLevel.getWidth() - levelView.getViewWidth()/2);
 		cameraDir.y = velDir(cameraPos.y, cameraDir.y, levelView.getViewHeight()/2, backgroundLevel.getHeight() - levelView.getViewHeight()/2);
 		

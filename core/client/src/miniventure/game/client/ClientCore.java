@@ -112,7 +112,7 @@ public class ClientCore extends ApplicationAdapter {
 		input.update();
 		
 		if (clientWorld != null && clientWorld.worldLoaded())
-			clientWorld.update(Gdx.graphics.getDeltaTime()); // renders as well
+			clientWorld.update(GameCore.getDeltaTime()); // renders as well
 		
 		hasMenu = menuScreen != null;
 		
