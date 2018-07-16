@@ -56,7 +56,7 @@ class NoiseFunctionEditor extends MyPanel implements NamedObject, Scrollable {
 		add(new JLabel("Size:"));
 		add(coordsPerValue);
 		
-		numCurves = new IntegerField(noiseFunction.getCurveCount(), 2, 1);
+		numCurves = new IntegerField(noiseFunction.getCurveCount(), 2, 0);
 		numCurves.addValueListener(noiseFunction::setCurveCount);
 		add(new JLabel("Curves:"));
 		add(numCurves);

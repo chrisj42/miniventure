@@ -17,10 +17,10 @@ import java.util.List;
 import java.util.Objects;
 
 import miniventure.game.util.MyUtils;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
 import miniventure.gentest.util.FloatField;
 import miniventure.gentest.util.IntegerField;
 import miniventure.gentest.util.MyPanel;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 /**
  * Contains: global seed selection, world size selection, regen button
@@ -85,7 +85,7 @@ public class GlobalPanel extends MyPanel {
 		
 		speedField = new IntegerField(5, 2, 1);
 		speedField.addActionListener(mapFocus);
-		zoomField = new IntegerField(2, 2, 1);
+		zoomField = new IntegerField(2);
 		zoomField.addActionListener(mapFocus);
 		bufferField = new FloatField(3, 2, 0);
 		bufferField.addActionListener(mapFocus);

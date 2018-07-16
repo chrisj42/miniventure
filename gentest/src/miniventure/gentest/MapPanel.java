@@ -19,7 +19,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 
 import miniventure.game.util.MyUtils;
-import miniventure.game.util.function.VoidMonoFunction;
+import miniventure.game.util.function.VoidBiFunction;
 import miniventure.game.world.Point;
 import miniventure.game.world.levelgen.LevelGenerator;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
@@ -92,7 +92,7 @@ public class MapPanel extends JPanel implements Runnable {
 			this.height = height;
 			worldOffX = width/2;
 			worldOffY = height/2;
-			forEachTile(p -> {});
+			forEachTile((p, rp) -> {});
 			msgLabel.setVisible(false);
 			requestFocus();
 			repaint();
@@ -125,6 +125,7 @@ public class MapPanel extends JPanel implements Runnable {
 			if(cnt > 10_000) {
 				repaint();
 				cnt %= 10_000;
+				MyUtils.sleep(10);
 			}
 		}
 	}
@@ -139,19 +140,12 @@ public class MapPanel extends JPanel implements Runnable {
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		
-		// Image buf = createImage(getWidth(), getHeight());
-		// Graphics bufg = buf.getGraphics();
-		// g.setColor(getBackground());
-		// g.fillRect(0, 0, getWidth(), getHeight());
-		// g.setColor(getForeground());
-		final int pixelDensity = testPanel.getGlobalPanel().zoomField.getValue();
+		final int pixelDensity = Math.max(1, testPanel.getGlobalPanel().zoomField.getValue());
 		
-		forEachTile(p -> {
+		forEachTile((p, rp) -> {
 			g.setColor(tiles.get(p));
-			g.fillRect(getWidth()/2+(p.x-worldOffX)*pixelDensity, getHeight()/2+(p.y-worldOffY)*pixelDensity, pixelDensity, pixelDensity);
+			g.fillRect(getWidth()/2+(rp.x-worldOffX)*pixelDensity, getHeight()/2+(rp.y-worldOffY)*pixelDensity, pixelDensity, pixelDensity);
 		});
-		
-		// g.drawImage(buf, 0, 0, null);
 	}
 	
 	private Point getInput() {
@@ -168,9 +162,14 @@ public class MapPanel extends JPanel implements Runnable {
 		return new Point(x, y);
 	}
 	
-	private void forEachTile(VoidMonoFunction<Point> action) {
-		int zoom = testPanel.getGlobalPanel().zoomField.getValue();
-		Point radius = new Point(Math.min(width, getWidth()/zoom)/2, Math.min(height, getHeight()/zoom)/2);
+	private void forEachTile(VoidBiFunction<Point, Point> action) {
+		int actualZoom = testPanel.getGlobalPanel().zoomField.getValue();
+		float zoom = actualZoom < 0 ? -1f/actualZoom : actualZoom == 0 ? 1 : actualZoom;
+		Point radius = new Point(Math.min(width, (int)(getWidth()/zoom))/2, Math.min(height, (int)(getHeight()/zoom))/2);
+		
+		int skipZoom = actualZoom < 0 ? -actualZoom : 1;
+		
+		
 		
 		int spd = testPanel.getGlobalPanel().speedField.getValue();
 		float buffer = testPanel.getGlobalPanel().bufferField.getValue();
@@ -178,15 +177,19 @@ public class MapPanel extends JPanel implements Runnable {
 		Point bufferRadiusNeg = new Point(radius.x + (int)(spd*buffer*(input.x<0?-input.x:0)), radius.y + (int)(spd*buffer*(input.y<0?-input.y:0)));
 		Point bufferRadiusPos = new Point(radius.x + (int)(spd*buffer*(input.x>0?input.x:0)), radius.y + (int)(spd*buffer*(input.y>0?input.y:0)));
 		
-		HashSet<Point> points = new HashSet<>((bufferRadiusNeg.x+bufferRadiusPos.x)*(bufferRadiusNeg.y+bufferRadiusPos.y)/2);
-		for(int x = -bufferRadiusNeg.x; x < bufferRadiusPos.x; x++) {
-			for(int y = -bufferRadiusNeg.y; y < bufferRadiusPos.y; y++) {
+		HashSet<Point> points = new HashSet<>((bufferRadiusNeg.x+bufferRadiusPos.x)/skipZoom*((bufferRadiusNeg.y+bufferRadiusPos.y)/skipZoom));
+		int xo = 0;
+		for(int x = -bufferRadiusNeg.x; x < bufferRadiusPos.x; x+=skipZoom) {
+			int yo = 0;
+			for(int y = -bufferRadiusNeg.y; y < bufferRadiusPos.y; y+=skipZoom) {
 				Point p = new Point(x + worldOffX, y + worldOffY);
 				if(!tiles.containsKey(p))
 					points.add(p);
 				else if(!(p.x < 0 || p.y < 0 || p.x >= width || p.y >= height) && Math.abs(x) <= radius.x && Math.abs(y) <= radius.y)
-					action.act(p);
+					action.act(p, new Point(worldOffX-bufferRadiusNeg.x/skipZoom+xo, worldOffY-bufferRadiusNeg.y/skipZoom+yo));
+				yo++;
 			}
+			xo++;
 		}
 		queueTiles(points);
 	}
@@ -213,6 +216,9 @@ public class MapPanel extends JPanel implements Runnable {
 			int worldOffX = this.worldOffX;
 			int worldOffY = this.worldOffY;
 			int spd = testPanel.getGlobalPanel().speedField.getValue();
+			int zoom = testPanel.getGlobalPanel().zoomField.getValue();
+			if(zoom < 0)
+				spd *= -zoom;
 			
 			if(keyPresses.contains(KeyEvent.VK_UP) && height >= getHeight() && worldOffY > 0)
 				worldOffY = Math.max(0, worldOffY - spd);

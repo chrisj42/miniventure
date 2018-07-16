@@ -8,9 +8,10 @@ public class IntegerField extends ValueField<Integer> {
 	private final int minVal;
 	
 	public IntegerField() { this(0); }
-	public IntegerField(int value) { this(value, 3, Integer.MIN_VALUE); }
+	public IntegerField(int value) { this(value, Integer.MIN_VALUE); }
 	public IntegerField(int value, int minVal) { this(value, 3, minVal); }
-	public IntegerField(Integer columns) { this(0, columns, Integer.MIN_VALUE); }
+	public IntegerField(Integer columns) { this(0, columns); }
+	public IntegerField(int value, Integer columns) { this(value, columns, Integer.MIN_VALUE); }
 	
 	public IntegerField(int value, int columns, int minVal) {
 		super(value, columns);

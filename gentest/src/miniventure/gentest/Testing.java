@@ -3,6 +3,7 @@ package miniventure.gentest;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.WindowConstants;
 
 import java.awt.Color;
@@ -73,7 +74,10 @@ class Testing {
 			protected void paintComponent(Graphics g) { g.drawImage(image, 0, 0, null); }
 		};
 		
-		JOptionPane.showMessageDialog(null, viewPanel, "Noise", JOptionPane.PLAIN_MESSAGE);
+		JScrollPane scrollPane = new JScrollPane(viewPanel);
+		scrollPane.setPreferredSize(new Dimension(1300, 600));
+		
+		JOptionPane.showMessageDialog(null, scrollPane, "Noise", JOptionPane.PLAIN_MESSAGE);
 	}
 	
 	/** @noinspection SameParameterValue*/
@@ -165,7 +169,10 @@ class Testing {
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
 		
-		/*Coherent2DNoiseFunction noise = new Coherent2DNoiseFunction(new Random().nextLong(), 100);
+		// while(true)
+		// 	testTerrainGen(800, 800, 8, 100, 1);
+		
+		/*Coherent2DNoiseFunction noise = new Coherent2DNoiseFunction(new Random().nextLong(), 10);
 		float max = 0, min = 0, avg = 0;
 		final int xr = 500, yr = 500;
 		for(int x = 0; x < xr; x++) {
