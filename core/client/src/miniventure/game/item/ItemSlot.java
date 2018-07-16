@@ -74,10 +74,12 @@ public class ItemSlot extends Actor {
 			// draw icon
 			Color prev = batch.getColor();
 			batch.setColor(Color.BLACK);
-			batch.draw(item.getTexture().texture, getX()+ XPADDING, getY()+YPADDING);
+			int xoff = (Item.ICON_SIZE - item.getTexture().width) / 2;
+			int yoff = (Item.ICON_SIZE - item.getTexture().height) / 2;
+			batch.draw(item.getTexture().texture, getX()+XPADDING+xoff, getY()+YPADDING+yoff);
 			batch.setColor(prev);
-			batch.draw(item.getTexture().texture, getX()+2+ XPADDING, getY()+2+YPADDING);
-			item.renderIconExtras(batch, getX()+2+ XPADDING, getY()+2+YPADDING);
+			batch.draw(item.getTexture().texture, getX()+2+XPADDING+xoff, getY()+2+YPADDING+yoff);
+			item.renderIconExtras(batch, getX()+2+XPADDING, getY()+2+YPADDING);
 			
 			if(showName) {
 				BitmapFont font = GameCore.getFont();

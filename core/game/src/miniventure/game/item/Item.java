@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class Item {
 	
-	public static final float ICON_SIZE = 32;
+	public static final int ICON_SIZE = 32;
 	
 	// TODO allow items to be animated
 	
