@@ -20,6 +20,17 @@ public class Coherent2DNoiseFunction {
 	}
 	
 	public float getValue(int x, int y) {
+		float totalHash = getValueRaw(x, y, false);
+		
+		totalHash = (totalHash + 1) / 2;
+		
+		for(int i = 0; i < numCurves; i++)
+			totalHash = curveCubic(totalHash);
+		
+		return totalHash;
+	}
+	public float getValueRaw(int x, int y) { return getValueRaw(x, y, true); }
+	private float getValueRaw(int x, int y, boolean curve) {
 		
 		float xVal = x / noiseCoordsPerValue;
 		float yVal = y / noiseCoordsPerValue;
@@ -62,10 +73,10 @@ public class Coherent2DNoiseFunction {
 		float bottomHash = interpolate(downLeftHash, downRightHash, xVal - xMin);
 		
 		float totalHash = interpolate(bottomHash, topHash, yVal - yMin);
-		totalHash = (totalHash + 1) / 2;
 		
-		for(int i = 0; i < numCurves; i++)
-			totalHash = curveCubic(totalHash);
+		if(curve)
+			for(int i = 0; i < numCurves; i++)
+				totalHash = curveCubic(totalHash);
 		
 		return totalHash;
 	}

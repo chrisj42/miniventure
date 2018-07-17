@@ -116,6 +116,7 @@ public class TestPanel extends MyPanel {
 		
 		NoiseMapper terrain = new GroupNoiseMapper("Terrain", continentNoise)
 			.addRegion(oceanBiome, 0.1f)
+			.addRegion(deepOceanBiome, .1f)
 			.addRegion(desertBiome, .1f)
 			.addRegion(plainsBiome, .1f)
 			.addRegion(mountainBiome, .1f)
