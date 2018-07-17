@@ -1,5 +1,4 @@
 # miniventure
-A remake of minicraft plus. After learning a bunch from the project, I wanted to start fresh, and try to make the best game possible. Let's see how it goes!
 
 As of now, miniventure is still very new and doesn't have many features, but it's getting there. Here's a list of the major features it *does* have:
 
