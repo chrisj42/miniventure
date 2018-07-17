@@ -1,6 +1,4 @@
-# miniventure
-
-As of now, miniventure is still very new and doesn't have many features, but it's getting there. Here's a list of the major features it *does* have:
+#### As of now, miniventure is still very new and doesn't have many features, but it's getting there. Here's a list of the major features it *does* have:
 
   - Multiplayer functionality, allowing many people to play in the same world. The server can be run without a GUI.
   - Random level generation based on perlin noise...improvements coming soon though!
