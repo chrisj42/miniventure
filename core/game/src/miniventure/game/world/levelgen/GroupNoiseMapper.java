@@ -9,6 +9,10 @@ import org.jetbrains.annotations.NotNull;
 
 public class GroupNoiseMapper extends NoiseMultiplexer {
 	
+	/*
+		Honestly, this shouldn't be a subclass. It really takes an input and gives a float which you can then give to a noise mapper. And each of the regions have a source noise function. they *are* noise functions, even. Not map regions, noise functions. Then afterwards, you pipe that into a noise mapper. but that shouldn't have to be part of this class.
+	 */
+	
 	private final HashMap<NoiseMapRegion, Coherent2DNoiseFunction> regionFunctions = new HashMap<>();
 	
 	public GroupNoiseMapper(@NotNull String name, @NotNull NamedNoiseFunction source) {
@@ -56,8 +60,8 @@ public class GroupNoiseMapper extends NoiseMultiplexer {
 				// in range to *be* this biome.
 				if(biome == null)
 					biome = regions[i+1];
-				else
-					System.out.println("multimatch for value "+values[i]+"; first region="+biome+", second region="+regions[i+1]+" sticking with first match.");
+				// else
+				// 	System.out.println("multimatch for value "+values[i]+"; first region="+biome+", second region="+regions[i+1]+" sticking with first match.");
 			}
 		}
 		
