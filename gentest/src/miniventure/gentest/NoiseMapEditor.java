@@ -6,7 +6,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Rectangle;
 import java.awt.event.ItemEvent;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -14,23 +13,23 @@ import java.util.LinkedList;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.levelgen.GroupNoiseMapper;
 import miniventure.game.world.levelgen.NamedNoiseFunction;
-import miniventure.game.world.levelgen.NoiseMapper;
-import miniventure.game.world.levelgen.NoiseMapper.NoiseMapRegion;
+import miniventure.game.world.levelgen.NoiseMultiplexer;
+import miniventure.game.world.levelgen.NoiseMultiplexer.NoiseMapRegion;
 import miniventure.gentest.util.MyPanel;
 
 import org.jetbrains.annotations.NotNull;
 
-public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
+public class NoiseMapEditor extends NoisePanel {
 	
 	@NotNull final TestPanel testPanel;
-	@NotNull private final NoiseMapper noiseMap;
+	@NotNull private final NoiseMultiplexer noiseMap;
 	private final MapDisplayBar bar;
 	
 	private final JComboBox<NamedNoiseFunction> functionSelector;
 	private final MyPanel regionHolder;
 	private final ArrayList<NoiseMapRegionEditor> regionEditors = new ArrayList<>();
 	
-	public NoiseMapEditor(@NotNull TestPanel testPanel, @NotNull NoiseMapper noiseMap) {
+	public NoiseMapEditor(@NotNull TestPanel testPanel, @NotNull NoiseMultiplexer noiseMap) {
 		this.testPanel = testPanel;
 		
 		if(noiseMap.getRegionCount() == 0)
@@ -147,7 +146,7 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 	}
 	
 	@NotNull
-	public NoiseMapper getNoiseMap() { return noiseMap; }
+	public NoiseMultiplexer getNoiseMap() { return noiseMap; }
 	
 	public NoiseMapRegionEditor[] getRegionEditors() { return regionEditors.toArray(new NoiseMapRegionEditor[regionEditors.size()]); }
 	
@@ -167,7 +166,7 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 	}
 	
 	boolean checkMapForLoops() { return checkMapForLoops(noiseMap, new ArrayList<>(testPanel.getNoiseMapperPanel().getElementCount())); }
-	private static boolean checkMapForLoops(NoiseMapper map, ArrayList<NoiseMapper> visitedMaps) {
+	private static boolean checkMapForLoops(NoiseMultiplexer map, ArrayList<NoiseMultiplexer> visitedMaps) {
 		if(visitedMaps.contains(map)) {
 			System.out.println(map+" contained twice");
 			return true;
@@ -189,7 +188,7 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 		if(editors.length == 0) return;
 		if(this.equals(editors[0])) {
 			// update the background of the other maps by checking for access
-			ArrayList<NoiseMapper> accessed = new ArrayList<>(editors.length);
+			ArrayList<NoiseMultiplexer> accessed = new ArrayList<>(editors.length);
 			addAccessedNoiseMaps(noiseMap, accessed);
 			for(NoiseMapEditor editor: editors)
 				editor.setBackground(accessed.contains(editor.noiseMap) ? null : Color.LIGHT_GRAY);
@@ -201,7 +200,7 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 			editors[0].refresh();
 	}
 	
-	private static void addAccessedNoiseMaps(NoiseMapper map, ArrayList<NoiseMapper> accessed) {
+	private static void addAccessedNoiseMaps(NoiseMultiplexer map, ArrayList<NoiseMultiplexer> accessed) {
 		accessed.add(map);
 		for(NoiseMapRegion region: map.getRegions())
 			if(!region.givesTileType())
@@ -232,26 +231,6 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 	}
 	
 	@Override
-	public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
-		return visibleRect.height/10;
-	}
-	
-	@Override
-	public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
-		return visibleRect.height/3;
-	}
-	
-	@Override
-	public boolean getScrollableTracksViewportWidth() {
-		return true;
-	}
-	
-	@Override
-	public boolean getScrollableTracksViewportHeight() {
-		return false;
-	}
-	
-	@Override
 	public Dimension getMaximumSize() { return new Dimension(super.getMaximumSize().width, getPreferredSize().height); }
 	
 	private class MapDisplayBar extends MyPanel {
@@ -278,7 +257,7 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 	}
 	
 	
-	private void drawBarRegions(Graphics g, NoiseMapper noiseMap, final float barWidth, final int barHeight, boolean drawSeparators, final float inherXOff, LinkedList<NoiseMapRegion> visitedRegions) {
+	private void drawBarRegions(Graphics g, NoiseMultiplexer noiseMap, final float barWidth, final int barHeight, boolean drawSeparators, final float inherXOff, LinkedList<NoiseMapRegion> visitedRegions) {
 		NoiseMapRegion[] regions = noiseMap.getRegions();
 		
 		float fxOff = inherXOff;
@@ -317,7 +296,7 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 		g.drawRect((int)inherXOff, 0, (int)barWidth-1, barHeight-1);
 	}
 	
-	static NoiseMapEditor[] getEditorsForAll(TestPanel testPanel, NoiseMapper... maps) {
+	static NoiseMapEditor[] getEditorsForAll(TestPanel testPanel, NoiseMultiplexer... maps) {
 		NoiseMapEditor[] editors = new NoiseMapEditor[maps.length];
 		for(int i = 0; i < maps.length; i++)
 			editors[i] = new NoiseMapEditor(testPanel, maps[i]);

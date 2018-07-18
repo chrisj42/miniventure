@@ -19,7 +19,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 
 import miniventure.game.util.MyUtils;
-import miniventure.game.util.function.VoidBiFunction;
+import miniventure.game.util.function.BiVoidFunction;
 import miniventure.game.world.Point;
 import miniventure.game.world.levelgen.LevelGenerator;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
@@ -167,7 +167,7 @@ public class MapPanel extends JPanel implements Runnable {
 		return new Point(x, y);
 	}
 	
-	private void forEachTile(VoidBiFunction<Point, Point> action) {
+	private void forEachTile(BiVoidFunction<Point, Point> action) {
 		if(generator == null) return;
 		
 		int actualZoom = testPanel.getGlobalPanel().zoomField.getValue();

@@ -11,30 +11,42 @@ import java.awt.event.MouseMotionAdapter;
 import java.util.HashMap;
 import java.util.Objects;
 
-import miniventure.gentest.NamedObject;
+import miniventure.game.util.function.MonoValueFunction;
+import miniventure.gentest.NoisePanel;
+import miniventure.gentest.util.ListItemTransferHandler.TransferListener;
 
-public class MyList<E extends JPanel & NamedObject> extends JPanel {
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+public class ComponentList<E extends Component> extends JPanel {
 	
 	private final JList<E> list;
+	private final ListItemTransferHandler transferHandler;
 	private final JPanel componentPanel;
+	
+	private final JPanel headerPanel, listPanel;
 	
 	private final HashMap<E, ElementContainer> containerMap = new HashMap<>();
 	private E mouseElement;
 	
 	@SafeVarargs
-	public MyList(E... elements) {
+	public ComponentList(@Nullable MonoValueFunction<E, String> stringifier, E... elements) {
+		// if stringifier is null, then use icon instead
+		
+		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+		
 		DefaultListModel<E> model = new DefaultListModel<>();
 		for (E e: elements)
 			model.addElement(e);
 		
 		list = new JList<>(model);
-		ListItemTransferHandler handler = new ListItemTransferHandler();
-		handler.addTransferListener(this::refreshElementList);
-		list.setTransferHandler(handler);
+		transferHandler = new ListItemTransferHandler();
+		transferHandler.addTransferListener(this::refreshElementList);
+		list.setTransferHandler(transferHandler);
 		list.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		list.setDropMode(DropMode.INSERT);
 		list.setDragEnabled(true);
-		list.setCellRenderer(new CellRenderer());
+		list.setCellRenderer(stringifier == null ? new CellRenderer() : new CellRenderer(stringifier));
 		list.addMouseMotionListener(new MouseMotionAdapter() {
 			@Override
 			public void mouseMoved(MouseEvent e) {
@@ -56,9 +68,10 @@ public class MyList<E extends JPanel & NamedObject> extends JPanel {
 			@Override public void mouseExited(MouseEvent e) { mouseElement = null; list.repaint(); }
 		});
 		
-		setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
-		add(Box.createHorizontalGlue());
-		add(list);
+		listPanel = new JPanel();
+		listPanel.setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+		listPanel.add(Box.createHorizontalGlue());
+		listPanel.add(list);
 		
 		componentPanel = new JPanel();
 		componentPanel.setLayout(new BoxLayout(componentPanel, BoxLayout.PAGE_AXIS));
@@ -71,8 +84,47 @@ public class MyList<E extends JPanel & NamedObject> extends JPanel {
 		
 		componentPanel.add(Box.createVerticalGlue());
 		
-		add(componentPanel);
-		add(Box.createHorizontalGlue());
+		listPanel.add(componentPanel);
+		listPanel.add(Box.createHorizontalGlue());
+		
+		
+		headerPanel = new JPanel();
+		headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.LINE_AXIS));
+		headerPanel.add(Box.createHorizontalGlue());
+		headerPanel.add(Box.createHorizontalGlue());
+		add(headerPanel);
+		
+		add(listPanel);
+		add(Box.createVerticalGlue());
+	}
+	
+	public void addTransferListener(TransferListener l) { transferHandler.addTransferListener(l); }
+	public void removeTransferListener(TransferListener l) { transferHandler.removeTransferListener(l); }
+	
+	public void addHeaderComponent(Component c) {
+		headerPanel.add(c, headerPanel.getComponentCount()-1);
+		revalidate();
+		repaint();
+	}
+	
+	public void removeHeaderComponent(Component c) {
+		headerPanel.remove(c);
+		revalidate();
+		repaint();
+	}
+	
+	public void addPreElementComponent(Component c) {
+		for(ElementContainer ec: containerMap.values())
+			ec.add(c, ec.getComponentCount()-1);
+		revalidate();
+		repaint();
+	}
+	
+	public void removePreElementComponent(Component c) {
+		for(ElementContainer ec: containerMap.values())
+			ec.remove(c);
+		revalidate();
+		repaint();
 	}
 	
 	private void refreshElementList() {
@@ -108,15 +160,23 @@ public class MyList<E extends JPanel & NamedObject> extends JPanel {
 	
 	private class CellRenderer extends JLabel implements ListCellRenderer<E> {
 		
+		private final MonoValueFunction<E, String> stringifier;
+		
 		public CellRenderer() {
-			super("", RIGHT);
+			super("icon", RIGHT); // TODO put icon
+			this.stringifier = null;
 			setOpaque(true);
-			// setHorizontalAlignment(RIGHT);
+		}
+		public CellRenderer(@NotNull MonoValueFunction<E, String> stringifier) {
+			super("", RIGHT);
+			this.stringifier = stringifier;
+			setOpaque(true);
 		}
 		
 		@Override
 		public Component getListCellRendererComponent(JList<? extends E> list, E value, int index, boolean isSelected, boolean cellHasFocus) {
-			setText(value.getObjectName());
+			if(stringifier != null)
+				setText(stringifier.get(value));
 			lastValue = value;
 			setBackground(Objects.equals(mouseElement, value) ? list.getSelectionBackground() : list.getBackground());
 			setForeground(Objects.equals(mouseElement, value) ? list.getSelectionForeground() : list.getForeground());
@@ -134,10 +194,13 @@ public class MyList<E extends JPanel & NamedObject> extends JPanel {
 	}
 	
 	private class ElementContainer extends JPanel {
+		private final E element;
+		
 		public ElementContainer(E element) {
-			add(ButtonMaker.removeButton(e -> removeElement(element)));
-			JButton editButton = new JButton("Edit");
-			add(editButton);
+			this.element = element;
+			// add(ButtonMaker.removeButton(e -> removeElement(element)));
+			// JButton editButton = new JButton("Edit");
+			// add(editButton);
 			add(element);
 		}
 	}

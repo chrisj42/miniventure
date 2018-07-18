@@ -12,8 +12,8 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 import miniventure.game.util.MyUtils;
-import miniventure.game.world.levelgen.NoiseMapper;
-import miniventure.game.world.levelgen.NoiseMapper.NoiseMapRegion;
+import miniventure.game.world.levelgen.NoiseMultiplexer;
+import miniventure.game.world.levelgen.NoiseMultiplexer.NoiseMapRegion;
 import miniventure.gentest.util.ButtonMaker;
 import miniventure.gentest.util.FloatField;
 import miniventure.gentest.util.MyPanel;
@@ -31,7 +31,7 @@ public class NoiseMapRegionEditor extends MyPanel {
 	private final ButtonGroup mapTypeButtonGroup = new ButtonGroup();
 	private final JRadioButton tileTypeBtn, noiseMapBtn;
 	private final JComboBox<TileTypeEnum> tileTypeSelector;
-	private final JComboBox<NoiseMapper> noiseMapSelector;
+	private final JComboBox<NoiseMultiplexer> noiseMapSelector;
 	
 	public NoiseMapRegionEditor(@NotNull NoiseMapEditor mapEditor, @NotNull NoiseMapRegion mapRegion) {
 		this.mapEditor = mapEditor;
@@ -106,7 +106,7 @@ public class NoiseMapRegionEditor extends MyPanel {
 			mapRegion.setGivesTileType(false);
 			
 			resetNoiseMapSelector();
-			NoiseMapper mapper = mapRegion.getChainNoiseMapper();
+			NoiseMultiplexer mapper = mapRegion.getChainNoiseMapper();
 			noiseMapSelector.setSelectedItem(mapper);
 			
 			remove(tileTypeSelector);
@@ -123,8 +123,8 @@ public class NoiseMapRegionEditor extends MyPanel {
 		
 		noiseMapSelector.addItemListener(e -> {
 			if(e.getStateChange() == ItemEvent.SELECTED) {
-				NoiseMapper prev = mapRegion.getChainNoiseMapper();
-				mapRegion.setChainNoiseMapper((NoiseMapper) e.getItem());
+				NoiseMultiplexer prev = mapRegion.getChainNoiseMapper();
+				mapRegion.setChainNoiseMapper((NoiseMultiplexer) e.getItem());
 				if(!Objects.equals(prev, mapRegion.getChainNoiseMapper()))
 					mapEditor.testPanel.getMapPanel().invalidateMaps();
 			}
@@ -162,7 +162,7 @@ public class NoiseMapRegionEditor extends MyPanel {
 	private void refresh() { mapEditor.refresh(); }
 	
 	// simply removes and re-adds the given map, if it was there to begin with.
-	void resetNoiseMapSelector(NoiseMapper map) {
+	void resetNoiseMapSelector(NoiseMultiplexer map) {
 		Object sel = noiseMapSelector.getSelectedItem();
 		for(int i = 0; i < noiseMapSelector.getItemCount(); i++) {
 			if(noiseMapSelector.getItemAt(i).equals(map)) {
@@ -177,7 +177,7 @@ public class NoiseMapRegionEditor extends MyPanel {
 	void resetNoiseMapSelector() {
 		Object sel = noiseMapSelector.getSelectedItem();
 		noiseMapSelector.removeAllItems();
-		for(NoiseMapper map : getNoiseMaps())
+		for(NoiseMultiplexer map : getNoiseMaps())
 			noiseMapSelector.addItem(map);
 		noiseMapSelector.setSelectedItem(sel);
 		if(!region.givesTileType()) {
@@ -188,15 +188,15 @@ public class NoiseMapRegionEditor extends MyPanel {
 	}
 	
 	@NotNull
-	private NoiseMapper[] getNoiseMaps() {
+	private NoiseMultiplexer[] getNoiseMaps() {
 		NoiseMapEditor[] editors = mapEditor.testPanel.getNoiseMapperPanel().getElements();
-		ArrayList<NoiseMapper> maps = new ArrayList<>();
+		ArrayList<NoiseMultiplexer> maps = new ArrayList<>();
 		for(NoiseMapEditor editor: editors) {
 			// if(editor.equals(mapEditor))
 			// 	continue;
 			maps.add(editor.getNoiseMap());
 		}
-		return maps.toArray(new NoiseMapper[maps.size()]);
+		return maps.toArray(new NoiseMultiplexer[maps.size()]);
 	}
 	
 	@Override

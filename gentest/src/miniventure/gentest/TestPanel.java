@@ -1,7 +1,6 @@
 package miniventure.gentest;
 
 import javax.swing.BoxLayout;
-import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
@@ -14,8 +13,7 @@ import java.util.Objects;
 import miniventure.game.util.Action;
 import miniventure.game.world.levelgen.GroupNoiseMapper;
 import miniventure.game.world.levelgen.NamedNoiseFunction;
-import miniventure.game.world.levelgen.NoiseMapper;
-import miniventure.gentest.util.MyList;
+import miniventure.game.world.levelgen.NoiseMultiplexer;
 import miniventure.gentest.util.MyPanel;
 
 import static miniventure.game.world.tile.TileType.TileTypeEnum.*;
@@ -47,17 +45,17 @@ public class TestPanel extends MyPanel {
 		NamedNoiseFunction cactusNoise = new NamedNoiseFunction("Cactus Noise", 4, 2);
 		
 		
-		NoiseMapper plainsBiome = new NoiseMapper("Plains", detailNoise)
+		NoiseMultiplexer plainsBiome = new NoiseMultiplexer("Plains", detailNoise)
 			.addRegion(GRASS, 4)
 			.addRegion(WATER, 1f)
 			.addRegion(GRASS, 3)
 			.addRegion(TREE_CARTOON, 1);
 		
-		NoiseMapper desertBiome = new NoiseMapper("Desert", cactusNoise)
+		NoiseMultiplexer desertBiome = new NoiseMultiplexer("Desert", cactusNoise)
 			.addRegion(CACTUS, 1)
 			.addRegion(SAND, 10);
 		
-		NoiseMapper canyonBiome = new NoiseMapper("Canyons", detailNoise)
+		NoiseMultiplexer canyonBiome = new NoiseMultiplexer("Canyons", detailNoise)
 			.addRegion(STONE, 20)
 			.addRegion(GRASS, 10)
 			.addRegion(TREE_PINE, 1)
@@ -65,12 +63,12 @@ public class TestPanel extends MyPanel {
 			.addRegion(STONE, 20);
 		
 		
-		NoiseMapper mountainBiome = new NoiseMapper("Mountains", biomeNoise)
+		NoiseMultiplexer mountainBiome = new NoiseMultiplexer("Mountains", biomeNoise)
 			.addRegion(STONE, 1)
 			.addRegion(canyonBiome, 4.5f)
 			.addRegion(STONE, 1);
 		
-		NoiseMapper snowBiome = new NoiseMapper("Snow", biomeNoise)
+		NoiseMultiplexer snowBiome = new NoiseMultiplexer("Snow", biomeNoise)
 			.addRegion(SNOW, 1)
 			.addRegion(GRASS, .25f)
 			.addRegion(WATER, .1f)
@@ -86,16 +84,16 @@ public class TestPanel extends MyPanel {
 			.addRegion(SAND, 1);
 		*/
 		
-		NoiseMapper marshBiome = new NoiseMapper("Marsh", detailNoise)
+		NoiseMultiplexer marshBiome = new NoiseMultiplexer("Marsh", detailNoise)
 			.addRegion(WATER, .75f)
 			.addRegion(DIRT, 1)
 			.addRegion(TREE_DARK, .3f)
 			.addRegion(WATER, .75f);
 		
-		NoiseMapper oceanBiome = new NoiseMapper("Ocean", biomeNoise)
+		NoiseMultiplexer oceanBiome = new NoiseMultiplexer("Ocean", biomeNoise)
 			.addRegion(WATER, 1);
 		
-		NoiseMapper deepOceanBiome = new NoiseMapper("Deep Ocean", islandNoise)
+		NoiseMultiplexer deepOceanBiome = new NoiseMultiplexer("Deep Ocean", islandNoise)
 			.addRegion(WATER, 10)
 			.addRegion(SAND, 1);
 		
@@ -108,7 +106,7 @@ public class TestPanel extends MyPanel {
 			.addRegion(oceanBiome, 2.5f);
 		*/
 		
-		NoiseMapper terrain = new GroupNoiseMapper("Terrain", continentNoise)
+		NoiseMultiplexer terrain = new GroupNoiseMapper("Terrain", continentNoise)
 			.addRegion(oceanBiome, 0.1f)
 			.addRegion(deepOceanBiome, .1f)
 			.addRegion(desertBiome, .1f)
@@ -120,7 +118,7 @@ public class TestPanel extends MyPanel {
 		
 		globalPanel = new GlobalPanel(this);
 		noiseFunctionPanel = new ListPanel<>(this, NoiseFunctionEditor.class, "<html>the value in the seed field will be retained <em>only</em> if \"random seed\" is unchecked.", name -> new NoiseFunctionEditor(this, new NamedNoiseFunction(name)));
-		noiseMapperPanel = new ListPanel<>(this, NoiseMapEditor.class, null, name -> new NoiseMapEditor(this, new NoiseMapper(name, noiseFunctionPanel.getElements()[0].getNoiseFunction())));
+		noiseMapperPanel = new ListPanel<>(this, NoiseMapEditor.class, null, name -> new NoiseMapEditor(this, new NoiseMultiplexer(name, noiseFunctionPanel.getElements()[0].getNoiseFunction())));
 		
 		Action resetMaps = () -> {
 			for(NoiseMapEditor mapEditor: noiseMapperPanel.getElements())
@@ -172,18 +170,8 @@ public class TestPanel extends MyPanel {
 		add(globalPanel);
 		add(tabPane);
 		
-		JPanel tp = new JPanel();
-		tabPane.addTab("Drag", tp);
-		
 		SwingUtilities.invokeLater(() -> {
 			// add all the editors for the biomes and noise functions from above
-			
-			tp.add(new MyList<>(
-				new NoiseFunctionEditor(this, continentNoise),
-				new NoiseFunctionEditor(this, biomeNoise),
-				new NoiseFunctionEditor(this, detailNoise),
-				new NoiseFunctionEditor(this, cactusNoise)
-			));
 			
 			for(NamedNoiseFunction function: terrain.getReferencedFunctions())
 				noiseFunctionPanel.addElement(new NoiseFunctionEditor(this, function));

@@ -19,7 +19,7 @@ import java.util.Objects;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.levelgen.GroupNoiseMapper;
 import miniventure.game.world.levelgen.NamedNoiseFunction;
-import miniventure.game.world.levelgen.NoiseMapper;
+import miniventure.game.world.levelgen.NoiseMultiplexer;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 import miniventure.gentest.util.FloatField;
 import miniventure.gentest.util.IntegerField;
@@ -189,7 +189,7 @@ public class GlobalPanel extends MyPanel {
 			}
 			
 			String[] mapData = dataMap.get("maps");
-			NoiseMapper[] maps = new NoiseMapper[mapData.length];
+			NoiseMultiplexer[] maps = new NoiseMultiplexer[mapData.length];
 			String[][] regionData = new String[maps.length][];
 			for(int i = 0; i < mapData.length; i++) {
 				HashMap<String, String> info = parseDataList(MyUtils.parseLayeredString(mapData[i]));
@@ -198,7 +198,7 @@ public class GlobalPanel extends MyPanel {
 				regionData[i] = MyUtils.parseLayeredString(info.get("regions"));
 				boolean isgroup = Boolean.parseBoolean(info.getOrDefault("isgroup", "false"));
 				
-				NoiseMapper map = isgroup ? new GroupNoiseMapper(name, function) : new NoiseMapper(name, function);
+				NoiseMultiplexer map = isgroup ? new GroupNoiseMapper(name, function) : new NoiseMultiplexer(name, function);
 				maps[i] = map;
 			}
 			
@@ -210,7 +210,7 @@ public class GlobalPanel extends MyPanel {
 					int chainMapIdx = Integer.parseInt(info.get("chainmap"));
 					int off = version < 2 && chainMapIdx >= i ? 1 : 0;
 					TileTypeEnum tileType = TileTypeEnum.valueOf(info.get("tiletype"));
-					NoiseMapper chainmap = chainMapIdx>=0?maps[chainMapIdx+off]:null;
+					NoiseMultiplexer chainmap = chainMapIdx>=0?maps[chainMapIdx+off]:null;
 					maps[i].addRegion(tileType, chainmap, givestile, size);
 				}
 			}
@@ -218,8 +218,8 @@ public class GlobalPanel extends MyPanel {
 			NoiseFunctionEditor[] functionEditors = new NoiseFunctionEditor[functions.length];
 			for(int i = 0; i < functions.length; i++) {
 				functionEditors[i] = new NoiseFunctionEditor(testPanel, functions[i]);
-				functionEditors[i].seed.setValue(seeds[i]);
-				functionEditors[i].randomSeed.setSelected(randSeeds[i]);
+				// functionEditors[i].seed.setValue(seeds[i]);
+				// functionEditors[i].randomSeed.setSelected(randSeeds[i]);
 			}
 			testPanel.getNoiseFunctionPanel().replaceElements(functionEditors);
 			

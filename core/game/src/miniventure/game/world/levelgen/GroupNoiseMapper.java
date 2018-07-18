@@ -7,7 +7,7 @@ import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 import org.jetbrains.annotations.NotNull;
 
-public class GroupNoiseMapper extends NoiseMapper {
+public class GroupNoiseMapper extends NoiseMultiplexer {
 	
 	private final HashMap<NoiseMapRegion, Coherent2DNoiseFunction> regionFunctions = new HashMap<>();
 	
