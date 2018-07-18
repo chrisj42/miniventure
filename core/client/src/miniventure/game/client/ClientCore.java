@@ -19,7 +19,7 @@ import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.util.MyUtils;
-import miniventure.game.util.function.VoidMonoFunction;
+import miniventure.game.util.function.MonoVoidFunction;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -47,7 +47,7 @@ public class ClientCore extends ApplicationAdapter {
 	
 	private final ServerStarter serverStarter;
 	
-	public static final VoidMonoFunction<Throwable> exceptionNotifier = throwable -> {
+	public static final MonoVoidFunction<Throwable> exceptionNotifier = throwable -> {
 		StringWriter string = new StringWriter();
 		PrintWriter printer = new PrintWriter(string);
 		throwable.printStackTrace(printer);

@@ -1,7 +1,7 @@
 package miniventure.game.world.tile;
 
 import miniventure.game.util.function.ValueFunction;
-import miniventure.game.util.function.VoidMonoFunction;
+import miniventure.game.util.function.MonoVoidFunction;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 import miniventure.game.world.tile.data.CacheTag;
 import miniventure.game.world.tile.data.DataMap;
@@ -18,7 +18,7 @@ public class UpdateManager {
 	 */
 	
 	interface UpdateAction {
-		void update(@NotNull Tile tile, ValueFunction<String> dataCacheFetcher, VoidMonoFunction<String> dataCacheSetter);
+		void update(@NotNull Tile tile, ValueFunction<String> dataCacheFetcher, MonoVoidFunction<String> dataCacheSetter);
 		
 		boolean canUpdate(@NotNull Tile tile);
 		

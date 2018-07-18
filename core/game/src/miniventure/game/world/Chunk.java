@@ -1,6 +1,6 @@
 package miniventure.game.world;
 
-import miniventure.game.util.function.ValueTriFunction;
+import miniventure.game.util.function.TriValueFunction;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.Tile.TileData;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
@@ -22,7 +22,7 @@ public class Chunk implements Boundable {
 	public final int width, height;
 	public final int chunkX, chunkY;
 	
-	public Chunk(int chunkX, int chunkY, @NotNull Level level, @NotNull TileTypeEnum[][][] tileTypes, @NotNull ValueTriFunction<Integer, Integer, TileTypeEnum[], Tile> tileFetcher) {
+	public Chunk(int chunkX, int chunkY, @NotNull Level level, @NotNull TileTypeEnum[][][] tileTypes, @NotNull TriValueFunction<Integer, Integer, TileTypeEnum[], Tile> tileFetcher) {
 		this.level = level;
 		tiles = new Tile[tileTypes.length][];
 		width = tiles.length;
@@ -37,7 +37,7 @@ public class Chunk implements Boundable {
 		}
 		this.height = height;
 	}
-	public Chunk(@NotNull Level level, @NotNull ChunkData data, ValueTriFunction<Point, TileTypeEnum[], DataMap[], Tile> tileFetcher) {
+	public Chunk(@NotNull Level level, @NotNull ChunkData data, TriValueFunction<Point, TileTypeEnum[], DataMap[], Tile> tileFetcher) {
 		this.level = level;
 		this.chunkX = data.chunkX;
 		this.chunkY = data.chunkY;

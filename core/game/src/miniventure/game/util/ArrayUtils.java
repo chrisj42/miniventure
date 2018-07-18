@@ -3,7 +3,7 @@ package miniventure.game.util;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 
-import miniventure.game.util.function.ValueMonoFunction;
+import miniventure.game.util.function.MonoValueFunction;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -28,7 +28,7 @@ public final class ArrayUtils {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <PT, RT> RT[] mapArray(PT[] startValues, Class<RT> returnType, ValueMonoFunction<PT, RT> mapper) {
+	public static <PT, RT> RT[] mapArray(PT[] startValues, Class<RT> returnType, MonoValueFunction<PT, RT> mapper) {
 		RT[] endValues = (RT[]) java.lang.reflect.Array.newInstance(returnType, startValues.length);
 		
 		for(int i = 0; i < startValues.length; i++)
@@ -67,7 +67,7 @@ public final class ArrayUtils {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <T> T[] fetchArray(Class<T> clazz, int length, ValueMonoFunction<Integer, T> valueFetcher) {
+	public static <T> T[] fetchArray(Class<T> clazz, int length, MonoValueFunction<Integer, T> valueFetcher) {
 		T[] ar = (T[]) Array.newInstance(clazz, length);
 		for(int i = 0; i < ar.length; i++)
 			ar[i] = valueFetcher.get(i);
@@ -101,7 +101,7 @@ public final class ArrayUtils {
 		return objAr;
 	}
 	
-	public static String deepToString(Object obj, ValueMonoFunction<String[], String> stringArrayJoiner, ValueMonoFunction<Object, String> stringifier) {
+	public static String deepToString(Object obj, MonoValueFunction<String[], String> stringArrayJoiner, MonoValueFunction<Object, String> stringifier) {
 		if(obj == null)
 			return "null";
 		

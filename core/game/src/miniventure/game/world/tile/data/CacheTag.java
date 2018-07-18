@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import miniventure.game.util.function.ValueMonoFunction;
+import miniventure.game.util.function.MonoValueFunction;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 import miniventure.game.world.tile.TransitionManager.TransitionMode;
 
@@ -71,7 +71,7 @@ public class CacheTag<T> extends DataTag<T> {
 	
 	
 	
-	private CacheTag(ValueMonoFunction<T, String> valueWriter, ValueMonoFunction<String, T> valueParser) {
+	private CacheTag(MonoValueFunction<T, String> valueWriter, MonoValueFunction<String, T> valueParser) {
 		super(valueWriter, valueParser);
 		ordinal = nextOrdinal();
 		values[ordinal] = this;

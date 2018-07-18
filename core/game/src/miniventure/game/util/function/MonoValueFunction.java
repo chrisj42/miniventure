@@ -1,6 +1,6 @@
 package miniventure.game.util.function;
 
 @FunctionalInterface
-public interface ValueMonoFunction<PT, RT> {
+public interface MonoValueFunction<PT, RT> {
 	RT get(PT val);
 }

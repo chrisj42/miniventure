@@ -1,6 +1,6 @@
 package miniventure.game.util.function;
 
 @FunctionalInterface
-public interface VoidMonoFunction<PT> {
+public interface MonoVoidFunction<PT> {
 	void act(PT obj);
 }

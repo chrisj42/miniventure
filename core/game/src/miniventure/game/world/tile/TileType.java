@@ -5,7 +5,7 @@ import java.awt.Color;
 import miniventure.game.item.Item;
 import miniventure.game.item.ToolType;
 import miniventure.game.util.MyUtils;
-import miniventure.game.util.function.ValueMonoFunction;
+import miniventure.game.util.function.MonoValueFunction;
 import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
@@ -143,10 +143,10 @@ public class TileType {
 		
 		
 		@NotNull public final Color color;
-		@NotNull private final ValueMonoFunction<TileTypeEnum, TileType> tileTypeFetcher;
+		@NotNull private final MonoValueFunction<TileTypeEnum, TileType> tileTypeFetcher;
 		private TileType tileType;
 		
-		TileTypeEnum(@NotNull Color color, @NotNull ValueMonoFunction<TileTypeEnum, TileType> typeFetcher) {
+		TileTypeEnum(@NotNull Color color, @NotNull MonoValueFunction<TileTypeEnum, TileType> typeFetcher) {
 			this.color = color;
 			tileTypeFetcher = typeFetcher;
 		}

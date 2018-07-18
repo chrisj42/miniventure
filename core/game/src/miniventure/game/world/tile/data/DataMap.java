@@ -3,7 +3,7 @@ package miniventure.game.world.tile.data;
 import java.util.HashMap;
 
 import miniventure.game.util.MyUtils;
-import miniventure.game.util.function.ValueMonoFunction;
+import miniventure.game.util.function.MonoValueFunction;
 
 public class DataMap {
 	
@@ -58,7 +58,7 @@ public class DataMap {
 		else
 			return val;
 	}
-	public <T, U> U computeFrom(DataTag<T> tag, ValueMonoFunction<T, U> mapper, U defaultValue) {
+	public <T, U> U computeFrom(DataTag<T> tag, MonoValueFunction<T, U> mapper, U defaultValue) {
 		if(!map.containsKey(tag))
 			return defaultValue;
 		else
