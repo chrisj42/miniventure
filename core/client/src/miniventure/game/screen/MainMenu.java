@@ -40,7 +40,7 @@ public class MainMenu extends MenuScreen {
 	private final Color lightOverlay;
 	private final Vector2 cameraPos, cameraDir;
 	
-	private static final float PAN_SPEED = 3f; // in tiles/second.
+	private static final float PAN_SPEED = 4.5f; // in tiles/second.
 	
 	public MainMenu() {
 		super();
@@ -107,10 +107,11 @@ public class MainMenu extends MenuScreen {
 		// setup level scrolling in background
 		
 		levelView = new LevelViewport();
+		levelView.zoom(-1);
 		TimeOfDay time = TimeOfDay.values[MathUtils.random(TimeOfDay.values.length-1)];
 		lightOverlay = TimeOfDay.getSkyColor(time.getStartOffsetSeconds());
 		
-		LevelGenerator generator = new LevelGenerator(MathUtils.random.nextLong(), 30, 20); // 100, 60
+		LevelGenerator generator = new LevelGenerator(MathUtils.random.nextLong(), 200, 100);
 		backgroundLevel = new DisplayLevel(generator);
 		
 		Vector2 size = new Vector2(levelView.getViewWidth(), levelView.getViewHeight());//.scl(0.5f);
@@ -120,12 +121,6 @@ public class MainMenu extends MenuScreen {
 		
 		// setup background music
 		Music song = ClientCore.setMusicTrack(Gdx.files.internal("audio/music/title.mp3"));
-		/*song.setOnCompletionListener(music -> MyUtils.delay(MathUtils.random(5000, 10000), () -> {
-			music.stop();
-			music.play();
-		}));*/
-		//song.setVolume(0.5f);
-		//MyUtils.delay(100, song::play);
 		song.setLooping(true);
 		song.play();
 	}
@@ -135,6 +130,7 @@ public class MainMenu extends MenuScreen {
 	
 	@Override
 	public void draw() {
+		// levelView.handleInput();
 		levelView.render(cameraPos, lightOverlay, backgroundLevel);
 		
 		cameraPos.add(cameraDir.cpy().scl(GameCore.getDeltaTime()));

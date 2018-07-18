@@ -59,13 +59,6 @@ public class GroupNoiseMapper extends NoiseMapper {
 				else
 					System.out.println("multimatch for value "+values[i]+"; first region="+biome+", second region="+regions[i+1]+" sticking with first match.");
 			}
-			/*else if(val <= regions[i].getSize()+threshold) {
-				// in range for canceling other biomes, but not quite enough to be this biome
-				if(biome != null)
-					return filler.getTileType(x, y); // previous found biome is too close
-				
-				close = true; // for checking future biomes
-			}*/
 		}
 		
 		if(biome == null) biome = filler; // no biomes were in range.

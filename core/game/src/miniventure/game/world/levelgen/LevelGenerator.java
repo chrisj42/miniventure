@@ -206,7 +206,6 @@ public class LevelGenerator {
 	
 	private static NoiseMapper ISLAND_MAPPER() {
 		NamedNoiseFunction continentNoise = new NamedNoiseFunction("Continent Noise", 500, 2);
-		NamedNoiseFunction landNoise = new NamedNoiseFunction("Land Noise", 300, 3);
 		NamedNoiseFunction biomeNoise = new NamedNoiseFunction("Biome Noise", 120, 2);
 		NamedNoiseFunction detailNoise = new NamedNoiseFunction("Detail Noise", 12, 2);
 		NamedNoiseFunction islandNoise = new NamedNoiseFunction("Island Noise", 24, 2);
@@ -215,7 +214,7 @@ public class LevelGenerator {
 		
 		NoiseMapper plainsBiome = new NoiseMapper("Plains", detailNoise)
 			.addRegion(GRASS, 4)
-			.addRegion(WATER, .07f)
+			// .addRegion(WATER, 1f)
 			.addRegion(GRASS, 3)
 			.addRegion(TREE_CARTOON, 1);
 		
@@ -239,7 +238,7 @@ public class LevelGenerator {
 		NoiseMapper snowBiome = new NoiseMapper("Snow", biomeNoise)
 			.addRegion(SNOW, 1)
 			.addRegion(GRASS, .25f)
-			.addRegion(WATER, .07f)
+			// .addRegion(WATER, .1f)
 			.addRegion(SNOW, 1);
 		
 		/*NoiseMapper volcanoBiome = new NoiseMapper("Volcano", continentNoise)

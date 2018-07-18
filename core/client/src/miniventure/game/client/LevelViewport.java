@@ -147,7 +147,7 @@ public class LevelViewport {
 		batch.end();
 	}
 	
-	private void zoom(int dir) {
+	public void zoom(int dir) {
 		zoom += dir;
 		zoom = MathUtils.clamp(zoom, MIN_ZOOM, MAX_ZOOM);
 		resetCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());

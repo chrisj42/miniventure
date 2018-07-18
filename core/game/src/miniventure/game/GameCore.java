@@ -33,7 +33,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class GameCore {
 	
-	public static final Version VERSION = new Version("1.5.4.dev");
+	public static final Version VERSION = new Version("1.5.4");
 	
 	public static final int DEFAULT_SCREEN_WIDTH = 800;
 	public static final int DEFAULT_SCREEN_HEIGHT = 450;
