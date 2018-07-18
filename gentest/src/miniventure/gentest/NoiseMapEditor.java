@@ -210,7 +210,7 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 	}
 	
 	@Override
-	public String toString() { return getObjectName()+"-Editor"; }
+	public String toString() { return getObjectName(); }
 	
 	@Override
 	public void setObjectName(@NotNull String name) {

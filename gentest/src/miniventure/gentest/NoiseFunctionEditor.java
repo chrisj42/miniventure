@@ -33,7 +33,7 @@ class NoiseFunctionEditor extends MyPanel implements NamedObject, Scrollable {
 		this.noiseFunction = noiseFunction;
 		
 		randomSeed = new JCheckBox("Random seed", true);
-		add(randomSeed);
+		// add(randomSeed);
 		
 		seed = new StringField("", 20);
 		seed.addValueListener(val -> {
@@ -49,8 +49,8 @@ class NoiseFunctionEditor extends MyPanel implements NamedObject, Scrollable {
 			@Override public void keyTyped(KeyEvent e) { randomSeed.setSelected(false); }
 		});
 		
-		add(new JLabel("Seed:"));
-		add(seed);
+		// add(new JLabel("Seed:"));
+		// add(seed);
 		
 		coordsPerValue = new IntegerField(noiseFunction.getCoordsPerValue(), 3, 1);
 		coordsPerValue.addValueListener(noiseFunction::setCoordsPerValue);
@@ -96,6 +96,8 @@ class NoiseFunctionEditor extends MyPanel implements NamedObject, Scrollable {
 	@Override @NotNull
 	public String getObjectName() { return noiseFunction.getName(); }
 	
+	@Override
+	public String toString() { return getObjectName(); }
 	
 	@Override
 	public Dimension getPreferredScrollableViewportSize() {

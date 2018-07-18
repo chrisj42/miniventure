@@ -13,9 +13,23 @@ import org.jetbrains.annotations.NotNull;
 // a data class only, not display.
 public class NoiseMapper {
 	
+	/*
+		I am going to give noise maps parameters. These parameters will have to be specified whenever the map is used.
+		There will be 3 possible parameter types:
+			- Float values (for region sizes)
+			- Noise Functions (for source functions)
+			- Tile Fetcher (this means noise maps and/or tiletypes)
+		
+		There will be a button next to "add region" that reads "add parameter"
+		clicking it brings up a panel below, similar to the region list panel.
+			- you can name the parameter
+			- you can select the parameter type
+	 */
+	
 	@NotNull private String name;
+	// private final ArrayList<>
 	private NamedNoiseFunction source;
-	private ArrayList<NoiseMapRegion> regions;
+	private final ArrayList<NoiseMapRegion> regions;
 	private float total;
 	
 	public NoiseMapper(@NotNull String name, @NotNull NamedNoiseFunction source) {
