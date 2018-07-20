@@ -110,6 +110,17 @@ public final class MyUtils {
 		return val;
 	}
 	
+	public static void drawRect(Rectangle rect, Color c, Batch batch) {
+		drawRect(rect.x, rect.y, rect.width, rect.height, c, batch);
+	}
+	public static void drawRect(float x, float y, float width, float height, Color c, float alpha, Batch batch) { drawRect(x, y, width, height, c.cpy().mul(1, 1, 1, alpha), batch); }
+	public static void drawRect(float x, float y, float width, float height, Color c, Batch batch) {
+		Color prev = batch.getColor();
+		batch.setColor(c);
+		batch.draw(GameCore.icons.get("tile-frame").texture, x, y, width, height);
+		batch.setColor(prev);
+	}
+	
 	public static void fillRect(Rectangle rect, Color c, Batch batch) {
 		fillRect(rect.x, rect.y, rect.width, rect.height, c, batch);
 	}

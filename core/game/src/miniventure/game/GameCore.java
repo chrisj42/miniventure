@@ -68,7 +68,8 @@ public class GameCore {
 		tileConnectionAtlas = new TextureAtlas("sprites/tileconnectmap.txt");
 		iconAtlas = new TextureAtlas("sprites/icons.txt");
 		
-		batch = new SpriteBatch();
+		if(batch == null)
+			batch = new SpriteBatch();
 		//font = new BitmapFont(); // uses libGDX's default Arial font
 		fontGenerator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/arial.ttf"));
 		skin = new Skin(Gdx.files.internal("skins/visui/uiskin.json"));
