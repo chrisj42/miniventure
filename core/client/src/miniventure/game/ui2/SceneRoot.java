@@ -1,4 +1,4 @@
-package miniventure.game.ui;
+package miniventure.game.ui2;
 
 import miniventure.game.GameCore;
 
@@ -21,11 +21,11 @@ public class SceneRoot extends Container {
 	
 	public SceneRoot() { this((Color)null); }
 	public SceneRoot(@Nullable Color background) { this.background = background; }
-	public SceneRoot(Layout layout) { this(layout, null); }
+	/*public SceneRoot(Layout layout) { this(layout, null); }
 	public SceneRoot(Layout layout, @Nullable Color background) {
 		super(layout);
 		this.background = background;
-	}
+	}*/
 	
 	@Override
 	public void update() { super.update(); }

@@ -1,4 +1,4 @@
-package miniventure.game.ui;
+package miniventure.game.ui2;
 
 import miniventure.game.GameCore;
 

@@ -1,6 +1,5 @@
-package miniventure.game.ui;
+package miniventure.game.ui2;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Vector2;
 
@@ -24,9 +23,9 @@ public abstract class Component {
 		maxSize = new Size(this::calcMaxSize);
 	}
 	
-	protected void calcMinSize(Vector2 v) { calcPrefSize(v); }
+	private void calcMinSize(Vector2 v) { calcPrefSize(v); }
 	protected abstract void calcPrefSize(Vector2 v);
-	protected void calcMaxSize(Vector2 v) { v.set(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()); }
+	private void calcMaxSize(Vector2 v) { calcPrefSize(v);/*v.set(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());*/ }
 	
 	void invalidate() {
 		minSize.invalidate();

@@ -1,23 +1,19 @@
-package miniventure.game.ui;
+package miniventure.game.ui2;
 
 import java.util.ArrayList;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Vector2;
 
-import org.jetbrains.annotations.Nullable;
-
 public class Container extends Component {
 	
 	private final ArrayList<Component> children = new ArrayList<>();
 	
 	private boolean validated = false;
-	@Nullable private Layout layout;
+	// @Nullable private Layout layout;
 	
-	Container() { this(null); }
-	Container(Layout layout) {
-		setLayout(layout);
-	}
+	Container() { /*this(null);*/ }
+	// Container(Layout layout) { setLayout(layout); }
 	
 	public void addComponent(Component c) {
 		if(c.getParent() != null)
@@ -35,10 +31,10 @@ public class Container extends Component {
 	
 	private Component[] getChildren() { return children.toArray(new Component[children.size()]); }
 	
-	void setLayout(Layout layout) {
+	/*void setLayout(Layout layout) {
 		this.layout = layout;
 		invalidate();
-	}
+	}*/
 	
 	@Override
 	void invalidate() {
@@ -62,8 +58,8 @@ public class Container extends Component {
 	private void validate() {
 		if(validated) return;
 		
-		if(layout != null)
-			layout.layout(getWidth(), getHeight(), getPrefSize(), getChildren());
+		// if(layout != null)
+		// 	layout.layout(getWidth(), getHeight(), getPrefSize(), getChildren());
 		
 		validated = true;
 	}
@@ -82,9 +78,9 @@ public class Container extends Component {
 		// ....!
 		
 		// I believe the layout is what can provide the preferred size.
-		if(layout != null)
+		/*if(layout != null)
 			layout.calcPreferredSize(v, getChildren());
-		else {
+		else {*/
 			// if there is no layout, then we just have to go with the maximum boundaries of the children as they currently are positioned, using the preferred sizes.
 			
 			if(children.size() == 0) {
@@ -106,6 +102,6 @@ public class Container extends Component {
 			}
 			
 			v.set(maxPos.x-minPos.x, maxPos.y-minPos.y);
-		}
+		// }
 	}
 }
