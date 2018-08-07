@@ -19,6 +19,7 @@ import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.ui.Screen;
+import miniventure.game.ui.TestScreen;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.MonoVoidFunction;
 
@@ -95,7 +96,7 @@ public class ClientCore extends ApplicationAdapter {
 			clientWorld = new ClientWorld(serverStarter, gameScreen);
 			
 			setScreen(new MainMenu());
-			setMenu(new Screen());
+			setMenu(new TestScreen());
 		}));
 	}
 	

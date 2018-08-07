@@ -8,15 +8,18 @@ import com.badlogic.gdx.math.Vector2;
 public final class Container extends Component {
 	
 	private ArrayList<Component> children;
+	private Layout layout;
 	
-	private float x, y;
-	
-	public Container() { this(0, 0); }
-	public Container(float x, float y) {
+	public Container() { this(null); }
+	public Container(Layout layout) { this(0, 0, layout); }
+	public Container(float x, float y) { this(x, y, null); }
+	public Container(float x, float y, Layout layout) {
+		this.layout = layout;
 		children = new ArrayList<>();
-		this.x = x;
-		this.y = y;
+		setPosition(x, y);
 	}
+	
+	protected Component[] getChildren() { return children.toArray(new Component[0]); }
 	
 	public void addComponent(Component c) {
 		children.remove(c);
@@ -28,19 +31,20 @@ public final class Container extends Component {
 	}
 	
 	@Override
-	protected void render(Batch batch) {
-		super.render(batch);
+	protected void render(Batch batch, Vector2 parentPos) {
+		if(layout != null)
+			layout.layout(this);
+		super.render(batch, parentPos);
+		Vector2 pos = getPosition().add(parentPos);
 		for(Component child: children)
-			child.render(batch);
-	}
-	
-	@Override
-	protected Vector2 getPosition() {
-		return new Vector2(x, y);
+			child.render(batch, pos);
 	}
 	
 	@Override
 	protected Vector2 getSize() {
+		if(layout != null)
+			return layout.getSize(this);
+		
 		if(children.size() == 0) {
 			return new Vector2();
 		}
@@ -61,5 +65,13 @@ public final class Container extends Component {
 		}
 		
 		return new Vector2(maxPos.x-minPos.x, maxPos.y-minPos.y);
+	}
+	
+	public Layout getLayout() {
+		return layout;
+	}
+	
+	public void setLayout(Layout layout) {
+		this.layout = layout;
 	}
 }

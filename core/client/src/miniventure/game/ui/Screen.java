@@ -1,27 +1,43 @@
 package miniventure.game.ui;
 
 import miniventure.game.GameCore;
+import miniventure.game.util.RelPos;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
+
+import org.jetbrains.annotations.NotNull;
 
 public class Screen {
 	
 	private static final OrthographicCamera camera = new OrthographicCamera(GameCore.DEFAULT_SCREEN_WIDTH, GameCore.DEFAULT_SCREEN_HEIGHT);
 	
-	private Container root;
+	protected Container root;
+	@NotNull
+	private RelPos rootPos = RelPos.CENTER;
 	private Color background = Color.ORANGE;
 	
-	public Screen() {
+	/*
+		The various screens will position containers in various positions:
+		
+		- title screen: custom background and components put in a vertical list (with custom spacing between options?)
+		- pause screen: vertical list
+		- informational screens: lists of labels (labels will have a set width)
+		- inventory: grid? or maybe list? either way the grid will have equally-sized cells.
+		
+		all of these are fairly simple, and require a relpos to position the elements within the list.
+	 */
+	
+	protected Screen() {
 		root = new Container();
-		root.setBackground(Background.fillColor(Color.RED));
-		root.addComponent(new Box(0, 0, 100, 100, Color.GREEN));
-		root.addComponent(new Box(0, 150, 50, 100, Color.BLUE));
-		root.addComponent(new Box(150, 50, 50, 200, Color.YELLOW));
 	}
+	
+	// protected Container getRoot() { return root; }
 	
 	public void render() {
 		if(background != null) {
@@ -29,10 +45,14 @@ public class Screen {
 			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		}
 		
+		// position root
+		Vector2 screenSize = new Vector2(camera.viewportWidth, camera.viewportHeight);
+		root.setPosition(rootPos.positionRect(root.getSize(), new Rectangle(-screenSize.x/2, -screenSize.y/2, screenSize.x, screenSize.y)));
+		
 		Batch batch = GameCore.getBatch();
 		batch.setProjectionMatrix(camera.combined);
 		batch.begin();
-		root.render(batch);
+		root.render(batch, new Vector2());
 		batch.end();
 	}
 	
@@ -40,5 +60,9 @@ public class Screen {
 		camera.setToOrtho(false, screenWidth, screenHeight);
 		camera.position.set(screenWidth / 2, screenHeight / 2, 0);
 		camera.update();
+	}
+	
+	public void setRootPos(@NotNull RelPos rootPos) {
+		this.rootPos = rootPos;
 	}
 }

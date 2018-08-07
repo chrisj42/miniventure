@@ -112,13 +112,13 @@ public enum RelPos {
 	/** positions the given rect to a relative position in the container. */
 	public Vector2 positionRect(Vector2 rectSize, Rectangle container) { return positionRect(rectSize.x, rectSize.y, container); }
 	public Vector2 positionRect(float rectWidth, float rectHeight, Rectangle container) {
-		Vector2 tlcorner = container.getCenter(new Vector2());
+		Vector2 blcorner = container.getCenter(new Vector2());
 		
 		// this moves the inner box correctly
-		tlcorner.x += (x * container.getWidth() / 2) - ((x+1) * rectWidth / 2);
-		tlcorner.y += (y * container.getHeight() / 2) - ((y+1) * rectHeight / 2);
+		blcorner.x += (x * container.getWidth() / 2) - ((x+1) * rectWidth / 2);
+		blcorner.y += (y * container.getHeight() / 2) - ((y+1) * rectHeight / 2);
 		
-		return tlcorner;
+		return blcorner;
 	}
 	
 	// the point is returned as a rectangle with the given dimension and the found location, within the provided dummy rectangle.
