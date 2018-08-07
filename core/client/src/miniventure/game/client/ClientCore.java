@@ -18,8 +18,7 @@ import miniventure.game.screen.ErrorScreen;
 import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
-import miniventure.game.ui2.SceneRoot;
-import miniventure.game.ui2.TestScreen;
+import miniventure.game.ui.Screen;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.MonoVoidFunction;
 
@@ -46,7 +45,7 @@ public class ClientCore extends ApplicationAdapter {
 	
 	private static boolean hasMenu = false;
 	private static MenuScreen menuScreen;
-	private static SceneRoot sceneRoot;
+	private static Screen uiScreen;
 	
 	private final ServerStarter serverStarter;
 	
@@ -96,7 +95,7 @@ public class ClientCore extends ApplicationAdapter {
 			clientWorld = new ClientWorld(serverStarter, gameScreen);
 			
 			setScreen(new MainMenu());
-			setMenu(new TestScreen());
+			setMenu(new Screen());
 		}));
 	}
 	
@@ -125,14 +124,14 @@ public class ClientCore extends ApplicationAdapter {
 		if (menuScreen != null)
 			menuScreen.draw();
 		
-		if(sceneRoot != null) {
-			sceneRoot.update();
-			sceneRoot.render();
+		if(uiScreen != null) {
+			// uiScreen.update();
+			uiScreen.render();
 		}
 	}
 	
-	public static void setMenu(@Nullable SceneRoot screen) {
-		sceneRoot = screen;
+	public static void setMenu(@Nullable Screen screen) {
+		uiScreen = screen;
 	}
 	public static void setScreen(@Nullable MenuScreen screen) {
 		if(menuScreen instanceof InventoryScreen) {
@@ -210,8 +209,8 @@ public class ClientCore extends ApplicationAdapter {
 		
 		if(menuScreen != null)
 			menuScreen.getViewport().update(width, height, true);
-		if(sceneRoot != null)
-			sceneRoot.resize(width, height);
+		if(uiScreen != null)
+			uiScreen.resize(width, height);
 	}
 	
 	
