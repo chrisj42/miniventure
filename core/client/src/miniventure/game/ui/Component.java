@@ -15,16 +15,21 @@ public abstract class Component {
 	private RelPos relPos; // if given more space than needed, position with this.
 	private float x, y;
 	
+	private boolean fillX = false, fillY = false;
+	
 	public Component() { this(null); }
 	public Component(Background background) {
 		this.background = background;
 	}
 	
-	protected void render(Batch batch, Vector2 parentPos) {
+	protected void render(Batch batch, Vector2 parentPos, Vector2 availableSize) {
 		// System.out.println("rendering component "+this);
+		Vector2 size = getSize(availableSize);
+		// Rectangle openBounds = new Rectangle(x, y, availableSize.x, availableSize.y);
+		// Vector2 pos = getRelPos().positionRect(size, openBounds);
+		// setPosition(pos);
 		if(background != null) {
-			// System.out.println("drawing background at "+scX()+','+scY()+" size "+getWidth()+','+getHeight());
-			Vector2 size = getSize();
+			// System.out.println("drawing background for "+this+" at "+(x+parentPos.x)+','+(y+parentPos.y)+" size "+size.x+','+size.y);
 			background.draw(batch, 1f, x+parentPos.x, y+parentPos.y, size.x, size.y);
 		}
 	}
@@ -33,6 +38,21 @@ public abstract class Component {
 	protected void setPosition(Vector2 pos) { setPosition(pos.x, pos.y); }
 	protected void setPosition(float x, float y) { this.x = x; this.y = y; }
 	protected abstract Vector2 getSize();
+	protected Vector2 getSize(Vector2 available) {
+		Vector2 size = getSize();
+		if(fillX) size.x = available.x;
+		if(fillY) size.y = available.y;
+		return size;
+	}
+	
+	protected Component setFillParent(boolean fillX, boolean fillY) {
+		this.fillX = fillX;
+		this.fillY = fillY;
+		return this;
+	}
+	
+	protected boolean getFillX() { return fillX; }
+	protected boolean getFillY() { return fillY; }
 	
 	public Background getBackground() { return background; }
 	public void setBackground(Background background) { this.background = background; }

@@ -14,21 +14,35 @@ public class Label extends Component {
 	private final String text;
 	private final GlyphLayout layout;
 	
-	public Label(float width, String text) {
+	public Label(float width, boolean fillParent, String text) {
 		this.width = width;
 		this.text = text;
 		this.layout = new GlyphLayout(GameCore.getFont(), text, Color.WHITE, width, Align.center, true);
+		setFillParent(fillParent, false);
 	}
 	
 	@Override
 	protected Vector2 getSize() {
+		// layout.setText(GameCore.getFont(), text, Color.WHITE, width, Align.center, true);
 		return new Vector2(layout.width, layout.height);
 	}
 	
 	@Override
-	protected void render(Batch batch, Vector2 parentPos) {
-		super.render(batch, parentPos);
+	protected Vector2 getSize(Vector2 availableSize) {
+		layout.setText(GameCore.getFont(), text, Color.WHITE, getFillX()?availableSize.x:width, Align.center, true);
+		return super.getSize(availableSize);
+	}
+	
+	@Override
+	protected void render(Batch batch, Vector2 parentPos, Vector2 availableSize) {
+		Vector2 size = getSize(availableSize);
+		// System.out.println(size+" of "+availableSize);
+		layout.setText(GameCore.getFont(), text, Color.WHITE, size.x, Align.center, true);
 		Vector2 pos = getPosition();
+		// MyUtils.drawRect(parentPos.x+pos.x, parentPos.y+pos.y, availableSize.x, availableSize.y, Color.PURPLE, batch);
+		super.render(batch, parentPos, availableSize);
+		pos.sub(size.x/2, size.y/2);
+		pos.add(0, GameCore.getFont().getLineHeight()/2);
 		GameCore.getFont().draw(batch, layout, pos.x, pos.y);
 	}
 }

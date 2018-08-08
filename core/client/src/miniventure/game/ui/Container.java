@@ -19,7 +19,14 @@ public final class Container extends Component {
 		setPosition(x, y);
 	}
 	
-	protected Component[] getChildren() { return children.toArray(new Component[0]); }
+	protected Component[] getChildren() { return getChildren(true); }
+	protected Component[] getChildren(boolean backwards) {
+		if(!backwards) return children.toArray(new Component[0]);
+		Component[] backChildren = new Component[children.size()];
+		for(int i = 0; i < children.size(); i++)
+			backChildren[i] = children.get(children.size()-i-1);
+		return backChildren;
+	}
 	
 	public void addComponent(Component c) {
 		children.remove(c);
@@ -31,13 +38,16 @@ public final class Container extends Component {
 	}
 	
 	@Override
-	protected void render(Batch batch, Vector2 parentPos) {
-		if(layout != null)
+	protected void render(Batch batch, Vector2 parentPos, Vector2 availableSize) {
+		if(layout != null) {
 			layout.layout(this);
-		super.render(batch, parentPos);
+			// layout.layout(this);
+		}
+		super.render(batch, parentPos, availableSize);
 		Vector2 pos = getPosition().add(parentPos);
+		Vector2 available = getSize(availableSize);
 		for(Component child: children)
-			child.render(batch, pos);
+			child.render(batch, pos, new Vector2(available.x, child.getSize().y));
 	}
 	
 	@Override

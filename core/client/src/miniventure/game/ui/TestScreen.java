@@ -12,8 +12,8 @@ public class TestScreen extends Screen {
 		root.addComponent(new Box(120, 20, Color.GREEN));
 		root.addComponent(new Box(100, 10, Color.BLUE));
 		root.addComponent(new Box(100, 12, Color.YELLOW));
-		root.addComponent(new Label(120, "Hello everyone people yes people. All the peoples. And other things too."));
-		root.addComponent(new Box(10, 20, Color.BROWN));
+		root.addComponent(new Label(80, true, "Hello everyone people yes people. All the peoples. And other things too."));
+		root.addComponent(new Box(10, 20, Color.BROWN).setFillParent(true, false));
 	}
 	
 }

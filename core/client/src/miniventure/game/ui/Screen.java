@@ -47,12 +47,12 @@ public class Screen {
 		
 		// position root
 		Vector2 screenSize = new Vector2(camera.viewportWidth, camera.viewportHeight);
-		root.setPosition(rootPos.positionRect(root.getSize(), new Rectangle(-screenSize.x/2, -screenSize.y/2, screenSize.x, screenSize.y)));
+		root.setPosition(rootPos.positionRect(root.getSize(screenSize), new Rectangle(-screenSize.x/2, -screenSize.y/2, screenSize.x, screenSize.y)));
 		
 		Batch batch = GameCore.getBatch();
 		batch.setProjectionMatrix(camera.combined);
 		batch.begin();
-		root.render(batch, new Vector2());
+		root.render(batch, new Vector2(), screenSize);
 		batch.end();
 	}
 	

@@ -5,13 +5,16 @@ import miniventure.game.util.RelPos;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
+import org.jetbrains.annotations.Nullable;
+
 public class VerticalListLayout implements Layout {
 	
+	@Nullable
 	private RelPos itemAlignment;
 	private float spacing;
 	
-	public VerticalListLayout(RelPos itemAlignment, float spacing) {
-		this.itemAlignment = itemAlignment;
+	public VerticalListLayout(@Nullable RelPos forceAlignment, float spacing) {
+		this.itemAlignment = forceAlignment;
 		this.spacing = spacing;
 	}
 	
@@ -30,11 +33,10 @@ public class VerticalListLayout implements Layout {
 				max.y += spacing;
 		}
 		
-		Vector2 parentPos = container.getPosition();
 		float yo = 0;
 		for(int i = 0; i < children.length; i++) {
 			Rectangle bounds = new Rectangle(0, yo, max.x, sizes[i].y);
-			children[i].setPosition(itemAlignment.positionRect(sizes[i], bounds));
+			children[i].setPosition((itemAlignment==null?children[i].getRelPos():itemAlignment).positionRect(children[i].getSize(new Vector2(max.x, sizes[i].y)), bounds));
 			yo += sizes[i].y + spacing;
 		}
 	}
