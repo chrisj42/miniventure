@@ -4,6 +4,7 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 
 import miniventure.game.util.function.MonoValueFunction;
+import miniventure.game.util.function.MonoVoidFunction;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -35,6 +36,11 @@ public final class ArrayUtils {
 			endValues[i] = mapper.get(startValues[i]);
 		
 		return endValues;
+	}
+	
+	public static <E> void forEach(E[] array, MonoVoidFunction<E> action) {
+		for(E e: array)
+			action.act(e);
 	}
 	
 	@NotNull
