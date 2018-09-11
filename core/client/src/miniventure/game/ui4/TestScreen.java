@@ -6,14 +6,17 @@ public class TestScreen extends Screen {
 	
 	public TestScreen() {
 		setLayout(new LineLayout(false));
-		add(LineLayout.createSpacer());
-		// add(LineLayout.createSpacer(false, true));
-		add(new Box(200, 100, Color.BLUE));
-		add(LineLayout.createSpacer());
-		// add(LineLayout.createSpacer(false, true));
-		add(new Box(100, 200, Color.BLUE));
-		add(LineLayout.createSpacer());
-		// setBackground(Color.GRAY);
+		add(LineLayout.createHorizontalSpacer());
+		for(int i = 0; i < 3; i++) {
+			Container c = new Container(new LineLayout(true));
+			c.add(LineLayout.createVerticalSpacer());
+			for(int j = i; j < 4; j++) {
+				c.add(new Box(200, 50, Color.GREEN));
+				c.add(LineLayout.createVerticalSpacer());
+			}
+			add(c);
+			add(LineLayout.createHorizontalSpacer());
+		}
 	}
 	
 }

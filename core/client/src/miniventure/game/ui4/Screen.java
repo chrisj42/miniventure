@@ -22,7 +22,8 @@ public class Screen extends Container {
 	}
 	
 	public void render() {
-		validate(); // does nothing if already valid
+		if(!isValid())
+			validate();
 		batch.setProjectionMatrix(viewport.getCamera().combined);
 		batch.begin();
 		render(batch);

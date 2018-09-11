@@ -118,22 +118,26 @@ public class LineLayout implements Layout {
 		
 		private final boolean vertical;
 		private final boolean horizontal;
+		private final float width;
+		private final float height;
 		
-		Spacer(boolean vertical, boolean horizontal) {
+		Spacer(boolean vertical, boolean horizontal, float width, float height) {
 			this.vertical = vertical;
 			this.horizontal = horizontal;
+			this.width = width;
+			this.height = height;
 		}
 		
 		@Override
 		protected Vector2 calcPreferredSize(Vector2 rt) {
-			return rt.setZero();
+			return rt.set(width, height);
 		}
 		
 		@Override
 		protected Vector2 calcMaxSize(Vector2 rt) {
 			super.calcMaxSize(rt).scl(100);
-			if(!vertical) rt.y = 0;
-			if(!horizontal) rt.x = 0;
+			if(!vertical) rt.y = height;
+			if(!horizontal) rt.x = width;
 			return rt;
 		}
 	}
@@ -141,5 +145,10 @@ public class LineLayout implements Layout {
 	public static Component createSpacer() { return createSpacer(true, true); }
 	public static Component createHorizontalSpacer() { return createSpacer(false, true); }
 	public static Component createVerticalSpacer() { return createSpacer(true, false); }
-	public static Component createSpacer(boolean vertical, boolean horizontal) { return new Spacer(vertical, horizontal); }
+	public static Component createSpacer(boolean vertical, boolean horizontal) { return new Spacer(vertical, horizontal, 0, 0); }
+	
+	public static Component createSpacer(float width, float height) { return createSpacer(false, false, width, height); }
+	public static Component createHorizontalSpacer(float width) { return createSpacer(width, 0); }
+	public static Component createVerticalSpacer(float height) { return createSpacer(0, height); }
+	public static Component createSpacer(boolean vertical, boolean horizontal, float width, float height) { return new Spacer(vertical, horizontal, width, height); }
 }

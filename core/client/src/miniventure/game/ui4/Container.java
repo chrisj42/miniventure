@@ -7,14 +7,15 @@ import com.badlogic.gdx.math.Vector2;
 
 import org.jetbrains.annotations.Nullable;
 
-public abstract class Container extends Component {
+public class Container extends Component {
 	
 	@Nullable private Layout layout;
 	
 	private ArrayList<Component> children = new ArrayList<>();
 	
-	public Container() {
-		
+	public Container() { }
+	public Container(Layout layout) {
+		setLayout(layout);
 	}
 	
 	public void add(Component c) {

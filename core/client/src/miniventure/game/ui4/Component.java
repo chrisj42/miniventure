@@ -9,7 +9,7 @@ import com.badlogic.gdx.math.Vector2;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class Component {
+public class Component {
 	
 	// next feature: add component padding.
 	
@@ -40,7 +40,7 @@ public abstract class Component {
 	}
 	
 	public void validate() {
-		if(valid) return;
+		// if(valid) return;
 		layout();
 		valid = true;
 		if(this instanceof Screen)
