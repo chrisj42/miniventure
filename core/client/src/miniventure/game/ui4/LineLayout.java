@@ -8,11 +8,11 @@ public class LineLayout implements Layout {
 	
 	private final boolean vertical;
 	// private final float spacing;
-	private final boolean expandChildrenToFit;
+	// private final boolean expandChildrenToFit;
 	
-	public LineLayout(boolean vertical/*, float spacing*/, boolean expandChildrenToFit) {
+	public LineLayout(boolean vertical/*, float spacing*//*, boolean expandChildrenToFit*/) {
 		// this.spacing = spacing;
-		this.expandChildrenToFit = expandChildrenToFit;
+		// this.expandChildrenToFit = expandChildrenToFit;
 		this.vertical = vertical;
 	}
 	
@@ -62,15 +62,15 @@ public class LineLayout implements Layout {
 		Vector2 limits = container.getSizeCache().getSize();
 		Vector2 total = new Vector2();
 		
-		if(bounds.x > limits.x || expandChildrenToFit && bounds.x < limits.x) {
+		if(bounds.x > limits.x || /*expandChildrenToFit && */bounds.x < limits.x) {
 			float[] xLimits = new float[container.getComponentCount()];
 			allocateSizes(container, total, (bounds.x > limits.x) ? SizeCache::getMinSize : SizeCache::getMaxSize, xLimits, null);
-			scaleSizes(xSizes, xLimits, bounds.x, limits.x);
+			scaleSizes(xSizes, xLimits, bounds.x, limits.x, !vertical);
 		}
-		if(bounds.y > limits.y || expandChildrenToFit && bounds.y < limits.y) {
+		if(bounds.y > limits.y || /*expandChildrenToFit && */bounds.y < limits.y) {
 			float[] yLimits = new float[container.getComponentCount()];
 			allocateSizes(container, total, (bounds.y > limits.y) ? SizeCache::getMinSize : SizeCache::getMaxSize, null, yLimits);
-			scaleSizes(ySizes, yLimits, bounds.y, limits.y);
+			scaleSizes(ySizes, yLimits, bounds.y, limits.y, vertical);
 		}
 		
 		total.setZero();
@@ -98,10 +98,14 @@ public class LineLayout implements Layout {
 		}
 	}
 	
-	private static void scaleSizes(float[] sizes, float[] limits, float total, float target) {
+	private static void scaleSizes(float[] sizes, float[] limits, float total, float target, boolean major) {
 		float totalSpace = 0;
-		for(int i = 0; i < sizes.length; i++)
-			totalSpace += limits[i] - sizes[i];
+		for(int i = 0; i < sizes.length; i++) {
+			if(major)
+				totalSpace += limits[i] - sizes[i];
+			else
+				totalSpace = Math.copySign(Math.max(Math.abs(totalSpace), Math.abs(limits[i] - sizes[i])), limits[i] - sizes[i]);
+		}
 		// now we have the total space we can work with; take the change from total to target, and apply it to each size, multiplied by that size's size divided by the total space.
 		float change = target - total;
 		for(int i = 0; i < sizes.length; i++)
@@ -111,6 +115,15 @@ public class LineLayout implements Layout {
 	
 	
 	private static class Spacer extends Component {
+		
+		private final boolean vertical;
+		private final boolean horizontal;
+		
+		Spacer(boolean vertical, boolean horizontal) {
+			this.vertical = vertical;
+			this.horizontal = horizontal;
+		}
+		
 		@Override
 		protected Vector2 calcPreferredSize(Vector2 rt) {
 			return rt.setZero();
@@ -118,9 +131,15 @@ public class LineLayout implements Layout {
 		
 		@Override
 		protected Vector2 calcMaxSize(Vector2 rt) {
-			return super.calcMaxSize(rt).scl(100);
+			super.calcMaxSize(rt).scl(100);
+			if(!vertical) rt.y = 0;
+			if(!horizontal) rt.x = 0;
+			return rt;
 		}
 	}
 	
-	public static Component createSpacer() { return new Spacer(); }
+	public static Component createSpacer() { return createSpacer(true, true); }
+	public static Component createHorizontalSpacer() { return createSpacer(false, true); }
+	public static Component createVerticalSpacer() { return createSpacer(true, false); }
+	public static Component createSpacer(boolean vertical, boolean horizontal) { return new Spacer(vertical, horizontal); }
 }
