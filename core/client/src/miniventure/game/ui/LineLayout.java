@@ -1,6 +1,6 @@
-package miniventure.game.ui4;
+package miniventure.game.ui;
 
-import miniventure.game.ui4.Component.SizeCache;
+import miniventure.game.ui.Component.SizeCache;
 
 import com.badlogic.gdx.math.Vector2;
 

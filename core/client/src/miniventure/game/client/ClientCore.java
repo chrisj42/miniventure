@@ -18,8 +18,8 @@ import miniventure.game.screen.ErrorScreen;
 import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
-import miniventure.game.ui4.Screen;
-import miniventure.game.ui4.TestScreen;
+import miniventure.game.ui.Screen;
+import miniventure.game.ui.TestScreen;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.MonoVoidFunction;
 

@@ -1,19 +1,22 @@
 package miniventure.game.ui;
 
-import miniventure.game.util.RelPos;
-
 import com.badlogic.gdx.graphics.Color;
 
 public class TestScreen extends Screen {
 	
 	public TestScreen() {
-		root.setLayout(new VerticalListLayout(RelPos.LEFT, 20));
-		root.setBackground(Background.fillColor(Color.RED));
-		root.addComponent(new Box(120, 20, Color.GREEN));
-		root.addComponent(new Box(100, 10, Color.BLUE));
-		root.addComponent(new Box(100, 12, Color.YELLOW));
-		root.addComponent(new Label(80, true, "Hello everyone people yes people. All the peoples. And other things too."));
-		root.addComponent(new Box(10, 20, Color.BROWN).setFillParent(true, false));
+		setLayout(new LineLayout(false));
+		add(LineLayout.createHorizontalSpacer());
+		for(int i = 0; i < 3; i++) {
+			Container c = new Container(new LineLayout(true));
+			c.add(LineLayout.createVerticalSpacer());
+			for(int j = i; j < 4; j++) {
+				c.add(new Box(200, 50, Color.GREEN));
+				c.add(LineLayout.createVerticalSpacer());
+			}
+			add(c);
+			add(LineLayout.createHorizontalSpacer());
+		}
 	}
 	
 }
