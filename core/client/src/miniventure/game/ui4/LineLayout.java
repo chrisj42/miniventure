@@ -93,8 +93,12 @@ public class LineLayout implements Layout {
 				majorOffset += xSizes[i];// + spacing;
 				yOff = (limits.y - ySizes[i]) / 2;
 			}
-			container.getComponentAt(i).setPosition(xOff, yOff);
-			container.getComponentAt(i).getSizeCache().setSize(xSizes[i], ySizes[i]);
+			
+			Component c = container.getComponentAt(i); 
+			c.setPosition(xOff, yOff);
+			// if(!(c instanceof Spacer))
+			// 	System.out.println();
+			c.getSizeCache().setSize(xSizes[i], ySizes[i]);
 		}
 	}
 	
@@ -104,7 +108,7 @@ public class LineLayout implements Layout {
 			if(major)
 				totalSpace += limits[i] - sizes[i];
 			else
-				totalSpace = Math.copySign(Math.max(Math.abs(totalSpace), Math.abs(limits[i] - sizes[i])), limits[i] - sizes[i]);
+				totalSpace = Math.copySign(Math.max(Math.abs(totalSpace), Math.abs(limits[i] - sizes[i])), Math.min(limits[i] - sizes[i], totalSpace));
 		}
 		// now we have the total space we can work with; take the change from total to target, and apply it to each size, multiplied by that size's size divided by the total space.
 		float change = target - total;

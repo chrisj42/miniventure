@@ -63,7 +63,7 @@ public class Component {
 	
 	public void setPosition(Vector2 pos) { setPosition(pos.x, pos.y); }
 	public void setPosition(float x, float y) {
-		System.out.println("set position of "+this+" to "+x+","+y);
+		// /*if(this instanceof Container) */System.out.println("set position of "+this+" to "+x+","+y);
 		if(position.x != x || position.y != y) {
 			position.set(x, y);
 			invalidateParent();
@@ -76,8 +76,8 @@ public class Component {
 	public Vector2 getPositionOnScreen() { return getPositionOnScreen(new Vector2()); }
 	public Vector2 getPositionOnScreen(Vector2 rt) { return rt == null ? getPositionOnScreen() : rt.set(getScreenX(), getScreenY()); }
 	
-	public float getScreenX() { return position.x + (parent == null ? 0 : ((Component)parent).getScreenX()); }
-	public float getScreenY() { return position.y + (parent == null ? 0 : ((Component)parent).getScreenY()); }
+	public float getScreenX() { return position.x + (parent == null ? 0 : parent.getScreenX()); }
+	public float getScreenY() { return position.y + (parent == null ? 0 : parent.getScreenY()); }
 	
 	
 	@NotNull
@@ -113,7 +113,7 @@ public class Component {
 		
 		public void setSize(@NotNull Vector2 size) { setSize(size.x, size.y); }
 		public void setSize(float width, float height) {
-			System.out.println("set size of "+Component.this+" to "+width+","+height);
+			// /*if(Component.this instanceof Container) */System.out.println("set size of "+Component.this+" to "+width+","+height);
 			size.set(width, height);
 			invalidateParent();
 		}
