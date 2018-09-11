@@ -89,7 +89,7 @@ public abstract class Component {
 	protected Vector2 calcPreferredSize(Vector2 rt) { return rt.set(1, 1); }
 	
 	// note: I'm going to have to make sure to account for numeric overflow when adding sizes together, such as when calculating the size of containers.
-	protected Vector2 calcMaxSize(Vector2 rt) { return rt.set(10_000, 10_000/*(float)Math.sqrt(Float.MAX_VALUE), (float)Math.sqrt(Float.MAX_VALUE)*/); }
+	protected Vector2 calcMaxSize(Vector2 rt) { return rt.set(1E20f, 1E20f/*(float)Math.sqrt(Float.MAX_VALUE), (float)Math.sqrt(Float.MAX_VALUE)*/); }
 	
 	// a class that extends container, that represents a root screen, will start validation by setting its size to the size of the application window.
 	// it will not matter what the pref, min, or max size of the root screen is.

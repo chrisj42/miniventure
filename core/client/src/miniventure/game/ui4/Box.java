@@ -32,4 +32,11 @@ public class Box extends Component {
 	protected Vector2 calcPreferredSize(Vector2 rt) {
 		return rt.set(width, height);
 	}
+	
+	@Override
+	protected Vector2 calcMaxSize(Vector2 rt) {
+		super.calcMaxSize(rt);
+		rt.x = width;
+		return rt;
+	}
 }
