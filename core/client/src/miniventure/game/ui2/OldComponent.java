@@ -66,7 +66,7 @@ abstract class OldComponent implements InputProcessor {
 			background.draw(batch, alpha, x, y, width, height);
 		
 		if(focused && showHighlight)
-			MyUtils.drawRect(x, y, width, height, Color.YELLOW, alpha, batch);
+			MyUtils.drawRect(x, y, width, height, 2, Color.YELLOW, alpha, batch);
 	}
 	
 	
