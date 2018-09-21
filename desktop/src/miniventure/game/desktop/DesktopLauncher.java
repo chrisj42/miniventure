@@ -47,7 +47,10 @@ public class DesktopLauncher {
 			config.width = GameCore.DEFAULT_SCREEN_WIDTH;
 			config.height = GameCore.DEFAULT_SCREEN_HEIGHT;
 			config.resizable = false;
-			LwjglCanvas canvas = new LwjglCanvas(new ClientCore((width, height, callback) -> {
+			
+			JPanel uiPanel = new JPanel();
+			
+			LwjglCanvas canvas = new LwjglCanvas(new ClientCore(uiPanel, (width, height, callback) -> {
 				ServerCore.initServer(width, height, false);
 				// server running, and world loaded; now, get the server world updating
 				new Thread(new ThreadGroup("server"), ServerCore::run, "Miniventure Server").start();
@@ -73,7 +76,7 @@ public class DesktopLauncher {
 			awtCanvas.setSize(WINDOW_SIZE);
 			
 			// the panel where swing UI components will be added.
-			JPanel uiPanel = new JPanel();
+			uiPanel.setFocusable(false);
 			com.sun.awt.AWTUtilities.setComponentMixingCutoutShape(uiPanel, new Rectangle());
 			// uiPanel.setPreferredSize(WINDOW_SIZE);
 			uiPanel.setSize(WINDOW_SIZE);

@@ -1,11 +1,10 @@
 package miniventure.game.screen;
 
+import javax.swing.JLabel;
+
 import java.util.Stack;
 
 import miniventure.game.util.ProgressLogger;
-
-import com.badlogic.gdx.Gdx;
-import com.kotcrab.vis.ui.widget.VisLabel;
 
 public class LoadingScreen extends MenuScreen implements ProgressLogger {
 	
@@ -20,31 +19,29 @@ public class LoadingScreen extends MenuScreen implements ProgressLogger {
 		Like that.  
 	 */
 	
-	private Stack<VisLabel> messageLabels = new Stack<>();
+	private Stack<JLabel> messageLabels = new Stack<>();
 	
 	public LoadingScreen() {
-		addActor(vGroup);
+		
 	}
 	
 	@Override
 	public void pushMessage(String message) {
-		final VisLabel label = new VisLabel(message);
+		final JLabel label = new JLabel(message);
 		messageLabels.push(label);
-		Gdx.app.postRunnable(() -> {
-			vGroup.addActor(label);
-		});
+		add(label);
 	}
 	
 	@Override
 	public void editMessage(final String message) {
-		final VisLabel label = messageLabels.peek();
-		Gdx.app.postRunnable(() -> label.setText(message));
+		final JLabel label = messageLabels.peek();
+		label.setText(message);
 	}
 	
 	@Override
 	public void popMessage() {
-		VisLabel removed = messageLabels.pop();
-		Gdx.app.postRunnable(() -> vGroup.removeActor(removed));
+		JLabel removed = messageLabels.pop();
+		remove(removed);
 	}
 	
 }

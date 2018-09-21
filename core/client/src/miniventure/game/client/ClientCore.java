@@ -1,6 +1,7 @@
 package miniventure.game.client;
 
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
@@ -23,7 +24,6 @@ import miniventure.game.util.function.MonoVoidFunction;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
@@ -45,6 +45,7 @@ public class ClientCore extends ApplicationAdapter {
 	private static boolean hasMenu = false;
 	private static MenuScreen menuScreen;
 	
+	private static JPanel uiPanel;
 	private final ServerStarter serverStarter;
 	
 	
@@ -76,7 +77,8 @@ public class ClientCore extends ApplicationAdapter {
 		}
 	}*/
 	
-	public ClientCore(ServerStarter serverStarter) {
+	public ClientCore(JPanel uiPanel, ServerStarter serverStarter) {
+		ClientCore.uiPanel = uiPanel;
 		this.serverStarter = serverStarter;
 	}
 	
@@ -102,8 +104,8 @@ public class ClientCore extends ApplicationAdapter {
 		if(gameScreen != null)
 			gameScreen.dispose();
 		
-		if(menuScreen != null)
-			menuScreen.dispose();
+		// if(menuScreen != null)
+		// 	menuScreen.dispose();
 		
 		GameCore.dispose();
 	}
@@ -117,10 +119,10 @@ public class ClientCore extends ApplicationAdapter {
 		
 		hasMenu = menuScreen != null;
 		
-		if (menuScreen != null)
-			menuScreen.act();
-		if (menuScreen != null)
-			menuScreen.draw();
+		// if (menuScreen != null)
+		// 	menuScreen.act();
+		// if (menuScreen != null)
+		// 	menuScreen.draw();
 	}
 	
 	public static void setScreen(@Nullable MenuScreen screen) {
@@ -132,30 +134,31 @@ public class ClientCore extends ApplicationAdapter {
 		if(menuScreen instanceof MainMenu && screen instanceof ErrorScreen)
 			return; // ignore it.
 		
-		if(screen == null && menuScreen != null && menuScreen != gameScreen.chatScreen)
-			menuScreen.dispose();
-		else if(screen != null && menuScreen != null && menuScreen != gameScreen.chatScreen)
+		// if(screen == null && menuScreen != null && menuScreen != gameScreen.chatScreen)
+		// 	menuScreen.dispose();
+		// FIXME chat screen
+		if(screen != null && menuScreen != null && menuScreen != gameScreen.chatScreen)
 			screen.setParent(menuScreen);
 		
 		System.out.println("setting screen to " + screen);
 		
 		menuScreen = screen;
 		if(menuScreen != null) menuScreen.focus();
-		if(gameScreen == null) {
-			Gdx.input.setInputProcessor(menuScreen == null ? input : menuScreen);
+		/*if(gameScreen == null) {
+			Gdx.input.setInputProcessor(oldMenuScreen == null ? input : oldMenuScreen);
 		}
 		else {
-			Gdx.input.setInputProcessor(menuScreen == null ? new InputMultiplexer(gameScreen.getGuiStage(), input) : new InputMultiplexer(menuScreen, gameScreen.getGuiStage()));
-		}
+			Gdx.input.setInputProcessor(oldMenuScreen == null ? new InputMultiplexer(gameScreen.getGuiStage(), input) : new InputMultiplexer(oldMenuScreen, gameScreen.getGuiStage()));
+		}*/
 		input.reset();
 	}
 	public static void backToParentScreen() {
 		if(menuScreen != null && menuScreen.getParent() != null) {
 			MenuScreen screen = menuScreen.getParent();
 			System.out.println("setting screen back to " + screen);
-			menuScreen.dispose(false);
+			// menuScreen.dispose(false);
 			menuScreen = screen;
-			Gdx.input.setInputProcessor(menuScreen);
+			// Gdx.input.setInputProcessor(menuScreen);
 			input.reset();
 		}
 	}
@@ -197,9 +200,9 @@ public class ClientCore extends ApplicationAdapter {
 		if(gameScreen != null)
 			gameScreen.resize(width, height);
 		
-		MenuScreen menu = getScreen();
-		if(menu != null)
-			menu.getViewport().update(width, height, true);
+		// MenuScreen menu = getScreen();
+		// if(menu != null)
+		// 	menu.getViewport().update(width, height, true);
 	}
 	
 	
@@ -207,6 +210,8 @@ public class ClientCore extends ApplicationAdapter {
 	
 	@Nullable
 	public static MenuScreen getScreen() { return menuScreen; }
+	
+	public static JPanel getUiPanel() { return uiPanel; }
 	
 	public static ClientWorld getWorld() { return clientWorld; }
 	public static GameClient getClient() { return clientWorld.getClient(); }

@@ -1,8 +1,13 @@
 package miniventure.game.screen;
 
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 import java.awt.EventQueue;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 
 import miniventure.game.GameCore;
 import miniventure.game.client.ClientCore;
@@ -20,22 +25,12 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.Align;
-import com.kotcrab.vis.ui.widget.LinkLabel.LinkLabelStyle;
-import com.kotcrab.vis.ui.widget.VisLabel;
-import com.kotcrab.vis.ui.widget.VisTextButton;
 
 import org.jetbrains.annotations.NotNull;
 
 public class MainMenu extends MenuScreen {
 	
 	private boolean dialog = false;
-	
-	private final Table table;
 	
 	private final DisplayLevel backgroundLevel;
 	private final LevelViewport levelView;
@@ -45,66 +40,62 @@ public class MainMenu extends MenuScreen {
 	private static final float PAN_SPEED = 4.5f; // in tiles/second.
 	
 	public MainMenu() {
-		super();
+		// super();
 		
 		ClientWorld world = ClientCore.getWorld();
 		
-		table = new Table();
+		// table = new Table();
 		// table.setDebug(true);
 		addLabel("Welcome to Miniventure!", 20);
 		addLabel("You are playing version " + GameCore.VERSION, 25);
 		
-		VisLabel updateLabel = addLabel("Checking for higher versions...", 45);
+		LinkLabel updateLabel = new LinkLabel("Checking for higher versions...", null);
+		add(updateLabel);
+		add(Box.createVerticalStrut(45));
 		setVersionUpdateLabel(updateLabel);
 		
-		VisTextButton playButton = new VisTextButton("Play");
+		JButton playButton = new JButton("Play");
 		
-		playButton.addListener(new ClickListener() {
-			@Override
-			public void clicked(InputEvent e, float x, float y) {
-				if(dialog) return;
-				world.createWorld(0, 0);
-			}
+		playButton.addActionListener(e -> {
+			if(dialog) return;
+			world.createWorld(0, 0);
 		});
 		
-		table.add(playButton).spaceBottom(20);
-		table.row();
+		add(playButton);
+		add(Box.createVerticalStrut(20));
 		
-		VisTextButton joinBtn = new VisTextButton("Join Server");
-		joinBtn.addListener(new ClickListener() {
-			@Override
-			public void clicked(InputEvent e, float x, float y) {
-				if(dialog) return;
-				dialog = true;
-				LoadingScreen loader = new LoadingScreen();
-				loader.pushMessage("Preparing to connect...");
-				ClientCore.setScreen(loader);
-				EventQueue.invokeLater(() -> {
-					String ipAddress = JOptionPane.showInputDialog("Enter the IP Address you want to connect to.");
-					Gdx.app.postRunnable(() -> {
-						if(ipAddress != null)
-							world.createWorld(ipAddress);
-						else
-							ClientCore.backToParentScreen();
-					});
-					dialog = false;
+		JButton joinBtn = new JButton("Join Server");
+		joinBtn.addActionListener(e -> {
+			if(dialog) return;
+			dialog = true;
+			LoadingScreen loader = new LoadingScreen();
+			loader.pushMessage("Preparing to connect...");
+			ClientCore.setScreen(loader);
+			EventQueue.invokeLater(() -> {
+				String ipAddress = JOptionPane.showInputDialog("Enter the IP Address you want to connect to.");
+				Gdx.app.postRunnable(() -> {
+					if(ipAddress != null)
+						world.createWorld(ipAddress);
+					else
+						ClientCore.backToParentScreen();
 				});
-			}
+				dialog = false;
+			});
 		});
 		
-		table.add(joinBtn).spaceBottom(20).row();
+		add(joinBtn);
+		add(Box.createVerticalStrut(20));
 		
-		VisTextButton helpBtn = makeButton("Instructions", () -> ClientCore.setScreen(new InstructionsScreen()));
-		table.add(helpBtn).spaceBottom(20).row();
+		JButton helpBtn = makeButton("Instructions", () -> ClientCore.setScreen(new InstructionsScreen()));
+		add(helpBtn);
+		add(Box.createVerticalStrut(20));
 		
-		VisTextButton creditsBtn = makeButton("Credits", () -> ClientCore.setScreen(new CreditsScreen()));
-		table.add(creditsBtn).spaceBottom(20).row();
+		JButton creditsBtn = makeButton("Credits", () -> ClientCore.setScreen(new CreditsScreen()));
+		add(creditsBtn);
+		add(Box.createVerticalStrut(20));
 		
-		VisTextButton exitBtn = makeButton("Quit", () -> Gdx.app.exit());
-		table.add(exitBtn).row();
-		
-		addActor(table);
-		table.setPosition(getWidth()/2, getHeight()/2, Align.center);
+		JButton exitBtn = makeButton("Quit", () -> Gdx.app.exit());
+		add(exitBtn);
 		
 		// setup level scrolling in background
 		
@@ -121,6 +112,13 @@ public class MainMenu extends MenuScreen {
 		
 		cameraDir = new Vector2().setLength(PAN_SPEED).setToRandomDirection().setLength(PAN_SPEED);
 		
+		addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentResized(ComponentEvent e) {
+				Gdx.app.postRunnable(() -> levelView.resize(getWidth(), getHeight()));
+			}
+		});
+		
 		// setup background music
 		Music song = ClientCore.setMusicTrack(Gdx.files.internal("audio/music/title.mp3"));
 		song.setLooping(true);
@@ -131,7 +129,7 @@ public class MainMenu extends MenuScreen {
 	public boolean usesWholeScreen() { return false; }
 	
 	@Override
-	public void draw() {
+	public void glDraw() {
 		// levelView.handleInput();
 		levelView.render(cameraPos, lightOverlay, backgroundLevel);
 		
@@ -139,7 +137,7 @@ public class MainMenu extends MenuScreen {
 		cameraDir.x = velDir(cameraPos.x, cameraDir.x, levelView.getViewWidth()/2, backgroundLevel.getWidth() - levelView.getViewWidth()/2);
 		cameraDir.y = velDir(cameraPos.y, cameraDir.y, levelView.getViewHeight()/2, backgroundLevel.getHeight() - levelView.getViewHeight()/2);
 		
-		super.draw();
+		super.glDraw();
 	}
 	
 	private float velDir(float pos, float vel, float min, float max) {
@@ -152,19 +150,23 @@ public class MainMenu extends MenuScreen {
 	}
 	
 	@NotNull
-	private VisLabel addLabel(String msg, int spacing) {
-		VisLabel label = makeLabel(msg);
-		table.add(label).spaceBottom(spacing);
-		table.row();
+	private JLabel addLabel(String msg, int spacing) {
+		JLabel label = makeLabel(msg);
+		add(label);
+		add(Box.createVerticalStrut(spacing));
+		// table.add(label).spaceBottom(spacing);
+		// table.row();
 		return label;
 	}
 	
 	@NotNull
-	private VisLabel makeLabel(String text) {
-		return new VisLabel(text, new LabelStyle(GameCore.getFont(), Color.WHITE));
+	private JLabel makeLabel(String text) {
+		JLabel lbl = new JLabel(text);
+		lbl.setForeground(java.awt.Color.WHITE);
+		return lbl;
 	}
 	
-	private void setVersionUpdateLabel(VisLabel label) {
+	private void setVersionUpdateLabel(LinkLabel label) {
 		if(!GameCore.determinedLatestVersion()) {
 			// return a "loading" label that will be replaced once the version check completes.
 			new Thread(() -> {
@@ -175,15 +177,16 @@ public class MainMenu extends MenuScreen {
 		else {
 			// add a message saying you have the latest version, or a hyperlink message to the newest jar file.
 			VersionInfo latestVersion = GameCore.getLatestVersion();
-			if(latestVersion.version.compareTo(GameCore.VERSION) > 0) // link new version
-				table.getCell(label).setActor(new MyLinkLabel("Miniventure " + latestVersion.releaseName + " Now Available! Click here to download.", latestVersion.assetUrl, new LinkLabelStyle(GameCore.getFont(), Color.SKY, new ColorRect(Color.SKY))));
-			else if(latestVersion.releaseName.length() > 0)
-				label.setText("You have the latest version.");
-			else
-				label.setText("Connection failed, could not check for updates.");
 			
-			table.pack();
-			table.setPosition(getWidth()/2, getHeight()/2, Align.center);
+			if(latestVersion.version.compareTo(GameCore.VERSION) > 0) // link new version
+				label.setValue("Miniventure " + latestVersion.releaseName + " Now Available! Click here to download.", latestVersion.assetUrl);
+			else if(latestVersion.releaseName.length() > 0)
+				label.setValue("You have the latest version.", null);
+			else
+				label.setValue("Connection failed, could not check for updates.", null);
+			
+			// table.pack();
+			// table.setPosition(getWidth()/2, getHeight()/2, Align.center);
 		}
 	}
 }
