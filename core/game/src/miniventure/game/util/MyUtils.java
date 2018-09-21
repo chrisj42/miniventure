@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import miniventure.game.GameCore;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Rectangle;
@@ -132,14 +133,22 @@ public final class MyUtils {
 		batch.setColor(prev);
 	}
 	
-	public static boolean noException(Action action) {
+	public static boolean noException(Action action) { return noException(action, false); }
+	public static boolean noException(Action action, boolean printError) {
 		try {
 			action.act();
 		} catch(Throwable t) {
+			if(printError)
+				t.printStackTrace();
 			return false;
 		}
 		
 		return true;
+	}
+	
+	public static void tryPlayMusic(Music music) {
+		if(!noException(music::play, true))
+			delay(1500, () -> tryPlayMusic(music));
 	}
 	
 	public static <T> boolean notNull(T obj) { return obj != null; }

@@ -75,9 +75,9 @@ public class GameClient implements GameProtocol {
 					Music song = ClientCore.setMusicTrack(Gdx.files.internal("audio/music/game.mp3"));
 					song.setOnCompletionListener(music -> {
 						music.stop();
-						MyUtils.delay(MathUtils.random(30_000, 90_000), music::play);
+						MyUtils.delay(MathUtils.random(30_000, 90_000), () -> MyUtils.tryPlayMusic(music));
 					});
-					MyUtils.delay(10_000, song::play);
+					MyUtils.delay(10_000, () -> MyUtils.tryPlayMusic(song));
 				}
 				
 				if(object instanceof TileUpdate) {
