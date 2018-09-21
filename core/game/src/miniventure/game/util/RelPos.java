@@ -1,8 +1,5 @@
 package miniventure.game.util;
 
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
-
 public enum RelPos {
 	TOP_LEFT, TOP, TOP_RIGHT,
 	LEFT, CENTER, RIGHT,
@@ -93,39 +90,5 @@ public enum RelPos {
 			return pos;
 		else
 			return pos.rotate(false);
-	}
-	
-	
-	/** positions the given rect around the given anchor. The double size is what aligns it to a point rather than a rect. */
-	public Vector2 positionRect(Vector2 rectSize, Vector2 anchor) {
-		Rectangle bounds = new Rectangle(anchor.x-rectSize.x, anchor.y-rectSize.y, rectSize.x*2, rectSize.y*2);
-		return positionRect(rectSize, bounds);
-	}
-	// the point is returned as a rectangle with the given dimension and the found location, within the provided dummy rectangle.
-	public Rectangle positionRect(Vector2 rectSize, Vector2 anchor, Rectangle dummy) {
-		Vector2 pos = positionRect(rectSize, anchor);
-		dummy.setSize(rectSize.x, rectSize.y);
-		dummy.setPosition(pos.x, pos.y);
-		return dummy;
-	}
-	
-	/** positions the given rect to a relative position in the container. */
-	public Vector2 positionRect(Vector2 rectSize, Rectangle container) { return positionRect(rectSize.x, rectSize.y, container); }
-	public Vector2 positionRect(float rectWidth, float rectHeight, Rectangle container) {
-		Vector2 blcorner = container.getCenter(new Vector2());
-		
-		// this moves the inner box correctly
-		blcorner.x += (x * container.getWidth() / 2) - ((x+1) * rectWidth / 2);
-		blcorner.y += (y * container.getHeight() / 2) - ((y+1) * rectHeight / 2);
-		
-		return blcorner;
-	}
-	
-	// the point is returned as a rectangle with the given dimension and the found location, within the provided dummy rectangle.
-	public Rectangle positionRect(Vector2 rectSize, Rectangle container, Rectangle dummy) {
-		Vector2 pos = positionRect(rectSize, container);
-		dummy.setSize(rectSize.x, rectSize.y);
-		dummy.setPosition(pos.x, pos.y);
-		return dummy;
 	}
 }
