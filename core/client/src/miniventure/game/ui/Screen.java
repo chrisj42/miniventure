@@ -3,6 +3,7 @@ package miniventure.game.ui;
 import miniventure.game.GameCore;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Vector2;
@@ -14,8 +15,9 @@ public class Screen extends Container {
 	private final ScreenViewport viewport;
 	
 	public Screen() {
+		setBackground(Color.DARK_GRAY);
 		OrthographicCamera camera = new OrthographicCamera();
-		camera.setToOrtho(true, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		viewport = new ScreenViewport(camera);
 		batch = GameCore.getBatch();
 		resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
