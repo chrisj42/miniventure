@@ -1,15 +1,15 @@
 package miniventure.game.chat;
 
-import com.badlogic.gdx.graphics.Color;
+import java.awt.Color;
 
 public class InfoMessageLine {
 	
-	public final String color;
+	public final Integer color;
 	public final String line;
 	
-	private InfoMessageLine() { this((String)null, null); }
-	public InfoMessageLine(Color color, String line) { this(color.toString(), line); }
-	private InfoMessageLine(String color, String line) {
+	private InfoMessageLine() { this((Integer)null, null); }
+	public InfoMessageLine(Color color, String line) { this(color.getRGB(), line); }
+	private InfoMessageLine(Integer color, String line) {
 		this.color = color;
 		this.line = line;
 	}

@@ -130,14 +130,13 @@ public class MainMenu extends MenuScreen {
 	
 	@Override
 	public void glDraw() {
+		super.glDraw();
 		// levelView.handleInput();
 		levelView.render(cameraPos, lightOverlay, backgroundLevel);
 		
 		cameraPos.add(cameraDir.cpy().scl(GameCore.getDeltaTime()));
 		cameraDir.x = velDir(cameraPos.x, cameraDir.x, levelView.getViewWidth()/2, backgroundLevel.getWidth() - levelView.getViewWidth()/2);
 		cameraDir.y = velDir(cameraPos.y, cameraDir.y, levelView.getViewHeight()/2, backgroundLevel.getHeight() - levelView.getViewHeight()/2);
-		
-		super.glDraw();
 	}
 	
 	private float velDir(float pos, float vel, float min, float max) {
@@ -149,14 +148,13 @@ public class MainMenu extends MenuScreen {
 		return vel;
 	}
 	
-	@NotNull
-	private JLabel addLabel(String msg, int spacing) {
+	private void addLabel(String msg, int spacing) {
 		JLabel label = makeLabel(msg);
 		add(label);
 		add(Box.createVerticalStrut(spacing));
 		// table.add(label).spaceBottom(spacing);
 		// table.row();
-		return label;
+		// return label;
 	}
 	
 	@NotNull

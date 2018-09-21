@@ -119,10 +119,10 @@ public class GameScreen {
 		guiStage.act(Gdx.graphics.getDeltaTime());
 		guiStage.draw();
 		
-		if(!(ClientCore.getScreen() instanceof ChatScreen)) {
-			chatOverlay.act(Gdx.graphics.getDeltaTime());
-			chatOverlay.draw();
-		}
+		// if(!(ClientCore.getScreen() instanceof ChatScreen)) {
+		// 	// chatOverlay.act(Gdx.graphics.getDeltaTime());
+		// 	chatOverlay.glDraw();
+		// }
 	}
 	
 	private static Vector2 getMouseInput() {
