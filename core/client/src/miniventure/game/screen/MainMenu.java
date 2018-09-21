@@ -2,6 +2,8 @@ package miniventure.game.screen;
 
 import javax.swing.JOptionPane;
 
+import java.awt.EventQueue;
+
 import miniventure.game.GameCore;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.ClientWorld;
@@ -77,7 +79,7 @@ public class MainMenu extends MenuScreen {
 				LoadingScreen loader = new LoadingScreen();
 				loader.pushMessage("Preparing to connect...");
 				ClientCore.setScreen(loader);
-				new Thread(() -> {
+				EventQueue.invokeLater(() -> {
 					String ipAddress = JOptionPane.showInputDialog("Enter the IP Address you want to connect to.");
 					Gdx.app.postRunnable(() -> {
 						if(ipAddress != null)
@@ -86,7 +88,7 @@ public class MainMenu extends MenuScreen {
 							ClientCore.backToParentScreen();
 					});
 					dialog = false;
-				}).start();
+				});
 			}
 		});
 		

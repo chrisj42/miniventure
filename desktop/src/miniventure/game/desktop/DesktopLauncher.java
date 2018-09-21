@@ -88,6 +88,7 @@ public class DesktopLauncher {
 				@Override
 				public void componentResized(ComponentEvent e) {
 					SwingUtilities.invokeLater(() -> {
+						System.out.println("frame resized");
 						Dimension size = frame.getContentPane().getSize();
 						awtCanvas.setSize(size);
 						uiPanel.setSize(size);

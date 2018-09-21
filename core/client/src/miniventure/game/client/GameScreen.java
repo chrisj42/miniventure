@@ -2,6 +2,8 @@ package miniventure.game.client;
 
 import javax.swing.JOptionPane;
 
+import java.awt.EventQueue;
+
 import miniventure.game.GameCore;
 import miniventure.game.screen.ChatScreen;
 import miniventure.game.world.ClientLevel;
@@ -61,11 +63,13 @@ public class GameScreen {
 		
 		boolean shift = Gdx.input.isKeyPressed(Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Keys.SHIFT_RIGHT);
 		if(shift && GameCore.debug && Gdx.input.isKeyJustPressed(Keys.S)) {
-			String newSpeed = JOptionPane.showInputDialog("Enter new Player Speed:", player.getSpeed());
-			try {
-				float value = Float.parseFloat(newSpeed);
-				player.setSpeed(value);
-			} catch(NumberFormatException ignored) {}
+			EventQueue.invokeLater(() -> {
+				String newSpeed = JOptionPane.showInputDialog("Enter new Player Speed:", player.getSpeed());
+				try {
+					float value = Float.parseFloat(newSpeed);
+					player.setSpeed(value);
+				} catch(NumberFormatException ignored) {}
+			});
 		}
 		
 		levelView.handleInput();
@@ -94,12 +98,12 @@ public class GameScreen {
 			
 			else if(ClientCore.input.pressingKey(Keys.ESCAPE)) {
 				dialog = true;
-				new Thread(() -> {
+				EventQueue.invokeLater(() -> {
 					int choice = JOptionPane.showConfirmDialog(null, "Leave Server?", "Confirmation", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 					if(choice == JOptionPane.YES_OPTION)
 						Gdx.app.postRunnable(() -> ClientCore.getWorld().exitWorld());
 					dialog = false;
-				}).start();
+				});
 			}
 		}
 	}

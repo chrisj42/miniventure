@@ -147,8 +147,10 @@ public final class MyUtils {
 	}
 	
 	public static void tryPlayMusic(Music music) {
-		if(!noException(music::play, true))
-			delay(1500, () -> tryPlayMusic(music));
+		// music.play();
+		noException(music::play, true);
+		// if(noException(music::play, true))
+		// 	return;// delay(1500, () -> tryPlayMusic(music));
 	}
 	
 	public static <T> boolean notNull(T obj) { return obj != null; }

@@ -2,6 +2,7 @@ package miniventure.game.client;
 
 import javax.swing.JOptionPane;
 
+import java.awt.EventQueue;
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -279,7 +280,7 @@ public class GameClient implements GameProtocol {
 		
 		logger.editMessage("logging in...");
 		
-		new Thread(() -> {
+		EventQueue.invokeLater(() -> {
 			username = JOptionPane.showInputDialog("Specify username:", username);
 			if(username == null) {
 				client.close();
@@ -289,7 +290,7 @@ public class GameClient implements GameProtocol {
 			send(new Login(username, GameCore.VERSION));
 			
 			logger.editMessage("Loading world from server...");
-		}).start();
+		});
 		
 		return true;
 	}

@@ -47,6 +47,8 @@ public class ClientCore extends ApplicationAdapter {
 	
 	private final ServerStarter serverStarter;
 	
+	
+	
 	public static final MonoVoidFunction<Throwable> exceptionNotifier = throwable -> {
 		StringWriter string = new StringWriter();
 		PrintWriter printer = new PrintWriter(string);
@@ -56,6 +58,7 @@ public class ClientCore extends ApplicationAdapter {
 		errorDisplay.setEditable(false);
 		JScrollPane errorPane = new JScrollPane(errorDisplay);
 		JOptionPane.showMessageDialog(null, errorPane, "An error has occurred", JOptionPane.ERROR_MESSAGE);
+		System.exit(1);
 	};
 	
 	public static final UncaughtExceptionHandler exceptionHandler = (thread, throwable) -> {
@@ -84,9 +87,7 @@ public class ClientCore extends ApplicationAdapter {
 		LoadingScreen loader = new LoadingScreen();
 		loader.pushMessage("Initializing...");
 		setScreen(loader);
-		//System.out.println("start delay");
 		MyUtils.delay(0, () -> Gdx.app.postRunnable(() -> {
-			//System.out.println("end delay");
 			GameCore.initGdx();
 			
 			gameScreen = new GameScreen();
