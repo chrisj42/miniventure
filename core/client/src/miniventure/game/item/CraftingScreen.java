@@ -1,23 +1,20 @@
 package miniventure.game.item;
 
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
+import java.awt.Color;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Arrays;
 
-import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.CraftRequest;
 import miniventure.game.client.ClientCore;
 import miniventure.game.screen.MenuScreen;
-import miniventure.game.util.MyUtils;
 
 import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.Align;
 
 public class CraftingScreen extends MenuScreen {
 	
@@ -28,25 +25,26 @@ public class CraftingScreen extends MenuScreen {
 	private final CraftableItem[] list;
 	private final ItemSelectionTable table;
 	
-	private final ItemStackSlot invCount = new ItemStackSlot(true, null, 0, null) {
+	private final ItemStackSlot invCount = new ItemStackSlot(true, null, 0) {
 		@Override protected boolean showCount() { return getItem() != null; }
 	};
-	private final VerticalGroup inInv = new OpaqueVerticalGroup(background);
-	private final VerticalGroup costs = new OpaqueVerticalGroup(background);
+	private final JPanel inInv = new OpaqueVerticalGroup(background);
+	private final JPanel costs = new OpaqueVerticalGroup(background);
 	
-	private static class OpaqueVerticalGroup extends VerticalGroup {
-		private final Color color;
+	private static class OpaqueVerticalGroup extends JPanel {
+		// private final Color color;
 		
 		public OpaqueVerticalGroup(Color color) {
-			this.color = color;
-			pad(5);
+			// this.color = color;
+			// pad(5);
+			setBackground(color);
 		}
 		
-		@Override
+		/*@Override
 		public void draw(Batch batch, float parentAlpha) {
 			MyUtils.fillRect(getX(), getY(), getWidth(), getHeight(), color, parentAlpha, batch);
 			super.draw(batch, parentAlpha);
-		}
+		}*/
 	}
 	
 	private static class CraftableRecipe {
@@ -61,7 +59,9 @@ public class CraftingScreen extends MenuScreen {
 	}
 	
 	public CraftingScreen(Recipe[] recipes, Inventory playerInventory) {
+		super(false);
 		this.playerInv = playerInventory;
+		setLayout(null);
 		
 		CraftableRecipe[] recipeCache = new CraftableRecipe[recipes.length];
 		for(int i = 0; i < recipeCache.length; i++)
@@ -77,15 +77,17 @@ public class CraftingScreen extends MenuScreen {
 		for(int i = 0; i < list.length; i++) {
 			CraftableItem craftEntry = new CraftableItem(recipeCache[i].recipe, i, recipeCache[i].index);
 			list[i] = craftEntry;
-			craftEntry.addListener(new ClickListener() {
+			craftEntry.addMouseListener(new MouseAdapter() {
 				@Override
-				public void clicked(InputEvent e, float x, float y) {
+				public void mouseClicked(MouseEvent e) {
 					craft(craftEntry);
 				}
 			});
-			craftEntry.addListener(new InputListener() {
+			craftEntry.addKeyListener(new KeyAdapter() {
 				@Override
-				public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+				public void keyPressed(KeyEvent e) {
+					if(e.getKeyCode() != KeyEvent.VK_ENTER)
+						return;
 					table.setSelection(craftEntry.getSlotIndex());
 				}
 			});
@@ -100,42 +102,47 @@ public class CraftingScreen extends MenuScreen {
 				CraftingScreen.this.setHighlightedRecipe(list[index].recipe);
 			}
 		};
-		table.addListener(new InputListener() {
+		table.setFocusable(false);
+		addKeyListener(new KeyAdapter() {
 			@Override
-			public boolean keyDown (InputEvent event, int keycode) {
+			public void keyPressed(KeyEvent e) {
+				int keycode = e.getKeyCode();
 				if(keycode == Keys.ENTER) {
 					craft(list[table.getSelection()]);
-					return true;
+					// return true;
 				}
-				return false;
+				// return false;
 			}
 		});
-		addActor(table);
+		add(table);
 		
-		inInv.columnAlign(Align.left);
-		inInv.space(5);
-		inInv.addActor(new Label("In inventory:", GameCore.getSkin()));
-		inInv.addActor(invCount);
-		addActor(inInv);
+		// inInv.columnAlign(Align.left);
+		// inInv.space(5);
+		inInv.add(new JLabel("In inventory:"));
+		inInv.add(invCount);
+		add(inInv);
 		
-		costs.columnAlign(Align.left);
-		costs.space(5);
-		addActor(costs);
+		// costs.columnAlign(Align.left);
+		// costs.space(5);
+		add(costs);
 		
 		
-		table.setPosition(0, getHeight(), Align.topLeft);
-		table.pack();
+		// table.setPosition(0, getHeight(), Align.topLeft);
+		// table.pack();
+		table.setAlignmentX(LEFT_ALIGNMENT);
+		table.setAlignmentY(TOP_ALIGNMENT);
 		
-		getRoot().addListener(new InputListener() {
+		addKeyListener(new KeyAdapter() {
 			@Override
-			public boolean keyDown (InputEvent event, int keycode) {
+			public void keyPressed(KeyEvent e) {
+				int keycode = e.getKeyCode();
 				if(keycode == Keys.Z || keycode == Keys.ESCAPE)
 					ClientCore.setScreen(null);
-				return true;
+				// return true;
 			}
 		});
 		
-		setKeyboardFocus(table);
+		table.requestFocus();
 	}
 	
 	@Override
@@ -150,20 +157,20 @@ public class CraftingScreen extends MenuScreen {
 	}
 	
 	private void setHighlightedRecipe(Recipe recipe) {
-		inInv.removeActor(invCount);
+		inInv.remove(invCount);
 		invCount.setItem(recipe.getResult().item);
 		invCount.setCount(playerInv.getCount(invCount.getItem()));
-		inInv.addActor(invCount);
+		inInv.add(invCount);
 		
-		costs.clearChildren();
-		costs.addActor(new Label("Costs:", GameCore.getSkin()));
+		costs.removeAll();
+		costs.add(new JLabel("Costs:"));
 		for(ItemStack cost: recipe.getCosts())
-			costs.addActor(new ItemStackSlot(true, cost.item, cost.count, null));
+			costs.add(new ItemStackSlot(true, cost.item, cost.count));
 		
-		inInv.invalidate();
-		inInv.pack();
-		costs.invalidate();
-		costs.pack();
+		inInv.revalidate();
+		// inInv.pack();
+		costs.revalidate();
+		// costs.pack();
 		
 		inInv.setPosition(table.getPrefWidth() + 10, getHeight() - inInv.getHeight());
 		costs.setPosition(table.getPrefWidth() + 10, getHeight() - inInv.getHeight() - 10 - costs.getHeight());

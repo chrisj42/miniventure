@@ -2,42 +2,45 @@ package miniventure.game.screen;
 
 import miniventure.game.client.ClientCore;
 
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.kotcrab.vis.ui.widget.VisLabel;
-import com.kotcrab.vis.ui.widget.VisTextButton;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class ErrorScreen extends MenuScreen {
 	
 	public ErrorScreen(String error) {
 		
-		addActor(vGroup);
+		// add(vGroup);
 		
-		vGroup.addActor(new VisLabel(error));
+		super(false);
+		add(new JLabel(error));
 		
-		vGroup.space(50);
+		add(Box.createVerticalStrut(50));
 		
 		
-		VisTextButton retryBtn = new VisTextButton("Reconnect");
-		retryBtn.addListener(new ClickListener() {
+		JButton retryBtn = new JButton("Reconnect");
+		retryBtn.addMouseListener(new MouseAdapter() {
 			@Override
-			public void clicked(InputEvent e, float x, float y) {
+			public void mouseClicked(MouseEvent e) {
 				ClientCore.getWorld().rejoinWorld();
 			}
 		});
-		vGroup.addActor(retryBtn);
+		add(retryBtn);
 		
-		vGroup.space(10);
+		add(Box.createVerticalStrut(10));
 		
-		VisTextButton returnBtn = new VisTextButton("Back to main menu");
-		returnBtn.addListener(new ClickListener() {
+		JButton returnBtn = new JButton("Back to main menu");
+		returnBtn.addMouseListener(new MouseAdapter() {
 			@Override
-			public void clicked(InputEvent e, float x, float y) {
+			public void mouseClicked(MouseEvent e) {
 				ClientCore.setScreen(new MainMenu());
 			}
 		});
-		vGroup.addActor(returnBtn);
+		add(returnBtn);
 	} 
 	
-	@Override public void focus() { ClientCore.stopMusic(); }
+	@Override public void focus() { ClientCore.stopMusic(); super.focus(); }
 }

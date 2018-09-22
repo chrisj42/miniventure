@@ -2,6 +2,7 @@ package miniventure.game.server;
 
 import javax.swing.Timer;
 
+import java.awt.Color;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -33,7 +34,6 @@ import miniventure.game.world.entity.mob.ServerPlayer;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;

@@ -1,5 +1,10 @@
 package miniventure.game.item;
 
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
 import miniventure.game.GameProtocol.ItemDropRequest;
 import miniventure.game.client.ClientCore;
 import miniventure.game.screen.MenuScreen;
@@ -7,10 +12,6 @@ import miniventure.game.screen.MenuScreen;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 
 public class InventoryScreen extends MenuScreen {
@@ -22,23 +23,22 @@ public class InventoryScreen extends MenuScreen {
 	private ItemSelectionTable table;
 	
 	public InventoryScreen(Inventory inventory, ClientHands hands) {
+		super(false);
 		this.inventory = inventory;
 		this.hands = hands;
+		
+		// TODO redo the item selection table entirely.
 		
 		ItemSlot[] items = new ItemSlot[inventory.getSlots()];
 		for(int i = 0; i < items.length; i++) {
 			items[i] = new ItemSlot(i, true, inventory.getItemAt(i), backgroundColor);
 		}
 		
-		table = new ItemSelectionTable(items, getHeight()) {
+		table = new ItemSelectionTable(items, getHeight());
+		table.addKeyListener(new KeyAdapter() {
 			@Override
-			public void onUpdate() {
-				table.setPosition(InventoryScreen.this.getWidth(), InventoryScreen.this.getHeight(), Align.topRight);
-			}
-		};
-		table.addListener(new InputListener() {
-			@Override
-			public boolean keyDown (InputEvent event, int keycode) {
+			public void keyPressed(KeyEvent e) {
+				int keycode = e.getKeyCode();
 				int hotbarSlots = hands.getSlots();
 				if(keycode >= Keys.NUM_1 && keycode <= Keys.NUM_1+hotbarSlots-1) {
 					int slot = keycode - Keys.NUM_1;
@@ -76,24 +76,26 @@ public class InventoryScreen extends MenuScreen {
 		});
 		
 		for(ItemSlot slot: items) {
-			slot.addListener(new InputListener() {
+			slot.addKeyListener(new KeyAdapter() {
 				@Override
-				public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+				public void keyPressed(KeyEvent e) {
+					if(e.getKeyCode() != KeyEvent.VK_ENTER)
+						return;
 					table.setSelection(slot.getSlotIndex());
 				}
 			});
-			slot.addListener(new ClickListener() {
+			slot.addMouseListener(new MouseAdapter() {
 				@Override
-				public void clicked (InputEvent event, float x, float y) {
+				public void mouseClicked(MouseEvent e) {
 					swapSelections();
 				}
 			});
 		}
 		
-		addActor(table);
+		add(table);
 		table.setPosition(getWidth(), getHeight(), Align.topRight);
 		
-		setKeyboardFocus(table);
+		table.requestFocus();
 	}
 	
 	@Override

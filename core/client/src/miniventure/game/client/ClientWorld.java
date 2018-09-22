@@ -5,6 +5,7 @@ import miniventure.game.GameProtocol.LevelData;
 import miniventure.game.GameProtocol.PositionUpdate;
 import miniventure.game.GameProtocol.SpawnData;
 import miniventure.game.GameProtocol.WorldData;
+import miniventure.game.screen.GLRenderer;
 import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
@@ -184,8 +185,8 @@ public class ClientWorld extends WorldManager {
 		PositionUpdate newPos = data.playerData.positionUpdate;
 		mainPlayer.moveTo(newPos.x, newPos.y, newPos.z);
 		
-		gameScreen.getGuiStage().clear();
-		gameScreen.getGuiStage().addActor(mainPlayer.getHands().getHotbarTable());
+		gameScreen.getHudPanel().clear();
+		gameScreen.getHudPanel().add(mainPlayer.getHands().getHotbarTable());
 		
 		this.mainPlayer = mainPlayer;
 		

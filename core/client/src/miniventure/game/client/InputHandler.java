@@ -41,7 +41,10 @@ public class InputHandler implements InputProcessor {
 		prevUpdate = elapTime;
 	}
 	
-	void reset() {
+	private boolean enabled = true;
+	
+	void reset(boolean enable) {
+		this.enabled = enable;
 		keyPresses.clear();
 	}
 	
@@ -52,6 +55,7 @@ public class InputHandler implements InputProcessor {
 	 * @return Whether the given key has just been pressed, either physically, or programmatically for repetition.
 	 */
 	public boolean pressingKey(int keycode) {
+		if(!enabled) return false;
 		return Gdx.input.isKeyJustPressed(keycode) || pressedKeys.contains(keycode);
 	}
 	

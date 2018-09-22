@@ -1,5 +1,8 @@
 package miniventure.game.util;
 
+import java.awt.Rectangle;
+import java.awt.Point;
+
 public enum RelPos {
 	TOP_LEFT, TOP, TOP_RIGHT,
 	LEFT, CENTER, RIGHT,
@@ -13,13 +16,15 @@ public enum RelPos {
 	}
 	
 	public int getX() { return x; }
-	public int getY() { return -y; }
+	public int getY() { return getY(false); }
+	public int getY(boolean yDown) { return yDown ? y : -y; }
 	
 	public static final RelPos[] values = RelPos.values();
 	public static RelPos values(int ordinal) { return values[ordinal]; }
 	
-	public static RelPos get(int x, int y) {
-		y = -y;
+	public static RelPos get(int x, int y) { return get(x, y, false); }
+	public static RelPos get(int x, int y, boolean yDown) {
+		y = yDown ? y : -y;
 		if(x < -1) x = -1;
 		if(x > 1) x = 1;
 		if(y < -1) y = -1;
@@ -90,5 +95,14 @@ public enum RelPos {
 			return pos;
 		else
 			return pos.rotate(false);
+	}
+	
+	public Point forRectangle(Rectangle rect) {
+		int xDist = rect.width/2;
+		int yDist = rect.height/2;
+		Point center = new Point((int)rect.getCenterX(), (int)rect.getCenterY());
+		center.x += xDist * getX();
+		center.y += yDist * getY(true);
+		return center;
 	}
 }

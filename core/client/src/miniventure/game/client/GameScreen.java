@@ -1,11 +1,18 @@
 package miniventure.game.client;
 
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
+import java.awt.Component;
 import java.awt.EventQueue;
+import java.awt.Point;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 
 import miniventure.game.GameCore;
 import miniventure.game.screen.ChatScreen;
+import miniventure.game.util.RelPos;
 import miniventure.game.world.ClientLevel;
 import miniventure.game.world.Level;
 import miniventure.game.world.TimeOfDay;
@@ -22,7 +29,6 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -31,28 +37,34 @@ public class GameScreen {
 	@NotNull private final LevelViewport levelView;
 	
 	private SpriteBatch batch = GameCore.getBatch();
-	private Stage guiStage;
+	// private Stage guiStage;
 	
-	private final OrthographicCamera uiCamera;
+	private final OrthographicCamera levelCamera;
 	
 	final ChatScreen chatOverlay, chatScreen;
 	private boolean showDebug = false;
+	private final JPanel hudPanel;
 	
-	public GameScreen() {
-		uiCamera = new OrthographicCamera();
-		guiStage = new Stage(new ExtendViewport(GameCore.DEFAULT_SCREEN_WIDTH, GameCore.DEFAULT_SCREEN_HEIGHT, uiCamera), batch);
+	public GameScreen(JPanel hudPanel) {
+		this.hudPanel = hudPanel;
+		hudPanel.setLayout(null); // redundant due to previous code, but whatever it's for safety.
 		
-		levelView = new LevelViewport(batch, uiCamera);
+		levelCamera = new OrthographicCamera();
+		// guiStage = new Stage(new ExtendViewport(GameCore.DEFAULT_SCREEN_WIDTH, GameCore.DEFAULT_SCREEN_HEIGHT, levelCamera), batch);
+		levelView = new LevelViewport(batch, levelCamera);
 		
 		resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		
 		chatOverlay = new ChatScreen(true);
 		chatScreen = new ChatScreen(false);
+		addToAnchorLayout(chatOverlay, RelPos.TOP_RIGHT, -5, 5);
+		addToAnchorLayout(chatScreen, RelPos.TOP_RIGHT, -5, 5);
+		chatScreen.setVisible(false); // hide for now
 	}
 	
 	void dispose() {
 		levelView.dispose();
-		guiStage.dispose();
+		// guiStage.dispose();
 	}
 	
 	private boolean dialog = false;
@@ -112,12 +124,12 @@ public class GameScreen {
 		
 		levelView.render(mainPlayer.getCenter(), lightOverlay, level);
 		
-		batch.setProjectionMatrix(uiCamera.combined);
-		batch.begin();
-		renderGui(mainPlayer, level);
-		batch.end();
-		guiStage.act(Gdx.graphics.getDeltaTime());
-		guiStage.draw();
+		// batch.setProjectionMatrix(levelCamera.combined);
+		// batch.begin();
+		// renderGui(mainPlayer, level);
+		// batch.end();
+		// guiStage.act(Gdx.graphics.getDeltaTime());
+		// guiStage.draw();
 		
 		// if(!(ClientCore.getScreen() instanceof ChatScreen)) {
 		// 	// chatOverlay.act(Gdx.graphics.getDeltaTime());
@@ -132,7 +144,7 @@ public class GameScreen {
 			mousePos.y = Gdx.graphics.getHeight() - mousePos.y; // origin is top left corner, so reverse Y dir
 			
 			// player is always in the center of the screen.
-			Vector2 screenCenter = new Vector2(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
+			Vector2 screenCenter = new Vector2(Gdx.graphics.getWidth()/2f, Gdx.graphics.getHeight()/2f);
 			
 			Vector2 mouseMove = mousePos.cpy().sub(screenCenter);
 			mouseMove.nor();
@@ -144,16 +156,17 @@ public class GameScreen {
 	}
 	
 	private void renderGui(@NotNull ClientPlayer mainPlayer, @NotNull Level level) {
-		batch.setProjectionMatrix(uiCamera.combined);
+		// FIXME rebase to swing
+		batch.setProjectionMatrix(levelCamera.combined);
 		
 		// draw UI for current item, and stats
-		mainPlayer.drawGui(new Rectangle(0, 0, uiCamera.viewportWidth, uiCamera.viewportHeight), batch);
+		mainPlayer.drawGui(new Rectangle(0, 0, levelCamera.viewportWidth, levelCamera.viewportHeight), batch);
 		
 		if(!showDebug) {
 			if(GameCore.debug) {
 				BitmapFont f = GameCore.getFont();
 				f.setColor(Color.ORANGE);
-				f.draw(batch, "Debug Mode ENABLED", 0, uiCamera.viewportHeight - 5);
+				f.draw(batch, "Debug Mode ENABLED", 0, levelCamera.viewportHeight - 5);
 			}
 			return;
 		}
@@ -186,11 +199,55 @@ public class GameScreen {
 		for(int i = 0; i < debugInfo.size; i++) {
 			if(GameCore.debug && i == 1)
 				font.setColor(Color.WHITE);
-			font.draw(batch, debugInfo.get(i), 0, uiCamera.viewportHeight - 5 - 15 * i);
+			font.draw(batch, debugInfo.get(i), 0, levelCamera.viewportHeight - 5 - 15 * i);
 		}
 	}
 	
 	void resize(int width, int height) { levelView.resize(width, height); }
 	
-	public Stage getGuiStage() { return guiStage; }
+	public JPanel getHudPanel() { return hudPanel; }
+	
+	/**
+	 * This method takes a component, and adds it to the HUD JPanel with a set of positioning constraints; there were no layout managers
+	 * that positioned components this way, so the HUD panel has a null layout, and this system is like a pseudo-layout.
+	 * 
+	 * What it does is take the two given "anchors" and make sure the positions they represent are on top of one another, before the offset.
+	 * The anchor positions are specified by RelPos instances, which refer to positions on a rectangle of the component's preferred size.
+	 * 
+	 * 
+	 * It works like this. When the screen is resized:
+	 * - It determines the coordinates of the container and component anchors.
+	 * - It moves the component so the component anchor matches the position of the container anchor.
+	 * - It moves the component by (anchorOffsetX, anchorOffsetY).
+	 * And it does that for every component added.
+	 * 
+	 * Overlap between multiple components added through this method is not considered.
+	 * 
+	 * @param c the component to be added to the HUD panel and kept in layout.
+	 * @param containerAnchor a RelPos position based on the size of the HUD panel.
+	 * @param componentAnchor a RelPos position based on the size of the given component.
+	 * @param anchorOffsetX horizontal difference wanted between the target position of the component anchor, and the position of the container anchor.
+	 * @param anchorOffsetY vertical difference wanted between the target position of the component anchor, and the position of the container anchor.
+	 */
+	private void addToAnchorLayout(Component c, RelPos containerAnchor, RelPos componentAnchor, int anchorOffsetX, int anchorOffsetY) {
+		hudPanel.addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentResized(ComponentEvent e) {
+				SwingUtilities.invokeLater(() -> {
+					c.setSize(c.getPreferredSize());
+					Point compAnchor = componentAnchor.forRectangle(c.getBounds());
+					Point parentAnchor = containerAnchor.forRectangle(hudPanel.getBounds());
+					
+					Point compPos = c.getLocation();
+					Point locAnchorDifference = new Point(compPos.x - compAnchor.x, compPos.y - compAnchor.y);
+					
+					parentAnchor.translate(anchorOffsetX, anchorOffsetY);
+					c.setLocation(parentAnchor.x + locAnchorDifference.x, parentAnchor.y + locAnchorDifference.y);
+				});
+			}
+		});
+	}
+	private void addToAnchorLayout(Component c, RelPos anchor, int anchorOffsetX, int anchorOffsetY) {
+		addToAnchorLayout(c, anchor, anchor, anchorOffsetX, anchorOffsetY);
+	}
 }

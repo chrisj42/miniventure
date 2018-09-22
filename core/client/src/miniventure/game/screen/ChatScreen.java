@@ -47,13 +47,14 @@ public class ChatScreen extends MenuScreen {
 	private String manualInput = ""; // this is the part of the command that the user entered manually, and so should not be changed when tabbing.
 	
 	public ChatScreen(boolean timeOutMessages) {
+		super(false);
 		useTimer = timeOutMessages;
 		
-		// addActor(vGroup);
+		// add(vGroup);
 		//
 		// vGroup.align(Align.topLeft);
 		// vGroup.columnAlign(Align.left);
-		// vGroup.space(5);
+		// add(Box.createVerticalStrut(5));
 		// vGroup.setWidth(getWidth()/2);
 		
 		input = new JTextField("") {
@@ -153,7 +154,7 @@ public class ChatScreen extends MenuScreen {
 			}
 		});
 		
-		// addActor(input);
+		// add(input);
 		add(input);
 		add(Box.createVerticalGlue());
 		// repack();

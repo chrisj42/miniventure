@@ -40,8 +40,7 @@ public class MainMenu extends MenuScreen {
 	private static final float PAN_SPEED = 4.5f; // in tiles/second.
 	
 	public MainMenu() {
-		// super();
-		
+		super(false);
 		ClientWorld world = ClientCore.getWorld();
 		
 		// table = new Table();

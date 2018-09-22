@@ -60,17 +60,7 @@ public class ClientHands extends Hands {
 			super(idx, false, getItemAt(idx), 1, Color.DARK_GRAY);
 			this.inventory = inventory;
 			// FIXME I can't seem to prevent clicks on the hotbar from propagating to the game screen and moving the player...
-			addListener(new ClickListener() {
-				@Override
-				public void clicked (InputEvent event, float x, float y) {
-					ClientHands.this.setSelection(idx);
-				}
-				@Override
-				public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
-					super.touchDown(event, x, y, pointer, button);
-					return true; // consume this event, to prevent it from being used to move the player.
-				}
-			});
+			
 		}
 		
 		@Override

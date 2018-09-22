@@ -5,6 +5,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+import java.awt.Rectangle;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.Thread.UncaughtExceptionHandler;
@@ -16,6 +17,7 @@ import miniventure.game.GameProtocol.Message;
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.item.InventoryScreen;
 import miniventure.game.screen.ErrorScreen;
+import miniventure.game.screen.GLRenderer;
 import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
@@ -46,6 +48,7 @@ public class ClientCore extends ApplicationAdapter {
 	private static MenuScreen menuScreen;
 	
 	private static JPanel uiPanel;
+	private final JPanel hudPanel;
 	private final ServerStarter serverStarter;
 	
 	
@@ -77,7 +80,8 @@ public class ClientCore extends ApplicationAdapter {
 		}
 	}*/
 	
-	public ClientCore(JPanel uiPanel, ServerStarter serverStarter) {
+	public ClientCore(JPanel hudPanel, JPanel uiPanel, ServerStarter serverStarter) {
+		this.hudPanel = hudPanel;
 		ClientCore.uiPanel = uiPanel;
 		this.serverStarter = serverStarter;
 	}
@@ -89,10 +93,11 @@ public class ClientCore extends ApplicationAdapter {
 		LoadingScreen loader = new LoadingScreen();
 		loader.pushMessage("Initializing...");
 		setScreen(loader);
+		// TODO once things work, see if removing the 0 delay and just posting the runnable works fine, or if it's still necessary.
 		MyUtils.delay(0, () -> Gdx.app.postRunnable(() -> {
 			GameCore.initGdx();
 			
-			gameScreen = new GameScreen();
+			gameScreen = new GameScreen(hudPanel);
 			clientWorld = new ClientWorld(serverStarter, gameScreen);
 			
 			setScreen(new MainMenu());
@@ -119,6 +124,10 @@ public class ClientCore extends ApplicationAdapter {
 		
 		hasMenu = menuScreen != null;
 		
+		if(menuScreen instanceof GLRenderer)
+			// the menu uses libGDX to render some or all of its graphics (most likely the background).
+			((GLRenderer)menuScreen).glDraw();
+		
 		// if (menuScreen != null)
 		// 	menuScreen.act();
 		// if (menuScreen != null)
@@ -136,11 +145,15 @@ public class ClientCore extends ApplicationAdapter {
 		
 		// if(screen == null && menuScreen != null && menuScreen != gameScreen.chatScreen)
 		// 	menuScreen.dispose();
-		// FIXME chat screen
 		if(screen != null && menuScreen != null && menuScreen != gameScreen.chatScreen)
-			screen.setParent(menuScreen);
+			screen.setParent(menuScreen); // when are you going to go from a chat screen to another screen...?
 		
 		System.out.println("setting screen to " + screen);
+		
+		if(menuScreen != null)
+			uiPanel.remove(menuScreen);
+		if(screen != null)
+			uiPanel.add(screen);
 		
 		menuScreen = screen;
 		if(menuScreen != null) menuScreen.focus();
@@ -150,7 +163,7 @@ public class ClientCore extends ApplicationAdapter {
 		else {
 			Gdx.input.setInputProcessor(oldMenuScreen == null ? new InputMultiplexer(gameScreen.getGuiStage(), input) : new InputMultiplexer(oldMenuScreen, gameScreen.getGuiStage()));
 		}*/
-		input.reset();
+		input.reset(menuScreen != null);
 	}
 	public static void backToParentScreen() {
 		if(menuScreen != null && menuScreen.getParent() != null) {
@@ -159,8 +172,10 @@ public class ClientCore extends ApplicationAdapter {
 			// menuScreen.dispose(false);
 			menuScreen = screen;
 			// Gdx.input.setInputProcessor(menuScreen);
-			input.reset();
+			input.reset(false);
 		}
+		// else
+		// 	input.reset(true);
 	}
 	
 	public static void playSound(String soundName) {
@@ -215,4 +230,9 @@ public class ClientCore extends ApplicationAdapter {
 	
 	public static ClientWorld getWorld() { return clientWorld; }
 	public static GameClient getClient() { return clientWorld.getClient(); }
+	
+	public static void setupTransparentSwingContainer(JPanel panel, boolean focusable) {
+		panel.setFocusable(focusable);
+		com.sun.awt.AWTUtilities.setComponentMixingCutoutShape(panel, new Rectangle());
+	}
 }

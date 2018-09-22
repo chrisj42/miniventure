@@ -1,5 +1,10 @@
 package miniventure.game.item;
 
+import javax.swing.JPanel;
+
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+
 import miniventure.game.util.MyUtils;
 
 import com.badlogic.gdx.Input.Keys;
@@ -10,7 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.kotcrab.vis.ui.layout.VerticalFlowGroup;
 
-public class ItemSelectionTable extends VerticalFlowGroup {
+public class ItemSelectionTable extends JPanel {
 	
 	/*
 		This will be used both for crafting screens and inventory screens. It should ideally take only half the screen horizontally at most, so that a second inventory screen can be placed next to it, for transfers between chests.
@@ -59,33 +64,21 @@ public class ItemSelectionTable extends VerticalFlowGroup {
 		 */
 		
 		for(ItemSlot item: itemSlots)
-			addActor(item);
+			add(item);
 		refresh();
 		
-		addListener(new InputListener() {
+		addKeyListener(new KeyAdapter() {
 			@Override
-			public boolean keyDown (InputEvent event, int keycode) {
-				switch(keycode) {
-					case Keys.RIGHT: moveFocusX(1); return true;
-					case Keys.LEFT: moveFocusX(-1); return true;
-					case Keys.UP: moveFocusY(-1); return true;
-					case Keys.DOWN: moveFocusY(1); return true;
-					
-					default: return false;
+			public void keyPressed(KeyEvent e) {
+				switch(e.getKeyCode()) {
+					case Keys.RIGHT: moveFocusX(1);
+					case Keys.LEFT: moveFocusX(-1);
+					case Keys.UP: moveFocusY(-1); 
+					case Keys.DOWN: moveFocusY(1);
 				}
 			}
-			
-			/*@Override
-			public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-				if(fromActor instanceof ItemSlot)
-					selectionIndex = ((ItemSlot)fromActor).getSlotIndex();
-			}*/
 		});
-		
-		pack();
 	}
-	
-	public void onUpdate() {}
 	
 	public void setSelection(int index) {
 		selectionIndex = index;
@@ -96,13 +89,9 @@ public class ItemSelectionTable extends VerticalFlowGroup {
 	void updateSelected(Item newItem) { update(selectionIndex, newItem); }
 	void update(int idx, Item newItem) {
 		itemSlots[idx].setItem(newItem);
-		refresh();
-		invalidateHierarchy();
-		pack();
-		onUpdate();
 	}
 	
-	private void refresh() {
+	/*private void refresh() {
 		float maxWidth = 0;
 		for(ItemSlot item: itemSlots) {
 			maxWidth = Math.max(maxWidth, item.getPrefWidth());
@@ -110,7 +99,7 @@ public class ItemSelectionTable extends VerticalFlowGroup {
 		for(ItemSlot item: itemSlots) {
 			item.setWidth(maxWidth);
 		}
-	}
+	}*/
 	
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
@@ -119,9 +108,9 @@ public class ItemSelectionTable extends VerticalFlowGroup {
 	}
 	
 	// highlight selected item
-	@Override
+	// @Override
 	protected void drawChildren(Batch batch, float parentAlpha) {
-		super.drawChildren(batch, parentAlpha);
+		// super.drawChildren(batch, parentAlpha);
 		if(itemSlots.length > 0) {
 			ItemSlot slot = itemSlots[selectionIndex];
 			MyUtils.fillRect(slot.getX(), slot.getY(), slot.getWidth(), slot.getHeight(), selectionColor, parentAlpha, batch);

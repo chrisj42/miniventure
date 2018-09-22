@@ -22,7 +22,7 @@ public class LoadingScreen extends MenuScreen implements ProgressLogger {
 	private Stack<JLabel> messageLabels = new Stack<>();
 	
 	public LoadingScreen() {
-		
+		super(false);
 	}
 	
 	@Override

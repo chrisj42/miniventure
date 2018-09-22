@@ -4,6 +4,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
+import miniventure.game.client.ClientCore;
 import miniventure.game.util.Action;
 
 import com.badlogic.gdx.Gdx;
@@ -14,17 +15,26 @@ public class MenuScreen extends JPanel {
 	private MenuScreen parent;
 	// protected VerticalGroup vGroup;
 	
-	public MenuScreen() {
+	public MenuScreen(boolean focusable) { this(focusable, false); }
+	public MenuScreen(boolean focusable, boolean opaque) {
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+		if(!opaque)
+			ClientCore.setupTransparentSwingContainer(this, focusable);
+		else
+			setFocusable(focusable);
+		
+		setOpaque(opaque);
 		// super(new ExtendViewport(GameCore.DEFAULT_SCREEN_WIDTH, GameCore.DEFAULT_SCREEN_HEIGHT), GameCore.getBatch());
 		// vGroup = new VerticalGroup();
-		// vGroup.space(10);
+		// add(Box.createVerticalStrut(10));
 		// vGroup.setPosition(getWidth()/2, getHeight()*2/3, Align.center);
 	}
 	
 	// called when the menu is focused, the first time and any subsequent times.
 	public void focus() {
 		revalidate();
+		if(isFocusable())
+			requestFocus();
 		repaint();
 	}
 	

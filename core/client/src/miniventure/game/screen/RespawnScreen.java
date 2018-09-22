@@ -4,18 +4,17 @@ import miniventure.game.client.ClientCore;
 
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.kotcrab.vis.ui.widget.VisLabel;
-import com.kotcrab.vis.ui.widget.VisTextButton;
+import javax.swing.JLabel;
 
 public class RespawnScreen extends MenuScreen {
 	
 	public RespawnScreen() {
-		super();
-		addActor(vGroup);
+		super(false);
+		add(vGroup);
 		
-		vGroup.addActor(new VisLabel("You died!"));
+		add(new JLabel("You died!"));
 		
-		vGroup.addActor(new VisTextButton("Respawn", new ChangeListener() {
+		add(new JButton("Respawn", new ChangeListener() {
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
 				ClientCore.getWorld().respawnPlayer();

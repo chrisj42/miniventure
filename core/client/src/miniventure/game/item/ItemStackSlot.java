@@ -2,7 +2,7 @@ package miniventure.game.item;
 
 import miniventure.game.GameCore;
 
-import com.badlogic.gdx.graphics.Color;
+import java.awt.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
@@ -23,14 +23,6 @@ public class ItemStackSlot extends ItemSlot {
 	}
 	public ItemStackSlot(int index, boolean showName, @Nullable Item item, int count, Color backgroundColor) {
 		super(index, showName, item, backgroundColor);
-		this.count = count;
-	}
-	public ItemStackSlot(boolean showName, @Nullable Item item, int count, Drawable background) {
-		super(showName, item, background);
-		this.count = count;
-	}
-	public ItemStackSlot(int index, boolean showName, @Nullable Item item, int count, Drawable background) {
-		super(index, showName, item, background);
 		this.count = count;
 	}
 	
