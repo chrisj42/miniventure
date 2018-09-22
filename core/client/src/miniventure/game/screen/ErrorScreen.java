@@ -1,7 +1,5 @@
 package miniventure.game.screen;
 
-import miniventure.game.client.ClientCore;
-
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -9,13 +7,15 @@ import javax.swing.JLabel;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import miniventure.game.client.ClientCore;
+
 public class ErrorScreen extends MenuScreen {
 	
 	public ErrorScreen(String error) {
 		
 		// add(vGroup);
 		
-		super(false);
+		super(true, false);
 		add(new JLabel(error));
 		
 		add(Box.createVerticalStrut(50));

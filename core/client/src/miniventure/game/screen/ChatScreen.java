@@ -5,6 +5,7 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
@@ -20,8 +21,7 @@ import miniventure.game.chat.InfoMessage;
 import miniventure.game.chat.InfoMessageLine;
 import miniventure.game.client.ClientCore;
 import miniventure.game.util.MyUtils;
-
-import com.badlogic.gdx.Input.Keys;
+import miniventure.game.util.RelPos;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -47,7 +47,7 @@ public class ChatScreen extends MenuScreen {
 	private String manualInput = ""; // this is the part of the command that the user entered manually, and so should not be changed when tabbing.
 	
 	public ChatScreen(boolean timeOutMessages) {
-		super(false);
+		super(true, false);
 		useTimer = timeOutMessages;
 		
 		// add(vGroup);
@@ -66,11 +66,33 @@ public class ChatScreen extends MenuScreen {
 			
 			@Override
 			public Dimension getPreferredSize() {
-				return new Dimension(ChatScreen.this.getWidth()/2, super.getPreferredSize().height);
+				return new Dimension(ClientCore.getUiPanel().getSize().width*2/5, super.getPreferredSize().height);
 			}
 		};
 		
-		input.setAlignmentX(RIGHT_ALIGNMENT);
+		// input.setAlignmentX(RIGHT_ALIGNMENT);
+		
+		input.addActionListener(e -> {
+			String text = input.getText();
+			if(text.length() == 0) return;// true;
+			if(text.equals("/")) return;// true;
+			
+			// not nothing
+			
+			if(prevCommandIdx != 0) // don't add the entry if we are just redoing the previous action
+				previousCommands.push(text);
+			prevCommandIdx = -1;
+			if(previousCommands.size() > COMMAND_BUFFER_SIZE)
+				previousCommands.pollLast(); // remove oldest command from history
+			
+			if(!text.startsWith("/"))
+				text = "msg " + text.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\""); // replace one backslash with two.
+			else
+				text = text.substring(1);
+			
+			ClientCore.getClient().send(new Message(text, (Integer)null));
+			ClientCore.setScreen(null);
+		});
 		
 		input.addKeyListener(new KeyListener() {
 			@Override
@@ -83,33 +105,11 @@ public class ChatScreen extends MenuScreen {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				int keycode = e.getKeyCode();
-				if(keycode == Keys.ENTER) {
-					String text = input.getText();
-					if(text.length() == 0) return;// true;
-					if(text.equals("/")) return;// true;
-					
-					// valid command
-					
-					if(prevCommandIdx != 0) // don't add the entry if we are just redoing the previous action
-						previousCommands.push(text);
-					prevCommandIdx = -1;
-					if(previousCommands.size() > COMMAND_BUFFER_SIZE)
-						previousCommands.pollLast(); // remove oldest command from history
-					
-					if(!text.startsWith("/"))
-						text = "msg " + text.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\""); // replace one backslash with two.
-					else
-						text = text.substring(1);
-					
-					ClientCore.getClient().send(new Message(text, (Integer)null));
+				if(keycode == KeyEvent.VK_ESCAPE) {
 					ClientCore.setScreen(null);
 					// return true;
 				}
-				else if(keycode == Keys.ESCAPE) {
-					ClientCore.setScreen(null);
-					// return true;
-				}
-				else if(keycode == Keys.UP) {
+				else if(keycode == KeyEvent.VK_UP) {
 					if(previousCommands.size() > prevCommandIdx+1) {
 						if(prevCommandIdx < 0)
 							curCommand = input.getText();
@@ -119,7 +119,7 @@ public class ChatScreen extends MenuScreen {
 					}
 					// return true;
 				}
-				else if(keycode == Keys.DOWN) {
+				else if(keycode == KeyEvent.VK_DOWN) {
 					if(prevCommandIdx+1 > 0) {
 						prevCommandIdx--;
 						if(prevCommandIdx == -1)
@@ -130,7 +130,7 @@ public class ChatScreen extends MenuScreen {
 					input.setCaretPosition(input.getText().length());
 					// return true;
 				}
-				else if(keycode == Keys.TAB) {
+				else if(keycode == KeyEvent.VK_TAB) {
 					if(!input.getText().startsWith("/")) return;// true;
 					
 					String text = tabbing ? manualInput : input.getText().substring(1);
@@ -174,6 +174,11 @@ public class ChatScreen extends MenuScreen {
 		super.focus();
 	}
 	
+	@Override
+	public void doLayoutBehavior(Container parent) {
+		ClientUtils.addToAnchorLayout(this, parent, RelPos.TOP_RIGHT, -5, 5);
+	}
+	
 	public void addMessage(InfoMessage msg) {
 		synchronized (labelQueue) {
 			// add in reverse order
@@ -210,8 +215,8 @@ public class ChatScreen extends MenuScreen {
 		input.setCaretPosition(input.getText().length());
 	}
 	
-	@Override
-	public boolean usesWholeScreen() { return false; }
+	// @Override
+	// public boolean usesWholeScreen() { return false; }
 	
 	/*private void repack() {
 		input.pack();
@@ -242,7 +247,7 @@ public class ChatScreen extends MenuScreen {
 		
 		@Override
 		public Dimension getPreferredSize() {
-			return new Dimension(ChatScreen.this.getWidth()/2, super.getPreferredSize().height);
+			return new Dimension(input.getPreferredSize().width, super.getPreferredSize().height);
 		}
 		
 		@Override

@@ -1,24 +1,25 @@
 package miniventure.game.screen;
 
-import miniventure.game.client.ClientCore;
-
-import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.Array;
+import javax.swing.Box;
+import javax.swing.JButton;
 import javax.swing.JLabel;
+
+import miniventure.game.client.ClientCore;
 
 public class InfoScreen extends MenuScreen {
 	
 	private InfoScreen(String... text) {
-		super(false);
-		Array<String> lines = new Array<>(text);
+		super(true, true);
+		// Array<String> lines = new Array<>(text);
 		//"(press b to show/hide chunk boundaries)",
-		JLabel instructions = new JLabel(String.join(System.lineSeparator(), lines.items));
-		instructions.setWrap(true);
-		instructions.setPosition(getWidth()/2, getHeight() - instructions.getPrefHeight() - 10, Align.center);
+		JLabel instructions = new JLabel("<html><p>"+String.join("<br>", text)+"</p>");
+		// instructions.setWrap(true);
+		// instructions.setPosition(getWidth()/2, getHeight() - instructions.getPrefHeight() - 10, Align.center);
+		add(Box.createVerticalGlue());
 		add(instructions);
-		
+		add(Box.createVerticalGlue());
 		JButton returnBtn = makeButton("Back to Main Menu", ClientCore::backToParentScreen);
-		returnBtn.setPosition(getWidth()/2, returnBtn.getPrefHeight()*3/2, Align.center);
+		// returnBtn.setPosition(getWidth()/2, returnBtn.getPrefHeight()*3/2, Align.center);
 		add(returnBtn);
 	}
 	

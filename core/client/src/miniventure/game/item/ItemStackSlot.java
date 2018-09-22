@@ -1,11 +1,6 @@
 package miniventure.game.item;
 
-import miniventure.game.GameCore;
-
 import java.awt.Color;
-import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -35,7 +30,8 @@ public class ItemStackSlot extends ItemSlot {
 	
 	protected boolean showCount() { return getItem() != null && getCount() > 0; }
 	
-	@Override
+	// FIXME draw item slots!
+	/*@Override
 	public void draw(Batch batch, float parentAlpha) {
 		super.draw(batch, parentAlpha);
 		if(showCount()) {
@@ -43,5 +39,5 @@ public class ItemStackSlot extends ItemSlot {
 			font.setColor(getTextColor());
 			font.draw(batch, getCount() + "", getX() + 2, getY() + 2 + font.getLineHeight());
 		}
-	}
+	}*/
 }

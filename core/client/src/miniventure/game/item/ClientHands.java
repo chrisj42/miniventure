@@ -1,11 +1,9 @@
 package miniventure.game.item;
 
+import java.awt.Color;
+
 import miniventure.game.GameProtocol.ItemDropRequest;
 import miniventure.game.client.ClientCore;
-
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
 public class ClientHands extends Hands {
 	
@@ -19,7 +17,7 @@ public class ClientHands extends Hands {
 			slots[i] = new HotbarSlot(i, inventory);
 		
 		hotbarTable = new ItemSelectionTable(slots, ItemSlot.HEIGHT);
-		hotbarTable.pack();
+		// hotbarTable.pack();
 	}
 	
 	public ItemSelectionTable getHotbarTable() { return hotbarTable; }

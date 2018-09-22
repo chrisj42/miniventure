@@ -5,7 +5,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-import java.awt.Rectangle;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.Thread.UncaughtExceptionHandler;
@@ -17,7 +16,6 @@ import miniventure.game.GameProtocol.Message;
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.item.InventoryScreen;
 import miniventure.game.screen.ErrorScreen;
-import miniventure.game.screen.GLRenderer;
 import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
@@ -124,9 +122,9 @@ public class ClientCore extends ApplicationAdapter {
 		
 		hasMenu = menuScreen != null;
 		
-		if(menuScreen instanceof GLRenderer)
-			// the menu uses libGDX to render some or all of its graphics (most likely the background).
-			((GLRenderer)menuScreen).glDraw();
+		if(menuScreen != null)
+			// some menus use libGDX to render some or all of their graphics (most likely the background); this is their opportunity to do so.
+			menuScreen.glDraw();
 		
 		// if (menuScreen != null)
 		// 	menuScreen.act();
@@ -135,6 +133,9 @@ public class ClientCore extends ApplicationAdapter {
 	}
 	
 	public static void setScreen(@Nullable MenuScreen screen) {
+		// if(screen == menuScreen)
+		// 	return; // nothing is happening here.
+		
 		if(menuScreen instanceof InventoryScreen) {
 			//System.out.println("sending held item request to server for "+clientWorld.getMainPlayer().getHands().getUsableItem());
 			getClient().send(new InventoryUpdate(clientWorld.getMainPlayer()));
@@ -146,14 +147,22 @@ public class ClientCore extends ApplicationAdapter {
 		// if(screen == null && menuScreen != null && menuScreen != gameScreen.chatScreen)
 		// 	menuScreen.dispose();
 		if(screen != null && menuScreen != null && menuScreen != gameScreen.chatScreen)
-			screen.setParent(menuScreen); // when are you going to go from a chat screen to another screen...?
+			screen.setParentScreen(menuScreen); // when are you going to go from a chat screen to another screen...?
 		
 		System.out.println("setting screen to " + screen);
 		
+		if(menuScreen == gameScreen.chatScreen)
+			gameScreen.chatOverlay.setVisible(true);
+		if(screen == gameScreen.chatScreen)
+			gameScreen.chatOverlay.setVisible(false);
+		
 		if(menuScreen != null)
 			uiPanel.remove(menuScreen);
-		if(screen != null)
+		
+		if(screen != null) {
 			uiPanel.add(screen);
+			screen.doLayoutBehavior(uiPanel);
+		}
 		
 		menuScreen = screen;
 		if(menuScreen != null) menuScreen.focus();
@@ -166,10 +175,15 @@ public class ClientCore extends ApplicationAdapter {
 		input.reset(menuScreen != null);
 	}
 	public static void backToParentScreen() {
-		if(menuScreen != null && menuScreen.getParent() != null) {
-			MenuScreen screen = menuScreen.getParent();
+		if(menuScreen != null && menuScreen.getParentScreen() != null) {
+			MenuScreen screen = menuScreen.getParentScreen();
 			System.out.println("setting screen back to " + screen);
-			// menuScreen.dispose(false);
+			
+			uiPanel.remove(menuScreen);
+			uiPanel.add(screen);
+			screen.doLayoutBehavior(screen);
+			screen.focus();
+			
 			menuScreen = screen;
 			// Gdx.input.setInputProcessor(menuScreen);
 			input.reset(false);
@@ -231,8 +245,4 @@ public class ClientCore extends ApplicationAdapter {
 	public static ClientWorld getWorld() { return clientWorld; }
 	public static GameClient getClient() { return clientWorld.getClient(); }
 	
-	public static void setupTransparentSwingContainer(JPanel panel, boolean focusable) {
-		panel.setFocusable(focusable);
-		com.sun.awt.AWTUtilities.setComponentMixingCutoutShape(panel, new Rectangle());
-	}
 }

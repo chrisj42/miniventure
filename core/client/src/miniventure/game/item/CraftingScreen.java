@@ -1,5 +1,6 @@
 package miniventure.game.item;
 
+import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -14,8 +15,6 @@ import miniventure.game.GameProtocol.CraftRequest;
 import miniventure.game.client.ClientCore;
 import miniventure.game.screen.MenuScreen;
 
-import com.badlogic.gdx.Input.Keys;
-
 public class CraftingScreen extends MenuScreen {
 	
 	private static final Color background = new Color(.2f, .4f, 1f, 1);
@@ -24,6 +23,8 @@ public class CraftingScreen extends MenuScreen {
 	
 	private final CraftableItem[] list;
 	private final ItemSelectionTable table;
+	
+	// FIXME fix up some things relating to the item selection table
 	
 	private final ItemStackSlot invCount = new ItemStackSlot(true, null, 0) {
 		@Override protected boolean showCount() { return getItem() != null; }
@@ -59,9 +60,9 @@ public class CraftingScreen extends MenuScreen {
 	}
 	
 	public CraftingScreen(Recipe[] recipes, Inventory playerInventory) {
-		super(false);
+		super(true, false);
 		this.playerInv = playerInventory;
-		setLayout(null);
+		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		
 		CraftableRecipe[] recipeCache = new CraftableRecipe[recipes.length];
 		for(int i = 0; i < recipeCache.length; i++)
@@ -86,9 +87,8 @@ public class CraftingScreen extends MenuScreen {
 			craftEntry.addKeyListener(new KeyAdapter() {
 				@Override
 				public void keyPressed(KeyEvent e) {
-					if(e.getKeyCode() != KeyEvent.VK_ENTER)
-						return;
-					table.setSelection(craftEntry.getSlotIndex());
+					if(e.getKeyCode() == KeyEvent.VK_ENTER)
+						table.setSelection(craftEntry.getSlotIndex());
 				}
 			});
 		}
@@ -107,7 +107,7 @@ public class CraftingScreen extends MenuScreen {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				int keycode = e.getKeyCode();
-				if(keycode == Keys.ENTER) {
+				if(keycode == KeyEvent.VK_ENTER) {
 					craft(list[table.getSelection()]);
 					// return true;
 				}
@@ -132,11 +132,11 @@ public class CraftingScreen extends MenuScreen {
 		table.setAlignmentX(LEFT_ALIGNMENT);
 		table.setAlignmentY(TOP_ALIGNMENT);
 		
-		addKeyListener(new KeyAdapter() {
+		table.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				int keycode = e.getKeyCode();
-				if(keycode == Keys.Z || keycode == Keys.ESCAPE)
+				if(keycode == KeyEvent.VK_Z || keycode == KeyEvent.VK_ESCAPE)
 					ClientCore.setScreen(null);
 				// return true;
 			}
@@ -145,8 +145,15 @@ public class CraftingScreen extends MenuScreen {
 		table.requestFocus();
 	}
 	
-	@Override
-	public boolean usesWholeScreen() { return false; }
+	// @Override
+	// public boolean usesWholeScreen() { return false; }
+	
+	
+	/*@Override
+	public Dimension getPreferredSize() {
+		Dimension tableSize = table.getPreferredSize();
+		return new Dimension(tableSize.width + 10 + costs.getPreferredSize().width, tableSize.height);
+	}*/
 	
 	private void craft(CraftableItem item) {
 		if(item.recipe.tryCraft(playerInv) != null)
@@ -172,8 +179,8 @@ public class CraftingScreen extends MenuScreen {
 		costs.revalidate();
 		// costs.pack();
 		
-		inInv.setPosition(table.getPrefWidth() + 10, getHeight() - inInv.getHeight());
-		costs.setPosition(table.getPrefWidth() + 10, getHeight() - inInv.getHeight() - 10 - costs.getHeight());
+		inInv.setLocation(table.getPreferredSize().width + 10, getHeight() - inInv.getHeight());
+		costs.setLocation(table.getPreferredSize().width + 10, getHeight() - inInv.getHeight() - 10 - costs.getHeight());
 	}
 	
 	private void refreshCanCraft() {

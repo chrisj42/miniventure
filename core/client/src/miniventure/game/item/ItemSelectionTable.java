@@ -7,15 +7,13 @@ import java.awt.event.KeyEvent;
 
 import miniventure.game.util.MyUtils;
 
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.kotcrab.vis.ui.layout.VerticalFlowGroup;
 
 public class ItemSelectionTable extends JPanel {
+	
+	// FIXME rebase to swing; this is currently def broken.
 	
 	/*
 		This will be used both for crafting screens and inventory screens. It should ideally take only half the screen horizontally at most, so that a second inventory screen can be placed next to it, for transfers between chests.
@@ -40,15 +38,15 @@ public class ItemSelectionTable extends JPanel {
 	private final int cellsPerColumn, numColumns;
 	
 	public ItemSelectionTable(ItemSlot[] itemSlots, float maxHeight) {
-		super(5);
+		// super(5);
 		
 		// configure the height to be something that equalizes the slots in as few columns as possible.
-		float cellHeight = ItemSlot.HEIGHT + getSpacing();
+		float cellHeight = ItemSlot.HEIGHT + 5;
 		float maxPerColumn = Math.max(1, (int) (maxHeight / cellHeight));
 		numColumns = Math.max(1, MathUtils.ceil(itemSlots.length / maxPerColumn));
 		cellsPerColumn = Math.max(1, MathUtils.ceil(itemSlots.length / (float)numColumns));
 		
-		setHeight(cellHeight * cellsPerColumn); // - getSpacing()/2;
+		// setHeight(cellHeight * cellsPerColumn); // - getSpacing()/2;
 		
 		this.itemSlots = itemSlots;
 		
@@ -65,16 +63,16 @@ public class ItemSelectionTable extends JPanel {
 		
 		for(ItemSlot item: itemSlots)
 			add(item);
-		refresh();
+		// refresh();
 		
 		addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				switch(e.getKeyCode()) {
-					case Keys.RIGHT: moveFocusX(1);
-					case Keys.LEFT: moveFocusX(-1);
-					case Keys.UP: moveFocusY(-1); 
-					case Keys.DOWN: moveFocusY(1);
+					case KeyEvent.VK_RIGHT: moveFocusX(1);
+					case KeyEvent.VK_LEFT: moveFocusX(-1);
+					case KeyEvent.VK_UP: moveFocusY(-1); 
+					case KeyEvent.VK_DOWN: moveFocusY(1);
 				}
 			}
 		});
@@ -101,11 +99,11 @@ public class ItemSelectionTable extends JPanel {
 		}
 	}*/
 	
-	@Override
-	public void draw(Batch batch, float parentAlpha) {
-		MyUtils.fillRect(getX()-getSpacing()/2, getY()+getSpacing()/2, getWidth(), getHeight(), background, batch);
-		super.draw(batch, parentAlpha);
-	}
+	// @Override
+	// public void draw(Batch batch, float parentAlpha) {
+	// 	MyUtils.fillRect(getX()-getSpacing()/2, getY()+getSpacing()/2, getWidth(), getHeight(), background, batch);
+	// 	super.draw(batch, parentAlpha);
+	// }
 	
 	// highlight selected item
 	// @Override

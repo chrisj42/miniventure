@@ -1,24 +1,17 @@
 package miniventure.game.screen;
 
-import miniventure.game.client.ClientCore;
-
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import javax.swing.JLabel;
+
+import miniventure.game.client.ClientCore;
 
 public class RespawnScreen extends MenuScreen {
 	
 	public RespawnScreen() {
-		super(false);
-		add(vGroup);
+		super(true, false);
+		// add(vGroup);
 		
-		add(new JLabel("You died!"));
-		
-		add(new JButton("Respawn", new ChangeListener() {
-			@Override
-			public void changed(ChangeEvent event, Actor actor) {
-				ClientCore.getWorld().respawnPlayer();
-			}
-		}));
+		addCentered(new JLabel("You died!"));
+		addCentered(makeButton("Respawn", () -> ClientCore.getWorld().respawnPlayer()));
 	}
+	
 }

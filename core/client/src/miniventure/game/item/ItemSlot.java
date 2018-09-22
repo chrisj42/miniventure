@@ -3,15 +3,7 @@ package miniventure.game.item;
 import javax.swing.JLabel;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Graphics;
-
-import miniventure.game.GameCore;
-import miniventure.game.screen.ColorBackground;
-
-import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -66,7 +58,7 @@ public class ItemSlot extends JLabel {
 	
 	@Override
 	protected void paintComponent(Graphics g) {
-		
+		// FIXME draw item slots!
 	}
 	
 	/*public void glDraw(Batch batch, float parentAlpha) {

@@ -2,16 +2,12 @@ package miniventure.game.client;
 
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 
-import java.awt.Component;
 import java.awt.EventQueue;
-import java.awt.Point;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 
 import miniventure.game.GameCore;
 import miniventure.game.screen.ChatScreen;
+import miniventure.game.screen.ClientUtils;
 import miniventure.game.util.RelPos;
 import miniventure.game.world.ClientLevel;
 import miniventure.game.world.Level;
@@ -27,7 +23,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
@@ -57,9 +52,7 @@ public class GameScreen {
 		
 		chatOverlay = new ChatScreen(true);
 		chatScreen = new ChatScreen(false);
-		addToAnchorLayout(chatOverlay, RelPos.TOP_RIGHT, -5, 5);
-		addToAnchorLayout(chatScreen, RelPos.TOP_RIGHT, -5, 5);
-		chatScreen.setVisible(false); // hide for now
+		ClientUtils.addToAnchorLayout(chatOverlay, hudPanel, RelPos.TOP_RIGHT, -5, 5);
 	}
 	
 	void dispose() {
@@ -124,10 +117,10 @@ public class GameScreen {
 		
 		levelView.render(mainPlayer.getCenter(), lightOverlay, level);
 		
-		// batch.setProjectionMatrix(levelCamera.combined);
-		// batch.begin();
-		// renderGui(mainPlayer, level);
-		// batch.end();
+		batch.setProjectionMatrix(levelCamera.combined);
+		batch.begin();
+		renderGui(mainPlayer, level);
+		batch.end();
 		// guiStage.act(Gdx.graphics.getDeltaTime());
 		// guiStage.draw();
 		
@@ -138,7 +131,7 @@ public class GameScreen {
 	}
 	
 	private static Vector2 getMouseInput() {
-		if(Gdx.input.isTouched()) {
+		if(ClientCore.input.isEnabled() && Gdx.input.isTouched()) {
 			
 			Vector2 mousePos = new Vector2(Gdx.input.getX(), Gdx.input.getY());
 			mousePos.y = Gdx.graphics.getHeight() - mousePos.y; // origin is top left corner, so reverse Y dir
@@ -156,7 +149,7 @@ public class GameScreen {
 	}
 	
 	private void renderGui(@NotNull ClientPlayer mainPlayer, @NotNull Level level) {
-		// FIXME rebase to swing
+		// TODO rebase to swing
 		batch.setProjectionMatrix(levelCamera.combined);
 		
 		// draw UI for current item, and stats
@@ -206,48 +199,4 @@ public class GameScreen {
 	void resize(int width, int height) { levelView.resize(width, height); }
 	
 	public JPanel getHudPanel() { return hudPanel; }
-	
-	/**
-	 * This method takes a component, and adds it to the HUD JPanel with a set of positioning constraints; there were no layout managers
-	 * that positioned components this way, so the HUD panel has a null layout, and this system is like a pseudo-layout.
-	 * 
-	 * What it does is take the two given "anchors" and make sure the positions they represent are on top of one another, before the offset.
-	 * The anchor positions are specified by RelPos instances, which refer to positions on a rectangle of the component's preferred size.
-	 * 
-	 * 
-	 * It works like this. When the screen is resized:
-	 * - It determines the coordinates of the container and component anchors.
-	 * - It moves the component so the component anchor matches the position of the container anchor.
-	 * - It moves the component by (anchorOffsetX, anchorOffsetY).
-	 * And it does that for every component added.
-	 * 
-	 * Overlap between multiple components added through this method is not considered.
-	 * 
-	 * @param c the component to be added to the HUD panel and kept in layout.
-	 * @param containerAnchor a RelPos position based on the size of the HUD panel.
-	 * @param componentAnchor a RelPos position based on the size of the given component.
-	 * @param anchorOffsetX horizontal difference wanted between the target position of the component anchor, and the position of the container anchor.
-	 * @param anchorOffsetY vertical difference wanted between the target position of the component anchor, and the position of the container anchor.
-	 */
-	private void addToAnchorLayout(Component c, RelPos containerAnchor, RelPos componentAnchor, int anchorOffsetX, int anchorOffsetY) {
-		hudPanel.addComponentListener(new ComponentAdapter() {
-			@Override
-			public void componentResized(ComponentEvent e) {
-				SwingUtilities.invokeLater(() -> {
-					c.setSize(c.getPreferredSize());
-					Point compAnchor = componentAnchor.forRectangle(c.getBounds());
-					Point parentAnchor = containerAnchor.forRectangle(hudPanel.getBounds());
-					
-					Point compPos = c.getLocation();
-					Point locAnchorDifference = new Point(compPos.x - compAnchor.x, compPos.y - compAnchor.y);
-					
-					parentAnchor.translate(anchorOffsetX, anchorOffsetY);
-					c.setLocation(parentAnchor.x + locAnchorDifference.x, parentAnchor.y + locAnchorDifference.y);
-				});
-			}
-		});
-	}
-	private void addToAnchorLayout(Component c, RelPos anchor, int anchorOffsetX, int anchorOffsetY) {
-		addToAnchorLayout(c, anchor, anchor, anchorOffsetX, anchorOffsetY);
-	}
 }

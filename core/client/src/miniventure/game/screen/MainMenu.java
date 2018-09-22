@@ -40,7 +40,7 @@ public class MainMenu extends MenuScreen {
 	private static final float PAN_SPEED = 4.5f; // in tiles/second.
 	
 	public MainMenu() {
-		super(false);
+		super(true, true);
 		ClientWorld world = ClientCore.getWorld();
 		
 		// table = new Table();
@@ -123,9 +123,6 @@ public class MainMenu extends MenuScreen {
 		song.setLooping(true);
 		song.play();
 	}
-	
-	@Override
-	public boolean usesWholeScreen() { return false; }
 	
 	@Override
 	public void glDraw() {

@@ -1,24 +1,18 @@
 package miniventure.game.desktop;
 
-import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
-import java.awt.BorderLayout;
 import java.awt.Canvas;
-import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Rectangle;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import miniventure.game.GameCore;
 import miniventure.game.client.ClientCore;
+import miniventure.game.screen.ClientUtils;
 import miniventure.game.server.ServerCore;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
@@ -60,11 +54,9 @@ public class DesktopLauncher {
 			
 			// the panel where swing UI components will be added (i.e. menu screens):
 			JPanel uiPanel = makeUIPanel(frame, WINDOW_SIZE);
-			uiPanel.setLayout(new BorderLayout());
 			
 			// the panel where swing HUD components will be added (i.e. health/hunger bars, debug display, chat overlay):
 			JPanel hudPanel = makeUIPanel(frame, WINDOW_SIZE);
-			hudPanel.setLayout(null);
 			
 			LwjglCanvas canvas = new LwjglCanvas(new ClientCore(hudPanel, uiPanel, (width, height, callback) -> {
 				ServerCore.initServer(width, height, false);
@@ -77,7 +69,7 @@ public class DesktopLauncher {
 			
 			// the canvas where libGDX rendering occurs
 			Canvas awtCanvas = canvas.getCanvas();
-			trackFrameSize(awtCanvas, frame, WINDOW_SIZE);
+			ClientUtils.trackParentSize(awtCanvas, frame.getContentPane(), WINDOW_SIZE);
 			
 			// end the program when the window is closed; this way allows libGDX to shutdown correctly (I think...)
 			frame.addWindowListener(new WindowAdapter() {
@@ -106,7 +98,7 @@ public class DesktopLauncher {
 	}
 	
 	private static JPanel makeUIPanel(JFrame frame, Dimension size) {
-		JPanel p = new JPanel() {
+		JPanel p = new JPanel(null) {
 			@Override
 			public Dimension getPreferredSize() {
 				return frame.getContentPane().getPreferredSize();
@@ -123,22 +115,11 @@ public class DesktopLauncher {
 			}
 		};
 		
-		ClientCore.setupTransparentSwingContainer(p, false);
-		trackFrameSize(p, frame, size);
+		p.setFocusable(false);
+		ClientUtils.setupTransparentSwingContainer(p);
+		ClientUtils.trackParentSize(p, frame.getContentPane(), size);
+		frame.getContentPane().add(p);
 		
 		return p;
-	}
-	
-	// adds a listener to the frame to make sure the given component size always fills the entire space inside the frame. Starts at the given size.
-	private static void trackFrameSize(Component c, JFrame frame, Dimension size) {
-		frame.addComponentListener(new ComponentAdapter() {
-			@Override
-			public void componentResized(ComponentEvent e) {
-				SwingUtilities.invokeLater(() -> c.setSize(frame.getContentPane().getSize()));
-			}
-		});
-		
-		c.setSize(size);
-		frame.add(c);
 	}
 }

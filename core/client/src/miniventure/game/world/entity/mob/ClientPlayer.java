@@ -232,7 +232,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 		drawStat(Stat.Stamina, canvas.x, hold.y, batch, hold);
 		drawStat(Stat.Hunger, canvas.x, hold.y, batch, hold);
 		
-		hands.getHotbarTable().setPosition(hold.x+20, 8);
+		hands.getHotbarTable().setLocation((int)hold.x+20, 8);
 	}
 	
 	private Vector2 renderBar(Stat stat, float x, float y, SpriteBatch batch) { return renderBar(stat, x, y, batch, 0); }
