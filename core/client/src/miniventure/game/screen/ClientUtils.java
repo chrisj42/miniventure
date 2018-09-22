@@ -55,7 +55,7 @@ public final class ClientUtils {
 		});
 		
 		c.setSize(size);
-		// parent.add(c);
+		parent.add(c);
 	}
 	
 	

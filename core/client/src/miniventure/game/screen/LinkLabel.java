@@ -33,24 +33,35 @@ public class LinkLabel extends JLabel implements MouseListener {
 		addMouseListener(this);
 	}
 	
-	public void setText(String text) {
+	public void setValue(String text, String url) {
+		this.text = text;
+		setLinkUrl(url);
+	}
+	
+	public void setLinkText(String text) {
 		this.text = text;
 		refresh();
 		revalidate();
 	}
 	
-	public void setUrl(String url) {
+	public void setLinkUrl(String url) {
 		this.url = url;
 		down = false;
 		if(valid())
-			setColor(Color.BLUE);
+			setLinkColor(Color.BLUE);
 		else
-			setColor(Color.BLACK);
+			setLinkColor(Color.BLACK);
 	}
 	
-	public void setValue(String text, String url) {
-		this.text = text;
-		setUrl(url);
+	private boolean valid() { return url != null && url.length() > 0; }
+	
+	private void setLinkColor(Color color) {
+		this.c = color;
+		refresh();
+	}
+	
+	private void refresh() {
+		setText("<html><span style='"+(valid()?"text-decoration:underline; ":"")+"color:rgba("+c.getRed()+","+c.getGreen()+","+c.getBlue()+","+c.getAlpha()+")'>"+text+"</span></html>");
 	}
 	
 	@Override
@@ -61,7 +72,7 @@ public class LinkLabel extends JLabel implements MouseListener {
 		over = true;
 		if(!valid()) return;
 		down = true;
-		setColor(Color.RED);
+		setLinkColor(Color.RED);
 	}
 	
 	@Override
@@ -72,7 +83,7 @@ public class LinkLabel extends JLabel implements MouseListener {
 			openLink();
 		
 		setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-		setColor(new Color(128, 0, 128, 255));
+		setLinkColor(new Color(128, 0, 128, 255));
 	}
 	
 	@Override
@@ -81,7 +92,7 @@ public class LinkLabel extends JLabel implements MouseListener {
 		if(!valid()) return;
 		setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		if(down)
-			setColor(Color.RED);
+			setLinkColor(Color.RED);
 	}
 	
 	@Override
@@ -89,18 +100,7 @@ public class LinkLabel extends JLabel implements MouseListener {
 		over = false;
 		if(!valid()) return;
 		setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
-		setColor(Color.BLUE);
-	}
-	
-	private boolean valid() { return url != null && url.length() > 0; }
-	
-	private void setColor(Color color) {
-		this.c = color;
-		refresh();
-	}
-	
-	private void refresh() {
-		setText("<html><span style='"+(valid()?"text-decoration:underline; ":"")+"color:rgba("+c.getRed()+","+c.getGreen()+","+c.getBlue()+","+c.getAlpha()+")'>"+text+"</span></html>");
+		setLinkColor(Color.BLUE);
 	}
 	
 	private void openLink() {

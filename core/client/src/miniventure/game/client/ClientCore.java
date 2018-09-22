@@ -146,15 +146,17 @@ public class ClientCore extends ApplicationAdapter {
 		
 		// if(screen == null && menuScreen != null && menuScreen != gameScreen.chatScreen)
 		// 	menuScreen.dispose();
-		if(screen != null && menuScreen != null && menuScreen != gameScreen.chatScreen)
+		if(screen != null && menuScreen != null && (gameScreen == null || menuScreen != gameScreen.chatScreen))
 			screen.setParentScreen(menuScreen); // when are you going to go from a chat screen to another screen...?
 		
 		System.out.println("setting screen to " + screen);
 		
-		if(menuScreen == gameScreen.chatScreen)
-			gameScreen.chatOverlay.setVisible(true);
-		if(screen == gameScreen.chatScreen)
-			gameScreen.chatOverlay.setVisible(false);
+		if(gameScreen != null) {
+			if(menuScreen == gameScreen.chatScreen)
+				gameScreen.chatOverlay.setVisible(true);
+			if(screen == gameScreen.chatScreen)
+				gameScreen.chatOverlay.setVisible(false);
+		}
 		
 		if(menuScreen != null)
 			uiPanel.remove(menuScreen);
