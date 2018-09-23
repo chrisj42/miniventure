@@ -58,7 +58,7 @@ public class GameServer implements GameProtocol {
 			this.connection = connection;
 			this.player = player;
 			
-			toClientOut = new InfoMessageBuilder(text -> new InfoMessageLine(Color.WHITE, text));
+			toClientOut = new InfoMessageBuilder(text -> new InfoMessageLine(Color.BLACK, text));
 			toClientErr = new InfoMessageBuilder(toClientOut, text -> new InfoMessageLine(Color.RED, text));
 			
 			op = connection.getRemoteAddressTCP().getAddress().isLoopbackAddress();
@@ -273,7 +273,7 @@ public class GameServer implements GameProtocol {
 					Level level = client.getLevel();
 					if(level != null) {
 						Tile t = level.getClosestTile(client.getInteractionRect());
-						connection.sendTCP(new Message(client+" looking at "+(t==null?null:t.toLocString()), Color.WHITE));
+						connection.sendTCP(new Message(client+" looking at "+(t==null?null:t.toLocString())));
 					}
 				}
 				
@@ -306,7 +306,7 @@ public class GameServer implements GameProtocol {
 						matches.sort(String::compareToIgnoreCase);
 						
 						if(request.tabIndex < 0)
-							connection.sendTCP(new Message(ArrayUtils.arrayToString(matches.shrink(), "", "", ", "), Color.WHITE));
+							connection.sendTCP(new Message(ArrayUtils.arrayToString(matches.shrink(), "", "", ", ")));
 						else {
 							// actually autocomplete
 							connection.sendTCP(new TabResponse(request.manualText, matches.get(request.tabIndex % matches.size)));
@@ -429,8 +429,8 @@ public class GameServer implements GameProtocol {
 	}
 	
 	public Message getMessage(@Nullable ServerPlayer sender, String msg) {
-		if(sender == null) return new Message("Server: "+msg, Color.LIGHT_GRAY);
-		return new Message(sender.getName()+": "+msg, Color.WHITE);
+		if(sender == null) return new Message("Server: "+msg, Color.GRAY);
+		return new Message(sender.getName()+": "+msg);
 	}
 	
 	private void sendEntityValidation(@NotNull PlayerData pData) {

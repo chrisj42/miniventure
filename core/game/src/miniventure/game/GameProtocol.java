@@ -113,6 +113,7 @@ public interface GameProtocol {
 		public final Integer color;
 		
 		private Message() { this(null, (Integer)null); }
+		public Message(String msg) { this(msg, (Integer)null); }
 		public Message(String msg, java.awt.Color color) { this(msg, color.getRGB()); }
 		public Message(String msg, Integer color) {
 			this.msg = msg;

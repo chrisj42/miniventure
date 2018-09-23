@@ -7,8 +7,6 @@ import java.awt.EventQueue;
 
 import miniventure.game.GameCore;
 import miniventure.game.screen.ChatScreen;
-import miniventure.game.screen.ClientUtils;
-import miniventure.game.util.RelPos;
 import miniventure.game.world.ClientLevel;
 import miniventure.game.world.Level;
 import miniventure.game.world.TimeOfDay;
@@ -52,7 +50,9 @@ public class GameScreen {
 		
 		chatOverlay = new ChatScreen(true);
 		chatScreen = new ChatScreen(false);
-		ClientUtils.addToAnchorLayout(chatOverlay, hudPanel, RelPos.TOP_RIGHT, -5, 5);
+		System.out.println("overlay: "+chatOverlay);
+		hudPanel.add(chatOverlay);
+		chatOverlay.doLayoutBehavior(hudPanel);
 	}
 	
 	void dispose() {
@@ -96,7 +96,7 @@ public class GameScreen {
 		
 		if(!ClientCore.hasMenu()) {
 			if(!shift && ClientCore.input.pressingKey(Keys.T))
-				chatScreen.focus("");
+				chatOverlay.focus("");
 			
 			else if(ClientCore.input.pressingKey(Keys.SLASH))
 				chatScreen.focus("/");

@@ -94,7 +94,17 @@ public class InventoryScreen extends MenuScreen {
 		add(table);
 		// table.setLocation(getWidth(), getHeight());
 		
-		table.requestFocus();
+		table.setFocusable(false);
+		// table.requestFocus();
+		setFocusable(true);
+		addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if(e.getKeyCode() == KeyEvent.VK_E || e.getKeyCode() == KeyEvent.VK_ESCAPE)
+					ClientCore.setScreen(null);
+			}
+		});
+		requestFocus();
 	}
 	
 	// @Override

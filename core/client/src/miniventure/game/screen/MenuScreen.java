@@ -108,4 +108,9 @@ public abstract class MenuScreen extends JPanel {
 		button.addActionListener(e -> onClick.act());
 		return button;
 	}
+	
+	@Override
+	public String toString() {
+		return getClass().getSimpleName()+"@"+Integer.toHexString(hashCode());
+	}
 }

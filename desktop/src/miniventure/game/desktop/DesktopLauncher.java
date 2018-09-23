@@ -7,6 +7,8 @@ import javax.swing.WindowConstants;
 
 import java.awt.Canvas;
 import java.awt.Dimension;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -53,10 +55,10 @@ public class DesktopLauncher {
 			frame.getContentPane().setPreferredSize(WINDOW_SIZE);
 			
 			// the panel where swing UI components will be added (i.e. menu screens):
-			JPanel uiPanel = makeUIPanel(frame, WINDOW_SIZE);
+			JPanel hudPanel = makeUIPanel(frame, WINDOW_SIZE);
 			
 			// the panel where swing HUD components will be added (i.e. health/hunger bars, debug display, chat overlay):
-			JPanel hudPanel = makeUIPanel(frame, WINDOW_SIZE);
+			JPanel uiPanel = makeUIPanel(frame, WINDOW_SIZE);
 			
 			LwjglCanvas canvas = new LwjglCanvas(new ClientCore(hudPanel, uiPanel, (width, height, callback) -> {
 				ServerCore.initServer(width, height, false);
@@ -69,7 +71,21 @@ public class DesktopLauncher {
 			
 			// the canvas where libGDX rendering occurs
 			Canvas awtCanvas = canvas.getCanvas();
+			ClientCore.gameCanvas = awtCanvas;
+			awtCanvas.addKeyListener(new KeyAdapter() {
+				@Override
+				public void keyPressed(KeyEvent e) {
+					if(e.getKeyCode() == KeyEvent.VK_R) {
+						System.out.println("remadkign");
+						hudPanel.revalidate();
+						hudPanel.validate();
+						hudPanel.repaint();
+					}
+				}
+			});
 			ClientUtils.trackParentSize(awtCanvas, frame.getContentPane(), WINDOW_SIZE);
+			awtCanvas.setFocusable(true);
+			awtCanvas.requestFocusInWindow();
 			
 			// end the program when the window is closed; this way allows libGDX to shutdown correctly (I think...)
 			frame.addWindowListener(new WindowAdapter() {
@@ -77,6 +93,7 @@ public class DesktopLauncher {
 				public void windowClosed(WindowEvent e) {
 					System.out.println("stopping gdx");
 					canvas.exit();
+					System.exit(0);
 				}
 			});
 			
@@ -116,6 +133,7 @@ public class DesktopLauncher {
 		};
 		
 		p.setFocusable(false);
+		p.setOpaque(false);
 		ClientUtils.setupTransparentAWTContainer(p);
 		ClientUtils.trackParentSize(p, frame.getContentPane(), size);
 		// frame.getContentPane().add(p);

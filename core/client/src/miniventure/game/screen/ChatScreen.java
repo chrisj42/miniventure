@@ -3,8 +3,10 @@ package miniventure.game.screen;
 import javax.swing.Box;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -70,12 +72,17 @@ public class ChatScreen extends MenuScreen {
 			}
 		};
 		
+		if(timeOutMessages)
+			ClientUtils.setupTransparentAWTContainer(input);
+		
 		// input.setAlignmentX(RIGHT_ALIGNMENT);
 		
 		input.addActionListener(e -> {
 			String text = input.getText();
-			if(text.length() == 0) return;// true;
-			if(text.equals("/")) return;// true;
+			if(text.length() == 0 || text.equals("/")) {
+				ClientCore.setScreen(null);
+				return;// true;
+			}
 			
 			// not nothing
 			
@@ -156,9 +163,22 @@ public class ChatScreen extends MenuScreen {
 		
 		// add(input);
 		add(input);
+		if(useTimer) {
+			// add(new JButton("Hello!"));
+			// add(new JButton("He!"));
+			// add(new JButton("Helffffo"));
+			setVisible(false);
+		}
 		add(Box.createVerticalGlue());
 		// repack();
+		// setPreferredSize(new Dimension(400, 300));
 	}
+	/*
+	@Override
+	public void paint(Graphics g) {
+		SwingUtilities.invokeLater(() -> ClientUtils.setupTransparentAWTContainer(this));
+		super.paint(g);
+	}*/
 	
 	public void focus(String initText) {
 		input.setText(initText);
@@ -198,14 +218,33 @@ public class ChatScreen extends MenuScreen {
 	private void addMessage(String msg, Integer color, boolean connect) {
 		// msg.setWrap(true);
 		TimerLabel label = new TimerLabel(msg, color==null?null:new Color(color));
-		label.setAlignmentX(RIGHT_ALIGNMENT);
+		// label.setAlignmentX(RIGHT_ALIGNMENT);
 		if(!connect)
 			add(Box.createVerticalStrut(5));
-		add(label, 0);
+		add(label, 1);
 		labelQueue.addFirst(label);
-		if(getComponentCount() > 10)
-			remove(labelQueue.removeLast());
+		if(getComponentCount() > 10) {
+			Component c = labelQueue.removeLast();
+			if(useTimer)
+				System.out.println("removing label " +c);
+			remove(c);
+		}
 		// repack();
+		revalidate();
+		repaint();
+		if(useTimer) {
+			System.out.println("msg added to "+this+": "+msg);
+			System.out.println("immediate component count: "+getComponentCount());
+			SwingUtilities.invokeLater(() -> {
+				System.out.println("for msg: "+msg);
+				System.out.println("new component count: "+getComponentCount());
+				System.out.println("new bounds: "+getBounds());
+				System.out.println("msg bounds: "+label.getBounds());
+				System.out.println("msg pref bounds: "+label.getPreferredSize());
+			});
+		}
+		
+		label.invalidate();
 	}
 	
 	public void autocomplete(TabResponse response) {
@@ -252,7 +291,7 @@ public class ChatScreen extends MenuScreen {
 		
 		@Override
 		protected void paintComponent(Graphics g) {
-			if(useTimer) {
+			if(useTimer && false) {
 				long now = System.nanoTime();
 				if(!started) {
 					started = true;
@@ -274,6 +313,8 @@ public class ChatScreen extends MenuScreen {
 				}
 			}
 			
+			ChatScreen.this.setSize(ChatScreen.this.getPreferredSize());
+			
 			super.paintComponent(g);
 		}
 		/*
@@ -289,5 +330,10 @@ public class ChatScreen extends MenuScreen {
 			
 			super.draw(batch, alpha);
 		}*/
+		
+		@Override
+		public String toString() {
+			return "TimerLabel:"+getText();
+		}
 	}
 }

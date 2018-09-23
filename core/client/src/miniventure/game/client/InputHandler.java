@@ -64,6 +64,7 @@ public class InputHandler implements InputProcessor {
 	
 	@Override
 	public boolean keyDown(int keycode) {
+		System.out.println("key down");
 		keyPresses.put(keycode, GameCore.getElapsedProgramTime());
 		if(Gdx.input.isKeyPressed(Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Keys.SHIFT_RIGHT))
 			if(Gdx.input.isKeyJustPressed(Keys.D) && Gdx.input.isKeyPressed(Keys.TAB) ||
