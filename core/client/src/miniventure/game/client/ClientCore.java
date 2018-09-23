@@ -183,7 +183,7 @@ public class ClientCore extends ApplicationAdapter {
 			
 			uiPanel.remove(menuScreen);
 			uiPanel.add(screen);
-			screen.doLayoutBehavior(screen);
+			screen.doLayoutBehavior(uiPanel);
 			screen.focus();
 			
 			menuScreen = screen;

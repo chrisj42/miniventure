@@ -32,7 +32,7 @@ public abstract class MenuScreen extends JPanel {
 		setFocusable(false);
 		setOpaque(!transparent);
 		if(transparent)
-			ClientUtils.setupTransparentSwingContainer(this);
+			ClientUtils.setupTransparentAWTContainer(this);
 	}
 	
 	// called when the menu is focused, the first time and any subsequent times.
@@ -80,6 +80,19 @@ public abstract class MenuScreen extends JPanel {
 		if(disposeParent && parent != null) parent.dispose();
 		super.dispose();
 	}*/
+	
+	@Override
+	protected void addImpl(Component comp, Object constraints, int index) {
+		if(/*comp instanceof JLabel || */comp instanceof Box.Filler)
+			ClientUtils.setupTransparentAWTContainer(comp);
+		/*
+		if(comp instanceof JLabel) {
+			if(comp.getForeground() == java.awt.Color.WHITE)
+				comp.setForeground(java.awt.Color.BLACK);
+		}*/
+		
+		super.addImpl(comp, constraints, index);
+	}
 	
 	protected void addCentered(JComponent comp) {
 		comp.setAlignmentX(CENTER_ALIGNMENT);

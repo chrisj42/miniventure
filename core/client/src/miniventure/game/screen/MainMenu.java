@@ -1,10 +1,9 @@
 package miniventure.game.screen;
 
-import javax.swing.Box;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
+import javax.swing.*;
+import javax.swing.border.BevelBorder;
 
+import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -22,7 +21,6 @@ import miniventure.game.world.levelgen.LevelGenerator;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 
@@ -34,8 +32,10 @@ public class MainMenu extends MenuScreen {
 	
 	private final DisplayLevel backgroundLevel;
 	private final LevelViewport levelView;
-	private final Color lightOverlay;
+	private final com.badlogic.gdx.graphics.Color lightOverlay;
 	private final Vector2 cameraPos, cameraDir;
+	
+	private final JPanel labelPanel = new JPanel();
 	
 	private static final float PAN_SPEED = 4.5f; // in tiles/second.
 	
@@ -43,13 +43,18 @@ public class MainMenu extends MenuScreen {
 		super(true, true);
 		ClientWorld world = ClientCore.getWorld();
 		
+		labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.PAGE_AXIS));
+		labelPanel.setBackground(new Color(163, 227, 232));
+		labelPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED, Color.CYAN, Color.GRAY), BorderFactory.createEmptyBorder(20, 30, 20, 20)));
+		
 		// table = new Table();
 		// table.setDebug(true);
 		addLabel("Welcome to Miniventure!", 20);
 		addLabel("You are playing version " + GameCore.VERSION, 25);
 		
 		LinkLabel updateLabel = new LinkLabel("Checking for higher versions...", null);
-		add(updateLabel);
+		labelPanel.add(updateLabel);
+		add(labelPanel);
 		add(Box.createVerticalStrut(45));
 		setVersionUpdateLabel(updateLabel);
 		
@@ -146,17 +151,14 @@ public class MainMenu extends MenuScreen {
 	
 	private void addLabel(String msg, int spacing) {
 		JLabel label = makeLabel(msg);
-		add(label);
-		add(Box.createVerticalStrut(spacing));
-		// table.add(label).spaceBottom(spacing);
-		// table.row();
-		// return label;
+		labelPanel.add(label);
+		labelPanel.add(Box.createVerticalStrut(spacing));
 	}
 	
 	@NotNull
 	private JLabel makeLabel(String text) {
 		JLabel lbl = new JLabel(text);
-		lbl.setForeground(java.awt.Color.WHITE);
+		lbl.setForeground(Color.BLACK);
 		return lbl;
 	}
 	

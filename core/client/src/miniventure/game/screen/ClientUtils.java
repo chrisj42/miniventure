@@ -1,6 +1,5 @@
 package miniventure.game.screen;
 
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import java.awt.Component;
@@ -14,6 +13,7 @@ import java.awt.event.ComponentListener;
 import java.awt.event.ContainerEvent;
 import java.awt.event.ContainerListener;
 
+import miniventure.game.util.Action;
 import miniventure.game.util.RelPos;
 
 public final class ClientUtils {
@@ -22,8 +22,8 @@ public final class ClientUtils {
 	}
 	
 	
-	public static void setupTransparentSwingContainer(JPanel panel) {
-		com.sun.awt.AWTUtilities.setComponentMixingCutoutShape(panel, new Rectangle());
+	public static void setupTransparentAWTContainer(Component comp) {
+		com.sun.awt.AWTUtilities.setComponentMixingCutoutShape(comp, new Rectangle());
 	}
 	
 	
@@ -87,23 +87,25 @@ public final class ClientUtils {
 			System.out.println("NOTE: removing layout " + parent.getLayout() + " from container " + parent + " in order to use anchor layout with component " + comp + ".");
 			parent.setLayout(null); // parent cannot have layout for this to work.
 		}
+		Action resized = () -> {
+			comp.setSize(comp.getPreferredSize());
+			Point compAnchor = componentAnchor.forRectangle(comp.getBounds());
+			Point parentAnchor = containerAnchor.forRectangle(parent.getBounds());
+			
+			Point compPos = comp.getLocation();
+			Point locAnchorDifference = new Point(compPos.x - compAnchor.x, compPos.y - compAnchor.y);
+			
+			parentAnchor.translate(anchorOffsetX, anchorOffsetY);
+			comp.setLocation(parentAnchor.x + locAnchorDifference.x, parentAnchor.y + locAnchorDifference.y);
+		};
 		ComponentListener l = new ComponentAdapter() {
 			@Override
 			public void componentResized(ComponentEvent e) {
-				SwingUtilities.invokeLater(() -> {
-					comp.setSize(comp.getPreferredSize());
-					Point compAnchor = componentAnchor.forRectangle(comp.getBounds());
-					Point parentAnchor = containerAnchor.forRectangle(parent.getBounds());
-					
-					Point compPos = comp.getLocation();
-					Point locAnchorDifference = new Point(compPos.x - compAnchor.x, compPos.y - compAnchor.y);
-					
-					parentAnchor.translate(anchorOffsetX, anchorOffsetY);
-					comp.setLocation(parentAnchor.x + locAnchorDifference.x, parentAnchor.y + locAnchorDifference.y);
-				});
+				SwingUtilities.invokeLater(resized::act);
 			}
 		};
 		addTempListener(parent, comp, l);
+		resized.act();
 	}
 	public static void addToAnchorLayout(Component comp, RelPos componentAnchor, Container parent, RelPos containerAnchor) {
 		addToAnchorLayout(comp, componentAnchor, parent, containerAnchor, 0, 0);

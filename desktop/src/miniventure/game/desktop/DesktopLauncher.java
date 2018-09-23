@@ -116,7 +116,7 @@ public class DesktopLauncher {
 		};
 		
 		p.setFocusable(false);
-		ClientUtils.setupTransparentSwingContainer(p);
+		ClientUtils.setupTransparentAWTContainer(p);
 		ClientUtils.trackParentSize(p, frame.getContentPane(), size);
 		// frame.getContentPane().add(p);
 		
