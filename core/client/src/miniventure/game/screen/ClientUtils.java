@@ -99,9 +99,9 @@ public final class ClientUtils {
 			
 			parentAnchor.translate(anchorOffsetX, anchorOffsetY);
 			comp.setLocation(parentAnchor.x + locAnchorDifference.x, parentAnchor.y + locAnchorDifference.y);
-			if(comp instanceof ChatScreen)
-				System.out.println("ChatScreen@"+comp.hashCode()+" being resized and repositioned; new bounds: "+comp.getBounds());
-			
+			// if(comp instanceof ChatScreen)
+			// 	System.out.println("ChatScreen@"+comp.hashCode()+" being resized and repositioned; new bounds: "+comp.getBounds());
+			 
 			if(comp.isVisible())
 				comp.repaint();
 		};

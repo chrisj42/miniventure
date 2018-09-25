@@ -219,19 +219,25 @@ public class ChatScreen extends MenuScreen {
 	private void addMessage(String msg, Integer color) { addMessage(msg, color, false); }
 	private void addMessage(String msg, Integer color, boolean connect) {
 		// msg.setWrap(true);
-		TimerLabel label = new TimerLabel(msg, color==null?null:new Color(color));
+		TimerLabel label = new TimerLabel(msg, color==null?null:new Color(color), connect ? null : Box.createVerticalStrut(5));
 		// label.setAlignmentX(RIGHT_ALIGNMENT);
-		if(!connect)
-			add(Box.createVerticalStrut(5));
 		add(label, 1);
+		if(label.spacer != null) add(label.spacer, 1);
 		labelQueue.addFirst(label);
-		if(getComponentCount() > 10) {
-			Component c = labelQueue.removeLast();
+		if(useTimer) {
+			System.out.println("component count: " + getComponentCount());
+			System.out.println("label queue size: " + labelQueue.size());
+		}
+		while(labelQueue.size() > 10) {
+			TimerLabel c = labelQueue.removeLast();
 			remove(c);
+			if(c.spacer != null) remove(c.spacer);
+			if(useTimer)
+				System.out.println("component count after removal of "+c+": "+getComponentCount());
 		}
 		// repack();
-		revalidate();
-		repaint();
+		// revalidate();
+		// repaint();
 	}
 	
 	public void autocomplete(TabResponse response) {
@@ -259,10 +265,12 @@ public class ChatScreen extends MenuScreen {
 	private class TimerLabel extends JLabel {
 		private boolean started = false;
 		private long startTime;
+		private final Component spacer;
 		// private final boolean connect;
 		
-		TimerLabel(String label, @Nullable Color color) {
+		TimerLabel(String label, @Nullable Color color, @Nullable Component spacer) {
 			super("<html><p>"+label+"</p>");
+			this.spacer = spacer;
 			// this.connect = connect;
 			// width(ChatScreen.this.getWidth()/2);
 			// timeLeft = MESSAGE_LIFE_TIME;
@@ -285,7 +293,9 @@ public class ChatScreen extends MenuScreen {
 					startTime = now;
 					MyUtils.delay((int)(MESSAGE_LIFE_TIME*1000), () -> {
 						ChatScreen.this.remove(this);
+						if(spacer != null) ChatScreen.this.remove(spacer);
 						labelQueue.remove(this);
+						// System.out.println("component count after removal of "+this+": "+ChatScreen.this.getComponentCount());
 					});
 				}
 				else {

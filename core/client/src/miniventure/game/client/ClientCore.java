@@ -157,7 +157,7 @@ public class ClientCore extends ApplicationAdapter {
 			if(screen == gameScreen.chatScreen)
 				gameScreen.chatOverlay.setVisible(false);
 			if(menuScreen == gameScreen.chatScreen) {
-				System.out.println("showing overlay");
+				// System.out.println("showing overlay");
 				gameScreen.chatOverlay.setVisible(true);
 				// gameScreen.chatOverlay.setSize(gameScreen.chatOverlay.getPreferredSize());
 				// gameScreen.chatOverlay.invalidate();
