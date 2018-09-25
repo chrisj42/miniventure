@@ -16,11 +16,11 @@ public class ClientHands extends Hands {
 		for(int i = 0; i < slots.length; i++)
 			slots[i] = new HotbarSlot(i, inventory);
 		
-		// hotbarTable = new ItemSelectionTable(slots, ItemSlot.HEIGHT);
+		hotbarTable = new ItemSelectionTable(slots, ItemSlot.HEIGHT);
 		// hotbarTable.pack();
 	}
 	
-	// public ItemSelectionTable getHotbarTable() { return hotbarTable; }
+	public ItemSelectionTable getHotbarTable() { return hotbarTable; }
 	
 	@Override
 	public void setSelection(int idx) {
@@ -72,6 +72,4 @@ public class ClientHands extends Hands {
 			return ClientHands.this.getCount(getItem()); // includes both inventory and hotbar
 		}
 	}
-	
-	public int getSlots() { return 0; }
 }

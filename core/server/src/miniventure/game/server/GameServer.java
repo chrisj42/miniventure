@@ -222,7 +222,7 @@ public class GameServer implements GameProtocol {
 					Hands hotbar = client.getHands();
 					Array<Item> items = new Array<>(Item.class);
 					items.addAll(inv.getItems());
-					// items.addAll(hotbar.getItems());
+					items.addAll(hotbar.getItems());
 					
 					// clear inventory and hand of items, load given items, and add them one by one
 					inv.loadItems(update.inventory);
@@ -235,13 +235,13 @@ public class GameServer implements GameProtocol {
 						}
 						else items.removeValue(item, false);
 					}
-					/*for(Item item: hotbar.getItems()) {
+					for(Item item: hotbar.getItems()) {
 						if(!items.contains(item, false)) {
 							// client sent over item that the server doesn't have
 							hotbar.removeItem(item);
 						}
 						else items.removeValue(item, false);
-					}*/
+					}
 					
 					// now check for any remaining items that the server had, but not the client, and add them back
 					for(Item item: items.shrink()) {
