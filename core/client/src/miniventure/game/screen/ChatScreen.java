@@ -91,7 +91,7 @@ public class ChatScreen extends MenuScreen {
 			
 			
 			// don't add the entry if we are just redoing the previous action
-			if(prevCommandIdx > 0 || !text.equals(previousCommands.get(prevCommandIdx)))
+			if(prevCommandIdx != 0 || !text.equals(previousCommands.get(prevCommandIdx)))
 				previousCommands.push(text);
 			prevCommandIdx = -1; // reset the scrollback index
 			if(previousCommands.size() > COMMAND_BUFFER_SIZE)
