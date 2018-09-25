@@ -84,7 +84,7 @@ public final class ClientUtils {
 	 */
 	public static void addToAnchorLayout(Component comp, RelPos componentAnchor, Container parent, RelPos containerAnchor, int anchorOffsetX, int anchorOffsetY) {
 		if(parent.getLayout() != null) {
-			System.out.println("NOTE: removing layout " + parent.getLayout() + " from container " + parent + " in order to use anchor layout with component " + comp + ".");
+			System.err.println("NOTE: removing layout " + parent.getLayout() + " from container " + parent + " in order to use anchor layout with component " + comp + ".");
 			parent.setLayout(null); // parent cannot have layout for this to work.
 		}
 		Action resized = () -> {
@@ -97,14 +97,23 @@ public final class ClientUtils {
 			
 			parentAnchor.translate(anchorOffsetX, anchorOffsetY);
 			comp.setLocation(parentAnchor.x + locAnchorDifference.x, parentAnchor.y + locAnchorDifference.y);
+			if(comp instanceof ChatScreen)
+				System.out.println("ChatScreen@"+comp.hashCode()+" being resized and repositioned; new bounds: "+comp.getBounds());
 		};
 		ComponentListener l = new ComponentAdapter() {
 			@Override
 			public void componentResized(ComponentEvent e) {
 				SwingUtilities.invokeLater(resized::act);
 			}
+			
+			@Override
+			public void componentShown(ComponentEvent e) {
+				if(e.getComponent() == comp)
+					SwingUtilities.invokeLater(resized::act);
+			}
 		};
 		addTempListener(parent, comp, l);
+		comp.addComponentListener(l);
 		resized.act();
 	}
 	public static void addToAnchorLayout(Component comp, RelPos componentAnchor, Container parent, RelPos containerAnchor) {

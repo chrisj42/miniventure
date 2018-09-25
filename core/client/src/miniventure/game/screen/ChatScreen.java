@@ -3,13 +3,13 @@ package miniventure.game.screen;
 import javax.swing.Box;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayDeque;
@@ -60,11 +60,11 @@ public class ChatScreen extends MenuScreen {
 		// vGroup.setWidth(getWidth()/2);
 		
 		input = new JTextField("") {
-			@Override
+			/*@Override
 			protected void paintComponent(Graphics g) {
 				if(ClientCore.getScreen() == ChatScreen.this)
 					super.paintComponent(g);
-			}
+			}*/
 			
 			@Override
 			public Dimension getPreferredSize() {
@@ -74,6 +74,9 @@ public class ChatScreen extends MenuScreen {
 		
 		if(timeOutMessages)
 			ClientUtils.setupTransparentAWTContainer(input);
+		
+		// setBackground(Color.BLUE);
+		// setOpaque(true);
 		
 		// input.setAlignmentX(RIGHT_ALIGNMENT);
 		
@@ -163,22 +166,22 @@ public class ChatScreen extends MenuScreen {
 		
 		// add(input);
 		add(input);
-		if(useTimer) {
-			// add(new JButton("Hello!"));
-			// add(new JButton("He!"));
-			// add(new JButton("Helffffo"));
+		if(useTimer)
 			setVisible(false);
-		}
 		add(Box.createVerticalGlue());
 		// repack();
-		// setPreferredSize(new Dimension(400, 300));
+		
+		addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if(e.getKeyCode() == KeyEvent.VK_L) {
+					System.out.println("focusing canvas");
+					
+				}
+			}
+		});
 	}
-	/*
-	@Override
-	public void paint(Graphics g) {
-		SwingUtilities.invokeLater(() -> ClientUtils.setupTransparentAWTContainer(this));
-		super.paint(g);
-	}*/
+	
 	
 	public void focus(String initText) {
 		input.setText(initText);
@@ -225,26 +228,11 @@ public class ChatScreen extends MenuScreen {
 		labelQueue.addFirst(label);
 		if(getComponentCount() > 10) {
 			Component c = labelQueue.removeLast();
-			if(useTimer)
-				System.out.println("removing label " +c);
 			remove(c);
 		}
 		// repack();
 		revalidate();
 		repaint();
-		if(useTimer) {
-			System.out.println("msg added to "+this+": "+msg);
-			System.out.println("immediate component count: "+getComponentCount());
-			SwingUtilities.invokeLater(() -> {
-				System.out.println("for msg: "+msg);
-				System.out.println("new component count: "+getComponentCount());
-				System.out.println("new bounds: "+getBounds());
-				System.out.println("msg bounds: "+label.getBounds());
-				System.out.println("msg pref bounds: "+label.getPreferredSize());
-			});
-		}
-		
-		label.invalidate();
 	}
 	
 	public void autocomplete(TabResponse response) {
@@ -291,7 +279,7 @@ public class ChatScreen extends MenuScreen {
 		
 		@Override
 		protected void paintComponent(Graphics g) {
-			if(useTimer && false) {
+			if(useTimer) {
 				long now = System.nanoTime();
 				if(!started) {
 					started = true;
@@ -312,8 +300,6 @@ public class ChatScreen extends MenuScreen {
 					}
 				}
 			}
-			
-			ChatScreen.this.setSize(ChatScreen.this.getPreferredSize());
 			
 			super.paintComponent(g);
 		}

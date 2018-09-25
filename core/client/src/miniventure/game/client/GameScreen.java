@@ -50,7 +50,7 @@ public class GameScreen {
 		
 		chatOverlay = new ChatScreen(true);
 		chatScreen = new ChatScreen(false);
-		System.out.println("overlay: "+chatOverlay);
+		// System.out.println("overlay: "+chatOverlay);
 		hudPanel.add(chatOverlay);
 		chatOverlay.doLayoutBehavior(hudPanel);
 	}
@@ -96,7 +96,7 @@ public class GameScreen {
 		
 		if(!ClientCore.hasMenu()) {
 			if(!shift && ClientCore.input.pressingKey(Keys.T))
-				chatOverlay.focus("");
+				chatScreen.focus("");
 			
 			else if(ClientCore.input.pressingKey(Keys.SLASH))
 				chatScreen.focus("/");

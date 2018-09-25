@@ -5,7 +5,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-import java.awt.Canvas;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.Thread.UncaughtExceptionHandler;
@@ -34,8 +33,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ClientCore extends ApplicationAdapter {
-	
-	public static Canvas gameCanvas;
 	
 	private static GameScreen gameScreen;
 	private static ClientWorld clientWorld;
@@ -101,9 +98,6 @@ public class ClientCore extends ApplicationAdapter {
 			gameScreen = new GameScreen(hudPanel);
 			clientWorld = new ClientWorld(serverStarter, gameScreen);
 			
-			// uiPanel.add(gameScreen.chatOverlay);
-			// gameScreen.chatOverlay.doLayoutBehavior(uiPanel);
-			
 			setScreen(new MainMenu());
 		}));
 	}
@@ -158,10 +152,17 @@ public class ClientCore extends ApplicationAdapter {
 		System.out.println("setting screen to " + screen);
 		
 		if(gameScreen != null) {
-			// if(screen == gameScreen.chatScreen)
-			// 	gameScreen.chatOverlay.setVisible(false);
-			if(menuScreen == gameScreen.chatScreen)
+			// System.out.println("chat screen: "+gameScreen.chatScreen);
+			// System.out.println("chat overlay: "+gameScreen.chatOverlay);
+			if(screen == gameScreen.chatScreen)
+				gameScreen.chatOverlay.setVisible(false);
+			if(menuScreen == gameScreen.chatScreen) {
+				System.out.println("showing overlay");
 				gameScreen.chatOverlay.setVisible(true);
+				// gameScreen.chatOverlay.setSize(gameScreen.chatOverlay.getPreferredSize());
+				// gameScreen.chatOverlay.invalidate();
+				// gameScreen.chatOverlay.invalidate();
+			}
 		}
 		
 		if(menuScreen != null)
@@ -181,19 +182,6 @@ public class ClientCore extends ApplicationAdapter {
 			Gdx.input.setInputProcessor(oldMenuScreen == null ? new InputMultiplexer(gameScreen.getGuiStage(), input) : new InputMultiplexer(oldMenuScreen, gameScreen.getGuiStage()));
 		}*/
 		input.reset(menuScreen == null);
-		if(menuScreen == null)
-			gameCanvas.requestFocus();
-		// System.out.println("input is "+(menuScreen == null ? "enabled" : "disabled"));
-		
-		if(gameScreen != null) {
-			System.out.println(gameScreen.chatOverlay.getParent());
-			if(gameScreen.chatOverlay.getParent() == null) {
-				gameScreen.getHudPanel().add(gameScreen.chatOverlay);
-				gameScreen.chatOverlay.doLayoutBehavior(gameScreen.getHudPanel());
-			}
-			else
-				System.out.println(gameScreen.chatOverlay.getParent().getClass().getSuperclass());
-		}
 	}
 	public static void backToParentScreen() {
 		if(menuScreen != null && menuScreen.getParentScreen() != null) {

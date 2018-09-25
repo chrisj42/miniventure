@@ -7,8 +7,6 @@ import javax.swing.WindowConstants;
 
 import java.awt.Canvas;
 import java.awt.Dimension;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -71,18 +69,6 @@ public class DesktopLauncher {
 			
 			// the canvas where libGDX rendering occurs
 			Canvas awtCanvas = canvas.getCanvas();
-			ClientCore.gameCanvas = awtCanvas;
-			awtCanvas.addKeyListener(new KeyAdapter() {
-				@Override
-				public void keyPressed(KeyEvent e) {
-					if(e.getKeyCode() == KeyEvent.VK_R) {
-						System.out.println("remadkign");
-						hudPanel.revalidate();
-						hudPanel.validate();
-						hudPanel.repaint();
-					}
-				}
-			});
 			ClientUtils.trackParentSize(awtCanvas, frame.getContentPane(), WINDOW_SIZE);
 			awtCanvas.setFocusable(true);
 			awtCanvas.requestFocusInWindow();
@@ -98,13 +84,34 @@ public class DesktopLauncher {
 			});
 			
 			
-			// add a sample button to the ui panel
+			/*frame.addKeyListener(new KeyAdapter() {
+				@Override
+				public void keyPressed(KeyEvent e) {
+					if(e.getKeyCode() == KeyEvent.VK_L) {
+						if(e.isShiftDown()) {
+							System.out.println("canvas request focus in window");
+							awtCanvas.requestFocusInWindow();
+						} else {
+							System.out.println("canvas request focus");
+							awtCanvas.requestFocus();
+						}
+					}
+				}
+			});*/
 			
-			// JButton dialog = new JButton("open dialog");
-			// dialog.addActionListener(e -> JOptionPane.showMessageDialog(null, "Hi!"));
-			//
-			// uiPanel.add(dialog);
-			
+			/*KeyboardFocusManager.getCurrentKeyboardFocusManager().addPropertyChangeListener("focusOwner", e -> {
+				Object oldVal = e.getOldValue();
+				Object newVal = e.getNewValue();
+				String oldStr = oldVal == null ? null : oldVal.getClass().getName();
+				if(oldStr != null)
+					oldStr = oldStr.substring(oldStr.lastIndexOf(".")+1)+"@"+oldVal.hashCode();
+				String newStr = newVal == null ? null : newVal.getClass().getName();
+				if(newStr != null)
+					newStr = newStr.substring(newStr.lastIndexOf(".")+1)+"@"+newVal.hashCode();
+				System.out.println("keyboard focus changed from "+oldStr+" to "+newStr);
+				if(newStr != null && newVal instanceof Component)
+					System.out.println("new component visible: "+((Component)newVal).isVisible());
+			});*/
 			
 			// run the program in the event thread
 			SwingUtilities.invokeLater(() -> {
