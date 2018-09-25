@@ -60,13 +60,13 @@ public class ClientCore extends ApplicationAdapter {
 		errorDisplay.setEditable(false);
 		JScrollPane errorPane = new JScrollPane(errorDisplay);
 		JOptionPane.showMessageDialog(null, errorPane, "An error has occurred", JOptionPane.ERROR_MESSAGE);
-		System.exit(1);
 	};
 	
 	public static final UncaughtExceptionHandler exceptionHandler = (thread, throwable) -> {
 		exceptionNotifier.act(throwable);
-		
 		throwable.printStackTrace();
+		// Gdx.app.exit();
+		System.exit(1);
 	};
 	
 	/*public static final void wrapex(Action a) {
