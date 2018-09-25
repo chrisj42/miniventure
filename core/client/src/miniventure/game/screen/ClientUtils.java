@@ -10,6 +10,7 @@ import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.ContainerAdapter;
 import java.awt.event.ContainerEvent;
 import java.awt.event.ContainerListener;
 
@@ -88,6 +89,7 @@ public final class ClientUtils {
 			parent.setLayout(null); // parent cannot have layout for this to work.
 		}
 		Action resized = () -> {
+			comp.revalidate();
 			comp.setSize(comp.getPreferredSize());
 			Point compAnchor = componentAnchor.forRectangle(comp.getBounds());
 			Point parentAnchor = containerAnchor.forRectangle(parent.getBounds());
@@ -99,6 +101,9 @@ public final class ClientUtils {
 			comp.setLocation(parentAnchor.x + locAnchorDifference.x, parentAnchor.y + locAnchorDifference.y);
 			if(comp instanceof ChatScreen)
 				System.out.println("ChatScreen@"+comp.hashCode()+" being resized and repositioned; new bounds: "+comp.getBounds());
+			
+			if(comp.isVisible())
+				comp.repaint();
 		};
 		ComponentListener l = new ComponentAdapter() {
 			@Override
@@ -114,6 +119,14 @@ public final class ClientUtils {
 		};
 		addTempListener(parent, comp, l);
 		comp.addComponentListener(l);
+		if(comp instanceof Container)
+			((Container) comp).addContainerListener(new ContainerAdapter() {
+				@Override
+				public void componentAdded(ContainerEvent e) { resized.act(); }
+				
+				@Override
+				public void componentRemoved(ContainerEvent e) { resized.act(); }
+			});
 		resized.act();
 	}
 	public static void addToAnchorLayout(Component comp, RelPos componentAnchor, Container parent, RelPos containerAnchor) {

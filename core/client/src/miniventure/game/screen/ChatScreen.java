@@ -163,7 +163,6 @@ public class ChatScreen extends MenuScreen {
 				
 			}
 		});
-		
 		// add(input);
 		add(input);
 		if(useTimer)
