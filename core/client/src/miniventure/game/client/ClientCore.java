@@ -50,6 +50,8 @@ public class ClientCore extends ApplicationAdapter {
 	private final ServerStarter serverStarter;
 	
 	
+	public static final boolean PLAY_MUSIC = false;
+	
 	
 	public static final MonoVoidFunction<Throwable> exceptionNotifier = throwable -> {
 		StringWriter string = new StringWriter();

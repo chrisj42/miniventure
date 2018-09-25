@@ -124,9 +124,11 @@ public class MainMenu extends MenuScreen {
 		});
 		
 		// setup background music
-		Music song = ClientCore.setMusicTrack(Gdx.files.internal("audio/music/title.mp3"));
-		song.setLooping(true);
-		song.play();
+		if(ClientCore.PLAY_MUSIC) {
+			Music song = ClientCore.setMusicTrack(Gdx.files.internal("audio/music/title.mp3"));
+			song.setLooping(true);
+			song.play();
+		}
 	}
 	
 	@Override
