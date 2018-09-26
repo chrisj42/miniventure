@@ -1,7 +1,11 @@
 package miniventure.game.screen;
 
-import javax.swing.*;
-import javax.swing.border.BevelBorder;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 import java.awt.Color;
 import java.awt.EventQueue;
@@ -44,8 +48,8 @@ public class MainMenu extends MenuScreen {
 		ClientWorld world = ClientCore.getWorld();
 		
 		labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.PAGE_AXIS));
-		labelPanel.setBackground(new Color(163, 227, 232));
-		labelPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED, Color.CYAN, Color.GRAY), BorderFactory.createEmptyBorder(20, 30, 20, 20)));
+		labelPanel.setBackground(new Color(163, 227, 232, 0));
+		// labelPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED, Color.CYAN, Color.GRAY), BorderFactory.createEmptyBorder(20, 30, 20, 20)));
 		
 		// table = new Table();
 		// table.setDebug(true);
@@ -54,6 +58,7 @@ public class MainMenu extends MenuScreen {
 		
 		LinkLabel updateLabel = new LinkLabel("Checking for higher versions...", null);
 		labelPanel.add(updateLabel);
+		updateLabel.setForeground(Color.WHITE);
 		add(labelPanel);
 		add(Box.createVerticalStrut(45));
 		setVersionUpdateLabel(updateLabel);
@@ -160,7 +165,7 @@ public class MainMenu extends MenuScreen {
 	@NotNull
 	private JLabel makeLabel(String text) {
 		JLabel lbl = new JLabel(text);
-		lbl.setForeground(Color.BLACK);
+		lbl.setForeground(Color.WHITE);
 		return lbl;
 	}
 	
@@ -183,8 +188,8 @@ public class MainMenu extends MenuScreen {
 			else
 				label.setValue("Connection failed, could not check for updates.", null);
 			
-			// table.pack();
-			// table.setPosition(getWidth()/2, getHeight()/2, Align.center);
+			revalidate();
+			repaint();
 		}
 	}
 }

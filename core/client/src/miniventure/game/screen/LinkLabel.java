@@ -50,7 +50,7 @@ public class LinkLabel extends JLabel implements MouseListener {
 		if(valid())
 			setLinkColor(Color.BLUE);
 		else
-			setLinkColor(Color.BLACK);
+			setLinkColor(Color.WHITE);
 	}
 	
 	private boolean valid() { return url != null && url.length() > 0; }
@@ -58,10 +58,13 @@ public class LinkLabel extends JLabel implements MouseListener {
 	private void setLinkColor(Color color) {
 		this.c = color;
 		refresh();
+		repaint();
 	}
 	
 	private void refresh() {
-		setText("<html><span style='"+(valid()?"text-decoration:underline; ":"")+"color:rgba("+c.getRed()+","+c.getGreen()+","+c.getBlue()+","+c.getAlpha()+")'>"+text+"</span></html>");
+		// System.out.println("color is "+c);
+		setText("<html><span style='"+(valid()?"text-decoration:underline; ":"")+"color:rgb("+c.getRed()+","+c.getGreen()+","+c.getBlue()+")'>"+text+"</span></html>");
+		// setForeground(c);
 	}
 	
 	@Override

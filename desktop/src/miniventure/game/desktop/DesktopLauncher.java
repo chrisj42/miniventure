@@ -6,9 +6,11 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import java.awt.Canvas;
+import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.Frame;
+import java.awt.Window.Type;
+import java.awt.event.*;
 
 import miniventure.game.GameCore;
 import miniventure.game.client.ClientCore;
@@ -49,14 +51,17 @@ public class DesktopLauncher {
 			// the window frame
 			JFrame frame = new JFrame(config.title);
 			frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE); // EXIT_ON_CLOSE interferes with libGDX shutdown
-			frame.getContentPane().setLayout(null); // manual positioning
+			
+			JFrame uiFrame = makeUIFrame(frame);
+			
+			uiFrame.getContentPane().setLayout(null); // manual positioning
 			frame.getContentPane().setPreferredSize(WINDOW_SIZE);
 			
 			// the panel where swing UI components will be added (i.e. menu screens):
-			JPanel hudPanel = makeUIPanel(frame, WINDOW_SIZE);
+			JPanel hudPanel = makeUIPanel(uiFrame, WINDOW_SIZE);
 			
 			// the panel where swing HUD components will be added (i.e. health/hunger bars, debug display, chat overlay):
-			JPanel uiPanel = makeUIPanel(frame, WINDOW_SIZE);
+			JPanel uiPanel = makeUIPanel(uiFrame, WINDOW_SIZE);
 			
 			LwjglCanvas canvas = new LwjglCanvas(new ClientCore(hudPanel, uiPanel, (width, height, callback) -> {
 				ServerCore.initServer(width, height, false);
@@ -69,9 +74,59 @@ public class DesktopLauncher {
 			
 			// the canvas where libGDX rendering occurs
 			Canvas awtCanvas = canvas.getCanvas();
-			ClientUtils.trackParentSize(awtCanvas, frame.getContentPane(), WINDOW_SIZE);
+			frame.add(awtCanvas);
+			// ClientUtils.trackParentSize(awtCanvas, frame.getContentPane(), WINDOW_SIZE);
 			awtCanvas.setFocusable(true);
-			awtCanvas.requestFocusInWindow();
+			awtCanvas.requestFocus();
+			
+			uiFrame.addKeyListener(new KeyListener() {
+				@Override
+				public void keyTyped(KeyEvent e) {
+					e.setSource(awtCanvas);
+					// System.out.println("forwarding key typed event: "+e);
+					awtCanvas.dispatchEvent(e);
+				}
+				
+				@Override
+				public void keyPressed(KeyEvent e) {
+					e.setSource(awtCanvas);
+					// System.out.println("forwarding key pressed event: "+e);
+					awtCanvas.dispatchEvent(e);
+				}
+				
+				@Override
+				public void keyReleased(KeyEvent e) {
+					e.setSource(awtCanvas);
+					// System.out.println("forwarding key released event: "+e);
+					awtCanvas.dispatchEvent(e);
+				}
+			});
+			
+			uiFrame.setFocusTraversalKeysEnabled(false);
+			frame.setFocusTraversalKeysEnabled(false);
+			awtCanvas.setFocusTraversalKeysEnabled(false);
+			// uiPanel.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, null);
+			// uiPanel.setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, null);
+			// uiPanel.setFocusTraversalKeys(KeyboardFocusManager.UP_CYCLE_TRAVERSAL_KEYS, null);
+			
+			awtCanvas.addKeyListener(new KeyListener() {
+				@Override
+				public void keyTyped(KeyEvent e) {
+					// System.out.println("key typed on canvas");
+					ClientCore.input.keyTyped(e.getKeyChar());
+				}
+				
+				@Override
+				public void keyPressed(KeyEvent e) {
+					ClientCore.input.keyDown(e.getExtendedKeyCode());
+				}
+				
+				@Override
+				public void keyReleased(KeyEvent e) {
+					// System.out.println("key released on canvas");
+					ClientCore.input.keyUp(e.getExtendedKeyCode());
+				}
+			});
 			
 			// end the program when the window is closed; this way allows libGDX to shutdown correctly (I think...)
 			frame.addWindowListener(new WindowAdapter() {
@@ -83,40 +138,17 @@ public class DesktopLauncher {
 				}
 			});
 			
-			
-			/*frame.addKeyListener(new KeyAdapter() {
-				@Override
-				public void keyPressed(KeyEvent e) {
-					if(e.getKeyCode() == KeyEvent.VK_L) {
-						if(e.isShiftDown()) {
-							System.out.println("canvas request focus in window");
-							awtCanvas.requestFocusInWindow();
-						} else {
-							System.out.println("canvas request focus");
-							awtCanvas.requestFocus();
-						}
-					}
-				}
-			});*/
-			
-			/*KeyboardFocusManager.getCurrentKeyboardFocusManager().addPropertyChangeListener("focusOwner", e -> {
-				Object oldVal = e.getOldValue();
-				Object newVal = e.getNewValue();
-				String oldStr = oldVal == null ? null : oldVal.getClass().getName();
-				if(oldStr != null)
-					oldStr = oldStr.substring(oldStr.lastIndexOf(".")+1)+"@"+oldVal.hashCode();
-				String newStr = newVal == null ? null : newVal.getClass().getName();
-				if(newStr != null)
-					newStr = newStr.substring(newStr.lastIndexOf(".")+1)+"@"+newVal.hashCode();
-				System.out.println("keyboard focus changed from "+oldStr+" to "+newStr);
-				if(newStr != null && newVal instanceof Component)
-					System.out.println("new component visible: "+((Component)newVal).isVisible());
-			});*/
+			uiFrame.setFocusable(true);
+			frame.setFocusable(true);
 			
 			// run the program in the event thread
 			SwingUtilities.invokeLater(() -> {
+				uiFrame.pack();
 				frame.pack();
 				frame.setVisible(true);
+				// Timer t = new Timer(3000, e -> System.out.println(KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner()));
+				// t.setRepeats(true);
+				// t.start();
 			});
 		}
 	}
@@ -139,12 +171,87 @@ public class DesktopLauncher {
 			}
 		};
 		
+		p.addContainerListener(new ContainerListener() {
+			@Override
+			public void componentAdded(ContainerEvent e) {
+				p.revalidate();
+				p.repaint();
+			}
+			
+			@Override
+			public void componentRemoved(ContainerEvent e) {
+				p.revalidate();
+				p.repaint();
+			}
+		});
+		
 		p.setFocusable(false);
 		p.setOpaque(false);
 		ClientUtils.setupTransparentAWTContainer(p);
 		ClientUtils.trackParentSize(p, frame.getContentPane(), size);
-		// frame.getContentPane().add(p);
 		
 		return p;
+	}
+	
+	private static JFrame makeUIFrame(JFrame frame) {
+		JFrame uiFrame = new JFrame("UI Frame");
+		frame.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) { uiFrame.setVisible(false); uiFrame.dispose(); }
+			
+			@Override
+			public void windowIconified(WindowEvent e) {
+				uiFrame.setExtendedState(Frame.ICONIFIED);
+			}
+			
+			@Override
+			public void windowDeiconified(WindowEvent e) {
+				uiFrame.setExtendedState(Frame.NORMAL);
+			}
+			
+			@Override
+			public void windowActivated(WindowEvent e) {
+				uiFrame.setAlwaysOnTop(true);
+			}
+			
+			@Override
+			public void windowDeactivated(WindowEvent e) {
+				uiFrame.setAlwaysOnTop(false);
+			}
+		});
+		uiFrame.setUndecorated(true);
+		uiFrame.setBackground(new Color(0, 0, 0, 0));
+		uiFrame.setAlwaysOnTop(true);
+		uiFrame.setType(Type.UTILITY);
+		frame.addComponentListener(new ComponentListener() {
+			@Override
+			public void componentResized(ComponentEvent e) {
+				// System.out.println("resizing over frame");
+				SwingUtilities.invokeLater(() -> {
+					uiFrame.setSize(frame.getContentPane().getSize());
+					uiFrame.revalidate();
+				});
+			}
+			
+			@Override
+			public void componentMoved(ComponentEvent e) {
+				// System.out.println("moving over frame");
+				uiFrame.setLocation(frame.getContentPane().getLocationOnScreen());
+			}
+			
+			@Override
+			public void componentShown(ComponentEvent e) {
+				// System.out.println("showing over frame");
+				uiFrame.setVisible(true);
+			}
+			
+			@Override
+			public void componentHidden(ComponentEvent e) {
+				// System.out.println("hiding over frame");
+				uiFrame.setVisible(false);
+			}
+		});
+		
+		return uiFrame;
 	}
 }

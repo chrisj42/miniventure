@@ -59,6 +59,11 @@ public class CraftingScreen extends MenuScreen {
 		}
 	}
 	
+	@Override
+	public void focus() {
+		ClientCore.setScreen(null);
+	}
+	
 	public CraftingScreen(Recipe[] recipes, Inventory playerInventory) {
 		super(true, false);
 		this.playerInv = playerInventory;

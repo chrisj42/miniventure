@@ -4,6 +4,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import java.awt.EventQueue;
+import java.awt.event.KeyEvent;
 
 import miniventure.game.GameCore;
 import miniventure.game.screen.ChatScreen;
@@ -14,7 +15,6 @@ import miniventure.game.world.entity.mob.ClientPlayer;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -66,8 +66,8 @@ public class GameScreen {
 		
 		player.handleInput(getMouseInput());
 		
-		boolean shift = Gdx.input.isKeyPressed(Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Keys.SHIFT_RIGHT);
-		if(shift && GameCore.debug && Gdx.input.isKeyJustPressed(Keys.S)) {
+		boolean shift = ClientCore.input.isKeyDown(KeyEvent.VK_SHIFT);
+		if(shift && GameCore.debug && ClientCore.input.isKeyJustPressed(KeyEvent.VK_S)) {
 			EventQueue.invokeLater(() -> {
 				String newSpeed = JOptionPane.showInputDialog("Enter new Player Speed:", player.getSpeed());
 				try {
@@ -79,10 +79,10 @@ public class GameScreen {
 		
 		levelView.handleInput();
 		
-		if(shift && Gdx.input.isKeyJustPressed(Keys.D) && !Gdx.input.isKeyPressed(Keys.TAB))
+		if(shift && ClientCore.input.isKeyJustPressed(KeyEvent.VK_D) && !ClientCore.input.isKeyDown(KeyEvent.VK_TAB))
 			showDebug = !showDebug;
 		
-		if(shift && ClientCore.input.pressingKey(Keys.T)) {
+		if(shift && ClientCore.input.pressingKey(KeyEvent.VK_T)) {
 			//ClientCore.getClient().send(DatalessRequest.Tile); // debug
 			ClientPlayer p = ClientCore.getWorld().getMainPlayer();
 			try {
@@ -95,13 +95,13 @@ public class GameScreen {
 		}
 		
 		if(!ClientCore.hasMenu()) {
-			if(!shift && ClientCore.input.pressingKey(Keys.T))
+			if(!shift && ClientCore.input.pressingKey(KeyEvent.VK_T))
 				chatScreen.focus("");
 			
-			else if(ClientCore.input.pressingKey(Keys.SLASH))
+			else if(ClientCore.input.pressingKey(KeyEvent.VK_SLASH))
 				chatScreen.focus("/");
 			
-			else if(ClientCore.input.pressingKey(Keys.ESCAPE)) {
+			else if(ClientCore.input.pressingKey(KeyEvent.VK_ESCAPE)) {
 				dialog = true;
 				EventQueue.invokeLater(() -> {
 					int choice = JOptionPane.showConfirmDialog(null, "Leave Server?", "Confirmation", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
@@ -121,13 +121,6 @@ public class GameScreen {
 		batch.begin();
 		renderGui(mainPlayer, level);
 		batch.end();
-		// guiStage.act(Gdx.graphics.getDeltaTime());
-		// guiStage.draw();
-		
-		// if(!(ClientCore.getScreen() instanceof ChatScreen)) {
-		// 	// chatOverlay.act(Gdx.graphics.getDeltaTime());
-		// 	chatOverlay.glDraw();
-		// }
 	}
 	
 	private static Vector2 getMouseInput() {

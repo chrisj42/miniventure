@@ -1,5 +1,7 @@
 package miniventure.game.client;
 
+import java.awt.event.KeyEvent;
+
 import miniventure.game.GameCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Chunk;
@@ -8,7 +10,6 @@ import miniventure.game.world.Level;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -59,12 +60,12 @@ public class LevelViewport {
 	}
 	
 	public void handleInput() {
-		if(Gdx.input.isKeyJustPressed(Keys.MINUS))
+		if(ClientCore.input.isKeyJustPressed(KeyEvent.VK_MINUS))
 			zoom(-1);
-		if(Gdx.input.isKeyJustPressed(Keys.EQUALS) || Gdx.input.isKeyJustPressed(Keys.PLUS))
+		if(ClientCore.input.isKeyJustPressed(KeyEvent.VK_EQUALS) || ClientCore.input.isKeyJustPressed(KeyEvent.VK_PLUS))
 			zoom(1);
 		
-		if(Gdx.input.isKeyJustPressed(Keys.B))
+		if(ClientCore.input.isKeyJustPressed(KeyEvent.VK_B))
 			debug = !debug;
 	}
 	

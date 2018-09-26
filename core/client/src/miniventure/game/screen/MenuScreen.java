@@ -83,13 +83,8 @@ public abstract class MenuScreen extends JPanel {
 	
 	@Override
 	protected void addImpl(Component comp, Object constraints, int index) {
-		if(/*comp instanceof JLabel || */comp instanceof Box.Filler)
+		if(comp instanceof Box.Filler)
 			ClientUtils.setupTransparentAWTContainer(comp);
-		/*
-		if(comp instanceof JLabel) {
-			if(comp.getForeground() == java.awt.Color.WHITE)
-				comp.setForeground(java.awt.Color.BLACK);
-		}*/
 		
 		super.addImpl(comp, constraints, index);
 	}

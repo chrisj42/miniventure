@@ -9,7 +9,6 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayDeque;
@@ -30,7 +29,7 @@ import org.jetbrains.annotations.Nullable;
 public class ChatScreen extends MenuScreen {
 	
 	private static final float MESSAGE_LIFE_TIME = 15; // time from post to removal.
-	private static final float MESSAGE_FADE_TIME = 3; // duration taken to go from full opaque to fully transparent.
+	private static final float MESSAGE_FADE_TIME = 10; // duration taken to go from full opaque to fully transparent.
 	private static final Color BACKGROUND = new Color(128, 128, 128, 255*3/5);
 	
 	private static final int COMMAND_BUFFER_SIZE = 30;
@@ -59,6 +58,8 @@ public class ChatScreen extends MenuScreen {
 		// add(Box.createVerticalStrut(5));
 		// vGroup.setWidth(getWidth()/2);
 		
+		setOpaque(false);
+		setBackground(BACKGROUND);
 		input = new JTextField("") {
 			/*@Override
 			protected void paintComponent(Graphics g) {
@@ -73,7 +74,7 @@ public class ChatScreen extends MenuScreen {
 		};
 		
 		if(timeOutMessages)
-			ClientUtils.setupTransparentAWTContainer(input);
+			input.setVisible(false);
 		
 		// setBackground(Color.BLUE);
 		// setOpaque(true);
@@ -171,16 +172,6 @@ public class ChatScreen extends MenuScreen {
 			setVisible(false);
 		add(Box.createVerticalGlue());
 		// repack();
-		
-		addKeyListener(new KeyAdapter() {
-			@Override
-			public void keyPressed(KeyEvent e) {
-				if(e.getKeyCode() == KeyEvent.VK_L) {
-					System.out.println("focusing canvas");
-					
-				}
-			}
-		});
 	}
 	
 	
@@ -273,6 +264,7 @@ public class ChatScreen extends MenuScreen {
 		TimerLabel(String label, @Nullable Color color, @Nullable Component spacer) {
 			super("<html><p>"+label+"</p>");
 			this.spacer = spacer;
+			setOpaque(false);
 			// this.connect = connect;
 			// width(ChatScreen.this.getWidth()/2);
 			// timeLeft = MESSAGE_LIFE_TIME;
@@ -288,6 +280,8 @@ public class ChatScreen extends MenuScreen {
 		
 		@Override
 		protected void paintComponent(Graphics g) {
+			g.setColor(getBackground());
+			g.fillRect(getX(), getY(), getWidth(), getHeight());
 			if(useTimer) {
 				long now = System.nanoTime();
 				if(!started) {
@@ -305,9 +299,9 @@ public class ChatScreen extends MenuScreen {
 					if(timeLeft < MESSAGE_FADE_TIME) {
 						float alpha = timeLeft / MESSAGE_FADE_TIME;
 						Color c = getForeground();
-						setForeground(new Color(c.getRed(), c.getGreen(), c.getBlue(), (int) (alpha * 255)));
+						setForeground(new Color(c.getRed(), c.getGreen(), c.getBlue(), (int) (alpha * c.getAlpha())));
 						c = getBackground();
-						setBackground(new Color(c.getRed(), c.getGreen(), c.getBlue(), (int) (alpha * 255)));
+						setBackground(new Color(c.getRed(), c.getGreen(), c.getBlue(), (int) (alpha * c.getAlpha())));
 					}
 				}
 			}

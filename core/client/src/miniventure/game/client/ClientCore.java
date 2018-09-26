@@ -71,15 +71,6 @@ public class ClientCore extends ApplicationAdapter {
 		System.exit(1);
 	};
 	
-	/*public static final void wrapex(Action a) {
-		try {
-			a.act();
-		} catch(Throwable t) {
-			exceptionHandler.uncaughtException(Thread.currentThread(), t);
-			throw t;
-		}
-	}*/
-	
 	public ClientCore(JPanel hudPanel, JPanel uiPanel, ServerStarter serverStarter) {
 		this.hudPanel = hudPanel;
 		ClientCore.uiPanel = uiPanel;
@@ -99,6 +90,7 @@ public class ClientCore extends ApplicationAdapter {
 			
 			gameScreen = new GameScreen(hudPanel);
 			clientWorld = new ClientWorld(serverStarter, gameScreen);
+			Gdx.input.setInputProcessor(input);
 			
 			setScreen(new MainMenu());
 		}));
@@ -109,15 +101,12 @@ public class ClientCore extends ApplicationAdapter {
 		if(gameScreen != null)
 			gameScreen.dispose();
 		
-		// if(menuScreen != null)
-		// 	menuScreen.dispose();
-		
 		GameCore.dispose();
 	}
 	
 	@Override
 	public void render() {
-		input.update();
+		input.update(true);
 		
 		if (clientWorld != null && clientWorld.worldLoaded())
 			clientWorld.update(GameCore.getDeltaTime()); // renders as well
@@ -128,43 +117,27 @@ public class ClientCore extends ApplicationAdapter {
 			// some menus use libGDX to render some or all of their graphics (most likely the background); this is their opportunity to do so.
 			menuScreen.glDraw();
 		
-		// if (menuScreen != null)
-		// 	menuScreen.act();
-		// if (menuScreen != null)
-		// 	menuScreen.draw();
+		input.update(false);
 	}
 	
 	public static void setScreen(@Nullable MenuScreen screen) {
-		// if(screen == menuScreen)
-		// 	return; // nothing is happening here.
-		
 		if(menuScreen instanceof InventoryScreen) {
-			//System.out.println("sending held item request to server for "+clientWorld.getMainPlayer().getHands().getUsableItem());
 			getClient().send(new InventoryUpdate(null, clientWorld.getMainPlayer().getHands()));
 		}
 		
 		if(menuScreen instanceof MainMenu && screen instanceof ErrorScreen)
 			return; // ignore it.
 		
-		// if(screen == null && menuScreen != null && menuScreen != gameScreen.chatScreen)
-		// 	menuScreen.dispose();
 		if(screen != null && menuScreen != null && (gameScreen == null || menuScreen != gameScreen.chatScreen))
 			screen.setParentScreen(menuScreen); // when are you going to go from a chat screen to another screen...?
 		
 		System.out.println("setting screen to " + screen);
 		
 		if(gameScreen != null) {
-			// System.out.println("chat screen: "+gameScreen.chatScreen);
-			// System.out.println("chat overlay: "+gameScreen.chatOverlay);
 			if(screen == gameScreen.chatScreen)
 				gameScreen.chatOverlay.setVisible(false);
-			if(menuScreen == gameScreen.chatScreen) {
-				// System.out.println("showing overlay");
+			if(menuScreen == gameScreen.chatScreen)
 				gameScreen.chatOverlay.setVisible(true);
-				// gameScreen.chatOverlay.setSize(gameScreen.chatOverlay.getPreferredSize());
-				// gameScreen.chatOverlay.invalidate();
-				// gameScreen.chatOverlay.invalidate();
-			}
 		}
 		
 		if(menuScreen != null)
@@ -230,10 +203,6 @@ public class ClientCore extends ApplicationAdapter {
 	public void resize(int width, int height) {
 		if(gameScreen != null)
 			gameScreen.resize(width, height);
-		
-		// MenuScreen menu = getScreen();
-		// if(menu != null)
-		// 	menu.getViewport().update(width, height, true);
 	}
 	
 	
