@@ -13,10 +13,8 @@ public class Inventory {
 	private final ArrayList<Item> uniqueItems;
 	private final InstanceCounter<Item> itemCounter;
 	private int spaceTaken = 0;
-	// private Item[] items; // mainly for the optimization of getItems
 	
 	public Inventory(int size) {
-		// items = new Item[size];
 		this.size = size;
 		uniqueItems = new ArrayList<>(size);
 		itemCounter = new InstanceCounter<>(size);
@@ -24,7 +22,6 @@ public class Inventory {
 	}
 	
 	public void reset() {
-		// Arrays.fill(items, hand);
 		itemCounter.clear();
 		uniqueItems.clear();
 		itemCounter.put(hand, size);
@@ -64,54 +61,6 @@ public class Inventory {
 		spaceTaken -= item.getSpaceUsage();
 		return true;
 	}
-	
-	/*private int getFirstMatch(Item item) { return getFirstMatch(0, item); }
-	private int getFirstMatch(int startIdx, Item item) {
-		for(int i = startIdx; i < size; i++)
-			if(items[i].equals(item))
-				return i;
-		
-		return -1;
-	}*/
-	
-	/*private int getLastMatch(Item item) { return getLastMatch(0, item); }
-	private int getLastMatch(int startIdx, Item item) {
-		for(int i = Math.min(startIdx, size-1); i >= 0; i--)
-			if(items[i].equals(item))
-				return i;
-		
-		return -1;
-	}*/
-	
-	Item getUniqueItemAt(int idx) {
-		if(idx >= uniqueItems.size())
-			throw new IndexOutOfBoundsException("cannot access uniqueItems index " + idx + "; though inventory can contain " + size + " items, unique item count is "+uniqueItems.size()+".");
-		
-		return uniqueItems.get(idx);
-	}
-	
-	/*Item replaceUniqueItemAt(int idx, Item item) {
-		checkIndex(idx);
-		// okay to replace with hand item.
-		if(item == null)
-			item = hand;
-		
-		Item cur = uniqueItems.get(idx);
-		if(itemCounter.removeInstance(cur) == 0 && !(cur instanceof HandItem))
-			uniqueItems.remove(cur); // remove from here if none are left; there shouldn't be any HandItems here.
-		
-		// add new items to uniqueItems
-		if(itemCounter.add(item) == 1 && !(item instanceof HandItem))
-			uniqueItems.add(0, item); // don't put any HandItems here.
-		
-		// items[idx] = item;
-		uniqueItems.set(idx, item);
-		return cur;
-	}*/
-	
-	/*private void checkIndex(int idx) {
-		
-	}*/
 	
 	
 	public String[] save() {

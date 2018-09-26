@@ -80,13 +80,6 @@ public class Hands {
 	public void setSelection(int idx) { selection = idx; }
 	public int getSelection() { return selection; }
 	
-	/*void swapItem(Inventory inv, int invIdx, int hotbarIdx) {
-		Item item = inv.replaceItemAt(invIdx, getItemAt(hotbarIdx));
-		replaceItemAt(hotbarIdx, item);
-	}*/
-	
-	// public void resetItemUsage() {}
-	
 	/** @noinspection BooleanMethodIsAlwaysInverted*/
 	public boolean hasUsableItem() { return !(getSelectedItem().isUsed()); }
 	

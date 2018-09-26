@@ -176,14 +176,8 @@ public class ClientCore extends ApplicationAdapter {
 		}
 		
 		menuScreen = screen;
-		if(menuScreen != null) menuScreen.focus();
-		/*if(gameScreen == null) {
-			Gdx.input.setInputProcessor(oldMenuScreen == null ? input : oldMenuScreen);
-		}
-		else {
-			Gdx.input.setInputProcessor(oldMenuScreen == null ? new InputMultiplexer(gameScreen.getGuiStage(), input) : new InputMultiplexer(oldMenuScreen, gameScreen.getGuiStage()));
-		}*/
 		input.reset(menuScreen == null);
+		if(menuScreen != null) menuScreen.focus();
 	}
 	public static void backToParentScreen() {
 		if(menuScreen != null && menuScreen.getParentScreen() != null) {
@@ -193,14 +187,11 @@ public class ClientCore extends ApplicationAdapter {
 			uiPanel.remove(menuScreen);
 			uiPanel.add(screen);
 			screen.doLayoutBehavior(uiPanel);
-			screen.focus();
 			
 			menuScreen = screen;
-			// Gdx.input.setInputProcessor(menuScreen);
 			input.reset(false);
+			screen.focus();
 		}
-		// else
-		// 	input.reset(true);
 	}
 	
 	public static void playSound(String soundName) {

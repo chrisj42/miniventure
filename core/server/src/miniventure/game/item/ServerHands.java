@@ -16,22 +16,7 @@ public class ServerHands extends Hands {
 		this.player = player;
 	}
 	
-	/*@Override
-	void dropItem(@NotNull Item item) {
-		boolean removed = player.getInventory().removeItem(item);
-		
-		ServerLevel level = player.getLevel();
-		if(level != null && removed)
-			level.addEntity(new ItemEntity(item, player.getDirection().getVector()), player.getPosition(), true);
-		
-		// TO-DO update the client's inventory (note that the server ultimately keeps track of the player's inventory)
-		ServerCore.getServer().sendToPlayer(player, new InventoryUpdate(player.getInventory(), player.getHands()));
-	}*/
-	
-	// @Override
 	public void resetItemUsage() {
-		// super.resetItemUsage();
-		
 		Item item = getSelectedItem();
 		
 		if(!item.isUsed()) return;
