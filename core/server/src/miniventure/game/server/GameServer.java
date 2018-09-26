@@ -17,7 +17,6 @@ import miniventure.game.chat.MessageBuilder;
 import miniventure.game.chat.command.Command;
 import miniventure.game.chat.command.CommandInputParser;
 import miniventure.game.item.Hands;
-import miniventure.game.item.Inventory;
 import miniventure.game.item.Item;
 import miniventure.game.item.ItemStack;
 import miniventure.game.item.Recipe;
@@ -217,43 +216,18 @@ public class GameServer implements GameProtocol {
 				});
 				
 				forPacket(object, InventoryUpdate.class, update -> {
-					// so, we need to check the sent over inventory and hotbar data, and make sure that all the items in the sent over match all the items of the server player. 
-					Inventory inv = client.getInventory();
+					// update the server hotbar with the one sent by the client. then, validate the hotbar.
+					
 					Hands hotbar = client.getHands();
-					Array<Item> items = new Array<>(Item.class);
-					items.addAll(inv.getItems());
-					items.addAll(hotbar.getItems());
+					hotbar.loadItemShortcuts(update.hotbar);
+					boolean updated = hotbar.validate();
 					
-					// clear inventory and hand of items, load given items, and add them one by one
-					inv.loadItems(update.inventory);
-					hotbar.loadItems(update.hotbar);
-					
-					for(Item item: inv.getItems()) {
-						if(!items.contains(item, false)) {
-							// client sent over item that the server doesn't have
-							inv.removeItem(item);
-						}
-						else items.removeValue(item, false);
-					}
-					for(Item item: hotbar.getItems()) {
-						if(!items.contains(item, false)) {
-							// client sent over item that the server doesn't have
-							hotbar.removeItem(item);
-						}
-						else items.removeValue(item, false);
-					}
-					
-					// now check for any remaining items that the server had, but not the client, and add them back
-					for(Item item: items.shrink()) {
-						hotbar.addItem(item);
-					}
-					
-					connection.sendTCP(new InventoryUpdate(client));
+					connection.sendTCP(new InventoryUpdate(client.getInventory(), updated ? hotbar : null));
 				});
 				
 				forPacket(object, CraftRequest.class, req -> {
 					Recipe recipe = Recipes.recipes[req.recipeIndex];
-					Item[] left = recipe.tryCraft(client.getHands());
+					Item[] left = recipe.tryCraft(client.getInventory());
 					if(left != null) {
 						ServerLevel level = client.getLevel();
 						if(level != null)

@@ -36,6 +36,8 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.esotericsoftware.kryo.Kryo;
 
+import org.jetbrains.annotations.Nullable;
+
 public interface GameProtocol {
 	
 	int PORT = 8405;
@@ -473,7 +475,12 @@ public interface GameProtocol {
 		
 		private InventoryUpdate() { this((String[])null, null); }
 		public InventoryUpdate(Player player) { this(player.getInventory(), player.getHands()); }
-		public InventoryUpdate(Inventory inv, Hands hands) { this(inv.save(), hands.save()); }
+		public InventoryUpdate(@Nullable Inventory inv, @Nullable Hands hands) {
+			this(
+				inv == null ? null : inv.save(),
+				hands == null ? null : hands.save()
+			);
+		}
 		public InventoryUpdate(String[] inventory, String[] hotbar) {
 			this.inventory = inventory;
 			this.hotbar = hotbar;

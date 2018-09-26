@@ -13,6 +13,7 @@ import miniventure.game.GameProtocol.StatUpdate;
 import miniventure.game.client.ClientCore;
 import miniventure.game.item.ClientHands;
 import miniventure.game.item.CraftingScreen;
+import miniventure.game.item.Hands;
 import miniventure.game.item.Inventory;
 import miniventure.game.item.InventoryScreen;
 import miniventure.game.item.Recipes;
@@ -73,7 +74,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 		inventory = new Inventory(INV_SIZE); // no must-fit because that is handled by the server
 		hands = new ClientHands(inventory);
 		
-		hands.loadItems(data.inventory.hotbar);
+		hands.loadItemShortcuts(data.inventory.hotbar);
 		inventory.loadItems(data.inventory.inventory);
 		
 		Stat.load(data.stats, this.stats);
@@ -181,9 +182,9 @@ public class ClientPlayer extends ClientEntity implements Player {
 		//	animator.requestState(AnimationState.ATTACK);
 		//}
 		
-		hands.resetItemUsage();
+		// hands.resetItemUsage();
 		
-		for(int i = 0; i < hands.getSlots(); i++)
+		for(int i = 0; i < Hands.HOTBAR_SIZE; i++)
 			if(Gdx.input.isKeyJustPressed(Keys.NUM_1+i))
 				hands.setSelection(i);
 		
@@ -192,7 +193,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 				// do nothing here; instead, tell the server to set the held item once selected (aka on inventory menu exit). The inventory should be up to date already, generally speaking.
 				ClientCore.setScreen(new InventoryScreen(inventory, hands));
 			} else if(ClientCore.input.pressingKey(Keys.Z))
-				ClientCore.setScreen(new CraftingScreen(Recipes.recipes, hands));
+				ClientCore.setScreen(new CraftingScreen(Recipes.recipes, inventory));
 			else if(ClientCore.input.pressingKey(Keys.Q)) {
 				hands.dropInvItems(hands.getSelectedItem(), Gdx.input.isKeyPressed(Keys.SHIFT_LEFT));
 			}
@@ -232,7 +233,8 @@ public class ClientPlayer extends ClientEntity implements Player {
 		drawStat(Stat.Stamina, canvas.x, hold.y, batch, hold);
 		drawStat(Stat.Hunger, canvas.x, hold.y, batch, hold);
 		
-		hands.getHotbarTable().setLocation((int)hold.x+20, 8);
+		// fixme draw hotbar table
+		// hands.getHotbarTable().setLocation((int)hold.x+20, 8);
 	}
 	
 	private Vector2 renderBar(Stat stat, float x, float y, SpriteBatch batch) { return renderBar(stat, x, y, batch, 0); }

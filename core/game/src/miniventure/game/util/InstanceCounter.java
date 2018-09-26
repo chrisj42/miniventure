@@ -6,9 +6,8 @@ import org.jetbrains.annotations.NotNull;
 
 public class InstanceCounter<T> extends HashMap<T, Integer> {
 	
-	public InstanceCounter() {
-		
-	}
+	public InstanceCounter() {}
+	public InstanceCounter(int initialCapacity) { super(initialCapacity); }
 	
 	public Integer add(T instance) {
 		Integer newVal = get(instance)+1;
@@ -34,12 +33,14 @@ public class InstanceCounter<T> extends HashMap<T, Integer> {
 	@Override @NotNull
 	public Integer remove(Object instance) {
 		Integer cur = super.remove(instance);
+		//noinspection ConstantConditions // because it's wrong
 		return cur == null ? 0 : cur;
 	}
 	
 	@Override @NotNull
 	public Integer put(T instance, Integer count) {
 		Integer prevVal = super.put(instance, count);
+		//noinspection ConstantConditions // because it's wrong
 		return prevVal == null ? 0 : prevVal;
 	}
 }

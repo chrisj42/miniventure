@@ -11,13 +11,16 @@ public final class HandItem extends Item {
 	}
 	
 	@Override
+	public int getSpaceUsage() { return 0; }
+	
+	@Override
 	public String[] save() { return new String[] { ItemType.Misc.name(), MyUtils.encodeStringArray(HandItem.class.getSimpleName()) }; }
 	
 	/** @noinspection Contract*/
 	public static Item load(String[] data) { return new HandItem(); }
 	
 	@Override public Item getUsedItem() { return this; }
-	@Override public Item copy() { return new HandItem(); }
+	@Override public Item copy() { return this; }
 	
 	@Override public boolean interact(WorldObject obj, Player player) {
 		boolean success = obj.interactWith(player, null);

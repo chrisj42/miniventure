@@ -60,7 +60,7 @@ public class ServerPlayer extends ServerMob implements Player {
 		//stats.put(Stat.Armor, Integer.parseInt(data[3]));
 		
 		inventory.loadItems(MyUtils.parseLayeredString(data[3]));
-		hands.loadItems(MyUtils.parseLayeredString(data[4]));
+		hands.loadItemShortcuts(MyUtils.parseLayeredString(data[4]));
 	}
 	
 	@Override
@@ -142,7 +142,8 @@ public class ServerPlayer extends ServerMob implements Player {
 	public Inventory getInventory() { return inventory; }
 	
 	public boolean takeItem(@NotNull Item item) {
-		if(hands.addItem(item)) {
+		if(inventory.addItem(item)) {
+			hands.addItem(item); // add to open hotbar slot if it exists
 			ServerCore.getServer().playEntitySound("pickup", this, false);
 			ServerCore.getServer().sendToPlayer(this, new InventoryUpdate(this));
 			return true;

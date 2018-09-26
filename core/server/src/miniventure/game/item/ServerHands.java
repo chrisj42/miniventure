@@ -3,6 +3,7 @@ package miniventure.game.item;
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.InventoryUpdate;
 import miniventure.game.server.ServerCore;
+import miniventure.game.world.ServerLevel;
 import miniventure.game.world.entity.mob.Player.Stat;
 import miniventure.game.world.entity.mob.ServerPlayer;
 
@@ -27,9 +28,9 @@ public class ServerHands extends Hands {
 		ServerCore.getServer().sendToPlayer(player, new InventoryUpdate(player.getInventory(), player.getHands()));
 	}*/
 	
-	@Override
+	// @Override
 	public void resetItemUsage() {
-		super.resetItemUsage();
+		// super.resetItemUsage();
 		
 		Item item = getSelectedItem();
 		
@@ -41,20 +42,47 @@ public class ServerHands extends Hands {
 		if(!GameCore.debug)
 			player.changeStat(Stat.Stamina, -item.getStaminaUsage());
 		
-		/*if(getSelectedItemCount() == 1 || item instanceof HandItem)
-			setItem(newItem == null ? new HandItem() : newItem, 1);
-		else {
-			setItem(item, getSelectedItemCount()-1);
-			if(newItem != null && !player.takeItem(newItem)) {// will add it to hand, or inventory, whichever fits.
-				// this happens if the inventory is full; in such a case, drop the new item on the ground.
-				dropItem(newItem); // if there was a new item, and it couldn't be picked up, then the count is not decreased.
-			}
-		}*/
-		if(newItem == null && player.getInventory().removeItem(item))
-			newItem = item.copy();
-		replaceItemAt(getSelection(), newItem);
 		
-		ServerCore.getServer().sendToPlayer(player, new InventoryUpdate(player.getInventory(), player.getHands()));
+		// remove the current item, no matter what.
+		getInv().removeItem(item);
+		if(newItem != null) {
+			// the item has changed, either in metadata or into an entirely separate item.
+			// add the new item to the inventory, and then determine what should become the held item: previous or new item.
+			// if the new item doesn't fit, then drop it on the ground instead.
+			
+			if(!getInv().addItem(newItem)) {
+				// inventory is full, try to drop it on the ground
+				ServerLevel level = player.getLevel();
+				if(level != null)
+					level.dropItem(newItem, player.getCenter(), player.getCenter().add(player.getDirection().getVector()));
+				else // this is a very bad situation, ideally it should never happen.
+					System.err.println("could not drop usage-spawn item "+newItem+", ServerLevel for player "+player+" is null. (inventory is also full)");
+			}
+			else {
+				// item was successfully added to the inventory
+				
+				// check if the original item has run out, in which case the new item should replace it in the hotbar.
+				if(!getInv().hasItem(item))
+					replaceItem(item, newItem);
+				else {
+					// original item still exists; decide if new item should replace it or not
+					if(newItem.getName().equals(item.getName())) {
+						// metadata changed, same item, replace stack
+						replaceItem(item, newItem);
+						// try and keep the stack in the hotbar
+						addItem(item, getSelection());
+					}
+					else // name changed, different item, keep stack
+						addItem(newItem); // try-add new item to hotbar like when you normally pick items up
+				}
+			}
+		}
+		
+		// remove old item from hotbar if it's no longer in the inventory
+		if(!getInv().hasItem(item))
+			removeItem(item);
+		
+		ServerCore.getServer().sendToPlayer(player, new InventoryUpdate(player));
 	}
 	
 	@Override

@@ -177,16 +177,17 @@ public class ClientWorld extends WorldManager {
 	
 	public void spawnPlayer(SpawnData data) {
 		// this has to come before making the new client player, because it has the same eid and so will overwrite some things.
+		//fixme hotbar table
 		if(this.mainPlayer != null) {
 			this.mainPlayer.remove();
-			gameScreen.getHudPanel().remove(this.mainPlayer.getHands().getHotbarTable());
+			// gameScreen.getHudPanel().remove(this.mainPlayer.getHands().getHotbarTable());
 		}
 		
 		ClientPlayer mainPlayer = new ClientPlayer(data);
 		PositionUpdate newPos = data.playerData.positionUpdate;
 		mainPlayer.moveTo(newPos.x, newPos.y, newPos.z);
 		
-		gameScreen.getHudPanel().add(mainPlayer.getHands().getHotbarTable());
+		// gameScreen.getHudPanel().add(mainPlayer.getHands().getHotbarTable());
 		
 		this.mainPlayer = mainPlayer;
 		

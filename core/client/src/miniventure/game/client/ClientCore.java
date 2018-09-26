@@ -140,7 +140,7 @@ public class ClientCore extends ApplicationAdapter {
 		
 		if(menuScreen instanceof InventoryScreen) {
 			//System.out.println("sending held item request to server for "+clientWorld.getMainPlayer().getHands().getUsableItem());
-			getClient().send(new InventoryUpdate(clientWorld.getMainPlayer()));
+			getClient().send(new InventoryUpdate(null, clientWorld.getMainPlayer().getHands()));
 		}
 		
 		if(menuScreen instanceof MainMenu && screen instanceof ErrorScreen)
