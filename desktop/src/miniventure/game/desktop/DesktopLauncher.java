@@ -9,6 +9,7 @@ import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
+import java.awt.Toolkit;
 import java.awt.Window.Type;
 import java.awt.event.*;
 
@@ -105,9 +106,6 @@ public class DesktopLauncher {
 			uiFrame.setFocusTraversalKeysEnabled(false);
 			frame.setFocusTraversalKeysEnabled(false);
 			awtCanvas.setFocusTraversalKeysEnabled(false);
-			// uiPanel.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, null);
-			// uiPanel.setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, null);
-			// uiPanel.setFocusTraversalKeys(KeyboardFocusManager.UP_CYCLE_TRAVERSAL_KEYS, null);
 			
 			awtCanvas.addKeyListener(new KeyListener() {
 				@Override
@@ -156,6 +154,9 @@ public class DesktopLauncher {
 			SwingUtilities.invokeLater(() -> {
 				uiFrame.pack();
 				frame.pack();
+				Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+				Dimension frameSize = frame.getSize();
+				frame.setLocation((screenSize.width - frameSize.width)/2, (screenSize.height - frameSize.height)/2);
 				frame.setVisible(true);
 				// Timer t = new Timer(3000, e -> System.out.println(KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner()));
 				// t.setRepeats(true);
