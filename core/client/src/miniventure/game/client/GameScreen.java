@@ -104,7 +104,7 @@ public class GameScreen {
 			else if(ClientCore.input.pressingKey(KeyEvent.VK_ESCAPE)) {
 				dialog = true;
 				EventQueue.invokeLater(() -> {
-					int choice = JOptionPane.showConfirmDialog(null, "Leave Server?", "Confirmation", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+					int choice = JOptionPane.showConfirmDialog(ClientCore.getUiPanel(), "Leave Server?", "Confirmation", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 					if(choice == JOptionPane.YES_OPTION)
 						Gdx.app.postRunnable(() -> ClientCore.getWorld().exitWorld());
 					dialog = false;
