@@ -55,7 +55,7 @@ public class InputHandler implements InputProcessor {
 	
 	public boolean isEnabled() { return enabled; }
 	
-	void reset(boolean enable) {
+	public void reset(boolean enable) {
 		this.enabled = enable;
 		keyPresses.clear();
 	}
