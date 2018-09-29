@@ -230,6 +230,7 @@ public class DesktopLauncher {
 				SwingUtilities.invokeLater(() -> {
 					uiFrame.setSize(frame.getContentPane().getSize());
 					uiFrame.revalidate();
+					// uiFrame.repaint();
 				});
 			}
 			
