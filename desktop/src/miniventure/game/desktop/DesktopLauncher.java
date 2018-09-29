@@ -138,8 +138,19 @@ public class DesktopLauncher {
 				}
 			});
 			
+			uiFrame.addWindowFocusListener(new WindowFocusListener() {
+				@Override
+				public void windowLostFocus(final WindowEvent e) {
+					frame.setFocusableWindowState(true);
+				}
+				
+				@Override
+				public void windowGainedFocus(final WindowEvent e) {
+					frame.setFocusableWindowState(false);
+				}
+			});
+			
 			uiFrame.setFocusable(true);
-			frame.setFocusable(true);
 			
 			// run the program in the event thread
 			SwingUtilities.invokeLater(() -> {
@@ -187,7 +198,7 @@ public class DesktopLauncher {
 		
 		p.setFocusable(false);
 		p.setOpaque(false);
-		ClientUtils.setupTransparentAWTContainer(p);
+		// ClientUtils.setupTransparentAWTContainer(p);
 		ClientUtils.trackParentSize(p, frame.getContentPane(), size);
 		
 		return p;
@@ -219,6 +230,7 @@ public class DesktopLauncher {
 				uiFrame.setAlwaysOnTop(false);
 			}
 		});
+		
 		uiFrame.setUndecorated(true);
 		uiFrame.setBackground(new Color(0, 0, 0, 0));
 		uiFrame.setAlwaysOnTop(true);

@@ -112,12 +112,12 @@ public interface GameProtocol {
 	// this is sent by the client as a command, a single line. Chat messages are already prepended with "msg ". The server sends this whenever a player says something.
 	class Message {
 		public final String msg;
-		public final Integer color;
+		public final int color;
 		
-		private Message() { this(null, (Integer)null); }
-		public Message(String msg) { this(msg, (Integer)null); }
+		private Message() { this(null, 0); }
+		// public Message(String msg) { this(msg, 0); }
 		public Message(String msg, java.awt.Color color) { this(msg, color.getRGB()); }
-		public Message(String msg, Integer color) {
+		public Message(String msg, int color) {
 			this.msg = msg;
 			this.color = color;
 		}

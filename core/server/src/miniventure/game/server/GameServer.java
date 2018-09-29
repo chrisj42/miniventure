@@ -46,6 +46,10 @@ import org.jetbrains.annotations.Nullable;
 
 public class GameServer implements GameProtocol {
 	
+	private static final Color SERVER_CHAT_COLOR = Color.WHITE;
+	private static final Color STATUS_MSG_COLOR = Color.ORANGE;
+	private static final Color ERROR_CHAT_COLOR = new Color(150, 0, 0);
+	
 	private class PlayerData {
 		final Connection connection;
 		@NotNull final ServerPlayer player;
@@ -57,8 +61,8 @@ public class GameServer implements GameProtocol {
 			this.connection = connection;
 			this.player = player;
 			
-			toClientOut = new InfoMessageBuilder(text -> new InfoMessageLine(Color.BLACK, text));
-			toClientErr = new InfoMessageBuilder(toClientOut, text -> new InfoMessageLine(Color.RED, text));
+			toClientOut = new InfoMessageBuilder(text -> new InfoMessageLine(GameCore.DEFAULT_CHAT_COLOR, text));
+			toClientErr = new InfoMessageBuilder(toClientOut, text -> new InfoMessageLine(ERROR_CHAT_COLOR, text));
 			
 			op = connection.getRemoteAddressTCP().getAddress().isLoopbackAddress();
 			
@@ -134,7 +138,7 @@ public class GameServer implements GameProtocol {
 						
 						playerData.validationTimer.start();
 						
-						broadcast(new Message(player.getName()+" joined the server.", Color.ORANGE), false, player);
+						broadcast(new Message(player.getName()+" joined the server.", STATUS_MSG_COLOR), false, player);
 					}
 					else connection.sendTCP(new LoginFailure("Server world is not initialized."));
 					
@@ -247,7 +251,7 @@ public class GameServer implements GameProtocol {
 					Level level = client.getLevel();
 					if(level != null) {
 						Tile t = level.getClosestTile(client.getInteractionRect());
-						connection.sendTCP(new Message(client+" looking at "+(t==null?null:t.toLocString())));
+						connection.sendTCP(new Message(client+" looking at "+(t==null?null:t.toLocString()), GameCore.DEFAULT_CHAT_COLOR));
 					}
 				}
 				
@@ -280,7 +284,7 @@ public class GameServer implements GameProtocol {
 						matches.sort(String::compareToIgnoreCase);
 						
 						if(request.tabIndex < 0)
-							connection.sendTCP(new Message(ArrayUtils.arrayToString(matches.shrink(), "", "", ", ")));
+							connection.sendTCP(new Message(ArrayUtils.arrayToString(matches.shrink(), "", "", ", "), GameCore.DEFAULT_CHAT_COLOR));
 						else {
 							// actually autocomplete
 							connection.sendTCP(new TabResponse(request.manualText, matches.get(request.tabIndex % matches.size)));
@@ -309,7 +313,7 @@ public class GameServer implements GameProtocol {
 				player.getWorld().removePlayer(player);
 				connectionToPlayerDataMap.remove(connection);
 				playerToConnectionMap.remove(player);
-				broadcast(new Message(player.getName()+" left the server.", Color.ORANGE));
+				broadcast(new Message(player.getName()+" left the server.", STATUS_MSG_COLOR));
 				//System.out.println("server disconnected from client: " + connection.getRemoteAddressTCP().getHostString());
 				
 				if(connectionToPlayerDataMap.size() == 0 && !standalone)
@@ -403,8 +407,8 @@ public class GameServer implements GameProtocol {
 	}
 	
 	public Message getMessage(@Nullable ServerPlayer sender, String msg) {
-		if(sender == null) return new Message("Server: "+msg, Color.GRAY);
-		return new Message(sender.getName()+": "+msg);
+		if(sender == null) return new Message("Server: "+msg, SERVER_CHAT_COLOR);
+		return new Message(sender.getName()+": "+msg, GameCore.DEFAULT_CHAT_COLOR);
 	}
 	
 	private void sendEntityValidation(@NotNull PlayerData pData) {

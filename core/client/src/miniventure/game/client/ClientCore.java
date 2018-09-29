@@ -5,7 +5,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-import java.awt.Color;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.Thread.UncaughtExceptionHandler;
@@ -50,7 +49,6 @@ public class ClientCore extends ApplicationAdapter {
 	private final JPanel hudPanel;
 	private final ServerStarter serverStarter;
 	
-	public static final Color DEFAULT_TEXT_COLOR = Color.BLACK;
 	public static final boolean PLAY_MUSIC = false;
 	
 	

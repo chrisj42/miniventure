@@ -16,6 +16,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.LinkedList;
 
+import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.Message;
 import miniventure.game.GameProtocol.TabRequest;
 import miniventure.game.GameProtocol.TabResponse;
@@ -59,6 +60,7 @@ public class ChatScreen extends MenuScreen {
 				return new Dimension(ClientCore.getUiPanel().getSize().width*2/5, super.getPreferredSize().height);
 			}
 		};
+		input.setFocusTraversalKeysEnabled(false);
 		
 		if(timeOutMessages)
 			input.setVisible(false);
@@ -84,7 +86,7 @@ public class ChatScreen extends MenuScreen {
 			else
 				text = text.substring(1);
 			
-			ClientCore.getClient().send(new Message(text, (Integer)null));
+			ClientCore.getClient().send(new Message(text, GameCore.DEFAULT_CHAT_COLOR));
 			ClientCore.setScreen(null);
 		});
 		
@@ -138,8 +140,6 @@ public class ChatScreen extends MenuScreen {
 		
 		add(input);
 		add(Box.createVerticalGlue());
-		if(useTimer)
-			setVisible(false);
 	}
 	
 	
@@ -176,11 +176,11 @@ public class ChatScreen extends MenuScreen {
 		}
 	}
 	
-	private void addMessage(String msg, Integer color) { addMessage(msg, color, false); }
-	private void addMessage(String msg, Integer color, boolean connect) {
+	private void addMessage(String msg, int color) { addMessage(msg, color, false); }
+	private void addMessage(String msg, int color, boolean connect) {
 		TimerLabel label = new TimerLabel(
 		  msg, 
-		  color == null ? ClientCore.DEFAULT_TEXT_COLOR : new Color(color),
+		  new Color(color),
 		  connect ? null : Box.createVerticalStrut(5)
 		);
 		add(label, 1);
@@ -236,7 +236,27 @@ public class ChatScreen extends MenuScreen {
 		protected void paintComponent(Graphics g) {
 			g.setColor(getBackground());
 			g.fillRect(0, 0, getWidth(), getHeight());
+			
+			// g.setColor(Color.BLACK);
 			super.paintComponent(g);
+			/*Graphics2D g2 = (Graphics2D) g;
+			g2.setStroke(new BasicStroke(0.2f));
+			g2.setColor(new Color(255, 255, 255, getForeground().getAlpha()));
+			FontMetrics fm = g2.getFontMetrics();
+			g2.translate(*//*getWidth()/2-fm1.stringWidth(s[1])/2*//*0, fm.getAscent());
+			System.out.println(getText()+" has "+getLineCount()+" lines.");
+			LineMetrics lm = fm.getLineMetrics(getText(), g2);
+			for(int i = 0; i < getLineCount(); i++) {
+				try {
+					int off = getLineStartOffset(i);
+					int len = getLineEndOffset(i) - off;
+					g2.draw(font.createGlyphVector(g2.getFontRenderContext(), getText(off, len)).getOutline());
+				} catch(BadLocationException e) {
+					e.printStackTrace();
+				}
+				g2.translate(*//*getWidth()/2-fm1.stringWidth(s[1])/2*//*0, fm.getHeight());
+			}*/
+			
 			if(useTimer) {
 				long now = System.nanoTime();
 				if(!started) {
