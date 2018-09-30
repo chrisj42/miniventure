@@ -13,7 +13,7 @@ public class InventoryScreen extends MenuScreen {
 	private final ClientHands hands;
 	
 	public InventoryScreen(Inventory inventory, ClientHands hands) {
-		super(true, false);
+		super(false);
 		this.inventory = inventory;
 		this.hands = hands;
 		

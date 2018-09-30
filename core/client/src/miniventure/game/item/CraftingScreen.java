@@ -65,7 +65,7 @@ public class CraftingScreen extends MenuScreen {
 	}
 	
 	public CraftingScreen(Recipe[] recipes, Inventory playerInventory) {
-		super(true, false);
+		super(false);
 		this.playerInv = playerInventory;
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		

@@ -1,5 +1,6 @@
 package miniventure.game.screen;
 
+import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 
 import java.awt.Color;
@@ -25,16 +26,17 @@ public class LoadingScreen extends MenuScreen implements ProgressLogger, Backgro
 	private BackgroundProvider gdxBackground;
 	
 	public LoadingScreen() {
-		super(true, true);
+		super(true);
 	}
 	
 	public void pushMessage(String message, Color color) {
 		final JLabel label = makeLabel(message);
+		label.setBorder(BorderFactory.createEmptyBorder(10, 2, 10, 2));
 		if(color != null) {
 			label.setForeground(color);
 		}
 		messageLabels.push(label);
-		add(label);
+		addComponent(label);
 	}
 	@Override
 	public void pushMessage(String message) {
@@ -50,7 +52,7 @@ public class LoadingScreen extends MenuScreen implements ProgressLogger, Backgro
 	@Override
 	public void popMessage() {
 		JLabel removed = messageLabels.pop();
-		remove(removed);
+		labelPanel.remove(removed);
 	}
 	
 	@Override

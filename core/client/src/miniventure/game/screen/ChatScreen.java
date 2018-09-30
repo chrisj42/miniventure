@@ -1,7 +1,6 @@
 package miniventure.game.screen;
 
 import javax.swing.Box;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import java.awt.Color;
@@ -50,7 +49,7 @@ public class ChatScreen extends MenuScreen {
 	private String manualInput = ""; // this is the part of the command that the user entered manually, and so should not be changed when tabbing.
 	
 	public ChatScreen(boolean timeOutMessages) {
-		super(true, false);
+		super(false);
 		useTimer = timeOutMessages;
 		
 		input = new JTextField("") {
@@ -206,7 +205,7 @@ public class ChatScreen extends MenuScreen {
 	}
 	
 	private static final Font font = new Font("Arial", Font.BOLD, 13);
-	private class TimerLabel extends JTextArea {
+	private class TimerLabel extends MultilineLabel {
 		private boolean started = false;
 		private long startTime;
 		private final Component spacer;
@@ -214,16 +213,10 @@ public class ChatScreen extends MenuScreen {
 		TimerLabel(String label, @NotNull Color color, @Nullable Component spacer) {
 			super(label);
 			this.spacer = spacer;
-			setOpaque(false);
-			setEditable(false);
-			setFocusable(false);
-			setFont(font);
-			setLineWrap(true);
-			setWrapStyleWord(true);
-			setBorder(null);
 			
 			setForeground(new Color(color.getRed(), color.getGreen(), color.getBlue(), 254));
 			setBackground(BACKGROUND);
+			setFont(font);
 		}
 		
 		@Override
@@ -232,15 +225,7 @@ public class ChatScreen extends MenuScreen {
 		}
 		
 		@Override
-		public Dimension getMaximumSize() {
-			return new Dimension(super.getMaximumSize().width, super.getPreferredSize().height);
-		}
-		
-		@Override
 		protected void paintComponent(Graphics g) {
-			g.setColor(getBackground());
-			g.fillRect(0, 0, getWidth(), getHeight());
-			
 			super.paintComponent(g);
 			
 			if(useTimer) {

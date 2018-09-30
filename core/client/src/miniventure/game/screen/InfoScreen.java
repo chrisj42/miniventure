@@ -1,27 +1,19 @@
 package miniventure.game.screen;
 
-import javax.swing.Box;
-import javax.swing.JButton;
-import javax.swing.JLabel;
+import java.awt.Color;
 
 import miniventure.game.client.ClientCore;
 
 public class InfoScreen extends MenuScreen implements BackgroundInheritor {
 	
 	private InfoScreen(String... text) {
-		super(true, true);
-		// Array<String> lines = new Array<>(text);
-		//"(press b to show/hide chunk boundaries)",
-		JLabel instructions = makeLabel("<html><p style='color:white'>"+String.join("<br>", text)+"</p>");
-		// instructions.setWrap(true);
-		// instructions.setPosition(getWidth()/2, getHeight() - instructions.getPrefHeight() - 10, Align.center);
-		add(Box.createVerticalGlue());
-		add(instructions);
-		add(Box.createVerticalGlue());
-		add(Box.createVerticalStrut(30));
-		JButton returnBtn = makeButton("Back to Main Menu", ClientCore::backToParentScreen);
-		// returnBtn.setPosition(getWidth()/2, returnBtn.getPrefHeight()*3/2, Align.center);
-		add(returnBtn);
+		super(true);
+		
+		MultilineLabel label = addComponent(new MultilineLabel(text));
+		
+		addComponent(30, makeButton("Back to Main Menu", ClientCore::backToParentScreen));
+		
+		setBackground(new Color(220, 0, 0, 200));
 	}
 	
 	private BackgroundProvider gdxBackground;

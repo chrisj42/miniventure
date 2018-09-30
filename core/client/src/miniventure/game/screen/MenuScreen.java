@@ -1,37 +1,36 @@
 package miniventure.game.screen;
 
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.*;
+import javax.swing.border.BevelBorder;
 
+import java.awt.Color;
 import java.awt.Component;
-import java.awt.Font;
+import java.awt.Graphics;
 
+import miniventure.game.client.ClientCore;
 import miniventure.game.util.Action;
 import miniventure.game.util.RelPos;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 
 public abstract class MenuScreen extends JPanel {
 	
 	private MenuScreen parent;
-	private final boolean fillScreen;
-	// protected VerticalGroup vGroup;
+	
+	private final boolean clearGdxBackground;
+	
+	protected LabelPanel labelPanel = null; // only instantiated if used
 	
 	/**
-	 * @param transparent if the panel should be transparent; if true, then a call will be made to allow the libGDX canvas to render on top of it.
-	 * @param fillScreen it the menu takes up the entire screen; note that this does not size the menu, but rather paints its background color around it on the libGDX canvas.
+	 * @param clearGdxBackground it the menu takes up the entire screen; note that this does not size the menu, but rather paints its background color around it on the libGDX canvas.
 	 */
-	public MenuScreen(boolean transparent, boolean fillScreen) {
+	public MenuScreen(boolean clearGdxBackground) {
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-		this.fillScreen = fillScreen;
+		this.clearGdxBackground = clearGdxBackground;
 		setFocusable(false);
-		setOpaque(!transparent);
+		setOpaque(false);
+		setBackground(new Color(0, 0, 0, 0));
 	}
 	
 	// called when the menu is focused, the first time and any subsequent times.
@@ -49,49 +48,83 @@ public abstract class MenuScreen extends JPanel {
 		parent.addToAnchorLayout(this, RelPos.CENTER);
 	}
 	
-	private final Color background = new Color();
+	@Override
+	protected void paintComponent(final Graphics g) {
+		if(!isOpaque() && !clearGdxBackground) {
+			g.setColor(getBackground());
+			g.fillRect(0, 0, getWidth(), getHeight());
+		}
+		super.paintComponent(g);
+	}
+	
+	private final com.badlogic.gdx.graphics.Color background = new com.badlogic.gdx.graphics.Color();
 	public void glDraw() {
-		if(fillScreen) {
-			Color.argb8888ToColor(background, getBackground().getRGB());
+		if(clearGdxBackground) {
+			com.badlogic.gdx.graphics.Color.argb8888ToColor(background, getBackground().getRGB());
 			Gdx.gl.glClearColor(background.r, background.g, background.b, background.a);
 			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		}
-		// super.draw();
 	}
 	
-	/*@Override
-	public void dispose() { dispose(true); }
-	public void dispose(boolean disposeParent) {
-		if(disposeParent && parent != null) parent.dispose();
-		super.dispose();
-	}*/
-	
-	protected void addCentered(JComponent comp) {
+	protected void addCentered(JComponent comp) { addCentered(comp, 0); }
+	protected void addCentered(JComponent comp, int space) {
 		comp.setAlignmentX(CENTER_ALIGNMENT);
-		super.add(comp);
+		addSpaced(comp, space);
 	}
 	protected void addSpaced(Component comp, int space) {
 		add(comp);
-		add(Box.createVerticalStrut(space));
+		if(space > 0) add(Box.createVerticalStrut(space));
 	}
-	
-	private static final Font uiFont = new JLabel().getFont().deriveFont(14f);
 	
 	protected static JLabel makeLabel(String text) {
 		JLabel label = new JLabel(text);
-		label.setFont(uiFont);
-		label.setForeground(java.awt.Color.WHITE);
+		label.setFont(ClientCore.DEFAULT_FONT);
 		return label;
 	}
 	
 	protected static JButton makeButton(String text, Action onClick) {
 		JButton button = new JButton(text);
 		button.addActionListener(e -> onClick.act());
+		button.setFont(ClientCore.DEFAULT_FONT);
 		return button;
 	}
 	
 	@Override
 	public String toString() {
 		return getClass().getSimpleName()+"@"+Integer.toHexString(hashCode());
+	}
+	
+	protected static class LabelPanel extends JPanel {
+		
+		public LabelPanel() {
+			setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+			setOpaque(false);
+			setBackground(new Color(163, 227, 232, 200));
+			setBorder(BorderFactory.createCompoundBorder(
+			  BorderFactory.createBevelBorder(BevelBorder.RAISED, Color.CYAN, Color.GRAY),
+			  BorderFactory.createEmptyBorder(20, 30, 20, 20)
+			));
+		}
+		
+		@Override
+		protected void paintComponent(final Graphics g) {
+			g.setColor(getBackground());
+			g.fillRect(0, 0, getWidth(), getHeight());
+			super.paintComponent(g);
+		}
+	}
+	
+	protected <T extends JComponent> T addComponent(T comp) { return addComponent(0, comp, 0); }
+	protected <T extends JComponent> T addComponent(int spacing, T comp) { return addComponent(spacing, comp, 0); }
+	protected <T extends JComponent> T addComponent(T comp, int spacing) { return addComponent(0, comp, spacing); }
+	protected <T extends JComponent> T addComponent(int preSpacing, T comp, int postSpacing) {
+		if(labelPanel == null) {
+			labelPanel = new LabelPanel();
+			add(labelPanel);
+		}
+		if(preSpacing > 0) labelPanel.add(Box.createVerticalStrut(preSpacing));
+		labelPanel.add(comp);
+		if(postSpacing > 0) labelPanel.add(Box.createVerticalStrut(postSpacing));
+		return comp;
 	}
 }

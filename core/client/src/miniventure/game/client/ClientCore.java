@@ -1,11 +1,13 @@
 package miniventure.game.client;
 
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.Thread.UncaughtExceptionHandler;
@@ -47,6 +49,7 @@ public class ClientCore extends ApplicationAdapter {
 	private final AnchorPanel hudPanel;
 	private final ServerStarter serverStarter;
 	
+	public static final Font DEFAULT_FONT = new JLabel().getFont().deriveFont(14f); 
 	public static final boolean PLAY_MUSIC = false;
 	
 	

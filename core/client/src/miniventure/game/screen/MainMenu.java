@@ -1,13 +1,13 @@
 package miniventure.game.screen;
 
-import javax.swing.*;
-import javax.swing.border.BevelBorder;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 
-import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Desktop.Action;
 import java.awt.EventQueue;
-import java.awt.Graphics;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.io.IOException;
@@ -39,71 +39,44 @@ public class MainMenu extends MenuScreen implements BackgroundProvider {
 	private final com.badlogic.gdx.graphics.Color lightOverlay;
 	private final Vector2 cameraPos, cameraDir;
 	
-	private final JPanel labelPanel = new JPanel() {
-		@Override
-		protected void paintComponent(final Graphics g) {
-			g.setColor(getBackground());
-			g.fillRect(0, 0, getWidth(), getHeight());
-			super.paintComponent(g);
-		}
-	};
-	
 	private static final float PAN_SPEED = 4.5f; // in tiles/second.
 	
 	public MainMenu() {
-		super(true, true);
+		super(true);
 		ClientWorld world = ClientCore.getWorld();
 		
-		labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.PAGE_AXIS));
-		labelPanel.setOpaque(false);
-		labelPanel.setBackground(new Color(163, 227, 232, 200));
-		labelPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED, Color.CYAN, Color.GRAY), BorderFactory.createEmptyBorder(20, 30, 20, 20)));
+		addComponent(makeLabel("Welcome to Miniventure!"), 20);
+		addComponent(makeLabel("You are playing version " + GameCore.VERSION), 25);
 		
-		addLabel("Welcome to Miniventure!", 20);
-		addLabel("You are playing version " + GameCore.VERSION, 25);
+		setVersionUpdateLabel(addComponent(makeLabel("Checking for higher versions...")));
 		
-		JLabel updateLabel = addLabel("Checking for higher versions...", 0);
-		add(labelPanel);
-		add(Box.createVerticalStrut(45));
-		setVersionUpdateLabel(updateLabel);
+		add(Box.createVerticalStrut(45)); // space after label panel
 		
-		JButton playButton = makeButton("Play", () -> {
+		addSpaced(makeButton("Play", () -> {
 			if(dialog) return;
 			world.createWorld(0, 0);
-		});
-		add(playButton);
-		add(Box.createVerticalStrut(20));
+		}), 20);
 		
-		JButton joinBtn = makeButton("Join Server", () -> {
+		addSpaced(makeButton("Join Server", () -> {
 			if(dialog) return;
 			dialog = true;
 			EventQueue.invokeLater(() -> {
 				String ipAddress = JOptionPane.showInputDialog("Enter the IP Address you want to connect to.");
 				Gdx.app.postRunnable(() -> {
-					if(ipAddress != null) {
-						// LoadingScreen loader = new LoadingScreen(this);
-						// loader.pushMessage("Preparing to connect...");
-						// ClientCore.setScreen(loader);
+					if(ipAddress != null)
 						world.createWorld(ipAddress);
-					}
 				});
 				dialog = false;
 			});
-		});
+		}), 20);
 		
-		add(joinBtn);
-		add(Box.createVerticalStrut(20));
+		addSpaced(makeButton("Instructions", () -> ClientCore.setScreen(new InstructionsScreen())),
+		  20);
 		
-		JButton helpBtn = makeButton("Instructions", () -> ClientCore.setScreen(new InstructionsScreen()));
-		add(helpBtn);
-		add(Box.createVerticalStrut(20));
+		addSpaced(makeButton("Credits", () -> ClientCore.setScreen(new CreditsScreen())),
+		  20);
 		
-		JButton creditsBtn = makeButton("Credits", () -> ClientCore.setScreen(new CreditsScreen()));
-		add(creditsBtn);
-		add(Box.createVerticalStrut(20));
-		
-		JButton exitBtn = makeButton("Quit", () -> Gdx.app.exit());
-		add(exitBtn);
+		add(makeButton("Quit", () -> Gdx.app.exit()));
 		
 		// setup level scrolling in background
 		
@@ -152,14 +125,6 @@ public class MainMenu extends MenuScreen implements BackgroundProvider {
 		}
 		
 		return vel;
-	}
-	
-	private JLabel addLabel(String msg, int spacing) {
-		JLabel label = makeLabel(msg);
-		label.setForeground(Color.BLACK);
-		labelPanel.add(label);
-		if(spacing > 0) labelPanel.add(Box.createVerticalStrut(spacing));
-		return label;
 	}
 	
 	private void setVersionUpdateLabel(JLabel label) {
