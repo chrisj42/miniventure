@@ -1,16 +1,13 @@
 package miniventure.game.screen;
 
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
+import javax.swing.*;
+import javax.swing.border.BevelBorder;
 
 import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Desktop.Action;
 import java.awt.EventQueue;
+import java.awt.Graphics;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.io.IOException;
@@ -42,7 +39,14 @@ public class MainMenu extends MenuScreen implements BackgroundProvider {
 	private final com.badlogic.gdx.graphics.Color lightOverlay;
 	private final Vector2 cameraPos, cameraDir;
 	
-	private final JPanel labelPanel = new JPanel();
+	private final JPanel labelPanel = new JPanel() {
+		@Override
+		protected void paintComponent(final Graphics g) {
+			g.setColor(getBackground());
+			g.fillRect(0, 0, getWidth(), getHeight());
+			super.paintComponent(g);
+		}
+	};
 	
 	private static final float PAN_SPEED = 4.5f; // in tiles/second.
 	
@@ -51,30 +55,26 @@ public class MainMenu extends MenuScreen implements BackgroundProvider {
 		ClientWorld world = ClientCore.getWorld();
 		
 		labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.PAGE_AXIS));
-		labelPanel.setBackground(new Color(163, 227, 232, 0));
-		// labelPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED, Color.CYAN, Color.GRAY), BorderFactory.createEmptyBorder(20, 30, 20, 20)));
+		labelPanel.setOpaque(false);
+		labelPanel.setBackground(new Color(163, 227, 232, 200));
+		labelPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED, Color.CYAN, Color.GRAY), BorderFactory.createEmptyBorder(20, 30, 20, 20)));
 		
 		addLabel("Welcome to Miniventure!", 20);
 		addLabel("You are playing version " + GameCore.VERSION, 25);
 		
-		JLabel updateLabel = makeLabel("Checking for higher versions...");
-		labelPanel.add(updateLabel);
+		JLabel updateLabel = addLabel("Checking for higher versions...", 0);
 		add(labelPanel);
 		add(Box.createVerticalStrut(45));
 		setVersionUpdateLabel(updateLabel);
 		
-		JButton playButton = new JButton("Play");
-		
-		playButton.addActionListener(e -> {
+		JButton playButton = makeButton("Play", () -> {
 			if(dialog) return;
 			world.createWorld(0, 0);
 		});
-		
 		add(playButton);
 		add(Box.createVerticalStrut(20));
 		
-		JButton joinBtn = new JButton("Join Server");
-		joinBtn.addActionListener(e -> {
+		JButton joinBtn = makeButton("Join Server", () -> {
 			if(dialog) return;
 			dialog = true;
 			EventQueue.invokeLater(() -> {
@@ -113,7 +113,7 @@ public class MainMenu extends MenuScreen implements BackgroundProvider {
 		TimeOfDay time = TimeOfDay.values[MathUtils.random(TimeOfDay.values.length-1)];
 		lightOverlay = TimeOfDay.getSkyColor(time.getStartOffsetSeconds());
 		
-		LevelGenerator generator = new LevelGenerator(MathUtils.random.nextLong(), 200, 100);
+		LevelGenerator generator = new LevelGenerator(MathUtils.random.nextLong(), 200, 100, true);
 		backgroundLevel = new DisplayLevel(generator);
 		
 		Vector2 size = new Vector2(levelView.getViewWidth(), levelView.getViewHeight());//.scl(0.5f);
@@ -156,10 +156,12 @@ public class MainMenu extends MenuScreen implements BackgroundProvider {
 		return vel;
 	}
 	
-	private void addLabel(String msg, int spacing) {
+	private JLabel addLabel(String msg, int spacing) {
 		JLabel label = makeLabel(msg);
+		label.setForeground(Color.BLACK);
 		labelPanel.add(label);
-		labelPanel.add(Box.createVerticalStrut(spacing));
+		if(spacing > 0) labelPanel.add(Box.createVerticalStrut(spacing));
+		return label;
 	}
 	
 	private void setVersionUpdateLabel(JLabel label) {
