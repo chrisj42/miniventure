@@ -2,6 +2,7 @@ package miniventure.game.screen;
 
 import javax.swing.JLabel;
 
+import java.awt.Color;
 import java.util.Stack;
 
 import miniventure.game.util.ProgressLogger;
@@ -25,16 +26,19 @@ public class LoadingScreen extends MenuScreen implements ProgressLogger, Backgro
 	
 	public LoadingScreen() {
 		super(true, true);
-		// setOpaque(true);
-		// setBackground(Color.WHITE);
 	}
 	
-	@Override
-	public void pushMessage(String message) {
+	public void pushMessage(String message, Color color) {
 		final JLabel label = makeLabel(message);
-		// label.setBackground(getBackground());
+		if(color != null) {
+			label.setForeground(color);
+		}
 		messageLabels.push(label);
 		add(label);
+	}
+	@Override
+	public void pushMessage(String message) {
+		pushMessage(message, null);
 	}
 	
 	@Override

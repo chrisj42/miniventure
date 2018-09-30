@@ -7,14 +7,10 @@ import javax.swing.WindowConstants;
 
 import java.awt.Canvas;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 
 import miniventure.game.GameCore;
 import miniventure.game.client.ClientCore;
@@ -54,7 +50,6 @@ public class DesktopLauncher {
 			
 			// the window frame
 			JFrame frame = new JFrame(config.title);
-			frame.setFocusable(true);
 			frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE); // EXIT_ON_CLOSE interferes with libGDX shutdown
 			frame.getContentPane().setPreferredSize(WINDOW_SIZE);
 			
@@ -74,58 +69,18 @@ public class DesktopLauncher {
 				
 			}), config);
 			
-			
 			// the canvas where libGDX rendering occurs
 			Canvas awtCanvas = canvas.getCanvas();
 			frame.add(awtCanvas);
-			awtCanvas.setFocusable(true);
-			awtCanvas.requestFocus();
-			
-			uiFrame.addKeyListener(new KeyListener() {
-				@Override
-				public void keyTyped(KeyEvent e) {
-					e.setSource(awtCanvas);
-					// System.out.println("forwarding key typed event: "+e);
-					awtCanvas.dispatchEvent(e);
-				}
-				
-				@Override
-				public void keyPressed(KeyEvent e) {
-					e.setSource(awtCanvas);
-					// System.out.println("forwarding key pressed event: "+e);
-					awtCanvas.dispatchEvent(e);
-				}
-				
-				@Override
-				public void keyReleased(KeyEvent e) {
-					e.setSource(awtCanvas);
-					// System.out.println("forwarding key released event: "+e);
-					awtCanvas.dispatchEvent(e);
-				}
+			awtCanvas.setFocusable(false);
+			awtCanvas.addFocusListener(new FocusListener() {
+				@Override public void focusGained(final FocusEvent e) { uiFrame.requestFocus(); }
+				@Override public void focusLost(final FocusEvent e) {}
 			});
 			
-			uiFrame.setFocusTraversalKeysEnabled(false);
+			addInputRedirects(uiFrame);
 			frame.setFocusTraversalKeysEnabled(false);
 			awtCanvas.setFocusTraversalKeysEnabled(false);
-			
-			awtCanvas.addKeyListener(new KeyListener() {
-				@Override
-				public void keyTyped(KeyEvent e) {
-					// System.out.println("key typed on canvas");
-					ClientCore.input.keyTyped(e.getKeyChar());
-				}
-				
-				@Override
-				public void keyPressed(KeyEvent e) {
-					ClientCore.input.keyDown(e.getExtendedKeyCode());
-				}
-				
-				@Override
-				public void keyReleased(KeyEvent e) {
-					// System.out.println("key released on canvas");
-					ClientCore.input.keyUp(e.getExtendedKeyCode());
-				}
-			});
 			
 			// end the program when the window is closed; this way allows libGDX to shutdown correctly (I think...)
 			frame.addWindowListener(new WindowAdapter() {
@@ -188,5 +143,57 @@ public class DesktopLauncher {
 		});
 		
 		return uiFrame;
+	}
+	
+	private static void addInputRedirects(Component comp) {
+		comp.setFocusTraversalKeysEnabled(false);
+		
+		// System.out.println("adding key listener to "+comp);
+		comp.addKeyListener(new KeyListener() {
+			@Override
+			public void keyTyped(KeyEvent e) {
+				// System.out.println("key typed on "+e.getSource());
+				ClientCore.input.keyTyped(e.getKeyChar());
+			}
+			
+			@Override
+			public void keyPressed(KeyEvent e) {
+				// System.out.println("key pressed on "+e.getSource());
+				ClientCore.input.keyDown(e.getExtendedKeyCode());
+			}
+			
+			@Override
+			public void keyReleased(KeyEvent e) {
+				// System.out.println("key released on "+e.getSource());
+				ClientCore.input.keyUp(e.getExtendedKeyCode());
+			}
+		});
+		
+		/*comp.addMouseListener(new MouseListener() {
+			@Override
+			public void mouseClicked(final MouseEvent e) {
+				System.out.println("clicked "+e.getSource());
+			}
+			
+			@Override
+			public void mousePressed(final MouseEvent e) {
+				System.out.println("pressed mouse "+e.getSource());
+			}
+			
+			@Override
+			public void mouseReleased(final MouseEvent e) {
+				System.out.println("released mouse "+e.getSource());
+			}
+			
+			@Override
+			public void mouseEntered(final MouseEvent e) {
+				System.out.println("entered "+e.getSource());
+			}
+			
+			@Override
+			public void mouseExited(final MouseEvent e) {
+				System.out.println("exited "+e.getSource());
+			}
+		});*/
 	}
 }

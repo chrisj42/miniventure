@@ -5,6 +5,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+import java.awt.Color;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.Thread.UncaughtExceptionHandler;
@@ -78,7 +79,7 @@ public class ClientCore extends ApplicationAdapter {
 		VisUI.load(Gdx.files.internal("skins/visui/uiskin.json"));
 		
 		LoadingScreen loader = new LoadingScreen();
-		loader.pushMessage("Initializing...");
+		loader.pushMessage("Initializing...", Color.BLACK);
 		setScreen(loader);
 		// TODO once things work, see if removing the 0 delay and just posting the runnable works fine, or if it's still necessary.
 		MyUtils.delay(0, () -> Gdx.app.postRunnable(() -> {
@@ -86,7 +87,7 @@ public class ClientCore extends ApplicationAdapter {
 			
 			gameScreen = new GameScreen(hudPanel);
 			clientWorld = new ClientWorld(serverStarter, gameScreen);
-			Gdx.input.setInputProcessor(input);
+			Gdx.input.setInputProcessor(null);
 			
 			setScreen(new MainMenu());
 		}));
