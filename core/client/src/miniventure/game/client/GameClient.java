@@ -288,7 +288,8 @@ public class GameClient implements GameProtocol {
 			username = JOptionPane.showInputDialog("Specify username:", username);
 			if(username == null) {
 				client.close();
-				Gdx.app.postRunnable(() -> ClientCore.setScreen(new MainMenu()));
+				MenuScreen parent = ClientCore.getScreen() == null ? null : ClientCore.getScreen().getParentScreen();
+				Gdx.app.postRunnable(() -> ClientCore.setScreen(parent == null ? new MainMenu() : parent));
 			}
 			
 			send(new Login(username, GameCore.VERSION));

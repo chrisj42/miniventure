@@ -6,23 +6,43 @@ import javax.swing.JLabel;
 
 import miniventure.game.client.ClientCore;
 
-public class InfoScreen extends MenuScreen {
+public class InfoScreen extends MenuScreen implements BackgroundInheritor {
 	
 	private InfoScreen(String... text) {
 		super(true, true);
 		// Array<String> lines = new Array<>(text);
 		//"(press b to show/hide chunk boundaries)",
-		JLabel instructions = new JLabel("<html><p>"+String.join("<br>", text)+"</p>");
+		JLabel instructions = makeLabel("<html><p style='color:white'>"+String.join("<br>", text)+"</p>");
 		// instructions.setWrap(true);
 		// instructions.setPosition(getWidth()/2, getHeight() - instructions.getPrefHeight() - 10, Align.center);
 		add(Box.createVerticalGlue());
 		add(instructions);
 		add(Box.createVerticalGlue());
+		add(Box.createVerticalStrut(30));
 		JButton returnBtn = makeButton("Back to Main Menu", ClientCore::backToParentScreen);
 		// returnBtn.setPosition(getWidth()/2, returnBtn.getPrefHeight()*3/2, Align.center);
 		add(returnBtn);
 	}
 	
+	private MenuScreen gdxBackground;
+	
+	@Override
+	public void setBackground(final MenuScreen gdxBackground) {
+		this.gdxBackground = gdxBackground;
+	}
+	
+	@Override
+	public MenuScreen getGdxBackground() {
+		return gdxBackground;
+	}
+	
+	@Override
+	public void glDraw() {
+		if(gdxBackground != null)
+			gdxBackground.glDraw();
+		else
+			super.glDraw();
+	}
 	
 	public static class InstructionsScreen extends InfoScreen {
 		public InstructionsScreen() {

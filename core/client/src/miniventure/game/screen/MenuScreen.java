@@ -4,9 +4,11 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import java.awt.Component;
+import java.awt.Font;
 
 import miniventure.game.util.Action;
 import miniventure.game.util.RelPos;
@@ -71,6 +73,15 @@ public abstract class MenuScreen extends JPanel {
 	protected void addSpaced(Component comp, int space) {
 		add(comp);
 		add(Box.createVerticalStrut(space));
+	}
+	
+	private static final Font uiFont = new JLabel().getFont().deriveFont(14f);
+	
+	protected static JLabel makeLabel(String text) {
+		JLabel label = new JLabel(text);
+		label.setFont(uiFont);
+		label.setForeground(java.awt.Color.WHITE);
+		return label;
 	}
 	
 	protected static JButton makeButton(String text, Action onClick) {

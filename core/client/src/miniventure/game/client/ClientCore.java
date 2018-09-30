@@ -16,6 +16,7 @@ import miniventure.game.GameProtocol.Message;
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.item.InventoryScreen;
 import miniventure.game.screen.AnchorPanel;
+import miniventure.game.screen.BackgroundInheritor;
 import miniventure.game.screen.ErrorScreen;
 import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MainMenu;
@@ -128,8 +129,19 @@ public class ClientCore extends ApplicationAdapter {
 		if(menuScreen instanceof MainMenu && screen instanceof ErrorScreen)
 			return; // ignore it.
 		
-		if(screen != null && menuScreen != null && (gameScreen == null || menuScreen != gameScreen.chatScreen))
-			screen.setParentScreen(menuScreen); // when are you going to go from a chat screen to another screen...?
+		if(menuScreen instanceof MainMenu && screen instanceof BackgroundInheritor)
+			((BackgroundInheritor)screen).setBackground(menuScreen);
+		if(menuScreen instanceof BackgroundInheritor && screen instanceof BackgroundInheritor)
+			((BackgroundInheritor)screen).inheritBackground((BackgroundInheritor)menuScreen);
+		
+		if(screen != null && menuScreen != null && (gameScreen == null || menuScreen != gameScreen.chatScreen)) {
+			if(screen instanceof ErrorScreen) {
+				if(menuScreen.getParentScreen() != null)
+					screen.setParentScreen(menuScreen.getParentScreen()); // when are you going to go from a chat screen to another screen...?
+			}
+			else
+				screen.setParentScreen(menuScreen);
+		}
 		
 		System.out.println("setting screen to " + screen);
 		

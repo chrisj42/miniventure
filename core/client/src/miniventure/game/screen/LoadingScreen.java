@@ -2,12 +2,13 @@ package miniventure.game.screen;
 
 import javax.swing.JLabel;
 
-import java.awt.Color;
 import java.util.Stack;
 
 import miniventure.game.util.ProgressLogger;
 
-public class LoadingScreen extends MenuScreen implements ProgressLogger {
+import org.jetbrains.annotations.Nullable;
+
+public class LoadingScreen extends MenuScreen implements ProgressLogger, BackgroundInheritor {
 	
 	/*
 		I want to have a system where it displays a message, and the message shows a #/total progress format.
@@ -20,18 +21,22 @@ public class LoadingScreen extends MenuScreen implements ProgressLogger {
 		Like that.  
 	 */
 	
-	private Stack<JLabel> messageLabels = new Stack<>();
+	private final Stack<JLabel> messageLabels = new Stack<>();
 	
-	public LoadingScreen() {
+	private MenuScreen gdxBackground;
+	
+	public LoadingScreen() { this(null); }
+	public LoadingScreen(@Nullable MenuScreen gdxBackground) {
 		super(true, true);
-		setOpaque(true);
-		setBackground(Color.WHITE);
+		this.gdxBackground = gdxBackground;
+		// setOpaque(true);
+		// setBackground(Color.WHITE);
 	}
 	
 	@Override
 	public void pushMessage(String message) {
-		final JLabel label = new JLabel(message);
-		label.setBackground(getBackground());
+		final JLabel label = makeLabel(message);
+		// label.setBackground(getBackground());
 		messageLabels.push(label);
 		add(label);
 	}
@@ -48,4 +53,21 @@ public class LoadingScreen extends MenuScreen implements ProgressLogger {
 		remove(removed);
 	}
 	
+	@Override
+	public void setBackground(final MenuScreen gdxBackground) {
+		this.gdxBackground = gdxBackground;
+	}
+	
+	@Override
+	public MenuScreen getGdxBackground() {
+		return gdxBackground;
+	}
+	
+	@Override
+	public void glDraw() {
+		if(gdxBackground != null)
+			gdxBackground.glDraw();
+		else
+			super.glDraw();
+	}
 }

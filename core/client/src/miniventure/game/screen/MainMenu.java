@@ -33,8 +33,6 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 
-import org.jetbrains.annotations.NotNull;
-
 public class MainMenu extends MenuScreen {
 	
 	private boolean dialog = false;
@@ -59,9 +57,8 @@ public class MainMenu extends MenuScreen {
 		addLabel("Welcome to Miniventure!", 20);
 		addLabel("You are playing version " + GameCore.VERSION, 25);
 		
-		JLabel updateLabel = new JLabel("Checking for higher versions...");
+		JLabel updateLabel = makeLabel("Checking for higher versions...");
 		labelPanel.add(updateLabel);
-		updateLabel.setForeground(Color.WHITE);
 		add(labelPanel);
 		add(Box.createVerticalStrut(45));
 		setVersionUpdateLabel(updateLabel);
@@ -80,16 +77,15 @@ public class MainMenu extends MenuScreen {
 		joinBtn.addActionListener(e -> {
 			if(dialog) return;
 			dialog = true;
-			LoadingScreen loader = new LoadingScreen();
-			loader.pushMessage("Preparing to connect...");
-			ClientCore.setScreen(loader);
 			EventQueue.invokeLater(() -> {
 				String ipAddress = JOptionPane.showInputDialog("Enter the IP Address you want to connect to.");
 				Gdx.app.postRunnable(() -> {
-					if(ipAddress != null)
+					if(ipAddress != null) {
+						// LoadingScreen loader = new LoadingScreen(this);
+						// loader.pushMessage("Preparing to connect...");
+						// ClientCore.setScreen(loader);
 						world.createWorld(ipAddress);
-					else
-						ClientCore.backToParentScreen();
+					}
 				});
 				dialog = false;
 			});
@@ -163,13 +159,6 @@ public class MainMenu extends MenuScreen {
 		JLabel label = makeLabel(msg);
 		labelPanel.add(label);
 		labelPanel.add(Box.createVerticalStrut(spacing));
-	}
-	
-	@NotNull
-	private JLabel makeLabel(String text) {
-		JLabel lbl = new JLabel(text);
-		lbl.setForeground(Color.WHITE);
-		return lbl;
 	}
 	
 	private void setVersionUpdateLabel(JLabel label) {
