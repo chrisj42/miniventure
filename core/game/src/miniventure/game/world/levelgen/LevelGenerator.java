@@ -47,30 +47,78 @@ public class LevelGenerator {
 		boolean valid = false;
 		Rectangle area = new Rectangle();
 		getSpawnArea(area);
-		int noiseOff = 0;
+		int noiseOffX = 0;
+		int noiseOffY = 0;
+		
+		// double max = 0;
+		// double avg = 0;
+		// int iterations = 0;
+		
 		while(!valid) {
 			// try and find land
+			int landCountUL = 0;
+			int landCountUR = 0;
+			int landCountBL = 0;
+			int landCountBR = 0;
+			int landCountTotal = 0;
 			for(int xo = 0; xo < area.width; xo++) {
 				for(int yo = 0; yo < area.height; yo++) {
-					if(noiseMapper.getTileType((int)area.x+xo+noiseOff, (int)area.y+yo) != TileTypeEnum.WATER) {
-						valid = true;
+					if(noiseMapper.getTileType((int)area.x+xo+noiseOffX, (int)area.y+yo+noiseOffY) != TileTypeEnum.WATER) {
+						landCountTotal++;
+						if(xo < area.width/2) {
+							if(yo < area.height/2)
+								landCountBL++;
+							else
+								landCountUL++;
+						} else {
+							if(yo < area.height/2)
+								landCountBR++;
+							else
+								landCountUR++;
+						}
 						break;
 					}
 				}
-				if(valid) break;
+				// if(valid) break;
 			}
-			if(!valid)
-				noiseOff += area.width;
+			
+			// iterations++;
+			// float frac = landCountTotal / (area.width * area.height);
+			// max = Math.max(frac, max);
+			// avg += frac;
+			// System.out.println("percent covered in land: "+frac);
+			// System.out.println("max: "+max);
+			// System.out.println("avg: "+(avg/iterations));
+			
+			if(landCountTotal < area.width * area.height / 100) {
+				boolean moved = false;
+				if(landCountBL + landCountBR < landCountUL + landCountUR) {
+					// go up
+					noiseOffY += area.height / 2;
+					moved = true;
+				}
+				if(landCountBL + landCountUL < landCountBR + landCountUR) {
+					// go right
+					noiseOffX += area.width / 2;
+					moved = true;
+				}
+				
+				if(!moved && landCountTotal < area.width * area.height / 100) {
+					noiseOffX += area.width * Math.random();
+					noiseOffY += area.height * Math.random();
+				}
+			}
+			else valid = true;
 		}
 		
-		this.noiseOffX = noiseOff;
-		noiseOffY = 0;
+		this.noiseOffX = noiseOffX;
+		this.noiseOffY = noiseOffY;
 	}
 	
 	public Rectangle getSpawnArea(Rectangle rect) {
 		int width = getDim(worldWidth);
 		int height = getDim(worldHeight);
-		return rect.set((worldWidth-width)/2, (worldHeight-height)/2, width, height);
+		return rect.set((worldWidth-width)/2f, (worldHeight-height)/2f, width, height);
 	}
 	private int getDim(int worldDim) {
 		// the idea here is to go from the spawn area being the whole map at 100 tiles across or less, to the center 1000 tiles after 4000, which is a quarter of the width at that point.
