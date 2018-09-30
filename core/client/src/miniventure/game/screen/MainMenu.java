@@ -8,9 +8,14 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import java.awt.Color;
+import java.awt.Desktop;
+import java.awt.Desktop.Action;
 import java.awt.EventQueue;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import miniventure.game.GameCore;
 import miniventure.game.client.ClientCore;
@@ -51,12 +56,10 @@ public class MainMenu extends MenuScreen {
 		labelPanel.setBackground(new Color(163, 227, 232, 0));
 		// labelPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED, Color.CYAN, Color.GRAY), BorderFactory.createEmptyBorder(20, 30, 20, 20)));
 		
-		// table = new Table();
-		// table.setDebug(true);
 		addLabel("Welcome to Miniventure!", 20);
 		addLabel("You are playing version " + GameCore.VERSION, 25);
 		
-		LinkLabel updateLabel = new LinkLabel("Checking for higher versions...", null);
+		JLabel updateLabel = new JLabel("Checking for higher versions...");
 		labelPanel.add(updateLabel);
 		updateLabel.setForeground(Color.WHITE);
 		add(labelPanel);
@@ -169,7 +172,7 @@ public class MainMenu extends MenuScreen {
 		return lbl;
 	}
 	
-	private void setVersionUpdateLabel(LinkLabel label) {
+	private void setVersionUpdateLabel(JLabel label) {
 		if(!GameCore.determinedLatestVersion()) {
 			// return a "loading" label that will be replaced once the version check completes.
 			new Thread(() -> {
@@ -181,12 +184,43 @@ public class MainMenu extends MenuScreen {
 			// add a message saying you have the latest version, or a hyperlink message to the newest jar file.
 			VersionInfo latestVersion = GameCore.getLatestVersion();
 			
-			if(latestVersion.version.compareTo(GameCore.VERSION) > 0) // link new version
-				label.setValue("Miniventure " + latestVersion.releaseName + " Now Available! Click here to download.", latestVersion.assetUrl);
-			else if(latestVersion.releaseName.length() > 0)
-				label.setValue("You have the latest version.", null);
-			else
-				label.setValue("Connection failed, could not check for updates.", null);
+			if(latestVersion.version.compareTo(GameCore.VERSION) > 0) { // link new version
+				JButton btn = new JButton("Miniventure " + latestVersion.releaseName + " Now Available! Click here to download.");
+				btn.addActionListener(e -> openLink(latestVersion.assetUrl));
+				labelPanel.remove(label);
+				labelPanel.add(btn);
+			}
+			else {
+				if(latestVersion.releaseName.length() > 0)
+					label.setText("You have the latest version.");
+				else
+					label.setText("Connection failed, could not check for updates.");
+			}
+			
+			revalidate();
+			repaint();
 		}
+	}
+	
+	private void openLink(String url) {
+		if(!Desktop.isDesktopSupported())
+			showLink(url);
+		else {
+			Desktop desktop = Desktop.getDesktop();
+			if(!desktop.isSupported(Action.BROWSE))
+				showLink(url);
+			else {
+				try {
+					desktop.browse(new URI(url));
+				} catch(IOException | URISyntaxException e) {
+					e.printStackTrace();
+					showLink(url);
+				}
+			}
+		}
+	}
+	
+	private void showLink(String url) {
+		EventQueue.invokeLater(() -> JOptionPane.showMessageDialog(ClientCore.getUiPanel(), url, "Site Link", JOptionPane.INFORMATION_MESSAGE));
 	}
 }
