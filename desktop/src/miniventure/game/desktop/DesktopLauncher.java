@@ -1,16 +1,20 @@
 package miniventure.game.desktop;
 
 import javax.swing.JFrame;
+import javax.swing.JWindow;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Frame;
 import java.awt.Toolkit;
-import java.awt.Window.Type;
-import java.awt.event.*;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import miniventure.game.GameCore;
 import miniventure.game.client.ClientCore;
@@ -50,16 +54,17 @@ public class DesktopLauncher {
 			
 			// the window frame
 			JFrame frame = new JFrame(config.title);
+			frame.setFocusable(true);
 			frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE); // EXIT_ON_CLOSE interferes with libGDX shutdown
 			frame.getContentPane().setPreferredSize(WINDOW_SIZE);
 			
-			JFrame uiFrame = makeUIFrame(frame);
+			JWindow uiFrame = makeUIFrame(frame);
 			
 			// the panel where swing UI components will be added (i.e. menu screens):
-			AnchorPanel hudPanel = new AnchorPanel(uiFrame);
+			AnchorPanel hudPanel = new AnchorPanel(uiFrame.getContentPane());
 			
 			// the panel where swing HUD components will be added (i.e. health/hunger bars, debug display, chat overlay):
-			AnchorPanel uiPanel = new AnchorPanel(uiFrame);
+			AnchorPanel uiPanel = new AnchorPanel(uiFrame.getContentPane());
 			
 			LwjglCanvas canvas = new LwjglCanvas(new ClientCore(hudPanel, uiPanel, (width, height, callback) -> {
 				ServerCore.initServer(width, height, false);
@@ -132,22 +137,6 @@ public class DesktopLauncher {
 				}
 			});
 			
-			uiFrame.addWindowFocusListener(new WindowFocusListener() {
-				@Override
-				public void windowLostFocus(final WindowEvent e) {
-					frame.setFocusableWindowState(true);
-					ClientCore.input.reset(false);
-				}
-				
-				@Override
-				public void windowGainedFocus(final WindowEvent e) {
-					frame.setFocusableWindowState(false);
-					ClientCore.input.reset(true);
-				}
-			});
-			
-			uiFrame.setFocusable(true);
-			
 			// run the program in the event thread
 			SwingUtilities.invokeLater(() -> {
 				uiFrame.pack();
@@ -163,8 +152,8 @@ public class DesktopLauncher {
 		}
 	}
 	
-	private static JFrame makeUIFrame(JFrame frame) {
-		JFrame uiFrame = new JFrame("UI Frame") {
+	private static JWindow makeUIFrame(JFrame frame) {
+		JWindow uiFrame = new JWindow(frame) {
 			@Override
 			public void doLayout() {
 				setSize(getPreferredSize());
@@ -177,58 +166,25 @@ public class DesktopLauncher {
 			}
 		};
 		
-		frame.addWindowListener(new WindowAdapter() {
+		uiFrame.setBackground(new Color(0, 0, 0, 0));
+		uiFrame.setFocusable(true);
+		
+		uiFrame.addWindowFocusListener(new WindowAdapter() {
 			@Override
-			public void windowClosing(WindowEvent e) { uiFrame.setVisible(false); uiFrame.dispose(); }
-			
+			public void windowGainedFocus(final WindowEvent e) { ClientCore.input.reset(true); }
 			@Override
-			public void windowIconified(WindowEvent e) {
-				uiFrame.setExtendedState(Frame.ICONIFIED);
-			}
-			
-			@Override
-			public void windowDeiconified(WindowEvent e) {
-				uiFrame.setExtendedState(Frame.NORMAL);
-			}
-			
-			@Override
-			public void windowActivated(WindowEvent e) {
-				uiFrame.setAlwaysOnTop(true);
-			}
-			
-			@Override
-			public void windowDeactivated(WindowEvent e) {
-				uiFrame.setAlwaysOnTop(false);
-			}
+			public void windowLostFocus(final WindowEvent e) { ClientCore.input.reset(false); }
 		});
 		
-		uiFrame.setUndecorated(true);
-		uiFrame.setBackground(new Color(0, 0, 0, 0));
-		uiFrame.setAlwaysOnTop(true);
-		uiFrame.setType(Type.UTILITY);
 		frame.addComponentListener(new ComponentListener() {
 			@Override
-			public void componentResized(ComponentEvent e) {
-				uiFrame.revalidate();
-			}
-			
+			public void componentResized(ComponentEvent e) { uiFrame.revalidate(); }
 			@Override
-			public void componentMoved(ComponentEvent e) {
-				// System.out.println("moving over frame");
-				uiFrame.setLocation(frame.getContentPane().getLocationOnScreen());
-			}
-			
+			public void componentMoved(ComponentEvent e) { uiFrame.setLocation(frame.getContentPane().getLocationOnScreen()); }
 			@Override
-			public void componentShown(ComponentEvent e) {
-				// System.out.println("showing over frame");
-				uiFrame.setVisible(true);
-			}
-			
+			public void componentShown(ComponentEvent e) { uiFrame.setVisible(true); }
 			@Override
-			public void componentHidden(ComponentEvent e) {
-				// System.out.println("hiding over frame");
-				uiFrame.setVisible(false);
-			}
+			public void componentHidden(ComponentEvent e) { uiFrame.setVisible(false); }
 		});
 		
 		return uiFrame;

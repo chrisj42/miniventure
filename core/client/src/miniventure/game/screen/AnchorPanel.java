@@ -1,10 +1,9 @@
 package miniventure.game.screen;
 
-import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.LayoutManager;
 import java.awt.Point;
@@ -19,28 +18,28 @@ import miniventure.game.util.RelPos;
 
 public class AnchorPanel extends JPanel {
 	
-	private final JFrame frame;
+	private final Container contentPane;
 	private final HashMap<Component, Action> layoutActions = new HashMap<>(); 
 	
-	public AnchorPanel(JFrame frame) {
+	public AnchorPanel(Container contentPane) {
 		super(null);
-		this.frame = frame;
-		frame.addComponentListener(new ComponentAdapter() {
+		this.contentPane = contentPane;
+		contentPane.addComponentListener(new ComponentAdapter() {
 			@Override
-			public void componentResized(final ComponentEvent e) {
-				SwingUtilities.invokeLater(() -> setSize(frame.getContentPane().getSize()));
-			}
+			public void componentResized(final ComponentEvent e) { setSize(contentPane.getSize()); }
 		});
 		
 		addContainerListener(new ContainerListener() {
 			@Override
 			public void componentAdded(final ContainerEvent e) {
+				revalidate();
 				repaint();
 			}
 			
 			@Override
 			public void componentRemoved(final ContainerEvent e) {
 				layoutActions.remove(e.getChild());
+				revalidate();
 				repaint();
 			}
 		});
@@ -48,7 +47,7 @@ public class AnchorPanel extends JPanel {
 		setFocusable(false);
 		setOpaque(false);
 		
-		frame.add(this);
+		contentPane.add(this);
 	}
 	
 	@Override
@@ -69,17 +68,17 @@ public class AnchorPanel extends JPanel {
 	
 	@Override
 	public Dimension getPreferredSize() {
-		return frame.getContentPane().getPreferredSize();
+		return contentPane.getPreferredSize();
 	}
 	
 	@Override
 	public Dimension getMinimumSize() {
-		return frame.getContentPane().getMinimumSize();
+		return contentPane.getMinimumSize();
 	}
 	
 	@Override
 	public Dimension getMaximumSize() {
-		return frame.getContentPane().getMaximumSize();
+		return contentPane.getMaximumSize();
 	}
 	
 	@Override
