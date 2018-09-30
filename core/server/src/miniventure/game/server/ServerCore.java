@@ -1,5 +1,6 @@
 package miniventure.game.server;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -63,12 +64,19 @@ public class ServerCore {
 		}
 	}
 	
-	public static void initServer(int width, int height, boolean standalone) {
+	public static boolean initServer(int width, int height, boolean standalone) {
 		if(serverWorld != null)
 			serverWorld.exitWorld();
 		
-		serverWorld = new ServerWorld(standalone);
+		try {
+			serverWorld = new ServerWorld(standalone);
+		} catch(IOException e) {
+			e.printStackTrace();
+			serverWorld = null;
+			return false;
+		}
 		serverWorld.createWorld(width, height);
+		return true;
 	}
 	
 	private static final float[] frameTimes = new float[20];
@@ -123,6 +131,7 @@ public class ServerCore {
 		}
 		
 		commandParser.end();
+		serverWorld = null;
 	}
 	
 	// stop the server.

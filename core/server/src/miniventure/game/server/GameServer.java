@@ -326,16 +326,9 @@ public class GameServer implements GameProtocol {
 	
 	public void addListener(Listener listener) { server.addListener(listener); }
 	
-	public boolean startServer() { return startServer(GameProtocol.PORT); }
-	public boolean startServer(int port) {
-		try {
-			server.bind(port);
-		} catch(IOException e) {
-			e.printStackTrace();
-			return false;
-		}
-		
-		return true;
+	public void startServer() throws IOException { startServer(GameProtocol.PORT); }
+	public void startServer(int port) throws IOException {
+		server.bind(port);
 	}
 	
 	public void sendToPlayer(@NotNull ServerPlayer player, Object obj) {

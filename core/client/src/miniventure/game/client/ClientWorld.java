@@ -5,11 +5,12 @@ import miniventure.game.GameProtocol.LevelData;
 import miniventure.game.GameProtocol.PositionUpdate;
 import miniventure.game.GameProtocol.SpawnData;
 import miniventure.game.GameProtocol.WorldData;
+import miniventure.game.screen.ErrorScreen;
 import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.RespawnScreen;
-import miniventure.game.util.Action;
+import miniventure.game.util.function.MonoVoidFunction;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.ClientLevel;
@@ -42,7 +43,7 @@ public class ClientWorld extends WorldManager {
 		GameScreen... game screen won't do much, just do the rendering. 
 	 */
 	
-	private final ServerStarter serverStarter;
+	private final ServerManager serverManager;
 	private String ipAddress;
 	
 	private final GameScreen gameScreen;
@@ -53,10 +54,10 @@ public class ClientWorld extends WorldManager {
 	
 	private boolean doDaylightCycle = true;
 	
-	ClientWorld(ServerStarter serverStarter, GameScreen gameScreen) {
+	ClientWorld(ServerManager serverManager, GameScreen gameScreen) {
 		super(new TileEnumMapper<>(tileType -> tileType));
 		
-		this.serverStarter = serverStarter;
+		this.serverManager = serverManager;
 		this.gameScreen = gameScreen;
 		
 		client = new GameClient(); // doesn't automatically connect
@@ -121,12 +122,25 @@ public class ClientWorld extends WorldManager {
 		
 		new Thread(() -> {
 			// with a server running, attempt to connect the client. If successful, it will set the screen to null.
-			Action connect = () -> client.connectToServer(loadingScreen, "localhost");
+			MonoVoidFunction<Boolean> connect = serverSuccess -> {
+				if(!serverSuccess)
+					ClientCore.setScreen(new ErrorScreen("Error starting local server. The port may already be in use.<br>Press 'reconnect' to attempt to connect to the existing server."));
+				else
+					client.connectToServer(loadingScreen, "localhost", success -> {
+						if(!success) {
+							serverManager.closeServer();
+							client = new GameClient();
+						}
+					});
+			};
 			
 			if(startServer) // start server, then connect
-				serverStarter.startServer(width, height, connect);
+				serverManager.startServer(width, height, connect);
 			else // server should already be running; just connect
-				client.connectToServer(loadingScreen, ipAddress);
+				client.connectToServer(loadingScreen, ipAddress, success -> {
+					if(!success)
+						client = new GameClient();
+				});
 			
 		}).start();
 	}
@@ -138,6 +152,7 @@ public class ClientWorld extends WorldManager {
 		mainPlayer = null;
 		clearLevels();
 		ClientCore.setScreen(new MainMenu());
+		client = new GameClient();
 	}
 	
 	// TODO add lighting overlays, based on level and/or time of day, depending on the level and perhaps other things.

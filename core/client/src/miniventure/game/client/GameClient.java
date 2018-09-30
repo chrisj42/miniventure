@@ -15,6 +15,7 @@ import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.ProgressLogger;
+import miniventure.game.util.function.MonoVoidFunction;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.ClientLevel;
@@ -268,8 +269,8 @@ public class GameClient implements GameProtocol {
 	public void send(Object obj) { client.sendTCP(obj); }
 	public void addListener(Listener listener) { client.addListener(listener); }
 	
-	public boolean connectToServer(@NotNull ProgressLogger logger, String host) { return connectToServer(logger, host, GameProtocol.PORT); }
-	public boolean connectToServer(@NotNull ProgressLogger logger, String host, int port) {
+	public boolean connectToServer(@NotNull ProgressLogger logger, String host, MonoVoidFunction<Boolean> callback) { return connectToServer(logger, host, GameProtocol.PORT, callback); }
+	public boolean connectToServer(@NotNull ProgressLogger logger, String host, int port, MonoVoidFunction<Boolean> callback) {
 		logger.pushMessage("connecting to server at "+host+":"+port+"...");
 		
 		try {
@@ -278,7 +279,10 @@ public class GameClient implements GameProtocol {
 			System.err.println("(caught IOException:)");
 			e.printStackTrace();
 			// error screen
-			Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen("failed to connect to server.")));
+			Gdx.app.postRunnable(() -> {
+				ClientCore.setScreen(new ErrorScreen("failed to connect to server."));
+				callback.act(false);
+			});
 			return false;
 		}
 		
@@ -287,14 +291,19 @@ public class GameClient implements GameProtocol {
 		EventQueue.invokeLater(() -> {
 			username = JOptionPane.showInputDialog("Specify username:", username);
 			if(username == null) {
-				client.close();
+				disconnect();
 				MenuScreen parent = ClientCore.getScreen() == null ? null : ClientCore.getScreen().getParentScreen();
-				Gdx.app.postRunnable(() -> ClientCore.setScreen(parent == null ? new MainMenu() : parent));
+				Gdx.app.postRunnable(() -> {
+					ClientCore.setScreen(parent == null ? new MainMenu() : parent);
+					callback.act(false);
+				});
+				return;
 			}
 			
 			send(new Login(username, GameCore.VERSION));
 			
 			logger.editMessage("Loading world from server...");
+			callback.act(true);
 		});
 		
 		return true;

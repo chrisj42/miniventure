@@ -50,7 +50,7 @@ public class ClientCore extends ApplicationAdapter {
 	
 	private static AnchorPanel uiPanel;
 	private final AnchorPanel hudPanel;
-	private final ServerStarter serverStarter;
+	private final ServerManager serverStarter;
 	
 	public static final Font DEFAULT_FONT = new JLabel().getFont().deriveFont(14f); 
 	public static final boolean PLAY_MUSIC = false;
@@ -73,7 +73,7 @@ public class ClientCore extends ApplicationAdapter {
 		exit();
 	};
 	
-	public ClientCore(AnchorPanel hudPanel, AnchorPanel uiPanel, Action shutdown, ServerStarter serverStarter) {
+	public ClientCore(AnchorPanel hudPanel, AnchorPanel uiPanel, Action shutdown, ServerManager serverStarter) {
 		this.hudPanel = hudPanel;
 		ClientCore.uiPanel = uiPanel;
 		ClientCore.shutdown = shutdown;
@@ -131,17 +131,17 @@ public class ClientCore extends ApplicationAdapter {
 		if(menuScreen instanceof MainMenu && screen instanceof ErrorScreen)
 			return; // ignore it.
 		
-		if(menuScreen instanceof BackgroundProvider && screen instanceof BackgroundInheritor)
-			((BackgroundInheritor)screen).setBackground((BackgroundProvider)menuScreen);
 		if(menuScreen instanceof BackgroundInheritor && screen instanceof BackgroundInheritor)
 			((BackgroundInheritor)screen).inheritBackground((BackgroundInheritor)menuScreen);
+		else if(menuScreen instanceof BackgroundProvider && screen instanceof BackgroundInheritor)
+			((BackgroundInheritor)screen).setBackground((BackgroundProvider)menuScreen);
 		
 		if(screen != null && menuScreen != null && (gameScreen == null || menuScreen != gameScreen.chatScreen)) {
-			if(screen instanceof ErrorScreen) {
-				if(menuScreen.getParentScreen() != null)
+			if((screen instanceof ErrorScreen || screen instanceof LoadingScreen) && (menuScreen instanceof ErrorScreen || menuScreen instanceof LoadingScreen || (screen instanceof ErrorScreen && menuScreen.getParentScreen() != null))) {
+				// if(menuScreen.getParentScreen() != null || )
 					screen.setParentScreen(menuScreen.getParentScreen()); // when are you going to go from a chat screen to another screen...?
 			}
-			else
+			else// if(!(menuScreen instanceof ErrorScreen))
 				screen.setParentScreen(menuScreen);
 		}
 		
@@ -153,6 +153,10 @@ public class ClientCore extends ApplicationAdapter {
 			if(menuScreen == gameScreen.chatScreen)
 				gameScreen.chatOverlay.setVisible(true);
 			gameScreen.getHudPanel().setVisible(screen == null);
+			if(screen instanceof MainMenu) {
+				gameScreen.chatScreen.reset();
+				gameScreen.chatOverlay.reset();
+			}
 		}
 		
 		if(menuScreen != null)

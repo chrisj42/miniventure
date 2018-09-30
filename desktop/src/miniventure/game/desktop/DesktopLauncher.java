@@ -14,8 +14,10 @@ import java.awt.event.*;
 
 import miniventure.game.GameCore;
 import miniventure.game.client.ClientCore;
+import miniventure.game.client.ServerManager;
 import miniventure.game.screen.AnchorPanel;
 import miniventure.game.server.ServerCore;
+import miniventure.game.util.function.MonoVoidFunction;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.backends.lwjgl.LwjglCanvas;
@@ -61,17 +63,30 @@ public class DesktopLauncher {
 			// the panel where swing HUD components will be added (i.e. health/hunger bars, debug display, chat overlay):
 			AnchorPanel uiPanel = new AnchorPanel(uiFrame.getContentPane());
 			
-			LwjglCanvas canvas = new LwjglCanvas(new ClientCore(hudPanel, uiPanel,
-			  
-			  () -> frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING)),
-			  
-			  (width, height, callback) -> {
-				ServerCore.initServer(width, height, false);
-				// server running, and world loaded; now, get the server world updating
-				new Thread(new ThreadGroup("server"), ServerCore::run, "Miniventure Server").start();
-				callback.act(); // ready to connect
+			LwjglCanvas canvas = new LwjglCanvas(new ClientCore(hudPanel,
+				uiPanel,
 				
-			}), config);
+				() -> frame.dispatchEvent(new WindowEvent(frame,
+				WindowEvent.WINDOW_CLOSING)),
+				
+				new ServerManager() {
+					@Override
+					public void startServer(final int worldWidth, final int worldHeight, final MonoVoidFunction<Boolean> callback) {
+						boolean started = ServerCore.initServer(worldWidth, worldHeight, false);
+						if(!started)
+							callback.act(false);
+						else {
+							// server running, and world loaded; now, get the server world updating
+							new Thread(new ThreadGroup("server"), ServerCore::run, "Miniventure Server").start();
+							callback.act(true); // ready to connect
+						}
+					}
+					
+					@Override
+					public void closeServer() {
+						ServerCore.quit();
+					}
+				}), config);
 			DesktopLauncher.canvas = canvas;
 			
 			// the canvas where libGDX rendering occurs

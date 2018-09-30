@@ -8,12 +8,14 @@ public class ErrorScreen extends MenuScreen implements BackgroundInheritor {
 	
 	private BackgroundProvider gdxBackground;
 	
-	public ErrorScreen(String error) {
+	public ErrorScreen(String error) { this(error, true); }
+	public ErrorScreen(String error, boolean allowRejoin) {
 		super(true);
 		
 		addComponent(makeLabel(error));
 		
-		addComponent(50, makeButton("Reconnect", () -> ClientCore.getWorld().rejoinWorld()));
+		if(allowRejoin)
+			addComponent(50, makeButton("Reconnect", () -> ClientCore.getWorld().rejoinWorld()));
 		
 		addComponent(10, 
 					 makeButton("Back to main menu", 

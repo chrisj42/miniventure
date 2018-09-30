@@ -1,8 +1,8 @@
 package miniventure.game.server;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Objects;
-import java.util.Random;
 
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.EntityAddition;
@@ -12,7 +12,12 @@ import miniventure.game.ProgressPrinter;
 import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolItem.Material;
 import miniventure.game.item.ToolType;
-import miniventure.game.world.*;
+import miniventure.game.world.Config;
+import miniventure.game.world.Level;
+import miniventure.game.world.ServerLevel;
+import miniventure.game.world.TimeOfDay;
+import miniventure.game.world.WorldManager;
+import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.ServerPlayer;
@@ -22,7 +27,6 @@ import miniventure.game.world.tile.TileEnumMapper;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
@@ -49,7 +53,7 @@ public class ServerWorld extends WorldManager {
 	
 	private final HashSet<WorldObject> keepAlives = new HashSet<>(); // always keep chunks around these objects loaded.
 	
-	public ServerWorld(boolean standalone) {
+	public ServerWorld(boolean standalone) throws IOException {
 		super(new TileEnumMapper<>(ServerTileType::new));
 		
 		server = new GameServer(standalone);

@@ -160,6 +160,13 @@ public class ChatScreen extends MenuScreen {
 		parent.addToAnchorLayout(this, RelPos.TOP_RIGHT, -5, 5);
 	}
 	
+	public void reset() {
+		removeAll();
+		add(input);
+		labelQueue.clear();
+		previousCommands.clear();
+	}
+	
 	public void addMessage(InfoMessage msg) {
 		synchronized (labelQueue) {
 			// add in reverse order
@@ -239,6 +246,8 @@ public class ChatScreen extends MenuScreen {
 		
 		@Override
 		protected void paintComponent(Graphics g) {
+			g.setColor(getBackground());
+			g.fillRect(0, 0, getWidth(), getHeight());
 			super.paintComponent(g);
 			
 			if(useTimer) {
