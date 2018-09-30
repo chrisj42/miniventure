@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import miniventure.game.chat.MessageBuilder;
-import miniventure.game.server.ServerCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.entity.mob.ServerPlayer;
 
@@ -51,8 +50,6 @@ public class CommandInputParser implements Runnable {
 			executeCommand(input, null, out, err);
 			out.println();
 		}
-		
-		ServerCore.quit();
 	}
 	
 	// a null player indicates that it is from the server console.
