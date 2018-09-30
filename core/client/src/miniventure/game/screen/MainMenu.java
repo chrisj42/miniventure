@@ -76,7 +76,7 @@ public class MainMenu extends MenuScreen implements BackgroundProvider {
 		addSpaced(makeButton("Credits", () -> ClientCore.setScreen(new CreditsScreen())),
 		  20);
 		
-		add(makeButton("Quit", () -> Gdx.app.exit()));
+		add(makeButton("Quit", ClientCore::exit));
 		
 		// setup level scrolling in background
 		

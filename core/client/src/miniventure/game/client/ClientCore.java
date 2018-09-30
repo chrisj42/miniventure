@@ -19,6 +19,7 @@ import miniventure.game.GameProtocol.Message;
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.item.InventoryScreen;
 import miniventure.game.screen.*;
+import miniventure.game.util.Action;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.MonoVoidFunction;
 
@@ -33,6 +34,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ClientCore extends ApplicationAdapter {
+	
+	private static Action shutdown;
 	
 	private static GameScreen gameScreen;
 	private static ClientWorld clientWorld;
@@ -67,13 +70,13 @@ public class ClientCore extends ApplicationAdapter {
 	public static final UncaughtExceptionHandler exceptionHandler = (thread, throwable) -> {
 		exceptionNotifier.act(throwable);
 		throwable.printStackTrace();
-		// Gdx.app.exit();
-		System.exit(1);
+		exit();
 	};
 	
-	public ClientCore(AnchorPanel hudPanel, AnchorPanel uiPanel, ServerStarter serverStarter) {
+	public ClientCore(AnchorPanel hudPanel, AnchorPanel uiPanel, Action shutdown, ServerStarter serverStarter) {
 		this.hudPanel = hudPanel;
 		ClientCore.uiPanel = uiPanel;
+		ClientCore.shutdown = shutdown;
 		this.serverStarter = serverStarter;
 	}
 	
@@ -225,4 +228,5 @@ public class ClientCore extends ApplicationAdapter {
 	public static ClientWorld getWorld() { return clientWorld; }
 	public static GameClient getClient() { return clientWorld.getClient(); }
 	
+	public static void exit() { shutdown.act(); }
 }

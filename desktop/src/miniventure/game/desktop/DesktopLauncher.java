@@ -61,13 +61,18 @@ public class DesktopLauncher {
 			// the panel where swing HUD components will be added (i.e. health/hunger bars, debug display, chat overlay):
 			AnchorPanel uiPanel = new AnchorPanel(uiFrame.getContentPane());
 			
-			LwjglCanvas canvas = new LwjglCanvas(new ClientCore(hudPanel, uiPanel, (width, height, callback) -> {
+			LwjglCanvas canvas = new LwjglCanvas(new ClientCore(hudPanel, uiPanel,
+			  
+			  () -> frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING)),
+			  
+			  (width, height, callback) -> {
 				ServerCore.initServer(width, height, false);
 				// server running, and world loaded; now, get the server world updating
 				new Thread(new ThreadGroup("server"), ServerCore::run, "Miniventure Server").start();
 				callback.act(); // ready to connect
 				
 			}), config);
+			DesktopLauncher.canvas = canvas;
 			
 			// the canvas where libGDX rendering occurs
 			Canvas awtCanvas = canvas.getCanvas();
@@ -106,6 +111,8 @@ public class DesktopLauncher {
 			});
 		}
 	}
+	
+	private static LwjglCanvas canvas;
 	
 	private static JWindow makeUIFrame(JFrame frame) {
 		JWindow uiFrame = new JWindow(frame) {
