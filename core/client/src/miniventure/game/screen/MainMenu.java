@@ -108,7 +108,6 @@ public class MainMenu extends MenuScreen implements BackgroundProvider {
 		// setup level scrolling in background
 		
 		levelView = new LevelViewport();
-		levelView.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		levelView.zoom(-1);
 		TimeOfDay time = TimeOfDay.values[MathUtils.random(TimeOfDay.values.length-1)];
 		lightOverlay = TimeOfDay.getSkyColor(time.getStartOffsetSeconds());
@@ -124,7 +123,7 @@ public class MainMenu extends MenuScreen implements BackgroundProvider {
 		addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentResized(ComponentEvent e) {
-				Gdx.app.postRunnable(() -> levelView.resize(getWidth(), getHeight()));
+				Gdx.app.postRunnable(() -> levelView.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
 			}
 		});
 		
@@ -139,7 +138,6 @@ public class MainMenu extends MenuScreen implements BackgroundProvider {
 	@Override
 	public void glDraw() {
 		super.glDraw();
-		// levelView.handleInput();
 		levelView.render(cameraPos, lightOverlay, backgroundLevel);
 		
 		cameraPos.add(cameraDir.cpy().scl(GameCore.getDeltaTime()));

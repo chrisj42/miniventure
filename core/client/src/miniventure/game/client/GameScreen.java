@@ -43,7 +43,7 @@ public class GameScreen {
 		this.hudPanel = hudPanel;
 		
 		levelCamera = new OrthographicCamera();
-		levelView = new LevelViewport(batch, levelCamera);
+		levelView = new LevelViewport(batch, levelCamera); // this passes the camera as the lighting camera; the main camera is always custom.
 		
 		resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		
@@ -143,7 +143,6 @@ public class GameScreen {
 	
 	private void renderGui(@NotNull ClientPlayer mainPlayer, @NotNull Level level) {
 		// TODO rebase to swing
-		batch.setProjectionMatrix(levelCamera.combined);
 		
 		// draw UI for current item, and stats
 		mainPlayer.drawGui(new Rectangle(0, 0, levelCamera.viewportWidth, levelCamera.viewportHeight), batch);
