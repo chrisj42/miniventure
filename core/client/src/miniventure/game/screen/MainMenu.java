@@ -140,16 +140,16 @@ public class MainMenu extends MenuScreen implements BackgroundProvider {
 			VersionInfo latestVersion = GameCore.getLatestVersion();
 			
 			if(latestVersion.version.compareTo(GameCore.VERSION) > 0) { // link new version
-				JButton btn = new JButton("Miniventure " + latestVersion.releaseName + " Now Available! Click here to download.");
+				JButton btn = new JButton("<html>Miniventure " + latestVersion.releaseName + " Now Available! Click here to download.");
 				btn.addActionListener(e -> openLink(latestVersion.assetUrl));
 				labelPanel.remove(label);
 				labelPanel.add(btn);
 			}
 			else {
 				if(latestVersion.releaseName.length() > 0)
-					label.setText("You have the latest version.");
+					label.setText("<html>You have the latest version.");
 				else
-					label.setText("Connection failed, could not check for updates.");
+					label.setText("<html>Connection failed, could not check for updates.");
 			}
 			
 			revalidate();

@@ -91,7 +91,9 @@ public class AnchorPanel extends JPanel {
 	public void addToAnchorLayout(Component comp, RelPos componentAnchor, RelPos containerAnchor, int anchorOffsetX, int anchorOffsetY) {
 		layoutActions.put(comp, () -> {
 			comp.invalidate();
-			comp.setSize(comp.getPreferredSize());
+			Dimension prefSize = comp.getPreferredSize();
+			Dimension parentSize = getSize();
+			comp.setSize(new Dimension(Math.min(prefSize.width, parentSize.width), Math.min(prefSize.height, parentSize.height)));
 			Point compAnchor = componentAnchor.forRectangle(comp.getBounds());
 			Point parentAnchor = containerAnchor.forRectangle(getBounds());
 			

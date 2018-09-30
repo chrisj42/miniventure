@@ -77,7 +77,7 @@ public abstract class MenuScreen extends JPanel {
 	}
 	
 	protected static JLabel makeLabel(String text) {
-		JLabel label = new JLabel(text);
+		JLabel label = new JLabel("<html>"+text);
 		label.setFont(ClientCore.DEFAULT_FONT);
 		return label;
 	}

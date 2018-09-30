@@ -1,6 +1,7 @@
 package miniventure.game.screen;
 
 import javax.swing.Box;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import java.awt.Color;
@@ -205,7 +206,7 @@ public class ChatScreen extends MenuScreen {
 	}
 	
 	private static final Font font = new Font("Arial", Font.BOLD, 13);
-	private class TimerLabel extends MultilineLabel {
+	private class TimerLabel extends JTextArea {
 		private boolean started = false;
 		private long startTime;
 		private final Component spacer;
@@ -213,6 +214,13 @@ public class ChatScreen extends MenuScreen {
 		TimerLabel(String label, @NotNull Color color, @Nullable Component spacer) {
 			super(label);
 			this.spacer = spacer;
+			
+			setOpaque(false);
+			setEditable(false);
+			setFocusable(false);
+			setLineWrap(true);
+			setWrapStyleWord(true);
+			setBorder(null);
 			
 			setForeground(new Color(color.getRed(), color.getGreen(), color.getBlue(), 254));
 			setBackground(BACKGROUND);
@@ -222,6 +230,11 @@ public class ChatScreen extends MenuScreen {
 		@Override
 		public Dimension getPreferredSize() {
 			return new Dimension(input.getPreferredSize().width, super.getPreferredSize().height);
+		}
+		
+		@Override
+		public Dimension getMaximumSize() {
+			return new Dimension(super.getMaximumSize().width, super.getPreferredSize().height);
 		}
 		
 		@Override

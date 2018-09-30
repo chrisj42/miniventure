@@ -1,7 +1,5 @@
 package miniventure.game.screen;
 
-import java.awt.Color;
-
 import miniventure.game.client.ClientCore;
 
 public class InfoScreen extends MenuScreen implements BackgroundInheritor {
@@ -9,11 +7,9 @@ public class InfoScreen extends MenuScreen implements BackgroundInheritor {
 	private InfoScreen(String... text) {
 		super(true);
 		
-		MultilineLabel label = addComponent(new MultilineLabel(text));
+		addComponent(makeLabel("<p>"+String.join("</p><p>", text)+"</p>"));
 		
 		addComponent(30, makeButton("Back to Main Menu", ClientCore::backToParentScreen));
-		
-		setBackground(new Color(220, 0, 0, 200));
 	}
 	
 	private BackgroundProvider gdxBackground;
