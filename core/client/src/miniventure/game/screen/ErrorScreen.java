@@ -7,7 +7,7 @@ import miniventure.game.client.ClientCore;
 
 public class ErrorScreen extends MenuScreen implements BackgroundInheritor {
 	
-	private MenuScreen gdxBackground;
+	private BackgroundProvider gdxBackground;
 	
 	public ErrorScreen(String error) {
 		super(true, false);
@@ -26,12 +26,12 @@ public class ErrorScreen extends MenuScreen implements BackgroundInheritor {
 	}
 	
 	@Override
-	public void setBackground(final MenuScreen gdxBackground) {
+	public void setBackground(final BackgroundProvider gdxBackground) {
 		this.gdxBackground = gdxBackground;
 	}
 	
 	@Override
-	public MenuScreen getGdxBackground() {
+	public BackgroundProvider getGdxBackground() {
 		return gdxBackground;
 	}
 	

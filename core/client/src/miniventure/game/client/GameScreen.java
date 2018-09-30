@@ -13,6 +13,7 @@ import miniventure.game.world.ClientLevel;
 import miniventure.game.world.Level;
 import miniventure.game.world.TimeOfDay;
 import miniventure.game.world.entity.mob.ClientPlayer;
+import miniventure.game.world.entity.mob.Player.Stat;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.Gdx;
@@ -51,6 +52,7 @@ public class GameScreen {
 		hudPanel.add(chatOverlay);
 	}
 	
+	LevelViewport getLevelView() { return levelView; }
 	void dispose() {
 		levelView.dispose();
 	}
@@ -105,6 +107,9 @@ public class GameScreen {
 					dialog = false;
 				});
 			}
+			
+			if(GameCore.debug && shift && ClientCore.input.pressingKey(KeyEvent.VK_H))
+				player.changeStat(Stat.Health, -1);
 		}
 	}
 	

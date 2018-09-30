@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import miniventure.game.GameProtocol.ChunkRequest;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.ClientWorld;
+import miniventure.game.screen.RespawnScreen;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.tile.ClientTile;
 import miniventure.game.world.tile.Tile;
@@ -53,6 +54,9 @@ public class ClientLevel extends Level {
 		
 		Array<Tile> tiles = getOverlappingTiles(renderSpace);
 		Array<Entity> entities = getOverlappingEntities(renderSpace);
+		
+		if(ClientCore.getScreen() instanceof RespawnScreen)
+			entities.removeValue(ClientCore.getWorld().getMainPlayer(), true);
 		
 		render(tiles, entities, batch, delta, posOffset);
 	}

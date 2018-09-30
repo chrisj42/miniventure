@@ -15,12 +15,7 @@ import miniventure.game.GameProtocol.InventoryUpdate;
 import miniventure.game.GameProtocol.Message;
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.item.InventoryScreen;
-import miniventure.game.screen.AnchorPanel;
-import miniventure.game.screen.BackgroundInheritor;
-import miniventure.game.screen.ErrorScreen;
-import miniventure.game.screen.LoadingScreen;
-import miniventure.game.screen.MainMenu;
-import miniventure.game.screen.MenuScreen;
+import miniventure.game.screen.*;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.MonoVoidFunction;
 
@@ -129,8 +124,8 @@ public class ClientCore extends ApplicationAdapter {
 		if(menuScreen instanceof MainMenu && screen instanceof ErrorScreen)
 			return; // ignore it.
 		
-		if(menuScreen instanceof MainMenu && screen instanceof BackgroundInheritor)
-			((BackgroundInheritor)screen).setBackground(menuScreen);
+		if(menuScreen instanceof BackgroundProvider && screen instanceof BackgroundInheritor)
+			((BackgroundInheritor)screen).setBackground((BackgroundProvider)menuScreen);
 		if(menuScreen instanceof BackgroundInheritor && screen instanceof BackgroundInheritor)
 			((BackgroundInheritor)screen).inheritBackground((BackgroundInheritor)menuScreen);
 		

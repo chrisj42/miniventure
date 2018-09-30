@@ -1,9 +1,9 @@
 package miniventure.game.screen;
 
-public interface BackgroundInheritor {
+public interface BackgroundInheritor extends BackgroundProvider {
 	
-	void setBackground(MenuScreen gdxBackground);
-	MenuScreen getGdxBackground();
+	void setBackground(BackgroundProvider gdxBackground);
+	BackgroundProvider getGdxBackground();
 	
 	default void inheritBackground(BackgroundInheritor other) {
 		setBackground(other.getGdxBackground());

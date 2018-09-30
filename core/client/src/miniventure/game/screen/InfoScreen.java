@@ -24,15 +24,15 @@ public class InfoScreen extends MenuScreen implements BackgroundInheritor {
 		add(returnBtn);
 	}
 	
-	private MenuScreen gdxBackground;
+	private BackgroundProvider gdxBackground;
 	
 	@Override
-	public void setBackground(final MenuScreen gdxBackground) {
+	public void setBackground(final BackgroundProvider gdxBackground) {
 		this.gdxBackground = gdxBackground;
 	}
 	
 	@Override
-	public MenuScreen getGdxBackground() {
+	public BackgroundProvider getGdxBackground() {
 		return gdxBackground;
 	}
 	

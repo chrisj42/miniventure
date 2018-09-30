@@ -6,8 +6,6 @@ import java.util.Stack;
 
 import miniventure.game.util.ProgressLogger;
 
-import org.jetbrains.annotations.Nullable;
-
 public class LoadingScreen extends MenuScreen implements ProgressLogger, BackgroundInheritor {
 	
 	/*
@@ -23,12 +21,10 @@ public class LoadingScreen extends MenuScreen implements ProgressLogger, Backgro
 	
 	private final Stack<JLabel> messageLabels = new Stack<>();
 	
-	private MenuScreen gdxBackground;
+	private BackgroundProvider gdxBackground;
 	
-	public LoadingScreen() { this(null); }
-	public LoadingScreen(@Nullable MenuScreen gdxBackground) {
+	public LoadingScreen() {
 		super(true, true);
-		this.gdxBackground = gdxBackground;
 		// setOpaque(true);
 		// setBackground(Color.WHITE);
 	}
@@ -54,12 +50,12 @@ public class LoadingScreen extends MenuScreen implements ProgressLogger, Backgro
 	}
 	
 	@Override
-	public void setBackground(final MenuScreen gdxBackground) {
+	public void setBackground(final BackgroundProvider gdxBackground) {
 		this.gdxBackground = gdxBackground;
 	}
 	
 	@Override
-	public MenuScreen getGdxBackground() {
+	public BackgroundProvider getGdxBackground() {
 		return gdxBackground;
 	}
 	

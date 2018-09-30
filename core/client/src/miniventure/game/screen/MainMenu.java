@@ -33,7 +33,7 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 
-public class MainMenu extends MenuScreen {
+public class MainMenu extends MenuScreen implements BackgroundProvider {
 	
 	private boolean dialog = false;
 	

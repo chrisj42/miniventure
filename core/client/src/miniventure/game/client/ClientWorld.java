@@ -72,8 +72,8 @@ public class ClientWorld extends WorldManager {
 		
 		ClientLevel level = mainPlayer.getLevel();
 		if(level == null) {
-			if(!(menu instanceof RespawnScreen))
-				ClientCore.setScreen(new RespawnScreen());
+			// if(!(menu instanceof RespawnScreen))
+			// 	ClientCore.setScreen(new RespawnScreen());
 			return;
 		}
 		
@@ -171,6 +171,14 @@ public class ClientWorld extends WorldManager {
 	@Override
 	public boolean isKeepAlive(@NotNull WorldObject obj) { return obj.equals(mainPlayer); }
 	
+	@Override
+	public void deregisterEntity(final int eid) {
+		if(mainPlayer != null && eid == mainPlayer.getId())
+			ClientCore.setScreen(new RespawnScreen(mainPlayer.getCenter(), getLightingOverlay(), mainPlayer.getLevel(), gameScreen.getLevelView()));
+		else
+			super.deregisterEntity(eid);
+	}
+	
 	
 	/*  --- PLAYER MANAGEMENT --- */
 	
@@ -179,7 +187,7 @@ public class ClientWorld extends WorldManager {
 		// this has to come before making the new client player, because it has the same eid and so will overwrite some things.
 		//fixme hotbar table
 		if(this.mainPlayer != null) {
-			this.mainPlayer.remove();
+			super.deregisterEntity(this.mainPlayer.getId());
 			// gameScreen.getHudPanel().remove(this.mainPlayer.getHands().getHotbarTable());
 		}
 		
@@ -199,6 +207,7 @@ public class ClientWorld extends WorldManager {
 	}
 	
 	public void respawnPlayer() {
+		// super.deregisterEntity(mainPlayer.getId());
 		LoadingScreen loader = new LoadingScreen();
 		ClientCore.setScreen(loader);
 		loader.pushMessage("respawning...");
