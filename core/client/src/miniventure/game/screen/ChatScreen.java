@@ -190,6 +190,7 @@ public class ChatScreen extends MenuScreen {
 			remove(c);
 			if(c.spacer != null) remove(c.spacer);
 		}
+		validate(); // ensures that the chat overlay is sized correctly on display.
 	}
 	
 	public void autocomplete(TabResponse response) {
@@ -199,6 +200,10 @@ public class ChatScreen extends MenuScreen {
 		input.setCaretPosition(input.getText().length());
 	}
 	
+	@Override
+	public String toString() {
+		return super.toString()+"[overlay="+useTimer+"]";
+	}
 	
 	private static final Font font = new Font("Arial", Font.BOLD, 13);
 	private class TimerLabel extends JTextArea {
