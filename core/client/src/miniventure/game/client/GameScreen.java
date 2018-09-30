@@ -7,6 +7,7 @@ import java.awt.EventQueue;
 import java.awt.event.KeyEvent;
 
 import miniventure.game.GameCore;
+import miniventure.game.screen.AnchorPanel;
 import miniventure.game.screen.ChatScreen;
 import miniventure.game.world.ClientLevel;
 import miniventure.game.world.Level;
@@ -30,34 +31,28 @@ public class GameScreen {
 	@NotNull private final LevelViewport levelView;
 	
 	private SpriteBatch batch = GameCore.getBatch();
-	// private Stage guiStage;
 	
 	private final OrthographicCamera levelCamera;
 	
 	final ChatScreen chatOverlay, chatScreen;
 	private boolean showDebug = false;
-	private final JPanel hudPanel;
+	private final AnchorPanel hudPanel;
 	
-	public GameScreen(JPanel hudPanel) {
+	public GameScreen(AnchorPanel hudPanel) {
 		this.hudPanel = hudPanel;
-		hudPanel.setLayout(null); // redundant due to previous code, but whatever it's for safety.
 		
 		levelCamera = new OrthographicCamera();
-		// guiStage = new Stage(new ExtendViewport(GameCore.DEFAULT_SCREEN_WIDTH, GameCore.DEFAULT_SCREEN_HEIGHT, levelCamera), batch);
 		levelView = new LevelViewport(batch, levelCamera);
 		
 		resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		
 		chatOverlay = new ChatScreen(true);
 		chatScreen = new ChatScreen(false);
-		// System.out.println("overlay: "+chatOverlay);
 		hudPanel.add(chatOverlay);
-		chatOverlay.doLayoutBehavior(hudPanel);
 	}
 	
 	void dispose() {
 		levelView.dispose();
-		// guiStage.dispose();
 	}
 	
 	private boolean dialog = false;

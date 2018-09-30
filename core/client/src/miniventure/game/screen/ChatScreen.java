@@ -6,7 +6,6 @@ import javax.swing.JTextField;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -152,13 +151,13 @@ public class ChatScreen extends MenuScreen {
 	
 	@Override
 	public void focus() {
-		input.requestFocus();
 		super.focus();
+		input.requestFocus();
 	}
 	
 	@Override
-	public void doLayoutBehavior(Container parent) {
-		ClientUtils.addToAnchorLayout(this, parent, RelPos.TOP_RIGHT, -5, 5);
+	public void setupAnchorLayout(AnchorPanel parent) {
+		parent.addToAnchorLayout(this, RelPos.TOP_RIGHT, -5, 5);
 	}
 	
 	public void addMessage(InfoMessage msg) {
@@ -237,25 +236,7 @@ public class ChatScreen extends MenuScreen {
 			g.setColor(getBackground());
 			g.fillRect(0, 0, getWidth(), getHeight());
 			
-			// g.setColor(Color.BLACK);
 			super.paintComponent(g);
-			/*Graphics2D g2 = (Graphics2D) g;
-			g2.setStroke(new BasicStroke(0.2f));
-			g2.setColor(new Color(255, 255, 255, getForeground().getAlpha()));
-			FontMetrics fm = g2.getFontMetrics();
-			g2.translate(*//*getWidth()/2-fm1.stringWidth(s[1])/2*//*0, fm.getAscent());
-			System.out.println(getText()+" has "+getLineCount()+" lines.");
-			LineMetrics lm = fm.getLineMetrics(getText(), g2);
-			for(int i = 0; i < getLineCount(); i++) {
-				try {
-					int off = getLineStartOffset(i);
-					int len = getLineEndOffset(i) - off;
-					g2.draw(font.createGlyphVector(g2.getFontRenderContext(), getText(off, len)).getOutline());
-				} catch(BadLocationException e) {
-					e.printStackTrace();
-				}
-				g2.translate(*//*getWidth()/2-fm1.stringWidth(s[1])/2*//*0, fm.getHeight());
-			}*/
 			
 			if(useTimer) {
 				long now = System.nanoTime();

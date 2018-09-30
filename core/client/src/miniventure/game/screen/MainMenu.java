@@ -187,9 +187,6 @@ public class MainMenu extends MenuScreen {
 				label.setValue("You have the latest version.", null);
 			else
 				label.setValue("Connection failed, could not check for updates.", null);
-			
-			revalidate();
-			repaint();
 		}
 	}
 }

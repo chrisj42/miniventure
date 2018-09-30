@@ -15,6 +15,7 @@ import miniventure.game.GameProtocol.InventoryUpdate;
 import miniventure.game.GameProtocol.Message;
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.item.InventoryScreen;
+import miniventure.game.screen.AnchorPanel;
 import miniventure.game.screen.ErrorScreen;
 import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MainMenu;
@@ -45,8 +46,8 @@ public class ClientCore extends ApplicationAdapter {
 	private static boolean hasMenu = false;
 	private static MenuScreen menuScreen;
 	
-	private static JPanel uiPanel;
-	private final JPanel hudPanel;
+	private static AnchorPanel uiPanel;
+	private final AnchorPanel hudPanel;
 	private final ServerStarter serverStarter;
 	
 	public static final boolean PLAY_MUSIC = false;
@@ -70,7 +71,7 @@ public class ClientCore extends ApplicationAdapter {
 		System.exit(1);
 	};
 	
-	public ClientCore(JPanel hudPanel, JPanel uiPanel, ServerStarter serverStarter) {
+	public ClientCore(AnchorPanel hudPanel, AnchorPanel uiPanel, ServerStarter serverStarter) {
 		this.hudPanel = hudPanel;
 		ClientCore.uiPanel = uiPanel;
 		this.serverStarter = serverStarter;
@@ -142,10 +143,8 @@ public class ClientCore extends ApplicationAdapter {
 		if(menuScreen != null)
 			uiPanel.remove(menuScreen);
 		
-		if(screen != null) {
+		if(screen != null)
 			uiPanel.add(screen);
-			screen.doLayoutBehavior(uiPanel);
-		}
 		
 		menuScreen = screen;
 		input.reset(menuScreen == null);
@@ -158,7 +157,6 @@ public class ClientCore extends ApplicationAdapter {
 			
 			uiPanel.remove(menuScreen);
 			uiPanel.add(screen);
-			screen.doLayoutBehavior(uiPanel);
 			
 			menuScreen = screen;
 			input.reset(false);

@@ -1,7 +1,6 @@
 package miniventure.game.desktop;
 
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
@@ -15,7 +14,7 @@ import java.awt.event.*;
 
 import miniventure.game.GameCore;
 import miniventure.game.client.ClientCore;
-import miniventure.game.screen.ClientUtils;
+import miniventure.game.screen.AnchorPanel;
 import miniventure.game.server.ServerCore;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
@@ -52,17 +51,15 @@ public class DesktopLauncher {
 			// the window frame
 			JFrame frame = new JFrame(config.title);
 			frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE); // EXIT_ON_CLOSE interferes with libGDX shutdown
+			frame.getContentPane().setPreferredSize(WINDOW_SIZE);
 			
 			JFrame uiFrame = makeUIFrame(frame);
 			
-			uiFrame.getContentPane().setLayout(null); // manual positioning
-			frame.getContentPane().setPreferredSize(WINDOW_SIZE);
-			
 			// the panel where swing UI components will be added (i.e. menu screens):
-			JPanel hudPanel = makeUIPanel(uiFrame, WINDOW_SIZE);
+			AnchorPanel hudPanel = new AnchorPanel(uiFrame);
 			
 			// the panel where swing HUD components will be added (i.e. health/hunger bars, debug display, chat overlay):
-			JPanel uiPanel = makeUIPanel(uiFrame, WINDOW_SIZE);
+			AnchorPanel uiPanel = new AnchorPanel(uiFrame);
 			
 			LwjglCanvas canvas = new LwjglCanvas(new ClientCore(hudPanel, uiPanel, (width, height, callback) -> {
 				ServerCore.initServer(width, height, false);
@@ -76,7 +73,6 @@ public class DesktopLauncher {
 			// the canvas where libGDX rendering occurs
 			Canvas awtCanvas = canvas.getCanvas();
 			frame.add(awtCanvas);
-			// ClientUtils.trackParentSize(awtCanvas, frame.getContentPane(), WINDOW_SIZE);
 			awtCanvas.setFocusable(true);
 			awtCanvas.requestFocus();
 			
@@ -167,48 +163,20 @@ public class DesktopLauncher {
 		}
 	}
 	
-	private static JPanel makeUIPanel(JFrame frame, Dimension size) {
-		JPanel p = new JPanel(null) {
+	private static JFrame makeUIFrame(JFrame frame) {
+		JFrame uiFrame = new JFrame("UI Frame") {
+			@Override
+			public void doLayout() {
+				setSize(getPreferredSize());
+				super.doLayout();
+			}
+			
 			@Override
 			public Dimension getPreferredSize() {
-				return frame.getContentPane().getPreferredSize();
-			}
-			
-			@Override
-			public Dimension getMinimumSize() {
-				return frame.getContentPane().getMinimumSize();
-			}
-			
-			@Override
-			public Dimension getMaximumSize() {
-				return frame.getContentPane().getMaximumSize();
+				return frame.getContentPane().getSize();
 			}
 		};
 		
-		p.addContainerListener(new ContainerListener() {
-			@Override
-			public void componentAdded(ContainerEvent e) {
-				p.revalidate();
-				p.repaint();
-			}
-			
-			@Override
-			public void componentRemoved(ContainerEvent e) {
-				p.revalidate();
-				p.repaint();
-			}
-		});
-		
-		p.setFocusable(false);
-		p.setOpaque(false);
-		// ClientUtils.setupTransparentAWTContainer(p);
-		ClientUtils.trackParentSize(p, frame.getContentPane(), size);
-		
-		return p;
-	}
-	
-	private static JFrame makeUIFrame(JFrame frame) {
-		JFrame uiFrame = new JFrame("UI Frame");
 		frame.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) { uiFrame.setVisible(false); uiFrame.dispose(); }
@@ -241,12 +209,7 @@ public class DesktopLauncher {
 		frame.addComponentListener(new ComponentListener() {
 			@Override
 			public void componentResized(ComponentEvent e) {
-				// System.out.println("resizing over frame");
-				SwingUtilities.invokeLater(() -> {
-					uiFrame.setSize(frame.getContentPane().getSize());
-					uiFrame.revalidate();
-					// uiFrame.repaint();
-				});
+				uiFrame.revalidate();
 			}
 			
 			@Override

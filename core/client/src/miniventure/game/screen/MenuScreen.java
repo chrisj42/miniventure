@@ -7,7 +7,6 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 import java.awt.Component;
-import java.awt.Container;
 
 import miniventure.game.util.Action;
 import miniventure.game.util.RelPos;
@@ -31,8 +30,6 @@ public abstract class MenuScreen extends JPanel {
 		this.fillScreen = fillScreen;
 		setFocusable(false);
 		setOpaque(!transparent);
-		if(transparent)
-			ClientUtils.setupTransparentAWTContainer(this);
 	}
 	
 	// called when the menu is focused, the first time and any subsequent times.
@@ -46,23 +43,9 @@ public abstract class MenuScreen extends JPanel {
 	public void setParentScreen(MenuScreen parent) { this.parent = parent; }
 	public MenuScreen getParentScreen() { return parent; }
 	
-	// protected abstract boolean usesWholeScreen();
-	
-	/**
-	 * Because the UI Panel will not have a layout, MenuScreens must provide a way to adapt to changes in screen size.
-	 * This will be done through a ComponentListener, which will be added to the ui panel, and removed when this screen
-	 * is removed from the panel.
-	 */
-	public void doLayoutBehavior(Container parent) {
-		ClientUtils.addToAnchorLayout(this, parent, RelPos.CENTER);
+	protected void setupAnchorLayout(AnchorPanel parent) {
+		parent.addToAnchorLayout(this, RelPos.CENTER);
 	}
-	
-	/*@Override
-	public Dimension getPreferredSize() {
-		if(fillScreen)
-			return ClientCore.getUiPanel().getSize();
-		return super.getPreferredSize();
-	}*/
 	
 	private final Color background = new Color();
 	public void glDraw() {
@@ -80,14 +63,6 @@ public abstract class MenuScreen extends JPanel {
 		if(disposeParent && parent != null) parent.dispose();
 		super.dispose();
 	}*/
-	
-	@Override
-	protected void addImpl(Component comp, Object constraints, int index) {
-		if(comp instanceof Box.Filler)
-			ClientUtils.setupTransparentAWTContainer(comp);
-		
-		super.addImpl(comp, constraints, index);
-	}
 	
 	protected void addCentered(JComponent comp) {
 		comp.setAlignmentX(CENTER_ALIGNMENT);

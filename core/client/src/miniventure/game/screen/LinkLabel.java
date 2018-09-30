@@ -22,6 +22,7 @@ public class LinkLabel extends JLabel implements MouseListener {
 	private String url;
 	private boolean down = false;
 	private boolean over = false;
+	private boolean visited = false;
 	
 	private Color c;
 	
@@ -31,6 +32,7 @@ public class LinkLabel extends JLabel implements MouseListener {
 	public LinkLabel(String text, String url) {
 		setValue(text, url);
 		addMouseListener(this);
+		setOpaque(false);
 	}
 	
 	public void setValue(String text, String url) {
@@ -61,6 +63,10 @@ public class LinkLabel extends JLabel implements MouseListener {
 		repaint();
 	}
 	
+	private void resetLinkColor() {
+		setLinkColor(visited ? new Color(128, 0, 128) : Color.BLUE);
+	}
+	
 	private void refresh() {
 		// System.out.println("color is "+c);
 		setText("<html><span style='"+(valid()?"text-decoration:underline; ":"")+"color:rgb("+c.getRed()+","+c.getGreen()+","+c.getBlue()+")'>"+text+"</span></html>");
@@ -82,11 +88,13 @@ public class LinkLabel extends JLabel implements MouseListener {
 	public void mouseReleased(MouseEvent e) {
 		down = false;
 		if(!valid()) return;
-		if(over)
+		if(over) {
 			openLink();
+			visited = true;
+		}
 		
 		setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-		setLinkColor(new Color(128, 0, 128, 255));
+		resetLinkColor();
 	}
 	
 	@Override
@@ -103,7 +111,7 @@ public class LinkLabel extends JLabel implements MouseListener {
 		over = false;
 		if(!valid()) return;
 		setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
-		setLinkColor(Color.BLUE);
+		resetLinkColor();
 	}
 	
 	private void openLink() {
