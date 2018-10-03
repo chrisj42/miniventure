@@ -10,6 +10,8 @@ hs_err_pid*
 /desktop/out/
 /gentest/out/
 notes/ignored/
+scripts/
+/*.jar
 
 ## Robovm
 /ios/robovm-build/
