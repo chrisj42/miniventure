@@ -8,6 +8,7 @@ import miniventure.game.client.ClientWorld;
 import miniventure.game.client.LevelViewport;
 import miniventure.game.screen.InfoScreen.CreditsScreen;
 import miniventure.game.screen.InfoScreen.InstructionsScreen;
+import miniventure.game.util.RelPos;
 import miniventure.game.util.VersionInfo;
 import miniventure.game.world.DisplayLevel;
 import miniventure.game.world.TimeOfDay;
@@ -100,7 +101,7 @@ public class MainMenu extends BackgroundProvider {
 		VisTextButton exitBtn = makeButton("Quit", () -> Gdx.app.exit());
 		table.add(exitBtn).row();
 		
-		addActor(table);
+		getAnchor().addAnchored(table, RelPos.CENTER);
 		table.setPosition(getWidth()/2, getHeight()/2, Align.center);
 		
 		// setup level scrolling in background

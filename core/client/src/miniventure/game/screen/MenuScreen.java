@@ -2,6 +2,7 @@ package miniventure.game.screen;
 
 import miniventure.game.GameCore;
 import miniventure.game.util.Action;
+import miniventure.game.util.RelPos;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -21,6 +22,8 @@ public class MenuScreen extends Stage {
 	
 	private final boolean clearGdxBackground;
 	private MenuScreen parent;
+	
+	private AnchorGroup anchorGroup;
 	protected VerticalGroup vGroup;
 	
 	public MenuScreen(final boolean clearGdxBackground) {
@@ -29,10 +32,15 @@ public class MenuScreen extends Stage {
 		vGroup = new VerticalGroup();
 		vGroup.space(10);
 		vGroup.setPosition(getWidth()/2, getHeight()*2/3, Align.center);
+		
+		anchorGroup = new AnchorGroup();
+		addActor(anchorGroup);
 	}
 	
 	// called when the menu is focused, the first time and any subsequent times.
 	public void focus() {}
+	
+	protected AnchorGroup getAnchor() { return anchorGroup; }
 	
 	public void setParent(MenuScreen parent) { this.parent = parent; }
 	public MenuScreen getParent() { return parent; }
@@ -82,7 +90,7 @@ public class MenuScreen extends Stage {
 	protected <T extends Actor> Container<T> addComponent(T comp, int spacing) { return addComponent(0, comp, spacing); }
 	protected <T extends Actor> Container<T> addComponent(int preSpacing, T comp, int postSpacing) {
 		if(vGroup.getParent() == null)
-			addActor(vGroup);
+			anchorGroup.addAnchored(vGroup, RelPos.CENTER);
 		Container<T> box = new Container<>(comp);
 		box.padTop(preSpacing);
 		box.padBottom(postSpacing);
@@ -91,6 +99,7 @@ public class MenuScreen extends Stage {
 	}
 	
 	public void resize(int width, int height) {
+		anchorGroup.invalidateHierarchy();
 		getViewport().update(width, height, true);
 	}
 	
