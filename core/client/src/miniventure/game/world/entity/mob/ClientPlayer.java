@@ -199,6 +199,9 @@ public class ClientPlayer extends ClientEntity implements Player {
 				hands.dropInvItems(hands.getSelectedItem(), Gdx.input.isKeyPressed(Keys.SHIFT_LEFT));
 			}
 		}
+		
+		if(GameCore.debug && Gdx.input.isKeyPressed(Keys.SHIFT_LEFT) && ClientCore.input.pressingKey(Keys.H))
+			changeStat(Stat.Health, -1);
 	}
 	
 	@Override
