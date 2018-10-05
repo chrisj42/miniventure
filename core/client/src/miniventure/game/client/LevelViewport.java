@@ -172,7 +172,7 @@ public class LevelViewport {
 		camera.setToOrtho(false, viewportWidth, viewportHeight);
 	}
 	
-	void resize(int width, int height) {
+	public void resize(int width, int height) {
 		resetCamera(width, height);
 		
 		lightingCamera.setToOrtho(false, width, height);

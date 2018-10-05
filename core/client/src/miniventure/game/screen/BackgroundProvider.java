@@ -17,6 +17,14 @@ public abstract class BackgroundProvider extends MenuScreen {
 	
 	public abstract void renderBackground();
 	
+	public abstract void resizeBackground(int width, int height);
+	
+	@Override
+	public void resize(int width, int height) {
+		super.resize(width, height);
+		resizeBackground(width, height);
+	}
+	
 	@Override
 	public boolean usesWholeScreen() { return clearGdxBackground || externallyCleared; }
 	

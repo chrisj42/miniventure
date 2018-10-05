@@ -135,6 +135,11 @@ public class MainMenu extends BackgroundProvider {
 		cameraDir.y = velDir(cameraPos.y, cameraDir.y, levelView.getViewHeight()/2, backgroundLevel.getHeight() - levelView.getViewHeight()/2);
 	}
 	
+	@Override
+	public void resizeBackground(int width, int height) {
+		levelView.resize(width, height);
+	}
+	
 	private float velDir(float pos, float vel, float min, float max) {
 		if((pos >= max && vel >= 0) || (pos <= min && vel <= 0)) {
 			vel += MathUtils.random(-PAN_SPEED/4, PAN_SPEED/4);

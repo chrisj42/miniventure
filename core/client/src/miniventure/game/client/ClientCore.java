@@ -220,7 +220,7 @@ public class ClientCore extends ApplicationAdapter {
 		
 		MenuScreen menu = getScreen();
 		if(menu != null)
-			menu.getViewport().update(width, height, true);
+			menu.resize(width, height);
 	}
 	
 	

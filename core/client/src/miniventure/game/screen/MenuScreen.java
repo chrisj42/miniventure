@@ -14,7 +14,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 
@@ -25,7 +24,7 @@ public class MenuScreen extends Stage {
 	protected VerticalGroup vGroup;
 	
 	public MenuScreen(final boolean clearGdxBackground) {
-		super(new ExtendViewport(GameCore.DEFAULT_SCREEN_WIDTH, GameCore.DEFAULT_SCREEN_HEIGHT), GameCore.getBatch());
+		super(new DiscreteScreenViewport(GameCore.DEFAULT_SCREEN_WIDTH, GameCore.DEFAULT_SCREEN_HEIGHT), GameCore.getBatch());
 		this.clearGdxBackground = clearGdxBackground;
 		vGroup = new VerticalGroup();
 		vGroup.space(10);
@@ -89,6 +88,10 @@ public class MenuScreen extends Stage {
 		box.padBottom(postSpacing);
 		vGroup.addActor(box);
 		return box;
+	}
+	
+	public void resize(int width, int height) {
+		getViewport().update(width, height, true);
 	}
 	
 	@Override

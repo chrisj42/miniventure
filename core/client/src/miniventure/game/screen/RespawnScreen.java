@@ -30,4 +30,9 @@ public class RespawnScreen extends BackgroundProvider {
 		if(level != null)
 			backgroundRenderer.render(deathPos, lighting, level);
 	}
+	
+	@Override
+	public void resizeBackground(int width, int height) {
+		backgroundRenderer.resize(width, height);
+	}
 }

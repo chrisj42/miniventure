@@ -26,4 +26,10 @@ public class BackgroundInheritor extends BackgroundProvider {
 		if(gdxBackground != null)
 			gdxBackground.renderBackground();
 	}
+	
+	@Override
+	public void resizeBackground(int width, int height) {
+		if(gdxBackground != null)
+			gdxBackground.resize(width, height);
+	}
 }
