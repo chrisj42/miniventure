@@ -40,7 +40,7 @@ public class GameScreen {
 		uiCamera = new OrthographicCamera();
 		guiStage = new Stage(new ExtendViewport(GameCore.DEFAULT_SCREEN_WIDTH, GameCore.DEFAULT_SCREEN_HEIGHT, uiCamera), batch);
 		
-		levelView = new LevelViewport(batch, uiCamera);
+		levelView = new LevelViewport(batch, uiCamera); // uses uiCamera for rendering lighting to the screen.
 		
 		resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		
