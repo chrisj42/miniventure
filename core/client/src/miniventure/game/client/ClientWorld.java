@@ -23,6 +23,7 @@ import miniventure.game.world.entity.mob.ClientPlayer;
 import miniventure.game.world.tile.ClientTile;
 import miniventure.game.world.tile.TileEnumMapper;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.Array;
 
@@ -188,8 +189,9 @@ public class ClientWorld extends WorldManager {
 	
 	@Override
 	public void deregisterEntity(final int eid) {
-		if(mainPlayer != null && eid == mainPlayer.getId())
-			ClientCore.setScreen(new RespawnScreen(mainPlayer.getCenter(), getLightingOverlay(), mainPlayer.getLevel(), gameScreen.getLevelView()));
+		if(mainPlayer != null && eid == mainPlayer.getId()) {
+			Gdx.app.postRunnable(() -> ClientCore.setScreen(new RespawnScreen(mainPlayer.getCenter(), getLightingOverlay(), mainPlayer.getLevel(), gameScreen.getLevelView())));
+		}
 		else
 			super.deregisterEntity(eid);
 	}
