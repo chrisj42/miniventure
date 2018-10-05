@@ -1,13 +1,9 @@
 package miniventure.game.client;
 
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-import java.awt.Color;
-import java.awt.Font;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.Thread.UncaughtExceptionHandler;
@@ -18,13 +14,18 @@ import miniventure.game.GameProtocol.InventoryUpdate;
 import miniventure.game.GameProtocol.Message;
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.item.InventoryScreen;
-import miniventure.game.screen.*;
-import miniventure.game.util.Action;
+import miniventure.game.screen.BackgroundInheritor;
+import miniventure.game.screen.BackgroundProvider;
+import miniventure.game.screen.ErrorScreen;
+import miniventure.game.screen.LoadingScreen;
+import miniventure.game.screen.MainMenu;
+import miniventure.game.screen.MenuScreen;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.MonoVoidFunction;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
@@ -34,8 +35,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ClientCore extends ApplicationAdapter {
-	
-	private static Action shutdown;
 	
 	private static GameScreen gameScreen;
 	private static ClientWorld clientWorld;
@@ -48,13 +47,9 @@ public class ClientCore extends ApplicationAdapter {
 	private static boolean hasMenu = false;
 	private static MenuScreen menuScreen;
 	
-	private static AnchorPanel uiPanel;
-	private final AnchorPanel hudPanel;
 	private final ServerManager serverStarter;
 	
-	public static final Font DEFAULT_FONT = new JLabel().getFont().deriveFont(14f); 
-	public static final boolean PLAY_MUSIC = false;
-	
+	public static boolean PLAY_MUSIC = false;
 	
 	public static final MonoVoidFunction<Throwable> exceptionNotifier = throwable -> {
 		StringWriter string = new StringWriter();
@@ -69,14 +64,20 @@ public class ClientCore extends ApplicationAdapter {
 	
 	public static final UncaughtExceptionHandler exceptionHandler = (thread, throwable) -> {
 		exceptionNotifier.act(throwable);
+		
 		throwable.printStackTrace();
-		exit();
 	};
 	
-	public ClientCore(AnchorPanel hudPanel, AnchorPanel uiPanel, Action shutdown, ServerManager serverStarter) {
-		this.hudPanel = hudPanel;
-		ClientCore.uiPanel = uiPanel;
-		ClientCore.shutdown = shutdown;
+	/*public static final void wrapex(Action a) {
+		try {
+			a.act();
+		} catch(Throwable t) {
+			exceptionHandler.uncaughtException(Thread.currentThread(), t);
+			throw t;
+		}
+	}*/
+	
+	public ClientCore(ServerManager serverStarter) {
 		this.serverStarter = serverStarter;
 	}
 	
@@ -85,15 +86,15 @@ public class ClientCore extends ApplicationAdapter {
 		VisUI.load(Gdx.files.internal("skins/visui/uiskin.json"));
 		
 		LoadingScreen loader = new LoadingScreen();
-		loader.pushMessage("Initializing...", Color.BLACK);
+		loader.pushMessage("Initializing...");
 		setScreen(loader);
-		// TODO once things work, see if removing the 0 delay and just posting the runnable works fine, or if it's still necessary.
+		//System.out.println("start delay");
 		MyUtils.delay(0, () -> Gdx.app.postRunnable(() -> {
+			//System.out.println("end delay");
 			GameCore.initGdx();
 			
-			gameScreen = new GameScreen(hudPanel);
+			gameScreen = new GameScreen();
 			clientWorld = new ClientWorld(serverStarter, gameScreen);
-			Gdx.input.setInputProcessor(null);
 			
 			setScreen(new MainMenu());
 		}));
@@ -104,82 +105,79 @@ public class ClientCore extends ApplicationAdapter {
 		if(gameScreen != null)
 			gameScreen.dispose();
 		
+		if(menuScreen != null)
+			menuScreen.dispose();
+		
 		GameCore.dispose();
 	}
 	
 	@Override
 	public void render() {
-		input.update(true);
+		input.update();
 		
 		if (clientWorld != null && clientWorld.worldLoaded())
 			clientWorld.update(GameCore.getDeltaTime()); // renders as well
 		
 		hasMenu = menuScreen != null;
 		
-		if(menuScreen != null)
-			// some menus use libGDX to render some or all of their graphics (most likely the background); this is their opportunity to do so.
-			menuScreen.glDraw();
-		
-		input.update(false);
+		if (menuScreen != null)
+			menuScreen.act();
+		if (menuScreen != null)
+			menuScreen.draw();
 	}
 	
 	public static void setScreen(@Nullable MenuScreen screen) {
 		if(menuScreen instanceof InventoryScreen) {
-			getClient().send(new InventoryUpdate(null, clientWorld.getMainPlayer().getHands()));
+			//System.out.println("sending held item request to server for "+clientWorld.getMainPlayer().getHands().getUsableItem());
+			getClient().send(new InventoryUpdate(clientWorld.getMainPlayer()));
+		}
+		
+		if(menuScreen != null && screen != null && screen == menuScreen.getParent()) {
+			backToParentScreen();
+			return;
 		}
 		
 		if(menuScreen instanceof MainMenu && screen instanceof ErrorScreen)
 			return; // ignore it.
 		
-		if(menuScreen instanceof BackgroundInheritor && screen instanceof BackgroundInheritor)
-			((BackgroundInheritor)screen).inheritBackground((BackgroundInheritor)menuScreen);
-		else if(menuScreen instanceof BackgroundProvider && screen instanceof BackgroundInheritor)
+		if(menuScreen instanceof BackgroundProvider && screen instanceof BackgroundInheritor)
 			((BackgroundInheritor)screen).setBackground((BackgroundProvider)menuScreen);
 		
 		if(screen != null && menuScreen != null && (gameScreen == null || menuScreen != gameScreen.chatScreen)) {
-			if((screen instanceof ErrorScreen || screen instanceof LoadingScreen) && (menuScreen instanceof ErrorScreen || menuScreen instanceof LoadingScreen || (screen instanceof ErrorScreen && menuScreen.getParentScreen() != null))) {
-				// if(menuScreen.getParentScreen() != null || )
-					screen.setParentScreen(menuScreen.getParentScreen()); // when are you going to go from a chat screen to another screen...?
+			if((screen instanceof ErrorScreen || screen instanceof LoadingScreen) && (menuScreen instanceof ErrorScreen || menuScreen instanceof LoadingScreen || (screen instanceof ErrorScreen && menuScreen.getParent() != null))) {
+				screen.setParent(menuScreen.getParent()); // when are you going to go from a chat screen to another screen...?
 			}
-			else// if(!(menuScreen instanceof ErrorScreen))
-				screen.setParentScreen(menuScreen);
+			else
+				screen.setParent(menuScreen);
 		}
 		
 		System.out.println("setting screen to " + screen);
 		
 		if(gameScreen != null) {
-			if(screen == gameScreen.chatScreen)
-				gameScreen.chatOverlay.setVisible(false);
-			if(menuScreen == gameScreen.chatScreen)
-				gameScreen.chatOverlay.setVisible(true);
-			gameScreen.getHudPanel().setVisible(screen == null);
 			if(screen instanceof MainMenu) {
 				gameScreen.chatScreen.reset();
 				gameScreen.chatOverlay.reset();
 			}
 		}
 		
-		if(menuScreen != null)
-			uiPanel.remove(menuScreen);
-		
-		if(screen != null)
-			uiPanel.add(screen);
-		
 		menuScreen = screen;
-		input.reset(menuScreen == null);
 		if(menuScreen != null) menuScreen.focus();
+		if(gameScreen == null) {
+			Gdx.input.setInputProcessor(menuScreen == null ? input : menuScreen);
+		}
+		else {
+			Gdx.input.setInputProcessor(menuScreen == null ? new InputMultiplexer(gameScreen.getGuiStage(), input) : new InputMultiplexer(menuScreen, gameScreen.getGuiStage()));
+		}
+		input.reset();
 	}
 	public static void backToParentScreen() {
-		if(menuScreen != null && menuScreen.getParentScreen() != null) {
-			MenuScreen screen = menuScreen.getParentScreen();
+		if(menuScreen != null && menuScreen.getParent() != null) {
+			MenuScreen screen = menuScreen.getParent();
 			System.out.println("setting screen back to " + screen);
-			
-			uiPanel.remove(menuScreen);
-			uiPanel.add(screen);
-			
+			menuScreen.dispose(false);
 			menuScreen = screen;
-			input.reset(false);
-			screen.focus();
+			Gdx.input.setInputProcessor(menuScreen);
+			input.reset();
 		}
 	}
 	
@@ -219,6 +217,10 @@ public class ClientCore extends ApplicationAdapter {
 	public void resize(int width, int height) {
 		if(gameScreen != null)
 			gameScreen.resize(width, height);
+		
+		MenuScreen menu = getScreen();
+		if(menu != null)
+			menu.getViewport().update(width, height, true);
 	}
 	
 	
@@ -227,10 +229,6 @@ public class ClientCore extends ApplicationAdapter {
 	@Nullable
 	public static MenuScreen getScreen() { return menuScreen; }
 	
-	public static JPanel getUiPanel() { return uiPanel; }
-	
 	public static ClientWorld getWorld() { return clientWorld; }
 	public static GameClient getClient() { return clientWorld.getClient(); }
-	
-	public static void exit() { shutdown.act(); }
 }

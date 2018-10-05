@@ -1,16 +1,11 @@
 package miniventure.game.screen;
 
-import java.awt.Color;
-
 import miniventure.game.client.ClientCore;
 
-public class ErrorScreen extends MenuScreen implements BackgroundInheritor {
-	
-	private BackgroundProvider gdxBackground;
+public class ErrorScreen extends BackgroundInheritor {
 	
 	public ErrorScreen(String error) { this(error, true); }
 	public ErrorScreen(String error, boolean allowRejoin) {
-		super(true);
 		
 		addComponent(makeLabel(error));
 		
@@ -18,31 +13,13 @@ public class ErrorScreen extends MenuScreen implements BackgroundInheritor {
 			addComponent(50, makeButton("Reconnect", () -> ClientCore.getWorld().rejoinWorld()));
 		
 		addComponent(10, 
-					 makeButton("Back to main menu", 
-								() -> ClientCore.setScreen(getParentScreen() != null ? getParentScreen() : new MainMenu())
-					 )
+			makeButton("Back to main menu", 
+				() -> ClientCore.setScreen(getParent() != null ? getParent() : new MainMenu())
+			)
 		);
 		
-		setBackground(new Color(32, 173, 43));
-	}
-	
-	@Override
-	public void setBackground(final BackgroundProvider gdxBackground) {
-		this.gdxBackground = gdxBackground;
-	}
-	
-	@Override
-	public BackgroundProvider getGdxBackground() {
-		return gdxBackground;
+		// setBackground(new Color(32, 173, 43));
 	}
 	
 	@Override public void focus() { ClientCore.stopMusic(); super.focus(); }
-	
-	@Override
-	public void glDraw() {
-		if(gdxBackground != null)
-			gdxBackground.glDraw();
-		else
-			super.glDraw();
-	}
 }

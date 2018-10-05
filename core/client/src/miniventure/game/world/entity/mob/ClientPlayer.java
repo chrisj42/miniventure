@@ -1,6 +1,5 @@
 package miniventure.game.world.entity.mob;
 
-import java.awt.event.KeyEvent;
 import java.util.EnumMap;
 import java.util.HashMap;
 
@@ -27,6 +26,9 @@ import miniventure.game.world.entity.mob.MobAnimationController.AnimationState;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.data.PropertyTag;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
@@ -131,10 +133,10 @@ public class ClientPlayer extends ClientEntity implements Player {
 	public void handleInput(Vector2 mouseInput) {
 		
 		Vector2 inputDir = new Vector2();
-		if(ClientCore.input.isKeyDown(KeyEvent.VK_LEFT)) inputDir.x--;
-		if(ClientCore.input.isKeyDown(KeyEvent.VK_RIGHT)) inputDir.x++;
-		if(ClientCore.input.isKeyDown(KeyEvent.VK_UP)) inputDir.y++;
-		if(ClientCore.input.isKeyDown(KeyEvent.VK_DOWN)) inputDir.y--;
+		if(Gdx.input.isKeyPressed(Keys.LEFT)) inputDir.x--;
+		if(Gdx.input.isKeyPressed(Keys.RIGHT)) inputDir.x++;
+		if(Gdx.input.isKeyPressed(Keys.UP)) inputDir.y++;
+		if(Gdx.input.isKeyPressed(Keys.DOWN)) inputDir.y--;
 		
 		inputDir.nor();
 		
@@ -171,29 +173,30 @@ public class ClientPlayer extends ClientEntity implements Player {
 		getStatEvo(StaminaSystem.class).isMoving = !moveDist.isZero();
 		
 		if(!isKnockedBack() && !ClientCore.hasMenu()) {
-			if(ClientCore.input.pressingKey(KeyEvent.VK_C))
+			if(ClientCore.input.pressingKey(Input.Keys.C))
 				ClientCore.getClient().send(new InteractRequest(true, new PositionUpdate(this), getDirection(), hands.getSelection()));
-			else if(ClientCore.input.pressingKey(KeyEvent.VK_V))
+			else if(ClientCore.input.pressingKey(Input.Keys.V))
 				ClientCore.getClient().send(new InteractRequest(false, new PositionUpdate(this), getDirection(), hands.getSelection()));
 		}
-		//if(ClientCore.input.isKeyDown(KeyEvent.VK_C) || ClientCore.input.isKeyDown(KeyEvent.VK_V))
+		//if(Gdx.input.isKeyPressed(Input.Keys.C) || Gdx.input.isKeyPressed(Input.Keys.V))
 		//	animator.requestState(AnimationState.ATTACK);
 		//}
 		
+		// the server will update the client hotbar as necessary when item stock changes.
 		// hands.resetItemUsage();
 		
 		for(int i = 0; i < Hands.HOTBAR_SIZE; i++)
-			if(ClientCore.input.isKeyJustPressed(KeyEvent.VK_1+i))
+			if(Gdx.input.isKeyJustPressed(Keys.NUM_1+i))
 				hands.setSelection(i);
 		
 		if(!ClientCore.hasMenu()) {
-			if(ClientCore.input.pressingKey(KeyEvent.VK_E)) {
+			if(ClientCore.input.pressingKey(Keys.E)) {
 				// do nothing here; instead, tell the server to set the held item once selected (aka on inventory menu exit). The inventory should be up to date already, generally speaking.
 				ClientCore.setScreen(new InventoryScreen(inventory, hands));
-			} else if(ClientCore.input.pressingKey(KeyEvent.VK_Z))
+			} else if(ClientCore.input.pressingKey(Keys.Z))
 				ClientCore.setScreen(new CraftingScreen(Recipes.recipes, inventory));
-			else if(ClientCore.input.pressingKey(KeyEvent.VK_Q)) {
-				hands.dropInvItems(hands.getSelectedItem(), ClientCore.input.isKeyDown(KeyEvent.VK_SHIFT));
+			else if(ClientCore.input.pressingKey(Keys.Q)) {
+				hands.dropInvItems(hands.getSelectedItem(), Gdx.input.isKeyPressed(Keys.SHIFT_LEFT));
 			}
 		}
 	}
@@ -231,8 +234,8 @@ public class ClientPlayer extends ClientEntity implements Player {
 		drawStat(Stat.Stamina, canvas.x, hold.y, batch, hold);
 		drawStat(Stat.Hunger, canvas.x, hold.y, batch, hold);
 		
-		// fixme draw hotbar table
-		// hands.getHotbarTable().setLocation((int)hold.x+20, 8);
+		// fixme hotbar table
+		// hands.getHotbarTable().setPosition(hold.x+20, 8);
 	}
 	
 	private Vector2 renderBar(Stat stat, float x, float y, SpriteBatch batch) { return renderBar(stat, x, y, batch, 0); }

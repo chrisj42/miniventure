@@ -1,19 +1,23 @@
 package miniventure.game.item;
 
-import javax.swing.BoxLayout;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-
-import java.awt.Color;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.Arrays;
 
+import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.CraftRequest;
 import miniventure.game.client.ClientCore;
 import miniventure.game.screen.MenuScreen;
+import miniventure.game.util.MyUtils;
+
+import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
 
 public class CraftingScreen extends MenuScreen {
 	
@@ -24,28 +28,25 @@ public class CraftingScreen extends MenuScreen {
 	private final CraftableItem[] list;
 	private final ItemSelectionTable table;
 	
-	// FIXME fix up some things relating to the item selection table
-	
-	private final ItemStackSlot invCount = new ItemStackSlot(true, null, 0) {
+	private final ItemStackSlot invCount = new ItemStackSlot(true, null, 0, null) {
 		@Override protected boolean showCount() { return getItem() != null; }
 	};
-	private final JPanel inInv = new OpaqueVerticalGroup(background);
-	private final JPanel costs = new OpaqueVerticalGroup(background);
+	private final VerticalGroup inInv = new OpaqueVerticalGroup(background);
+	private final VerticalGroup costs = new OpaqueVerticalGroup(background);
 	
-	private static class OpaqueVerticalGroup extends JPanel {
-		// private final Color color;
+	private static class OpaqueVerticalGroup extends VerticalGroup {
+		private final Color color;
 		
 		public OpaqueVerticalGroup(Color color) {
-			// this.color = color;
-			// pad(5);
-			setBackground(color);
+			this.color = color;
+			pad(5);
 		}
 		
-		/*@Override
+		@Override
 		public void draw(Batch batch, float parentAlpha) {
 			MyUtils.fillRect(getX(), getY(), getWidth(), getHeight(), color, parentAlpha, batch);
 			super.draw(batch, parentAlpha);
-		}*/
+		}
 	}
 	
 	private static class CraftableRecipe {
@@ -59,15 +60,9 @@ public class CraftingScreen extends MenuScreen {
 		}
 	}
 	
-	@Override
-	public void focus() {
-		ClientCore.setScreen(null);
-	}
-	
 	public CraftingScreen(Recipe[] recipes, Inventory playerInventory) {
 		super(false);
 		this.playerInv = playerInventory;
-		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		
 		CraftableRecipe[] recipeCache = new CraftableRecipe[recipes.length];
 		for(int i = 0; i < recipeCache.length; i++)
@@ -83,17 +78,16 @@ public class CraftingScreen extends MenuScreen {
 		for(int i = 0; i < list.length; i++) {
 			CraftableItem craftEntry = new CraftableItem(recipeCache[i].recipe, i, recipeCache[i].index);
 			list[i] = craftEntry;
-			craftEntry.addMouseListener(new MouseAdapter() {
+			craftEntry.addListener(new ClickListener() {
 				@Override
-				public void mouseClicked(MouseEvent e) {
+				public void clicked(InputEvent e, float x, float y) {
 					craft(craftEntry);
 				}
 			});
-			craftEntry.addKeyListener(new KeyAdapter() {
+			craftEntry.addListener(new InputListener() {
 				@Override
-				public void keyPressed(KeyEvent e) {
-					if(e.getKeyCode() == KeyEvent.VK_ENTER)
-						table.setSelection(craftEntry.getSlotIndex());
+				public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+					table.setSelection(craftEntry.getSlotIndex());
 				}
 			});
 		}
@@ -107,58 +101,43 @@ public class CraftingScreen extends MenuScreen {
 				CraftingScreen.this.setHighlightedRecipe(list[index].recipe);
 			}
 		};
-		table.setFocusable(false);
-		addKeyListener(new KeyAdapter() {
+		table.addListener(new InputListener() {
 			@Override
-			public void keyPressed(KeyEvent e) {
-				int keycode = e.getKeyCode();
-				if(keycode == KeyEvent.VK_ENTER) {
+			public boolean keyDown (InputEvent event, int keycode) {
+				if(keycode == Keys.ENTER) {
 					craft(list[table.getSelection()]);
-					// return true;
+					return true;
 				}
-				// return false;
+				return false;
 			}
 		});
-		add(table);
+		addActor(table);
 		
-		// inInv.columnAlign(Align.left);
-		// inInv.space(5);
-		inInv.add(new JLabel("In inventory:"));
-		inInv.add(invCount);
-		add(inInv);
+		inInv.columnAlign(Align.left);
+		inInv.space(5);
+		inInv.addActor(new Label("In inventory:", GameCore.getSkin()));
+		inInv.addActor(invCount);
+		addActor(inInv);
 		
-		// costs.columnAlign(Align.left);
-		// costs.space(5);
-		add(costs);
+		costs.columnAlign(Align.left);
+		costs.space(5);
+		addActor(costs);
 		
 		
-		// table.setPosition(0, getHeight(), Align.topLeft);
-		// table.pack();
-		table.setAlignmentX(LEFT_ALIGNMENT);
-		table.setAlignmentY(TOP_ALIGNMENT);
+		table.setPosition(0, getHeight(), Align.topLeft);
+		table.pack();
 		
-		table.addKeyListener(new KeyAdapter() {
+		getRoot().addListener(new InputListener() {
 			@Override
-			public void keyPressed(KeyEvent e) {
-				int keycode = e.getKeyCode();
-				if(keycode == KeyEvent.VK_Z || keycode == KeyEvent.VK_ESCAPE)
+			public boolean keyDown (InputEvent event, int keycode) {
+				if(keycode == Keys.Z || keycode == Keys.ESCAPE)
 					ClientCore.setScreen(null);
-				// return true;
+				return true;
 			}
 		});
 		
-		table.requestFocus();
+		setKeyboardFocus(table);
 	}
-	
-	// @Override
-	// public boolean usesWholeScreen() { return false; }
-	
-	
-	/*@Override
-	public Dimension getPreferredSize() {
-		Dimension tableSize = table.getPreferredSize();
-		return new Dimension(tableSize.width + 10 + costs.getPreferredSize().width, tableSize.height);
-	}*/
 	
 	private void craft(CraftableItem item) {
 		if(item.recipe.tryCraft(playerInv) != null)
@@ -169,23 +148,23 @@ public class CraftingScreen extends MenuScreen {
 	}
 	
 	private void setHighlightedRecipe(Recipe recipe) {
-		inInv.remove(invCount);
+		inInv.removeActor(invCount);
 		invCount.setItem(recipe.getResult().item);
 		invCount.setCount(playerInv.getCount(invCount.getItem()));
-		inInv.add(invCount);
+		inInv.addActor(invCount);
 		
-		costs.removeAll();
-		costs.add(new JLabel("Costs:"));
+		costs.clearChildren();
+		costs.addActor(new Label("Costs:", GameCore.getSkin()));
 		for(ItemStack cost: recipe.getCosts())
-			costs.add(new ItemStackSlot(true, cost.item, cost.count));
+			costs.addActor(new ItemStackSlot(true, cost.item, cost.count, null));
 		
-		inInv.revalidate();
-		// inInv.pack();
-		costs.revalidate();
-		// costs.pack();
+		inInv.invalidate();
+		inInv.pack();
+		costs.invalidate();
+		costs.pack();
 		
-		inInv.setLocation(table.getPreferredSize().width + 10, getHeight() - inInv.getHeight());
-		costs.setLocation(table.getPreferredSize().width + 10, getHeight() - inInv.getHeight() - 10 - costs.getHeight());
+		inInv.setPosition(table.getPrefWidth() + 10, getHeight() - inInv.getHeight());
+		costs.setPosition(table.getPrefWidth() + 10, getHeight() - inInv.getHeight() - 10 - costs.getHeight());
 	}
 	
 	private void refreshCanCraft() {

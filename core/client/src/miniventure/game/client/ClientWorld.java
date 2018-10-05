@@ -84,7 +84,7 @@ public class ClientWorld extends WorldManager {
 		
 		level.updateEntities(getEntities(level), delta);
 		
-		if(menu == null || !menu.isOpaque())
+		if(menu == null || !menu.usesWholeScreen())
 			gameScreen.render(mainPlayer, getLightingOverlay(), level);
 		
 		super.update(delta);

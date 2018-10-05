@@ -88,6 +88,9 @@ public class Hands {
 	
 	
 	public String[] save() {
+		// make sure we don't save out-of-date information.
+		validate();
+		
 		String[] data = new String[hotbarItems.length];
 		for(int i = 0; i < hotbarItems.length; i++)
 			data[i] = MyUtils.encodeStringArray(hotbarItems[i].save());

@@ -1,18 +1,6 @@
 package miniventure.game.screen;
 
-import javax.swing.Box;
-import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-
-import java.awt.Desktop;
-import java.awt.Desktop.Action;
-import java.awt.EventQueue;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 import miniventure.game.GameCore;
 import miniventure.game.client.ClientCore;
@@ -27,56 +15,93 @@ import miniventure.game.world.levelgen.LevelGenerator;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
+import com.kotcrab.vis.ui.widget.LinkLabel.LinkLabelStyle;
+import com.kotcrab.vis.ui.widget.VisLabel;
+import com.kotcrab.vis.ui.widget.VisTextButton;
 
-public class MainMenu extends MenuScreen implements BackgroundProvider {
+import org.jetbrains.annotations.NotNull;
+
+public class MainMenu extends BackgroundProvider {
 	
 	private boolean dialog = false;
 	
+	private final Table table;
+	
 	private final DisplayLevel backgroundLevel;
 	private final LevelViewport levelView;
-	private final com.badlogic.gdx.graphics.Color lightOverlay;
+	private final Color lightOverlay;
 	private final Vector2 cameraPos, cameraDir;
 	
 	private static final float PAN_SPEED = 4.5f; // in tiles/second.
 	
 	public MainMenu() {
-		super(true);
+		super(false, true); // level renderer clears it anyway
+		
 		ClientWorld world = ClientCore.getWorld();
 		
-		addComponent(makeLabel("Welcome to Miniventure!"), 20);
-		addComponent(makeLabel("You are playing version " + GameCore.VERSION), 25);
+		table = new Table();
+		// table.setDebug(true);
+		addLabel("Welcome to Miniventure!", 20);
+		addLabel("You are playing version " + GameCore.VERSION, 25);
 		
-		setVersionUpdateLabel(addComponent(makeLabel("Checking for higher versions...")));
+		VisLabel updateLabel = addLabel("Checking for higher versions...", 45);
+		setVersionUpdateLabel(updateLabel);
 		
-		add(Box.createVerticalStrut(45)); // space after label panel
+		VisTextButton playButton = new VisTextButton("Play");
 		
-		addSpaced(makeButton("Play", () -> {
-			if(dialog) return;
-			world.createWorld(0, 0);
-		}), 20);
+		playButton.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent e, float x, float y) {
+				if(dialog) return;
+				world.createWorld(0, 0);
+			}
+		});
 		
-		addSpaced(makeButton("Join Server", () -> {
-			if(dialog) return;
-			dialog = true;
-			EventQueue.invokeLater(() -> {
-				String ipAddress = JOptionPane.showInputDialog("Enter the IP Address you want to connect to.");
-				Gdx.app.postRunnable(() -> {
-					if(ipAddress != null)
-						world.createWorld(ipAddress);
-				});
-				dialog = false;
-			});
-		}), 20);
+		table.add(playButton).spaceBottom(20);
+		table.row();
 		
-		addSpaced(makeButton("Instructions", () -> ClientCore.setScreen(new InstructionsScreen())),
-		  20);
+		VisTextButton joinBtn = new VisTextButton("Join Server");
+		joinBtn.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent e, float x, float y) {
+				if(dialog) return;
+				dialog = true;
+				LoadingScreen loader = new LoadingScreen();
+				loader.pushMessage("Preparing to connect...");
+				ClientCore.setScreen(loader);
+				new Thread(() -> {
+					String ipAddress = JOptionPane.showInputDialog("Enter the IP Address you want to connect to.");
+					Gdx.app.postRunnable(() -> {
+						if(ipAddress != null)
+							world.createWorld(ipAddress);
+						else
+							ClientCore.backToParentScreen();
+					});
+					dialog = false;
+				}).start();
+			}
+		});
 		
-		addSpaced(makeButton("Credits", () -> ClientCore.setScreen(new CreditsScreen())),
-		  20);
+		table.add(joinBtn).spaceBottom(20).row();
 		
-		add(makeButton("Quit", ClientCore::exit));
+		VisTextButton helpBtn = makeButton("Instructions", () -> ClientCore.setScreen(new InstructionsScreen()));
+		table.add(helpBtn).spaceBottom(20).row();
+		
+		VisTextButton creditsBtn = makeButton("Credits", () -> ClientCore.setScreen(new CreditsScreen()));
+		table.add(creditsBtn).spaceBottom(20).row();
+		
+		VisTextButton exitBtn = makeButton("Quit", () -> Gdx.app.exit());
+		table.add(exitBtn).row();
+		
+		addActor(table);
+		table.setPosition(getWidth()/2, getHeight()/2, Align.center);
 		
 		// setup level scrolling in background
 		
@@ -93,15 +118,8 @@ public class MainMenu extends MenuScreen implements BackgroundProvider {
 		
 		cameraDir = new Vector2().setLength(PAN_SPEED).setToRandomDirection().setLength(PAN_SPEED);
 		
-		addComponentListener(new ComponentAdapter() {
-			@Override
-			public void componentResized(ComponentEvent e) {
-				Gdx.app.postRunnable(() -> levelView.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
-			}
-		});
-		
-		// setup background music
 		if(ClientCore.PLAY_MUSIC) {
+			// setup background music
 			Music song = ClientCore.setMusicTrack(Gdx.files.internal("audio/music/title.mp3"));
 			song.setLooping(true);
 			song.play();
@@ -109,8 +127,7 @@ public class MainMenu extends MenuScreen implements BackgroundProvider {
 	}
 	
 	@Override
-	public void glDraw() {
-		super.glDraw();
+	public void renderBackground() {
 		levelView.render(cameraPos, lightOverlay, backgroundLevel);
 		
 		cameraPos.add(cameraDir.cpy().scl(GameCore.getDeltaTime()));
@@ -127,7 +144,15 @@ public class MainMenu extends MenuScreen implements BackgroundProvider {
 		return vel;
 	}
 	
-	private void setVersionUpdateLabel(JLabel label) {
+	@NotNull
+	private VisLabel addLabel(String msg, int spacing) {
+		VisLabel label = makeLabel(msg);
+		table.add(label).spaceBottom(spacing);
+		table.row();
+		return label;
+	}
+	
+	private void setVersionUpdateLabel(VisLabel label) {
 		if(!GameCore.determinedLatestVersion()) {
 			// return a "loading" label that will be replaced once the version check completes.
 			new Thread(() -> {
@@ -138,44 +163,15 @@ public class MainMenu extends MenuScreen implements BackgroundProvider {
 		else {
 			// add a message saying you have the latest version, or a hyperlink message to the newest jar file.
 			VersionInfo latestVersion = GameCore.getLatestVersion();
+			if(latestVersion.version.compareTo(GameCore.VERSION) > 0) // link new version
+				table.getCell(label).setActor(new MyLinkLabel("Miniventure " + latestVersion.releaseName + " Now Available! Click here to download.", latestVersion.assetUrl, new LinkLabelStyle(GameCore.getFont(), Color.SKY, new ColorRect(Color.SKY))));
+			else if(latestVersion.releaseName.length() > 0)
+				label.setText("You have the latest version.");
+			else
+				label.setText("Connection failed, could not check for updates.");
 			
-			if(latestVersion.version.compareTo(GameCore.VERSION) > 0) { // link new version
-				JButton btn = new JButton("<html>Miniventure " + latestVersion.releaseName + " Now Available! Click here to download.");
-				btn.addActionListener(e -> openLink(latestVersion.assetUrl));
-				labelPanel.remove(label);
-				labelPanel.add(btn);
-			}
-			else {
-				if(latestVersion.releaseName.length() > 0)
-					label.setText("<html>You have the latest version.");
-				else
-					label.setText("<html>Connection failed, could not check for updates.");
-			}
-			
-			revalidate();
-			repaint();
+			table.pack();
+			table.setPosition(getWidth()/2, getHeight()/2, Align.center);
 		}
-	}
-	
-	private void openLink(String url) {
-		if(!Desktop.isDesktopSupported())
-			showLink(url);
-		else {
-			Desktop desktop = Desktop.getDesktop();
-			if(!desktop.isSupported(Action.BROWSE))
-				showLink(url);
-			else {
-				try {
-					desktop.browse(new URI(url));
-				} catch(IOException | URISyntaxException e) {
-					e.printStackTrace();
-					showLink(url);
-				}
-			}
-		}
-	}
-	
-	private void showLink(String url) {
-		EventQueue.invokeLater(() -> JOptionPane.showMessageDialog(ClientCore.getUiPanel(), url, "Site Link", JOptionPane.INFORMATION_MESSAGE));
 	}
 }

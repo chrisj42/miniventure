@@ -1,14 +1,13 @@
 package miniventure.game.screen;
 
-import javax.swing.BorderFactory;
-import javax.swing.JLabel;
-
-import java.awt.Color;
 import java.util.Stack;
 
 import miniventure.game.util.ProgressLogger;
 
-public class LoadingScreen extends MenuScreen implements ProgressLogger, BackgroundInheritor {
+import com.badlogic.gdx.Gdx;
+import com.kotcrab.vis.ui.widget.VisLabel;
+
+public class LoadingScreen extends BackgroundInheritor implements ProgressLogger {
 	
 	/*
 		I want to have a system where it displays a message, and the message shows a #/total progress format.
@@ -21,55 +20,31 @@ public class LoadingScreen extends MenuScreen implements ProgressLogger, Backgro
 		Like that.  
 	 */
 	
-	private final Stack<JLabel> messageLabels = new Stack<>();
-	
-	private BackgroundProvider gdxBackground;
+	private Stack<VisLabel> messageLabels = new Stack<>();
 	
 	public LoadingScreen() {
-		super(true);
+		addActor(vGroup);
 	}
 	
-	public void pushMessage(String message, Color color) {
-		final JLabel label = makeLabel(message);
-		label.setBorder(BorderFactory.createEmptyBorder(10, 2, 10, 2));
-		if(color != null) {
-			label.setForeground(color);
-		}
-		messageLabels.push(label);
-		addComponent(label);
-	}
 	@Override
 	public void pushMessage(String message) {
-		pushMessage(message, null);
+		final VisLabel label = new VisLabel(message);
+		messageLabels.push(label);
+		Gdx.app.postRunnable(() -> {
+			vGroup.addActor(label);
+		});
 	}
 	
 	@Override
 	public void editMessage(final String message) {
-		final JLabel label = messageLabels.peek();
-		label.setText(message);
+		final VisLabel label = messageLabels.peek();
+		Gdx.app.postRunnable(() -> label.setText(message));
 	}
 	
 	@Override
 	public void popMessage() {
-		JLabel removed = messageLabels.pop();
-		labelPanel.remove(removed);
+		VisLabel removed = messageLabels.pop();
+		Gdx.app.postRunnable(() -> vGroup.removeActor(removed));
 	}
 	
-	@Override
-	public void setBackground(final BackgroundProvider gdxBackground) {
-		this.gdxBackground = gdxBackground;
-	}
-	
-	@Override
-	public BackgroundProvider getGdxBackground() {
-		return gdxBackground;
-	}
-	
-	@Override
-	public void glDraw() {
-		if(gdxBackground != null)
-			gdxBackground.glDraw();
-		else
-			super.glDraw();
-	}
 }

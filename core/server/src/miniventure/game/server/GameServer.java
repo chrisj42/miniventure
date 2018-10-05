@@ -2,7 +2,6 @@ package miniventure.game.server;
 
 import javax.swing.Timer;
 
-import java.awt.Color;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -33,6 +32,7 @@ import miniventure.game.world.entity.mob.ServerPlayer;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -48,7 +48,7 @@ public class GameServer implements GameProtocol {
 	
 	private static final Color SERVER_CHAT_COLOR = Color.WHITE;
 	private static final Color STATUS_MSG_COLOR = Color.ORANGE;
-	private static final Color ERROR_CHAT_COLOR = new Color(150, 0, 0);
+	private static final Color ERROR_CHAT_COLOR = new Color(.588f, 0, 0, 1f);
 	
 	private class PlayerData {
 		final Connection connection;

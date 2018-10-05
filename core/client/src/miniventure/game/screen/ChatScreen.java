@@ -1,16 +1,5 @@
 package miniventure.game.screen;
 
-import javax.swing.Box;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.LinkedList;
@@ -23,16 +12,22 @@ import miniventure.game.chat.InfoMessage;
 import miniventure.game.chat.InfoMessageLine;
 import miniventure.game.client.ClientCore;
 import miniventure.game.util.MyUtils;
-import miniventure.game.util.RelPos;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.ui.Container;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
+import com.badlogic.gdx.utils.Align;
 
 public class ChatScreen extends MenuScreen {
 	
 	private static final float MESSAGE_LIFE_TIME = 15; // time from post to removal.
 	private static final float MESSAGE_FADE_TIME = 3; // duration taken to go from full opaque to fully transparent.
-	private static final Color BACKGROUND = new Color(128, 128, 128, 255*4/5);
+	private static final Color BACKGROUND = Color.GRAY.cpy().sub(0, 0, 0, 0.25f);
 	
 	private static final int COMMAND_BUFFER_SIZE = 30;
 	
@@ -43,7 +38,7 @@ public class ChatScreen extends MenuScreen {
 	
 	private final boolean useTimer;
 	
-	private final JTextField input;
+	private final TextField input;
 	
 	private boolean tabbing = false;
 	private int tabIndex = -1;
@@ -51,67 +46,67 @@ public class ChatScreen extends MenuScreen {
 	
 	public ChatScreen(boolean timeOutMessages) {
 		super(false);
+		
 		useTimer = timeOutMessages;
 		
-		input = new JTextField("") {
+		addActor(vGroup);
+		
+		vGroup.align(Align.topLeft);
+		vGroup.columnAlign(Align.left);
+		vGroup.space(5);
+		vGroup.setWidth(getWidth()/2);
+		
+		input = new TextField("", GameCore.getSkin()) {
 			@Override
-			public Dimension getPreferredSize() {
-				return new Dimension(ClientCore.getUiPanel().getSize().width*2/5, super.getPreferredSize().height);
+			public void draw(Batch batch, float parentAlpha) {
+				if(ClientCore.getScreen() == ChatScreen.this)
+					super.draw(batch, parentAlpha);
 			}
 		};
-		input.setFocusTraversalKeysEnabled(false);
+		input.setWidth(getWidth()/2);
+		input.setAlignment(Align.left);
 		
-		if(timeOutMessages)
-			input.setVisible(false);
-		
-		input.addActionListener(e -> {
-			String text = input.getText();
-			if(text.length() == 0 || text.equals("/")) {
-				ClientCore.setScreen(null);
-				return;
-			}
-			
-			// not nothing
-			
-			// don't add the entry if we are just redoing the previous action
-			if(prevCommandIdx != 0 || !text.equals(previousCommands.get(prevCommandIdx)))
-				previousCommands.push(text);
-			prevCommandIdx = -1; // reset the scrollback index
-			if(previousCommands.size() > COMMAND_BUFFER_SIZE)
-				previousCommands.pollLast(); // remove oldest command from history
-			
-			if(!text.startsWith("/"))
-				text = "msg " + text.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\""); // replace one backslash with two.
-			else
-				text = text.substring(1);
-			
-			ClientCore.getClient().send(new Message(text, GameCore.DEFAULT_CHAT_COLOR));
-			ClientCore.setScreen(null);
-		});
-		
-		input.addKeyListener(new KeyListener() {
+		input.addListener(new InputListener() {
 			@Override
-			public void keyTyped(KeyEvent e) {
-				if(e.getKeyChar() != '\t')
-					tabbing = false;
-			}
-			
-			@Override
-			public void keyPressed(KeyEvent e) {
-				int keycode = e.getKeyCode();
-				if(keycode == KeyEvent.VK_ESCAPE) {
+			public boolean keyDown (InputEvent event, int keycode) {
+				if(keycode == Keys.ENTER) {
+					String text = input.getText();
+					if(text.length() == 0) return true;
+					if(text.equals("/")) return true;
+					
+					// not nothing
+					
+					// don't add the entry if we are just redoing the previous action
+					if(prevCommandIdx != 0 || !text.equals(previousCommands.get(prevCommandIdx)))
+						previousCommands.push(text);
+					prevCommandIdx = -1;
+					if(previousCommands.size() > COMMAND_BUFFER_SIZE)
+						previousCommands.pollLast(); // remove oldest command from history
+					
+					if(!text.startsWith("/"))
+						text = "msg " + text.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\""); // replace one backslash with two.
+					else
+						text = text.substring(1);
+					
+					ClientCore.getClient().send(new Message(text, GameCore.DEFAULT_CHAT_COLOR));
 					ClientCore.setScreen(null);
+					return true;
 				}
-				else if(keycode == KeyEvent.VK_UP) {
+				else if(keycode == Keys.ESCAPE) {
+					ClientCore.setScreen(null);
+					return true;
+				}
+				else if(keycode == Keys.UP) {
 					if(previousCommands.size() > prevCommandIdx+1) {
 						if(prevCommandIdx < 0)
 							curCommand = input.getText();
 						prevCommandIdx++;
 						input.setText(previousCommands.get(prevCommandIdx));
-						input.setCaretPosition(input.getText().length());
+						input.setCursorPosition(input.getText().length());
 					}
+					return true;
 				}
-				else if(keycode == KeyEvent.VK_DOWN) {
+				else if(keycode == Keys.DOWN) {
 					if(prevCommandIdx+1 > 0) {
 						prevCommandIdx--;
 						if(prevCommandIdx == -1)
@@ -119,10 +114,11 @@ public class ChatScreen extends MenuScreen {
 						else
 							input.setText(previousCommands.get(prevCommandIdx));
 					}
-					input.setCaretPosition(input.getText().length());
+					input.setCursorPosition(input.getText().length());
+					return true;
 				}
-				else if(keycode == KeyEvent.VK_TAB) {
-					if(!input.getText().startsWith("/")) return;
+				else if(keycode == Keys.TAB) {
+					if(!input.getText().startsWith("/")) return true;
 					
 					String text = tabbing ? manualInput : input.getText().substring(1);
 					if(!tabbing) {
@@ -132,39 +128,41 @@ public class ChatScreen extends MenuScreen {
 					}
 					ClientCore.getClient().send(new TabRequest(manualInput, tabIndex));
 					tabIndex++;
+					
+					return true;
 				}
+				else
+					return false;
 			}
-			@Override public void keyReleased(KeyEvent e) {}
+			
+			@Override
+			public boolean keyTyped (InputEvent event, char character) {
+				if(character != '\t')
+					tabbing = false;
+				// else
+				// 	return true;
+				return false;
+			}
 		});
 		
-		add(input);
-		add(Box.createVerticalGlue());
-	}
-	
-	
-	public void focus(String initText) {
-		input.setText(initText);
-		input.setCaretPosition(initText.length());
-		ClientCore.setScreen(this);
-		focus();
-	}
-	
-	@Override
-	public void focus() {
-		super.focus();
-		input.requestFocus();
-	}
-	
-	@Override
-	public void setupAnchorLayout(AnchorPanel parent) {
-		parent.addToAnchorLayout(this, RelPos.TOP_RIGHT, -5, 5);
+		addActor(input);
+		repack();
 	}
 	
 	public void reset() {
-		removeAll();
-		add(input);
-		labelQueue.clear();
-		previousCommands.clear();
+		
+	}
+	
+	public void focus(String initText) {
+		input.setText(initText);
+		input.setCursorPosition(initText.length());
+		ClientCore.setScreen(this);
+	}
+	@Override
+	public void focus() {
+		input.pack();
+		input.setWidth(getWidth()/2);
+		setKeyboardFocus(input);
 	}
 	
 	public void addMessage(InfoMessage msg) {
@@ -172,112 +170,81 @@ public class ChatScreen extends MenuScreen {
 			// add in reverse order
 			for(int i = msg.lines.length - 1; i >= 0; i--) {
 				InfoMessageLine line = msg.lines[i];
-				addMessage(line.line, line.color, i != 0);
+				addMessage(new Label(line.line, new Label.LabelStyle(GameCore.getFont(), Color.valueOf(line.color))), i != 0);
 			}
 		}
 	}
 	public void addMessage(Message msg) {
 		synchronized (labelQueue) {
-			addMessage(msg.msg, msg.color);
+			addMessage(new Label(msg.msg, new Label.LabelStyle(GameCore.getFont(), Color.valueOf(msg.color))));
 		}
 	}
 	
-	private void addMessage(String msg, int color) { addMessage(msg, color, false); }
-	private void addMessage(String msg, int color, boolean connect) {
-		TimerLabel label = new TimerLabel(
-		  msg, 
-		  new Color(color),
-		  connect ? null : Box.createVerticalStrut(5)
-		);
-		add(label, 1);
-		if(label.spacer != null) add(label.spacer, 1);
-		labelQueue.addFirst(label);
-		while(labelQueue.size() > 10) {
-			TimerLabel c = labelQueue.removeLast();
-			remove(c);
-			if(c.spacer != null) remove(c.spacer);
-		}
-		validate(); // ensures that the chat overlay is sized correctly on display.
+	private void addMessage(Label msg) { addMessage(msg, false); }
+	private void addMessage(Label msg, boolean connect) {
+		msg.setWrap(true);
+		TimerLabel label = new TimerLabel(msg, connect);
+		vGroup.addActorAt(0, label);
+		labelQueue.add(label);
+		if(vGroup.getChildren().size > 10)
+			vGroup.removeActor(labelQueue.poll());
+		repack();
 	}
 	
 	public void autocomplete(TabResponse response) {
 		if(!tabbing) return; // abandoned request
 		if(!manualInput.equals(response.manualText)) return; // response doesn't match the current state
 		input.setText("/"+response.completion);
-		input.setCaretPosition(input.getText().length());
+		input.setCursorPosition(input.getText().length());
 	}
 	
-	@Override
-	public String toString() {
-		return super.toString()+"[overlay="+useTimer+"]";
+	private void repack() {
+		input.pack();
+		input.setWidth(getWidth()/2);
+		input.setPosition(getWidth() / 2, getHeight() - input.getHeight());
+		try {
+			vGroup.pack();
+		} catch(IndexOutOfBoundsException e) {
+			e.printStackTrace();
+		}
+		vGroup.setPosition(getWidth() / 2, input.getY() - 10 - vGroup.getHeight());
 	}
 	
-	private static final Font font = new Font("Arial", Font.BOLD, 13);
-	private class TimerLabel extends JTextArea {
-		private boolean started = false;
-		private long startTime;
-		private final Component spacer;
+	private class TimerLabel extends Container<Label> {
+		float timeLeft;
+		private final boolean connect;
 		
-		TimerLabel(String label, @NotNull Color color, @Nullable Component spacer) {
+		TimerLabel(Label label, boolean connect) {
 			super(label);
-			this.spacer = spacer;
-			
-			setOpaque(false);
-			setEditable(false);
-			setFocusable(false);
-			setLineWrap(true);
-			setWrapStyleWord(true);
-			setBorder(null);
-			
-			setForeground(new Color(color.getRed(), color.getGreen(), color.getBlue(), 254));
-			setBackground(BACKGROUND);
-			setFont(font);
+			this.connect = connect;
+			width(ChatScreen.this.getWidth()/2);
+			timeLeft = MESSAGE_LIFE_TIME;
 		}
 		
 		@Override
-		public Dimension getPreferredSize() {
-			return new Dimension(input.getPreferredSize().width, super.getPreferredSize().height);
-		}
-		
-		@Override
-		public Dimension getMaximumSize() {
-			return new Dimension(super.getMaximumSize().width, super.getPreferredSize().height);
-		}
-		
-		@Override
-		protected void paintComponent(Graphics g) {
-			g.setColor(getBackground());
-			g.fillRect(0, 0, getWidth(), getHeight());
-			super.paintComponent(g);
+		public void act(float delta) {
+			super.act(delta);
 			
-			if(useTimer) {
-				long now = System.nanoTime();
-				if(!started) {
-					started = true;
-					startTime = now;
-					MyUtils.delay((int)(MESSAGE_LIFE_TIME*1000), () -> {
-						ChatScreen.this.remove(this);
-						if(spacer != null) ChatScreen.this.remove(spacer);
-						labelQueue.remove(this);
-					});
-					MyUtils.delay((int)((MESSAGE_LIFE_TIME - MESSAGE_FADE_TIME)*1000), this::repaint);
-				}
-				else {
-					float timeLeft = MESSAGE_LIFE_TIME - (float)((now-startTime)/1E9d);
-					if(timeLeft < MESSAGE_FADE_TIME) {
-						float alpha = Math.max(0, timeLeft / MESSAGE_FADE_TIME);
-						Color c = getForeground();
-						setForeground(new Color(c.getRed(), c.getGreen(), c.getBlue(), (int) (alpha * BACKGROUND.getAlpha())));
-						c = getBackground();
-						setBackground(new Color(c.getRed(), c.getGreen(), c.getBlue(), (int) (alpha * BACKGROUND.getAlpha())));
-					}
-				}
+			if(!useTimer) return;
+			timeLeft = Math.max(0, timeLeft-delta);
+			if(timeLeft == 0) {
+				vGroup.removeActor(this);
+				repack();
+				labelQueue.remove(this);
 			}
 		}
 		
 		@Override
-		public String toString() {
-			return "TimerLabel:"+getText();
+		public void draw(Batch batch, float parentAlpha) {
+			float alpha = parentAlpha;
+			
+			// apply alpha, if fading.
+			if(timeLeft < MESSAGE_FADE_TIME)
+				alpha *= (timeLeft / MESSAGE_FADE_TIME);
+			
+			MyUtils.fillRect(getX(), getY(), ChatScreen.this.getWidth()/2, getHeight()+(connect?vGroup.getSpace():0), BACKGROUND, alpha, batch);
+			
+			super.draw(batch, alpha);
 		}
 	}
 }

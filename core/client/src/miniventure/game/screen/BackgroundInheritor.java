@@ -1,11 +1,29 @@
 package miniventure.game.screen;
 
-public interface BackgroundInheritor extends BackgroundProvider {
+public class BackgroundInheritor extends BackgroundProvider {
 	
-	void setBackground(BackgroundProvider gdxBackground);
-	BackgroundProvider getGdxBackground();
+	private BackgroundProvider gdxBackground;
 	
-	default void inheritBackground(BackgroundInheritor other) {
-		setBackground(other.getGdxBackground());
+	public BackgroundInheritor() {
+		super(false);
+		// the background provider will clear the background if needed
+	}
+	
+	@Override
+	public boolean usesWholeScreen() {
+		return gdxBackground != null && gdxBackground.usesWholeScreen();
+	}
+	
+	public void setBackground(final BackgroundProvider gdxBackground) {
+		if(gdxBackground instanceof BackgroundInheritor)
+			setBackground(((BackgroundInheritor)gdxBackground).gdxBackground);
+		else if(gdxBackground != this) // don't want an infinite loop going
+			this.gdxBackground = gdxBackground;
+	}
+	
+	@Override
+	public void renderBackground() {
+		if(gdxBackground != null)
+			gdxBackground.draw();
 	}
 }

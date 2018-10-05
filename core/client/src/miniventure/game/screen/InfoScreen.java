@@ -2,34 +2,12 @@ package miniventure.game.screen;
 
 import miniventure.game.client.ClientCore;
 
-public class InfoScreen extends MenuScreen implements BackgroundInheritor {
+public class InfoScreen extends BackgroundInheritor {
 	
 	private InfoScreen(String... text) {
-		super(true);
-		
 		addComponent(makeLabel("<p>"+String.join("</p><p>", text)+"</p>"));
 		
 		addComponent(30, makeButton("Back to Main Menu", ClientCore::backToParentScreen));
-	}
-	
-	private BackgroundProvider gdxBackground;
-	
-	@Override
-	public void setBackground(final BackgroundProvider gdxBackground) {
-		this.gdxBackground = gdxBackground;
-	}
-	
-	@Override
-	public BackgroundProvider getGdxBackground() {
-		return gdxBackground;
-	}
-	
-	@Override
-	public void glDraw() {
-		if(gdxBackground != null)
-			gdxBackground.glDraw();
-		else
-			super.glDraw();
 	}
 	
 	public static class InstructionsScreen extends InfoScreen {

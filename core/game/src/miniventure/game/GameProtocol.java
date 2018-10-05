@@ -30,6 +30,7 @@ import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.Tile.TileData;
 import miniventure.game.world.tile.Tile.TileTag;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -112,12 +113,12 @@ public interface GameProtocol {
 	// this is sent by the client as a command, a single line. Chat messages are already prepended with "msg ". The server sends this whenever a player says something.
 	class Message {
 		public final String msg;
-		public final int color;
+		public final String color;
 		
-		private Message() { this(null, 0); }
+		private Message() { this(null, (String)null); }
 		// public Message(String msg) { this(msg, 0); }
-		public Message(String msg, java.awt.Color color) { this(msg, color.getRGB()); }
-		public Message(String msg, int color) {
+		public Message(String msg, Color color) { this(msg, color.toString()); }
+		private Message(String msg, String color) {
 			this.msg = msg;
 			this.color = color;
 		}
