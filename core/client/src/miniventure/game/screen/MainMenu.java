@@ -42,7 +42,7 @@ public class MainMenu extends BackgroundProvider {
 	private static final float PAN_SPEED = 4.5f; // in tiles/second.
 	
 	public MainMenu() {
-		super(false, true); // level renderer clears it anyway
+		super(false, true); // level renderer clears it
 		
 		ClientWorld world = ClientCore.getWorld();
 		

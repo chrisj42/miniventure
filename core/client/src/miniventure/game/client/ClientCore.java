@@ -86,7 +86,7 @@ public class ClientCore extends ApplicationAdapter {
 		VisUI.load(Gdx.files.internal("skins/visui/uiskin.json"));
 		
 		LoadingScreen loader = new LoadingScreen();
-		loader.pushMessage("Initializing...");
+		loader.pushMessage("Initializing...", true);
 		setScreen(loader);
 		//System.out.println("start delay");
 		MyUtils.delay(0, () -> Gdx.app.postRunnable(() -> {

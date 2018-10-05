@@ -24,6 +24,6 @@ public class BackgroundInheritor extends BackgroundProvider {
 	@Override
 	public void renderBackground() {
 		if(gdxBackground != null)
-			gdxBackground.draw();
+			gdxBackground.renderBackground();
 	}
 }

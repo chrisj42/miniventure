@@ -5,7 +5,7 @@ import miniventure.game.client.ClientCore;
 public class InfoScreen extends BackgroundInheritor {
 	
 	private InfoScreen(String... text) {
-		addComponent(makeLabel("<p>"+String.join("</p><p>", text)+"</p>"));
+		addComponent(makeLabel(String.join("\n", text)));
 		
 		addComponent(30, makeButton("Back to Main Menu", ClientCore::backToParentScreen));
 	}

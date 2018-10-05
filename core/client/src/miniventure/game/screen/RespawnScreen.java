@@ -15,7 +15,7 @@ public class RespawnScreen extends BackgroundProvider {
 	private final LevelViewport backgroundRenderer;
 	
 	public RespawnScreen(Vector2 deathPos, Color lighting, ClientLevel level, LevelViewport backgroundRenderer) {
-		super(false, true); // level renderer clears it anyway
+		super(false, true); // level renderer clears it
 		this.deathPos = deathPos;
 		this.lighting = lighting;
 		this.level = level;

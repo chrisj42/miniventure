@@ -118,6 +118,8 @@ public class MenuScreen extends Stage {
 	protected <T extends Actor> Container<T> addComponent(int spacing, T comp) { return addComponent(spacing, comp, 0); }
 	protected <T extends Actor> Container<T> addComponent(T comp, int spacing) { return addComponent(0, comp, spacing); }
 	protected <T extends Actor> Container<T> addComponent(int preSpacing, T comp, int postSpacing) {
+		if(vGroup.getParent() == null)
+			addActor(vGroup);
 		Container<T> box = new Container<>(comp);
 		box.padTop(preSpacing);
 		box.padBottom(postSpacing);
