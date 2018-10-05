@@ -78,6 +78,7 @@ public class MenuScreen extends Stage {
 	protected static VisLabel makeLabel(String text) {
 		VisLabel label = new VisLabel(text, new LabelStyle(GameCore.getFont(), Color.WHITE));
 		label.setWrap(true);
+		label.setAlignment(Align.center, Align.left);
 		return label;
 	}
 	

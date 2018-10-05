@@ -48,7 +48,7 @@ public class GameServer implements GameProtocol {
 	
 	private static final Color SERVER_CHAT_COLOR = Color.WHITE;
 	private static final Color STATUS_MSG_COLOR = Color.ORANGE;
-	private static final Color ERROR_CHAT_COLOR = new Color(.588f, 0, 0, 1f);
+	private static final Color ERROR_CHAT_COLOR = Color.RED;
 	
 	private class PlayerData {
 		final Connection connection;
