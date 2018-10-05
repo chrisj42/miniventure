@@ -73,15 +73,10 @@ public class ClientWorld extends WorldManager {
 		MenuScreen menu = ClientCore.getScreen();
 		
 		ClientLevel level = mainPlayer.getLevel();
-		if(level == null) {
-			// if(!(menu instanceof RespawnScreen))
-			// 	ClientCore.setScreen(new RespawnScreen());
-			return;
-		}
+		if(level == null) return;
 		
 		if(menu == null)
 			gameScreen.handleInput(mainPlayer);
-		//mainPlayer.updateStats(delta);
 		
 		level.updateEntities(getEntities(level), delta);
 		
@@ -224,10 +219,9 @@ public class ClientWorld extends WorldManager {
 	}
 	
 	public void respawnPlayer() {
-		// super.deregisterEntity(mainPlayer.getId());
 		LoadingScreen loader = new LoadingScreen();
 		ClientCore.setScreen(loader);
-		loader.pushMessage("respawning...");
+		loader.pushMessage("Respawning...");
 		client.send(DatalessRequest.Respawn);
 	}
 	
