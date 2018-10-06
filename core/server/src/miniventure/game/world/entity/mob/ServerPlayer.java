@@ -19,6 +19,7 @@ import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.particle.ActionParticle.ActionType;
 import miniventure.game.world.entity.particle.TextParticle;
 import miniventure.game.world.tile.Tile;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;
@@ -239,4 +240,9 @@ public class ServerPlayer extends ServerMob implements Player {
 	
 	@Override
 	public void die() { getWorld().despawnPlayer(this); }
+	
+	@Override
+	public boolean maySpawn(TileTypeEnum type) {
+		return super.maySpawn(type) && type != TileTypeEnum.SAND;
+	}
 }

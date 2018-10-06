@@ -23,7 +23,7 @@ public class LevelGenerator {
 	
 	public LevelGenerator(long seed) { this(seed, 0, 0); }
 	public LevelGenerator(long seed, int width, int height) { this(seed, width, height,false); }
-	public LevelGenerator(long seed, int width, int height, boolean ensureMuchLand) { this(seed, width, height, ISLAND_MAPPER(), ensureMuchLand); }
+	public LevelGenerator(long seed, int width, int height, boolean ensureMuchLand) { this(seed, width, height, DEFAULT_MAPPER(), ensureMuchLand); }
 	public LevelGenerator(long seed, int width, int height, NoiseMapper mapper) { this(seed, width, height, mapper, false); }
 	public LevelGenerator(long seed, int width, int height, NoiseMapper mapper, boolean ensureMuchLand) { this(seed, width, height, mapper, true, ensureMuchLand); }
 	public LevelGenerator(long seed, int width, int height, NoiseMapper mapper, boolean ensureLand, boolean ensureMuchLand) {
@@ -212,54 +212,84 @@ public class LevelGenerator {
 		
 		NoiseMapper plainsBiome = new NoiseMapper("Plains", detailNoise)
 			.addRegion(GRASS, 8)
-			.addRegion(TREE_CARTOON, 1);
+			.addRegion(TREE_CARTOON, 1)
+			;
 		
 		NoiseMapper desertBiome = new NoiseMapper("Desert", cactusNoise)
 			.addRegion(CACTUS, 1)
-			.addRegion(SAND, 10);
+			.addRegion(SAND, 10)
+			;
+		
+		NoiseMapper snowBiome = new NoiseMapper("Snow", cactusNoise)
+			.addRegion(SNOW, 2)
+			.addRegion(TREE_PINE, .5f)
+			.addRegion(SNOW, 8)
+			.addRegion(TREE_DARK, .5f)
+			;
 		
 		NoiseMapper canyonBiome = new NoiseMapper("Canyons", detailNoise)
 			.addRegion(STONE, 20)
 			.addRegion(GRASS, 10)
 			.addRegion(TREE_PINE, 1)
 			.addRegion(GRASS, 10)
-			.addRegion(STONE, 20);
+			.addRegion(STONE, 20)
+			;
 		
 		
 		NoiseMapper mountainBiome = new NoiseMapper("Mountains", biomeNoise)
-			.addRegion(STONE, 1)
-			.addRegion(canyonBiome, 4.5f)
-			.addRegion(STONE, 1);
+			.addRegion(canyonBiome, 1.5f)
+			.addRegion(STONE, .5f)
+			.addRegion(canyonBiome, 4f)
+			.addRegion(STONE, .5f)
+			.addRegion(canyonBiome, 1.5f)
+			.addRegion(snowBiome, 1)
+			;
 		
 		
 		NoiseMapper oceanBiome = new NoiseMapper("Ocean", biomeNoise)
-			.addRegion(WATER, 1);
+			.addRegion(WATER, 1)
+			;
 		
 		NoiseMapper deepOceanBiome = new NoiseMapper("Deep Ocean", islandNoise)
 			.addRegion(WATER, 10)
-			.addRegion(SAND, 1);
+			.addRegion(SAND, 1)
+			;
 		
 		
 		
 		NoiseMapper landTerrain = new NoiseMapper("Land", landNoise)
 			.addRegion(desertBiome, 4)
 			.addRegion(plainsBiome, 8)
-			.addRegion(mountainBiome, 6);
+			.addRegion(mountainBiome, 6)
+			;
 		
+		NoiseMapper marshBiome = new GroupNoiseMapper("Marsh", detailNoise)
+			.addRegion(DIRT, .1f)
+			.addRegion(WATER, .1f)
+			.addRegion(TREE_DARK, .1f)
+			.addRegion(GRASS, .1f)
+			;
+		
+		NoiseMapper border = new NoiseMapper("Beach Type", continentNoise)
+			.addRegion(SAND, 1)
+			.addRegion(marshBiome, 1)
+			;
 		
 		NoiseMapper biomeCategories = new NoiseMapper("Surface Type", continentNoise)
 			.addRegion(oceanBiome, 0.5f)
-			.addRegion(SAND, 0.05f)
+			.addRegion(border, 0.05f)
 			.addRegion(landTerrain, 1f)
-			.addRegion(SAND, 0.05f)
+			.addRegion(border, 0.05f)
 			.addRegion(oceanBiome, .35f)
-			.addRegion(deepOceanBiome, 1f);
+			.addRegion(deepOceanBiome, 1f)
+			;
 		
 		//noinspection UnnecessaryLocalVariable
 		NoiseMapper rivers = new NoiseMapper("Rivers", biomeNoise)
 			.addRegion(biomeCategories, 1)
 			.addRegion(WATER, .07f)
-			.addRegion(biomeCategories, 1.1f);
+			.addRegion(biomeCategories, 1.1f)
+			;
 		
 		return rivers;
 	}
@@ -276,30 +306,42 @@ public class LevelGenerator {
 			.addRegion(GRASS, 4)
 			// .addRegion(WATER, 1f)
 			.addRegion(GRASS, 3)
-			.addRegion(TREE_CARTOON, 1);
+			.addRegion(TREE_CARTOON, 1)
+			;
 		
 		NoiseMapper desertBiome = new NoiseMapper("Desert", cactusNoise)
 			.addRegion(CACTUS, 1)
-			.addRegion(SAND, 10);
+			.addRegion(SAND, 10)
+			.addRegion(TREE_CARTOON, .3f)
+			;
 		
 		NoiseMapper canyonBiome = new NoiseMapper("Canyons", detailNoise)
 			.addRegion(STONE, 20)
 			.addRegion(GRASS, 10)
 			.addRegion(TREE_PINE, 1)
 			.addRegion(GRASS, 10)
-			.addRegion(STONE, 20);
+			.addRegion(STONE, 20)
+			;
 		
 		
 		NoiseMapper mountainBiome = new NoiseMapper("Mountains", biomeNoise)
 			.addRegion(STONE, 1)
 			.addRegion(canyonBiome, 4.5f)
-			.addRegion(STONE, 1);
+			.addRegion(STONE, 1)
+			;
 		
-		NoiseMapper snowBiome = new NoiseMapper("Snow", biomeNoise)
-			.addRegion(SNOW, 1)
-			.addRegion(GRASS, .25f)
+		NoiseMapper snowBiome = new GroupNoiseMapper("Snow", detailNoise)
+			.addRegion(SNOW, .6f)
+			.addRegion(TREE_PINE, .1f)
+			// .addRegion(SNOW, 1)
+			.addRegion(GRASS, .1f)
+			// .addRegion(TREE_, .25f)
+			// .addRegion(GRASS, .25f)
 			// .addRegion(WATER, .1f)
-			.addRegion(SNOW, 1);
+			// .addRegion(SNOW, 1)
+			.addRegion(TREE_DARK, .1f)
+			// .addRegion(SNOW, 1)
+			;
 		
 		/*NoiseMapper volcanoBiome = new NoiseMapper("Volcano", continentNoise)
 			.addRegion(SAND, 1)
@@ -311,18 +353,30 @@ public class LevelGenerator {
 			.addRegion(SAND, 1);
 		*/
 		
-		NoiseMapper marshBiome = new NoiseMapper("Marsh", detailNoise)
-			.addRegion(WATER, .75f)
-			.addRegion(DIRT, 1)
-			.addRegion(TREE_DARK, .3f)
-			.addRegion(WATER, .75f);
+		NoiseMapper marshBiome = new GroupNoiseMapper("Marsh", detailNoise)
+			.addRegion(DIRT, .1f)
+			.addRegion(WATER, .1f)
+			.addRegion(TREE_DARK, .1f)
+			.addRegion(GRASS, .1f)
+			// .addRegion(DIRT, 1)
+			// .addRegion(WATER, .75f)
+			// .addRegion(GRASS, .4f)
+			// .addRegion(TREE_DARK, .3f)
+			// .addRegion(DIRT, 1)
+			// .addRegion(WATER, .75f)
+			// .addRegion(GRASS, .4f)
+			// .addRegion(TREE_DARK, .3f)
+			// .addRegion(WATER, .75f)
+			;
 		
 		NoiseMapper oceanBiome = new NoiseMapper("Ocean", biomeNoise)
-			.addRegion(WATER, 1);
+			.addRegion(WATER, 1)
+			;
 		
 		NoiseMapper deepOceanBiome = new NoiseMapper("Deep Ocean", islandNoise)
 			.addRegion(WATER, 10)
-			.addRegion(SAND, 1);
+			.addRegion(SAND, 1)
+			;
 		
 		
 		/*NoiseMapper biomeCategories = new NoiseMapper("Surface Type", continentNoise)
@@ -335,13 +389,14 @@ public class LevelGenerator {
 		
 		//noinspection UnnecessaryLocalVariable
 		NoiseMapper terrain = new GroupNoiseMapper("Terrain", continentNoise)
-			.addRegion(oceanBiome, 0.1f)
-			.addRegion(deepOceanBiome, .1f)
+			.addRegion(oceanBiome, .05f) // this one is special, it's the filler
+			.addRegion(deepOceanBiome, .2f)
 			.addRegion(desertBiome, .1f)
 			.addRegion(plainsBiome, .1f)
 			.addRegion(mountainBiome, .1f)
 			.addRegion(snowBiome, .1f)
-			.addRegion(marshBiome, .1f);
+			.addRegion(marshBiome, .1f)
+			;
 		
 		return terrain;
 	}

@@ -1,7 +1,5 @@
 package miniventure.game.world.levelgen;
 
-import miniventure.game.world.levelgen.Coherent2DNoiseFunction;
-
 import org.jetbrains.annotations.NotNull;
 
 public class NamedNoiseFunction {
@@ -12,6 +10,12 @@ public class NamedNoiseFunction {
 	private int curveCount;
 	
 	private Coherent2DNoiseFunction noiseFunction;
+	
+	public NamedNoiseFunction(@NotNull NamedNoiseFunction model) {
+		this(model.name, model.coordsPerValue, model.curveCount);
+		this.seed = model.seed * 13;
+		noiseFunction = new Coherent2DNoiseFunction(seed, coordsPerValue, curveCount);
+	}
 	
 	public NamedNoiseFunction(@NotNull String name) { this(name, 12); }
 	public NamedNoiseFunction(@NotNull String name, int coordsPerValue) { this(name, coordsPerValue, 2); }

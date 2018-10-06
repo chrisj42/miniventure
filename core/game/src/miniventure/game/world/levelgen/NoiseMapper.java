@@ -20,7 +20,7 @@ public class NoiseMapper {
 	
 	public NoiseMapper(@NotNull String name, @NotNull NamedNoiseFunction source) {
 		this.name = name;
-		this.source = source;
+		this.source = new NamedNoiseFunction(source);
 		regions = new ArrayList<>();
 	}
 	
