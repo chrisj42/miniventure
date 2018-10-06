@@ -1,5 +1,7 @@
 package miniventure.game.screen;
 
+import java.util.LinkedList;
+
 import miniventure.game.GameCore;
 import miniventure.game.util.Action;
 import miniventure.game.util.RelPos;
@@ -25,22 +27,18 @@ public abstract class MenuScreen extends Stage {
 	private final boolean clearGdxBackground;
 	private MenuScreen parent;
 	
-	private Group mainGroup; // usually going to be the above vGroup or table.
-	private RelPos mainContainerAnchor;
-	private RelPos mainGroupAnchor;
+	private final LinkedList<ActorAnchor> anchoredActors = new LinkedList<>();
 	
 	public MenuScreen(final boolean clearGdxBackground) {
 		super(new DiscreteViewport(), GameCore.getBatch());
 		this.clearGdxBackground = clearGdxBackground;
 	}
 	
-	protected void setCenterGroup(Group group) { setMainGroup(group, RelPos.CENTER); }
-	protected void setMainGroup(Group group, RelPos anchor) { setMainGroup(group, anchor, anchor); }
-	protected void setMainGroup(Group group, RelPos containerAnchor, RelPos groupAnchor) {
-		this.mainGroup = group;
-		mainContainerAnchor = containerAnchor;
-		mainGroupAnchor = groupAnchor;
-		if(group != null && group.getStage() != this)
+	protected void setCenterGroup(Group group) { addMainGroup(group, RelPos.CENTER); }
+	protected void addMainGroup(Group group, RelPos anchor) { addMainGroup(group, anchor, anchor); }
+	protected void addMainGroup(Group group, RelPos containerAnchor, RelPos groupAnchor) {
+		anchoredActors.add(new ActorAnchor(group, containerAnchor, groupAnchor));
+		if(group.getStage() != this)
 			addActor(group);
 	}
 	
@@ -48,10 +46,8 @@ public abstract class MenuScreen extends Stage {
 	public void focus() { layoutActors(); }
 	
 	protected void layoutActors() {
-		if(mainGroup != null) {
-			Vector2 containerPos = mainContainerAnchor.ofRectangle(new Rectangle(0, 0, getWidth(), getHeight()));
-			mainGroup.setPosition(containerPos.x, containerPos.y, mainGroupAnchor.getGdxAlign());
-		}
+		for(ActorAnchor anchor: anchoredActors)
+			anchor.layout();
 	}
 	
 	public void setParent(MenuScreen parent) {
@@ -129,5 +125,23 @@ public abstract class MenuScreen extends Stage {
 	@Override
 	public String toString() {
 		return getClass().getSimpleName()+"@"+Integer.toHexString(hashCode());
+	}
+	
+	
+	private class ActorAnchor {
+		private Group mainGroup; // usually going to be the above vGroup or table.
+		private RelPos mainContainerAnchor;
+		private RelPos mainGroupAnchor;
+		
+		ActorAnchor(Group mainGroup, RelPos mainContainerAnchor, RelPos mainGroupAnchor) {
+			this.mainGroup = mainGroup;
+			this.mainContainerAnchor = mainContainerAnchor;
+			this.mainGroupAnchor = mainGroupAnchor;
+		}
+		
+		void layout() {
+			Vector2 containerPos = mainContainerAnchor.ofRectangle(new Rectangle(0, 0, getWidth(), getHeight()));
+			mainGroup.setPosition(containerPos.x, containerPos.y, mainGroupAnchor.getGdxAlign());
+		}
 	}
 }

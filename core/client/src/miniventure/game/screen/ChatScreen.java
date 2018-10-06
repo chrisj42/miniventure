@@ -52,7 +52,7 @@ public class ChatScreen extends MenuScreen implements ParentScreen {
 		useTimer = timeOutMessages;
 		
 		VerticalGroup vGroup = useVGroup(0, Align.topRight, false);
-		setMainGroup(vGroup, RelPos.TOP_RIGHT);
+		addMainGroup(vGroup, RelPos.TOP_RIGHT);
 		vGroup.padTop(10).padRight(10);
 		
 		messageStream = new VerticalGroup();

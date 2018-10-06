@@ -34,7 +34,7 @@ public class InventoryScreen extends MenuScreen {
 		
 		hGroup = new HorizontalGroup();
 		hGroup.align(Align.right);
-		setMainGroup(hGroup, RelPos.RIGHT);
+		addMainGroup(hGroup, RelPos.RIGHT);
 		hGroup.rowCenter();
 		hGroup.addActor(fillBar);
 		
