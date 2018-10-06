@@ -6,12 +6,12 @@ import miniventure.game.screen.ColorBackground;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.ui.Widget;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 
 import org.jetbrains.annotations.Nullable;
 
-public class ItemSlot extends Actor {
+public class ItemSlot extends Widget {
 	
 	private static final float SPACING = 10, XPADDING = 3, YPADDING = 2;
 	public static final float HEIGHT = Item.ICON_SIZE+2+YPADDING*2;
@@ -63,7 +63,11 @@ public class ItemSlot extends Actor {
 	}
 	public Color getTextColor() { return textColor; }
 	
-	public float getPrefWidth() { return prefWidth; }
+	@Override public float getPrefWidth() { return prefWidth; }
+	@Override public float getPrefHeight() { return Item.ICON_SIZE; }
+	
+	// @Override public float getWidth() { return prefWidth; }
+	// @Override public float getHeight() { return Item.ICON_SIZE; }
 	
 	@Override public void draw(Batch batch, float parentAlpha) {
 		super.draw(batch, parentAlpha);

@@ -1,16 +1,19 @@
 package miniventure.game.item;
 
-import miniventure.game.GameProtocol.ItemDropRequest;
+import miniventure.game.GameCore;
 import miniventure.game.client.ClientCore;
 import miniventure.game.screen.MenuScreen;
+import miniventure.game.util.MyUtils;
+import miniventure.game.util.RelPos;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
+import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
+import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.utils.Align;
 
 public class InventoryScreen extends MenuScreen {
@@ -21,18 +24,57 @@ public class InventoryScreen extends MenuScreen {
 	private final ClientHands hands;
 	private ItemSelectionTable table;
 	
+	private final HorizontalGroup hGroup;
+	private final ProgressBar fillBar;
+	private final VerticalGroup invGroup;
+	
 	public InventoryScreen(Inventory inventory, ClientHands hands) {
 		super(false);
 		this.inventory = inventory;
 		this.hands = hands;
 		
+		fillBar = new ProgressBar(0, 1, .01f, true, GameCore.getSkin());
+		
+		hGroup = new HorizontalGroup();
+		hGroup.align(Align.right);
+		setMainGroup(hGroup, RelPos.RIGHT);
+		hGroup.rowCenter();
+		hGroup.addActor(fillBar);
+		
+		invGroup = new VerticalGroup() {
+			@Override
+			public void draw(Batch batch, float parentAlpha) {
+				MyUtils.fillRect(getX(), getY(), getWidth(), getHeight(), backgroundColor, parentAlpha, batch);
+				super.draw(batch, parentAlpha);
+			}
+		};
+		hGroup.addActor(invGroup);
+		
 		Item[] allItems = inventory.getUniqueItems();
 		ItemSlot[] items = new ItemSlot[allItems.length];
 		for(int i = 0; i < items.length; i++) {
-			items[i] = new ItemSlot(i, true, allItems[i], backgroundColor);
+			items[i] = new ItemStackSlot(i, true, allItems[i], inventory.getCount(allItems[i]), backgroundColor);
+			invGroup.addActor(items[i]);
 		}
 		
-		table = new ItemSelectionTable(items, getHeight()) {
+		float percentUsed = inventory.getSpaceLeft() / (float)inventory.getSlots();
+		fillBar.setValue(1 - percentUsed);
+		
+		InputListener l = new InputListener() {
+			@Override
+			public boolean keyDown(InputEvent event, int keycode) {
+				if(keycode == Keys.ESCAPE || keycode == Keys.E) {
+					ClientCore.setScreen(null);
+					return true;
+				}
+				return false;
+			}
+		};
+		
+		addListener(l);
+		invGroup.addListener(l);
+		
+		/*table = new ItemSelectionTable(items, getHeight()) {
 			@Override
 			public void onUpdate() {
 				table.setPosition(InventoryScreen.this.getWidth(), InventoryScreen.this.getHeight(), Align.topRight);
@@ -91,18 +133,32 @@ public class InventoryScreen extends MenuScreen {
 					swapSelections();
 				}
 			});
-		}
+		}*/
 		
-		addActor(table);
-		table.setPosition(getWidth(), getHeight(), Align.topRight);
+		// addActor(table);
+		// table.setPosition(getWidth(), getHeight(), Align.topRight);
 		
-		setKeyboardFocus(table);
+		// setKeyboardFocus(table);
+		hGroup.pack();
 	}
 	
-	private void swapSelections() {
+	/*private void swapSelections() {
 		// hands.swapItem(inventory, table.getSelection(), hands.getSelection());
 		// table.updateSelected(getSelectedItem());
 	}
 	
-	private Item getSelectedItem() { return new HandItem();/*inventory.getItemAt(table.getSelection());*/ }
+	private Item getSelectedItem() { return new HandItem();*//*inventory.getItemAt(table.getSelection());*//* }*/
+	
+	/*@Override
+	protected void layoutActors() {
+		invGroup.setSize(invGroup.getPrefWidth(), invGroup.getPrefHeight());
+		hGroup.setSize(fillBar.getPrefWidth()+invGroup.getPrefWidth(), fillBar.getPrefHeight()+invGroup.getPrefHeight());
+		System.out.println("inv group pref size: "+invGroup.getPrefWidth()+","+invGroup.getPrefHeight());
+		System.out.println("h group pref size: "+hGroup.getPrefWidth()+","+hGroup.getPrefHeight());
+		super.layoutActors();
+		System.out.println(Gdx.graphics.getWidth()+","+Gdx.graphics.getHeight());
+		hGroup.setX(Gdx.graphics.getWidth() - hGroup.getWidth());
+		System.out.println("h group position: "+hGroup.getX()+","+hGroup.getY()+","+hGroup.getWidth()+","+hGroup.getHeight());
+		System.out.println("inv group position: "+invGroup.getX()+","+invGroup.getY()+","+invGroup.getWidth()+","+invGroup.getHeight());
+	}*/
 }
