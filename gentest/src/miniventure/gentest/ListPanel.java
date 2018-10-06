@@ -10,7 +10,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import miniventure.game.util.function.ValueMonoFunction;
+import miniventure.game.util.function.MonoValueFunction;
 import miniventure.game.world.levelgen.GroupNoiseMapper;
 import miniventure.gentest.util.ButtonMaker;
 import miniventure.gentest.util.MyPanel;
@@ -29,11 +29,11 @@ public class ListPanel<E extends JComponent & NamedObject & Scrollable> extends 
 	
 	private final TestPanel testPanel;
 	private final Class<E> clazz;
-	private final ValueMonoFunction<String, E> fetcher;
+	private final MonoValueFunction<String, E> fetcher;
 	private final JScrollPane scrollPane;
 	private final MyPanel container; // elements are added here
 	
-	ListPanel(TestPanel testPanel, Class<E> clazz, @Nullable String descriptor, ValueMonoFunction<String, E> fetcher) {
+	ListPanel(TestPanel testPanel, Class<E> clazz, @Nullable String descriptor, MonoValueFunction<String, E> fetcher) {
 		this.testPanel = testPanel;
 		this.clazz = clazz;
 		this.fetcher = fetcher;
