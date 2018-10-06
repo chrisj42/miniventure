@@ -68,7 +68,7 @@ public class ChatScreen extends MenuScreen implements ParentScreen {
 			}
 			@Override
 			public float getPrefWidth() {
-				return ChatScreen.this.getWidth()/2;
+				return ChatScreen.this.getWidth()/3;
 			}
 		};
 		
@@ -231,7 +231,7 @@ public class ChatScreen extends MenuScreen implements ParentScreen {
 		
 		@Override
 		public float getPrefWidth() {
-			return ChatScreen.this.getWidth() / 2;
+			return ChatScreen.this.getWidth() / 3;
 		}
 		
 		@Override
