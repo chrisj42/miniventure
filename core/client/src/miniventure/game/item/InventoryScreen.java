@@ -3,30 +3,27 @@ package miniventure.game.item;
 import miniventure.game.GameCore;
 import miniventure.game.client.ClientCore;
 import miniventure.game.screen.MenuScreen;
-import miniventure.game.util.MyUtils;
 import miniventure.game.util.RelPos;
 
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
-import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.utils.Align;
 
 public class InventoryScreen extends MenuScreen {
 	
-	private static final Color backgroundColor = Color.TEAL;
+	private static final Color slotBackgroundColor = Color.TEAL.cpy().lerp(Color.WHITE, .1f);
 	
 	private final Inventory inventory;
 	private final ClientHands hands;
-	private ItemSelectionTable table;
 	
 	private final HorizontalGroup hGroup;
 	private final ProgressBar fillBar;
-	private final VerticalGroup invGroup;
+	private final ItemSelectionTable invGroup;
 	
 	public InventoryScreen(Inventory inventory, ClientHands hands) {
 		super(false);
@@ -41,21 +38,22 @@ public class InventoryScreen extends MenuScreen {
 		hGroup.rowCenter();
 		hGroup.addActor(fillBar);
 		
-		invGroup = new VerticalGroup() {
-			@Override
-			public void draw(Batch batch, float parentAlpha) {
-				MyUtils.fillRect(getX(), getY(), getWidth(), getHeight(), backgroundColor, parentAlpha, batch);
-				super.draw(batch, parentAlpha);
-			}
-		};
-		hGroup.addActor(invGroup);
+		float heightAvailable = getHeight() * 3 / 4;
+		int minSlots = (int) (heightAvailable / Item.ICON_SIZE);
 		
 		Item[] allItems = inventory.getUniqueItems();
-		ItemSlot[] items = new ItemSlot[allItems.length];
+		ItemSlot[] items = new ItemSlot[Math.max(allItems.length, minSlots)];
 		for(int i = 0; i < items.length; i++) {
-			items[i] = new ItemStackSlot(i, true, allItems[i], inventory.getCount(allItems[i]), backgroundColor);
-			invGroup.addActor(items[i]);
+			if(i >= allItems.length)
+				items[i] = new ItemSlot(i, true, new HandItem(), slotBackgroundColor);
+			else
+				items[i] = new ItemStackSlot(i, true, allItems[i], inventory.getCount(allItems[i]), slotBackgroundColor);
 		}
+		
+		invGroup = new ItemSelectionTable(items, getHeight());
+		Container<ItemSelectionTable> inventoryContainer = new Container<>(invGroup);
+		inventoryContainer.fill().pad(10, 10, 10, 0);
+		hGroup.addActor(inventoryContainer);
 		
 		float percentUsed = inventory.getSpaceLeft() / (float)inventory.getSlots();
 		fillBar.setValue(1 - percentUsed);
@@ -140,6 +138,12 @@ public class InventoryScreen extends MenuScreen {
 		
 		// setKeyboardFocus(table);
 		hGroup.pack();
+	}
+	
+	@Override
+	protected void layoutActors() {
+		invGroup.refresh();
+		super.layoutActors();
 	}
 	
 	/*private void swapSelections() {

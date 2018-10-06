@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.kotcrab.vis.ui.layout.VerticalFlowGroup;
 
 public class ItemSelectionTable extends VerticalFlowGroup {
@@ -28,7 +29,7 @@ public class ItemSelectionTable extends VerticalFlowGroup {
 	 */
 	
 	private final ItemSlot[] itemSlots;
-	private static final Color background = new Color(.2f, .4f, 1f, 1);
+	private static final Color background = Color.TEAL;
 	private static final Color selectionColor = new Color(.8f, .8f, .8f, 0.5f);
 	
 	private int selectionIndex = 0;
@@ -43,7 +44,15 @@ public class ItemSelectionTable extends VerticalFlowGroup {
 		numColumns = Math.max(1, MathUtils.ceil(itemSlots.length / maxPerColumn));
 		cellsPerColumn = Math.max(1, MathUtils.ceil(itemSlots.length / (float)numColumns));
 		
-		setHeight(cellHeight * cellsPerColumn); // - getSpacing()/2;
+		setHeight(Math.max(getSpacing(), cellHeight * cellsPerColumn - getSpacing()));
+		
+		if(itemSlots.length > 1) {
+			// need to adjust spacing to make sure there isn't a large space at the bottom
+			float spaceTaken = Math.min(itemSlots.length, maxPerColumn) * Item.ICON_SIZE;
+			float spaceAvailable = getHeight();
+			float emptySpace = spaceAvailable - spaceTaken;
+			setSpacing(emptySpace / (itemSlots.length-1));
+		}
 		
 		this.itemSlots = itemSlots;
 		
@@ -102,7 +111,7 @@ public class ItemSelectionTable extends VerticalFlowGroup {
 		onUpdate();
 	}
 	
-	private void refresh() {
+	void refresh() {
 		float maxWidth = 0;
 		for(ItemSlot item: itemSlots) {
 			maxWidth = Math.max(maxWidth, item.getPrefWidth());
@@ -114,7 +123,18 @@ public class ItemSelectionTable extends VerticalFlowGroup {
 	
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
-		MyUtils.fillRect(getX()-getSpacing()/2, getY()+getSpacing()/2, getWidth(), getHeight(), background, batch);
+		float x = getX();
+		float y = getY();
+		float width = getWidth();
+		float height = getHeight();
+		if(getParent() instanceof Container) {
+			Container c = (Container) getParent();
+			x -= c.getPadLeft();
+			width += c.getPadX();
+			y -= c.getPadBottom();
+			height += c.getPadY();
+		}
+		MyUtils.fillRect(x, y, width, height, background, parentAlpha, batch);
 		super.draw(batch, parentAlpha);
 	}
 	
@@ -128,22 +148,17 @@ public class ItemSelectionTable extends VerticalFlowGroup {
 		}
 	}
 	
-	public void moveFocusX(int amt) {
+	private void moveFocusX(int amt) { moveFocus(true, amt); }
+	private void moveFocusY(int amt) { moveFocus(false, amt); }
+	private void moveFocus(boolean x, int amt) {
 		int xPos = selectionIndex / cellsPerColumn;
 		int yPos = selectionIndex % cellsPerColumn;
 		int newPos;
 		do {
-			xPos = MyUtils.mod(xPos+amt, numColumns);
-			newPos = xPos * cellsPerColumn + yPos;
-		} while(newPos >= itemSlots.length);
-		moveFocus(newPos);
-	}
-	public void moveFocusY(int amt) {
-		int xPos = selectionIndex / cellsPerColumn;
-		int yPos = selectionIndex % cellsPerColumn;
-		int newPos;
-		do {
-			yPos = MyUtils.mod(yPos+amt, cellsPerColumn);
+			if(x)
+				xPos = MyUtils.mod(xPos+amt, numColumns);
+			else
+				yPos = MyUtils.mod(yPos+amt, cellsPerColumn);
 			newPos = xPos * cellsPerColumn + yPos;
 		} while(newPos >= itemSlots.length);
 		moveFocus(newPos);
