@@ -99,9 +99,9 @@ public class CommandInputParser implements Runnable {
 			command = Command.getCommand(commandName, executor);
 		}
 		if(command == null)
-			err.println("Command not recognized: \""+commandName+"\". Type \"help\" for a list of commands.");
+			err.println("Command not recognized: \""+commandName+"\". Type \"/help\" for a list of commands.");
 		else
-			command.execute(args.toArray(new String[args.size()]), executor, out, err);
+			command.execute(args.toArray(new String[0]), executor, out, err);
 	}
 	
 	public void end() { shouldRun = false; }
