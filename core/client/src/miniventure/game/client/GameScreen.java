@@ -38,14 +38,12 @@ public class GameScreen {
 	
 	public GameScreen() {
 		uiCamera = new OrthographicCamera();
-		guiStage = new Stage(new ScreenViewport(/*GameCore.DEFAULT_SCREEN_WIDTH, GameCore.DEFAULT_SCREEN_HEIGHT, */uiCamera), batch);
+		guiStage = new Stage(new ScreenViewport(uiCamera), batch);
 		
 		levelView = new LevelViewport(batch, uiCamera); // uses uiCamera for rendering lighting to the screen.
 		
 		chatOverlay = new ChatScreen(true);
 		chatScreen = new ChatScreen(false);
-		System.out.println("overlay = "+Integer.toOctalString(chatOverlay.hashCode()));
-		System.out.println("screen = "+Integer.toOctalString(chatScreen.hashCode()));
 		
 		resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 	}
@@ -71,7 +69,7 @@ public class GameScreen {
 			try {
 				float value = Float.parseFloat(newSpeed);
 				player.setSpeed(value);
-			} catch(NumberFormatException ignored) {}
+			} catch(NumberFormatException | NullPointerException ignored) {}
 		}
 		
 		levelView.handleInput();
@@ -122,7 +120,6 @@ public class GameScreen {
 		guiStage.draw();
 		
 		if(!(ClientCore.getScreen() instanceof ChatScreen)) {
-			// chatScreen.validate();
 			chatOverlay.act(Gdx.graphics.getDeltaTime());
 			chatOverlay.draw();
 		}

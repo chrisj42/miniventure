@@ -46,7 +46,7 @@ public class MainMenu extends BackgroundProvider implements ParentScreen {
 		ClientWorld world = ClientCore.getWorld();
 		
 		table = useTable();
-		// table.setDebug(true);
+		
 		addLabel("Welcome to Miniventure!", 20);
 		addLabel("You are playing version " + GameCore.VERSION, 25);
 		
@@ -99,9 +99,6 @@ public class MainMenu extends BackgroundProvider implements ParentScreen {
 		VisTextButton exitBtn = makeButton("Quit", () -> Gdx.app.exit());
 		table.add(exitBtn).row();
 		
-		// getAnchor().addAnchored(table, RelPos.CENTER);
-		
-		// layoutActors();
 		// setup level scrolling in background
 		
 		levelView = new LevelViewport();
@@ -173,9 +170,6 @@ public class MainMenu extends BackgroundProvider implements ParentScreen {
 				label.setText("You have the latest version.");
 			else
 				label.setText("Connection failed, could not check for updates.");
-			
-			// table.pack();
-			// table.setPosition(getWidth()/2, getHeight()/2, Align.center);
 		}
 	}
 }

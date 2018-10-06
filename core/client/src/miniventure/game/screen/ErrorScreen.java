@@ -20,7 +20,6 @@ public class ErrorScreen extends BackgroundInheritor {
 			makeButton("Back to main menu", () -> ClientCore.setScreen(getParent() != null ? getParent() : new MainMenu()))
 		).spaceTop(10).row();
 		
-		// setBackground(new Color(32, 173, 43));
 	}
 	
 	@Override public void focus() { ClientCore.stopMusic(); super.focus(); }

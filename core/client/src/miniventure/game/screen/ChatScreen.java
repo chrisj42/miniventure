@@ -153,11 +153,6 @@ public class ChatScreen extends MenuScreen implements ParentScreen {
 				return false;
 			}
 		});
-		
-		
-		// getAnchor().addAnchored(boxComponent(vGroup).fill(.5f, 0), RelPos.TOP_RIGHT);
-		// vGroup.addActor(boxComponent(input).fillX());
-		// vGroup.addActor(boxComponent(messageStream).fillX());
 	}
 	
 	public void reset() {
@@ -174,8 +169,6 @@ public class ChatScreen extends MenuScreen implements ParentScreen {
 	@Override
 	public void focus() {
 		super.focus();
-		// input.pack();
-		// input.setWidth(getWidth()/2);
 		setKeyboardFocus(input);
 	}
 	
@@ -214,18 +207,6 @@ public class ChatScreen extends MenuScreen implements ParentScreen {
 		});
 	}
 	
-	/*private void repack() {
-		input.pack();
-		input.setWidth(getWidth()/2);
-		input.setPosition(getWidth() / 2, getHeight() - input.getHeight());
-		try {
-			vGroup.pack();
-		} catch(IndexOutOfBoundsException e) {
-			e.printStackTrace();
-		}
-		vGroup.setPosition(getWidth() / 2, input.getY() - 10 - vGroup.getHeight());
-	}*/
-	
 	@Override
 	protected void layoutActors() {
 		// invalidate all the things so they will resize properly
@@ -243,7 +224,6 @@ public class ChatScreen extends MenuScreen implements ParentScreen {
 		TimerLabel(String text, Color color, boolean connect) {
 			super(text, new LabelStyle(GameCore.getFont(), color));
 			this.connect = connect;
-			// width(ChatScreen.this.getWidth()/2);
 			timeLeft = MESSAGE_LIFE_TIME;
 			setAlignment(Align.left);
 			setWrap(true);

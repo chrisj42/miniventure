@@ -68,15 +68,6 @@ public class ClientCore extends ApplicationAdapter {
 		throwable.printStackTrace();
 	};
 	
-	/*public static final void wrapex(Action a) {
-		try {
-			a.act();
-		} catch(Throwable t) {
-			exceptionHandler.uncaughtException(Thread.currentThread(), t);
-			throw t;
-		}
-	}*/
-	
 	public ClientCore(ServerManager serverStarter) {
 		this.serverStarter = serverStarter;
 	}

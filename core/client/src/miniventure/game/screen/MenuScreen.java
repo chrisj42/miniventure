@@ -16,7 +16,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.utils.Layout;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.widget.VisLabel;
@@ -27,40 +26,14 @@ public abstract class MenuScreen extends Stage {
 	private final boolean clearGdxBackground;
 	private MenuScreen parent;
 	
-	// private AnchorGroup anchorGroup;
-	
-	// protected VerticalGroup vGroup;
-	// protected Table table;
-	
 	private Group mainGroup; // usually going to be the above vGroup or table.
 	private RelPos mainContainerAnchor;
 	private RelPos mainGroupAnchor;
 	
-	// private final LinkedList<VisLabel> labels = new LinkedList<>();
-	
 	public MenuScreen(final boolean clearGdxBackground) {
-		super(new ScreenViewport(/*Scaling.fill, GameCore.DEFAULT_SCREEN_WIDTH, GameCore.DEFAULT_SCREEN_HEIGHT*/)/*new DiscreteViewport()*/, GameCore.getBatch());
+		super(new ScreenViewport(), GameCore.getBatch());
 		this.clearGdxBackground = clearGdxBackground;
-		// vGroup = new VerticalGroup();
-		// vGroup.space(10);
-		// vGroup.setPosition(getWidth()/2, getHeight()*2/3, Align.center);
-		//
-		// anchorGroup = new AnchorGroup();
-		// addActor(anchorGroup);
-		// anchorGroup.setDebug(true);
-		// setDebugAll(true);
 	}
-	
-	/*protected VerticalGroup getVGroup() {
-		if(vGroup == null)
-			vGroup = new VerticalGroup();
-		return vGroup;
-	}
-	protected Table getTable() {
-		if(table == null)
-			table = new Table();
-		return table;
-	}*/
 	
 	protected void setCenterGroup(Group group) { setMainGroup(group, RelPos.CENTER); }
 	protected void setMainGroup(Group group, RelPos anchor) { setMainGroup(group, anchor, anchor); }
@@ -77,17 +50,10 @@ public abstract class MenuScreen extends Stage {
 	
 	protected void layoutActors() {
 		if(mainGroup != null) {
-			if(mainGroup instanceof Layout) {
-				// ((Layout) mainGroup).invalidate();
-				// ((Layout) mainGroup).layout();
-				// ((Layout) mainGroup).validate();
-			}
 			Vector2 containerPos = mainContainerAnchor.ofRectangle(new Rectangle(0, 0, getWidth(), getHeight()));
 			mainGroup.setPosition(containerPos.x, containerPos.y, mainGroupAnchor.getGdxAlign());
 		}
 	}
-	
-	// protected AnchorGroup getAnchor() { return anchorGroup; }
 	
 	public void setParent(MenuScreen parent) {
 		if(parent != null && !(parent instanceof ParentScreen))
@@ -124,12 +90,6 @@ public abstract class MenuScreen extends Stage {
 		return button;
 	}
 	
-	/*protected void addCentered(Actor comp) { addCentered(comp, 0); }
-	protected void addCentered(Actor comp, int space) {
-		Container<Actor> box = addComponent(comp, space);
-		box.center();
-	}*/
-	
 	protected static VisLabel makeLabel(String text) {
 		VisLabel label = new VisLabel(text, new LabelStyle(GameCore.getFont(), Color.WHITE));
 		label.setWrap(true);
@@ -161,30 +121,9 @@ public abstract class MenuScreen extends Stage {
 		return table;
 	}
 	
-	/*protected <T extends Actor> Container<T> addComponent(T comp) { return addComponent(0, comp, 0); }
-	protected <T extends Actor> Container<T> addComponent(int spacing, T comp) { return addComponent(spacing, comp, 0); }
-	protected <T extends Actor> Container<T> addComponent(T comp, int spacing) { return addComponent(0, comp, spacing); }
-	protected <T extends Actor> Container<T> addComponent(int preSpacing, T comp, int postSpacing) {
-		if(vGroup.getParent() == null)
-			anchorGroup.addAnchored(vGroup, RelPos.CENTER);
-		Container<T> box = new Container<>(comp);
-		box.padTop(preSpacing);
-		box.padBottom(postSpacing);
-		vGroup.addActor(box);
-		return box;
-	}*/
-	
-	/*protected static <T extends Actor> Container<T> boxComponent(T comp) {
-		Container<T> box = new Box<>(comp);
-		if(comp instanceof Layout)
-			((Layout)comp).setFillParent(true);
-		return box;
-	}*/
-	
 	public void resize(int width, int height) {
 		getViewport().update(width, height, true);
 		// System.out.println("menu screen resized to "+width+","+height+"; current menu stage size: "+getWidth()+","+getHeight()+"; new viewport: "+getViewport().getWorldWidth()+","+getViewport().getWorldHeight()+" world, "+getViewport().getScreenWidth()+","+getViewport().getScreenHeight()+" screen.");
-		// anchorGroup.invalidate();
 		layoutActors();
 	}
 	
