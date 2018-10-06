@@ -4,7 +4,7 @@ import javax.swing.JOptionPane;
 
 import miniventure.game.GameCore;
 import miniventure.game.screen.ChatScreen;
-import miniventure.game.screen.DiscreteViewport;
+import miniventure.game.screen.util.DiscreteViewport;
 import miniventure.game.world.ClientLevel;
 import miniventure.game.world.Level;
 import miniventure.game.world.TimeOfDay;

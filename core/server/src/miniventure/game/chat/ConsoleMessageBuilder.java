@@ -1,8 +1,6 @@
-package miniventure.game.chat.command;
+package miniventure.game.chat;
 
 import java.io.PrintWriter;
-
-import miniventure.game.chat.MessageBuilder;
 
 public class ConsoleMessageBuilder implements MessageBuilder {
 	

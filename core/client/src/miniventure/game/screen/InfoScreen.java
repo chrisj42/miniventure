@@ -1,6 +1,7 @@
 package miniventure.game.screen;
 
 import miniventure.game.client.ClientCore;
+import miniventure.game.screen.util.BackgroundInheritor;
 
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 

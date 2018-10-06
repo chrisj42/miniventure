@@ -11,6 +11,7 @@ import miniventure.game.GameProtocol.TabResponse;
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.chat.InfoMessageLine;
 import miniventure.game.client.ClientCore;
+import miniventure.game.screen.util.ParentScreen;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.RelPos;
 

@@ -1,4 +1,4 @@
-package miniventure.game.screen;
+package miniventure.game.screen.util;
 
 import miniventure.game.util.MyUtils;
 

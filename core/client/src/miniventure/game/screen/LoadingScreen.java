@@ -2,6 +2,7 @@ package miniventure.game.screen;
 
 import java.util.Stack;
 
+import miniventure.game.screen.util.BackgroundInheritor;
 import miniventure.game.util.ProgressLogger;
 
 import com.badlogic.gdx.Gdx;

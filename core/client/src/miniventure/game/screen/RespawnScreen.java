@@ -2,6 +2,7 @@ package miniventure.game.screen;
 
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.LevelViewport;
+import miniventure.game.screen.util.BackgroundProvider;
 import miniventure.game.world.ClientLevel;
 
 import com.badlogic.gdx.graphics.Color;

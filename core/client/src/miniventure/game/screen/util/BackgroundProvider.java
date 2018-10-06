@@ -1,4 +1,6 @@
-package miniventure.game.screen;
+package miniventure.game.screen.util;
+
+import miniventure.game.screen.MenuScreen;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;

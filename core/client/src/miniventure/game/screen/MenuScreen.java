@@ -3,6 +3,8 @@ package miniventure.game.screen;
 import java.util.LinkedList;
 
 import miniventure.game.GameCore;
+import miniventure.game.screen.util.DiscreteViewport;
+import miniventure.game.screen.util.ParentScreen;
 import miniventure.game.util.Action;
 import miniventure.game.util.RelPos;
 

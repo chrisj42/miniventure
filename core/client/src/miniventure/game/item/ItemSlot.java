@@ -1,7 +1,7 @@
 package miniventure.game.item;
 
 import miniventure.game.GameCore;
-import miniventure.game.screen.ColorBackground;
+import miniventure.game.screen.util.ColorBackground;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
