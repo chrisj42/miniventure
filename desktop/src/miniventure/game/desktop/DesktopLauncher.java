@@ -6,8 +6,8 @@ import miniventure.game.client.ServerManager;
 import miniventure.game.server.ServerCore;
 import miniventure.game.util.function.MonoVoidFunction;
 
-import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 
 public class DesktopLauncher {
 	
@@ -29,11 +29,11 @@ public class DesktopLauncher {
 			ServerCore.main(args);
 		} else {
 			Thread.setDefaultUncaughtExceptionHandler(ClientCore.exceptionHandler);
-			LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-			config.title = "Miniventure " + GameCore.VERSION;
-			config.width = GameCore.DEFAULT_SCREEN_WIDTH;
-			config.height = GameCore.DEFAULT_SCREEN_HEIGHT;
-			new LwjglApplication(new ClientCore(new ServerManager() {
+			Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
+			config.setTitle("Miniventure " + GameCore.VERSION);
+			config.setWindowedMode(GameCore.DEFAULT_SCREEN_WIDTH, GameCore.DEFAULT_SCREEN_HEIGHT);
+			config.setWindowSizeLimits(GameCore.DEFAULT_SCREEN_WIDTH, GameCore.DEFAULT_SCREEN_HEIGHT, -1, -1);
+			new Lwjgl3Application(new ClientCore(new ServerManager() {
 				@Override
 				public void startServer(int worldWidth, int worldHeight, MonoVoidFunction<Boolean> callback) {
 					boolean started = ServerCore.initServer(worldWidth, worldHeight, false);
