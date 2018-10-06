@@ -20,7 +20,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -38,14 +38,16 @@ public class GameScreen {
 	
 	public GameScreen() {
 		uiCamera = new OrthographicCamera();
-		guiStage = new Stage(new ExtendViewport(GameCore.DEFAULT_SCREEN_WIDTH, GameCore.DEFAULT_SCREEN_HEIGHT, uiCamera), batch);
+		guiStage = new Stage(new ScreenViewport(/*GameCore.DEFAULT_SCREEN_WIDTH, GameCore.DEFAULT_SCREEN_HEIGHT, */uiCamera), batch);
 		
 		levelView = new LevelViewport(batch, uiCamera); // uses uiCamera for rendering lighting to the screen.
 		
-		resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		
 		chatOverlay = new ChatScreen(true);
 		chatScreen = new ChatScreen(false);
+		System.out.println("overlay = "+Integer.toOctalString(chatOverlay.hashCode()));
+		System.out.println("screen = "+Integer.toOctalString(chatScreen.hashCode()));
+		
+		resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 	}
 	
 	@NotNull LevelViewport getLevelView() { return levelView; }
@@ -53,6 +55,8 @@ public class GameScreen {
 	void dispose() {
 		levelView.dispose();
 		guiStage.dispose();
+		chatOverlay.dispose();
+		chatScreen.dispose();
 	}
 	
 	private boolean dialog = false;
@@ -118,6 +122,7 @@ public class GameScreen {
 		guiStage.draw();
 		
 		if(!(ClientCore.getScreen() instanceof ChatScreen)) {
+			// chatScreen.validate();
 			chatOverlay.act(Gdx.graphics.getDeltaTime());
 			chatOverlay.draw();
 		}
@@ -188,7 +193,11 @@ public class GameScreen {
 		}
 	}
 	
-	void resize(int width, int height) { levelView.resize(width, height); }
+	void resize(int width, int height) {
+		levelView.resize(width, height);
+		guiStage.getViewport().update(width, height, true);
+		chatOverlay.resize(width, height);
+	}
 	
 	public Stage getGuiStage() { return guiStage; }
 }

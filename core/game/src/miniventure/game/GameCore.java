@@ -151,8 +151,10 @@ public class GameCore {
 	}
 	
 	public static BitmapFont getFont() {
-		if(defaultFont == null)
+		if(defaultFont == null) {
 			defaultFont = fontGenerator.generateFont(getDefaultFontConfig());
+			defaultFont.setUseIntegerPositions(true);
+		}
 		
 		defaultFont.setColor(Color.WHITE);
 		return defaultFont;

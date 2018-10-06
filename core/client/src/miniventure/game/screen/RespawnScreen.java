@@ -6,6 +6,7 @@ import miniventure.game.world.ClientLevel;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 
 public class RespawnScreen extends BackgroundProvider {
 	
@@ -21,8 +22,10 @@ public class RespawnScreen extends BackgroundProvider {
 		this.level = level;
 		this.backgroundRenderer = backgroundRenderer;
 		
-		addCentered(makeLabel("You died!"), 20);
-		addCentered(makeButton("Respawn", () -> ClientCore.getWorld().respawnPlayer()));
+		VerticalGroup vGroup = useVGroup(20);
+		
+		vGroup.addActor(makeLabel("You died!"));
+		vGroup.addActor(makeButton("Respawn", () -> ClientCore.getWorld().respawnPlayer()));
 	}
 	
 	@Override

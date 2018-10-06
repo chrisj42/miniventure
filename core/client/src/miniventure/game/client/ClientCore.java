@@ -143,13 +143,13 @@ public class ClientCore extends ApplicationAdapter {
 		if(menuScreen instanceof BackgroundProvider && screen instanceof BackgroundInheritor)
 			((BackgroundInheritor)screen).setBackground((BackgroundProvider)menuScreen);
 		
-		if(screen != null && menuScreen != null && (gameScreen == null || menuScreen != gameScreen.chatScreen)) {
-			if((screen instanceof ErrorScreen || screen instanceof LoadingScreen) && (menuScreen instanceof ErrorScreen || menuScreen instanceof LoadingScreen || (screen instanceof ErrorScreen && menuScreen.getParent() != null))) {
-				screen.setParent(menuScreen.getParent()); // when are you going to go from a chat screen to another screen...?
-			}
-			else
-				screen.setParent(menuScreen);
+		if(screen != null) {
+			// error and loading (and chat) screens can have parents, but cannot be parents.
+			screen.setParent(menuScreen);
+			screen.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		}
+		else if(menuScreen != null && (gameScreen == null || menuScreen != gameScreen.chatScreen))
+			menuScreen.dispose();
 		
 		System.out.println("setting screen to " + screen);
 		
@@ -174,7 +174,9 @@ public class ClientCore extends ApplicationAdapter {
 		if(menuScreen != null && menuScreen.getParent() != null) {
 			MenuScreen screen = menuScreen.getParent();
 			System.out.println("setting screen back to " + screen);
-			menuScreen.dispose(false);
+			if(gameScreen == null || menuScreen != gameScreen.chatScreen)
+				menuScreen.dispose(false);
+			screen.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 			menuScreen = screen;
 			Gdx.input.setInputProcessor(menuScreen);
 			input.reset();

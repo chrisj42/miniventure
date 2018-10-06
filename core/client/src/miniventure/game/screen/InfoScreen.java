@@ -2,12 +2,16 @@ package miniventure.game.screen;
 
 import miniventure.game.client.ClientCore;
 
+import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
+
 public class InfoScreen extends BackgroundInheritor {
 	
 	private InfoScreen(String... text) {
-		addComponent(makeLabel(String.join("\n", text)));
+		VerticalGroup vGroup = useVGroup(30);
 		
-		addComponent(30, makeButton("Back to Main Menu", ClientCore::backToParentScreen));
+		vGroup.addActor(makeLabel(String.join("\n", text)));
+		
+		vGroup.addActor(makeButton("Back to Main Menu", ClientCore::backToParentScreen));
 	}
 	
 	public static class InstructionsScreen extends InfoScreen {

@@ -5,16 +5,16 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
-public class DiscreteScreenViewport extends ScreenViewport {
+public class DiscreteViewport extends ScreenViewport {
 	
 	private final int minWidth;
 	private final int minHeight;
 	
-	public DiscreteScreenViewport(int minWidth, int minHeight) {
+	public DiscreteViewport(int minWidth, int minHeight) {
 		this(minWidth, minHeight, new OrthographicCamera());
 	}
 	
-	public DiscreteScreenViewport(int minWidth, int minHeight, Camera camera) {
+	public DiscreteViewport(int minWidth, int minHeight, Camera camera) {
 		super(camera);
 		this.minWidth = minWidth;
 		this.minHeight = minHeight;

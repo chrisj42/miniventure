@@ -5,6 +5,7 @@ import java.util.Stack;
 import miniventure.game.util.ProgressLogger;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.kotcrab.vis.ui.widget.VisLabel;
 
 public class LoadingScreen extends BackgroundInheritor implements ProgressLogger {
@@ -20,10 +21,13 @@ public class LoadingScreen extends BackgroundInheritor implements ProgressLogger
 		Like that.  
 	 */
 	
+	private final VerticalGroup vGroup;
 	private Stack<VisLabel> messageLabels = new Stack<>();
 	
 	public LoadingScreen() {
-		addActor(vGroup);
+		vGroup = new VerticalGroup();
+		setCenterGroup(vGroup);
+		vGroup.space(15);
 	}
 	
 	@Override

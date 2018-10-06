@@ -8,7 +8,6 @@ import miniventure.game.client.ClientWorld;
 import miniventure.game.client.LevelViewport;
 import miniventure.game.screen.InfoScreen.CreditsScreen;
 import miniventure.game.screen.InfoScreen.InstructionsScreen;
-import miniventure.game.util.RelPos;
 import miniventure.game.util.VersionInfo;
 import miniventure.game.world.DisplayLevel;
 import miniventure.game.world.TimeOfDay;
@@ -22,14 +21,13 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.Align;
 import com.kotcrab.vis.ui.widget.LinkLabel.LinkLabelStyle;
 import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 
 import org.jetbrains.annotations.NotNull;
 
-public class MainMenu extends BackgroundProvider {
+public class MainMenu extends BackgroundProvider implements ParentScreen {
 	
 	private boolean dialog = false;
 	
@@ -47,7 +45,7 @@ public class MainMenu extends BackgroundProvider {
 		
 		ClientWorld world = ClientCore.getWorld();
 		
-		table = new Table();
+		table = useTable();
 		// table.setDebug(true);
 		addLabel("Welcome to Miniventure!", 20);
 		addLabel("You are playing version " + GameCore.VERSION, 25);
@@ -101,9 +99,9 @@ public class MainMenu extends BackgroundProvider {
 		VisTextButton exitBtn = makeButton("Quit", () -> Gdx.app.exit());
 		table.add(exitBtn).row();
 		
-		getAnchor().addAnchored(table, RelPos.CENTER);
-		table.setPosition(getWidth()/2, getHeight()/2, Align.center);
+		// getAnchor().addAnchored(table, RelPos.CENTER);
 		
+		// layoutActors();
 		// setup level scrolling in background
 		
 		levelView = new LevelViewport();
@@ -176,8 +174,8 @@ public class MainMenu extends BackgroundProvider {
 			else
 				label.setText("Connection failed, could not check for updates.");
 			
-			table.pack();
-			table.setPosition(getWidth()/2, getHeight()/2, Align.center);
+			// table.pack();
+			// table.setPosition(getWidth()/2, getHeight()/2, Align.center);
 		}
 	}
 }

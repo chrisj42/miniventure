@@ -1,16 +1,19 @@
 package miniventure.game.util;
 
-import java.awt.Rectangle;
-import java.awt.Point;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Align;
 
 public enum RelPos {
-	TOP_LEFT, TOP, TOP_RIGHT,
-	LEFT, CENTER, RIGHT,
-	BOTTOM_LEFT, BOTTOM, BOTTOM_RIGHT;
+	TOP_LEFT(Align.topLeft), TOP(Align.top), TOP_RIGHT(Align.topRight),
+	LEFT(Align.left), CENTER(Align.center), RIGHT(Align.right),
+	BOTTOM_LEFT(Align.bottomLeft), BOTTOM(Align.bottom), BOTTOM_RIGHT(Align.bottomRight);
 	
 	private final int x, y;
+	private final int gdxAlign;
 	
-	RelPos() {
+	RelPos(int align) {
+		gdxAlign = align;
 		x = (ordinal() % 3) - 1;
 		y = (ordinal() / 3) - 1;
 	}
@@ -18,6 +21,8 @@ public enum RelPos {
 	public int getX() { return x; }
 	public int getY() { return getY(false); }
 	public int getY(boolean yDown) { return yDown ? y : -y; }
+	
+	public int getGdxAlign() { return gdxAlign; }
 	
 	public static final RelPos[] values = RelPos.values();
 	public static RelPos values(int ordinal) { return values[ordinal]; }
@@ -33,6 +38,13 @@ public enum RelPos {
 		x++;
 		y++;
 		return values[x + y*3];
+	}
+	
+	public static RelPos get(int gdxAlign) {
+		for(RelPos pos: values)
+			if(pos.gdxAlign == gdxAlign)
+				return pos;
+		return null;
 	}
 	
 	public RelPos getOpposite() {
@@ -97,12 +109,12 @@ public enum RelPos {
 			return pos.rotate(false);
 	}
 	
-	public Point forRectangle(Rectangle rect) {
-		int xDist = rect.width/2;
-		int yDist = rect.height/2;
-		Point center = new Point((int)rect.getCenterX(), (int)rect.getCenterY());
+	public Vector2 ofRectangle(Rectangle rect) {
+		float xDist = rect.width/2;
+		float yDist = rect.height/2;
+		Vector2 center = rect.getCenter(new Vector2());
 		center.x += xDist * getX();
-		center.y += yDist * getY(true);
+		center.y += yDist * getY();
 		return center;
 	}
 }

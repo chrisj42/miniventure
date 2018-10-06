@@ -2,12 +2,9 @@ Item selection legit *sucks*.
 
 "tp playername" crashes game when used on client
 
-UI doesn't scale right. Whenever the window size changes, I need to remake the UI, and call resize on all the conponents. Or revalidate them somehow.
-About that: the main menu is also aligned wrong; the anchor isn't in the right place.
-The char screen sometimes causes an uncaught internal exception when formatting. -_-
+walking animations continue playing on respawn screen
 
-if you exit to the main menu, you cannot start another world without restarting the application; the server won't connect. Maybe there are some threads I forgot to close..? Or maybe it has something to do with already having initialized once?
-Actually, sometimes you can...
+The chat screen sometimes causes an uncaught internal exception when formatting. -_-
 
 Whenever the game freezes for a second, and then starts again, all the entities jump way more than they're supposed to; as if they kept going in the same direction without other things updating. This sometimes can cause the player (or other entities) to jump across tiles that are normally solid.
 
