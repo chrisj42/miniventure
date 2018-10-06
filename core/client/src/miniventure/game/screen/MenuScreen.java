@@ -17,7 +17,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 
@@ -31,7 +30,7 @@ public abstract class MenuScreen extends Stage {
 	private RelPos mainGroupAnchor;
 	
 	public MenuScreen(final boolean clearGdxBackground) {
-		super(new ScreenViewport(), GameCore.getBatch());
+		super(new DiscreteViewport(), GameCore.getBatch());
 		this.clearGdxBackground = clearGdxBackground;
 	}
 	

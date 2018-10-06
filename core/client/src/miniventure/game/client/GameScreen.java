@@ -4,6 +4,7 @@ import javax.swing.JOptionPane;
 
 import miniventure.game.GameCore;
 import miniventure.game.screen.ChatScreen;
+import miniventure.game.screen.DiscreteViewport;
 import miniventure.game.world.ClientLevel;
 import miniventure.game.world.Level;
 import miniventure.game.world.TimeOfDay;
@@ -20,7 +21,6 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -38,7 +38,7 @@ public class GameScreen {
 	
 	public GameScreen() {
 		uiCamera = new OrthographicCamera();
-		guiStage = new Stage(new ScreenViewport(uiCamera), batch);
+		guiStage = new Stage(new DiscreteViewport(uiCamera), batch);
 		
 		levelView = new LevelViewport(batch, uiCamera); // uses uiCamera for rendering lighting to the screen.
 		

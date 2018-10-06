@@ -1,5 +1,7 @@
 package miniventure.game.screen;
 
+import miniventure.game.GameCore;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -10,14 +12,15 @@ public class DiscreteViewport extends ScreenViewport {
 	private final int minWidth;
 	private final int minHeight;
 	
-	public DiscreteViewport(int minWidth, int minHeight) {
-		this(minWidth, minHeight, new OrthographicCamera());
+	public DiscreteViewport() {
+		this(new OrthographicCamera());
 	}
 	
-	public DiscreteViewport(int minWidth, int minHeight, Camera camera) {
+	public DiscreteViewport(Camera camera) {
 		super(camera);
-		this.minWidth = minWidth;
-		this.minHeight = minHeight;
+		 
+		this.minWidth = GameCore.DEFAULT_SCREEN_WIDTH;
+		this.minHeight = GameCore.DEFAULT_SCREEN_HEIGHT;
 	}
 	
 	@Override
@@ -30,9 +33,10 @@ public class DiscreteViewport extends ScreenViewport {
 		float minRatio = Math.min(widthRatio, heightRatio);
 		
 		// only scale in integer multiples
+		minRatio = (int)(4*minRatio)/4f;
 		
 		if(minRatio >= 1)
-			setUnitsPerPixel(1f/((int)minRatio));
+			setUnitsPerPixel(1f/minRatio);
 		else
 			Gdx.graphics.setWindowedMode(Math.max(screenWidth, minWidth), Math.max(screenHeight, minHeight));
 		
