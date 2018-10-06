@@ -16,9 +16,10 @@ public final class ButtonMaker {
 	
 	static {
 		try {
-			upArrow = ImageIO.read(ButtonMaker.class.getResourceAsStream("/up-arrow.png"));
-			downArrow = ImageIO.read(ButtonMaker.class.getResourceAsStream("/down-arrow.png"));
+			upArrow = ImageIO.read(ButtonMaker.class.getResourceAsStream("up-arrow.png"));
+			downArrow = ImageIO.read(ButtonMaker.class.getResourceAsStream("down-arrow.png"));
 		} catch(Exception e) {
+			System.err.println("Please copy icons into class folder.");
 			e.printStackTrace();
 		}
 	}
