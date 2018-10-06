@@ -39,7 +39,18 @@ public abstract class MenuScreen extends Stage {
 	protected void setCenterGroup(Group group) { addMainGroup(group, RelPos.CENTER); }
 	protected void addMainGroup(Group group, RelPos anchor) { addMainGroup(group, anchor, anchor); }
 	protected void addMainGroup(Group group, RelPos containerAnchor, RelPos groupAnchor) {
-		anchoredActors.add(new ActorAnchor(group, containerAnchor, groupAnchor));
+		boolean match = false;
+		for(ActorAnchor anchor: anchoredActors) {
+			if(anchor.mainGroup == group) {
+				match = true;
+				anchor.mainContainerAnchor = containerAnchor;
+				anchor.mainGroupAnchor = groupAnchor;
+				break;
+			}
+		}
+		if(!match)
+			anchoredActors.add(new ActorAnchor(group, containerAnchor, groupAnchor));
+		
 		if(group.getStage() != this)
 			addActor(group);
 	}
