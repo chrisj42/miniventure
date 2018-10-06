@@ -30,16 +30,12 @@ public class InventoryScreen extends MenuScreen {
 		this.inventory = inventory;
 		this.hands = hands;
 		
-		fillBar = new ProgressBar(0, 1, .01f, true, GameCore.getSkin());
-		
 		hGroup = new HorizontalGroup();
 		hGroup.align(Align.right);
 		addMainGroup(hGroup, RelPos.RIGHT);
 		hGroup.rowCenter();
-		hGroup.addActor(fillBar);
 		
-		float heightAvailable = getHeight() * 3 / 4;
-		int minSlots = (int) (heightAvailable / Item.ICON_SIZE);
+		int minSlots = (int) (getHeight() / 2 / Item.ICON_SIZE);
 		
 		Item[] allItems = inventory.getUniqueItems();
 		ItemSlot[] items = new ItemSlot[Math.max(allItems.length, minSlots)];
@@ -50,13 +46,22 @@ public class InventoryScreen extends MenuScreen {
 				items[i] = new ItemStackSlot(i, true, allItems[i], inventory.getCount(allItems[i]), slotBackgroundColor);
 		}
 		
-		invGroup = new ItemSelectionTable(items, getHeight());
+		invGroup = new ItemSelectionTable(items, getHeight()*3/4);
 		Container<ItemSelectionTable> inventoryContainer = new Container<>(invGroup);
 		inventoryContainer.fill().pad(10, 10, 10, 0);
-		hGroup.addActor(inventoryContainer);
+		
+		fillBar = new ProgressBar(0, 1, .01f, true, GameCore.getSkin()) {
+			@Override
+			public float getPrefHeight() {
+				return invGroup.getHeight();
+			}
+		};
 		
 		float percentUsed = inventory.getSpaceLeft() / (float)inventory.getSlots();
 		fillBar.setValue(1 - percentUsed);
+		
+		hGroup.addActor(fillBar);
+		hGroup.addActor(inventoryContainer);
 		
 		InputListener l = new InputListener() {
 			@Override
@@ -143,6 +148,8 @@ public class InventoryScreen extends MenuScreen {
 	@Override
 	protected void layoutActors() {
 		invGroup.refresh();
+		// fillBar.setHeight(invGroup.getHeight());
+		// fillBar.invalidateHierarchy();
 		super.layoutActors();
 	}
 	

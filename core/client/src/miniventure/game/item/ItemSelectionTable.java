@@ -49,8 +49,7 @@ public class ItemSelectionTable extends VerticalFlowGroup {
 		if(itemSlots.length > 1) {
 			// need to adjust spacing to make sure there isn't a large space at the bottom
 			float spaceTaken = Math.min(itemSlots.length, maxPerColumn) * Item.ICON_SIZE;
-			float spaceAvailable = getHeight();
-			float emptySpace = spaceAvailable - spaceTaken;
+			float emptySpace = getHeight() - spaceTaken;
 			setSpacing(emptySpace / (itemSlots.length-1));
 		}
 		
