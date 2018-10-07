@@ -208,8 +208,10 @@ public class GameServer implements GameProtocol {
 				forPacket(object, ItemDropRequest.class, drop -> {
 					ItemStack stack = ItemStack.load(drop.stackData);
 					int removed = 0;
-					while(removed < stack.count && client.getHands().removeItem(stack.item))
+					while(removed < stack.count && client.getInventory().removeItem(stack.item))
 						removed++;
+					if(client.getHands().validate())
+						connection.sendTCP(new InventoryUpdate(null, client.getHands()));
 					ServerLevel level = client.getLevel();
 					if(level == null) return;
 					// get target pos, which is one tile in front of player.

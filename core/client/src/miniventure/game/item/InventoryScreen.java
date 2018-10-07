@@ -1,121 +1,35 @@
 package miniventure.game.item;
 
-import miniventure.game.GameCore;
-import miniventure.game.client.ClientCore;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.util.RelPos;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.badlogic.gdx.scenes.scene2d.ui.Container;
-import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
-import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
-import com.badlogic.gdx.utils.Align;
+
+import org.jetbrains.annotations.NotNull;
 
 public class InventoryScreen extends MenuScreen {
 	
-	private static final Color slotBackgroundColor = Color.TEAL.cpy().lerp(Color.WHITE, .1f);
-	
-	private final Inventory inventory;
 	private final ClientHands hands;
 	
-	private final HorizontalGroup hGroup;
-	private final ProgressBar fillBar;
-	private final ItemSelectionTable invGroup;
+	private final InventoryDisplayGroup invGroup;
 	
-	public InventoryScreen(Inventory inventory, ClientHands hands) {
+	public InventoryScreen(ClientHands hands) {
 		super(false);
-		this.inventory = inventory;
 		this.hands = hands;
 		
-		hGroup = new HorizontalGroup();
-		hGroup.align(Align.right);
-		addMainGroup(hGroup, RelPos.RIGHT);
-		hGroup.rowCenter();
+		invGroup = new InventoryDisplayGroup(hands.getInv(), getHeight() * 4 / 5, true);
+		addMainGroup(invGroup, RelPos.get(invGroup.getAlign()));
 		
-		int minSlots = (int) (getHeight() / 2 / Item.ICON_SIZE);
-		
-		Item[] allItems = inventory.getUniqueItems();
-		ItemSlot[] items = new ItemSlot[Math.max(allItems.length, minSlots)];
-		for(int i = 0; i < items.length; i++) {
-			if(i >= allItems.length)
-				items[i] = new ItemSlot(i, true, new HandItem(), slotBackgroundColor);
-			else
-				items[i] = new ItemStackSlot(i, true, allItems[i], inventory.getCount(allItems[i]), slotBackgroundColor);
-		}
-		
-		invGroup = new ItemSelectionTable(items, getHeight()*3/4);
-		Container<ItemSelectionTable> inventoryContainer = new Container<>(invGroup);
-		inventoryContainer.fill().pad(10, 10, 10, 0);
-		
-		fillBar = new ProgressBar(0, 1, .01f, true, GameCore.getSkin()) {
-			@Override
-			public float getPrefHeight() {
-				return invGroup.getHeight();
-			}
-		};
-		
-		float percentUsed = inventory.getSpaceLeft() / (float)inventory.getSlots();
-		fillBar.setValue(1 - percentUsed);
-		
-		hGroup.addActor(fillBar);
-		hGroup.addActor(inventoryContainer);
-		
-		InputListener l = new InputListener() {
+		invGroup.addListener(new InputListener() {
 			@Override
 			public boolean keyDown(InputEvent event, int keycode) {
-				if(keycode == Keys.ESCAPE || keycode == Keys.E) {
-					ClientCore.setScreen(null);
-					return true;
-				}
-				return false;
-			}
-		};
-		
-		addListener(l);
-		invGroup.addListener(l);
-		
-		/*table = new ItemSelectionTable(items, getHeight()) {
-			@Override
-			public void onUpdate() {
-				table.setPosition(InventoryScreen.this.getWidth(), InventoryScreen.this.getHeight(), Align.topRight);
-			}
-		};
-		table.addListener(new InputListener() {
-			@Override
-			public boolean keyDown (InputEvent event, int keycode) {
-				int hotbarSlots = Hands.HOTBAR_SIZE;
-				if(keycode >= Keys.NUM_1 && keycode <= Keys.NUM_1+hotbarSlots-1) {
-					int slot = keycode - Keys.NUM_1;
-					hands.setSelection(slot);
-					return true;
-				}
-				
-				if(keycode == Keys.ENTER) {
-					swapSelections();
-					return true;
-				}
-				
-				if(keycode == Keys.E || keycode == Keys.ESCAPE) {
-					ClientCore.setScreen(null);
-					return true;
-				}
-				
-				if(keycode == Keys.Q) {
-					if(Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)) {
-						Item item = getSelectedItem();
-						hands.dropInvItems(item, true);
-						Item[] items = inventory.getUniqueItems();
-						for(int i = 0; i < items.length; i++)
-							table.update(i, items[i]);
-					} else {
-						// remove the highlighted item only
-						Item removed = new HandItem();
-						// Item removed = inventory.removeItemAt(table.getSelection(), new HandItem());
-						ClientCore.getClient().send(new ItemDropRequest(new ItemStack(removed, 1)));
-						table.updateSelected(getSelectedItem());
+				for(int i = 0; i < Hands.HOTBAR_SIZE; i++) {
+					if(Gdx.input.isKeyJustPressed(Keys.NUM_1 + i)) {
+						toggleHotbarItem(i, invGroup.getSelectedItem());
+						return true;
 					}
 				}
 				
@@ -123,53 +37,45 @@ public class InventoryScreen extends MenuScreen {
 			}
 		});
 		
-		for(ItemSlot slot: items) {
-			slot.addListener(new InputListener() {
-				@Override
-				public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-					table.setSelection(slot.getSlotIndex());
-				}
-			});
-			slot.addListener(new ClickListener() {
-				@Override
-				public void clicked (InputEvent event, float x, float y) {
-					swapSelections();
-				}
-			});
-		}*/
-		
-		// addActor(table);
-		// table.setPosition(getWidth(), getHeight(), Align.topRight);
-		
-		// setKeyboardFocus(table);
-		hGroup.pack();
+		for(int i = 0; i < Hands.HOTBAR_SIZE; i++)
+			invGroup.setHotbarHighlight(hands.getItem(i), true);
 	}
 	
 	@Override
-	protected void layoutActors() {
-		invGroup.refresh();
-		// fillBar.setHeight(invGroup.getHeight());
-		// fillBar.invalidateHierarchy();
-		super.layoutActors();
+	public void focus() {
+		super.focus();
+		setKeyboardFocus(invGroup);
 	}
 	
-	/*private void swapSelections() {
-		// hands.swapItem(inventory, table.getSelection(), hands.getSelection());
-		// table.updateSelected(getSelectedItem());
+	// this method deals with setting the special inventory highlight for items that are in the hotbar.
+	private void toggleHotbarItem(int hotbarIndex, @NotNull Item item) {
+		
+		if(item instanceof HandItem) {
+			// we're taking an item off the hotbar (by replacing it with a hand)
+			Item prevItem = hands.removeItem(hotbarIndex);
+			invGroup.setHotbarHighlight(prevItem, false);
+		}
+		else {
+			// we could be adding or removing an item from the hotbar, or just moving it around. Or moving it and removing another one.
+			
+			if(hands.getItem(hotbarIndex).equals(item)) {
+				// remove it from the hotbar
+				hands.removeItem(hotbarIndex);
+				invGroup.setHotbarHighlight(false);
+			}
+			else {
+				// adding an item, or moving it around and possibly replacing another item.
+				
+				// because the item could move, we will try to remove it from the hotbar now, to be added back later.
+				invGroup.setHotbarHighlight(item, false);
+				
+				Item prevItem = hands.replaceItem(hotbarIndex, item);
+				
+				// since item was already removed if it existed before, we can just add it back here.
+				invGroup.setHotbarHighlight(true);
+				// we need to make sure to unset this item as a hotbar item, since it was replaced.
+				invGroup.setHotbarHighlight(prevItem, false);
+			}
+		}
 	}
-	
-	private Item getSelectedItem() { return new HandItem();*//*inventory.getItemAt(table.getSelection());*//* }*/
-	
-	/*@Override
-	protected void layoutActors() {
-		invGroup.setSize(invGroup.getPrefWidth(), invGroup.getPrefHeight());
-		hGroup.setSize(fillBar.getPrefWidth()+invGroup.getPrefWidth(), fillBar.getPrefHeight()+invGroup.getPrefHeight());
-		System.out.println("inv group pref size: "+invGroup.getPrefWidth()+","+invGroup.getPrefHeight());
-		System.out.println("h group pref size: "+hGroup.getPrefWidth()+","+hGroup.getPrefHeight());
-		super.layoutActors();
-		System.out.println(Gdx.graphics.getWidth()+","+Gdx.graphics.getHeight());
-		hGroup.setX(Gdx.graphics.getWidth() - hGroup.getWidth());
-		System.out.println("h group position: "+hGroup.getX()+","+hGroup.getY()+","+hGroup.getWidth()+","+hGroup.getHeight());
-		System.out.println("inv group position: "+invGroup.getX()+","+invGroup.getY()+","+invGroup.getWidth()+","+invGroup.getHeight());
-	}*/
 }

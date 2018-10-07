@@ -58,10 +58,20 @@ public class Inventory {
 		if(itemCounter.removeInstance(item) == 0 && !(item instanceof HandItem))
 			uniqueItems.remove(item); // there shouldn't be any HandItems in it anyway.
 		
+		itemCounter.add(hand);
 		spaceTaken -= item.getSpaceUsage();
 		return true;
 	}
 	
+	public int removeItemStack(Item item) {
+		if(item == null || item instanceof HandItem) return 0;
+		int count = getCount(item);
+		if(count == 0) return 0;
+		itemCounter.remove(item);
+		uniqueItems.remove(item);
+		spaceTaken -= item.getSpaceUsage() * count;
+		return count;
+	}
 	
 	public String[] save() {
 		String[] data = new String[uniqueItems.size()];

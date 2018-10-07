@@ -2,6 +2,7 @@ package miniventure.game.item;
 
 import miniventure.game.GameCore;
 import miniventure.game.screen.util.ColorBackground;
+import miniventure.game.util.MyUtils;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -9,51 +10,72 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.ui.Widget;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ItemSlot extends Widget {
+	
+	private static final Color selectionColor = new Color(.8f, .8f, .8f, 0.5f);
 	
 	private static final float SPACING = 10, XPADDING = 3, YPADDING = 2;
 	public static final float HEIGHT = Item.ICON_SIZE+2+YPADDING*2;
 	
 	private final boolean showName;
 	@Nullable private Item item;
+	private int count;
 	private float prefWidth;
 	private Color textColor;
 	private Drawable background;
 	
-	private final int slotIndex;
+	private boolean selected = false;
+	void setSelected(boolean selected) { this.selected = selected; }
 	
-	public ItemSlot(boolean showName, @Nullable Item item) { this(0, showName, item); }
-	public ItemSlot(int index, boolean showName, @Nullable Item item) { this(index, showName, item, (Drawable)null); }
-	public ItemSlot(int index, boolean showName, @Nullable Item item, Color backgroundColor) {
-		this(index, showName, item, new ColorBackground(null, backgroundColor));
-		((ColorBackground)background).setActor(this);
+	public ItemSlot(boolean showName, @Nullable Item item) { this(showName, item, 1); }
+	public ItemSlot(boolean showName, @Nullable Item item, int count) { this(showName, item, count, (Drawable)null); }
+	public ItemSlot(boolean showName, @Nullable Item item, Color backgroundColor) { this(showName, item, 1, backgroundColor); }
+	public ItemSlot(boolean showName, @Nullable Item item, int count, Color backgroundColor) {
+		this(showName, item, count, (Drawable)null);
+		setBackground(new ColorBackground(this, backgroundColor));
 	}
-	public ItemSlot(boolean showName, @Nullable Item item, Drawable background) { this(0, showName, item, background); }
-	public ItemSlot(int index, boolean showName, @Nullable Item item, Drawable background) {
-		this.slotIndex = index;
+	public ItemSlot(boolean showName, @Nullable Item item, Drawable background) { this(showName, item, 1, background); }
+	public ItemSlot(boolean showName, @Nullable Item item, int count, Drawable background) {
 		this.showName = showName;
-		this.background = background;
 		textColor = Color.WHITE;
-		setItem(item);
+		setBackground(background);
 		setHeight(HEIGHT);
+		if(!showName) {
+			prefWidth = Item.ICON_SIZE + 2 + XPADDING * 2;
+			setWidth(prefWidth);
+		}
+		setCount(count);
+		setItem(item);
 	}
 	
-	public int getSlotIndex() { return slotIndex; }
-	
-	@Nullable
-	public Item getItem() { return item; }
+	@NotNull
+	public Item getItem() { return item == null ? new HandItem() : item; }
 	
 	public ItemSlot setItem(@Nullable Item item) {
+		if(this.item == item) return this; // no action is needed.
 		this.item = item instanceof HandItem ? null : item;
-		if(!showName) prefWidth = Item.ICON_SIZE + 2;
+		if(!showName) return this; // the layout is always the same.
 		else if(item == null) prefWidth = Item.ICON_SIZE * 2;
 		else prefWidth = Item.ICON_SIZE + 2 + SPACING + GameCore.getTextLayout(item.getName()).width;
 		prefWidth += XPADDING * 2;
 		setWidth(prefWidth);
 		return this;
 	}
+	
+	public int getCount() { return count; }
+	public ItemSlot setCount(int count) {
+		this.count = count;
+		return this;
+	}
+	public ItemSlot changeCount(int amt) {
+		count += amt;
+		return this;
+	}
+	
+	private boolean showCount() { return item != null && count > 0; }
 	
 	public void setBackground(Drawable background) { this.background = background; }
 	
@@ -63,8 +85,8 @@ public class ItemSlot extends Widget {
 	}
 	public Color getTextColor() { return textColor; }
 	
-	@Override public float getPrefWidth() { return prefWidth; }
-	@Override public float getPrefHeight() { return Item.ICON_SIZE; }
+	@Override public float getPrefWidth() { return getParent() != null && getParent().getWidth() > prefWidth ? getParent().getWidth() : prefWidth; }
+	@Override public float getPrefHeight() { return HEIGHT; }
 	
 	// @Override public float getWidth() { return prefWidth; }
 	// @Override public float getHeight() { return Item.ICON_SIZE; }
@@ -73,7 +95,7 @@ public class ItemSlot extends Widget {
 		super.draw(batch, parentAlpha);
 		if(background != null)
 			background.draw(batch, getX(), getY(), getWidth(), getHeight());
-		Item item = getItem();
+		Item item = this.item;
 		if(item != null) {
 			// draw icon
 			Color prev = batch.getColor();
@@ -85,13 +107,24 @@ public class ItemSlot extends Widget {
 			batch.draw(item.getTexture().texture, getX()+2+XPADDING+xoff, getY()+2+YPADDING+yoff);
 			item.renderIconExtras(batch, getX()+2+XPADDING, getY()+2+YPADDING);
 			
-			if(showName) {
+			if(showName || showCount()) {
 				BitmapFont font = GameCore.getFont();
 				font.setColor(getTextColor());
-				float yo = font.getDescent();
-				yo = yo + (getHeight() - font.getDescent() + font.getCapHeight() + font.getAscent()) / 2;
-				font.draw(batch, item.getName().replace("_", " "), getX()+Item.ICON_SIZE+2+SPACING+ XPADDING, getY()+yo+YPADDING);
+				
+				if(showName) {
+					float yo = font.getDescent();
+					yo = yo + (getHeight() - font.getDescent() + font.getCapHeight() + font.getAscent()) / 2;
+					font.draw(batch, item.getName().replace("_", " "), getX() + Item.ICON_SIZE + 2 + SPACING + XPADDING, getY() + yo + YPADDING);
+				}
+				
+				if(showCount())
+					font.draw(batch, getCount() + "", getX() + 2, getY() + 2 + font.getLineHeight());
 			}
 		}
+		// else
+		// 	System.out.println("item null");
+		
+		if(selected)
+			MyUtils.fillRect(getX(), getY(), getWidth(), getHeight(), selectionColor, parentAlpha, batch);
 	}
 }

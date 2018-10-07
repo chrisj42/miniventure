@@ -52,9 +52,16 @@ public class InputHandler implements InputProcessor {
 	 * @return Whether the given key has just been pressed, either physically, or programmatically for repetition.
 	 */
 	public boolean pressingKey(int keycode) {
-		return Gdx.input.isKeyJustPressed(keycode) || pressedKeys.contains(keycode);
+		return Gdx.input.isKeyJustPressed(keycode) || repressingKey(keycode);
 	}
 	
+	/**
+	 * Used to detect when a key is being programmatically re-pressed. Good if you want to avoid collisions with libGDX input listeners.
+	 * 
+	 * @param keycode the keycode of the key to check
+	 * @return Whether the given key is currently being re-pressed programmatically for repetition.
+	 */
+	public boolean repressingKey(int keycode) { return pressedKeys.contains(keycode); }
 	
 	@Override
 	public boolean keyDown(int keycode) {

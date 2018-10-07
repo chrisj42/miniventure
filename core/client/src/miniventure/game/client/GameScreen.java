@@ -3,8 +3,11 @@ package miniventure.game.client;
 import javax.swing.JOptionPane;
 
 import miniventure.game.GameCore;
+import miniventure.game.item.HotbarTable;
 import miniventure.game.screen.ChatScreen;
+import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.util.DiscreteViewport;
+import miniventure.game.util.RelPos;
 import miniventure.game.world.ClientLevel;
 import miniventure.game.world.Level;
 import miniventure.game.world.TimeOfDay;
@@ -20,6 +23,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
@@ -38,7 +42,29 @@ public class GameScreen {
 	
 	public GameScreen() {
 		uiCamera = new OrthographicCamera();
-		guiStage = new Stage(new DiscreteViewport(uiCamera), batch);
+		guiStage = new MenuScreen(false, new DiscreteViewport(uiCamera), batch) {
+			HotbarTable hotbar;
+			{
+				setDebugAll(true);
+				hotbar = new HotbarTable();
+				// Container<HotbarTable> box = new Container<>(hotbar);
+				// box.setBackground(new ColorBackground(box, Color.TEAL), false);
+				// box.fill();
+				addMainGroup(hotbar, RelPos.BOTTOM_RIGHT);
+				// Table table = useTable();
+				// table.add(new VisTextButton("Testing")).grow();
+				hotbar.setOrigin(Align.bottomRight);
+				hotbar.setPosition(getWidth()/2, 0);
+				// hotbar.pack();
+			}
+			
+			@Override
+			public void draw() {
+				hotbar.pack();
+				hotbar.setPosition(getWidth(), 0, Align.bottomRight);
+				super.draw();
+			}
+		};
 		
 		levelView = new LevelViewport(batch, uiCamera); // uses uiCamera for rendering lighting to the screen.
 		
@@ -116,11 +142,11 @@ public class GameScreen {
 		batch.begin();
 		renderGui(mainPlayer, level);
 		batch.end();
-		guiStage.act(Gdx.graphics.getDeltaTime());
+		guiStage.act();
 		guiStage.draw();
 		
 		if(!(ClientCore.getScreen() instanceof ChatScreen)) {
-			chatOverlay.act(Gdx.graphics.getDeltaTime());
+			chatOverlay.act();
 			chatOverlay.draw();
 		}
 	}
@@ -146,7 +172,7 @@ public class GameScreen {
 	private void renderGui(@NotNull ClientPlayer mainPlayer, @NotNull Level level) {
 		batch.setProjectionMatrix(uiCamera.combined);
 		
-		// draw UI for current item, and stats
+		// draw UI for stats
 		mainPlayer.drawGui(new Rectangle(0, 0, uiCamera.viewportWidth, uiCamera.viewportHeight), batch);
 		
 		if(!showDebug) {

@@ -11,6 +11,7 @@ import miniventure.game.util.RelPos;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Group;
@@ -21,18 +22,20 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 
-public abstract class MenuScreen extends Stage {
+public class MenuScreen extends Stage {
 	
 	private final boolean clearGdxBackground;
 	private MenuScreen parent;
 	
 	private final LinkedList<ActorAnchor> anchoredActors = new LinkedList<>();
 	
-	public MenuScreen(final boolean clearGdxBackground) {
-		super(new DiscreteViewport(), GameCore.getBatch());
+	public MenuScreen(final boolean clearGdxBackground) { this(clearGdxBackground, new DiscreteViewport(), GameCore.getBatch()); }
+	public MenuScreen(final boolean clearGdxBackground, Viewport viewport, Batch batch) {
+		super(viewport, batch);
 		this.clearGdxBackground = clearGdxBackground;
 	}
 	
