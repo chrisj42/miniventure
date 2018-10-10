@@ -13,7 +13,7 @@ public class ClientHands extends Hands {
 		if(!(item instanceof HandItem)) {
 			int count = all ? getInv().getCount(item) : 1;
 			for(int i = 0; i < count; i++)
-				removeItem(item);
+				getInv().removeItem(item);
 			ClientCore.getClient().send(new ItemDropRequest(new ItemStack(item, count)));
 		}
 	}
