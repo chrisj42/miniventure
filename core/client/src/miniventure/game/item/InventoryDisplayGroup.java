@@ -87,6 +87,13 @@ public class InventoryDisplayGroup extends HorizontalGroup {
 				super.drawChildren(batch, parentAlpha);
 				itemSlots.get(selectionIndex).setSelected(false);
 			}
+			
+			@Override
+			public void layout() {
+				super.layout();
+				for(ItemSlot slot: itemSlots)
+					slot.setWidth(invGroup.getPrefWidth());
+			}
 		};
 		
 		float cellHeight = ItemSlot.HEIGHT + MIN_SPACING;
@@ -142,7 +149,7 @@ public class InventoryDisplayGroup extends HorizontalGroup {
 		
 		// give padding to the inventory list
 		Container<VerticalFlowGroup> inventoryContainer = new Container<>(invGroup);
-		inventoryContainer.fill().pad(10, 10, 10, 10);
+		inventoryContainer.fill().pad(10);
 		
 		if(fillBarLeft)
 			addActor(fillBar);
@@ -163,9 +170,6 @@ public class InventoryDisplayGroup extends HorizontalGroup {
 			}
 		});
 		
-		// invGroup.invalidateHierarchy();
-		// invGroup.pack();
-		// pack();
 	}
 	
 	@Override
@@ -213,6 +217,7 @@ public class InventoryDisplayGroup extends HorizontalGroup {
 		slot.setItem(new HandItem())
 			.setCount(1)
 			.setBackground(new ColorBackground(slot, background));
+		invGroup.invalidateHierarchy();
 	}
 	
 	@NotNull

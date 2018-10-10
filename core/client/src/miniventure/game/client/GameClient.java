@@ -215,7 +215,8 @@ public class GameClient implements GameProtocol {
 				
 				forPacket(object, InventoryUpdate.class, newInv -> {
 					if(player == null) return;
-					player.getInventory().loadItems(newInv.inventory);
+					if(newInv.inventory != null)
+						player.getInventory().loadItems(newInv.inventory);
 					if(newInv.hotbar != null)
 						player.getHands().loadItemShortcuts(newInv.hotbar);
 					// if it's null, then that means the hotbar was valid.

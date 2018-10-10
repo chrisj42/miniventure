@@ -61,7 +61,6 @@ public class ItemSlot extends Widget {
 		else if(item == null) prefWidth = Item.ICON_SIZE * 2;
 		else prefWidth = Item.ICON_SIZE + 2 + SPACING + GameCore.getTextLayout(item.getName()).width;
 		prefWidth += XPADDING * 2;
-		setWidth(prefWidth);
 		return this;
 	}
 	
@@ -85,11 +84,8 @@ public class ItemSlot extends Widget {
 	}
 	public Color getTextColor() { return textColor; }
 	
-	@Override public float getPrefWidth() { return getParent() != null && getParent().getWidth() > prefWidth ? getParent().getWidth() : prefWidth; }
+	@Override public float getPrefWidth() { return prefWidth; }
 	@Override public float getPrefHeight() { return HEIGHT; }
-	
-	// @Override public float getWidth() { return prefWidth; }
-	// @Override public float getHeight() { return Item.ICON_SIZE; }
 	
 	@Override public void draw(Batch batch, float parentAlpha) {
 		super.draw(batch, parentAlpha);

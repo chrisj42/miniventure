@@ -5,6 +5,7 @@ import miniventure.game.world.entity.mob.ClientPlayer;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.utils.Align;
 
 public class HotbarTable extends Table {
 	
@@ -13,15 +14,15 @@ public class HotbarTable extends Table {
 	public HotbarTable() {
 		pad(10);
 		// align(Align.bottomRight);
-		defaults().pad(5).grow();
+		defaults().pad(5);
 		
 		slots = new ItemSlot[Hands.HOTBAR_SIZE];
 		for(int i = 0; i < slots.length; i++) {
 			slots[i] = new ItemSlot(false, null);
-			addActor(slots[i]);
+			add(slots[i]);
 		}
 		row();
-		
+		setOrigin(Align.bottomRight);
 		pack();
 	}
 	

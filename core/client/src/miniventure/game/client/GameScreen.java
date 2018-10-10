@@ -22,8 +22,9 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
@@ -33,7 +34,7 @@ public class GameScreen {
 	@NotNull private final LevelViewport levelView;
 	
 	private SpriteBatch batch = GameCore.getBatch();
-	private Stage guiStage;
+	private MenuScreen guiStage;
 	
 	private final OrthographicCamera uiCamera;
 	
@@ -42,29 +43,36 @@ public class GameScreen {
 	
 	public GameScreen() {
 		uiCamera = new OrthographicCamera();
+		HotbarTable hotbar = new HotbarTable();
 		guiStage = new MenuScreen(false, new DiscreteViewport(uiCamera), batch) {
-			HotbarTable hotbar;
+			
 			{
 				setDebugAll(true);
-				hotbar = new HotbarTable();
 				// Container<HotbarTable> box = new Container<>(hotbar);
 				// box.setBackground(new ColorBackground(box, Color.TEAL), false);
 				// box.fill();
 				addMainGroup(hotbar, RelPos.BOTTOM_RIGHT);
 				// Table table = useTable();
 				// table.add(new VisTextButton("Testing")).grow();
-				hotbar.setOrigin(Align.bottomRight);
-				hotbar.setPosition(getWidth()/2, 0);
+				// hotbar.setOrigin(Align.bottomRight);
+				// hotbar.setPosition(getWidth()/2, 0);
 				// hotbar.pack();
+				// hotbar.invalidateHierarchy();
 			}
 			
-			@Override
+			/*@Override
 			public void draw() {
-				hotbar.pack();
-				hotbar.setPosition(getWidth(), 0, Align.bottomRight);
+				// hotbar.pack();
+				// hotbar.setPosition(getWidth(), 0, Align.bottomRight);
 				super.draw();
-			}
+			}*/
 		};
+		guiStage.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y) {
+				hotbar.invalidateHierarchy();
+			}
+		});
 		
 		levelView = new LevelViewport(batch, uiCamera); // uses uiCamera for rendering lighting to the screen.
 		
@@ -142,6 +150,7 @@ public class GameScreen {
 		batch.begin();
 		renderGui(mainPlayer, level);
 		batch.end();
+		guiStage.focus();
 		guiStage.act();
 		guiStage.draw();
 		
