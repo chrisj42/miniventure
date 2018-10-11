@@ -154,6 +154,7 @@ public class InventoryDisplayGroup extends Table {
 					ClientCore.getClient().send(new ItemDropRequest(new ItemStack(item, 1)));
 				}
 			}
+			fillBar.setValue(inventory.getPercentFilled());
 		}
 		
 		
