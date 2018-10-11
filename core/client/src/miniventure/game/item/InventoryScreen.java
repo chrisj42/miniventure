@@ -68,6 +68,7 @@ public class InventoryScreen extends MenuScreen {
 				
 				// because the item could move, we will try to remove it from the hotbar now, to be added back later.
 				invGroup.setHotbarHighlight(item, false);
+				hands.removeItem(item);
 				
 				Item prevItem = hands.replaceItem(hotbarIndex, item);
 				

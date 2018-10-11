@@ -171,7 +171,7 @@ public class InventoryDisplayGroup extends Table {
 		ItemSlot slot = itemSlots.get(idx);
 		slot.setItem(new HandItem())
 			.setCount(1)
-			.setBackground(new ColorBackground(slot, background));
+			.setBackground(new ColorBackground(slot, slotBackgroundColor));
 		invGroup.invalidateHierarchy();
 	}
 	
@@ -189,7 +189,7 @@ public class InventoryDisplayGroup extends Table {
 	void setHotbarHighlight(boolean set) { setHotbarHighlight(itemSlots.get(selectionIndex), set); }
 	private void setHotbarHighlight(ItemSlot slot, boolean set) {
 		if(set && slot.getItem() instanceof HandItem) return; // don't do it
-		slot.setBackground(new ColorBackground(slot, set ? hotbarBackground : background));
+		slot.setBackground(new ColorBackground(slot, set ? hotbarBackground : slotBackgroundColor));
 	}
 	
 	private void moveFocusX(int amt) { moveFocus(true, amt); }
