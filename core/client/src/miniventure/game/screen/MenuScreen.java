@@ -41,18 +41,22 @@ public class MenuScreen extends Stage {
 	
 	protected void setCenterGroup(Group group) { addMainGroup(group, RelPos.CENTER); }
 	protected void addMainGroup(Group group, RelPos anchor) { addMainGroup(group, anchor, anchor); }
-	protected void addMainGroup(Group group, RelPos containerAnchor, RelPos groupAnchor) {
+	protected void addMainGroup(Group group, RelPos containerAnchor, RelPos groupAnchor) { addMainGroup(group, containerAnchor, groupAnchor, 0, 0); }
+	protected void addMainGroup(Group group, RelPos anchor, int offX, int offY) { addMainGroup(group, anchor, anchor, offX, offY); }
+	protected void addMainGroup(Group group, RelPos containerAnchor, RelPos groupAnchor, int offX, int offY) {
 		boolean match = false;
 		for(ActorAnchor anchor: anchoredActors) {
 			if(anchor.mainGroup == group) {
 				match = true;
 				anchor.mainContainerAnchor = containerAnchor;
 				anchor.mainGroupAnchor = groupAnchor;
+				anchor.offX = offX;
+				anchor.offY = offY;
 				break;
 			}
 		}
 		if(!match)
-			anchoredActors.add(new ActorAnchor(group, containerAnchor, groupAnchor));
+			anchoredActors.add(new ActorAnchor(group, containerAnchor, groupAnchor, offX, offY));
 		
 		if(group.getStage() != this)
 			addActor(group);
@@ -145,18 +149,23 @@ public class MenuScreen extends Stage {
 	
 	
 	private class ActorAnchor {
-		private Group mainGroup; // usually going to be the above vGroup or table.
+		private final Group mainGroup; // usually going to be the above vGroup or table.
 		private RelPos mainContainerAnchor;
 		private RelPos mainGroupAnchor;
+		private int offX;
+		private int offY;
 		
-		ActorAnchor(Group mainGroup, RelPos mainContainerAnchor, RelPos mainGroupAnchor) {
+		ActorAnchor(Group mainGroup, RelPos mainContainerAnchor, RelPos mainGroupAnchor) { this(mainGroup, mainContainerAnchor, mainGroupAnchor, 0, 0); }
+		ActorAnchor(Group mainGroup, RelPos mainContainerAnchor, RelPos mainGroupAnchor, int offX, int offY) {
 			this.mainGroup = mainGroup;
 			this.mainContainerAnchor = mainContainerAnchor;
 			this.mainGroupAnchor = mainGroupAnchor;
+			this.offX = offX;
+			this.offY = offY;
 		}
 		
 		void layout() {
-			Vector2 containerPos = mainContainerAnchor.ofRectangle(new Rectangle(0, 0, getWidth(), getHeight()));
+			Vector2 containerPos = mainContainerAnchor.ofRectangle(new Rectangle(offX, offY, getWidth(), getHeight()));
 			mainGroup.setPosition(containerPos.x, containerPos.y, mainGroupAnchor.getGdxAlign());
 		}
 	}
