@@ -20,8 +20,8 @@ public class InventoryScreen extends MenuScreen {
 		super(false);
 		this.hands = hands;
 		
-		invGroup = new InventoryDisplayGroup(hands.getInv(), getHeight() * 4 / 5, true);
-		addMainGroup(invGroup, RelPos.get(invGroup.getAlign()));
+		invGroup = new InventoryDisplayGroup(hands.getInv(), getHeight() * 2 / 3);
+		addMainGroup(invGroup, RelPos.TOP_RIGHT, 0, -10);
 		
 		invGroup.addListener(new InputListener() {
 			@Override

@@ -1,28 +1,30 @@
 package miniventure.game.item;
 
 import miniventure.game.client.ClientCore;
+import miniventure.game.screen.util.ColorBackground;
 import miniventure.game.world.entity.mob.ClientPlayer;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.utils.Align;
 
 public class HotbarTable extends Table {
 	
 	private final ItemSlot[] slots;
+	private final ProgressBar fillBar;
 	
-	public HotbarTable() {
-		pad(10);
-		// align(Align.bottomRight);
+	public HotbarTable(ProgressBar fillBar) {
+		this.fillBar = fillBar;
+		pad(5);
 		defaults().pad(5);
 		
 		slots = new ItemSlot[Hands.HOTBAR_SIZE];
 		for(int i = 0; i < slots.length; i++) {
-			slots[i] = new ItemSlot(false, null);
+			slots[i] = new ItemSlot(false, null, InventoryDisplayGroup.slotBackgroundColor);
 			add(slots[i]);
 		}
 		row();
-		setOrigin(Align.bottomRight);
+		background(new ColorBackground(this, InventoryDisplayGroup.background));
 		pack();
 	}
 	
@@ -43,14 +45,28 @@ public class HotbarTable extends Table {
 				diff = true;
 			}
 			if(!item.equals(slots[i].getItem())) diff = true;
+			boolean diffCount = count != slots[i].getCount();
 			slots[i].setItem(item);
 			slots[i].setCount(count);
 			slots[i].setSelected(i == selection);
 			if(diff) invalidateHierarchy();
+			else if(diffCount) invalidate();
 		}
 		
 		super.draw(batch, parentAlpha);
 		
-		
+		if(!filled) invalidate();
+	}
+	
+	private boolean filled = false;
+	@Override
+	public void layout() {
+		super.layout();
+		filled = false;
+		if(ClientCore.getWorld() == null) return;
+		ClientPlayer player = ClientCore.getWorld().getMainPlayer();
+		if(player == null) return;
+		fillBar.setValue(player.getInventory().getPercentFilled());
+		filled = true;
 	}
 }

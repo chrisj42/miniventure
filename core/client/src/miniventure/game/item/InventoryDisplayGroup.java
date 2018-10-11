@@ -14,16 +14,14 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.badlogic.gdx.scenes.scene2d.ui.Container;
-import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
-import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Array;
-import com.kotcrab.vis.ui.layout.VerticalFlowGroup;
+import com.kotcrab.vis.ui.widget.VisLabel;
 
 import org.jetbrains.annotations.NotNull;
 
-public class InventoryDisplayGroup extends HorizontalGroup {
+public class InventoryDisplayGroup extends Table {
 	
 	/*
 		This will be used both for container screens and inventory screens. It should ideally take only half the screen horizontally at most, so that a second inventory screen can be placed next to it, for transfers between chests.
@@ -40,46 +38,33 @@ public class InventoryDisplayGroup extends HorizontalGroup {
 		Actually... should I make a class that is specifically one column? I actually like that idea... it won't have a background, just the background for the individual items, and empty cells.
 	 */
 	
-	private static final Color background = Color.TEAL;
+	public static final Color background = Color.TEAL;
 	private static final Color hotbarBackground = Color.TEAL.cpy().lerp(Color.YELLOW, .25f);
-	private static final Color slotBackgroundColor = Color.TEAL.cpy().lerp(Color.WHITE, .1f);
+	public static final Color slotBackgroundColor = Color.TEAL.cpy().lerp(Color.WHITE, .1f);
 	
 	private static final float MIN_SPACING = 5;
 	
 	private final Inventory inventory;
 	private final Array<ItemSlot> itemSlots;
 	private final ProgressBar fillBar;
-	private final VerticalFlowGroup invGroup;
+	private final Table invGroup;
+	private final PageCounter pageCounter;
 	
 	private int selectionIndex = 0;
 	private int cellsPerColumn, numColumns;
 	
-	public InventoryDisplayGroup(Inventory inventory, float maxHeight, boolean fillBarLeft) {
-		// super(5);
-		
-		align(Align.right);
-		rowCenter();
-		
+	public InventoryDisplayGroup(final Inventory inventory, final float maxHeight) {
 		this.inventory = inventory;
 		
-		invGroup = new VerticalFlowGroup(15) {
-			@Override
-			public void draw(Batch batch, float parentAlpha) {
-				float x = getX();
-				float y = getY();
-				float width = getWidth();
-				float height = getHeight();
-				if(getParent() instanceof Container) {
-					Container c = (Container) getParent();
-					x -= c.getPadLeft();
-					width += c.getPadX();
-					y -= c.getPadBottom();
-					height += c.getPadY();
-				}
-				MyUtils.fillRect(x, y, width, height, background, parentAlpha, batch);
-				super.draw(batch, parentAlpha);
-			}
-			
+		defaults().space(5f).center();
+		background(new ColorBackground(this, background));
+		
+		// fill bar
+		fillBar = new ProgressBar(0, 1, .01f, false, GameCore.getSkin());
+		fillBar.setValue(inventory.getPercentFilled());
+		add(fillBar).growX().row();
+		
+		invGroup = new Table() {
 			// highlight selected item
 			@Override
 			protected void drawChildren(Batch batch, float parentAlpha) {
@@ -87,23 +72,22 @@ public class InventoryDisplayGroup extends HorizontalGroup {
 				super.drawChildren(batch, parentAlpha);
 				itemSlots.get(selectionIndex).setSelected(false);
 			}
-			
-			@Override
-			public void layout() {
-				super.layout();
-				for(ItemSlot slot: itemSlots)
-					slot.setWidth(invGroup.getPrefWidth());
-			}
 		};
+		invGroup.defaults().growX();
+		add(invGroup).row();
+		
+		pageCounter = new PageCounter();
+		add(pageCounter).row();
+		
+		float heightAvailable = maxHeight - getRowHeight(0) - getRowHeight(2);
 		
 		float cellHeight = ItemSlot.HEIGHT + MIN_SPACING;
-		int maxPerColumn = Math.max(1, (int) (maxHeight / cellHeight));
+		int invSpaces = Math.max(1, (int) (heightAvailable / cellHeight));
 		
 		Item[] allItems = inventory.getUniqueItems();
-		int initialSlotCount = Math.max(allItems.length, maxPerColumn);
 		
 		itemSlots = new Array<>(ItemSlot.class);
-		for(int i = 0; i < initialSlotCount; i++) {
+		for(int i = 0; i < invSpaces; i++) {
 			ItemSlot slot;
 			if(i >= allItems.length)
 				slot = new ItemSlot(true, new HandItem(), slotBackgroundColor);
@@ -118,45 +102,22 @@ public class InventoryDisplayGroup extends HorizontalGroup {
 			});
 			
 			itemSlots.add(slot);
-			invGroup.addActor(slot);
+			invGroup.add(slot).row();
 		}
 		
 		// configure the height to be something that equalizes the slots in as few columns as possible.
-		numColumns = Math.max(1, MathUtils.ceil(this.itemSlots.size / (float)maxPerColumn));
+		numColumns = Math.max(1, MathUtils.ceil(this.itemSlots.size / (float)invSpaces));
 		cellsPerColumn = Math.max(1, MathUtils.ceil(this.itemSlots.size / (float)numColumns));
 		
 		float height = Math.max(MIN_SPACING, cellHeight * cellsPerColumn - MIN_SPACING);
-		invGroup.setHeight(height);
 		
 		if(this.itemSlots.size > 1) {
 			// need to adjust spacing to make sure there isn't a large space at the bottom
-			float spaceTaken = Math.min(this.itemSlots.size, maxPerColumn) * ItemSlot.HEIGHT;
+			float spaceTaken = Math.min(this.itemSlots.size, invSpaces) * ItemSlot.HEIGHT;
 			float emptySpace = height - spaceTaken;
-			invGroup.setSpacing(emptySpace / (this.itemSlots.size - 1));
+			for(int i = 1; i < invGroup.getRows(); i++)
+				invGroup.getCells().get(i).spaceTop(emptySpace / (this.itemSlots.size - 1));
 		}
-		
-		// fill bar
-		
-		fillBar = new ProgressBar(0, 1, .01f, true, GameCore.getSkin()) {
-			@Override
-			public float getPrefHeight() {
-				return invGroup.getHeight();
-			}
-		};
-		
-		float percentUsed = inventory.getSpaceLeft() / (float)inventory.getSlots();
-		fillBar.setValue(1 - percentUsed);
-		
-		// give padding to the inventory list
-		Container<VerticalFlowGroup> inventoryContainer = new Container<>(invGroup);
-		inventoryContainer.fill().pad(10);
-		
-		if(fillBarLeft)
-			addActor(fillBar);
-		addActor(inventoryContainer);
-		if(!fillBarLeft)
-			addActor(fillBar);
-		
 		
 		addListener(new InputListener() {
 			@Override
@@ -169,7 +130,7 @@ public class InventoryDisplayGroup extends HorizontalGroup {
 				return false;
 			}
 		});
-		
+		pack();
 	}
 	
 	@Override
@@ -205,12 +166,6 @@ public class InventoryDisplayGroup extends HorizontalGroup {
 		if(ClientCore.input.pressingKey(Keys.DOWN))
 			moveFocusY(1);
 	}
-	
-	// public void onUpdate() {}
-	
-	/*private void setSelection(int index) {
-		selectionIndex = index;
-	}*/
 	
 	private void resetSlot(int idx) {
 		ItemSlot slot = itemSlots.get(idx);
@@ -256,5 +211,14 @@ public class InventoryDisplayGroup extends HorizontalGroup {
 	public void moveFocus(int index) {
 		index %= itemSlots.size;
 		selectionIndex = index;
+	}
+	
+	private class PageCounter extends Table {
+		
+		public PageCounter() {
+			VisLabel page = new VisLabel("1 / 2");
+			add(page).center();
+		}
+		
 	}
 }

@@ -29,9 +29,10 @@ public class Inventory {
 		spaceTaken = 0;
 	}
 	
-	public int getSlots() { return size; }
-	public int getSpaceLeft() { return getSlots() - spaceTaken; }
+	public int getSpace() { return size; }
+	public int getSpaceLeft() { return getSpace() - spaceTaken; }
 	public int getSlotsTaken() { return uniqueItems.size(); }
+	public float getPercentFilled() { return spaceTaken / (float) getSpace(); }
 	
 	public int getCount(Item item) { return itemCounter.get(item); }
 	public boolean hasItem(Item item) { return hasItem(item, 1); }

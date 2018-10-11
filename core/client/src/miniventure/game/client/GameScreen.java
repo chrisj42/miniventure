@@ -22,9 +22,9 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.ui.Container;
+import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
@@ -43,36 +43,29 @@ public class GameScreen {
 	
 	public GameScreen() {
 		uiCamera = new OrthographicCamera();
-		HotbarTable hotbar = new HotbarTable();
 		guiStage = new MenuScreen(false, new DiscreteViewport(uiCamera), batch) {
-			
 			{
-				setDebugAll(true);
-				// Container<HotbarTable> box = new Container<>(hotbar);
-				// box.setBackground(new ColorBackground(box, Color.TEAL), false);
-				// box.fill();
+				ProgressBar fillBar = new ProgressBar(0, 1, .01f, true, GameCore.getSkin()) {
+					@Override
+					public float getPrefHeight() {
+						return uiCamera.viewportHeight * 2 / 5;
+					}
+					
+					/*@Override
+					public float getPrefWidth() {
+						return 20f;
+					}*/
+				};
+				fillBar.pack();
+				Container<ProgressBar> box = new Container<>(fillBar);
+				box.fill().prefWidth(20f);
+				box.pack();
+				addMainGroup(box, RelPos.RIGHT);
+				
+				HotbarTable hotbar = new HotbarTable(fillBar);
 				addMainGroup(hotbar, RelPos.BOTTOM_RIGHT);
-				// Table table = useTable();
-				// table.add(new VisTextButton("Testing")).grow();
-				// hotbar.setOrigin(Align.bottomRight);
-				// hotbar.setPosition(getWidth()/2, 0);
-				// hotbar.pack();
-				// hotbar.invalidateHierarchy();
 			}
-			
-			/*@Override
-			public void draw() {
-				// hotbar.pack();
-				// hotbar.setPosition(getWidth(), 0, Align.bottomRight);
-				super.draw();
-			}*/
 		};
-		guiStage.addListener(new ClickListener() {
-			@Override
-			public void clicked(InputEvent event, float x, float y) {
-				hotbar.invalidateHierarchy();
-			}
-		});
 		
 		levelView = new LevelViewport(batch, uiCamera); // uses uiCamera for rendering lighting to the screen.
 		
