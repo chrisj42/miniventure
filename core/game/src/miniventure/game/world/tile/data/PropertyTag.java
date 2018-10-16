@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import miniventure.game.util.function.MonoValueFunction;
+import miniventure.game.util.function.MapFunction;
 import miniventure.game.world.tile.SwimAnimation;
 
 public class PropertyTag<T> extends DataTag<T> {
@@ -59,7 +59,7 @@ public class PropertyTag<T> extends DataTag<T> {
 	public int ordinal() { return ordinal; }
 	
 	
-	PropertyTag(MonoValueFunction<T, String> valueWriter, MonoValueFunction<String, T> valueParser) {
+	PropertyTag(MapFunction<T, String> valueWriter, MapFunction<String, T> valueParser) {
 		super(valueWriter, valueParser);
 		ordinal = nextOrdinal();
 		values[ordinal] = this;

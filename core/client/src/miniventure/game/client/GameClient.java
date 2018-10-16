@@ -15,7 +15,7 @@ import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.ProgressLogger;
-import miniventure.game.util.function.MonoVoidFunction;
+import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.ClientLevel;
@@ -270,8 +270,8 @@ public class GameClient implements GameProtocol {
 	public void send(Object obj) { client.sendTCP(obj); }
 	public void addListener(Listener listener) { client.addListener(listener); }
 	
-	public boolean connectToServer(@NotNull ProgressLogger logger, String host, MonoVoidFunction<Boolean> callback) { return connectToServer(logger, host, GameProtocol.PORT, callback); }
-	public boolean connectToServer(@NotNull ProgressLogger logger, String host, int port, MonoVoidFunction<Boolean> callback) {
+	public boolean connectToServer(@NotNull ProgressLogger logger, String host, ValueFunction<Boolean> callback) { return connectToServer(logger, host, GameProtocol.PORT, callback); }
+	public boolean connectToServer(@NotNull ProgressLogger logger, String host, int port, ValueFunction<Boolean> callback) {
 		logger.pushMessage("connecting to server at "+host+":"+port+"...");
 		
 		try {

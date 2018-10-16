@@ -10,7 +10,7 @@ import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.RespawnScreen;
-import miniventure.game.util.function.MonoVoidFunction;
+import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.ClientLevel;
@@ -118,7 +118,7 @@ public class ClientWorld extends WorldManager {
 		
 		new Thread(() -> {
 			// with a server running, attempt to connect the client. If successful, it will set the screen to null.
-			MonoVoidFunction<Boolean> connect = serverSuccess -> {
+			ValueFunction<Boolean> connect = serverSuccess -> {
 				if(!serverSuccess)
 					ClientCore.setScreen(new ErrorScreen("Error starting local server. The port may already be in use.<br>Press 'reconnect' to attempt to connect to the existing server."));
 				else

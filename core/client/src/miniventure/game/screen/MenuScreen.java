@@ -5,8 +5,8 @@ import java.util.LinkedList;
 import miniventure.game.GameCore;
 import miniventure.game.screen.util.DiscreteViewport;
 import miniventure.game.screen.util.ParentScreen;
-import miniventure.game.util.Action;
 import miniventure.game.util.RelPos;
+import miniventure.game.util.function.Action;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;

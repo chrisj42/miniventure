@@ -3,8 +3,8 @@ package miniventure.game.util;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 
-import miniventure.game.util.function.MonoValueFunction;
-import miniventure.game.util.function.MonoVoidFunction;
+import miniventure.game.util.function.MapFunction;
+import miniventure.game.util.function.ValueFunction;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -29,7 +29,7 @@ public final class ArrayUtils {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <PT, RT> RT[] mapArray(PT[] startValues, Class<RT> returnType, MonoValueFunction<PT, RT> mapper) {
+	public static <PT, RT> RT[] mapArray(PT[] startValues, Class<RT> returnType, MapFunction<PT, RT> mapper) {
 		RT[] endValues = (RT[]) java.lang.reflect.Array.newInstance(returnType, startValues.length);
 		
 		for(int i = 0; i < startValues.length; i++)
@@ -38,7 +38,7 @@ public final class ArrayUtils {
 		return endValues;
 	}
 	
-	public static <E> void forEach(E[] array, MonoVoidFunction<E> action) {
+	public static <E> void forEach(E[] array, ValueFunction<E> action) {
 		for(E e: array)
 			action.act(e);
 	}
@@ -73,7 +73,7 @@ public final class ArrayUtils {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <T> T[] fetchArray(Class<T> clazz, int length, MonoValueFunction<Integer, T> valueFetcher) {
+	public static <T> T[] fetchArray(Class<T> clazz, int length, MapFunction<Integer, T> valueFetcher) {
 		T[] ar = (T[]) Array.newInstance(clazz, length);
 		for(int i = 0; i < ar.length; i++)
 			ar[i] = valueFetcher.get(i);
@@ -107,7 +107,7 @@ public final class ArrayUtils {
 		return objAr;
 	}
 	
-	public static String deepToString(Object obj, MonoValueFunction<String[], String> stringArrayJoiner, MonoValueFunction<Object, String> stringifier) {
+	public static String deepToString(Object obj, MapFunction<String[], String> stringArrayJoiner, MapFunction<Object, String> stringifier) {
 		if(obj == null)
 			return "null";
 		

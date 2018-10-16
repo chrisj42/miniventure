@@ -21,7 +21,7 @@ import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.util.BackgroundInheritor;
 import miniventure.game.screen.util.BackgroundProvider;
 import miniventure.game.util.MyUtils;
-import miniventure.game.util.function.MonoVoidFunction;
+import miniventure.game.util.function.ValueFunction;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -51,7 +51,7 @@ public class ClientCore extends ApplicationAdapter {
 	
 	public static boolean PLAY_MUSIC = false;
 	
-	public static final MonoVoidFunction<Throwable> exceptionNotifier = throwable -> {
+	public static final ValueFunction<Throwable> exceptionNotifier = throwable -> {
 		StringWriter string = new StringWriter();
 		PrintWriter printer = new PrintWriter(string);
 		throwable.printStackTrace(printer);

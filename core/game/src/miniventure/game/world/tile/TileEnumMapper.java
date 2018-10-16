@@ -11,9 +11,9 @@ public class TileEnumMapper<T> {
 	
 	private final EnumMap<TileTypeEnum, T> overrides = new EnumMap<>(TileTypeEnum.class);
 	
-	private final MapFunction<T> mapper;
+	private final MapFunction<T, T> mapper;
 	
-	public TileEnumMapper(@NotNull MapFunction<T> mapper) {
+	public TileEnumMapper(@NotNull MapFunction<T, T> mapper) {
 		this.mapper = mapper;
 	}
 	

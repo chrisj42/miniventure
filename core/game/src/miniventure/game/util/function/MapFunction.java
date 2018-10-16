@@ -1,7 +1,6 @@
 package miniventure.game.util.function;
 
-public interface MapFunction<T> {
-	
-	T get(T obj);
-	
+@FunctionalInterface
+public interface MapFunction<PT, RT> {
+	RT get(PT obj);
 }

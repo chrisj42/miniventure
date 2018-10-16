@@ -11,7 +11,7 @@ import java.awt.event.ContainerEvent;
 import java.awt.event.ContainerListener;
 import java.util.Objects;
 
-import miniventure.game.util.Action;
+import miniventure.game.util.function.Action;
 import miniventure.game.world.levelgen.GroupNoiseMapper;
 import miniventure.game.world.levelgen.NamedNoiseFunction;
 import miniventure.game.world.levelgen.NoiseMapper;

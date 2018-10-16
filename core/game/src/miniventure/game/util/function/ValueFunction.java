@@ -1,6 +1,6 @@
 package miniventure.game.util.function;
 
 @FunctionalInterface
-public interface ValueFunction<RT> {
-	RT get();
+public interface ValueFunction<PT> {
+	void act(PT obj);
 }

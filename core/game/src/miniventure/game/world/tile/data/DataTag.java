@@ -5,8 +5,8 @@ import java.lang.reflect.InvocationTargetException;
 
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
-import miniventure.game.util.function.BiValueFunction;
-import miniventure.game.util.function.MonoValueFunction;
+import miniventure.game.util.function.FetchBiFunction;
+import miniventure.game.util.function.MapFunction;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -30,10 +30,10 @@ public abstract class DataTag<T> implements Comparable<DataTag<?>> {
 	/* --- INSTANCE DEFINITION --- */
 	
 	
-	private final MonoValueFunction<T, String> valueWriter;
-	private final MonoValueFunction<String, T> valueParser;
+	private final MapFunction<T, String> valueWriter;
+	private final MapFunction<String, T> valueParser;
 	
-	DataTag(MonoValueFunction<T, String> valueWriter, MonoValueFunction<String, T> valueParser) {
+	DataTag(MapFunction<T, String> valueWriter, MapFunction<String, T> valueParser) {
 		this.valueWriter = valueWriter;
 		this.valueParser = valueParser;
 	}
@@ -70,27 +70,27 @@ public abstract class DataTag<T> implements Comparable<DataTag<?>> {
 	}
 	
 	@FunctionalInterface
-	interface ClassParser<T> extends BiValueFunction<String, Class<T>, T> {}
+	interface ClassParser<T> extends FetchBiFunction<String, Class<T>, T> {}
 	
-	private static <T> MonoValueFunction<T, String> getValueWriter(Class<T> valueClass, MonoValueFunction<Object, String> baseParser) {
+	private static <T> MapFunction<T, String> getValueWriter(Class<T> valueClass, MapFunction<Object, String> baseParser) {
 		if(valueClass.isArray())
 			return ar -> ArrayUtils.deepToString(ar, MyUtils::encodeStringArray, baseParser);
-		return (MonoValueFunction<T, String>) baseParser;
+		return (MapFunction<T, String>) baseParser;
 	}
 	
-	private static <T, B> MonoValueFunction<String, T> getValueParser(Class<T> valueClass, ClassParser<B> baseValueParser) {
+	private static <T, B> MapFunction<String, T> getValueParser(Class<T> valueClass, ClassParser<B> baseValueParser) {
 		if(valueClass.isArray())
-			return (MonoValueFunction<String, T>) getArrayParser(valueClass.getComponentType(), baseValueParser);
+			return (MapFunction<String, T>) getArrayParser(valueClass.getComponentType(), baseValueParser);
 		// T == B
 		return data -> ((ClassParser<T>)baseValueParser).get(data, valueClass);
 	}
 	
-	private static <C, B> MonoValueFunction<String, B> getArrayParser(Class<C> componentType, ClassParser<B> baseValueParser) {
-		MonoValueFunction<String, C> componentParser = getValueParser(componentType, baseValueParser);
+	private static <C, B> MapFunction<String, B> getArrayParser(Class<C> componentType, ClassParser<B> baseValueParser) {
+		MapFunction<String, C> componentParser = getValueParser(componentType, baseValueParser);
 		return data -> parseArray(componentType, componentParser, data);
 	}
 	
-	private static <C, A> A parseArray(Class<C> componentType, MonoValueFunction<String, C> componentParser, String data) {
+	private static <C, A> A parseArray(Class<C> componentType, MapFunction<String, C> componentParser, String data) {
 		String[] dataArray = MyUtils.parseLayeredString(data);
 		A ar = (A) Array.newInstance(componentType, dataArray.length);
 		for(int i = 0; i < dataArray.length; i++)

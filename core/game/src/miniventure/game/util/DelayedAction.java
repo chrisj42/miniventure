@@ -2,6 +2,8 @@ package miniventure.game.util;
 
 import javax.swing.Timer;
 
+import miniventure.game.util.function.Action;
+
 public class DelayedAction {
 	
 	private Timer timer;

@@ -4,8 +4,8 @@ import java.util.EnumSet;
 import java.util.HashSet;
 
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.function.FetchFunction;
 import miniventure.game.util.function.ValueFunction;
-import miniventure.game.util.function.MonoVoidFunction;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 import miniventure.game.world.tile.UpdateManager.UpdateAction;
 
@@ -54,7 +54,7 @@ class SpreadUpdateAction implements UpdateAction {
 	}
 	
 	@Override
-	public void update(@NotNull Tile tile, ValueFunction<String> dataCacheFetcher, MonoVoidFunction<String> dataCacheSetter) {
+	public void update(@NotNull Tile tile, FetchFunction<String> dataCacheFetcher, ValueFunction<String> dataCacheSetter) {
 		if(MathUtils.random() >= spreadChance) return; // must be less to execute; a chance of 1 will always execute.
 		
 		HashSet<Tile> around = tile.getAdjacentTiles(false);
