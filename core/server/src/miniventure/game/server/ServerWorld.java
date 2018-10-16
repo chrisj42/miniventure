@@ -9,6 +9,7 @@ import miniventure.game.GameProtocol.EntityAddition;
 import miniventure.game.GameProtocol.EntityRemoval;
 import miniventure.game.GameProtocol.WorldData;
 import miniventure.game.ProgressPrinter;
+import miniventure.game.item.TileItem;
 import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolItem.Material;
 import miniventure.game.item.ToolType;
@@ -24,6 +25,7 @@ import miniventure.game.world.entity.mob.ServerPlayer;
 import miniventure.game.world.levelgen.LevelGenerator;
 import miniventure.game.world.tile.ServerTileType;
 import miniventure.game.world.tile.TileEnumMapper;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -182,6 +184,8 @@ public class ServerWorld extends WorldManager {
 		
 		if(GameCore.debug)
 			player.getInventory().addItem(new ToolItem(ToolType.Shovel, Material.Gem));
+		for(int i = 0; i < 10; i++)
+			player.getInventory().addItem(TileItem.get(TileTypeEnum.PATH_STONE));
 		return player;
 	}
 	

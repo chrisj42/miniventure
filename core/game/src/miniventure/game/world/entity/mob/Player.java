@@ -74,8 +74,8 @@ public interface Player extends Mob {
 	default Rectangle getInteractionRect() {
 		Rectangle bounds = getBounds();
 		Vector2 dirVector = getDirection().getVector();
-		bounds.x += dirVector.x;
-		bounds.y += dirVector.y;
+		bounds.x += dirVector.x*9/10;
+		bounds.y += dirVector.y*9/10;
 		return bounds;
 	}
 	
