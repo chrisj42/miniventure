@@ -4,7 +4,7 @@
         <key>fileFormatVersion</key>
         <int>4</int>
         <key>texturePackerVersion</key>
-        <string>4.8.1</string>
+        <string>4.9.0</string>
         <key>autoSDSettings</key>
         <array>
             <struct type="AutoSDSettings">
@@ -259,6 +259,26 @@
             <key type="filename">tile-sprites/hole/c45.png</key>
             <key type="filename">tile-sprites/hole/c46.png</key>
             <key type="filename">tile-sprites/hole/swim.png</key>
+            <key type="filename">tile-sprites/path_stone/c00.png</key>
+            <key type="filename">tile-sprites/path_stone/o00.png</key>
+            <key type="filename">tile-sprites/path_stone/o01.png</key>
+            <key type="filename">tile-sprites/path_stone/o02.png</key>
+            <key type="filename">tile-sprites/path_stone/o03.png</key>
+            <key type="filename">tile-sprites/path_stone/o04.png</key>
+            <key type="filename">tile-sprites/path_stone/o05.png</key>
+            <key type="filename">tile-sprites/path_stone/o06.png</key>
+            <key type="filename">tile-sprites/path_stone/o07.png</key>
+            <key type="filename">tile-sprites/path_stone/o08.png</key>
+            <key type="filename">tile-sprites/path_stone/o09.png</key>
+            <key type="filename">tile-sprites/path_stone/o10.png</key>
+            <key type="filename">tile-sprites/path_stone/o11.png</key>
+            <key type="filename">tile-sprites/path_stone/o12.png</key>
+            <key type="filename">tile-sprites/path_stone/o13.png</key>
+            <key type="filename">tile-sprites/path_stone/o14.png</key>
+            <key type="filename">tile-sprites/path_stone/o15.png</key>
+            <key type="filename">tile-sprites/path_stone/o16.png</key>
+            <key type="filename">tile-sprites/path_stone/o17.png</key>
+            <key type="filename">tile-sprites/path_stone/o18.png</key>
             <key type="filename">tile-sprites/sand/c00.png</key>
             <key type="filename">tile-sprites/sand/o00.png</key>
             <key type="filename">tile-sprites/sand/o01.png</key>
@@ -300,6 +320,25 @@
             <key type="filename">tile-sprites/snow/o17.png</key>
             <key type="filename">tile-sprites/snow/o18.png</key>
             <key type="filename">tile-sprites/stone/c00.png</key>
+            <key type="filename">tile-sprites/stone/o00.png</key>
+            <key type="filename">tile-sprites/stone/o01.png</key>
+            <key type="filename">tile-sprites/stone/o02.png</key>
+            <key type="filename">tile-sprites/stone/o03.png</key>
+            <key type="filename">tile-sprites/stone/o04.png</key>
+            <key type="filename">tile-sprites/stone/o05.png</key>
+            <key type="filename">tile-sprites/stone/o06.png</key>
+            <key type="filename">tile-sprites/stone/o07.png</key>
+            <key type="filename">tile-sprites/stone/o08.png</key>
+            <key type="filename">tile-sprites/stone/o09.png</key>
+            <key type="filename">tile-sprites/stone/o10.png</key>
+            <key type="filename">tile-sprites/stone/o11.png</key>
+            <key type="filename">tile-sprites/stone/o12.png</key>
+            <key type="filename">tile-sprites/stone/o13.png</key>
+            <key type="filename">tile-sprites/stone/o14.png</key>
+            <key type="filename">tile-sprites/stone/o15.png</key>
+            <key type="filename">tile-sprites/stone/o16.png</key>
+            <key type="filename">tile-sprites/stone/o17.png</key>
+            <key type="filename">tile-sprites/stone/o18.png</key>
             <key type="filename">tile-sprites/stone_floor/c00.png</key>
             <key type="filename">tile-sprites/stone_floor/c01.png</key>
             <key type="filename">tile-sprites/stone_floor/c02.png</key>

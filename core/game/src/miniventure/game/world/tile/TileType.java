@@ -70,6 +70,14 @@ public class TileType {
 			)
 		)),
 		
+		PATH_STONE(Color.GRAY, type -> new TileType(type, true,
+			new DestructionManager(type, new RequiredTool(ToolType.Pickaxe)),
+			
+			new TileTypeRenderer(type, true,
+				new OverlapManager(type, RenderStyle.SINGLE_FRAME)
+			)
+		)),
+		
 		SNOW(Color.WHITE, type -> new TileType(type, true,
 			new DestructionManager(type, new RequiredTool(ToolType.Shovel)),
 			
@@ -98,7 +106,9 @@ public class TileType {
 				new PreferredTool(ToolType.Pickaxe, 5)
 			),
 			
-			new TileTypeRenderer(type, true)
+			new TileTypeRenderer(type, true, 
+				new OverlapManager(type, RenderStyle.SINGLE_FRAME)
+			)
 		)),
 		
 		STONE_FLOOR(Color.LIGHT_GRAY, type -> new FloorTile(type, ToolType.Pickaxe)),

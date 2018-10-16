@@ -4,7 +4,7 @@
         <key>fileFormatVersion</key>
         <int>4</int>
         <key>texturePackerVersion</key>
-        <string>4.8.1</string>
+        <string>4.9.0</string>
         <key>autoSDSettings</key>
         <array>
             <struct type="AutoSDSettings">
@@ -332,16 +332,8 @@
             <key type="filename">entity-sprites/pig/idle-up_1.png</key>
             <key type="filename">entity-sprites/pig/walk-down_1.png</key>
             <key type="filename">entity-sprites/pig/walk-down_2.png</key>
-            <key type="filename">entity-sprites/pig/walk-down_3.png</key>
-            <key type="filename">entity-sprites/pig/walk-down_4.png</key>
-            <key type="filename">entity-sprites/pig/walk-down_5.png</key>
-            <key type="filename">entity-sprites/pig/walk-down_6.png</key>
             <key type="filename">entity-sprites/pig/walk-up_1.png</key>
             <key type="filename">entity-sprites/pig/walk-up_2.png</key>
-            <key type="filename">entity-sprites/pig/walk-up_3.png</key>
-            <key type="filename">entity-sprites/pig/walk-up_4.png</key>
-            <key type="filename">entity-sprites/pig/walk-up_5.png</key>
-            <key type="filename">entity-sprites/pig/walk-up_6.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -358,16 +350,8 @@
             <key type="filename">entity-sprites/pig/idle-right_1.png</key>
             <key type="filename">entity-sprites/pig/walk-left_1.png</key>
             <key type="filename">entity-sprites/pig/walk-left_2.png</key>
-            <key type="filename">entity-sprites/pig/walk-left_3.png</key>
-            <key type="filename">entity-sprites/pig/walk-left_4.png</key>
-            <key type="filename">entity-sprites/pig/walk-left_5.png</key>
-            <key type="filename">entity-sprites/pig/walk-left_6.png</key>
             <key type="filename">entity-sprites/pig/walk-right_1.png</key>
             <key type="filename">entity-sprites/pig/walk-right_2.png</key>
-            <key type="filename">entity-sprites/pig/walk-right_3.png</key>
-            <key type="filename">entity-sprites/pig/walk-right_4.png</key>
-            <key type="filename">entity-sprites/pig/walk-right_5.png</key>
-            <key type="filename">entity-sprites/pig/walk-right_6.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>

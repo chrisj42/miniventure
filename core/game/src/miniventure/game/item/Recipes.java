@@ -62,6 +62,10 @@ public class Recipes {
 		
 		new Recipe(TileItem.get(TileTypeEnum.STONE_FLOOR),
 			new ItemStack(TileItem.get(TileTypeEnum.STONE), 1)
+		),
+		
+		new Recipe(new ItemStack(TileItem.get(TileTypeEnum.PATH_STONE), 2),
+			new ItemStack(TileItem.get(TileTypeEnum.STONE), 1)
 		)
 	};
 }
