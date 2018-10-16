@@ -115,11 +115,24 @@ public abstract class Entity implements WorldObject {
 		return moved;
 	}
 	
-	protected float moveAxis(@NotNull Level level, boolean xaxis, float amt, float other) {
+	/// moves the entity along an axis, given there are no collisions. calls touch methods during move.
+	private float moveAxis(@NotNull Level level, boolean xaxis, float amt, float other) {
 		if(amt == 0) return 0;
 		Rectangle oldRect = getBounds();
 		oldRect.setPosition(x+(xaxis?0:other), y+(xaxis?other:0));
 		Rectangle newRect = new Rectangle(oldRect.x+(xaxis?amt:0), oldRect.y+(xaxis?0:amt), oldRect.width, oldRect.height);
+		
+		if(checkMove(level, oldRect, newRect, true))
+			return amt;
+		else
+			return 0;
+	}
+	/// public method to check if an entity can be moved in a given fashion. Does not call touch methods.
+	public static boolean checkMove(@NotNull Entity entity, @NotNull Level level, Rectangle oldRect, Rectangle newRect) {
+		return entity.checkMove(level, oldRect, newRect, false);
+	}
+	
+	private boolean checkMove(@NotNull Level level, Rectangle oldRect, Rectangle newRect, boolean interact) {
 		
 		// check and see if the entity can go to the new coordinates.
 		/*
@@ -143,7 +156,8 @@ public abstract class Entity implements WorldObject {
 		
 		boolean canMove = true;
 		for(Tile tile: newTiles) {
-			touchTile(tile);
+			if(interact)
+				touchTile(tile);
 			canMove = canMove && (!canMoveCurrent || tile.isPermeableBy(this));
 		}
 		
@@ -165,22 +179,23 @@ public abstract class Entity implements WorldObject {
 				canMove = false;
 		}
 		
-		if(!canMove) return 0; // don't bother interacting with entities if tiles prevent movement.
+		if(!canMove) return false; // don't bother interacting with entities if tiles prevent movement.
 		
 		// get and touch entities, and check for blockage
 		
 		Array<Entity> newEntities = level.getOverlappingEntities(newRect);
 		newEntities.removeAll(level.getOverlappingEntities(oldRect), true); // because the "old rect" entities are never added in the first place, we don't need to worry about this entity being included in this list, and accidentally interacting with itself.
 		for(Entity entity: newEntities) {
-			touchEntity(entity);
+			if(interact)
+				touchEntity(entity);
 			canMove = canMove && entity.isPermeableBy(this);
 		}
 		
-		if(!canMove) return 0;
+		if(!canMove) return false;
 		
 		// the entity can move.
 		
-		return amt;
+		return true;
 	}
 	
 	abstract void touchTile(Tile tile);

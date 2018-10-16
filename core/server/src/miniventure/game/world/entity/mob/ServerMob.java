@@ -108,12 +108,10 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 	@Override
 	public Direction getDirection() { return dir; }
 	protected void setDirection(@NotNull Direction dir) {
-		boolean diff = this.dir != dir;
-		this.dir = dir;
-		animator.setDirection(dir);
-		
-		if(diff)
+		if(animator.setDirection(dir)) {
+			this.dir = dir;
 			ServerCore.getServer().broadcast(new MobUpdate(getTag(), dir), this);
+		}
 	}
 	
 	@Override

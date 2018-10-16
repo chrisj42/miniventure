@@ -143,8 +143,8 @@ public class ClientPlayer extends ClientEntity implements Player {
 			
 		Direction newDir = Direction.getDirection(inputDir.x, inputDir.y);
 		if(newDir != null) {
-			dir = newDir;
-			animator.setDirection(dir);
+			if(animator.setDirection(newDir))
+				dir = newDir;
 		}
 		
 		Vector2 moveDist = inputDir.cpy().scl(moveSpeed*GameCore.getDeltaTime());

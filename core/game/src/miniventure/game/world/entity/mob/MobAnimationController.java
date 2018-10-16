@@ -3,9 +3,12 @@ package miniventure.game.world.entity.mob;
 import java.util.concurrent.PriorityBlockingQueue;
 
 import miniventure.game.GameProtocol.SpriteUpdate;
+import miniventure.game.world.Level;
 import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.EntityRenderer.DirectionalAnimationRenderer;
+
+import com.badlogic.gdx.math.Rectangle;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -60,7 +63,29 @@ public class MobAnimationController<M extends Entity & Mob> {
 		return new SpriteUpdate(renderer);
 	}
 	
-	void setDirection(@NotNull Direction dir) { renderer.setDirection(dir); }
+	boolean setDirection(@NotNull Direction dir) {
+		if(mob.getDirection() == dir)
+			return false; // no change.
+		
+		// check if the mob can fit facing this new direction.
+		Rectangle oldRect = mob.getBounds();
+		renderer.setDirection(dir);
+		Rectangle newRect = mob.getBounds();
+		
+		// if the new bounds isn't new space, then there's no need to check for collisions.
+		if(!oldRect.equals(newRect) && !oldRect.contains(newRect)) {
+			Level level = mob.getLevel();
+			// if level is null, we cannot check if the movement is valid.
+			boolean valid = level == null || Entity.checkMove(mob, level, oldRect, newRect);
+			if(!valid) {
+				renderer.setDirection(mob.getDirection());
+				return false; // different directional sprite causes new collisions.
+			}
+		}
+		
+		renderer.setDirection(dir);
+		return true;
+	}
 	
 	void progressAnimation(float delta) {
 		// update the animation
