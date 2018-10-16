@@ -11,12 +11,8 @@ import org.jetbrains.annotations.Nullable;
 
 public interface SpawnBehavior {
 	
-	SpawnBehavior DEFAULT = custom(null,
-		TileTypeEnum.GRASS, TileTypeEnum.DIRT, TileTypeEnum.SAND, TileTypeEnum.SNOW
-	);
-	SpawnBehavior DEFAULT_NIGHT = custom(TimeOfDay.Night,
-		TileTypeEnum.GRASS, TileTypeEnum.DIRT, TileTypeEnum.SAND, TileTypeEnum.SNOW
-	);
+	SpawnBehavior DEFAULT = custom(null);
+	SpawnBehavior DEFAULT_NIGHT = custom(TimeOfDay.Night);
 	
 	static SpawnBehavior custom(@Nullable TimeOfDay spawnTime, TileTypeEnum... types) {
 		final EnumSet<TileTypeEnum> tileTypes = types.length == 0 ? EnumSet.noneOf(TileTypeEnum.class) : EnumSet.copyOf(Arrays.asList(types));
@@ -28,6 +24,9 @@ public interface SpawnBehavior {
 			}
 			
 			@Override
+			public boolean hasTiles() { return tileTypes.size() > 0; }
+			
+			@Override
 			public boolean maySpawn(TileTypeEnum type) {
 				return tileTypes.contains(type);
 			}
@@ -36,4 +35,5 @@ public interface SpawnBehavior {
 	
 	boolean maySpawn(Entity e);
 	boolean maySpawn(TileTypeEnum type);
+	boolean hasTiles();
 }

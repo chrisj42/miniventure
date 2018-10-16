@@ -4,15 +4,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import miniventure.game.item.Item;
-import miniventure.game.server.ServerCore;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.ServerLevel;
-import miniventure.game.world.TimeOfDay;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClassDataList;
 import miniventure.game.world.entity.Entity;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -115,8 +114,13 @@ public class MobAi extends ServerMob {
 	
 	@Override
 	public boolean maySpawn() {
-		if(!aiType.daySpawn && TimeOfDay.getTimeOfDay(ServerCore.getWorld().getDaylightOffset()) != TimeOfDay.Night)
-			return false;
-		return super.maySpawn();
+		return super.maySpawn() && aiType.spawnBehavior.maySpawn(this);
+	}
+	
+	@Override
+	public boolean maySpawn(TileTypeEnum type) {
+		if(!aiType.spawnBehavior.hasTiles())
+			return super.maySpawn(type);
+		return aiType.spawnBehavior.maySpawn(type);
 	}
 }

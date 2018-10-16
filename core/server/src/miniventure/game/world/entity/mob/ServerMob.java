@@ -10,11 +10,11 @@ import miniventure.game.item.Item;
 import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolType;
 import miniventure.game.server.ServerCore;
-import miniventure.game.world.entity.ClassDataList;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
+import miniventure.game.world.entity.ClassDataList;
 import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.KnockbackController;
 import miniventure.game.world.entity.ServerEntity;
@@ -193,6 +193,6 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 	
 	public boolean maySpawn() { return true; }
 	public boolean maySpawn(TileTypeEnum type) {
-		return type == TileTypeEnum.GRASS || type == TileTypeEnum.DIRT || type == TileTypeEnum.SAND;
+		return type == TileTypeEnum.GRASS || type == TileTypeEnum.DIRT || type == TileTypeEnum.SAND || type == TileTypeEnum.SNOW;
 	}
 }

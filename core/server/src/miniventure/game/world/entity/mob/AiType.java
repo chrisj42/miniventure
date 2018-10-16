@@ -2,29 +2,32 @@ package miniventure.game.world.entity.mob;
 
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.entity.mob.PursuePattern.FollowBehavior;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public enum AiType {
 	
-	Pig(8, true, new WanderingPattern(), HitReaction.FLEE, null/*, new ItemDrop()*/), // later, drops pork food item.
+	Pig(8, SpawnBehavior.DEFAULT, new WanderingPattern(), HitReaction.FLEE, null/*, new ItemDrop()*/), // later, drops pork food item.
 	
-	Cow(12, true, new WanderingPattern(), null, null),
+	Cow(12, SpawnBehavior.DEFAULT, new WanderingPattern(), null, null),
 	
-	Crocodile(14, true, new WanderingPattern(), HitReaction.CHASE, TouchReaction.attackPlayer(2)),
+	// TODO don't allow crocodile to leave water; perhaps add clause to wandering pattern?
+	Crocodile(14, SpawnBehavior.custom(null, TileTypeEnum.WATER), new WanderingPattern(), HitReaction.CHASE, TouchReaction.attackPlayer(2)),
 	
-	Zombie(15, false, new PursuePattern(FollowBehavior.NEAREST_PLAYER), null, TouchReaction.attackPlayer(1));
+	Zombie(15, SpawnBehavior.DEFAULT_NIGHT, new PursuePattern(FollowBehavior.NEAREST_PLAYER), null, TouchReaction.attackPlayer(1));
 	
 	final int health;
-	final boolean daySpawn;
-	final MovementPattern defaultPattern;
-	final HitReaction onHit;
-	final TouchReaction onTouch;
-	final ItemDrop[] deathDrops;
+	@NotNull final SpawnBehavior spawnBehavior;
+	@NotNull final MovementPattern defaultPattern;
+	@Nullable final HitReaction onHit;
+	@Nullable final TouchReaction onTouch;
+	@NotNull final ItemDrop[] deathDrops;
 	
-	AiType(int health, boolean daySpawn, MovementPattern defaultPattern, @Nullable HitReaction onHit, @Nullable TouchReaction onTouch, ItemDrop... deathDrops) {
+	AiType(int health, @NotNull SpawnBehavior spawnBehavior, @NotNull MovementPattern defaultPattern, @Nullable HitReaction onHit, @Nullable TouchReaction onTouch, ItemDrop... deathDrops) {
 		this.health = health;
-		this.daySpawn = daySpawn;
+		this.spawnBehavior = spawnBehavior;
 		this.defaultPattern = defaultPattern;
 		this.onHit = onHit;
 		this.onTouch = onTouch;
