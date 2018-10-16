@@ -241,49 +241,10 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">entity-sprites/particle/impact_01.png</key>
-            <key type="filename">entity-sprites/particle/impact_02.png</key>
-            <key type="filename">entity-sprites/particle/impact_03.png</key>
-            <key type="filename">entity-sprites/particle/impact_04.png</key>
-            <key type="filename">entity-sprites/particle/impact_05.png</key>
-            <key type="filename">entity-sprites/particle/impact_06.png</key>
-            <key type="filename">entity-sprites/particle/impact_07.png</key>
-            <key type="filename">entity-sprites/particle/punch-down_00.png</key>
-            <key type="filename">entity-sprites/particle/punch-down_01.png</key>
-            <key type="filename">entity-sprites/particle/punch-down_02.png</key>
-            <key type="filename">entity-sprites/particle/punch-down_03.png</key>
-            <key type="filename">entity-sprites/particle/punch-down_04.png</key>
-            <key type="filename">entity-sprites/particle/punch-down_05.png</key>
-            <key type="filename">entity-sprites/particle/punch-left_00.png</key>
-            <key type="filename">entity-sprites/particle/punch-left_01.png</key>
-            <key type="filename">entity-sprites/particle/punch-left_02.png</key>
-            <key type="filename">entity-sprites/particle/punch-left_03.png</key>
-            <key type="filename">entity-sprites/particle/punch-left_04.png</key>
-            <key type="filename">entity-sprites/particle/punch-left_05.png</key>
-            <key type="filename">entity-sprites/particle/punch-right_00.png</key>
-            <key type="filename">entity-sprites/particle/punch-right_01.png</key>
-            <key type="filename">entity-sprites/particle/punch-right_02.png</key>
-            <key type="filename">entity-sprites/particle/punch-right_03.png</key>
-            <key type="filename">entity-sprites/particle/punch-right_04.png</key>
-            <key type="filename">entity-sprites/particle/punch-right_05.png</key>
-            <key type="filename">entity-sprites/particle/punch-up_00.png</key>
-            <key type="filename">entity-sprites/particle/punch-up_01.png</key>
-            <key type="filename">entity-sprites/particle/punch-up_02.png</key>
-            <key type="filename">entity-sprites/particle/punch-up_03.png</key>
-            <key type="filename">entity-sprites/particle/punch-up_04.png</key>
-            <key type="filename">entity-sprites/particle/punch-up_05.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>16,16,32,32</rect>
-                <key>scale9Paddings</key>
-                <rect>16,16,32,32</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
+            <key type="filename">entity-sprites/crocodile/walk-down_3.png</key>
+            <key type="filename">entity-sprites/crocodile/walk-down_4.png</key>
+            <key type="filename">entity-sprites/crocodile/walk-up_3.png</key>
+            <key type="filename">entity-sprites/crocodile/walk-up_4.png</key>
             <key type="filename">entity-sprites/particle/slash-down_00.png</key>
             <key type="filename">entity-sprites/particle/slash-down_01.png</key>
             <key type="filename">entity-sprites/particle/slash-down_02.png</key>
@@ -325,6 +286,49 @@
                 <rect>8,8,16,16</rect>
                 <key>scale9Paddings</key>
                 <rect>8,8,16,16</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">entity-sprites/particle/impact_01.png</key>
+            <key type="filename">entity-sprites/particle/impact_02.png</key>
+            <key type="filename">entity-sprites/particle/impact_03.png</key>
+            <key type="filename">entity-sprites/particle/impact_04.png</key>
+            <key type="filename">entity-sprites/particle/impact_05.png</key>
+            <key type="filename">entity-sprites/particle/impact_06.png</key>
+            <key type="filename">entity-sprites/particle/impact_07.png</key>
+            <key type="filename">entity-sprites/particle/punch-down_00.png</key>
+            <key type="filename">entity-sprites/particle/punch-down_01.png</key>
+            <key type="filename">entity-sprites/particle/punch-down_02.png</key>
+            <key type="filename">entity-sprites/particle/punch-down_03.png</key>
+            <key type="filename">entity-sprites/particle/punch-down_04.png</key>
+            <key type="filename">entity-sprites/particle/punch-down_05.png</key>
+            <key type="filename">entity-sprites/particle/punch-left_00.png</key>
+            <key type="filename">entity-sprites/particle/punch-left_01.png</key>
+            <key type="filename">entity-sprites/particle/punch-left_02.png</key>
+            <key type="filename">entity-sprites/particle/punch-left_03.png</key>
+            <key type="filename">entity-sprites/particle/punch-left_04.png</key>
+            <key type="filename">entity-sprites/particle/punch-left_05.png</key>
+            <key type="filename">entity-sprites/particle/punch-right_00.png</key>
+            <key type="filename">entity-sprites/particle/punch-right_01.png</key>
+            <key type="filename">entity-sprites/particle/punch-right_02.png</key>
+            <key type="filename">entity-sprites/particle/punch-right_03.png</key>
+            <key type="filename">entity-sprites/particle/punch-right_04.png</key>
+            <key type="filename">entity-sprites/particle/punch-right_05.png</key>
+            <key type="filename">entity-sprites/particle/punch-up_00.png</key>
+            <key type="filename">entity-sprites/particle/punch-up_01.png</key>
+            <key type="filename">entity-sprites/particle/punch-up_02.png</key>
+            <key type="filename">entity-sprites/particle/punch-up_03.png</key>
+            <key type="filename">entity-sprites/particle/punch-up_04.png</key>
+            <key type="filename">entity-sprites/particle/punch-up_05.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>16,16,32,32</rect>
+                <key>scale9Paddings</key>
+                <rect>16,16,32,32</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
