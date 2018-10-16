@@ -10,8 +10,6 @@ import miniventure.game.server.ServerCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.AiType;
-import miniventure.game.world.entity.mob.MobAi;
-import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.mob.ServerMob;
 import miniventure.game.world.entity.particle.ItemEntity;
 import miniventure.game.world.levelgen.LevelGenerator;
@@ -147,7 +145,7 @@ public class ServerLevel extends Level {
 		updateEntities(entities, delta);
 		
 		if(entities.length < getMobCap() && MathUtils.randomBoolean(0.01f))
-			spawnMob(new MobAi(AiType.values[MathUtils.random(AiType.values.length-1)]));
+			spawnMob(AiType.values[MathUtils.random(AiType.values.length-1)].makeMob());
 	}
 	
 	public void dropItems(@NotNull ItemDrop drop, @NotNull WorldObject source, @Nullable WorldObject target) {

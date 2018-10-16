@@ -40,7 +40,7 @@ public class MobAi extends ServerMob {
 	@Nullable private MovementPattern tempMovePattern = null;
 	private float tempTimeLeft = 0;
 	
-	public MobAi(@NotNull AiType aiType) {
+	protected MobAi(@NotNull AiType aiType) {
 		super(aiType.name().toLowerCase(), aiType.health);
 		this.aiType = aiType;
 		this.itemDrops = aiType.deathDrops;
@@ -55,8 +55,6 @@ public class MobAi extends ServerMob {
 		this.itemDrops = aiType.deathDrops;
 		this.movePattern = aiType.defaultPattern.copy();
 	}
-	
-	public MobAi(MobAi model) { this(model.aiType); }
 	
 	@Override
 	public ClassDataList save() {

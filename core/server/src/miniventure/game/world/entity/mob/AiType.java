@@ -13,7 +13,6 @@ public enum AiType {
 	
 	Cow(12, SpawnBehavior.DEFAULT, new WanderingPattern(), null, null),
 	
-	// TODO don't allow crocodile to leave water; perhaps add clause to wandering pattern?
 	Crocodile(14, SpawnBehavior.custom(null, TileTypeEnum.WATER), new WanderingPattern(), HitReaction.CHASE, TouchReaction.attackPlayer(2)),
 	
 	Zombie(15, SpawnBehavior.DEFAULT_NIGHT, new PursuePattern(FollowBehavior.NEAREST_PLAYER), null, TouchReaction.attackPlayer(1));
@@ -25,7 +24,7 @@ public enum AiType {
 	@Nullable final TouchReaction onTouch;
 	@NotNull final ItemDrop[] deathDrops;
 	
-	AiType(int health, @NotNull SpawnBehavior spawnBehavior, @NotNull MovementPattern defaultPattern, @Nullable HitReaction onHit, @Nullable TouchReaction onTouch, ItemDrop... deathDrops) {
+	AiType(int health, @NotNull SpawnBehavior spawnBehavior, @NotNull MovementPattern defaultPattern, @Nullable HitReaction onHit, @Nullable TouchReaction onTouch, @NotNull ItemDrop... deathDrops) {
 		this.health = health;
 		this.spawnBehavior = spawnBehavior;
 		this.defaultPattern = defaultPattern;
@@ -34,6 +33,7 @@ public enum AiType {
 		this.deathDrops = deathDrops;
 	}
 	
+	public MobAi makeMob() { return new MobAi(this); }
 	
 	public static final AiType[] values = AiType.values();
 }

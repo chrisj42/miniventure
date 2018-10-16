@@ -152,13 +152,13 @@ public abstract class Entity implements WorldObject {
 		// we now have a list of the tiles that will be touched, but aren't now.
 		boolean canMoveCurrent = false;
 		for(Tile tile: currentTiles) // if any are permeable, then don't let the player escape to new impermeable tiles.
-			canMoveCurrent = canMoveCurrent || tile.isPermeableBy(this);
+			canMoveCurrent = canMoveCurrent || permeates(tile);
 		
 		boolean canMove = true;
 		for(Tile tile: newTiles) {
 			if(interact)
 				touchTile(tile);
-			canMove = canMove && (!canMoveCurrent || tile.isPermeableBy(this));
+			canMove = canMove && (!canMoveCurrent || permeates(tile));
 		}
 		
 		if(canMove && canMoveCurrent) {
@@ -171,9 +171,9 @@ public abstract class Entity implements WorldObject {
 			// check the sameTiles; if at least one is not permeable, and at least one oldTile is, then stop the move.
 			boolean canMoveOld = false, canMoveSame = true;
 			for(Tile oldTile: oldTiles)
-				canMoveOld = canMoveOld || oldTile.isPermeableBy(this);
+				canMoveOld = canMoveOld || permeates(oldTile);
 			for(Tile sameTile: sameTiles)
-				canMoveSame = canMoveSame && sameTile.isPermeableBy(this);
+				canMoveSame = canMoveSame && permeates(sameTile);
 			
 			if(!canMoveSame && canMoveOld)
 				canMove = false;
@@ -246,6 +246,8 @@ public abstract class Entity implements WorldObject {
 	@Override
 	public final boolean isPermeableBy(Entity e) { return isPermeable(); }
 	public boolean isPermeable() { return false; }
+	
+	public boolean permeates(Tile tile) { return tile.isPermeableBy(this); }
 	
 	@Override
 	public boolean attackedBy(WorldObject obj, @Nullable Item attackItem, int damage) { return false; }
