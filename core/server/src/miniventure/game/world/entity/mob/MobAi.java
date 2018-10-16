@@ -1,17 +1,18 @@
 package miniventure.game.world.entity.mob;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import miniventure.game.item.Item;
 import miniventure.game.server.ServerCore;
 import miniventure.game.util.Version;
+import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.TimeOfDay;
 import miniventure.game.world.WorldObject;
+import miniventure.game.world.entity.ClassDataList;
 import miniventure.game.world.entity.Entity;
-
-import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -47,10 +48,11 @@ public class MobAi extends ServerMob {
 		this.movePattern = aiType.defaultPattern.copy();
 	}
 	
-	protected MobAi(String[][] allData, Version version) {
-		super(Arrays.copyOfRange(allData, 0, allData.length-1), version);
-		String[] data = allData[allData.length-1];
-		aiType = AiType.valueOf(data[0]);
+	// if a subclass was made of this, then it may not save the ai type.
+	protected MobAi(ClassDataList allData, final Version version, ValueFunction<ClassDataList> modifier) {
+		super(allData, version, modifier);
+		ArrayList<String> data = allData.get(2);
+		aiType = AiType.valueOf(data.get(0));
 		this.itemDrops = aiType.deathDrops;
 		this.movePattern = aiType.defaultPattern.copy();
 	}
@@ -58,14 +60,14 @@ public class MobAi extends ServerMob {
 	public MobAi(MobAi model) { this(model.aiType); }
 	
 	@Override
-	public Array<String[]> save() {
-		Array<String[]> data = super.save();
-		
-		data.add(new String[] {
+	public ClassDataList save() {
+		ClassDataList allData = super.save();
+		ArrayList<String> data = new ArrayList<>(Arrays.asList(
 			aiType.name()
-		});
+		));
 		
-		return data;
+		allData.add(data);
+		return allData;
 	}
 	
 	public AiType getType() { return aiType; }

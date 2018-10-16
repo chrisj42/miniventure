@@ -1,5 +1,6 @@
 package miniventure.game.world.entity.mob;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
 
@@ -10,8 +11,10 @@ import miniventure.game.item.Inventory;
 import miniventure.game.item.Item;
 import miniventure.game.item.ServerHands;
 import miniventure.game.server.ServerCore;
+import miniventure.game.world.entity.ClassDataList;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
+import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.Boundable;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
@@ -47,36 +50,36 @@ public class ServerPlayer extends ServerMob implements Player {
 		reset();
 	}
 	
-	protected ServerPlayer(String[][] allData, Version version) {
-		super(Arrays.copyOfRange(allData, 0, allData.length-1), version);
-		String[] data = allData[allData.length-1];
+	protected ServerPlayer(ClassDataList allData, final Version version, ValueFunction<ClassDataList> modifier) {
+		super(allData, version, modifier);
+		ArrayList<String> data = allData.get(2);
 		
-		name = data[0];
+		name = data.get(0);
 		hands = new ServerHands(this);
 		reset();
 		
 		stats.put(Stat.Health, getHealth());
-		stats.put(Stat.Hunger, Integer.parseInt(data[1]));
-		stats.put(Stat.Stamina, Integer.parseInt(data[2]));
-		//stats.put(Stat.Armor, Integer.parseInt(data[3]));
+		stats.put(Stat.Hunger, Integer.parseInt(data.get(1)));
+		stats.put(Stat.Stamina, Integer.parseInt(data.get(2)));
+		//stats.put(Stat.Armor, Integer.parseInt(data.get(3)));
 		
-		inventory.loadItems(MyUtils.parseLayeredString(data[3]));
-		hands.loadItemShortcuts(MyUtils.parseLayeredString(data[4]));
+		inventory.loadItems(MyUtils.parseLayeredString(data.get(3)));
+		hands.loadItemShortcuts(MyUtils.parseLayeredString(data.get(4)));
 	}
 	
 	@Override
-	public Array<String[]> save() {
-		Array<String[]> data = super.save();
-		
-		data.add(new String[] {
+	public ClassDataList save() {
+		ClassDataList allData = super.save();
+		ArrayList<String> data = new ArrayList<>(Arrays.asList(
 			name,
 			String.valueOf(getStat(Stat.Hunger)),
 			String.valueOf(getStat(Stat.Stamina)),
 			MyUtils.encodeStringArray(inventory.save()),
 			MyUtils.encodeStringArray(hands.save())
-		});
+		));
 		
-		return data;
+		allData.add(data);
+		return allData;
 	}
 	
 	public String getName() { return name; }

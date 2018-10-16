@@ -1,13 +1,14 @@
 package miniventure.game.world.entity.particle;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
+import miniventure.game.world.entity.ClassDataList;
 import miniventure.game.util.Version;
+import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.EntityRenderer.AnimationRenderer;
 import miniventure.game.world.entity.ServerEntity;
-
-import com.badlogic.gdx.utils.Array;
 
 public class ActionParticle extends ServerEntity implements Particle {
 	
@@ -48,12 +49,12 @@ public class ActionParticle extends ServerEntity implements Particle {
 		setRenderer(new AnimationRenderer(spriteName, animationTime, false, false));
 	}
 	
-	protected ActionParticle(String[][] allData, Version version) {
-		super(Arrays.copyOfRange(allData, 0, allData.length-1), version);
-		String[] data = allData[allData.length-1];
-		spriteName = data[0];
-		animationTime = Float.parseFloat(data[1]);
-		timeElapsed = Float.parseFloat(data[2]);
+	protected ActionParticle(ClassDataList allData, final Version version, ValueFunction<ClassDataList> modifier) {
+		super(allData, version, modifier);
+		ArrayList<String> data = allData.get(1);
+		spriteName = data.get(0);
+		animationTime = Float.parseFloat(data.get(1));
+		timeElapsed = Float.parseFloat(data.get(2));
 		
 		//Array<AtlasRegion> frames = GameCore.entityAtlas.findRegions(spriteName);
 		//animation = new Animation<>(animationTime / frames.size, frames);
@@ -62,16 +63,16 @@ public class ActionParticle extends ServerEntity implements Particle {
 	}
 	
 	@Override
-	public Array<String[]> save() {
-		Array<String[]> data = super.save();
-		
-		data.add(new String[] {
+	public ClassDataList save() {
+		ClassDataList allData = super.save();
+		ArrayList<String> data = new ArrayList<>(Arrays.asList(
 			spriteName,
-			animationTime+"",
-			timeElapsed+""
-		});
+			String.valueOf(animationTime),
+			String.valueOf(timeElapsed)
+		));
 		
-		return data;
+		allData.add(data);
+		return allData;
 	}
 	
 	@Override

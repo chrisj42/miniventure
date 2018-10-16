@@ -1,5 +1,6 @@
 package miniventure.game.world.entity.mob;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import miniventure.game.GameProtocol.Hurt;
@@ -9,7 +10,9 @@ import miniventure.game.item.Item;
 import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolType;
 import miniventure.game.server.ServerCore;
+import miniventure.game.world.entity.ClassDataList;
 import miniventure.game.util.Version;
+import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Direction;
@@ -21,7 +24,6 @@ import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -40,15 +42,12 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 	private int health;
 	
 	@NotNull private KnockbackController knockbackController;
-	//private float knockbackTimeLeft = 0;
-	//@NotNull private Vector2 knockbackVelocity = new Vector2();
 	
 	private float invulnerableTime = 0;
-	//private FrameBlinker blinker;
 	
 	private final String spriteName;
 	
-	public ServerMob(@NotNull String spriteName, int health) {
+	protected ServerMob(@NotNull String spriteName, int health) {
 		super();
 		dir = Direction.DOWN;
 		this.maxHealth = health;
@@ -59,39 +58,38 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 		knockbackController = new KnockbackController(this);
 		
 		animator = new MobAnimationController<>(this, spriteName);
-		
-		//setRenderer(animator.getRendererUpdate());
 	}
 	
-	protected ServerMob(String[][] allData, Version version) {
-		super(Arrays.copyOfRange(allData, 0, allData.length-1), version);
-		String[] data = allData[allData.length-1];
+	// some stuff is given in the child constructor; this shouldn't need to be saved to file.
+	// these include the sprite name and the max health, in this case.
+	// these things
+	protected ServerMob(ClassDataList allData, final Version version, ValueFunction<ClassDataList> modifier) {
+		super(allData, version, modifier);
+		ArrayList<String> data = allData.get(1);
 		
-		this.spriteName = data[0];
-		dir = Direction.valueOf(data[1]);
-		maxHealth = Integer.parseInt(data[2]);
-		health = Integer.parseInt(data[3]);
-		invulnerableTime = Float.parseFloat(data[4]);
+		this.spriteName = data.get(0);
+		dir = Direction.valueOf(data.get(1));
+		maxHealth = Integer.parseInt(data.get(2));
+		health = Integer.parseInt(data.get(3));
+		invulnerableTime = Float.parseFloat(data.get(4));
 		
 		knockbackController = new KnockbackController(this);
 		animator = new MobAnimationController<>(this, spriteName);
-		
-		//setRenderer(animator.getRendererUpdate());
 	}
 	
 	@Override
-	public Array<String[]> save() {
-		Array<String[]> data = super.save();
-		
-		data.add(new String[] {
+	public ClassDataList save() {
+		ClassDataList allData = super.save();
+		ArrayList<String> data = new ArrayList<>(Arrays.asList(
 			spriteName,
 			dir.name(),
-			maxHealth+"",
-			health+"",
-			invulnerableTime+""
-		});
+			String.valueOf(maxHealth),
+			String.valueOf(health),
+			String.valueOf(invulnerableTime)
+		));
 		
-		return data;
+		allData.add(data);
+		return allData;
 	}
 	
 	public void reset() {
@@ -117,17 +115,6 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 	@Override
 	public boolean isKnockedBack() { return knockbackController.hasKnockback(); }
 	
-	//@Override
-	//protected TextureRegion getSprite() { return animator.getSprite(); }
-	
-	/*@Override
-	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
-		blinker.update(delta);
-		
-		if(invulnerableTime <= 0 || blinker.shouldRender())
-			super.render(batch, delta, posOffset);
-	}*/
-	
 	@Override
 	public void update(float delta) {
 		animator.progressAnimation(delta);
@@ -136,14 +123,6 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 		if(newSprite != null)
 			updateSprite(newSprite);
 		
-		/*if(knockbackTimeLeft > 0) {
-			super.move(new Vector2(knockbackVelocity).scl(delta));
-			knockbackTimeLeft -= delta;
-			if(knockbackTimeLeft <= 0) {
-				knockbackTimeLeft = 0;
-				knockbackVelocity.setZero();
-			}
-		}*/
 		knockbackController.update(delta);
 		
 		super.update(delta);

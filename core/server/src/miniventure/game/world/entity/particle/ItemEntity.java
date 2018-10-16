@@ -1,16 +1,18 @@
 package miniventure.game.world.entity.particle;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import miniventure.game.item.Item;
+import miniventure.game.world.entity.ClassDataList;
 import miniventure.game.util.Version;
+import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.EntityRenderer.ItemSpriteRenderer;
 import miniventure.game.world.entity.mob.ServerPlayer;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -30,20 +32,20 @@ public class ItemEntity extends BounceEntity {
 		setRenderer(new ItemSpriteRenderer(item));
 	}
 	
-	protected ItemEntity(String[][] allData, Version version) {
-		super(Arrays.copyOfRange(allData, 0, allData.length-1), version);
-		String[] data = allData[allData.length-1];
+	protected ItemEntity(ClassDataList allData, final Version version, ValueFunction<ClassDataList> modifier) {
+		super(allData, version, modifier);
+		ArrayList<String> data = allData.get(2);
 		delayPickup = false;
-		item = Item.load(data);
+		item = Item.load(data.toArray(new String[0]));
 	}
 	
 	@Override
-	public Array<String[]> save() {
-		Array<String[]> data = super.save();
+	public ClassDataList save() {
+		ClassDataList allData = super.save();
+		ArrayList<String> data = new ArrayList<>(Arrays.asList(item.save()));
 		
-		data.add(item.save());
-		
-		return data;
+		allData.add(data);
+		return allData;
 	}
 	
 	@Override

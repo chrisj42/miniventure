@@ -1,16 +1,18 @@
 package miniventure.game.world.entity.particle;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
+import miniventure.game.world.entity.ClassDataList;
 import miniventure.game.util.Version;
 import miniventure.game.util.blinker.FrameBlinker;
+import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.Level;
 import miniventure.game.world.entity.ServerEntity;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -39,34 +41,34 @@ public abstract class BounceEntity extends ServerEntity {
 		setBlinker(lifetime * BLINK_THRESHOLD, false, new FrameBlinker(1, 1, false));
 	}
 	
-	protected BounceEntity(String[][] allData, Version version) {
-		super(Arrays.copyOfRange(allData, 0, allData.length-1), version);
-		String[] data = allData[allData.length-1];
-		lifetime = Float.parseFloat(data[0]);
-		float x = Float.parseFloat(data[1]);
-		float y = Float.parseFloat(data[2]);
-		float z = Float.parseFloat(data[3]);
+	protected BounceEntity(ClassDataList allData, final Version version, ValueFunction<ClassDataList> modifier) {
+		super(allData, version, modifier);
+		ArrayList<String> data = allData.get(1);
+		lifetime = Float.parseFloat(data.get(0));
+		float x = Float.parseFloat(data.get(1));
+		float y = Float.parseFloat(data.get(2));
+		float z = Float.parseFloat(data.get(3));
 		velocity = new Vector3(x, y, z);
-		time = Float.parseFloat(data[4]);
-		lastBounceTime = Float.parseFloat(data[5]);
+		time = Float.parseFloat(data.get(4));
+		lastBounceTime = Float.parseFloat(data.get(5));
 		
 		setBlinker(lifetime * BLINK_THRESHOLD, false, new FrameBlinker(1, 1, false));
 	}
 	
 	@Override
-	public Array<String[]> save() {
-		Array<String[]> data = super.save();
+	public ClassDataList save() {
+		ClassDataList allData = super.save();
+		ArrayList<String> data = new ArrayList<>(Arrays.asList(
+			String.valueOf(lifetime),
+			String.valueOf(velocity.x),
+			String.valueOf(velocity.y),
+			String.valueOf(velocity.z),
+			String.valueOf(time),
+			String.valueOf(lastBounceTime)
+		));
 		
-		data.add(new String[] {
-			lifetime+"",
-			velocity.x+"",
-			velocity.y+"",
-			velocity.z+"",
-			time+"",
-			lastBounceTime+""
-		});
-		
-		return data;
+		allData.add(data);
+		return allData;
 	}
 	
 	protected void scaleVelocity(float amt) { velocity.scl(amt, amt, 1); }
