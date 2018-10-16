@@ -11,7 +11,7 @@ public enum AiType {
 	
 	Cow(12, true, new WanderingPattern(), null, null),
 	
-	Crocodile(18, true, new WanderingPattern(), HitReaction.CHASE, TouchReaction.attackPlayer(2)),
+	Crocodile(14, true, new WanderingPattern(), HitReaction.CHASE, TouchReaction.attackPlayer(2)),
 	
 	Zombie(15, false, new PursuePattern(FollowBehavior.NEAREST_PLAYER), null, TouchReaction.attackPlayer(1));
 	
