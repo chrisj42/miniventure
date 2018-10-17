@@ -1268,6 +1268,23 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">tile-sprites/coal/c00.png</key>
+            <key type="filename">tile-sprites/flint/c00.png</key>
+            <key type="filename">tile-sprites/iron/c00.png</key>
+            <key type="filename">tile-sprites/ruby/c00.png</key>
+            <key type="filename">tile-sprites/tungsten/c00.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,4,8,8</rect>
+                <key>scale9Paddings</key>
+                <rect>4,4,8,8</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
         </map>
         <key>fileList</key>
         <array>
@@ -1280,9 +1297,9 @@
         <key>ignoredWarnings</key>
         <array/>
         <key>commonDivisorX</key>
-        <uint>1</uint>
+        <uint>36</uint>
         <key>commonDivisorY</key>
-        <uint>1</uint>
+        <uint>36</uint>
         <key>packNormalMaps</key>
         <false/>
         <key>autodetectNormalMaps</key>

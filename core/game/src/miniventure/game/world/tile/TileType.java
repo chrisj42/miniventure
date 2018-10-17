@@ -75,7 +75,7 @@ public class TileType {
 		
 		STONE_PATH(Color.GRAY, type -> new TileType(type, true,
 			new DestructionManager(type,
-				new ItemDrop(ResourceType.Stone.get(), 3),
+				new ItemDrop(ResourceType.Stone.get(), 2),
 				new RequiredTool(ToolType.Pickaxe)
 			),
 			
@@ -97,6 +97,11 @@ public class TileType {
 			)
 		)),
 		
+		FLINT(Color.DARK_GRAY, type -> new TileType(type, true,
+			new DestructionManager(type),
+			new TileTypeRenderer(type, false)
+		)),
+		
 		WATER(Color.BLUE, type -> new TileType(type, true,
 			new DataMap(PropertyTag.SpeedRatio.as(0.6f))
 			.add(PropertyTag.Swim.as(new SwimAnimation(type))),
@@ -112,10 +117,15 @@ public class TileType {
 			)
 		)),
 		
+		COAL(Color.BLACK, type -> new OreTile(type, 25)),
+		IRON(new Color(205, 212, 210), type -> new OreTile(type, 35)),
+		TUNGSTEN(new Color(176, 182, 180), type -> new OreTile(type, 45)),
+		RUBY(Color.RED, type -> new OreTile(type, 60)),
+		
 		STONE(Color.GRAY, type -> new TileType(type, false,
 			new DestructionManager(type, 40,
 				new PreferredTool(ToolType.Pickaxe, 5),
-				new ItemDrop(ResourceType.Stone.get(), 3, 4)
+				new ItemDrop(ResourceType.Stone.get(), 2, 3)
 			),
 			
 			new TileTypeRenderer(type, true, 
