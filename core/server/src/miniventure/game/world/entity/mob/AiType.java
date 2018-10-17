@@ -21,7 +21,10 @@ public enum AiType {
 	
 	Crocodile(14, SpawnBehavior.custom(null, TileTypeEnum.WATER), new WanderingPattern(), HitReaction.CHASE, TouchReaction.attackPlayer(2),
 		new ItemDrop(FoodType.Raw_Meat.get(), 1, 2)
-	),
+	) {
+		@Override
+		public MobAi makeMob() { return new Crocodile(); }
+	},
 	
 	Zombie(15, SpawnBehavior.DEFAULT_NIGHT, new PursuePattern(FollowBehavior.NEAREST_PLAYER), null, TouchReaction.attackPlayer(1),
 		new ItemDrop(FoodType.Gooseberry.get(), 0, 1, 0.2f),
