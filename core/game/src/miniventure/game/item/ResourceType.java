@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 public enum ResourceType {
 	
-	Log;
+	Log, Flint, Coal, Cotton, Fabric, Stone, Iron, Tungsten, Ruby;
 	
 	@NotNull
 	public Item get() {

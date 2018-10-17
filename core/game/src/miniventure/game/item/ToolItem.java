@@ -1,5 +1,6 @@
 package miniventure.game.item;
 
+import miniventure.game.GameCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;
@@ -12,13 +13,15 @@ public class ToolItem extends Item {
 	private static final float DURABILITY_BAR_HEIGHT = 4; // 8 pixels.
 	
 	public enum Material {
-		Wood(30, 1, 1),
+		Flint(50, 1, 3),
 		
-		Stone(80, 2, 2),
+		Stone(120, 2, 3),
 		
 		Iron(250, 4, 3),
 		
-		Gem(800, 8, 4);
+		Tungsten(600, 6, 2),
+		
+		Ruby(1500, 8, 2);
 		
 		public final int maxDurability; // the number of uses this level of tool gets.
 		public final int damageMultiplier; // damage done by this tool is multiplied by this number.
@@ -39,7 +42,7 @@ public class ToolItem extends Item {
 	
 	public ToolItem(ToolType type, Material material) { this(type, material, material.maxDurability); }
 	public ToolItem(ToolType type, Material material, int durability) {
-		super(ItemType.Tool, material.name() + " " + type.name(), type.texture);
+		super(ItemType.Tool, material.name() + " " + type.name(), GameCore.icons.get("items/tools/"+material.name().toLowerCase()+"_"+type.name().toLowerCase()));
 		this.toolType = type;
 		this.material = material;
 		this.durability = durability;

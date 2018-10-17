@@ -183,9 +183,9 @@ public class ServerWorld extends WorldManager {
 		respawnPlayer(player);
 		
 		if(GameCore.debug)
-			player.getInventory().addItem(new ToolItem(ToolType.Shovel, Material.Gem));
+			player.getInventory().addItem(new ToolItem(ToolType.Shovel, Material.Ruby));
 		for(int i = 0; i < 10; i++)
-			player.getInventory().addItem(TileItem.get(TileTypeEnum.PATH_STONE));
+			player.getInventory().addItem(TileItem.get(TileTypeEnum.STONE_PATH));
 		return player;
 	}
 	

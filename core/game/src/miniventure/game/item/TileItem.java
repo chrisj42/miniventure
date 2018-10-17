@@ -21,7 +21,7 @@ public class TileItem extends Item {
 	private static final HashMap<TileTypeEnum, TileItem> items = new HashMap<>();
 	
 	private static final TileTypeEnum[] groundTypes = new TileTypeEnum[] {
-		TileTypeEnum.GRASS, TileTypeEnum.DIRT, TileTypeEnum.SAND, TileTypeEnum.SNOW, TileTypeEnum.STONE_FLOOR, TileTypeEnum.PATH_STONE
+		TileTypeEnum.GRASS, TileTypeEnum.DIRT, TileTypeEnum.SAND, TileTypeEnum.SNOW, TileTypeEnum.STONE_FLOOR, TileTypeEnum.STONE_PATH
 	};
 	
 	private static void addItem(TileTypeEnum result, TileTypeEnum... canPlaceOn) {
@@ -43,7 +43,7 @@ public class TileItem extends Item {
 		
 		addItem(TileTypeEnum.STONE_FLOOR, TileTypeEnum.HOLE/*, TileTypeEnum.DIRT*/);
 		
-		addItem(TileTypeEnum.PATH_STONE, TileTypeEnum.DIRT, TileTypeEnum.SAND, TileTypeEnum.GRASS, TileTypeEnum.SNOW);
+		addItem(TileTypeEnum.STONE_PATH, TileTypeEnum.DIRT, TileTypeEnum.SAND, TileTypeEnum.GRASS, TileTypeEnum.SNOW);
 	}
 	
 	@NotNull

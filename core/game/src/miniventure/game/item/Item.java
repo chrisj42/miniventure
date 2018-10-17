@@ -27,7 +27,7 @@ public abstract class Item {
 	private boolean used = false;
 	
 	Item(@NotNull ItemType type, @NotNull String name) {
-		this(type, name, GameCore.icons.get(name.toLowerCase()));
+		this(type, name.replace("_", " "), GameCore.icons.get("items/"+name.toLowerCase()));
 	}
 	Item(@NotNull ItemType type, @NotNull String name, @NotNull TextureHolder texture) {
 		this.texture = texture;

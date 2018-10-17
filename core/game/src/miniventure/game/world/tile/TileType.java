@@ -2,10 +2,13 @@ package miniventure.game.world.tile;
 
 import java.awt.Color;
 
+import miniventure.game.item.FoodType;
 import miniventure.game.item.Item;
+import miniventure.game.item.ResourceType;
 import miniventure.game.item.ToolType;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.MapFunction;
+import miniventure.game.world.ItemDrop;
 import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
@@ -70,8 +73,11 @@ public class TileType {
 			)
 		)),
 		
-		PATH_STONE(Color.GRAY, type -> new TileType(type, true,
-			new DestructionManager(type, new RequiredTool(ToolType.Pickaxe)),
+		STONE_PATH(Color.GRAY, type -> new TileType(type, true,
+			new DestructionManager(type,
+				new ItemDrop(ResourceType.Stone.get(), 3),
+				new RequiredTool(ToolType.Pickaxe)
+			),
 			
 			new TileTypeRenderer(type, true,
 				new OverlapManager(type, RenderStyle.SINGLE_FRAME)
@@ -79,7 +85,12 @@ public class TileType {
 		)),
 		
 		SNOW(Color.WHITE, type -> new TileType(type, true,
-			new DestructionManager(type, new RequiredTool(ToolType.Shovel)),
+			new DestructionManager.DestructibleBuilder(type, true)
+				.drops(false,
+					new ItemDrop(FoodType.Snow_Berries.get(), 0, 1, .1f)
+				)
+				.require(new RequiredTool(ToolType.Shovel))
+				.make(),
 			
 			new TileTypeRenderer(type, true,
 				new OverlapManager(type, RenderStyle.SINGLE_FRAME)
@@ -103,7 +114,8 @@ public class TileType {
 		
 		STONE(Color.GRAY, type -> new TileType(type, false,
 			new DestructionManager(type, 40,
-				new PreferredTool(ToolType.Pickaxe, 5)
+				new PreferredTool(ToolType.Pickaxe, 5),
+				new ItemDrop(ResourceType.Stone.get(), 3, 4)
 			),
 			
 			new TileTypeRenderer(type, true, 
@@ -135,7 +147,9 @@ public class TileType {
 		)),
 		
 		CACTUS(Color.GREEN.darker().darker(), type -> new TileType(type, false,
-			new DestructionManager(type, 12, null),
+			new DestructionManager(type, 12, null,
+				new ItemDrop(FoodType.Cactus_Fruit.get(), 1, 2, .15f)
+			),
 			
 			new TileTypeRenderer(type, false)
 			

@@ -8,7 +8,8 @@ public class Recipes {
 	private Recipes() {}
 	
 	public static final Recipe[] recipes = new Recipe[] {
-		new Recipe(new ToolItem(ToolType.Pickaxe, Material.Wood),
+		new Recipe(new ToolItem(ToolType.Pickaxe, Material.Flint),
+			new ItemStack(ResourceType.Flint.get(), 2),
 			new ItemStack(ResourceType.Log.get(), 2)
 		),
 		
@@ -17,7 +18,7 @@ public class Recipes {
 			new ItemStack(ResourceType.Log.get(), 1)
 		),
 		
-		new Recipe(new ToolItem(ToolType.Shovel, Material.Wood),
+		new Recipe(new ToolItem(ToolType.Shovel, Material.Flint),
 			new ItemStack(ResourceType.Log.get(), 2)
 		),
 		
@@ -26,7 +27,7 @@ public class Recipes {
 			new ItemStack(ResourceType.Log.get(), 1)
 		),
 		
-		new Recipe(new ToolItem(ToolType.Sword, Material.Wood),
+		new Recipe(new ToolItem(ToolType.Sword, Material.Flint),
 			new ItemStack(ResourceType.Log.get(), 2)
 		),
 		
@@ -35,7 +36,7 @@ public class Recipes {
 			new ItemStack(ResourceType.Log.get(), 1)
 		),
 		
-		new Recipe(new ToolItem(ToolType.Axe, Material.Wood),
+		new Recipe(new ToolItem(ToolType.Axe, Material.Flint),
 			new ItemStack(ResourceType.Log.get(), 2)
 		),
 		
@@ -64,7 +65,7 @@ public class Recipes {
 			new ItemStack(TileItem.get(TileTypeEnum.STONE), 1)
 		),
 		
-		new Recipe(new ItemStack(TileItem.get(TileTypeEnum.PATH_STONE), 2),
+		new Recipe(new ItemStack(TileItem.get(TileTypeEnum.STONE_PATH), 2),
 			new ItemStack(TileItem.get(TileTypeEnum.STONE), 1)
 		)
 	};

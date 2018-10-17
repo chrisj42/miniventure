@@ -18,8 +18,8 @@ public class TreeTile extends TileType {
 			
 			new DestructionManager(enumType, 24,
 				new PreferredTool(ToolType.Axe, 2),
-				new ItemDrop(ResourceType.Log.get(), 1, 2),
-				new ItemDrop(FoodType.Apple.get(), 0, 2, 0.2f)
+				new ItemDrop(ResourceType.Log.get(), 2),
+				new ItemDrop(FoodType.Apple.get(), 0, 2, 0.32f)
 			),
 			
 			new TileTypeRenderer(enumType, false,
