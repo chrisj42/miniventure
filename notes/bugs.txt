@@ -1,12 +1,6 @@
-Item selection legit *sucks*.
-
 "tp playername" crashes game when used on client
 
 walking animations continue playing on respawn screen
-
-The chat screen sometimes causes an uncaught internal exception when formatting. -_-
-
-Whenever the game freezes for a second, and then starts again, all the entities jump way more than they're supposed to; as if they kept going in the same direction without other things updating. This sometimes can cause the player (or other entities) to jump across tiles that are normally solid.
 
 player jumps back whenever walking into an entity that is moving toward it, when the server is remote. I'm pretty sure this is due to the delay between server updates and the server updating the client. The client thinks it can move somewhere, because the server hasn't had a chance to tell it otherwise, so it tries to move. The server then corrects it, causing the "jump-back".
 
