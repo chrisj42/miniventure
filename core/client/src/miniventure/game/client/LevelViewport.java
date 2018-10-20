@@ -28,7 +28,7 @@ public class LevelViewport {
 	
 	private static final float OFF_SCREEN_LIGHT_RADIUS = 5; // in tiles; used to render light halos when the object creating said halo could be off screen. any halos bigger than this in radius will appear to disappear suddenly when the object casting it goes too far off screen; but increasing this value means iterating through a lot more objects. Your average halo isn't going to bigger than 5 tiles in radius, though, so 5 is a good enough value.
 	
-	private static final float DEFAULT_VIEWPORT_SIZE = 20; // in tiles
+	private static final float DEFAULT_VIEWPORT_SIZE = 16; // in tiles
 	
 	private static final int MIN_ZOOM = -3, MAX_ZOOM = 5;
 	
