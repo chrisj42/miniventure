@@ -2,14 +2,10 @@ package miniventure.game.util.customenum;
 
 import java.lang.reflect.InvocationTargetException;
 
-class SerialEntry<T, D extends SerialEnum<T>> {
-	
-	final D key;
-	final T value;
+class SerialEntry<T, D extends SerialEnum<T>> extends DataEntry<T, D> {
 	
 	SerialEntry(D dataTag, T value) {
-		this.key = dataTag;
-		this.value = value;
+		super(dataTag, value);
 	}
 	
 	String serialize() {

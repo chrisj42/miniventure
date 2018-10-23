@@ -9,7 +9,7 @@ import miniventure.game.util.function.FetchBiFunction;
 import miniventure.game.util.function.MapFunction;
 
 @SuppressWarnings("unchecked")
-public abstract class SerialEnum<T> extends GenericEnum<SerialEnum<T>> {
+public abstract class SerialEnum<T> extends DataEnum<T> {
 	
 	/* Some notes:
 		
@@ -90,12 +90,10 @@ public abstract class SerialEnum<T> extends GenericEnum<SerialEnum<T>> {
 		return ar;
 	}
 	
+	@Override
 	public SerialEntry<T, ?> as(T value) { return new SerialEntry<>(this, value); }
 	SerialEntry<T, ?> serialEntry(String value) { return new SerialEntry<>(this, deserialize(value)); }
 	
 	public String serialize(T value) { return valueWriter.get(value); }
 	public T deserialize(String data) { return valueParser.get(data); }
-	
-	/** @noinspection NoopMethodInAbstractClass*/
-	public static void init() {}
 }

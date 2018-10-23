@@ -7,6 +7,7 @@ import miniventure.game.item.Item;
 import miniventure.game.item.ResourceType;
 import miniventure.game.item.ToolType;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.customenum.PropertyMap;
 import miniventure.game.util.customenum.SerialMap;
 import miniventure.game.util.function.MapFunction;
 import miniventure.game.world.ItemDrop;
@@ -33,7 +34,7 @@ public class TileType {
 	public enum TileTypeEnum {
 		
 		HOLE(BROWN.darker(), type -> new TileType(type, true,
-			new SerialMap(TilePropertyTag.Swim.as(new SwimAnimation(type, 0.75f))),
+			new PropertyMap(TilePropertyTag.Swim.as(new SwimAnimation(type, 0.75f))),
 			
 			DestructionManager.INDESTRUCTIBLE(type),
 			
@@ -56,7 +57,7 @@ public class TileType {
 			))
 		),
 		
-		GRASS(Color.GREEN, type -> new TileType(type, true, new SerialMap(),
+		GRASS(Color.GREEN, type -> new TileType(type, true, new PropertyMap(),
 			new DestructionManager.DestructibleBuilder(type, 1, false)
 				.require(new RequiredTool(ToolType.Shovel))
 				.make(),
@@ -103,7 +104,7 @@ public class TileType {
 		)),
 		
 		WATER(Color.BLUE, type -> new TileType(type, true,
-			new SerialMap(TilePropertyTag.SpeedRatio.as(0.6f))
+			new PropertyMap(TilePropertyTag.SpeedRatio.as(0.6f))
 			.add(TilePropertyTag.Swim.as(new SwimAnimation(type))),
 			
 			DestructionManager.INDESTRUCTIBLE(type),
@@ -144,7 +145,7 @@ public class TileType {
 		DOOR_CLOSED(BROWN.brighter(), DoorTile::getClosedDoor),
 		
 		TORCH(Color.ORANGE, type -> new TileType(type, true,
-			new SerialMap(TilePropertyTag.LightRadius.as(2f)),
+			new PropertyMap(TilePropertyTag.LightRadius.as(2f)),
 			
 			new DestructionManager(type),
 			
@@ -203,7 +204,7 @@ public class TileType {
 	}
 	
 	private final TileTypeEnum enumType;
-	final SerialMap propertyMap;
+	final PropertyMap propertyMap;
 	final boolean walkable;
 	final DestructionManager destructionManager;
 	final TileTypeRenderer renderer;
@@ -222,12 +223,12 @@ public class TileType {
 		this(enumType, false, destructionManager, renderer);
 	}*/
 	protected TileType(@NotNull TileTypeEnum enumType, boolean walkable, DestructionManager destructionManager, TileTypeRenderer renderer) {
-		this(enumType, walkable, new SerialMap(), destructionManager, renderer);
+		this(enumType, walkable, new PropertyMap(), destructionManager, renderer);
 	}
-	protected TileType(@NotNull TileTypeEnum enumType, boolean walkable, SerialMap propertyMap, DestructionManager destructionManager, TileTypeRenderer renderer) {
+	protected TileType(@NotNull TileTypeEnum enumType, boolean walkable, PropertyMap propertyMap, DestructionManager destructionManager, TileTypeRenderer renderer) {
 		this(enumType, walkable, propertyMap, destructionManager, renderer, new UpdateManager(enumType));
 	}
-	protected TileType(@NotNull TileTypeEnum enumType, boolean walkable, SerialMap propertyMap, DestructionManager destructionManager, TileTypeRenderer renderer, UpdateManager updateManager) {
+	protected TileType(@NotNull TileTypeEnum enumType, boolean walkable, PropertyMap propertyMap, DestructionManager destructionManager, TileTypeRenderer renderer, UpdateManager updateManager) {
 		this.enumType = enumType;
 		this.walkable = walkable;
 		this.propertyMap = propertyMap;

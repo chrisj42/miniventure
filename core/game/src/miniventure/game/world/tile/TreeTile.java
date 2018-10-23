@@ -3,7 +3,7 @@ package miniventure.game.world.tile;
 import miniventure.game.item.FoodType;
 import miniventure.game.item.ResourceType;
 import miniventure.game.item.ToolType;
-import miniventure.game.util.customenum.SerialMap;
+import miniventure.game.util.customenum.PropertyMap;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.tile.DestructionManager.PreferredTool;
 import miniventure.game.world.tile.data.TilePropertyTag;
@@ -14,7 +14,7 @@ public class TreeTile extends TileType {
 	
 	TreeTile(@NotNull TileTypeEnum enumType) {
 		super(enumType, false,
-			new SerialMap(TilePropertyTag.ZOffset.as(0.25f)),
+			new PropertyMap(TilePropertyTag.ZOffset.as(0.25f)),
 			
 			new DestructionManager(enumType, 24,
 				new PreferredTool(ToolType.Axe, 2),
