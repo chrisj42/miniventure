@@ -1,4 +1,4 @@
-package miniventure.game.world.tile.data;
+package miniventure.game.util.customenum;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
@@ -8,10 +8,8 @@ import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.FetchBiFunction;
 import miniventure.game.util.function.MapFunction;
 
-import org.jetbrains.annotations.NotNull;
-
 @SuppressWarnings("unchecked")
-public abstract class DataTag<T> implements Comparable<DataTag<?>> {
+public abstract class SerialEnum<T> extends GenericEnum<SerialEnum<T>> {
 	
 	/* Some notes:
 		
@@ -23,22 +21,15 @@ public abstract class DataTag<T> implements Comparable<DataTag<?>> {
 	 */
 	
 	
-	public abstract String name();
-	public abstract int ordinal();
-	
-	
-	/* --- INSTANCE DEFINITION --- */
-	
-	
 	private final MapFunction<T, String> valueWriter;
 	private final MapFunction<String, T> valueParser;
 	
-	DataTag(MapFunction<T, String> valueWriter, MapFunction<String, T> valueParser) {
+	protected SerialEnum(MapFunction<T, String> valueWriter, MapFunction<String, T> valueParser) {
 		this.valueWriter = valueWriter;
 		this.valueParser = valueParser;
 	}
 	
-	DataTag(final Class<T> valueClass) {
+	protected SerialEnum(final Class<T> valueClass) {
 		this.valueWriter = getValueWriter(valueClass, String::valueOf);
 		this.valueParser = getValueParser(valueClass, (data, baseClass) -> {
 			if(Enum.class.isAssignableFrom(baseClass))
@@ -99,28 +90,12 @@ public abstract class DataTag<T> implements Comparable<DataTag<?>> {
 		return ar;
 	}
 	
-	public DataEntry<T, ?> as(T value) { return new DataEntry<>(this, value); }
-	DataEntry<T, ?> serialEntry(String value) { return new DataEntry<>(this, deserialize(value)); }
+	public SerialEntry<T, ?> as(T value) { return new SerialEntry<>(this, value); }
+	SerialEntry<T, ?> serialEntry(String value) { return new SerialEntry<>(this, deserialize(value)); }
 	
 	public String serialize(T value) { return valueWriter.get(value); }
 	public T deserialize(String data) { return valueParser.get(data); }
 	
-	@Override
-	public boolean equals(Object other) {
-		if(!(other instanceof DataTag)) return false;
-		return ordinal() == ((DataTag)other).ordinal();
-	}
-	
-	@Override
-	public final int hashCode() { return ordinal(); }
-	
-	@Override
-	public final int compareTo(@NotNull DataTag<?> o) {
-		return Integer.compare(ordinal(), o.ordinal());
-	}
-	
-	@Override
-	public final String toString() { return name()==null?String.valueOf(ordinal()):name(); }
-	
+	/** @noinspection NoopMethodInAbstractClass*/
 	public static void init() {}
 }

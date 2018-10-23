@@ -7,6 +7,7 @@ import miniventure.game.item.Item;
 import miniventure.game.item.ResourceType;
 import miniventure.game.item.ToolType;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.customenum.SerialMap;
 import miniventure.game.util.function.MapFunction;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.WorldManager;
@@ -17,9 +18,8 @@ import miniventure.game.world.entity.particle.Particle;
 import miniventure.game.world.tile.DestructionManager.PreferredTool;
 import miniventure.game.world.tile.DestructionManager.RequiredTool;
 import miniventure.game.world.tile.SpreadUpdateAction.FloatFetcher;
-import miniventure.game.world.tile.data.CacheTag;
-import miniventure.game.world.tile.data.DataMap;
-import miniventure.game.world.tile.data.PropertyTag;
+import miniventure.game.world.tile.data.TileCacheTag;
+import miniventure.game.world.tile.data.TilePropertyTag;
 
 import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 
@@ -33,7 +33,7 @@ public class TileType {
 	public enum TileTypeEnum {
 		
 		HOLE(BROWN.darker(), type -> new TileType(type, true,
-			new DataMap(PropertyTag.Swim.as(new SwimAnimation(type, 0.75f))),
+			new SerialMap(TilePropertyTag.Swim.as(new SwimAnimation(type, 0.75f))),
 			
 			DestructionManager.INDESTRUCTIBLE(type),
 			
@@ -56,7 +56,7 @@ public class TileType {
 			))
 		),
 		
-		GRASS(Color.GREEN, type -> new TileType(type, true, new DataMap(),
+		GRASS(Color.GREEN, type -> new TileType(type, true, new SerialMap(),
 			new DestructionManager.DestructibleBuilder(type, 1, false)
 				.require(new RequiredTool(ToolType.Shovel))
 				.make(),
@@ -103,8 +103,8 @@ public class TileType {
 		)),
 		
 		WATER(Color.BLUE, type -> new TileType(type, true,
-			new DataMap(PropertyTag.SpeedRatio.as(0.6f))
-			.add(PropertyTag.Swim.as(new SwimAnimation(type))),
+			new SerialMap(TilePropertyTag.SpeedRatio.as(0.6f))
+			.add(TilePropertyTag.Swim.as(new SwimAnimation(type))),
 			
 			DestructionManager.INDESTRUCTIBLE(type),
 			
@@ -144,7 +144,7 @@ public class TileType {
 		DOOR_CLOSED(BROWN.brighter(), DoorTile::getClosedDoor),
 		
 		TORCH(Color.ORANGE, type -> new TileType(type, true,
-			new DataMap(PropertyTag.LightRadius.as(2f)),
+			new SerialMap(TilePropertyTag.LightRadius.as(2f)),
 			
 			new DestructionManager(type),
 			
@@ -191,8 +191,8 @@ public class TileType {
 		
 		/** @noinspection StaticMethodReferencedViaSubclass*/
 		public static void init() {
-			CacheTag.init();
-			PropertyTag.init();
+			TileCacheTag.init();
+			TilePropertyTag.init();
 		}
 		
 		public TileType getTileType(@NotNull WorldManager world) {
@@ -203,7 +203,7 @@ public class TileType {
 	}
 	
 	private final TileTypeEnum enumType;
-	final DataMap propertyMap;
+	final SerialMap propertyMap;
 	final boolean walkable;
 	final DestructionManager destructionManager;
 	final TileTypeRenderer renderer;
@@ -222,12 +222,12 @@ public class TileType {
 		this(enumType, false, destructionManager, renderer);
 	}*/
 	protected TileType(@NotNull TileTypeEnum enumType, boolean walkable, DestructionManager destructionManager, TileTypeRenderer renderer) {
-		this(enumType, walkable, new DataMap(), destructionManager, renderer);
+		this(enumType, walkable, new SerialMap(), destructionManager, renderer);
 	}
-	protected TileType(@NotNull TileTypeEnum enumType, boolean walkable, DataMap propertyMap, DestructionManager destructionManager, TileTypeRenderer renderer) {
+	protected TileType(@NotNull TileTypeEnum enumType, boolean walkable, SerialMap propertyMap, DestructionManager destructionManager, TileTypeRenderer renderer) {
 		this(enumType, walkable, propertyMap, destructionManager, renderer, new UpdateManager(enumType));
 	}
-	protected TileType(@NotNull TileTypeEnum enumType, boolean walkable, DataMap propertyMap, DestructionManager destructionManager, TileTypeRenderer renderer, UpdateManager updateManager) {
+	protected TileType(@NotNull TileTypeEnum enumType, boolean walkable, SerialMap propertyMap, DestructionManager destructionManager, TileTypeRenderer renderer, UpdateManager updateManager) {
 		this.enumType = enumType;
 		this.walkable = walkable;
 		this.propertyMap = propertyMap;
@@ -236,11 +236,11 @@ public class TileType {
 		this.updateManager = updateManager;
 	}
 	
-	public DataMap getInitialData() { return new DataMap(); }
+	public SerialMap getInitialData() { return new SerialMap(); }
 	
-	public boolean hasProperty(PropertyTag<?> tag) { return propertyMap.contains(tag); }
+	public boolean hasProperty(TilePropertyTag<?> tag) { return propertyMap.contains(tag); }
 	
-	public <T> T getPropertyOrDefault(PropertyTag<T> tag, T defaultValue) {
+	public <T> T getPropertyOrDefault(TilePropertyTag<T> tag, T defaultValue) {
 		return propertyMap.getOrDefault(tag, defaultValue);
 	}
 	
@@ -276,12 +276,12 @@ public class TileType {
 	 * @return how long to wait before next call, or 0 for never (until adjacent tile update)
 	 */ 
 	public float update(@NotNull Tile tile) {
-		DataMap dataMap = tile.getDataMap(this);
+		SerialMap dataMap = tile.getDataMap(this);
 		
 		float now = tile.getWorld().getGameTime();
-		float lastUpdate = dataMap.getOrDefault(CacheTag.LastUpdate, now);
+		float lastUpdate = dataMap.getOrDefault(TileCacheTag.LastUpdate, now);
 		float delta = now - lastUpdate;
-		dataMap.put(CacheTag.LastUpdate, now);
+		dataMap.put(TileCacheTag.LastUpdate, now);
 		
 		return updateManager.update(tile, delta);
 	}

@@ -9,7 +9,7 @@ import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.tile.SwimAnimation;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.data.PropertyTag;
+import miniventure.game.world.tile.data.TilePropertyTag;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -43,7 +43,7 @@ public class ClientEntity extends Entity {
 		if(!particle) {
 			Tile closest = getClosestTile();
 			if(closest != null) {
-				SwimAnimation swimAnimation = closest.getType().getPropertyOrDefault(PropertyTag.Swim, null);
+				SwimAnimation swimAnimation = closest.getType().getPropertyOrDefault(TilePropertyTag.Swim, null);
 				if(swimAnimation != null) {
 					Vector2 pos = getCenter().sub(posOffset).sub(0, getSize().y / 2).scl(Tile.SIZE);
 					swimAnimation.drawSwimAnimation(batch, pos, getWorld());

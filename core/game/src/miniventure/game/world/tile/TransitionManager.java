@@ -4,9 +4,9 @@ import java.util.EnumMap;
 import java.util.HashMap;
 
 import miniventure.game.texture.TextureHolder;
+import miniventure.game.util.customenum.SerialMap;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
-import miniventure.game.world.tile.data.CacheTag;
-import miniventure.game.world.tile.data.DataMap;
+import miniventure.game.world.tile.data.TileCacheTag;
 
 import com.badlogic.gdx.utils.Array;
 
@@ -81,15 +81,15 @@ public class TransitionManager {
 		HashMap<String, TransitionAnimation> animations = isEntering ? entranceAnimations : exitAnimations;
 		for(TransitionAnimation animation: animations.values()) {
 			if(animation.isTriggerType(other)) {
-				DataMap dataMap = tile.getDataMap();
-				dataMap.put(CacheTag.TransitionName, animation.name);
+				SerialMap dataMap = tile.getDataMap();
+				dataMap.put(TileCacheTag.TransitionName, animation.name);
 				float start = tile.getWorld().getGameTime();
-				dataMap.put(CacheTag.TransitionStart, start);
-				dataMap.put(CacheTag.TransitionMode, isEntering ? TransitionMode.ENTERING : TransitionMode.EXITING);
+				dataMap.put(TileCacheTag.TransitionStart, start);
+				dataMap.put(TileCacheTag.TransitionMode, isEntering ? TransitionMode.ENTERING : TransitionMode.EXITING);
 				if(addNext)
-					dataMap.put(CacheTag.TransitionTile, other.getEnumType());
+					dataMap.put(TileCacheTag.TransitionTile, other.getEnumType());
 				else
-					dataMap.remove(CacheTag.TransitionTile);
+					dataMap.remove(TileCacheTag.TransitionTile);
 				return true;
 			}
 		}
@@ -98,10 +98,10 @@ public class TransitionManager {
 	}
 	
 	TileAnimation<TextureHolder> getTransitionSprite(@NotNull Tile tile) {
-		DataMap dataMap = tile.getDataMap(tileType);
+		SerialMap dataMap = tile.getDataMap(tileType);
 		
-		TransitionMode mode = dataMap.get(CacheTag.TransitionMode);
-		String name = dataMap.get(CacheTag.TransitionName);
+		TransitionMode mode = dataMap.get(TileCacheTag.TransitionMode);
+		String name = dataMap.get(TileCacheTag.TransitionName);
 		
 		TransitionAnimation animation = getAnimationStyle(mode, name);
 		if(animation == null)
@@ -123,13 +123,13 @@ public class TransitionManager {
 	}*/
 	
 	void resetAnimation(@NotNull Tile tile) {
-		DataMap map = tile.getDataMap(tileType);
-		map.put(CacheTag.TransitionStart, tile.getWorld().getGameTime());
+		SerialMap map = tile.getDataMap(tileType);
+		map.put(TileCacheTag.TransitionStart, tile.getWorld().getGameTime());
 	}
 	
 	private boolean isTransitionMode(@NotNull Tile tile, TransitionMode mode) {
-		DataMap map = tile.getDataMap(tileType);
-		return map.getOrDefault(CacheTag.TransitionMode, TransitionMode.NONE) == mode;
+		SerialMap map = tile.getDataMap(tileType);
+		return map.getOrDefault(TileCacheTag.TransitionMode, TransitionMode.NONE) == mode;
 	}
 	
 	public boolean playingAnimation(@NotNull Tile tile) { return !isTransitionMode(tile, TransitionMode.NONE); }
@@ -137,25 +137,25 @@ public class TransitionManager {
 	public boolean playingExitAnimation(@NotNull Tile tile) { return isTransitionMode(tile, TransitionMode.EXITING); }
 	
 	public float tryFinishAnimation(@NotNull Tile tile) {
-		DataMap dataMap = tile.getDataMap(tileType);
+		SerialMap dataMap = tile.getDataMap(tileType);
 		
-		TransitionAnimation anim = getAnimationStyle(dataMap.get(CacheTag.TransitionMode), dataMap.get(CacheTag.TransitionName));
+		TransitionAnimation anim = getAnimationStyle(dataMap.get(TileCacheTag.TransitionMode), dataMap.get(TileCacheTag.TransitionName));
 		
 		if(anim == null)
 			return 0;
 		
 		float now = tile.getWorld().getGameTime();
-		float prev = dataMap.get(CacheTag.TransitionStart);
+		float prev = dataMap.get(TileCacheTag.TransitionStart);
 		float timeElapsed = now - prev;
 		
 		if(timeElapsed < anim.getDuration())
 			return anim.getDuration() - timeElapsed;
 		
 		
-		TransitionMode mode = dataMap.remove(CacheTag.TransitionMode);
-		dataMap.remove(CacheTag.TransitionStart);
-		dataMap.remove(CacheTag.TransitionName);
-		TileTypeEnum nextType = dataMap.remove(CacheTag.TransitionTile);
+		TransitionMode mode = dataMap.remove(TileCacheTag.TransitionMode);
+		dataMap.remove(TileCacheTag.TransitionStart);
+		dataMap.remove(TileCacheTag.TransitionName);
+		TileTypeEnum nextType = dataMap.remove(TileCacheTag.TransitionTile);
 		
 		// if entering, no action required. if removing, remove the current tile from the stack, specifying not to check for an exit animation. If removing, and there is data for a tile type, then add that tile type.
 		

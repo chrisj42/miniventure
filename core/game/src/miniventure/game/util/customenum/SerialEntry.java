@@ -1,13 +1,13 @@
-package miniventure.game.world.tile.data;
+package miniventure.game.util.customenum;
 
 import java.lang.reflect.InvocationTargetException;
 
-class DataEntry<T, D extends DataTag<T>> {
+class SerialEntry<T, D extends SerialEnum<T>> {
 	
 	final D key;
 	final T value;
 	
-	DataEntry(D dataTag, T value) {
+	SerialEntry(D dataTag, T value) {
 		this.key = dataTag;
 		this.value = value;
 	}
@@ -17,7 +17,7 @@ class DataEntry<T, D extends DataTag<T>> {
 	}
 	
 	@SuppressWarnings("unchecked")
-	static <D extends DataTag<?>> DataEntry<?, D> deserialize(String data, Class<D> tagClass) {
+	static <D extends SerialEnum<?>> SerialEntry<?, D> deserialize(String data, Class<D> tagClass) {
 		String key = data.substring(0, data.indexOf(','));
 		String value = data.substring(data.indexOf(',')+1);
 		
@@ -29,6 +29,6 @@ class DataEntry<T, D extends DataTag<T>> {
 			throw new IllegalStateException("All classes extending DataTag must have a static valueOf(String) method that returns an instance of the class; "+tagClass+" does not.");
 		}
 		
-		return (DataEntry<?, D>) tag.serialEntry(value);
+		return (SerialEntry<?, D>) tag.serialEntry(value);
 	}
 }

@@ -5,6 +5,7 @@ import java.util.HashSet;
 
 import miniventure.game.item.Item;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.customenum.SerialMap;
 import miniventure.game.world.Level;
 import miniventure.game.world.Point;
 import miniventure.game.world.WorldManager;
@@ -12,11 +13,9 @@ import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
-import miniventure.game.world.tile.data.CacheTag;
-import miniventure.game.world.tile.data.DataMap;
-import miniventure.game.world.tile.data.PropertyTag;
+import miniventure.game.world.tile.data.TileCacheTag;
+import miniventure.game.world.tile.data.TilePropertyTag;
 
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
@@ -49,10 +48,10 @@ public abstract class Tile implements WorldObject {
 	
 	@NotNull private final Level level;
 	protected final int x, y;
-	private EnumMap<TileTypeEnum, DataMap> dataMaps = new EnumMap<>(TileTypeEnum.class);
+	private EnumMap<TileTypeEnum, SerialMap> dataMaps = new EnumMap<>(TileTypeEnum.class);
 	
 	// the TileType array is ALWAYS expected in order of bottom to top.
-	protected Tile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, @Nullable DataMap[] dataMaps) {
+	protected Tile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, @Nullable SerialMap[] dataMaps) {
 		this.level = level;
 		this.x = x;
 		this.y = y;
@@ -78,9 +77,9 @@ public abstract class Tile implements WorldObject {
 	public TileType getType() { return tileStack.getTopLayer(); }
 	public TileStack getTypeStack() { return tileStack; }
 	
-	public DataMap getDataMap() { return getDataMap(getType().getEnumType()); }
-	public DataMap getDataMap(TileType tileType) { return getDataMap(tileType.getEnumType()); }
-	public DataMap getDataMap(TileTypeEnum tileType) {
+	public SerialMap getDataMap() { return getDataMap(getType().getEnumType()); }
+	public SerialMap getDataMap(TileType tileType) { return getDataMap(tileType.getEnumType()); }
+	public SerialMap getDataMap(TileTypeEnum tileType) {
 		synchronized (dataLock) {
 			return dataMaps.get(tileType);
 		}
@@ -224,7 +223,7 @@ public abstract class Tile implements WorldObject {
 	public float getLightRadius() {
 		float maxRadius = 0;
 		for(TileType type: tileStack.getTypes())
-			maxRadius = Math.max(maxRadius, type.getPropertyOrDefault(PropertyTag.LightRadius, 0f));
+			maxRadius = Math.max(maxRadius, type.getPropertyOrDefault(TilePropertyTag.LightRadius, 0f));
 		
 		return maxRadius;
 	}
@@ -312,17 +311,17 @@ public abstract class Tile implements WorldObject {
 			return types;
 		}
 		
-		public DataMap[] getDataMaps() { return getDataMaps(data); }
-		public static DataMap[] getDataMaps(String[] data) {
-			DataMap[] maps = new DataMap[data.length];
+		public SerialMap[] getDataMaps() { return getDataMaps(data); }
+		public static SerialMap[] getDataMaps(String[] data) {
+			SerialMap[] maps = new SerialMap[data.length];
 			for(int i = 0; i < data.length; i++)
-				maps[i] = DataMap.deserialize(data[i], CacheTag.class);
+				maps[i] = SerialMap.deserialize(data[i], TileCacheTag.class);
 			return maps;
 		}
 		
 		public void apply(Tile tile) {
 			TileTypeEnum[] types = getTypes();
-			DataMap[] maps = getDataMaps();
+			SerialMap[] maps = getDataMaps();
 			
 			synchronized (tile.dataLock) {
 				tile.tileStack = new TileStack(tile.getWorld(), types);

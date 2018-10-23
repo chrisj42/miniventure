@@ -1,9 +1,9 @@
 package miniventure.game.world.tile;
 
 import miniventure.game.item.Item;
+import miniventure.game.util.customenum.SerialMap;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Player;
-import miniventure.game.world.tile.data.DataMap;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,7 +19,7 @@ public class ServerTileType extends TileType {
 	}
 	
 	@Override
-	public DataMap getInitialData() {
+	public SerialMap getInitialData() {
 		return model.getInitialData();
 	}
 	

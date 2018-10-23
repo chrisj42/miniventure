@@ -9,10 +9,10 @@ import java.util.TreeMap;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.RelPos;
+import miniventure.game.util.customenum.SerialMap;
 import miniventure.game.world.Level;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
-import miniventure.game.world.tile.data.DataMap;
-import miniventure.game.world.tile.data.PropertyTag;
+import miniventure.game.world.tile.data.TilePropertyTag;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
@@ -29,7 +29,7 @@ public class RenderTile extends Tile {
 	
 	private final Object spriteLock = new Object();
 	
-	public RenderTile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, DataMap[] data) {
+	public RenderTile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, SerialMap[] data) {
 		super(level, x, y, types, data);
 	}
 	
@@ -45,7 +45,7 @@ public class RenderTile extends Tile {
 			for(int i = 0; i < spriteStack.size(); i++) {
 				TileAnimation<TextureHolder> animation = spriteStack.get(i);
 				//typeStack.get(i).getRenderer().transitionManager.tryFinishAnimation(this);
-				batch.draw(animation.getKeyFrame(this).texture, (x - posOffset.x) * SIZE, (y - posOffset.y + typeStack.get(i).getPropertyOrDefault(PropertyTag.ZOffset, 0f)) * SIZE);
+				batch.draw(animation.getKeyFrame(this).texture, (x - posOffset.x) * SIZE, (y - posOffset.y + typeStack.get(i).getPropertyOrDefault(TilePropertyTag.ZOffset, 0f)) * SIZE);
 			}
 		}
 	}

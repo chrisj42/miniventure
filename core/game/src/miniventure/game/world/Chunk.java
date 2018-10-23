@@ -1,10 +1,10 @@
 package miniventure.game.world;
 
+import miniventure.game.util.customenum.SerialMap;
 import miniventure.game.util.function.FetchTriFunction;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.Tile.TileData;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
-import miniventure.game.world.tile.data.DataMap;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -37,7 +37,7 @@ public class Chunk implements Boundable {
 		}
 		this.height = height;
 	}
-	public Chunk(@NotNull Level level, @NotNull ChunkData data, FetchTriFunction<Point, TileTypeEnum[], DataMap[], Tile> tileFetcher) {
+	public Chunk(@NotNull Level level, @NotNull ChunkData data, FetchTriFunction<Point, TileTypeEnum[], SerialMap[], Tile> tileFetcher) {
 		this.level = level;
 		this.chunkX = data.chunkX;
 		this.chunkY = data.chunkY;

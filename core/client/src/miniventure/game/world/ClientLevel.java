@@ -14,7 +14,7 @@ import miniventure.game.world.entity.Entity;
 import miniventure.game.world.tile.ClientTile;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.Tile.TileData;
-import miniventure.game.world.tile.data.PropertyTag;
+import miniventure.game.world.tile.data.TilePropertyTag;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
@@ -74,7 +74,7 @@ public class ClientLevel extends Level {
 				objects.add(e);
 		}
 		for(Tile t: tiles) {
-			if(t.getType().hasProperty(PropertyTag.ZOffset)) // TODO instead, use "not permeable by player"
+			if(t.getType().hasProperty(TilePropertyTag.ZOffset)) // TODO instead, use "not permeable by player"
 				objects.add(t);
 			else
 				under.add(t);

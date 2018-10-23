@@ -3,11 +3,11 @@ package miniventure.game.world.tile;
 import miniventure.game.item.Item;
 import miniventure.game.item.TileItem;
 import miniventure.game.item.ToolType;
+import miniventure.game.util.customenum.SerialMap;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.tile.DestructionManager.RequiredTool;
-import miniventure.game.world.tile.data.DataMap;
-import miniventure.game.world.tile.data.PropertyTag;
+import miniventure.game.world.tile.data.TilePropertyTag;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -44,7 +44,7 @@ public class DoorTile extends TileType {
 	
 	private DoorTile(@NotNull TileTypeEnum enumType, boolean walkable, DestructionManager destructionManager, TransitionManager transitionManager) {
 		super(enumType, walkable,
-			new DataMap(PropertyTag.ZOffset.as(0.4f)),
+			new SerialMap(TilePropertyTag.ZOffset.as(0.4f)),
 			
 			destructionManager,
 			
