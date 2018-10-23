@@ -8,8 +8,8 @@ import miniventure.game.world.entity.Entity;
  */
 public class EntityItem extends Item {
 	
-	public EntityItem(String entityData) {
-		
+	public EntityItem(Entity e) {
+		super(ItemType.Entity, e.getClass().getSimpleName());
 	}
 	
 	@Override
