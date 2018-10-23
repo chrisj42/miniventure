@@ -22,6 +22,7 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class EntityRenderer {
 	
@@ -246,17 +247,19 @@ public abstract class EntityRenderer {
 		private EntityRenderer mainRenderer;
 		private final boolean blinkFirst;
 		private final float initialDuration;
+		@Nullable private final Color blinkColor;
 		private final Blinker blinker;
 		
-		public BlinkRenderer(EntityRenderer mainRenderer, float initialDuration, boolean blinkFirst, Blinker blinker) {
+		public BlinkRenderer(EntityRenderer mainRenderer, @Nullable Color blinkColor, float initialDuration, boolean blinkFirst, Blinker blinker) {
 			this.mainRenderer = mainRenderer;
+			this.blinkColor = blinkColor;
 			this.initialDuration = initialDuration;
 			this.blinkFirst = blinkFirst;
 			this.blinker = blinker;
 		}
 		
 		private BlinkRenderer(String[] data) {
-			this(EntityRenderer.deserialize(MyUtils.parseLayeredString(data[0])), Float.parseFloat(data[1]), Boolean.parseBoolean(data[2]), Blinker.load(MyUtils.parseLayeredString(data[3])));
+			this(EntityRenderer.deserialize(MyUtils.parseLayeredString(data[0])), data[1].equals("null")?null:Color.valueOf(data[1]), Float.parseFloat(data[2]), Boolean.parseBoolean(data[3]), Blinker.load(MyUtils.parseLayeredString(data[4])));
 		}
 		
 		public void setRenderer(EntityRenderer renderer) {
@@ -267,6 +270,7 @@ public abstract class EntityRenderer {
 		protected String[] save() {
 			return new String[] {
 				MyUtils.encodeStringArray(EntityRenderer.serialize(mainRenderer)),
+				blinkColor==null?"null":blinkColor.toString(),
 				String.valueOf(initialDuration),
 				String.valueOf(blinkFirst),
 				MyUtils.encodeStringArray(blinker.save())
@@ -289,6 +293,12 @@ public abstract class EntityRenderer {
 		public void render(float x, float y, Batch batch, float drawableHeight) {
 			if(!blinkerActive() || blinker.shouldRender())
 				mainRenderer.render(x, y, batch, drawableHeight);
+			else if(blinkColor != null) {
+				Color c = batch.getColor();
+				batch.setColor(blinkColor);
+				mainRenderer.render(x, y, batch, drawableHeight);
+				batch.setColor(c);
+			}
 		}
 		
 		@Override

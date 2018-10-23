@@ -11,6 +11,7 @@ import miniventure.game.world.tile.SwimAnimation;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.data.PropertyTag;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -76,7 +77,7 @@ public class ClientEntity extends Entity {
 	
 	// power = health percent, loosely
 	public void hurt(WorldObject source, float power) {
-		setBlinker(0.5f, true, new FrameBlinker(5, 1, false));
+		setBlinker(Color.RED, 0.5f, true, new FrameBlinker(5, 1, false));
 	}
 	
 	public boolean move(Vector2 moveDist, boolean validate) { return move(moveDist.x, moveDist.y, validate); }

@@ -3,11 +3,11 @@ package miniventure.game.world.entity.particle;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import miniventure.game.world.entity.ClassDataList;
 import miniventure.game.util.Version;
 import miniventure.game.util.blinker.FrameBlinker;
 import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.Level;
+import miniventure.game.world.entity.ClassDataList;
 import miniventure.game.world.entity.ServerEntity;
 
 import com.badlogic.gdx.math.MathUtils;
@@ -38,7 +38,7 @@ public abstract class BounceEntity extends ServerEntity {
 		
 		velocity = new Vector3(goalDir, MathUtils.random(8f, 12f));
 		
-		setBlinker(lifetime * BLINK_THRESHOLD, false, new FrameBlinker(1, 1, false));
+		setBlinker(null, lifetime * BLINK_THRESHOLD, false, new FrameBlinker(1, 1, false));
 	}
 	
 	protected BounceEntity(ClassDataList allData, final Version version, ValueFunction<ClassDataList> modifier) {
@@ -52,7 +52,7 @@ public abstract class BounceEntity extends ServerEntity {
 		time = Float.parseFloat(data.get(4));
 		lastBounceTime = Float.parseFloat(data.get(5));
 		
-		setBlinker(lifetime * BLINK_THRESHOLD, false, new FrameBlinker(1, 1, false));
+		setBlinker(null, lifetime * BLINK_THRESHOLD, false, new FrameBlinker(1, 1, false));
 	}
 	
 	@Override

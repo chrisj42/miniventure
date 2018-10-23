@@ -9,6 +9,7 @@ import miniventure.game.world.entity.EntityRenderer.BlinkRenderer;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.tile.Tile;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -65,8 +66,8 @@ public abstract class Entity implements WorldObject {
 		if(blinker != null)
 			blinker.setRenderer(renderer);
 	}
-	public void setBlinker(float initialDuration, boolean blinkFirst, Blinker blinker) {
-		this.blinker = new BlinkRenderer(renderer, initialDuration, blinkFirst, blinker);
+	public void setBlinker(@Nullable Color blinkColor, float initialDuration, boolean blinkFirst, Blinker blinker) {
+		this.blinker = new BlinkRenderer(renderer, blinkColor, initialDuration, blinkFirst, blinker);
 	}
 	@NotNull public EntityRenderer getRenderer() {
 		if(blinker != null) return blinker;
