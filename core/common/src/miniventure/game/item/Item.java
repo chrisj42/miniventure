@@ -95,6 +95,6 @@ public abstract class Item {
 	public static Item load(String[] data) {
 		if(data == null) return null;
 		ItemType type = ItemType.valueOf(data[0]);
-		return type.load(Arrays.copyOfRange(data, 1, data.length));
+		return null;//type.load(Arrays.copyOfRange(data, 1, data.length));
 	}
 }

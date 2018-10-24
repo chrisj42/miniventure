@@ -49,7 +49,7 @@ project(":core:server") {
 	}
 }
 
-project(":desktop") {
+project(":core:desktop") {
 	dependencies {
 		compile project(":core:client")
 		compile project(":core:server")
