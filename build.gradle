@@ -23,7 +23,7 @@ allprojects {
 	}
 }
 
-project(":core:game") {
+project(":core:common") {
 	dependencies {
 		compile "com.badlogicgames.gdx:gdx:$gdxVersion"
 		compile "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
@@ -38,14 +38,14 @@ project(":core:game") {
 
 project(":core:client") {
 	dependencies {
-		compile project(":core:game")
+		compile project(":core:common")
 		compile "com.kotcrab.vis:vis-ui:1.4.0"
 	}
 }
 
 project(":core:server") {
 	dependencies {
-		compile project(":core:game")
+		compile project(":core:common")
 	}
 }
 
@@ -62,6 +62,6 @@ project(":desktop") {
 
 project(":gentest") {
 	dependencies {
-		compile project(":core:game")
+		compile project(":core:common")
 	}
 }
