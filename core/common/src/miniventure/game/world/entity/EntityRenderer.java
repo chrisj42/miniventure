@@ -83,7 +83,7 @@ public abstract class EntityRenderer {
 		}
 		
 		protected ItemSpriteRenderer(String[] data) {
-			this(Item.load(data));
+			this(new Item);
 		}
 		
 		@Override

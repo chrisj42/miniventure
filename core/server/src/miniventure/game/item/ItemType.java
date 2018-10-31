@@ -35,7 +35,7 @@ public enum ItemType {
 					}
 				}
 			}
-			return (Item) clazz.getMethod("load", String[].class).invoke(null, (Object)Arrays.copyOfRange(data, 1, data.length));
+			return (ServerItem) clazz.getMethod("load", String[].class).invoke(null, (Object)Arrays.copyOfRange(data, 1, data.length));
 		} catch(ClassNotFoundException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
 			e.printStackTrace();
 		}
@@ -53,7 +53,7 @@ public enum ItemType {
 	
 	@FunctionalInterface
 	interface ItemFetcher {
-		Item load(String[] data);
+		ServerItem load(String[] data);
 	}
 	
 	private ItemFetcher fetcher;
@@ -61,12 +61,12 @@ public enum ItemType {
 		this.fetcher = fetcher;
 	}
 	
-	public Item load(String[] data) {
+	public ServerItem load(String[] data) {
 		return fetcher.load(data);
 	}
 	
 	
-	static abstract class SimpleEnumItem extends Item {
+	static abstract class SimpleEnumItem extends ServerItem {
 		
 		SimpleEnumItem(@NotNull ItemType type, @NotNull String name) {
 			super(type, name);

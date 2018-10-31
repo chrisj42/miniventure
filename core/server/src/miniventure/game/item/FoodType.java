@@ -20,7 +20,7 @@ public enum FoodType {
 	}
 	
 	@NotNull
-	public Item get() { return new FoodItem(); }
+	public FoodItem get() { return new FoodItem(); }
 	
 	class FoodItem extends SimpleEnumItem {
 		private FoodItem() {

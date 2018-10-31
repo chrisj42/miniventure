@@ -6,10 +6,10 @@ import miniventure.game.world.entity.Entity;
  * An item that, when placed in the world, becomes an entity.
  * This is similar to TileItems, which become tiles when placed.
  */
-public class EntityItem extends Item {
+public class EntityItem extends ServerItem {
 	
 	public EntityItem(String entityData) {
-		
+		super(ItemType)
 	}
 	
 	@Override
@@ -18,7 +18,7 @@ public class EntityItem extends Item {
 	}
 	
 	@Override
-	public Item copy() {
+	public EntityItem copy() {
 		return null;
 	}
 }

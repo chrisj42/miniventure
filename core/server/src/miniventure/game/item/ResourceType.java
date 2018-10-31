@@ -9,7 +9,7 @@ public enum ResourceType {
 	Log, Flint, Coal, Cotton, Fabric, Stone, Iron, Tungsten, Ruby;
 	
 	@NotNull
-	public Item get() {
+	public ResourceItem get() {
 		return new ResourceItem();
 	}
 	
