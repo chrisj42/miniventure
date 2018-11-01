@@ -12,6 +12,22 @@ import org.jetbrains.annotations.NotNull;
 
 public class InventoryScreen extends MenuScreen {
 	
+	/*
+		This will be handled as follows:
+		- during normal play, the client has item references for the whole inventory
+		- the hotbar displays items at certain indices in the inventory
+		- updates to a single inventory item/stack are sent as a serialized item stack with an index
+		- whenever a new item is added, the entire inventory and hotbar references are sent over by the server.
+		- when an item is dropped, the client automatically removes it from the inventory (and hotbar if applicable).
+			- if an item stack reaches zero, then the index of all hotbar items greater than the removed index are lowered by one.
+		
+		- when opening the inventory screen, the client asks for an inventory update.
+		- any item drops are handled just like hotbar drops.
+		- when the inventory screen closes, if hotbar changes were made, the hotbar selections are sent to the server.
+			- and maybe the client gets another inventory update. we'll see.
+			
+	 */
+	
 	private final ClientHands hands;
 	
 	private final InventoryDisplayGroup invGroup;

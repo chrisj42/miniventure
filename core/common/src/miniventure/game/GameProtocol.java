@@ -449,6 +449,7 @@ public interface GameProtocol {
 	
 	// sent by client to drop an item from the inventory
 	class ItemDropRequest {
+		// TODO only send inventory/hotbar index, boolean for hotbar, and boolean for whole stack.
 		public final String[] stackData;
 		
 		private ItemDropRequest() { this((String[])null); }
