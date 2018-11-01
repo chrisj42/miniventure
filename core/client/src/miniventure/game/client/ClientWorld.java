@@ -172,7 +172,7 @@ public class ClientWorld extends WorldManager {
 			return;
 		}
 		
-		level.loadChunk(new Chunk(level, data, (p, types, dataMaps) -> new ClientTile(level, p.x, p.y, types, dataMaps)));
+		level.loadChunk(new Chunk(level, data, (x, y, types, dataMaps) -> new ClientTile(level, x, y, types, dataMaps)));
 	}
 	
 	

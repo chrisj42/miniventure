@@ -5,7 +5,6 @@ import java.lang.reflect.InvocationTargetException;
 
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
-import miniventure.game.util.function.FetchBiFunction;
 import miniventure.game.util.function.MapFunction;
 
 @SuppressWarnings("unchecked")
@@ -20,6 +19,10 @@ public abstract class SerialEnum<T> extends DataEnum<T> {
 		- None of these values will ever be saved to file. TileType properties will be regenerated, and tile data-caches don't hold important data.
 	 */
 	
+	@FunctionalInterface
+	interface ClassParser<T> {
+		T get(String data, Class<T> clazz);
+	}
 	
 	private final MapFunction<T, String> valueWriter;
 	private final MapFunction<String, T> valueParser;
@@ -78,9 +81,6 @@ public abstract class SerialEnum<T> extends DataEnum<T> {
 			}
 		});
 	}
-	
-	@FunctionalInterface
-	interface ClassParser<T> extends FetchBiFunction<String, Class<T>, T> {}
 	
 	private static <T> MapFunction<T, String> getValueWriter(Class<T> valueClass, MapFunction<Object, String> baseParser) {
 		if(valueClass.isArray())

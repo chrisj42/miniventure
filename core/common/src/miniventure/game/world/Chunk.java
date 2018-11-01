@@ -1,7 +1,6 @@
 package miniventure.game.world;
 
 import miniventure.game.util.customenum.SerialMap;
-import miniventure.game.util.function.FetchTriFunction;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.Tile.TileData;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
@@ -22,7 +21,17 @@ public class Chunk implements Boundable {
 	public final int width, height;
 	public final int chunkX, chunkY;
 	
-	public Chunk(int chunkX, int chunkY, @NotNull Level level, @NotNull TileTypeEnum[][][] tileTypes, @NotNull FetchTriFunction<Integer, Integer, TileTypeEnum[], Tile> tileFetcher) {
+	@FunctionalInterface
+	public interface TileMaker {
+		Tile get(int x, int y, TileTypeEnum[] types);
+	}
+	
+	@FunctionalInterface
+	public interface TileLoader {
+		Tile get(int x, int y, TileTypeEnum[] types, SerialMap[] dataMaps);
+	}
+	
+	public Chunk(int chunkX, int chunkY, @NotNull Level level, @NotNull TileTypeEnum[][][] tileTypes, @NotNull TileMaker tileFetcher) {
 		this.level = level;
 		tiles = new Tile[tileTypes.length][];
 		width = tiles.length;
@@ -37,7 +46,7 @@ public class Chunk implements Boundable {
 		}
 		this.height = height;
 	}
-	public Chunk(@NotNull Level level, @NotNull ChunkData data, FetchTriFunction<Point, TileTypeEnum[], SerialMap[], Tile> tileFetcher) {
+	public Chunk(@NotNull Level level, @NotNull ChunkData data, TileLoader tileFetcher) {
 		this.level = level;
 		this.chunkX = data.chunkX;
 		this.chunkY = data.chunkY;
@@ -50,7 +59,7 @@ public class Chunk implements Boundable {
 			height = Math.max(height, tiles[x].length);
 			for(int y = 0; y < tiles[x].length; y++) {
 				TileData tileData = data.tileData[x][y];
-				tiles[x][y] = tileFetcher.get(new Point(chunkX * SIZE + x, chunkY * SIZE + y), tileData.getTypes(), tileData.getDataMaps());
+				tiles[x][y] = tileFetcher.get(chunkX * SIZE + x, chunkY * SIZE + y, tileData.getTypes(), tileData.getDataMaps());
 			}
 		}
 		this.height = height;
