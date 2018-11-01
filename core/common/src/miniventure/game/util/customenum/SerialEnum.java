@@ -30,8 +30,27 @@ public abstract class SerialEnum<T> extends DataEnum<T> {
 	}
 	
 	protected SerialEnum(final Class<T> valueClass) {
-		this.valueWriter = getValueWriter(valueClass, String::valueOf);
-		this.valueParser = getValueParser(valueClass, (data, baseClass) -> {
+		this.valueWriter = defaultValueWriter(valueClass);
+		this.valueParser = defaultValueParser(valueClass);
+	}
+	
+	// these two constructors below are essentially the same as the two above, except that they convert the value type to a substitute type which gets serialized instead.
+	
+	protected <U> SerialEnum(MapFunction<T, U> substituter, MapFunction<U, T> unsubstituter, MapFunction<U, String> substituteWriter, MapFunction<String, U> substituteParser) {
+		this.valueWriter = val -> substituteWriter.get(substituter.get(val));
+		this.valueParser = string -> unsubstituter.get(substituteParser.get(string));
+	}
+	
+	protected <U> SerialEnum(final Class<U> substituteClass, MapFunction<T, U> substituter, MapFunction<U, T> unsubstituter) {
+		this(substituter, unsubstituter, defaultValueWriter(substituteClass), defaultValueParser(substituteClass));
+	}
+	
+	private static <T> MapFunction<T, String> defaultValueWriter(final Class<T> valueClass) {
+		return getValueWriter(valueClass, String::valueOf);
+	}
+	
+	private static <T> MapFunction<String, T> defaultValueParser(final Class<T> valueClass) {
+		return getValueParser(valueClass, (data, baseClass) -> {
 			if(Enum.class.isAssignableFrom(baseClass))
 				return Enum.valueOf(baseClass.asSubclass(Enum.class), data);
 			
