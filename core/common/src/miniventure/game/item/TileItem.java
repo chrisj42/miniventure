@@ -16,7 +16,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class TileItem extends ServerItem {
+public class TileItem extends Item {
 	
 	private static final HashMap<TileTypeEnum, TileItem> items = new HashMap<>();
 	

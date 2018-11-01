@@ -8,7 +8,7 @@ import miniventure.game.world.entity.mob.Player;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 
-public class ToolItem extends ServerItem {
+public class ToolItem extends Item {
 	
 	private static final float DURABILITY_BAR_HEIGHT = 4; // 8 pixels.
 	

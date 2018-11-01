@@ -22,21 +22,26 @@ public abstract class Item {
 	
 	@NotNull private final TextureHolder texture;
 	@NotNull private final String name;
+	@NotNull private final ItemType type;
 	
 	private boolean used = false;
 	
-	Item(@NotNull String name) {
-		this(name.replace("_", " "), GameCore.icons.get("items/"+name.toLowerCase()));
+	Item(@NotNull ItemType type, @NotNull String name) {
+		this(type, name.replace("_", " "), GameCore.icons.get("items/"+name.toLowerCase()));
 	}
-	Item(@NotNull String name, @NotNull TextureHolder texture) {
+	Item(@NotNull ItemType type, @NotNull String name, @NotNull TextureHolder texture) {
 		this.texture = texture;
 		this.name = name;
+		this.type = type;
 	}
 	
 	@NotNull public TextureHolder getTexture() { return texture; }
 	@NotNull public String getName() { return name; }
+	@NotNull public ItemType getType() { return type; }
 	public int getStaminaUsage() { return 1; } // default; note that without a successful attack or interaction, no stamina is lost.
 	public int getSpaceUsage() { return 1; } // default
+	
+	public abstract String[] save();
 	
 	// called to reset the item
 	@Nullable public final Item resetUsage() {
@@ -82,4 +87,14 @@ public abstract class Item {
 		return name + " Item";
 	}
 	
+	public static String[] save(Item item) {
+		if(item == null) return null;
+		return item.save();
+	}
+	
+	public static Item load(String[] data) {
+		if(data == null) return null;
+		ItemType type = ItemType.valueOf(data[0]);
+		return null;//type.load(Arrays.copyOfRange(data, 1, data.length));
+	}
 }
