@@ -205,9 +205,6 @@ public abstract class Level implements Taggable<Level> {
 		return overlappingChunks;
 	}
 	
-	public Array<Entity> getOverlappingEntities(Rectangle rect) {
-		return getOverlappingEntities(rect, (Entity)null);
-	}
 	public Array<Entity> getOverlappingEntities(Rectangle rect, Entity... exclude) {
 		Array<Entity> overlapping = new Array<>(Entity.class);
 		world.actOnEntitySet(this, set -> {
@@ -216,7 +213,8 @@ public abstract class Level implements Taggable<Level> {
 					overlapping.add(entity);
 		});
 		
-		overlapping.removeAll(new Array<>(exclude), true); // use ==, not .equals()
+		if(exclude.length > 0)
+			overlapping.removeAll(new Array<>(exclude), true); // use ==, not .equals()
 		
 		return overlapping;
 	}
