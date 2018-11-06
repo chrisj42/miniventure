@@ -159,11 +159,11 @@ public abstract class Tile implements WorldObject {
 		Tile[] surroundingTiles = surroundingTileSet.toArray(new Tile[surroundingTileSet.size()]);
 		for(Entity entity: level.getOverlappingEntities(getBounds())) {
 			// for each entity, check if it can walk on the new tile type. If not, fetch the surrounding tiles, remove those the entity can't walk on, and then fetch the closest tile of the remaining ones.
-			if(newType.isPermeableBy(entity)) continue; // no worries for this entity.
+			if(newType.isWalkable()) continue; // no worries for this entity.
 			
 			Array<Tile> aroundTiles = new Array<>(surroundingTiles);
 			for(int i = 0; i < aroundTiles.size; i++) {
-				if(!aroundTiles.get(i).getType().isPermeableBy(entity)) {
+				if(!aroundTiles.get(i).getType().isWalkable()) {
 					aroundTiles.removeIndex(i);
 					i--;
 				}
@@ -229,8 +229,8 @@ public abstract class Tile implements WorldObject {
 	}
 	
 	@Override
-	public boolean isPermeableBy(Entity e) {
-		return getType().isPermeableBy(e);
+	public boolean isPermeable() {
+		return getType().isWalkable();
 	}
 	
 	@Override

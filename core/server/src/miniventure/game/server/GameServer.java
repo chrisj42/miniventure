@@ -25,6 +25,8 @@ import miniventure.game.world.Chunk;
 import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
+import miniventure.game.world.WorldObject;
+import miniventure.game.world.entity.particle.ParticleData;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.Player;
@@ -404,6 +406,13 @@ public class GameServer implements GameProtocol {
 	public Message getMessage(@Nullable ServerPlayer sender, String msg) {
 		if(sender == null) return new Message("Server: "+msg, SERVER_CHAT_COLOR);
 		return new Message(sender.getName()+": "+msg, GameCore.DEFAULT_CHAT_COLOR);
+	}
+	
+	public void broadcastParticle(ParticleData data, WorldObject posMarker) {
+		broadcastParticle(data, posMarker.getLevel(), posMarker.getCenter());
+	}
+	public void broadcastParticle(ParticleData data, Level level, Vector2 pos) {
+		broadcast(new ParticleAddition(data, new PositionUpdate(level, pos)));
 	}
 	
 	private void sendEntityValidation(@NotNull PlayerData pData) {

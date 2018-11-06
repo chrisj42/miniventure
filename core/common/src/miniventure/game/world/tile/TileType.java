@@ -15,7 +15,6 @@ import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Player;
-import miniventure.game.world.entity.particle.Particle;
 import miniventure.game.world.tile.DestructionManager.PreferredTool;
 import miniventure.game.world.tile.DestructionManager.RequiredTool;
 import miniventure.game.world.tile.SpreadUpdateAction.FloatFetcher;
@@ -250,7 +249,7 @@ public class TileType {
 	
 	public TileTypeRenderer getRenderer() { return renderer; }
 	
-	public boolean isPermeableBy(Entity e) { return e instanceof Particle || walkable; }
+	public boolean isWalkable() { return walkable; }
 	
 	/*
 		Some update methods. All methods have Tile param in addition to whatever listed.

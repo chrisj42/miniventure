@@ -68,7 +68,7 @@ public class ClientLevel extends Level {
 		Array<WorldObject> under = new Array<>(); // ground tiles
 		Array<WorldObject> over = new Array<>();
 		for(Entity e: entities) {
-			if(e.isParticle())
+			if(e.isFloating())
 				over.add(e);
 			else
 				objects.add(e);

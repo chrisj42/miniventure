@@ -11,16 +11,18 @@ import miniventure.game.item.Inventory;
 import miniventure.game.item.Item;
 import miniventure.game.item.ServerHands;
 import miniventure.game.server.ServerCore;
-import miniventure.game.world.entity.ClassDataList;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.Boundable;
 import miniventure.game.world.Level;
+import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
+import miniventure.game.world.entity.particle.ActionType;
+import miniventure.game.world.entity.ClassDataList;
+import miniventure.game.world.entity.particle.ParticleData.ActionParticleData;
+import miniventure.game.world.entity.particle.ParticleData.TextParticleData;
 import miniventure.game.world.entity.Direction;
-import miniventure.game.world.entity.particle.ActionParticle.ActionType;
-import miniventure.game.world.entity.particle.TextParticle;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 
@@ -110,9 +112,9 @@ public class ServerPlayer extends ServerMob implements Player {
 			ServerCore.getServer().sendToPlayer(this, new StatUpdate(stat, amt));
 			
 			if(stat == Stat.Hunger && change > 0) {
-				Level level = getLevel();
+				ServerLevel level = getLevel();
 				if(level != null)
-					level.addEntity(new TextParticle(String.valueOf(amt), Color.CORAL), getCenter(), true);
+					ServerCore.getServer().broadcastParticle(new TextParticleData(String.valueOf(amt), Color.CORAL), this);
 			}
 		}
 		
@@ -196,9 +198,17 @@ public class ServerPlayer extends ServerMob implements Player {
 		
 		if (level != null) {
 			if(success)
-				level.addEntity(ActionType.SLASH.get(getDirection()), getCenter().add(getDirection().getVector().scl(getSize().scl(0.5f))), true);
+				ServerCore.getServer().broadcastParticle(
+					new ActionParticleData(ActionType.SLASH, getDirection()),
+					level,
+					getCenter().add(getDirection().getVector().scl(getSize().scl(0.5f)))
+				);
 			else
-				level.addEntity(ActionType.PUNCH.get(getDirection()), getInteractionRect().getCenter(new Vector2()), true);
+				ServerCore.getServer().broadcastParticle(
+					new ActionParticleData(ActionType.PUNCH, getDirection()),
+					level,
+					getInteractionRect().getCenter(new Vector2())
+				);
 		}
 		
 		if(!success) // if successful, then the sound will be taken care of. This sound is of an empty swing.

@@ -5,7 +5,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.EntityUpdate;
 import miniventure.game.GameProtocol.PositionUpdate;
 import miniventure.game.GameProtocol.SpriteUpdate;
@@ -18,7 +17,6 @@ import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Mob;
-import miniventure.game.world.entity.particle.Particle;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.utils.Array;
@@ -64,18 +62,16 @@ public abstract class ServerEntity extends Entity {
 	
 	@Override
 	public boolean isMob() { return this instanceof Mob; }
-	@Override
-	public boolean isParticle() { return this instanceof Particle; }
 	
 	@Override
 	public void update(float delta) {
-		if(/*!(this instanceof Particle) && */(newSprite != null || newPos != null)) {
+		if(newSprite != null || newPos != null) {
 			ServerCore.getServer().broadcast(new EntityUpdate(getTag(), newPos, newSprite), this);
 			newPos = null;
 			newSprite = null;
 		}
 		
-		if(this instanceof Particle) return; // particles don't interact
+		if(isFloating()) return; // floating entities don't interact
 		
 		ServerLevel level = getLevel();
 		if(level == null) return;
@@ -90,9 +86,6 @@ public abstract class ServerEntity extends Entity {
 	}
 	
 	protected void updateSprite(SpriteUpdate newSprite) { this.newSprite = newSprite; }
-	
-	public float getZ() { return z; }
-	protected void setZ(float z) { this.z = z; }
 	
 	@Override
 	public void moveTo(@NotNull Level level, float x, float y) {

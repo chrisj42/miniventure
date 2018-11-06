@@ -22,25 +22,34 @@ import org.jetbrains.annotations.Nullable;
 
 public class ClientEntity extends Entity {
 	
-	private final boolean particle;
 	private final boolean permeable;
 	private final String descriptor;
 	private final boolean cutHeight;
+	private final boolean canFloat;
 	
 	public ClientEntity(EntityAddition data) {
 		super(ClientCore.getWorld(), data.eid);
-		this.particle = data.particle;
 		this.permeable = data.permeable;
 		this.descriptor = data.descriptor;
 		this.cutHeight = data.cutHeight;
+		this.canFloat = data.canFloat;
 		setRenderer(EntityRenderer.deserialize(data.spriteUpdate.rendererData));
+	}
+	
+	// for locally updated entities. Assumes traits of a particle.
+	protected ClientEntity() {
+		super(ClientCore.getWorld());
+		permeable = true;
+		canFloat = true;
+		cutHeight = false;
+		descriptor = getClass().getSimpleName();
 	}
 	
 	@Override
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
 		super.render(batch, delta, posOffset);
 		float drawableHeight = 1;
-		if(!particle) {
+		if(!canFloat) {
 			Tile closest = getClosestTile();
 			if(closest != null) {
 				SwimAnimation swimAnimation = closest.getType().getPropertyOrDefault(TilePropertyTag.Swim, null);
@@ -63,7 +72,7 @@ public class ClientEntity extends Entity {
 	@Override
 	public boolean isMob() { return cutHeight; } // this is probably a bad idea but currently it is exactly the value I'm looking for...
 	@Override
-	public boolean isParticle() { return particle; }
+	public boolean isFloating() { return canFloat; }
 	
 	@NotNull @Override
 	public Rectangle getBounds() {

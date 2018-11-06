@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 
 public abstract class WorldManager {
 	
-	private final HashMap<Integer, Entity> entityIDMap = new HashMap<>();
+	private final HashMap<Integer, Entity> entityIDMap;
 	protected float gameTime, daylightOffset;
 	
 	
@@ -38,8 +38,10 @@ public abstract class WorldManager {
 	private final TileEnumMapper<TileType> tileTypeFetcher;
 	
 	// this class contains all the levels in the game.
-	public WorldManager(TileEnumMapper<TileType> fetcher) {
+	public WorldManager(TileEnumMapper<TileType> fetcher) { this(fetcher, new HashMap<>()); }
+	public WorldManager(TileEnumMapper<TileType> fetcher, HashMap<Integer, Entity> entityIDMap) {
 		tileTypeFetcher = fetcher;
+		this.entityIDMap = entityIDMap;
 	}
 	
 	
@@ -127,12 +129,15 @@ public abstract class WorldManager {
 		//	throw new IllegalStateException("Attempted to register entity with duplicate entity id "+e.getId()+"; original="+old+", new="+e);
 	}
 	
-	/** generates a entity id that is unique for this game. */
-	public int registerEntityWithNewId(@NotNull Entity e) {
+	/**
+	 * generates a entity id that is unique for this game.
+	 * Negative numbers represent entities updated only by the client.
+	 */
+	public int registerEntityWithNewId(@NotNull Entity e, boolean negative) {
 		int eid;
 		
 		do eid = MathUtils.random.nextInt();
-		while(entityIDMap.containsKey(eid));
+		while((eid < 0) != negative || entityIDMap.containsKey(eid));
 		
 		entityIDMap.put(eid, e);
 		return eid;

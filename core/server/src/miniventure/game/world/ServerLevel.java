@@ -177,12 +177,12 @@ public class ServerLevel extends Level {
 			return;
 		}
 		
-		if(!ie.permeates(closest)) {
+		if(!ie.canPermeate(closest)) {
 			// we need to look around for a tile that the item *can* be placed on.
 			HashSet<Tile> adjacent = closest.getAdjacentTiles(true);
 			Boundable.sortByDistance(new Array<>(adjacent.toArray(new Tile[adjacent.size()])), targetPos == null ? dropPos : targetPos);
 			for(Tile adj: adjacent) {
-				if(ie.permeates(adj)) {
+				if(ie.canPermeate(adj)) {
 					closest = adj;
 					break;
 				}

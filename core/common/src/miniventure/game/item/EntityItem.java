@@ -9,7 +9,8 @@ import miniventure.game.world.entity.Entity;
 public class EntityItem extends Item {
 	
 	public EntityItem(String entityData) {
-		
+		// FIXME this is just to make it compile
+		super(ItemType.Misc, "Entity");
 	}
 	
 	@Override

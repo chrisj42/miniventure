@@ -20,7 +20,7 @@ public class ItemStack {
 		String[] itemData = item.save();
 		String[] data = new String[itemData.length+1];
 		System.arraycopy(itemData, 0, data, 1, itemData.length);
-		data[0] = count+"";
+		data[0] = String.valueOf(count);
 		
 		return data;
 	}

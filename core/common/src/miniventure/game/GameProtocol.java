@@ -18,6 +18,8 @@ import miniventure.game.world.Point;
 import miniventure.game.world.Taggable.Tag;
 import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
+import miniventure.game.world.entity.particle.ActionType;
+import miniventure.game.world.entity.particle.ParticleData;
 import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.Entity.EntityTag;
@@ -25,7 +27,6 @@ import miniventure.game.world.entity.EntityRenderer;
 import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.mob.Player.Stat;
-import miniventure.game.world.entity.particle.Particle;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.Tile.TileData;
 import miniventure.game.world.tile.Tile.TileTag;
@@ -49,9 +50,8 @@ public interface GameProtocol {
 	int lagMin = lag?10:0, lagMax = lag?100:0;
 	
 	static void registerClasses(Kryo kryo) {
-		Class<?>[] classes = GameProtocol.class.getDeclaredClasses();
-		for(Class<?> clazz: classes)
-			kryo.register(clazz);
+		registerNestedClasses(kryo, GameProtocol.class);
+		registerNestedClasses(kryo, ParticleData.class, true);
 		
 		kryo.register(TileData.class);
 		kryo.register(TileData[].class);
@@ -63,6 +63,7 @@ public interface GameProtocol {
 		kryo.register(EntityTag.class);
 		kryo.register(TileTag.class);
 		kryo.register(Direction.class);
+		kryo.register(ActionType.class);
 		kryo.register(Stat.class);
 		kryo.register(InfoMessageLine.class);
 		kryo.register(InfoMessageLine[].class);
@@ -219,23 +220,35 @@ public interface GameProtocol {
 		}
 	}
 	
+	
+	class ParticleAddition {
+		public final ParticleData particleData;
+		public final PositionUpdate positionUpdate;
+		
+		private ParticleAddition() { this(null, null); }
+		public ParticleAddition(ParticleData particleData, PositionUpdate positionUpdate) {
+			this.positionUpdate = positionUpdate;
+			this.particleData = particleData;
+		}
+	}
+	
 	class EntityAddition {
 		public final PositionUpdate positionUpdate;
 		public final SpriteUpdate spriteUpdate;
 		public final int eid;
-		public final boolean particle;
 		public final boolean permeable;
 		public final String descriptor;
+		public final boolean canFloat;
 		public final boolean cutHeight;
 		
-		private EntityAddition() { this(0, null, null, false, false, "Blank entity", false); }
+		private EntityAddition() { this(0, null, null, false, false, null, false); }
 		public EntityAddition(Entity e) { this(e, e.getClass().getSimpleName().replace("Server", "")); }
-		public EntityAddition(Entity e, String descriptor) { this(e.getId(), new PositionUpdate(e), new SpriteUpdate(e), e instanceof Particle, e.isPermeable(), descriptor, e instanceof Mob); }
-		public EntityAddition(int eid, PositionUpdate positionUpdate, SpriteUpdate spriteUpdate, boolean particle, boolean permeable, String descriptor, boolean cutHeight) {
+		public EntityAddition(Entity e, String descriptor) { this(e.getId(), new PositionUpdate(e), new SpriteUpdate(e), e.isFloating(), e.isPermeable(), descriptor, e instanceof Mob); }
+		public EntityAddition(int eid, PositionUpdate positionUpdate, SpriteUpdate spriteUpdate, boolean canFloat, boolean permeable, String descriptor, boolean cutHeight) {
 			this.eid = eid;
 			this.positionUpdate = positionUpdate;
 			this.spriteUpdate = spriteUpdate;
-			this.particle = particle;
+			this.canFloat = canFloat;
 			this.permeable = permeable;
 			this.descriptor = descriptor;
 			this.cutHeight = cutHeight;
@@ -339,14 +352,15 @@ public interface GameProtocol {
 		@Override public String toString() { return "SpriteUpdate("+ Arrays.toString(rendererData)+")"; }
 	}
 	
-	// sent in EntityUpdate
+	// sent in EntityUpdate, EntityAddition, ParticleAddition.
 	class PositionUpdate {
 		public final float x, y, z;
 		public final Integer levelDepth; // should never be null, actually, because it is always on one level or another, and if not, then it's not in the game, aka removed. An entity removal would be sent rather than a position update. However, it's a bit complicated to change now, so I'll leave it...
 		
 		private PositionUpdate() { this(null, 0, 0, 0); }
-		public PositionUpdate(Entity e) { this(e, e.getLevel(), e.getLocation()); }
-		private PositionUpdate(Entity e, Level level, Vector3 pos) { this(level==null?null:level.getDepth(), pos); }
+		public PositionUpdate(Entity e) { this(e.getLevel(), e.getLocation()); }
+		public PositionUpdate(Level level, Vector2 pos) { this(level, new Vector3(pos, 0)); }
+		public PositionUpdate(Level level, Vector3 pos) { this(level==null?null:level.getDepth(), pos); }
 		public PositionUpdate(Integer depth, Vector3 pos) { this(depth, pos.x, pos.y, pos.z); }
 		public PositionUpdate(Integer depth, float x, float y, float z) {
 			this.levelDepth = depth;
@@ -498,6 +512,14 @@ public interface GameProtocol {
 		}
 	}
 	
+	static void registerNestedClasses(Kryo kryo, Class<?> containerClass) { registerNestedClasses(kryo, containerClass, false); }
+	static void registerNestedClasses(Kryo kryo, Class<?> containerClass, boolean registerContainer) {
+		if(registerContainer)
+			kryo.register(containerClass);
+		Class<?>[] classes = containerClass.getDeclaredClasses();
+		for(Class<?> clazz: classes)
+			kryo.register(clazz);
+	}
 	
 	static void registerClassesInPackage(Kryo kryo, String packageName, boolean recursive) {
 		String sep = File.separator;

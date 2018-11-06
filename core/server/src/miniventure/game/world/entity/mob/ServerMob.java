@@ -15,11 +15,11 @@ import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClassDataList;
+import miniventure.game.world.entity.particle.ParticleData.TextParticleData;
 import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.KnockbackController;
 import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.MobAnimationController.AnimationState;
-import miniventure.game.world.entity.particle.TextParticle;
 import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 import com.badlogic.gdx.graphics.Color;
@@ -178,7 +178,7 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 		ServerLevel level = getLevel();
 		if(level != null) {
 			ServerCore.getServer().broadcast(new Hurt(obj.getTag(), getTag(), damage*1f/maxHealth));
-			level.addEntity(new TextParticle(damage + "", this instanceof ServerPlayer ? Color.PINK : Color.RED), getCenter(), true);
+			ServerCore.getServer().broadcastParticle(new TextParticleData(String.valueOf(damage), this instanceof ServerPlayer ? Color.PINK : Color.RED), this);
 		}
 		
 		if (health == 0)

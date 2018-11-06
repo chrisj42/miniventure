@@ -25,7 +25,7 @@ public class Crocodile extends MobAi {
 	}
 	
 	@Override
-	public boolean permeates(Tile tile) {
-		return super.permeates(tile) && tile.getType().getEnumType() == TileTypeEnum.WATER;
+	public boolean canPermeate(Tile tile) {
+		return tile.getType().getEnumType() == TileTypeEnum.WATER;
 	}
 }

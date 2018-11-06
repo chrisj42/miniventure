@@ -29,8 +29,8 @@ public class ServerTileType extends TileType {
 	}
 	
 	@Override
-	public boolean isPermeableBy(Entity e) {
-		return model.isPermeableBy(e);
+	public boolean isWalkable() {
+		return model.isWalkable();
 	}
 	
 	@Override

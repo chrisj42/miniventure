@@ -6,8 +6,9 @@ import miniventure.game.util.customenum.SerialMap;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
-import miniventure.game.world.entity.particle.ActionParticle;
-import miniventure.game.world.entity.particle.TextParticle;
+import miniventure.game.world.entity.particle.ActionType;
+import miniventure.game.world.entity.particle.ParticleData.ActionParticleData;
+import miniventure.game.world.entity.particle.ParticleData.TextParticleData;
 import miniventure.game.world.tile.data.TileCacheTag;
 
 import org.jetbrains.annotations.NotNull;
@@ -28,14 +29,14 @@ public class ServerDestructionManager extends DestructionManager {
 			//	tile.getLevel().getWorld().getSender().sendData(new Hurt(attacker.getTag(), tile.getTag(), damage, Item.save(item)));
 			
 			// add damage particle
-			tile.getLevel().addEntity(ActionParticle.ActionType.IMPACT.get(null), tile.getCenter(), true);
+			ServerCore.getServer().broadcastParticle(new ActionParticleData(ActionType.IMPACT), tile);
 			
 			SerialMap dataMap = tile.getDataMap(tileType);
 			
 			int health = totalHealth > 1 ? dataMap.getOrDefaultAndPut(TileCacheTag.Health, totalHealth) : 1;
 			health -= damage;
 			if(totalHealth > 1)
-				tile.getLevel().addEntity(new TextParticle(String.valueOf(damage)), tile.getCenter(), true);
+				ServerCore.getServer().broadcastParticle(new TextParticleData(String.valueOf(damage)), tile);
 			if(health <= 0) {
 				ServerCore.getServer().playTileSound("break", tile, tileType);
 				tile.breakTile();

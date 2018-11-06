@@ -20,8 +20,8 @@ public interface WorldObject extends Boundable, Taggable<WorldObject> {
 	
 	default float getLightRadius() { return 0; }
 	
-	// returns whether the given entity can share the same space as this object.
-	boolean isPermeableBy(Entity e);
+	// returns whether this object is collision-enabled.
+	boolean isPermeable();
 	
 	// returns whether interaction had any effect (should we look for other objects to interact with?)
 	boolean interactWith(Player player, @Nullable Item heldItem);

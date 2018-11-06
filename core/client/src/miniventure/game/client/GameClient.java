@@ -23,6 +23,7 @@ import miniventure.game.world.Level;
 import miniventure.game.world.Point;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClientEntity;
+import miniventure.game.world.entity.particle.ClientParticle;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.EntityRenderer;
 import miniventure.game.world.entity.EntityRenderer.DirectionalAnimationRenderer;
@@ -106,6 +107,16 @@ public class GameClient implements GameProtocol {
 					if(target instanceof ClientEntity)
 						((ClientEntity)target).hurt(source, hurt.power);
 				}
+				
+				forPacket(object, ParticleAddition.class, addition -> {
+					ClientLevel level = world.getLevel(addition.positionUpdate.levelDepth);
+					if(level == null || (player != null && !level.equals(player.getLevel()))) return;
+					
+					ClientParticle e = ClientParticle.get(addition.particleData);
+					PositionUpdate newPos = addition.positionUpdate;
+					Vector2 size = e.getSize();
+					e.moveTo(level, newPos.x - size.x/2, newPos.y - size.y/2, newPos.z); // center entity
+				});
 				
 				if(object instanceof EntityAddition) {
 					//System.out.println("client received entity addition");

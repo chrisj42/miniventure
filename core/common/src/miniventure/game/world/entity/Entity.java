@@ -7,6 +7,7 @@ import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.EntityRenderer.BlinkRenderer;
 import miniventure.game.world.entity.mob.Player;
+import miniventure.game.world.entity.particle.ParticleData;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.graphics.Color;
@@ -29,14 +30,14 @@ public abstract class Entity implements WorldObject {
 	@NotNull private EntityRenderer renderer = EntityRenderer.BLANK;
 	private BlinkRenderer blinker = null;
 	
-	// for server
+	// for entities updated locally (called by both server and client for different entities)
 	public Entity(@NotNull WorldManager world) {
 		this.world = world;
 		
-		eid = world.registerEntityWithNewId(this);
+		eid = world.registerEntityWithNewId(this, this instanceof ParticleData);
 	}
 	
-	// for client
+	// for client, on entities updated by the server
 	public Entity(@NotNull WorldManager world, int eid) {
 		this.world = world;
 		this.eid = eid;
@@ -52,7 +53,7 @@ public abstract class Entity implements WorldObject {
 	public Level getLevel() { return world.getEntityLevel(this); }
 	
 	public abstract boolean isMob();
-	public abstract boolean isParticle();
+	public boolean isFloating() { return false; }
 	
 	/// this is called only to remove an entity completely from the game, not to change levels.
 	public void remove() {
@@ -88,7 +89,10 @@ public abstract class Entity implements WorldObject {
 	
 	public Vector3 getLocation() { return new Vector3(x, y, z); }
 	public Vector3 getLocation(boolean worldOriginCenter) { return new Vector3(getPosition(worldOriginCenter), z); }
-		
+	
+	public float getZ() { return z; }
+	protected void setZ(float z) { this.z = z; }
+	
 	@Override @NotNull
 	public Rectangle getBounds() {
 		Rectangle bounds = getUnscaledBounds();
@@ -153,13 +157,13 @@ public abstract class Entity implements WorldObject {
 		// we now have a list of the tiles that will be touched, but aren't now.
 		boolean canMoveCurrent = false;
 		for(Tile tile: currentTiles) // if any are permeable, then don't let the player escape to new impermeable tiles.
-			canMoveCurrent = canMoveCurrent || permeates(tile);
+			canMoveCurrent = canMoveCurrent || canPermeate(tile);
 		
 		boolean canMove = true;
 		for(Tile tile: newTiles) {
 			if(interact)
 				touchTile(tile);
-			canMove = canMove && (!canMoveCurrent || permeates(tile));
+			canMove = canMove && (!canMoveCurrent || canPermeate(tile));
 		}
 		
 		if(canMove && canMoveCurrent) {
@@ -172,9 +176,9 @@ public abstract class Entity implements WorldObject {
 			// check the sameTiles; if at least one is not permeable, and at least one oldTile is, then stop the move.
 			boolean canMoveOld = false, canMoveSame = true;
 			for(Tile oldTile: oldTiles)
-				canMoveOld = canMoveOld || permeates(oldTile);
+				canMoveOld = canMoveOld || canPermeate(oldTile);
 			for(Tile sameTile: sameTiles)
-				canMoveSame = canMoveSame && permeates(sameTile);
+				canMoveSame = canMoveSame && canPermeate(sameTile);
 			
 			if(!canMoveSame && canMoveOld)
 				canMove = false;
@@ -189,7 +193,7 @@ public abstract class Entity implements WorldObject {
 		for(Entity entity: newEntities) {
 			if(interact)
 				touchEntity(entity);
-			canMove = canMove && entity.isPermeableBy(this);
+			canMove = canMove && entity.isPermeable();
 		}
 		
 		if(!canMove) return false;
@@ -245,10 +249,9 @@ public abstract class Entity implements WorldObject {
 	public void touching(Entity entity) {}
 	
 	@Override
-	public final boolean isPermeableBy(Entity e) { return isPermeable(); }
 	public boolean isPermeable() { return false; }
 	
-	public boolean permeates(Tile tile) { return tile.isPermeableBy(this); }
+	public boolean canPermeate(Tile tile) { return isPermeable() || tile.isPermeable(); }
 	
 	@Override
 	public boolean attackedBy(WorldObject obj, @Nullable Item attackItem, int damage) { return false; }
