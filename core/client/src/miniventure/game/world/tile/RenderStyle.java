@@ -36,6 +36,10 @@ public class RenderStyle {
 	}
 	
 	TileAnimation<TextureHolder> getAnimation(@NotNull TileTypeEnum tileType, String name, EnumMap<TileTypeEnum, HashMap<String, Array<TextureHolder>>> map) {
+		if(!map.containsKey(tileType))
+			throw new SpriteNotFoundException("tile type "+tileType+" does not have any registered overlap sprites. (discovered when attempting to fetch sprite \""+name+"\")");
+		if(!map.get(tileType).containsKey(name))
+			throw new SpriteNotFoundException("tile type "+tileType+" does not overlap sprites with name \""+name+"\".");
 		return getAnimation(tileType, map.get(tileType).get(name));
 	}
 	TileAnimation<TextureHolder> getAnimation(@NotNull TileTypeEnum tileType, Array<TextureHolder> frames) {
@@ -43,5 +47,12 @@ public class RenderStyle {
 			return new TileAnimation<>(sync, 1, frames.get(0));
 		else
 			return new TileAnimation<>(sync, isFrameTime ? time : time / frames.size, frames, playMode);
+	}
+	
+	// TODO this ought to be a checked exception
+	private static class SpriteNotFoundException extends RuntimeException {
+		SpriteNotFoundException(String msg) {
+			super(msg);
+		}
 	}
 }
