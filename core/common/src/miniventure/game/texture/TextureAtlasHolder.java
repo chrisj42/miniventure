@@ -14,27 +14,10 @@ public class TextureAtlasHolder {
 	public TextureAtlasHolder(TextureAtlas atlas) {
 		this.atlas = atlas;
 		regions = null;
-		for(AtlasRegion region: atlas.getRegions())
-			region.name = fixPath(region.name);
 	}
 	public TextureAtlasHolder(TextureAtlasData data) {
 		atlas = null;
 		regions = data.getRegions();
-		for(Region region: regions)
-			region.name = fixPath(region.name);
-	}
-	
-	/*
-		In the tile atlas, some folders are parented more for organization that isn't meant to show
-		in the code and call names. These extra folders end in a "_", and it is meant that all subfolders
-		would originally have been top-level folders with the name prefix of the parent folder's name.
-		So, this converts the "_/" pattern you would see in the atlas to just a "_" that the code expects.
-		
-		Note that there should not be any files as direct children of folders ending in "_", only subfolders.
-		All files should be contained in said subfolders.
-	 */
-	private static String fixPath(String name) {
-		return name.replaceAll("(\\w+)_/(\\w+)", "$2_$1");
 	}
 	
 	public TextureHolder findRegion(String name) {
