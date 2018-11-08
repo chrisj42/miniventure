@@ -32,7 +32,7 @@ import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.mob.ServerPlayer;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.TileTypeEnum;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;

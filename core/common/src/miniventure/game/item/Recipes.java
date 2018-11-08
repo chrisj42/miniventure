@@ -1,7 +1,7 @@
 package miniventure.game.item;
 
 import miniventure.game.item.ToolItem.Material;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.TileTypeEnum;
 
 public class Recipes {
 	

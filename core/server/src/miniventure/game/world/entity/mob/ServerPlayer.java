@@ -24,7 +24,7 @@ import miniventure.game.world.entity.particle.ParticleData.ActionParticleData;
 import miniventure.game.world.entity.particle.ParticleData.TextParticleData;
 import miniventure.game.world.entity.Direction;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.TileTypeEnum;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;

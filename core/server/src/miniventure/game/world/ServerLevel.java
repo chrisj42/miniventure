@@ -14,8 +14,9 @@ import miniventure.game.world.entity.mob.ServerMob;
 import miniventure.game.world.entity.particle.ItemEntity;
 import miniventure.game.world.levelgen.LevelGenerator;
 import miniventure.game.world.tile.ServerTile;
+import miniventure.game.world.tile.ServerTileType;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.TileTypeEnum;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
@@ -27,7 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /** @noinspection EqualsAndHashcode*/
-public class ServerLevel extends Level {
+public class ServerLevel extends Level<ServerTileType> {
 	
 	//private static final float TILE_REFRESH_INTERVAL = 500; // every this many seconds, all tiles within the below radius of any keep-alive is updated.
 	//private static final int TILE_REFRESH_RADIUS = 4; // the radius mentioned above.
@@ -59,13 +60,10 @@ public class ServerLevel extends Level {
 		}
 	}
 	
-	@Override
-	public void render(Rectangle renderSpace, SpriteBatch batch, float delta, Vector2 posOffset) {}
-	
 	public void onTileUpdate(ServerTile tile) {
 		ServerCore.getServer().broadcast(new TileUpdate(tile), this);
 		
-		HashSet<Tile> tiles = getAreaTiles(tile.getLocation(), 1, true);
+		HashSet<Tile<ServerTileType>> tiles = getAreaTiles(tile.getLocation(), 1, true);
 		
 		synchronized (newTileUpdates) {
 			newTileUpdates.addAll(tiles);
@@ -135,7 +133,7 @@ public class ServerLevel extends Level {
 		
 		// go through and update all the tiles that need it; if it specifies a delay until next update, add it to the update queue.
 		for(Tile tile: tilesToUpdate) {
-			float interval = tile.update();
+			float interval = ((ServerTile)tile).update();
 			if(interval > 0)
 				tileUpdateQueue.put(tile, interval);
 		}
@@ -167,7 +165,7 @@ public class ServerLevel extends Level {
 		
 		ItemEntity ie = new ItemEntity(item, Vector2.Zero.cpy()); // this is a dummy variable.
 		
-		Tile closest = getTile(dropPos.x, dropPos.y);
+		Tile<ServerTileType> closest = getTile(dropPos.x, dropPos.y);
 		
 		Rectangle itemBounds = ie.getBounds();
 		itemBounds.setPosition(dropPos);
@@ -179,9 +177,9 @@ public class ServerLevel extends Level {
 		
 		if(!ie.canPermeate(closest)) {
 			// we need to look around for a tile that the item *can* be placed on.
-			HashSet<Tile> adjacent = closest.getAdjacentTiles(true);
+			HashSet<Tile<ServerTileType>> adjacent = closest.getAdjacentTiles(true);
 			Boundable.sortByDistance(new Array<>(adjacent.toArray(new Tile[adjacent.size()])), targetPos == null ? dropPos : targetPos);
-			for(Tile adj: adjacent) {
+			for(Tile<ServerTileType> adj: adjacent) {
 				if(ie.canPermeate(adj)) {
 					closest = adj;
 					break;
@@ -208,17 +206,17 @@ public class ServerLevel extends Level {
 	}
 	
 	
-	private void spawnMob(ServerMob mob, Tile[] tiles) {
+	private void spawnMob(ServerMob mob, ServerTile[] tiles) {
 		if(tiles.length == 0) throw new IllegalArgumentException("Tile array for spawning mobs must have at least one tile in it. (tried to spawn mob "+mob+")");
 		
 		if(!mob.maySpawn()) return;
 		
-		Tile spawnTile;
+		ServerTile spawnTile;
 		if(tiles.length == 1)
 			spawnTile = tiles[0];
 		else {
 			do spawnTile = tiles[MathUtils.random(tiles.length - 1)];
-			while (spawnTile == null || !mob.maySpawn(spawnTile.getType().getEnumType()));
+			while (spawnTile == null || !mob.maySpawn(spawnTile.getType().getTypeEnum()));
 		}
 		
 		mob.moveTo(spawnTile);
@@ -253,7 +251,7 @@ public class ServerLevel extends Level {
 					TileTypeEnum[] types = levelGenerator.generateTile(x, y);
 					type = types[types.length-1];
 				} else
-					type = tile.getType().getEnumType();
+					type = tile.getType().getTypeEnum();
 			} while(!mob.maySpawn(type));
 			
 			loadChunk(Chunk.getCoords(x, y));

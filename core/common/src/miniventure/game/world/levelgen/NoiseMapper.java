@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.Random;
 
 import miniventure.game.util.MyUtils;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.TileTypeEnum;
 
 import org.jetbrains.annotations.NotNull;
 

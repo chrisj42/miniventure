@@ -8,7 +8,7 @@ import java.util.Map.Entry;
 
 import miniventure.game.GameCore;
 import miniventure.game.util.function.Action;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.TileTypeEnum;
 
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;

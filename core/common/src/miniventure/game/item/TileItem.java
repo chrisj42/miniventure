@@ -9,7 +9,7 @@ import miniventure.game.util.MyUtils;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.TileTypeEnum;
 
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 
@@ -74,14 +74,14 @@ public class TileItem extends Item {
 			boolean canPlace = canPlaceOn == null;
 			if(!canPlace) {
 				for (TileTypeEnum underType : canPlaceOn) {
-					if(underType == tile.getType().getEnumType()) {
+					if(underType == tile.getType().getTypeEnum()) {
 						canPlace = true;
 						break;
 					}
 				}
 			}
 			
-			if(canPlace && tile.addTile(result.getTileType(tile.getWorld()))) {
+			if(canPlace && tile.addTile(result.getTypeInstance(tile.getWorld()))) {
 				use();
 				return true;
 			}

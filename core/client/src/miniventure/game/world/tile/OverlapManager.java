@@ -9,7 +9,6 @@ import java.util.HashSet;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.RelPos;
 import miniventure.game.world.Point;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 import com.badlogic.gdx.utils.Array;
 
@@ -88,15 +87,15 @@ public class OverlapManager {
 		HashSet<Tile> aroundTiles = tile.getAdjacentTiles(true);
 		
 		for(Tile aroundTile: aroundTiles) {
-			TileType[] types = aroundTile.getTypeStack().getTypes(!excludeCovered);
+			ClientTileType[] types = aroundTile.getTypeStack().getTypes(!excludeCovered);
 			
 			Point thisPos = tile.getLocation();
 			Point otherPos = aroundTile.getLocation();
 			RelPos tilePos = RelPos.get(otherPos.x - thisPos.x, otherPos.y - thisPos.y);
 			
-			for(TileType tileType: types) {
-				typeMap.putIfAbsent(tileType.getEnumType(), EnumSet.noneOf(RelPos.class));
-				typeMap.get(tileType.getEnumType()).add(tilePos);
+			for(ClientTileType tileType: types) {
+				typeMap.putIfAbsent(tileType.getTypeEnum(), EnumSet.noneOf(RelPos.class));
+				typeMap.get(tileType.getTypeEnum()).add(tilePos);
 			}
 		}
 		

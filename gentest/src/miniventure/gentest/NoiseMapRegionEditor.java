@@ -17,7 +17,7 @@ import miniventure.game.world.levelgen.NoiseMapper.NoiseMapRegion;
 import miniventure.gentest.util.ButtonMaker;
 import miniventure.gentest.util.FloatField;
 import miniventure.gentest.util.MyPanel;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.TileTypeEnum;
 
 import org.jetbrains.annotations.NotNull;
 

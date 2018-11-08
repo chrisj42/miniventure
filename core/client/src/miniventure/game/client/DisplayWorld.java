@@ -3,13 +3,14 @@ package miniventure.game.client;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
+import miniventure.game.world.tile.ClientTileType;
 import miniventure.game.world.tile.TileEnumMapper;
+import miniventure.game.world.tile.TileType;
+import miniventure.game.world.tile.TileTypeEnum;
 
 import com.badlogic.gdx.utils.Array;
 
 public class DisplayWorld extends WorldManager {
-	
-	public DisplayWorld() { super(new TileEnumMapper<>(prop -> prop)); }
 	
 	@Override
 	protected boolean doDaylightCycle() {
@@ -32,4 +33,7 @@ public class DisplayWorld extends WorldManager {
 	
 	@Override
 	public Array<WorldObject> getKeepAlives(Level level) { return new Array<>(); }
+	
+	@Override
+	public TileType getTileType(TileTypeEnum type) { return ClientTileType.get(type); }
 }

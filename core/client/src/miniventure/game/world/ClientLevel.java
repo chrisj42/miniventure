@@ -12,19 +12,18 @@ import miniventure.game.client.ClientWorld;
 import miniventure.game.screen.RespawnScreen;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.tile.ClientTile;
+import miniventure.game.world.tile.ClientTileType;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.Tile.TileData;
-import miniventure.game.world.tile.data.TilePropertyTag;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
 
-public class ClientLevel extends Level {
+public class ClientLevel extends RenderLevel {
 	
 	@NotNull private ClientWorld world;
 	
@@ -52,68 +51,13 @@ public class ClientLevel extends Level {
 		renderSpace = new Rectangle(Math.max(0, renderSpace.x), Math.max(0, renderSpace.y), Math.min(getWidth()-renderSpace.x, renderSpace.width), Math.min(getHeight()-renderSpace.y, renderSpace.height));
 		// pass the offset vector to all objects being rendered.
 		
-		Array<Tile> tiles = getOverlappingTiles(renderSpace);
+		Array<Tile<ClientTileType>> tiles = getOverlappingTiles(renderSpace);
 		Array<Entity> entities = getOverlappingEntities(renderSpace);
 		
 		if(ClientCore.getScreen() instanceof RespawnScreen)
 			entities.removeValue(ClientCore.getWorld().getMainPlayer(), true);
 		
 		render(tiles, entities, batch, delta, posOffset);
-	}
-	
-	public static void render(Array<Tile> tiles, Array<Entity> entities, SpriteBatch batch, float delta, Vector2 posOffset) {
-		// pass the offset vector to all objects being rendered.
-		
-		Array<WorldObject> objects = new Array<>();
-		Array<WorldObject> under = new Array<>(); // ground tiles
-		Array<WorldObject> over = new Array<>();
-		for(Entity e: entities) {
-			if(e.isFloating())
-				over.add(e);
-			else
-				objects.add(e);
-		}
-		for(Tile t: tiles) {
-			if(t.getType().hasProperty(TilePropertyTag.ZOffset)) // TODO instead, use "not permeable by player"
-				objects.add(t);
-			else
-				under.add(t);
-		}
-		
-		// first, ground tiles
-		// then, entities and surface tiles, higher y first
-		// then particles
-		
-		// entities second
-		objects.sort((e1, e2) -> Float.compare(e2.getCenter().y, e1.getCenter().y));
-		//objects.addAll(entities);
-		
-		for(WorldObject obj: under)
-			obj.render(batch, delta, posOffset);
-		for(WorldObject obj: objects)
-			obj.render(batch, delta, posOffset);
-		for(WorldObject obj: over)
-			obj.render(batch, delta, posOffset);
-	}
-	
-	public Array<Vector3> renderLighting(Rectangle renderSpace) {
-		Array<WorldObject> objects = new Array<>();
-		objects.addAll(getOverlappingTiles(renderSpace));
-		objects.addAll(getOverlappingEntities(renderSpace));
-		
-		return renderLighting(objects);
-	}
-	
-	public static Array<Vector3> renderLighting(Array<WorldObject> objects) {
-		Array<Vector3> lighting = new Array<>();
-		
-		for(WorldObject obj: objects) {
-			float lightR = obj.getLightRadius();
-			if(lightR > 0)
-				lighting.add(new Vector3(obj.getCenter(), lightR));
-		}
-		
-		return lighting;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -125,13 +69,13 @@ public class ClientLevel extends Level {
 			tileUpdates.clear();
 		}
 		for(Entry<ClientTile, TileData> entry: tilesToUpdate) {
-			entry.getValue().apply(entry.getKey());
+			entry.getKey().apply(entry.getValue());
 			spriteUpdates.add(entry.getKey());
 			spriteUpdates.addAll(entry.getKey().getAdjacentTiles(true));
 		}
 		
 		for(Tile t: spriteUpdates)
-			t.updateSprites();
+			((ClientTile)t).updateSprites();
 	}
 	
 	public void serverUpdate(ClientTile tile, TileData data) {

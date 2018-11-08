@@ -8,7 +8,7 @@ import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.MapFunction;
 
 @SuppressWarnings("unchecked")
-public abstract class SerialEnum<T> extends DataEnum<T> {
+public abstract class SerialEnum<T> extends GenericEnum<SerialEnum<T>> {
 	
 	/* Some notes:
 		
@@ -24,28 +24,36 @@ public abstract class SerialEnum<T> extends DataEnum<T> {
 		T get(String data, Class<T> clazz);
 	}
 	
+	public final boolean save;
+	public final boolean send;
 	private final MapFunction<T, String> valueWriter;
 	private final MapFunction<String, T> valueParser;
 	
-	protected SerialEnum(MapFunction<T, String> valueWriter, MapFunction<String, T> valueParser) {
+	protected SerialEnum(boolean save, boolean send, MapFunction<T, String> valueWriter, MapFunction<String, T> valueParser) {
+		this.save = save;
+		this.send = send;
 		this.valueWriter = valueWriter;
 		this.valueParser = valueParser;
 	}
 	
-	protected SerialEnum(final Class<T> valueClass) {
+	protected SerialEnum(boolean save, boolean send, final Class<T> valueClass) {
+		this.save = save;
+		this.send = send;
 		this.valueWriter = defaultValueWriter(valueClass);
 		this.valueParser = defaultValueParser(valueClass);
 	}
 	
 	// these two constructors below are essentially the same as the two above, except that they convert the value type to a substitute type which gets serialized instead.
 	
-	protected <U> SerialEnum(MapFunction<T, U> substituter, MapFunction<U, T> unsubstituter, MapFunction<U, String> substituteWriter, MapFunction<String, U> substituteParser) {
+	protected <U> SerialEnum(boolean save, boolean send, MapFunction<T, U> substituter, MapFunction<U, T> unsubstituter, MapFunction<U, String> substituteWriter, MapFunction<String, U> substituteParser) {
+		this.save = save;
+		this.send = send;
 		this.valueWriter = val -> substituteWriter.get(substituter.get(val));
 		this.valueParser = string -> unsubstituter.get(substituteParser.get(string));
 	}
 	
-	protected <U> SerialEnum(final Class<U> substituteClass, MapFunction<T, U> substituter, MapFunction<U, T> unsubstituter) {
-		this(substituter, unsubstituter, defaultValueWriter(substituteClass), defaultValueParser(substituteClass));
+	protected <U> SerialEnum(boolean save, boolean send, final Class<U> substituteClass, MapFunction<T, U> substituter, MapFunction<U, T> unsubstituter) {
+		this(save, send, substituter, unsubstituter, defaultValueWriter(substituteClass), defaultValueParser(substituteClass));
 	}
 	
 	private static <T> MapFunction<T, String> defaultValueWriter(final Class<T> valueClass) {
@@ -109,9 +117,8 @@ public abstract class SerialEnum<T> extends DataEnum<T> {
 		return ar;
 	}
 	
-	@Override
-	public SerialEntry<T, ?> as(T value) { return new SerialEntry<>(this, value); }
-	SerialEntry<T, ?> serialEntry(String value) { return new SerialEntry<>(this, deserialize(value)); }
+	public SerialEntry<T> as(T value) { return new SerialEntry<>(this, value); }
+	SerialEntry<T> serialEntry(String value) { return new SerialEntry<>(this, deserialize(value)); }
 	
 	public String serialize(T value) { return valueWriter.get(value); }
 	public T deserialize(String data) { return valueParser.get(data); }

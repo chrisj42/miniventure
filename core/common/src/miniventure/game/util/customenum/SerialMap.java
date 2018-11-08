@@ -10,21 +10,21 @@ public class SerialMap {
 	private final HashMap<SerialEnum<?>, Object> map = new HashMap<>();
 	
 	public SerialMap() {}
-	public SerialMap(SerialEntry<?, ?> entry) { add(entry); }
-	public SerialMap(SerialEntry<?, ?>[] entries) { addAll(entries); }
+	public SerialMap(SerialEntry<?> entry) { add(entry); }
+	public SerialMap(SerialEntry<?>[] entries) { addAll(entries); }
 	public SerialMap(SerialMap model) { this(model.getEntries()); }
 	
-	public SerialMap add(SerialEntry<?, ?> entry) {
+	public SerialMap add(SerialEntry<?> entry) {
 		put(entry);
 		return this;
 	}
-	public SerialMap addAll(SerialEntry<?, ?>[] entries) {
-		for(SerialEntry<?, ?> e: entries)
+	public SerialMap addAll(SerialEntry<?>[] entries) {
+		for(SerialEntry<?> e: entries)
 			add(e);
 		return this;
 	}
 	
-	public <T> T put(SerialEntry<T, ?> entry) { return put(entry.key, entry.value); }
+	public <T> T put(SerialEntry<T> entry) { return put(entry.key, entry.value); }
 	@SuppressWarnings("unchecked")
 	public <T> T put(SerialEnum<T> key, T value) {
 		return (T) map.put(key, value);
@@ -70,8 +70,8 @@ public class SerialMap {
 		return asClass.cast(get(tag));
 	}
 	
-	public SerialEntry<?, ?>[] getEntries() {
-		SerialEntry<?, ?>[] entries = new SerialEntry[map.size()];
+	public SerialEntry<?>[] getEntries() {
+		SerialEntry<?>[] entries = new SerialEntry[map.size()];
 		int i = 0;
 		for(SerialEnum<?> tag: map.keySet())
 			entries[i++] = getEntry(tag);
@@ -79,14 +79,14 @@ public class SerialMap {
 		return entries;
 	}
 	
-	private <T, D extends SerialEnum<T>> SerialEntry<T, D> getEntry(D tag) { return new SerialEntry<>(tag, get(tag)); }
+	private <T, D extends SerialEnum<T>> SerialEntry<T> getEntry(D tag) { return new SerialEntry<>(tag, get(tag)); }
 	
 	
 	public String serialize() {
 		String[] entries = new String[map.size()];
 		
 		int i = 0;
-		for(SerialEntry<?, ?> entry: getEntries())
+		for(SerialEntry<?> entry: getEntries())
 			entries[i++] = entry.serialize();
 		
 		return MyUtils.encodeStringArray(entries);
@@ -95,7 +95,7 @@ public class SerialMap {
 	public static <D extends SerialEnum<?>> SerialMap deserialize(String alldata, Class<D> tagClass) {
 		String[] data = MyUtils.parseLayeredString(alldata);
 		
-		SerialEntry<?, ?>[] entries = new SerialEntry[data.length];
+		SerialEntry<?>[] entries = new SerialEntry[data.length];
 		for(int i = 0; i < entries.length; i++)
 			entries[i] = SerialEntry.deserialize(data[i], tagClass);
 		

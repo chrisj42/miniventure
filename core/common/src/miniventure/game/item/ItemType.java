@@ -6,7 +6,7 @@ import java.util.Arrays;
 import miniventure.game.item.ToolItem.Material;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.TileTypeEnum;
 
 import org.jetbrains.annotations.NotNull;
 

@@ -9,21 +9,21 @@ public class PropertyMap {
 	private final HashMap<DataEnum<?>, Object> map = new HashMap<>();
 	
 	public PropertyMap() {}
-	public PropertyMap(DataEntry<?, ?> entry) { add(entry); }
-	public PropertyMap(DataEntry<?, ?>[] entries) { addAll(entries); }
+	public PropertyMap(DataEntry<?> entry) { add(entry); }
+	public PropertyMap(DataEntry<?>[] entries) { addAll(entries); }
 	public PropertyMap(PropertyMap model) { this(model.getEntries()); }
 	
-	public PropertyMap add(DataEntry<?, ?> entry) {
+	public PropertyMap add(DataEntry<?> entry) {
 		put(entry);
 		return this;
 	}
-	public PropertyMap addAll(DataEntry<?, ?>[] entries) {
-		for(DataEntry<?, ?> e: entries)
+	public PropertyMap addAll(DataEntry<?>[] entries) {
+		for(DataEntry<?> e: entries)
 			add(e);
 		return this;
 	}
 	
-	public <T> T put(DataEntry<T, ?> entry) { return put(entry.key, entry.value); }
+	public <T> T put(DataEntry<T> entry) { return put(entry.key, entry.value); }
 	@SuppressWarnings("unchecked")
 	public <T> T put(DataEnum<T> key, T value) {
 		return (T) map.put(key, value);
@@ -65,12 +65,12 @@ public class PropertyMap {
 	}
 	
 	// asClass should match the class in DataTag, generally.
-	public <T> T get(DataEnum<T> tag, Class<? extends T> asClass) {
-		return asClass.cast(get(tag));
-	}
+	// public <T> T get(DataEnum<?, T> tag, Class<? extends T> asClass) {
+	// 	return asClass.cast(get(tag));
+	// }
 	
-	public DataEntry<?, ?>[] getEntries() {
-		DataEntry<?, ?>[] entries = new DataEntry[map.size()];
+	public DataEntry<?>[] getEntries() {
+		DataEntry<?>[] entries = new DataEntry[map.size()];
 		int i = 0;
 		for(DataEnum<?> tag: map.keySet())
 			entries[i++] = getEntry(tag);
@@ -78,5 +78,5 @@ public class PropertyMap {
 		return entries;
 	}
 	
-	private <T, D extends DataEnum<T>> DataEntry<T, D> getEntry(D tag) { return new DataEntry<>(tag, get(tag)); }
+	private <T, D extends DataEnum<T>> DataEntry<T> getEntry(D tag) { return new DataEntry<>(tag, get(tag)); }
 }

@@ -4,7 +4,7 @@ import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.entity.ClassDataList;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.TileTypeEnum;
 
 public class Crocodile extends MobAi {
 	
@@ -26,6 +26,6 @@ public class Crocodile extends MobAi {
 	
 	@Override
 	public boolean canPermeate(Tile tile) {
-		return tile.getType().getEnumType() == TileTypeEnum.WATER;
+		return tile.getType().getTypeEnum() == TileTypeEnum.WATER;
 	}
 }

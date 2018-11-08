@@ -5,7 +5,7 @@ public abstract class DataEnum<T> extends GenericEnum<DataEnum<T>> {
 	
 	protected DataEnum() {}
 	
-	public DataEntry<T, ?> as(T value) { return new DataEntry<>(this, value); }
+	public DataEntry<T> as(T value) { return new DataEntry<>(this, value); }
 	
 	/** @noinspection NoopMethodInAbstractClass*/
 	public static void init() {}

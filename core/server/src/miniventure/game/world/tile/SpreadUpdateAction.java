@@ -6,7 +6,6 @@ import java.util.HashSet;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.FetchFunction;
 import miniventure.game.util.function.ValueFunction;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
 import miniventure.game.world.tile.UpdateManager.UpdateAction;
 
 import com.badlogic.gdx.math.MathUtils;
@@ -17,7 +16,7 @@ class SpreadUpdateAction implements UpdateAction {
 	
 	@FunctionalInterface
 	interface TileReplaceBehavior {
-		void spreadType(TileType newType, Tile tile);
+		void spreadType(ServerTileType newType, ServerTile tile);
 	}
 	
 	@FunctionalInterface
@@ -60,8 +59,8 @@ class SpreadUpdateAction implements UpdateAction {
 		HashSet<Tile> around = tile.getAdjacentTiles(false);
 		//around.shuffle();
 		for(Tile t: around) {
-			if(replaces.contains(t.getType().getEnumType())) {
-				replaceBehavior.spreadType(tileType.getTileType(t.getWorld()), t);
+			if(replaces.contains(t.getType().getTypeEnum())) {
+				replaceBehavior.spreadType(tileType.getTypeInstance(t.getWorld()), (ServerTile)t);
 				//break;
 			}
 		}
@@ -70,7 +69,7 @@ class SpreadUpdateAction implements UpdateAction {
 	@Override
 	public boolean canUpdate(@NotNull Tile tile) {
 		for(Tile t: tile.getAdjacentTiles(false))
-			if(replaces.contains(t.getType().getEnumType()))
+			if(replaces.contains(t.getType().getTypeEnum()))
 				return true;
 		
 		return false;

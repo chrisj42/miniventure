@@ -3,8 +3,6 @@ package miniventure.game.world.tile;
 import miniventure.game.util.customenum.SerialMap;
 import miniventure.game.util.function.FetchFunction;
 import miniventure.game.util.function.ValueFunction;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
-import miniventure.game.world.tile.data.TileCacheTag;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -33,9 +31,9 @@ public class UpdateManager {
 		this.actions = actions;
 	}
 	
-	public float update(@NotNull Tile tile, float delta) {
+	public float update(@NotNull ServerTile tile, float delta) {
 		// if playing an exit animation, then don't update the tile.
-		TransitionManager man = tileType.getTileType(tile.getWorld()).getRenderer().transitionManager;
+		TransitionManager man = ServerTileType.get(tileType).transitionManager;
 		if(man.playingExitAnimation(tile))
 			return man.tryFinishAnimation(tile);
 		

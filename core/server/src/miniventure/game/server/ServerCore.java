@@ -9,6 +9,7 @@ import miniventure.game.chat.command.CommandInputParser;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.VersionInfo;
+import miniventure.game.world.tile.ServerTileType;
 
 import com.badlogic.gdx.math.MathUtils;
 
@@ -38,6 +39,8 @@ public class ServerCore {
 				int height = Integer.parseInt(args[sizeIdx+1]);
 				
 				GameCore.initNonGdx();
+				//noinspection StaticMethodReferencedViaSubclass
+				ServerTileType.init();
 				
 				System.out.println("loading server world...");
 				

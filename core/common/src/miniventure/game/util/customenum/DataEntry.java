@@ -1,11 +1,11 @@
 package miniventure.game.util.customenum;
 
-class DataEntry<T, D extends DataEnum<T>> {
+public class DataEntry<T> {
 	
-	final D key;
+	final DataEnum<T> key;
 	final T value;
 	
-	DataEntry(D dataTag, T value) {
+	public DataEntry(DataEnum<T> dataTag, T value) {
 		this.key = dataTag;
 		this.value = value;
 	}

@@ -24,8 +24,8 @@ import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.ServerPlayer;
 import miniventure.game.world.levelgen.LevelGenerator;
 import miniventure.game.world.tile.ServerTileType;
-import miniventure.game.world.tile.TileEnumMapper;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.TileType;
+import miniventure.game.world.tile.TileTypeEnum;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -56,8 +56,6 @@ public class ServerWorld extends WorldManager {
 	private final HashSet<WorldObject> keepAlives = new HashSet<>(); // always keep chunks around these objects loaded.
 	
 	public ServerWorld(boolean standalone) throws IOException {
-		super(new TileEnumMapper<>(ServerTileType::new));
-		
 		server = new GameServer(standalone);
 		server.startServer();
 	}
@@ -218,6 +216,7 @@ public class ServerWorld extends WorldManager {
 	/*  --- GET METHODS --- */
 	
 	
+	@Override
 	public Array<WorldObject> getKeepAlives(@NotNull Level level) {
 		Array<WorldObject> keepAlives = new Array<>();
 		for(WorldObject obj: this.keepAlives)
@@ -226,6 +225,9 @@ public class ServerWorld extends WorldManager {
 		
 		return keepAlives;
 	}
+	
+	@Override
+	public TileType getTileType(TileTypeEnum type) { return ServerTileType.get(type); }
 	
 	public GameServer getServer() { return server; }
 	

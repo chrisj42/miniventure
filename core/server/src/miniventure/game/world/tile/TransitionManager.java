@@ -1,30 +1,17 @@
 package miniventure.game.world.tile;
 
-import java.util.EnumMap;
 import java.util.HashMap;
 
-import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.customenum.SerialMap;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
-import miniventure.game.world.tile.data.TileCacheTag;
-
-import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class TransitionManager {
 	
-	static EnumMap<TileTypeEnum, HashMap<String, Array<TextureHolder>>> tileAnimations = new EnumMap<>(TileTypeEnum.class);
-	
 	private final TileTypeEnum tileType;
-	private final HashMap<String, TransitionAnimation> entranceAnimations = new HashMap<>();
-	private final HashMap<String, TransitionAnimation> exitAnimations = new HashMap<>();
-	
-	// store this in DataMap, along with trans start time?
-	public enum TransitionMode {
-		ENTERING, EXITING, NONE
-	}
+	private final HashMap<String, ServerTileTransition> entranceAnimations = new HashMap<>();
+	private final HashMap<String, ServerTileTransition> exitAnimations = new HashMap<>();
 	
 	public TransitionManager(@NotNull TileTypeEnum tileType) {
 		this.tileType = tileType;
@@ -35,15 +22,15 @@ public class TransitionManager {
 		exitAnimations.putAll(manager.exitAnimations);
 	}
 	
-	public TransitionManager addEntranceAnimations(@NotNull TransitionAnimation... animations) {
-		for(TransitionAnimation transition: animations)
+	public TransitionManager addEntranceAnimations(@NotNull ServerTileTransition... animations) {
+		for(ServerTileTransition transition: animations)
 			entranceAnimations.put(transition.name, transition);
 		
 		return this;
 	}
 	
-	public TransitionManager addExitAnimations(@NotNull TransitionAnimation... animations) {
-		for(TransitionAnimation transition: animations)
+	public TransitionManager addExitAnimations(@NotNull ServerTileTransition... animations) {
+		for(ServerTileTransition transition: animations)
 			exitAnimations.put(transition.name, transition);
 		
 		return this;
@@ -57,8 +44,8 @@ public class TransitionManager {
 		return getAnimationStyle(mode, name);
 	}*/
 	@Nullable
-	private TransitionAnimation getAnimationStyle(TransitionMode mode, String name) {
-		TransitionAnimation animation = null;
+	private ServerTileTransition getAnimationStyle(TransitionMode mode, String name) {
+		ServerTileTransition animation = null;
 		if(mode == TransitionMode.ENTERING)
 			animation = entranceAnimations.get(name);
 		else if(mode == TransitionMode.EXITING)
@@ -69,17 +56,17 @@ public class TransitionManager {
 	
 	
 	// enter animation
-	public boolean tryStartAnimation(@NotNull Tile tile, @NotNull TileType previous) {
+	public boolean tryStartAnimation(@NotNull ServerTile tile, @NotNull TileType previous) {
 		return tryStartAnimation(tile, true, previous, false);
 	}
 	// exit animation
-	public boolean tryStartAnimation(@NotNull Tile tile, @NotNull TileType next, boolean addNext) {
+	public boolean tryStartAnimation(@NotNull ServerTile tile, @NotNull TileType next, boolean addNext) {
 		return tryStartAnimation(tile, false, next, addNext);
 	}
 	// check for transition animation; tiletype is being entered or removed, and given what tile type will be the main one next.
-	private boolean tryStartAnimation(@NotNull Tile tile, boolean isEntering, @NotNull TileType other, boolean addNext) { // addNext is ignored if isEntering is true
-		HashMap<String, TransitionAnimation> animations = isEntering ? entranceAnimations : exitAnimations;
-		for(TransitionAnimation animation: animations.values()) {
+	private boolean tryStartAnimation(@NotNull ServerTile tile, boolean isEntering, @NotNull TileType other, boolean addNext) { // addNext is ignored if isEntering is true
+		HashMap<String, ServerTileTransition> animations = isEntering ? entranceAnimations : exitAnimations;
+		for(ServerTileTransition animation: animations.values()) {
 			if(animation.isTriggerType(other)) {
 				SerialMap dataMap = tile.getDataMap();
 				dataMap.put(TileCacheTag.TransitionName, animation.name);
@@ -87,9 +74,10 @@ public class TransitionManager {
 				dataMap.put(TileCacheTag.TransitionStart, start);
 				dataMap.put(TileCacheTag.TransitionMode, isEntering ? TransitionMode.ENTERING : TransitionMode.EXITING);
 				if(addNext)
-					dataMap.put(TileCacheTag.TransitionTile, other.getEnumType());
+					dataMap.put(TileCacheTag.TransitionTile, other.getTypeEnum());
 				else
 					dataMap.remove(TileCacheTag.TransitionTile);
+				tile.getLevel().onTileUpdate(tile);
 				return true;
 			}
 		}
@@ -97,7 +85,7 @@ public class TransitionManager {
 		return false;
 	}
 	
-	TileAnimation<TextureHolder> getTransitionSprite(@NotNull Tile tile) {
+	/*TileAnimation<TextureHolder> getTransitionSprite(@NotNull Tile tile) {
 		SerialMap dataMap = tile.getDataMap(tileType);
 		
 		TransitionMode mode = dataMap.get(TileCacheTag.TransitionMode);
@@ -108,7 +96,7 @@ public class TransitionManager {
 			throw new IllegalStateException("Cannot get transition sprite when not transitioning.");
 		
 		return animation.getAnimation(tileType, name, tileAnimations);
-	}
+	}*/
 	
 	/*public float getTimeRemaining(@NotNull Tile tile) {
 		if(!playingAnimation(tile)) return 0;
@@ -136,10 +124,10 @@ public class TransitionManager {
 	public boolean playingEntranceAnimation(@NotNull Tile tile) { return isTransitionMode(tile, TransitionMode.ENTERING); }
 	public boolean playingExitAnimation(@NotNull Tile tile) { return isTransitionMode(tile, TransitionMode.EXITING); }
 	
-	public float tryFinishAnimation(@NotNull Tile tile) {
+	public float tryFinishAnimation(@NotNull ServerTile tile) {
 		SerialMap dataMap = tile.getDataMap(tileType);
 		
-		TransitionAnimation anim = getAnimationStyle(dataMap.get(TileCacheTag.TransitionMode), dataMap.get(TileCacheTag.TransitionName));
+		ServerTileTransition anim = getAnimationStyle(dataMap.get(TileCacheTag.TransitionMode), dataMap.get(TileCacheTag.TransitionName));
 		
 		if(anim == null)
 			return 0;
@@ -162,7 +150,7 @@ public class TransitionManager {
 		if(mode == TransitionMode.EXITING) {
 			tile.breakTile(false);
 			if(nextType != null)
-				tile.addTile(nextType.getTileType(tile.getWorld()));
+				tile.addTile(ServerTileType.get(nextType));
 		}
 		
 		return 0;

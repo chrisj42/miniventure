@@ -8,7 +8,6 @@ import java.util.HashMap;
 import miniventure.game.GameCore;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.RelPos;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 import com.badlogic.gdx.utils.Array;
 
@@ -20,23 +19,21 @@ public class TileTypeRenderer {
 	static {
 		Array<TextureHolder> regions = GameCore.tileAtlas.getRegions();
 		for(TextureHolder region: regions) {
-			TileTypeEnum tileType = TileTypeEnum.valueOf(region.name.substring(0, region.name.indexOf("/")).toUpperCase());
-			String spriteID = region.name.substring(region.name.indexOf("/")+1);
+			TileTypeEnum tileType = TileTypeEnum.valueOf(region.name.substring(0, region.name.indexOf('/')).toUpperCase());
+			String spriteID = region.name.substring(region.name.indexOf('/')+1);
 			
 			String prefix = spriteID.substring(0, 1);
 			spriteID = spriteID.substring(1).toLowerCase();
 			
 			EnumMap<TileTypeEnum, HashMap<String, Array<TextureHolder>>> animationMap;
-			if(prefix.equals("c"))
-				animationMap = ConnectionManager.tileAnimations;
-			else if(prefix.equals("o"))
-				animationMap = OverlapManager.tileAnimations;
-			else if(prefix.equals("t"))
-				animationMap = TransitionManager.tileAnimations;
-			else {
-				if(!(prefix+spriteID).equals("swim"))
-					System.err.println("Unknown Tile Sprite Frame for "+tileType+": "+prefix+spriteID);
-				continue;
+			switch(prefix) {
+				case "c": animationMap = ConnectionManager.tileAnimations; break;
+				case "o": animationMap = OverlapManager.tileAnimations; break;
+				case "t": animationMap = TransitionAnimation.tileAnimations; break;
+				default:
+					if(!(prefix + spriteID).equals("swim"))
+						System.err.println("Unknown Tile Sprite Frame for " + tileType + ": " + prefix + spriteID);
+					continue;
 			}
 			
 			animationMap.computeIfAbsent(tileType, k -> new HashMap<>());
@@ -50,7 +47,6 @@ public class TileTypeRenderer {
 	private final boolean isOpaque;
 	private final ConnectionManager connectionManager;
 	private final OverlapManager overlapManager;
-	final TransitionManager transitionManager;
 	
 	public TileTypeRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque) {
 		this(tileType, isOpaque, new ConnectionManager(tileType, RenderStyle.SINGLE_FRAME));
@@ -62,22 +58,17 @@ public class TileTypeRenderer {
 		this(tileType, isOpaque, new ConnectionManager(tileType, RenderStyle.SINGLE_FRAME), overlapManager);
 	}
 	public TileTypeRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque, ConnectionManager connectionManager, OverlapManager overlapManager) {
-		this(tileType, isOpaque, connectionManager, overlapManager, new TransitionManager(tileType));
-	}
-	public TileTypeRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque, ConnectionManager connectionManager, OverlapManager overlapManager, TransitionManager transitionManager) {
 		this.tileType = tileType;
 		this.isOpaque = isOpaque;
 		this.connectionManager = connectionManager;
 		this.overlapManager = overlapManager;
-		this.transitionManager = transitionManager;
 	}
 	
-	public TileTypeRenderer(@NotNull TileTypeRenderer model, @Nullable ConnectionManager connectionManager, @Nullable OverlapManager overlapManager, @Nullable TransitionManager transitionManager) {
+	public TileTypeRenderer(@NotNull TileTypeRenderer model, @Nullable ConnectionManager connectionManager, @Nullable OverlapManager overlapManager) {
 		this.tileType = model.tileType;
 		isOpaque = model.isOpaque;
 		this.connectionManager = connectionManager == null ? model.connectionManager : connectionManager;
 		this.overlapManager = overlapManager == null ? model.overlapManager : overlapManager;
-		this.transitionManager = transitionManager == null ? model.transitionManager : transitionManager;
 	}
 	
 	public boolean isOpaque() { return isOpaque; }
@@ -86,8 +77,9 @@ public class TileTypeRenderer {
 	
 	// gets the sprite for when this tiletype is surrounded by the given types.
 	public TileAnimation<TextureHolder> getConnectionSprite(@NotNull Tile tile, EnumMap<RelPos, EnumSet<TileTypeEnum>> aroundTypes) {
-		if(transitionManager.playingAnimation(tile))
-			return transitionManager.getTransitionSprite(tile);
+		String name = tile.getDataMap(tileType).get(TileCacheTag.TransitionName);
+		if(name != null)
+			return ClientTileType.get(tileType).getTransition(name).getAnimation();
 		
 		return connectionManager.getConnectionSprite(aroundTypes);
 	}

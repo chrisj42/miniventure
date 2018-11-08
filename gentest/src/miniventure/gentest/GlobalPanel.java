@@ -20,7 +20,7 @@ import miniventure.game.util.MyUtils;
 import miniventure.game.world.levelgen.GroupNoiseMapper;
 import miniventure.game.world.levelgen.NamedNoiseFunction;
 import miniventure.game.world.levelgen.NoiseMapper;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.TileTypeEnum;
 import miniventure.gentest.util.FloatField;
 import miniventure.gentest.util.IntegerField;
 import miniventure.gentest.util.MyPanel;

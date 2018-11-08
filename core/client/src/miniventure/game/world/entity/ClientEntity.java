@@ -7,9 +7,9 @@ import miniventure.game.util.blinker.FrameBlinker;
 import miniventure.game.world.ClientLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Mob;
+import miniventure.game.world.tile.ClientTile;
 import miniventure.game.world.tile.SwimAnimation;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.data.TilePropertyTag;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -50,9 +50,9 @@ public class ClientEntity extends Entity {
 		super.render(batch, delta, posOffset);
 		float drawableHeight = 1;
 		if(!canFloat) {
-			Tile closest = getClosestTile();
+			ClientTile closest = (ClientTile) getClosestTile();
 			if(closest != null) {
-				SwimAnimation swimAnimation = closest.getType().getPropertyOrDefault(TilePropertyTag.Swim, null);
+				SwimAnimation swimAnimation = closest.getType().getSwimAnimation();
 				if(swimAnimation != null) {
 					Vector2 pos = getCenter().sub(posOffset).sub(0, getSize().y / 2).scl(Tile.SIZE);
 					swimAnimation.drawSwimAnimation(batch, pos, getWorld());

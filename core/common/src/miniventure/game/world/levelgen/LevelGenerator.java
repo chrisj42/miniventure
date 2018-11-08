@@ -6,11 +6,11 @@ import java.util.Random;
 
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Chunk;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.TileTypeEnum;
 
 import com.badlogic.gdx.math.Rectangle;
 
-import static miniventure.game.world.tile.TileType.TileTypeEnum.*;
+import static miniventure.game.world.tile.TileTypeEnum.*;
 
 public class LevelGenerator {
 	
@@ -190,10 +190,10 @@ public class LevelGenerator {
 		put(WATER, HOLE);
 		put(SAND, DIRT);
 		put(CACTUS, SAND);
-		put(TREE_CARTOON, GRASS);
-		put(TREE_PINE, GRASS);
-		put(TREE_DARK, DIRT);
-		put(TREE_POOF, GRASS);
+		put(CARTOON_TREE, GRASS);
+		put(PINE_TREE, GRASS);
+		put(DARK_TREE, DIRT);
+		put(POOF_TREE, GRASS);
 		put(DIRT, HOLE);
 		put(GRASS, DIRT);
 		put(STONE, DIRT);
@@ -219,7 +219,7 @@ public class LevelGenerator {
 		NoiseMapper plainsBiome = new NoiseMapper("Plains", detailNoise)
 			.addRegion(FLINT, .03f)
 			.addRegion(GRASS, 8)
-			.addRegion(TREE_CARTOON, 1)
+			.addRegion(CARTOON_TREE, 1)
 			;
 		
 		NoiseMapper desertBiome = new NoiseMapper("Desert", cactusNoise)
@@ -229,16 +229,16 @@ public class LevelGenerator {
 		
 		NoiseMapper snowBiome = new NoiseMapper("Snow", cactusNoise)
 			.addRegion(SNOW, 2)
-			.addRegion(TREE_PINE, .5f)
+			.addRegion(PINE_TREE, .5f)
 			.addRegion(SNOW, 8)
-			.addRegion(TREE_DARK, .5f)
+			.addRegion(DARK_TREE, .5f)
 			;
 		
 		NoiseMapper canyonBiome = new NoiseMapper("Canyons", detailNoise)
 			.addRegion(STONE, 20)
 			.addRegion(FLINT, 1)
 			.addRegion(GRASS, 10)
-			.addRegion(TREE_PINE, 1)
+			.addRegion(PINE_TREE, 1)
 			.addRegion(GRASS, 10)
 			.addRegion(STONE, 20)
 			;
@@ -287,7 +287,7 @@ public class LevelGenerator {
 		NoiseMapper marshBiome = new GroupNoiseMapper("Marsh", detailNoise)
 			.addRegion(DIRT, .1f)
 			.addRegion(WATER, .1f)
-			.addRegion(TREE_DARK, .1f)
+			.addRegion(DARK_TREE, .1f)
 			.addRegion(GRASS, .1f)
 			;
 		
@@ -327,19 +327,19 @@ public class LevelGenerator {
 			.addRegion(GRASS, 4)
 			// .addRegion(WATER, 1f)
 			.addRegion(GRASS, 3)
-			.addRegion(TREE_CARTOON, 1)
+			.addRegion(CARTOON_TREE, 1)
 			;
 		
 		NoiseMapper desertBiome = new NoiseMapper("Desert", cactusNoise)
 			.addRegion(CACTUS, 1)
 			.addRegion(SAND, 10)
-			.addRegion(TREE_CARTOON, .3f)
+			.addRegion(CARTOON_TREE, .3f)
 			;
 		
 		NoiseMapper canyonBiome = new NoiseMapper("Canyons", detailNoise)
 			.addRegion(STONE, 20)
 			.addRegion(GRASS, 10)
-			.addRegion(TREE_PINE, 1)
+			.addRegion(PINE_TREE, 1)
 			.addRegion(GRASS, 10)
 			.addRegion(STONE, 20)
 			;
@@ -353,14 +353,14 @@ public class LevelGenerator {
 		
 		NoiseMapper snowBiome = new GroupNoiseMapper("Snow", detailNoise)
 			.addRegion(SNOW, .6f)
-			.addRegion(TREE_PINE, .1f)
+			.addRegion(PINE_TREE, .1f)
 			// .addRegion(SNOW, 1)
 			.addRegion(GRASS, .1f)
 			// .addRegion(TREE_, .25f)
 			// .addRegion(GRASS, .25f)
 			// .addRegion(WATER, .1f)
 			// .addRegion(SNOW, 1)
-			.addRegion(TREE_DARK, .1f)
+			.addRegion(DARK_TREE, .1f)
 			// .addRegion(SNOW, 1)
 			;
 		
@@ -377,16 +377,16 @@ public class LevelGenerator {
 		NoiseMapper marshBiome = new GroupNoiseMapper("Marsh", detailNoise)
 			.addRegion(DIRT, .1f)
 			.addRegion(WATER, .1f)
-			.addRegion(TREE_DARK, .1f)
+			.addRegion(DARK_TREE, .1f)
 			.addRegion(GRASS, .1f)
 			// .addRegion(DIRT, 1)
 			// .addRegion(WATER, .75f)
 			// .addRegion(GRASS, .4f)
-			// .addRegion(TREE_DARK, .3f)
+			// .addRegion(DARK_TREE, .3f)
 			// .addRegion(DIRT, 1)
 			// .addRegion(WATER, .75f)
 			// .addRegion(GRASS, .4f)
-			// .addRegion(TREE_DARK, .3f)
+			// .addRegion(DARK_TREE, .3f)
 			// .addRegion(WATER, .75f)
 			;
 		

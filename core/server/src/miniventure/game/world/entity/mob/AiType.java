@@ -4,7 +4,7 @@ import miniventure.game.item.FoodType;
 import miniventure.game.item.ResourceType;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.entity.mob.PursuePattern.FollowBehavior;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.TileTypeEnum;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

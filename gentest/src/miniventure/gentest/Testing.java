@@ -15,13 +15,13 @@ import java.util.Random;
 
 import miniventure.game.world.levelgen.Coherent2DNoiseFunction;
 import miniventure.game.world.levelgen.LevelGenerator;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.TileTypeEnum;
 
 class Testing {
 	private static final HashMap<TileTypeEnum, Color> tileMap = new HashMap<>();
 	static {
 		tileMap.put(TileTypeEnum.WATER, Color.BLUE);
-		tileMap.put(TileTypeEnum.TREE_CARTOON, Color.GREEN.darker().darker());
+		tileMap.put(TileTypeEnum.CARTOON_TREE, Color.GREEN.darker().darker());
 		tileMap.put(TileTypeEnum.CACTUS, Color.GREEN.darker());
 		tileMap.put(TileTypeEnum.GRASS, Color.GREEN);
 		tileMap.put(TileTypeEnum.STONE, Color.GRAY);

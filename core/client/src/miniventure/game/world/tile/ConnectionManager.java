@@ -7,7 +7,7 @@ import java.util.HashMap;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.RelPos;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.TileTypeEnum;
 
 import com.badlogic.gdx.utils.Array;
 
@@ -16,6 +16,13 @@ import org.jetbrains.annotations.NotNull;
 public class ConnectionManager {
 	
 	static EnumMap<TileTypeEnum, HashMap<String, Array<TextureHolder>>> tileAnimations = new EnumMap<>(TileTypeEnum.class);
+	
+	public static ConnectionManager DEFAULT(@NotNull TileTypeEnum type) {
+		return NO_CONNECT(type, RenderStyle.SINGLE_FRAME);
+	}
+	public static ConnectionManager NO_CONNECT(@NotNull TileTypeEnum type, RenderStyle style) {
+		return new ConnectionManager(type, style);
+	}
 	
 	private final TileTypeEnum type;
 	private final RenderStyle renderStyle;

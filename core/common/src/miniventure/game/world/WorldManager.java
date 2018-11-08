@@ -8,22 +8,26 @@ import java.util.Set;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.tile.TileEnumMapper;
 import miniventure.game.world.tile.TileType;
+import miniventure.game.world.tile.TileTypeEnum;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * this class contains all the levels in the game, and generally manages world-level data.
+ */
 public abstract class WorldManager {
 	
-	private final HashMap<Integer, Entity> entityIDMap;
+	private static final int INITIAL_ENTITY_BUFFER = 128;
+	
 	protected float gameTime, daylightOffset;
+	private final HashMap<Integer, Entity> entityIDMap = new HashMap<>(INITIAL_ENTITY_BUFFER);
 	
-	
-	
-	private final HashMap<Integer, Level> levels = new HashMap<>();
-	private final HashMap<Level, Set<Entity>> levelEntities = new HashMap<>();
-	private final HashMap<Entity, Level> entityLevels = new HashMap<>();
+	private final HashMap<Integer, Level> levels = new HashMap<>(INITIAL_ENTITY_BUFFER);
+	private final HashMap<Level, Set<Entity>> levelEntities = new HashMap<>(4);
+	private final HashMap<Entity, Level> entityLevels = new HashMap<>(INITIAL_ENTITY_BUFFER);
 	
 	@FunctionalInterface
 	interface EntitySetAction {
@@ -33,15 +37,6 @@ public abstract class WorldManager {
 	@FunctionalInterface
 	interface EntitySetFunction<T> {
 		T getFromSet(Set<Entity> set);
-	}
-	
-	private final TileEnumMapper<TileType> tileTypeFetcher;
-	
-	// this class contains all the levels in the game.
-	public WorldManager(TileEnumMapper<TileType> fetcher) { this(fetcher, new HashMap<>()); }
-	public WorldManager(TileEnumMapper<TileType> fetcher, HashMap<Integer, Entity> entityIDMap) {
-		tileTypeFetcher = fetcher;
-		this.entityIDMap = entityIDMap;
 	}
 	
 	
@@ -200,7 +195,7 @@ public abstract class WorldManager {
 	/** get all keep-alive objects on the given level */
 	public abstract Array<WorldObject> getKeepAlives(Level level);
 	
-	public TileEnumMapper<TileType> getTileTypeFetcher() { return tileTypeFetcher; }
+	public abstract TileType getTileType(TileTypeEnum type);
 	
 	public Entity getEntity(int eid) { return entityIDMap.get(eid); }
 	

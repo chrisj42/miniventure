@@ -3,27 +3,18 @@ package miniventure.game.world.tile;
 import java.util.EnumMap;
 import java.util.HashSet;
 
-import miniventure.game.item.Item;
-import miniventure.game.util.MyUtils;
 import miniventure.game.util.customenum.SerialMap;
 import miniventure.game.world.Level;
 import miniventure.game.world.Point;
 import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
-import miniventure.game.world.entity.Entity;
-import miniventure.game.world.entity.mob.Player;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
-import miniventure.game.world.tile.data.TileCacheTag;
-import miniventure.game.world.tile.data.TilePropertyTag;
 
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-public abstract class Tile implements WorldObject {
+public abstract class Tile<T extends TileType> implements WorldObject {
 	
 	/*
 		So. The client, in terms of properties, doesn't have to worry about tile interaction properties. It always sends a request to the server when interactions should occur.
@@ -43,29 +34,29 @@ public abstract class Tile implements WorldObject {
 	
 	public static final int SIZE = 32;
 	
-	private TileStack tileStack;
+	private TileStack<T> tileStack;
 	private final Object dataLock = new Object();
 	
-	@NotNull private final Level level;
-	protected final int x, y;
-	private EnumMap<TileTypeEnum, SerialMap> dataMaps = new EnumMap<>(TileTypeEnum.class);
+	@NotNull private final Level<T> level;
+	final int x, y;
+	final EnumMap<TileTypeEnum, SerialMap> dataMaps = new EnumMap<>(TileTypeEnum.class);
 	
 	// the TileType array is ALWAYS expected in order of bottom to top.
-	protected Tile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, @Nullable SerialMap[] dataMaps) {
+	Tile(@NotNull Level<T> level, int x, int y, @NotNull TileTypeEnum[] types) {
 		this.level = level;
 		this.x = x;
 		this.y = y;
-		
-		tileStack = new TileStack(getWorld(), types);
-		for(int i = 0; i < types.length; i++) {
-			this.dataMaps.put(types[i], dataMaps == null ? types[i].getTileType(level.getWorld()).getInitialData() : dataMaps[i]);
-		}
+		setTileStack(makeStack(types));
 	}
+	
+	abstract TileStack<T> makeStack(@NotNull TileTypeEnum[] types);
+	
+	void setTileStack(TileStack<T> stack) { this.tileStack = stack; }
 	
 	@NotNull @Override
 	public WorldManager getWorld() { return level.getWorld(); }
 	
-	@NotNull @Override public Level getLevel() { return level; }
+	@NotNull @Override public Level<T> getLevel() { return level; }
 	
 	@NotNull
 	@Override public Rectangle getBounds() { return new Rectangle(x, y, 1, 1); }
@@ -74,128 +65,19 @@ public abstract class Tile implements WorldObject {
 	public Point getLocation() { return new Point(x, y); }
 	
 	
-	public TileType getType() { return tileStack.getTopLayer(); }
-	public TileStack getTypeStack() { return tileStack; }
+	public T getType() { return tileStack.getTopLayer(); }
+	public TileStack<T> getTypeStack() { return tileStack; }
 	
-	public SerialMap getDataMap() { return getDataMap(getType().getEnumType()); }
-	public SerialMap getDataMap(TileType tileType) { return getDataMap(tileType.getEnumType()); }
-	public SerialMap getDataMap(TileTypeEnum tileType) {
-		synchronized (dataLock) {
-			return dataMaps.get(tileType);
-		}
-	}
+	public SerialMap getDataMap() { return getDataMap(getType().getTypeEnum()); }
+	public SerialMap getDataMap(T tileType) { return getDataMap(tileType.getTypeEnum()); }
+	public SerialMap getDataMap(TileTypeEnum tileType) { return dataMaps.get(tileType); }
 	
 	
-	public boolean addTile(@NotNull TileType newType) { return addTile(newType, getType()); }
-	private boolean addTile(@NotNull TileType newType, @NotNull TileType prevType) {
-		
-		moveEntities(newType);
-		
-		tileStack.addLayer(newType);
-		dataMaps.put(newType.getEnumType(), newType.getInitialData());
-		
-		// check for an entrance animation
-		newType.getRenderer().transitionManager.tryStartAnimation(this, prevType);
-		// we don't use the return value because transition or not, there's nothing we need to do. :P
-		
-		return true;
-	}
-	
-	boolean breakTile() { return breakTile(true); }
-	boolean breakTile(boolean checkForExitAnim) {
-		if(checkForExitAnim) {
-			TileType type = getType();
-			if(type.getRenderer().transitionManager.tryStartAnimation(this, tileStack.getLayerFromTop(1, true), false))
-				// transitioning successful
-				return true; // don't actually break the tile yet (but still signal for update)
-		}
-		
-		TileType prevType = tileStack.removeLayer();
-		
-		if(prevType != null) {
-			dataMaps.remove(prevType.getEnumType());
-			moveEntities(getType());
-			return true;
-		}
-		
-		return false; // cannot break this tile any further.
-	}
-	
-	boolean replaceTile(@NotNull TileType newType) {
-		// for doors, the animations will be attached to the open door type; an entrance when coming from a closed door, and an exit when going to a closed door.
-		/*
-			when adding a type, check only for an entrance animation on the new type, and do it after adding it to the stack. when the animation finishes, do nothing except finish the animation.
-			when removing a type, check for an exit anim on the type, before removing. When animation finishes, remove the type for real.
-			
-			when replacing a type, the old type is checked for an exit anim. but the new type is also
-		 */
-		
-		TileType type = getType();
-		TileType underType = tileStack.size() == 1 ? type : tileStack.getLayerFromBottom(1);
-		
-		if(newType.equals(type)) {
-			// just reset the data
-			dataMaps.put(type.getEnumType(), type.getInitialData());
-			return true;
-		}
-		
-		// check that the new type can be placed on the type that was under the previous type
-		if(newType.getEnumType().compareTo(underType.getEnumType()) <= 0)
-			return false; // cannot replace tile
-		
-		if(type.getRenderer().transitionManager.tryStartAnimation(this, newType, true))
-			// there is an exit animation; it needs to be played. So let that happen, the tile will be replaced later
-			return true; // can replace (but will do it in a second)
-		
-		// no exit animation, so remove the current tile (without doing the exit anim obviously, since we just checked) and add the new one
-		breakTile(false);
-		return addTile(newType, type); // already checks for entrance animation, so we don't need to worry about that; but we do need to pass the previous type, otherwise it will compare with the under type.
-		// the above should always return true, btw, because we already checked with the same conditional a few lines up.
-	}
-	
-	private void moveEntities(TileType newType) {
-		// check for entities that will not be allowed on the new tile, and move them to the closest adjacent tile they are allowed on.
-		HashSet<Tile> surroundingTileSet = getAdjacentTiles(true);
-		Tile[] surroundingTiles = surroundingTileSet.toArray(new Tile[surroundingTileSet.size()]);
-		for(Entity entity: level.getOverlappingEntities(getBounds())) {
-			// for each entity, check if it can walk on the new tile type. If not, fetch the surrounding tiles, remove those the entity can't walk on, and then fetch the closest tile of the remaining ones.
-			if(newType.isWalkable()) continue; // no worries for this entity.
-			
-			Array<Tile> aroundTiles = new Array<>(surroundingTiles);
-			for(int i = 0; i < aroundTiles.size; i++) {
-				if(!aroundTiles.get(i).getType().isWalkable()) {
-					aroundTiles.removeIndex(i);
-					i--;
-				}
-			}
-			
-			// from the remaining tiles, find the one that is closest to the entity.
-			Tile closest = entity.getClosestTile(aroundTiles);
-			// if none remain (returned tile is null), take no action for that entity. If a tile is returned, then move the entity just barely inside the new tile.
-			if(closest != null) {
-				Rectangle tileBounds = closest.getBounds();
-				
-				Tile secClosest = closest;
-				do {
-					aroundTiles.removeValue(secClosest, false);
-					secClosest = entity.getClosestTile(aroundTiles);
-				} while(secClosest != null && secClosest.x != closest.x && secClosest.y != closest.y);
-				if(secClosest != null)
-					// expand the rect that the player can be moved to so it's not so large.
-					tileBounds.merge(secClosest.getBounds());
-				
-				Rectangle entityBounds = entity.getBounds();
-				MyUtils.moveRectInside(entityBounds, tileBounds, 0.05f);
-				entity.moveTo(closest.level, entityBounds.x, entityBounds.y);
-			}
-		}
-	}
-	
-	public HashSet<Tile> getAdjacentTiles(boolean includeCorners) {
+	public HashSet<Tile<T>> getAdjacentTiles(boolean includeCorners) {
 		if(includeCorners)
 			return level.getAreaTiles(x, y, 1, false);
 		else {
-			HashSet<Tile> tiles = new HashSet<>();
+			HashSet<Tile<T>> tiles = new HashSet<>();
 			if(x > 0) tiles.add(level.getTile(x-1, y));
 			if(y < level.getHeight()-1) tiles.add(level.getTile(x, y+1));
 			if(x < level.getWidth()-1) tiles.add(level.getTile(x+1, y));
@@ -205,61 +87,16 @@ public abstract class Tile implements WorldObject {
 		}
 	}
 	
-	public abstract void updateSprites();
-	
-	public float update() {
-		float min = 0;
-		for(TileType type: getTypeStack().getTypes()) {
-			float wait = type.update(this);
-			if(min == 0)
-				min = wait;
-			else if(wait != 0)
-				min = Math.min(wait, min);
-		}
-		return min;
+	/*
+	@Override @Nullable @SuppressWarnings("unchecked")
+	public Tile<T> getClosestTile(@NotNull Array<Tile> tiles) {
+		return (Tile<T>) WorldObject.super.getClosestTile(tiles);
 	}
-	
-	@Override
-	public float getLightRadius() {
-		float maxRadius = 0;
-		for(TileType type: tileStack.getTypes())
-			maxRadius = Math.max(maxRadius, type.getPropertyOrDefault(TilePropertyTag.LightRadius, 0f));
-		
-		return maxRadius;
+	@Override @Nullable @SuppressWarnings("unchecked")
+	public Tile<T> getClosestTile() {
+		return (Tile<T>) WorldObject.super.getClosestTile();
 	}
-	
-	@Override
-	public boolean isPermeable() {
-		return getType().isWalkable();
-	}
-	
-	@Override
-	public boolean attackedBy(WorldObject obj, @Nullable Item item, int damage) {
-		if(getType().getRenderer().transitionManager.playingExitAnimation(this))
-			return false;
-		return getType().attacked(this, obj, item, damage);
-	}
-	
-	@Override
-	public boolean interactWith(Player player, @Nullable Item heldItem) {
-		if(getType().getRenderer().transitionManager.playingExitAnimation(this))
-			return false;
-		return getType().interact(this, player, heldItem);
-	}
-	
-	@Override
-	public boolean touchedBy(Entity entity) {
-		if(getType().getRenderer().transitionManager.playingExitAnimation(this))
-			return false;
-		return getType().touched(this, entity, true);
-	}
-	
-	@Override
-	public void touching(Entity entity) {
-		if(getType().getRenderer().transitionManager.playingExitAnimation(this))
-			return;
-		getType().touched(this, entity, false);
-	}
+	*/
 	
 	@Override
 	public String toString() { return getType().getName()+' '+getClass().getSimpleName(); }
@@ -287,9 +124,10 @@ public abstract class Tile implements WorldObject {
 			this.typeOrdinals = typeOrdinals;
 			this.data = data;
 		}
+		@SuppressWarnings("unchecked")
 		public TileData(Tile tile) {
 			synchronized (tile.dataLock) {
-				TileTypeEnum[] tileTypes = tile.getTypeStack().getEnumTypes(true);
+				TileTypeEnum[] tileTypes = tile.getTypeStack().getEnumTypes();
 				typeOrdinals = new int[tileTypes.length];
 				for(int i = 0; i < tileTypes.length; i++) {
 					TileTypeEnum type = tileTypes[i];
@@ -298,7 +136,7 @@ public abstract class Tile implements WorldObject {
 				
 				this.data = new String[tileTypes.length];
 				for(int i = 0; i < data.length; i++)
-					data[i] = tile.dataMaps.get(tileTypes[i]).serialize();
+					data[i] = ((EnumMap<TileTypeEnum, SerialMap>)tile.dataMaps).get(tileTypes[i]).serialize();
 			}
 		}
 		
@@ -306,7 +144,7 @@ public abstract class Tile implements WorldObject {
 		public static TileTypeEnum[] getTypes(int[] typeOrdinals) {
 			TileTypeEnum[] types = new TileTypeEnum[typeOrdinals.length];
 			for(int i = 0; i < types.length; i++) {
-				types[i] = TileTypeEnum.values(typeOrdinals[i]);
+				types[i] = TileTypeEnum.value(typeOrdinals[i]);
 			}
 			return types;
 		}
@@ -319,26 +157,15 @@ public abstract class Tile implements WorldObject {
 			return maps;
 		}
 		
-		public void apply(Tile tile) {
-			TileTypeEnum[] types = getTypes();
-			SerialMap[] maps = getDataMaps();
-			
-			synchronized (tile.dataLock) {
-				tile.tileStack = new TileStack(tile.getWorld(), types);
-				tile.dataMaps.clear();
-				for(int i = 0; i < data.length; i++)
-					tile.dataMaps.put(types[i], maps[i]);
-			}
-		}
 	}
 	
-	public static class TileTag implements Tag<Tile> {
+	public static class TileTag<T extends TileType> implements Tag<Tile<T>> {
 		public final int x;
 		public final int y;
 		public final int levelDepth;
 		
 		private TileTag() { this(0, 0, 0); }
-		public TileTag(Tile tile) { this(tile.x, tile.y, tile.getLevel().getDepth()); }
+		public TileTag(Tile<T> tile) { this(tile.x, tile.y, tile.getLevel().getDepth()); }
 		public TileTag(int x, int y, int levelDepth) {
 			this.x = x;
 			this.y = y;
@@ -346,8 +173,9 @@ public abstract class Tile implements WorldObject {
 		}
 		
 		@Override
-		public Tile getObject(WorldManager world) {
-			Level level = world.getLevel(levelDepth);
+		@SuppressWarnings("unchecked")
+		public Tile<T> getObject(WorldManager world) {
+			Level<T> level = (Level<T>) world.getLevel(levelDepth);
 			if(level != null)
 				return level.getTile(x, y);
 			return null;
@@ -355,5 +183,5 @@ public abstract class Tile implements WorldObject {
 	}
 	
 	@Override
-	public Tag<Tile> getTag() { return new TileTag(this); }
+	public Tag<Tile<T>> getTag() { return new TileTag<>(this); }
 }

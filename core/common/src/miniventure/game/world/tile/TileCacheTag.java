@@ -1,12 +1,9 @@
-package miniventure.game.world.tile.data;
+package miniventure.game.world.tile;
 
 import miniventure.game.util.customenum.GenericEnum;
 import miniventure.game.util.customenum.SerialEnum;
 import miniventure.game.util.function.MapFunction;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
-import miniventure.game.world.tile.TransitionManager.TransitionMode;
 
-@SuppressWarnings("unchecked")
 public class TileCacheTag<T> extends SerialEnum<T> {
 	
 	static {
@@ -16,10 +13,13 @@ public class TileCacheTag<T> extends SerialEnum<T> {
 	/* --- ENUMERATION VALUES --- */
 	
 	
-	public static final TileCacheTag<Integer> Health = new TileCacheTag<>(Integer.class);
+	public static final TileCacheTag<Integer> Health =
+		new TileCacheTag<>(true, false, Integer.class);
 	
-	// Rendering
-	public static final TileCacheTag<String> TransitionName = new TileCacheTag<>(String.class);
+	// Transition
+	public static final TileCacheTag<String> TransitionName =
+		new TileCacheTag<>(false, true, String.class);
+	
 	public static final TileCacheTag<Float> TransitionStart = new TileCacheTag<>(Float.class);
 	public static final TileCacheTag<TransitionMode> TransitionMode = new TileCacheTag<>(TransitionMode.class);
 	public static final TileCacheTag<TileTypeEnum> TransitionTile = new TileCacheTag<>(TileTypeEnum.class);
@@ -31,13 +31,19 @@ public class TileCacheTag<T> extends SerialEnum<T> {
 	
 	
 	public static TileCacheTag<?> valueOf(String str) { return valueOf(TileCacheTag.class, str); }
+	public static TileCacheTag<?> valueOf(int ord) { return valueOf(TileCacheTag.class, ord); }
+	
 	
 	private TileCacheTag(MapFunction<T, String> valueWriter, MapFunction<String, T> valueParser) {
-		super(valueWriter, valueParser);
+		this(false, false, valueWriter, valueParser);
+	}
+	private TileCacheTag(boolean save, boolean send, MapFunction<T, String> valueWriter, MapFunction<String, T> valueParser) {
+		super(save, send, valueWriter, valueParser);
 	}
 	
-	private TileCacheTag(Class<T> valueClass) {
-		super(valueClass);
+	private TileCacheTag(Class<T> valueClass) { this(false, false, valueClass); }
+	private TileCacheTag(boolean save, boolean send, Class<T> valueClass) {
+		super(save, send, valueClass);
 	}
 	
 }

@@ -10,6 +10,7 @@ import miniventure.game.util.SynchronizedAccessor;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.tile.Tile;
+import miniventure.game.world.tile.TileType;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
@@ -19,7 +20,7 @@ import com.badlogic.gdx.utils.Array;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class Level implements Taggable<Level> {
+public abstract class Level<T extends TileType> implements Taggable<Level<T>> {
 	
 	public static final int X_LOAD_RADIUS = 4, Y_LOAD_RADIUS = 2;
 	
@@ -120,8 +121,6 @@ public abstract class Level implements Taggable<Level> {
 		}
 	}
 	
-	public abstract void render(Rectangle renderSpace, SpriteBatch batch, float delta, Vector2 posOffset);
-	
 	public void updateEntities(Entity[] entities, float delta) {
 		int mobs = 0;
 		for(Entity e: entities) {
@@ -133,9 +132,10 @@ public abstract class Level implements Taggable<Level> {
 	}
 	
 	@Nullable
-	public Tile getTile(Vector2 pos) { return getTile(pos.x, pos.y); }
+	public Tile<T> getTile(Vector2 pos) { return getTile(pos.x, pos.y); }
 	@Nullable
-	public Tile getTile(float x, float y) {
+	@SuppressWarnings("unchecked")
+	public Tile<T> getTile(float x, float y) {
 		if(x < 0 || y < 0 || x > getWidth() || y > getHeight())
 			return null;
 		
@@ -148,7 +148,7 @@ public abstract class Level implements Taggable<Level> {
 		
 		Chunk chunk = getLoadedChunk(new Point(chunkX, chunkY));
 		if(chunk != null)
-			return chunk.getTile(xt, yt);
+			return (Tile<T>) chunk.getTile(xt, yt);
 		
 		return null;
 	}
@@ -169,12 +169,12 @@ public abstract class Level implements Taggable<Level> {
 		return overlappingTiles;
 	}
 	
-	public Array<Tile> getOverlappingTiles(Rectangle rect) {
-		Array<Tile> overlappingTiles = new Array<>();
+	public Array<Tile<T>> getOverlappingTiles(Rectangle rect) {
+		Array<Tile<T>> overlappingTiles = new Array<>();
 		Array<Point> points = getOverlappingTileCoords(rect);
 		
 		for(Point p: points) {
-			Tile tile = getTile(p.x, p.y);
+			Tile<T> tile = getTile(p.x, p.y);
 			if (tile != null)
 				overlappingTiles.add(tile);
 		}
@@ -216,10 +216,10 @@ public abstract class Level implements Taggable<Level> {
 		return objects;
 	}
 	
-	public HashSet<Tile> getAreaTiles(Point tilePos, int radius, boolean includeCenter) { return getAreaTiles(tilePos.x, tilePos.y, radius, includeCenter); }
-	public HashSet<Tile> getAreaTiles(int x, int y, int radius, boolean includeCenter) {
+	public HashSet<Tile<T>> getAreaTiles(Point tilePos, int radius, boolean includeCenter) { return getAreaTiles(tilePos.x, tilePos.y, radius, includeCenter); }
+	public HashSet<Tile<T>> getAreaTiles(int x, int y, int radius, boolean includeCenter) {
 		
-		HashSet<Tile> tiles = new HashSet<>();
+		HashSet<Tile<T>> tiles = new HashSet<>();
 		for(int xo = Math.max(0, x-radius); xo <= Math.min(getWidth()-1, x+radius); xo++)
 			for(int yo = Math.max(0, y-radius); yo <= Math.min(getHeight()-1, y+radius); yo++)
 				tiles.add(getTile(xo, yo));
@@ -255,8 +255,8 @@ public abstract class Level implements Taggable<Level> {
 	}
 	
 	@Nullable
-	public Tile getClosestTile(Rectangle rect) { return getClosestTile(rect.getCenter(new Vector2())); }
-	public Tile getClosestTile(Vector2 center) { return getTile(center.x, center.y); }
+	public Tile<T> getClosestTile(Rectangle rect) { return getClosestTile(rect.getCenter(new Vector2())); }
+	public Tile<T> getClosestTile(Vector2 center) { return getTile(center.x, center.y); }
 	
 	@Nullable
 	public Player getClosestPlayer(final Vector2 pos) {
@@ -290,26 +290,6 @@ public abstract class Level implements Taggable<Level> {
 	public void loadChunk(Chunk newChunk) {
 		//tileCount += newChunk.width * newChunk.height;
 		putLoadedChunk(new Point(newChunk.chunkX, newChunk.chunkY), newChunk);
-		
-		// queue all contained tiles for update
-		Tile[][] tiles = newChunk.getTiles();
-		for(int i = 0; i < tiles.length; i++) {
-			for(int j = 0; j < tiles[i].length; j++) {
-				Tile t = tiles[i][j];
-				t.updateSprites();
-				// update the tiles in adjacent chunks
-				int oi = i == 0 ? -1 : i == tiles.length-1 ? 1 : 0;
-				int oj = j == 0 ? -1 : j == tiles[i].length-1 ? 1 : 0;
-				if(oi != 0) tryUpdate(t, oi, 0); // left/right side
-				if(oj != 0) tryUpdate(t, 0, oj); // above/below
-				if(oi != 0 && oj != 0) tryUpdate(t, oi, oj); // corner
-			}
-		}
-	}
-	private void tryUpdate(Tile ref, int ox, int oy) {
-		Point p = ref.getLocation();
-		Tile tile = getTile(p.x+ox, p.y+oy);
-		if(tile != null) tile.updateSprites();
 	}
 	
 	@Override
@@ -320,17 +300,18 @@ public abstract class Level implements Taggable<Level> {
 	public String toString() { return getClass().getSimpleName()+"(depth="+depth+")"; }
 	
 	@Override
-	public LevelTag getTag() { return new LevelTag(depth); }
+	public LevelTag<T> getTag() { return new LevelTag<>(depth); }
 	
-	public static class LevelTag implements Tag<Level> {
+	public static class LevelTag<T extends TileType> implements Tag<Level<T>> {
 		
 		private final int depth;
 		
 		public LevelTag(int depth) { this.depth = depth; }
 		
 		@Override
-		public Level getObject(WorldManager world) {
-			return world.getLevel(depth);
+		@SuppressWarnings("unchecked")
+		public Level<T> getObject(WorldManager world) {
+			return (Level<T>) world.getLevel(depth);
 		}
 	}
 }

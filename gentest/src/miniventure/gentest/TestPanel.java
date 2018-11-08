@@ -18,7 +18,7 @@ import miniventure.game.world.levelgen.NoiseMapper;
 import miniventure.gentest.util.MyList;
 import miniventure.gentest.util.MyPanel;
 
-import static miniventure.game.world.tile.TileType.TileTypeEnum.*;
+import static miniventure.game.world.tile.TileTypeEnum.*;
 
 /**
  * Holds all the testing components in a JTabbedPane: Noise functions, Noise mappers, and the Map.
@@ -51,7 +51,7 @@ public class TestPanel extends MyPanel {
 			.addRegion(GRASS, 4)
 			.addRegion(WATER, 1f)
 			.addRegion(GRASS, 3)
-			.addRegion(TREE_CARTOON, 1);
+			.addRegion(CARTOON_TREE, 1);
 		
 		NoiseMapper desertBiome = new NoiseMapper("Desert", cactusNoise)
 			.addRegion(CACTUS, 1)
@@ -60,7 +60,7 @@ public class TestPanel extends MyPanel {
 		NoiseMapper canyonBiome = new NoiseMapper("Canyons", detailNoise)
 			.addRegion(STONE, 20)
 			.addRegion(GRASS, 10)
-			.addRegion(TREE_PINE, 1)
+			.addRegion(PINE_TREE, 1)
 			.addRegion(GRASS, 10)
 			.addRegion(STONE, 20);
 		
@@ -89,7 +89,7 @@ public class TestPanel extends MyPanel {
 		NoiseMapper marshBiome = new NoiseMapper("Marsh", detailNoise)
 			.addRegion(WATER, .75f)
 			.addRegion(DIRT, 1)
-			.addRegion(TREE_DARK, .3f)
+			.addRegion(DARK_TREE, .3f)
 			.addRegion(WATER, .75f);
 		
 		NoiseMapper oceanBiome = new NoiseMapper("Ocean", biomeNoise)

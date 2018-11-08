@@ -22,6 +22,7 @@ import miniventure.game.screen.util.BackgroundInheritor;
 import miniventure.game.screen.util.BackgroundProvider;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.ValueFunction;
+import miniventure.game.world.tile.ClientTileType;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -83,6 +84,8 @@ public class ClientCore extends ApplicationAdapter {
 		MyUtils.delay(0, () -> Gdx.app.postRunnable(() -> {
 			//System.out.println("end delay");
 			GameCore.initGdx();
+			//noinspection StaticMethodReferencedViaSubclass
+			ClientTileType.init();
 			
 			gameScreen = new GameScreen();
 			clientWorld = new ClientWorld(serverStarter, gameScreen);
