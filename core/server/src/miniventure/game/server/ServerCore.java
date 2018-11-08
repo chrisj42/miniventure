@@ -2,6 +2,8 @@ package miniventure.game.server;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import miniventure.game.GameCore;
@@ -12,6 +14,8 @@ import miniventure.game.util.VersionInfo;
 import miniventure.game.world.tile.ServerTileType;
 
 import com.badlogic.gdx.math.MathUtils;
+
+import org.jetbrains.annotations.NotNull;
 
 public class ServerCore {
 	
@@ -94,6 +98,14 @@ public class ServerCore {
 		return ((loopedFrames ? frameTimes.length : timeIdx) * FRAME_INTERVAL) / totalTime;
 	}
 	
+	private static final List<Runnable> runnables = Collections.synchronizedList(new LinkedList<>());
+	
+	public static void postRunnable(@NotNull Runnable r) {
+		synchronized (runnables) {
+			runnables.add(r);
+		}
+	}
+	
 	public static void run() {
 		// start scanner thread
 		if(commandParser != null)
@@ -122,6 +134,16 @@ public class ServerCore {
 			
 			try {
 				serverWorld.update(MathUtils.clamp((now - lastNow) / 1E9f, 0, GameCore.MAX_DELTA));
+				
+				// run any runnables that were posted during the above update
+				Runnable[] lastRunnables;
+				synchronized (runnables) {
+					lastRunnables = runnables.toArray(new Runnable[0]);
+					runnables.clear();
+				}
+				for(Runnable r: lastRunnables)
+					r.run(); // any runnables added here will be run next update
+				
 			} catch(Throwable t) {
 				getServer().stop();
 				throw t;
