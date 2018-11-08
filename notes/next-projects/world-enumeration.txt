@@ -275,3 +275,28 @@
 	When holes or water are shown, only part of the sprite is shown, but it shouldn't change the collision bounds. this means the collision bounds need to be specified separately from the sprite bounds.
 	This exists due to the strange 2.5D nature of the perspective of the game. If an angle can be decided, that would be good, but really I just need to figure out the perspective.
 	I REALLY need to figure out how I want to handle 2.5D stuff.
+	
+	----- SOME PROPERTY STUFF -----
+	
+	Everything here DEFINITELY needs to be serializable; this exists so
+	the client AND server can share common properties, so clearly this stuff
+	needs to be sent across the connection.
+	
+	examples of common properties:
+	- direction (enum)
+	- position (vector3)
+	- transition animation (name, frame rate, play mode) 
+	- inventory (item[]?)
+	- hotbar (int[])
+	- stats - these will all be separate (maybe); the client will have a pre-determined value-density for the stat icons.
+		- max health (int)
+		- current health (int)
+		- max stamina (int)
+		- current stamina (int)
+		- max hunger (int)
+		- current hunger (int)
+		- max armor (int)
+		- current armor (int)
+	- isMoving state (boolean)
+	- text color?
+	- text shadow?
