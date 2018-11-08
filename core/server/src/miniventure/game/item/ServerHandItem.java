@@ -5,8 +5,11 @@ import miniventure.game.util.MyUtils;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;
 
-public final class HandItem extends Item {
-	HandItem() {
+final class ServerHandItem extends ServerItem {
+	
+	// this is to be used only for the purposes of interaction; the inventory should not have them, and the hotbar ought to be filled with nulls for empty spaces.
+	
+	ServerHandItem() {
 		super(ItemType.Misc, "Hand", GameCore.icons.get("blank"));
 	}
 	
@@ -14,13 +17,18 @@ public final class HandItem extends Item {
 	public int getSpaceUsage() { return 0; }
 	
 	@Override
-	public String[] save() { return new String[] { ItemType.Misc.name(), MyUtils.encodeStringArray(HandItem.class.getSimpleName()) }; }
+	public String[] save() {
+		return new String[] {
+			ItemType.Misc.name(),
+			MyUtils.encodeStringArray(ServerHandItem.class.getSimpleName())
+		};
+	}
 	
 	/** @noinspection Contract*/
-	public static Item load(String[] data) { return new HandItem(); }
+	public static ServerItem load(String[] data) { return new ServerHandItem(); }
 	
-	@Override public Item getUsedItem() { return this; }
-	@Override public Item copy() { return this; }
+	@Override public ServerItem getUsedItem() { return this; }
+	@Override public ServerItem copy() { return this; }
 	
 	@Override public boolean interact(WorldObject obj, Player player) {
 		boolean success = obj.interactWith(player, null);
