@@ -21,6 +21,7 @@ import miniventure.game.world.entity.ClientEntity;
 import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.KnockbackController;
 import miniventure.game.world.entity.mob.MobAnimationController.AnimationState;
+import miniventure.game.world.tile.ClientTile;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -34,6 +35,8 @@ import com.badlogic.gdx.math.Vector2;
 import org.jetbrains.annotations.NotNull;
 
 public class ClientPlayer extends ClientEntity implements Player {
+	
+	// TODO move the stat handling to the server, because it is important info that is saved, and all such info ought to be tracked and handled by the server.
 	
 	interface StatEvolver { void update(float delta); }
 	
@@ -147,9 +150,9 @@ public class ClientPlayer extends ClientEntity implements Player {
 		
 		Vector2 moveDist = inputDir.cpy().scl(moveSpeed*GameCore.getDeltaTime());
 		// FIXME speed needs to be set in server 
-		// ClientTile closest = (ClientTile) getClosestTile();
-		// if(closest != null)
-		// 	moveDist.scl(closest.getType().getPropertyOrDefault(TilePropertyTag.SpeedRatio, 1f));
+		ClientTile closest = (ClientTile) getClosestTile();
+		if(closest != null)
+			moveDist.scl(closest.getType().getSpeedRatio());
 		
 		//float elapTime = GameCore.getElapsedProgramTime();
 		if(!moveDist.isZero()) {

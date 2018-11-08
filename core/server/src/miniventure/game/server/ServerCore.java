@@ -39,7 +39,6 @@ public class ServerCore {
 				int height = Integer.parseInt(args[sizeIdx+1]);
 				
 				GameCore.initNonGdx();
-				//noinspection StaticMethodReferencedViaSubclass
 				ServerTileType.init();
 				
 				System.out.println("loading server world...");

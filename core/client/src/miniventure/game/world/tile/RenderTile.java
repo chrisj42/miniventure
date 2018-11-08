@@ -27,16 +27,14 @@ public class RenderTile extends Tile<ClientTileType> {
 	private ArrayList<TileAnimation<TextureHolder>> spriteStack;
 	private ArrayList<ClientTileType> typeStack;
 	private boolean updateSprites;
-	//private ArrayList<String> spriteNames;
-	//private final HashMap<String, Float> animationDeltas = new HashMap<>(16);
 	
 	private final Object spriteLock = new Object();
 	
-	public RenderTile(@NotNull Level<ClientTileType> level, int x, int y, @NotNull TileTypeEnum[] types, SerialMap[] data) {
+	public RenderTile(@NotNull Level<ClientTileType> level, int x, int y, @NotNull TileTypeEnum[] types, @Nullable SerialMap[] data) {
 		super(level, x, y, types);
 		
 		for(int i = 0; i < types.length; i++)
-			this.dataMaps.put(types[i], data[i]);
+			this.dataMaps.put(types[i], data == null ? new SerialMap() : data[i]);
 	}
 	
 	@Override
@@ -53,9 +51,11 @@ public class RenderTile extends Tile<ClientTileType> {
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
 		if(getLevel().getTile(x, y) == null) return; // cannot render if there are no tiles.
 		
-		// cannot render if there are no sprites.
-		if(spriteStack == null || updateSprites)
-			compileSprites();
+		synchronized (spriteLock) {
+			// cannot render if there are no sprites.
+			if(spriteStack == null || updateSprites)
+				compileSprites(); // since the lock can be reacquired by the same thread, this is fine to put in a synchronized statement.
+		}
 		
 		synchronized (spriteLock) {
 			for(int i = 0; i < spriteStack.size(); i++) {
@@ -75,13 +75,17 @@ public class RenderTile extends Tile<ClientTileType> {
 		return maxRadius;
 	}
 	
-	@Override public boolean isPermeable() { return true; }
+	@Override public boolean isPermeable() { return getType().isWalkable(); }
 	@Override public boolean interactWith(Player player, @Nullable Item heldItem) { return false; }
 	@Override public boolean attackedBy(WorldObject obj, @Nullable Item item, int dmg) { return false; }
 	@Override public boolean touchedBy(Entity entity) { return false; }
 	@Override public void touching(Entity entity) {}
 	
-	public void updateSprites() { updateSprites = true; }
+	public void updateSprites() {
+		synchronized (spriteLock) {
+			updateSprites = true;
+		}
+	}
 	
 	/** @noinspection ObjectAllocationInLoop*/
 	@SuppressWarnings("unchecked")
@@ -93,7 +97,7 @@ public class RenderTile extends Tile<ClientTileType> {
 		for (RelPos rp: RelPos.values()) {
 			int x = rp.getX();
 			int y = rp.getY();
-			ClientTile oTile = (ClientTile) getLevel().getTile(this.x + x, this.y + y);
+			RenderTile oTile = (RenderTile) getLevel().getTile(this.x + x, this.y + y);
 			ClientTileType[] aroundTypes = oTile != null ? oTile.getTypeStack().getTypes() : new ClientTileType[0];
 			
 			EnumMap<TileTypeEnum, ClientTileType> typeMap = new EnumMap<>(TileTypeEnum.class);

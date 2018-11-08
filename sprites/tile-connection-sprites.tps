@@ -4,9 +4,7 @@
         <key>fileFormatVersion</key>
         <int>4</int>
         <key>texturePackerVersion</key>
-        <string>4.6.3</string>
-        <key>fileName</key>
-        <string>/home/chris/Documents/minicraft/miniventure/sprites/tile-connection-sprites.tps</string>
+        <string>4.10.0</string>
         <key>autoSDSettings</key>
         <array>
             <struct type="AutoSDSettings">
@@ -134,7 +132,7 @@
             <key>data</key>
             <struct type="DataFile">
                 <key>name</key>
-                <filename>../core/game/assets/sprites/tileconnectmap.txt</filename>
+                <filename>../core/common/assets/sprites/tileconnectmap.txt</filename>
             </struct>
         </map>
         <key>multiPack</key>

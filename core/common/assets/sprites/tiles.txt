@@ -24,56 +24,56 @@ dirt/c00
   orig: 32, 32
   offset: 0, 0
   index: -1
-door_closed/c00
+door_/closed/c00
   rotate: false
   xy: 110, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-door_open/c00
+door_/open/c00
   rotate: false
   xy: 146, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-door_open/tclose
+door_/open/tclose
   rotate: false
   xy: 182, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 1
-door_open/tclose
+door_/open/tclose
   rotate: false
   xy: 218, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 2
-door_open/tclose
+door_/open/tclose
   rotate: false
   xy: 254, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 3
-door_open/topen
+door_/open/topen
   rotate: false
   xy: 254, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 1
-door_open/topen
+door_/open/topen
   rotate: false
   xy: 218, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 2
-door_open/topen
+door_/open/topen
   rotate: false
   xy: 182, 2
   size: 32, 32
@@ -1522,1316 +1522,1316 @@ torch/tenter
   orig: 32, 32
   offset: 0, 0
   index: 3
-tree_cartoon/c00
+tree_/cartoon/c00
   rotate: false
   xy: 434, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c01
+tree_/cartoon/c01
   rotate: false
   xy: 434, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c02
+tree_/cartoon/c02
   rotate: false
   xy: 434, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c03
+tree_/cartoon/c03
   rotate: false
   xy: 434, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c04
+tree_/cartoon/c04
   rotate: false
   xy: 434, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c05
+tree_/cartoon/c05
   rotate: false
   xy: 434, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c06
+tree_/cartoon/c06
   rotate: false
   xy: 434, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c07
+tree_/cartoon/c07
   rotate: false
   xy: 434, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c08
+tree_/cartoon/c08
   rotate: false
   xy: 434, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c09
+tree_/cartoon/c09
   rotate: false
   xy: 434, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c10
+tree_/cartoon/c10
   rotate: false
   xy: 434, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c11
+tree_/cartoon/c11
   rotate: false
   xy: 470, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c12
+tree_/cartoon/c12
   rotate: false
   xy: 506, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c13
+tree_/cartoon/c13
   rotate: false
   xy: 542, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c14
+tree_/cartoon/c14
   rotate: false
   xy: 578, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c15
+tree_/cartoon/c15
   rotate: false
   xy: 434, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c16
+tree_/cartoon/c16
   rotate: false
   xy: 434, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c17
+tree_/cartoon/c17
   rotate: false
   xy: 434, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c18
+tree_/cartoon/c18
   rotate: false
   xy: 434, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c19
+tree_/cartoon/c19
   rotate: false
   xy: 470, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c20
+tree_/cartoon/c20
   rotate: false
   xy: 506, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c21
+tree_/cartoon/c21
   rotate: false
   xy: 542, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c22
+tree_/cartoon/c22
   rotate: false
   xy: 578, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c23
+tree_/cartoon/c23
   rotate: false
   xy: 578, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c24
+tree_/cartoon/c24
   rotate: false
   xy: 470, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c25
+tree_/cartoon/c25
   rotate: false
   xy: 506, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c26
+tree_/cartoon/c26
   rotate: false
   xy: 542, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c27
+tree_/cartoon/c27
   rotate: false
   xy: 614, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c28
+tree_/cartoon/c28
   rotate: false
   xy: 650, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c29
+tree_/cartoon/c29
   rotate: false
   xy: 686, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c30
+tree_/cartoon/c30
   rotate: false
   xy: 722, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c31
+tree_/cartoon/c31
   rotate: false
   xy: 434, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c32
+tree_/cartoon/c32
   rotate: false
   xy: 470, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c33
+tree_/cartoon/c33
   rotate: false
   xy: 506, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c34
+tree_/cartoon/c34
   rotate: false
   xy: 542, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c35
+tree_/cartoon/c35
   rotate: false
   xy: 578, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c36
+tree_/cartoon/c36
   rotate: false
   xy: 614, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c37
+tree_/cartoon/c37
   rotate: false
   xy: 650, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c38
+tree_/cartoon/c38
   rotate: false
   xy: 686, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c39
+tree_/cartoon/c39
   rotate: false
   xy: 722, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c40
+tree_/cartoon/c40
   rotate: false
   xy: 758, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c41
+tree_/cartoon/c41
   rotate: false
   xy: 794, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c42
+tree_/cartoon/c42
   rotate: false
   xy: 830, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c43
+tree_/cartoon/c43
   rotate: false
   xy: 866, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c44
+tree_/cartoon/c44
   rotate: false
   xy: 902, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c45
+tree_/cartoon/c45
   rotate: false
   xy: 938, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_cartoon/c46
+tree_/cartoon/c46
   rotate: false
   xy: 974, 218
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c00
+tree_/dark/c00
   rotate: false
   xy: 2, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c01
+tree_/dark/c01
   rotate: false
   xy: 2, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c02
+tree_/dark/c02
   rotate: false
   xy: 2, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c03
+tree_/dark/c03
   rotate: false
   xy: 2, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c04
+tree_/dark/c04
   rotate: false
   xy: 2, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c05
+tree_/dark/c05
   rotate: false
   xy: 2, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c06
+tree_/dark/c06
   rotate: false
   xy: 2, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c07
+tree_/dark/c07
   rotate: false
   xy: 2, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c08
+tree_/dark/c08
   rotate: false
   xy: 2, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c09
+tree_/dark/c09
   rotate: false
   xy: 2, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c10
+tree_/dark/c10
   rotate: false
   xy: 2, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c11
+tree_/dark/c11
   rotate: false
   xy: 38, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c12
+tree_/dark/c12
   rotate: false
   xy: 74, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c13
+tree_/dark/c13
   rotate: false
   xy: 110, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c14
+tree_/dark/c14
   rotate: false
   xy: 146, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c15
+tree_/dark/c15
   rotate: false
   xy: 2, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c16
+tree_/dark/c16
   rotate: false
   xy: 2, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c17
+tree_/dark/c17
   rotate: false
   xy: 2, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c18
+tree_/dark/c18
   rotate: false
   xy: 2, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c19
+tree_/dark/c19
   rotate: false
   xy: 38, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c20
+tree_/dark/c20
   rotate: false
   xy: 74, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c21
+tree_/dark/c21
   rotate: false
   xy: 110, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c22
+tree_/dark/c22
   rotate: false
   xy: 146, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c23
+tree_/dark/c23
   rotate: false
   xy: 146, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c24
+tree_/dark/c24
   rotate: false
   xy: 38, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c25
+tree_/dark/c25
   rotate: false
   xy: 74, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c26
+tree_/dark/c26
   rotate: false
   xy: 110, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c27
+tree_/dark/c27
   rotate: false
   xy: 182, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c28
+tree_/dark/c28
   rotate: false
   xy: 218, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c29
+tree_/dark/c29
   rotate: false
   xy: 254, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c30
+tree_/dark/c30
   rotate: false
   xy: 290, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c31
+tree_/dark/c31
   rotate: false
   xy: 2, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c32
+tree_/dark/c32
   rotate: false
   xy: 38, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c33
+tree_/dark/c33
   rotate: false
   xy: 74, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c34
+tree_/dark/c34
   rotate: false
   xy: 110, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c35
+tree_/dark/c35
   rotate: false
   xy: 146, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c36
+tree_/dark/c36
   rotate: false
   xy: 182, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c37
+tree_/dark/c37
   rotate: false
   xy: 218, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c38
+tree_/dark/c38
   rotate: false
   xy: 254, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c39
+tree_/dark/c39
   rotate: false
   xy: 290, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c40
+tree_/dark/c40
   rotate: false
   xy: 326, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c41
+tree_/dark/c41
   rotate: false
   xy: 362, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c42
+tree_/dark/c42
   rotate: false
   xy: 398, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c43
+tree_/dark/c43
   rotate: false
   xy: 434, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c44
+tree_/dark/c44
   rotate: false
   xy: 470, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c45
+tree_/dark/c45
   rotate: false
   xy: 506, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_dark/c46
+tree_/dark/c46
   rotate: false
   xy: 542, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c00
+tree_/pine/c00
   rotate: false
   xy: 578, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c01
+tree_/pine/c01
   rotate: false
   xy: 578, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c02
+tree_/pine/c02
   rotate: false
   xy: 578, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c03
+tree_/pine/c03
   rotate: false
   xy: 578, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c04
+tree_/pine/c04
   rotate: false
   xy: 578, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c05
+tree_/pine/c05
   rotate: false
   xy: 578, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c06
+tree_/pine/c06
   rotate: false
   xy: 578, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c07
+tree_/pine/c07
   rotate: false
   xy: 578, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c08
+tree_/pine/c08
   rotate: false
   xy: 578, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c09
+tree_/pine/c09
   rotate: false
   xy: 578, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c10
+tree_/pine/c10
   rotate: false
   xy: 578, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c11
+tree_/pine/c11
   rotate: false
   xy: 614, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c12
+tree_/pine/c12
   rotate: false
   xy: 650, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c13
+tree_/pine/c13
   rotate: false
   xy: 686, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c14
+tree_/pine/c14
   rotate: false
   xy: 722, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c15
+tree_/pine/c15
   rotate: false
   xy: 578, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c16
+tree_/pine/c16
   rotate: false
   xy: 578, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c17
+tree_/pine/c17
   rotate: false
   xy: 578, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c18
+tree_/pine/c18
   rotate: false
   xy: 578, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c19
+tree_/pine/c19
   rotate: false
   xy: 614, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c20
+tree_/pine/c20
   rotate: false
   xy: 650, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c21
+tree_/pine/c21
   rotate: false
   xy: 686, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c22
+tree_/pine/c22
   rotate: false
   xy: 722, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c23
+tree_/pine/c23
   rotate: false
   xy: 722, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c24
+tree_/pine/c24
   rotate: false
   xy: 614, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c25
+tree_/pine/c25
   rotate: false
   xy: 650, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c26
+tree_/pine/c26
   rotate: false
   xy: 686, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c27
+tree_/pine/c27
   rotate: false
   xy: 758, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c28
+tree_/pine/c28
   rotate: false
   xy: 794, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c29
+tree_/pine/c29
   rotate: false
   xy: 830, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c30
+tree_/pine/c30
   rotate: false
   xy: 866, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c31
+tree_/pine/c31
   rotate: false
   xy: 578, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c32
+tree_/pine/c32
   rotate: false
   xy: 614, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c33
+tree_/pine/c33
   rotate: false
   xy: 650, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c34
+tree_/pine/c34
   rotate: false
   xy: 686, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c35
+tree_/pine/c35
   rotate: false
   xy: 722, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c36
+tree_/pine/c36
   rotate: false
   xy: 758, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c37
+tree_/pine/c37
   rotate: false
   xy: 794, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c38
+tree_/pine/c38
   rotate: false
   xy: 830, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c39
+tree_/pine/c39
   rotate: false
   xy: 866, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c40
+tree_/pine/c40
   rotate: false
   xy: 902, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c41
+tree_/pine/c41
   rotate: false
   xy: 938, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c42
+tree_/pine/c42
   rotate: false
   xy: 974, 254
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c43
+tree_/pine/c43
   rotate: false
   xy: 2, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c44
+tree_/pine/c44
   rotate: false
   xy: 38, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c45
+tree_/pine/c45
   rotate: false
   xy: 74, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_pine/c46
+tree_/pine/c46
   rotate: false
   xy: 110, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c00
+tree_/poof/c00
   rotate: false
   xy: 146, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c01
+tree_/poof/c01
   rotate: false
   xy: 146, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c02
+tree_/poof/c02
   rotate: false
   xy: 146, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c03
+tree_/poof/c03
   rotate: false
   xy: 146, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c04
+tree_/poof/c04
   rotate: false
   xy: 146, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c05
+tree_/poof/c05
   rotate: false
   xy: 146, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c06
+tree_/poof/c06
   rotate: false
   xy: 146, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c07
+tree_/poof/c07
   rotate: false
   xy: 146, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c08
+tree_/poof/c08
   rotate: false
   xy: 146, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c09
+tree_/poof/c09
   rotate: false
   xy: 146, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c10
+tree_/poof/c10
   rotate: false
   xy: 146, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c11
+tree_/poof/c11
   rotate: false
   xy: 182, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c12
+tree_/poof/c12
   rotate: false
   xy: 218, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c13
+tree_/poof/c13
   rotate: false
   xy: 254, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c14
+tree_/poof/c14
   rotate: false
   xy: 290, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c15
+tree_/poof/c15
   rotate: false
   xy: 146, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c16
+tree_/poof/c16
   rotate: false
   xy: 146, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c17
+tree_/poof/c17
   rotate: false
   xy: 146, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c18
+tree_/poof/c18
   rotate: false
   xy: 146, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c19
+tree_/poof/c19
   rotate: false
   xy: 182, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c20
+tree_/poof/c20
   rotate: false
   xy: 218, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c21
+tree_/poof/c21
   rotate: false
   xy: 254, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c22
+tree_/poof/c22
   rotate: false
   xy: 290, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c23
+tree_/poof/c23
   rotate: false
   xy: 290, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c24
+tree_/poof/c24
   rotate: false
   xy: 182, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c25
+tree_/poof/c25
   rotate: false
   xy: 218, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c26
+tree_/poof/c26
   rotate: false
   xy: 254, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c27
+tree_/poof/c27
   rotate: false
   xy: 326, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c28
+tree_/poof/c28
   rotate: false
   xy: 362, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c29
+tree_/poof/c29
   rotate: false
   xy: 398, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c30
+tree_/poof/c30
   rotate: false
   xy: 434, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c31
+tree_/poof/c31
   rotate: false
   xy: 146, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c32
+tree_/poof/c32
   rotate: false
   xy: 182, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c33
+tree_/poof/c33
   rotate: false
   xy: 218, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c34
+tree_/poof/c34
   rotate: false
   xy: 254, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c35
+tree_/poof/c35
   rotate: false
   xy: 290, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c36
+tree_/poof/c36
   rotate: false
   xy: 326, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c37
+tree_/poof/c37
   rotate: false
   xy: 362, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c38
+tree_/poof/c38
   rotate: false
   xy: 398, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c39
+tree_/poof/c39
   rotate: false
   xy: 434, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c40
+tree_/poof/c40
   rotate: false
   xy: 470, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c41
+tree_/poof/c41
   rotate: false
   xy: 506, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c42
+tree_/poof/c42
   rotate: false
   xy: 542, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c43
+tree_/poof/c43
   rotate: false
   xy: 578, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c44
+tree_/poof/c44
   rotate: false
   xy: 614, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c45
+tree_/poof/c45
   rotate: false
   xy: 650, 290
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tree_poof/c46
+tree_/poof/c46
   rotate: false
   xy: 686, 290
   size: 32, 32

@@ -70,7 +70,7 @@ public class TileStack<T extends TileType> {
 	private int clamp(int idx) { return clamp(idx, true); }
 	private int clamp(int idx, boolean doClamp) { return doClamp ? Math.max(Math.min(idx, size()-1), 0) : idx; }
 	
-	void addLayer(T newLayer) {
+	void addLayer(@NotNull T newLayer) {
 		stack.addLast(newLayer);
 	}
 	

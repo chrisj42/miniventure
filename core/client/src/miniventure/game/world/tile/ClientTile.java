@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class ClientTile extends RenderTile {
 	
-	public ClientTile(@NotNull ClientLevel level, int x, int y, @NotNull TileTypeEnum[] types, SerialMap[] data) {
+	public ClientTile(@NotNull ClientLevel level, int x, int y, @NotNull TileTypeEnum[] types, @NotNull SerialMap[] data) {
 		super(level, x, y, types, data);
 	}
 	

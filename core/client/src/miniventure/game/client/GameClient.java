@@ -267,6 +267,7 @@ public class GameClient implements GameProtocol {
 		});//);
 		
 		new Thread(client) {
+			@Override
 			public void start() {
 				client.start();
 				client.getUpdateThread().setUncaughtExceptionHandler((t, e) -> {

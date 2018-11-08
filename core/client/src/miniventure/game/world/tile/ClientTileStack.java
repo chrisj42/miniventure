@@ -12,7 +12,12 @@ import org.jetbrains.annotations.Nullable;
 
 public class ClientTileStack extends TileStack<ClientTileType> {
 	
-	private LinkedList<ClientTileType> opaqueStack = new LinkedList<>(); // opaque tiles only
+	private LinkedList<ClientTileType> opaqueStack; // opaque tiles only
+	
+	{
+		if(opaqueStack == null)
+			opaqueStack = new LinkedList<>();
+	}
 	
 	public ClientTileStack() {
 		super(ClientTileType.class, ClientCore.getWorld());
@@ -50,8 +55,10 @@ public class ClientTileStack extends TileStack<ClientTileType> {
 	
 	
 	@Override
-	void addLayer(ClientTileType newLayer) {
+	void addLayer(@NotNull ClientTileType newLayer) {
 		super.addLayer(newLayer);
+		if(opaqueStack == null)
+			opaqueStack = new LinkedList<>();
 		if(newLayer.getRenderer().isOpaque())
 			opaqueStack.add(newLayer);
 	}

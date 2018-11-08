@@ -16,11 +16,11 @@ public class UpdateManager {
 	 */
 	
 	interface UpdateAction {
-		void update(@NotNull Tile tile, FetchFunction<String> dataCacheFetcher, ValueFunction<String> dataCacheSetter);
+		void update(@NotNull ServerTile tile, FetchFunction<String> dataCacheFetcher, ValueFunction<String> dataCacheSetter);
 		
-		boolean canUpdate(@NotNull Tile tile);
+		boolean canUpdate(@NotNull ServerTile tile);
 		
-		float getDelta(@NotNull Tile tile);
+		float getDelta(@NotNull ServerTile tile);
 	}
 	
 	private final TileTypeEnum tileType;

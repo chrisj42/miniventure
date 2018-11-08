@@ -84,7 +84,6 @@ public class ClientCore extends ApplicationAdapter {
 		MyUtils.delay(0, () -> Gdx.app.postRunnable(() -> {
 			//System.out.println("end delay");
 			GameCore.initGdx();
-			//noinspection StaticMethodReferencedViaSubclass
 			ClientTileType.init();
 			
 			gameScreen = new GameScreen();

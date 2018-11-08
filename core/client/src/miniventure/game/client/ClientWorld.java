@@ -121,7 +121,7 @@ public class ClientWorld extends WorldManager {
 			// with a server running, attempt to connect the client. If successful, it will set the screen to null.
 			ValueFunction<Boolean> connect = serverSuccess -> {
 				if(!serverSuccess)
-					ClientCore.setScreen(new ErrorScreen("Error starting local server. The port may already be in use.<br>Press 'reconnect' to attempt to connect to the existing server."));
+					Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen("Error starting local server. The port may already be in use.\nPress 'reconnect' to attempt to connect to the existing server.")));
 				else
 					client.connectToServer(loadingScreen, "localhost", success -> {
 						if(!success) {

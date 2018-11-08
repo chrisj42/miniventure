@@ -79,15 +79,15 @@ public class OverlapManager {
 	}
 	
 	
-	public static EnumMap<TileTypeEnum, EnumSet<RelPos>> mapTileTypesAround(@NotNull Tile tile) { return mapTileTypesAround(tile, true); }
+	public static EnumMap<TileTypeEnum, EnumSet<RelPos>> mapTileTypesAround(@NotNull ClientTile tile) { return mapTileTypesAround(tile, true); }
 	/** @noinspection SameParameterValue*/ // Exclude covered means that tile types beneath ground layers won't be included.
-	private static EnumMap<TileTypeEnum, EnumSet<RelPos>> mapTileTypesAround(@NotNull Tile tile, boolean excludeCovered) {
+	private static EnumMap<TileTypeEnum, EnumSet<RelPos>> mapTileTypesAround(@NotNull ClientTile tile, boolean excludeCovered) {
 		EnumMap<TileTypeEnum, EnumSet<RelPos>> typeMap = new EnumMap<>(TileTypeEnum.class);
 		
-		HashSet<Tile> aroundTiles = tile.getAdjacentTiles(true);
+		HashSet<Tile<ClientTileType>> aroundTiles = tile.getAdjacentTiles(true);
 		
-		for(Tile aroundTile: aroundTiles) {
-			ClientTileType[] types = aroundTile.getTypeStack().getTypes(!excludeCovered);
+		for(Tile<ClientTileType> aroundTile: aroundTiles) {
+			ClientTileType[] types = ((ClientTileStack)aroundTile.getTypeStack()).getTypes(!excludeCovered);
 			
 			Point thisPos = tile.getLocation();
 			Point otherPos = aroundTile.getLocation();

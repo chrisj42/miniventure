@@ -1,6 +1,7 @@
 package miniventure.game.item;
 
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.HashMap;
 
 import miniventure.game.GameCore;
@@ -18,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class TileItem extends Item {
 	
-	private static final HashMap<TileTypeEnum, TileItem> items = new HashMap<>();
+	private static final EnumMap<TileTypeEnum, TileItem> items = new EnumMap<>(TileTypeEnum.class);
 	
 	private static final TileTypeEnum[] groundTypes = new TileTypeEnum[] {
 		TileTypeEnum.GRASS, TileTypeEnum.DIRT, TileTypeEnum.SAND, TileTypeEnum.SNOW, TileTypeEnum.STONE_FLOOR, TileTypeEnum.STONE_PATH
@@ -38,8 +39,8 @@ public class TileItem extends Item {
 		addItem(TileTypeEnum.GRASS, TileTypeEnum.DIRT);
 		addItem(TileTypeEnum.STONE, TileTypeEnum.DIRT);
 		
-		items.put(TileTypeEnum.DOOR_CLOSED, new TileItem("Door", GameCore.tileAtlas.findRegion("door_closed/c00"), TileTypeEnum.DOOR_CLOSED, groundTypes));
-		items.put(TileTypeEnum.DOOR_OPEN, items.get(TileTypeEnum.DOOR_CLOSED));
+		items.put(TileTypeEnum.CLOSED_DOOR, new TileItem("Door", GameCore.tileAtlas.findRegion("closed_door/c00"), TileTypeEnum.CLOSED_DOOR, groundTypes));
+		items.put(TileTypeEnum.OPEN_DOOR, items.get(TileTypeEnum.CLOSED_DOOR));
 		
 		addItem(TileTypeEnum.STONE_FLOOR, TileTypeEnum.HOLE/*, TileTypeEnum.DIRT*/);
 		
@@ -81,7 +82,8 @@ public class TileItem extends Item {
 				}
 			}
 			
-			if(canPlace && tile.addTile(result.getTypeInstance(tile.getWorld()))) {
+			// FIXME comment is just to make it compile
+			if(canPlace/* && tile.addTile(result.getTypeInstance(tile.getWorld()))*/) {
 				use();
 				return true;
 			}

@@ -49,7 +49,7 @@ public class Recipes {
 			new ItemStack(ResourceType.Log.get(), 1)
 		),
 		
-		new Recipe(TileItem.get(TileTypeEnum.DOOR_CLOSED),
+		new Recipe(TileItem.get(TileTypeEnum.CLOSED_DOOR),
 			new ItemStack(ResourceType.Log.get(), 3)
 		),
 		

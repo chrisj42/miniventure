@@ -10,9 +10,13 @@ public abstract class TileType {
 	
 	public TileTypeEnum getTypeEnum() { return enumType; }
 	
+	public boolean isWalkable() { return enumType.walkable; }
+	public float getSpeedRatio() {
+		return enumType.speedRatio;
+	}
+	
 	public String getName() { return MyUtils.toTitleCase(enumType.name(), "_"); }
 	
-	public static void init() {
-		System.out.println("tiletype init"); // quick test, delete later
-	}
+	@Override
+	public String toString() { return getName()+' '+getClass().getSimpleName(); }
 }

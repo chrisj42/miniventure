@@ -1,8 +1,8 @@
 package miniventure.game.world;
 
 import miniventure.game.world.entity.Entity;
-import miniventure.game.world.tile.ClientTile;
 import miniventure.game.world.tile.ClientTileType;
+import miniventure.game.world.tile.RenderTile;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -84,7 +84,7 @@ public abstract class RenderLevel extends Level<ClientTileType> {
 		Tile[][] tiles = newChunk.getTiles();
 		for(int i = 0; i < tiles.length; i++) {
 			for(int j = 0; j < tiles[i].length; j++) {
-				ClientTile t = (ClientTile) tiles[i][j];
+				RenderTile t = (RenderTile) tiles[i][j];
 				t.updateSprites();
 				// update the tiles in adjacent chunks
 				int oi = i == 0 ? -1 : i == tiles.length-1 ? 1 : 0;
@@ -95,9 +95,9 @@ public abstract class RenderLevel extends Level<ClientTileType> {
 			}
 		}
 	}
-	private void tryUpdate(ClientTile ref, int ox, int oy) {
+	private void tryUpdate(RenderTile ref, int ox, int oy) {
 		Point p = ref.getLocation();
-		ClientTile tile = (ClientTile) getTile(p.x+ox, p.y+oy);
+		RenderTile tile = (RenderTile) getTile(p.x+ox, p.y+oy);
 		if(tile != null) tile.updateSprites();
 	}
 }

@@ -53,21 +53,21 @@ class SpreadUpdateAction implements UpdateAction {
 	}
 	
 	@Override
-	public void update(@NotNull Tile tile, FetchFunction<String> dataCacheFetcher, ValueFunction<String> dataCacheSetter) {
+	public void update(@NotNull ServerTile tile, FetchFunction<String> dataCacheFetcher, ValueFunction<String> dataCacheSetter) {
 		if(MathUtils.random() >= spreadChance) return; // must be less to execute; a chance of 1 will always execute.
 		
-		HashSet<Tile> around = tile.getAdjacentTiles(false);
+		HashSet<Tile<ServerTileType>> around = tile.getAdjacentTiles(false);
 		//around.shuffle();
-		for(Tile t: around) {
+		for(Tile<ServerTileType> t: around) {
 			if(replaces.contains(t.getType().getTypeEnum())) {
-				replaceBehavior.spreadType(tileType.getTypeInstance(t.getWorld()), (ServerTile)t);
+				replaceBehavior.spreadType(ServerTileType.get(tileType), (ServerTile)t);
 				//break;
 			}
 		}
 	}
 	
 	@Override
-	public boolean canUpdate(@NotNull Tile tile) {
+	public boolean canUpdate(@NotNull ServerTile tile) {
 		for(Tile t: tile.getAdjacentTiles(false))
 			if(replaces.contains(t.getType().getTypeEnum()))
 				return true;
@@ -77,7 +77,7 @@ class SpreadUpdateAction implements UpdateAction {
 	
 	// not called repeatedly, unless updatable state changes repeatedly.
 	@Override
-	public float getDelta(@NotNull Tile tile) {
+	public float getDelta(@NotNull ServerTile tile) {
 		return spreadDelayFetcher.getFloat();
 	}
 	

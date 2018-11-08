@@ -309,7 +309,7 @@ public interface GameProtocol {
 		public final Point[] chunks;
 		
 		private EntityValidation() { this(0, null, null); }
-		public EntityValidation(Level level, Rectangle area, Entity... excluded) {
+		public EntityValidation(Level<?> level, Rectangle area, Entity... excluded) {
 			this.levelDepth = level.getDepth();
 			
 			Array<Entity> entities = level.getOverlappingEntities(area, excluded);

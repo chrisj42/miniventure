@@ -5,6 +5,7 @@ import miniventure.game.util.MyUtils;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.ClientLevel;
 import miniventure.game.world.Level;
+import miniventure.game.world.RenderLevel;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.Gdx;
@@ -68,7 +69,7 @@ public class LevelViewport {
 			debug = !debug;
 	}
 	
-	public void render(@NotNull Vector2 cameraCenter, Color ambientLighting, @NotNull Level level) {
+	public void render(@NotNull Vector2 cameraCenter, Color ambientLighting, @NotNull RenderLevel level) {
 		// get the size of the area of the game on screen by projecting the application window dimensions into world space.
 		Vector3 screenSize = new Vector3(Gdx.graphics.getWidth(), 0, 0); // because unproject has origin at the top, so the upper right corner is at (width, 0).
 		camera.unproject(screenSize); // screen to render coords
@@ -101,7 +102,7 @@ public class LevelViewport {
 		
 		batch.setBlendFunction(GL20.GL_ZERO, GL20.GL_ONE_MINUS_SRC_ALPHA);
 		
-		Array<Vector3> lights = ClientLevel.renderLighting(level.getOverlappingObjects(lightRenderSpace));
+		Array<Vector3> lights = RenderLevel.renderLighting(level.getOverlappingObjects(lightRenderSpace));
 		final TextureRegion lightTexture = GameCore.icons.get("light").texture;
 		
 		for(Vector3 light: lights) {

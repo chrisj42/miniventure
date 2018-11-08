@@ -87,6 +87,7 @@ public class ServerPlayer extends ServerMob implements Player {
 	public String getName() { return name; }
 	
 	// use this instead of creating a new player.
+	@Override
 	public void reset() {
 		for(Stat stat: Stat.values)
 			stats.put(stat, stat.initial);
@@ -97,9 +98,11 @@ public class ServerPlayer extends ServerMob implements Player {
 		hands.reset();
 	}
 	
+	@Override
 	public int getStat(@NotNull Stat stat) {
 		return stats.get(stat);
 	}
+	@Override
 	public int changeStat(@NotNull Stat stat, int amt) {
 		int prevVal = stats.get(stat);
 		stats.put(stat, Math.max(0, Math.min(stat.max, stats.get(stat) + amt)));
@@ -139,6 +142,7 @@ public class ServerPlayer extends ServerMob implements Player {
 	@Override
 	public Integer[] saveStats() { return Stat.save(stats); }
 	
+	@Override
 	public void setDirection(@NotNull Direction dir) { super.setDirection(dir); }
 	
 	/// These two methods are ONLY to be accessed by GameScreen, so far.
@@ -163,7 +167,7 @@ public class ServerPlayer extends ServerMob implements Player {
 		Array<WorldObject> objects = new Array<>();
 		
 		// get level, and don't interact if level is not found
-		Level level = getWorld().getEntityLevel(this);
+		ServerLevel level = getWorld().getEntityLevel(this);
 		if(level == null) return objects;
 		
 		Rectangle interactionBounds = getInteractionRect();

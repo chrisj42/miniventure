@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.param.Param;
 import miniventure.game.util.param.ParamMap;
 import miniventure.game.util.param.Value;
@@ -15,10 +14,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class ClientTileType extends TileType {
 	
-	static {
-		// quick test, delete later
-		System.out.println("Client tile type init");
-	}
+	public static void init() {}
 	
 	@FunctionalInterface
 	private interface P {
@@ -135,8 +131,8 @@ public class ClientTileType extends TileType {
 		WOOD_WALL(ClientTileFactory::wall),
 		STONE_WALL(ClientTileFactory::wall),
 		
-		DOOR_OPEN(ClientTileFactory::door),
-		DOOR_CLOSED(ClientTileFactory::door),
+		OPEN_DOOR(ClientTileFactory::door),
+		CLOSED_DOOR(ClientTileFactory::door),
 		
 		TORCH(type -> new ClientTileType(type, false,
 			new ConnectionManager(type, new RenderStyle(1/12f)),

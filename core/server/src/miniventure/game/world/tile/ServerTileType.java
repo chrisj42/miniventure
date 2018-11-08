@@ -24,6 +24,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class ServerTileType extends TileType {
 	
+	public static void init() {}
+	
 	@FunctionalInterface
 	private interface ManagerFetcher<T> extends MapFunction<TileTypeEnum, T> {}
 	
@@ -36,19 +38,12 @@ public class ServerTileType extends TileType {
 		ServerTileType get(TileTypeEnum type);
 	}
 	
-	private final boolean walkable;
-	private final float speedRatio;
 	public final DestructionManager destructionManager;
 	public final UpdateManager updateManager;
 	public final TransitionManager transitionManager;
 	
-	private ServerTileType(@NotNull TileTypeEnum type, boolean walkable, DestructionManager destructionManager, Value... params) {
-		this(type, walkable, 1, destructionManager, params);
-	}
-	private ServerTileType(@NotNull TileTypeEnum type, boolean walkable, float speedRatio, DestructionManager destructionManager, Value... params) {
+	private ServerTileType(@NotNull TileTypeEnum type, DestructionManager destructionManager, Value... params) {
 		super(type);
-		this.walkable = walkable;
-		this.speedRatio = speedRatio;
 		this.destructionManager = destructionManager;
 		ParamMap map = new ParamMap(params);
 		updateManager = map.get(P.UPDATE).get(type);
@@ -60,14 +55,6 @@ public class ServerTileType extends TileType {
 	}
 	
 	public SerialMap getInitialData() { return new SerialMap(); }
-	
-	public boolean isWalkable() {
-		return walkable;
-	}
-	
-	public float getSpeedRatio() {
-		return speedRatio;
-	}
 	
 	/**
 	 * Called to update the tile's state in some way, whenever an adjacent tile is updated. It is also called once on tile load to get the first value and determine future calls.
@@ -99,19 +86,19 @@ public class ServerTileType extends TileType {
 	
 	private enum ServerTileTypeEnum {
 		
-		HOLE(type -> new ServerTileType(type, true,
+		HOLE(type -> new ServerTileType(type,
 			DestructionManager.INDESTRUCTIBLE(type)
 		)),
 		
-		DIRT(type -> new ServerTileType(type, true,
+		DIRT(type -> new ServerTileType(type,
 			new DestructionManager(type, new RequiredTool(ToolType.Shovel))
 		)),
 		
-		SAND(type -> new ServerTileType(type, true,
+		SAND(type -> new ServerTileType(type,
 			new DestructionManager(type, new RequiredTool(ToolType.Shovel))
 		)),
 		
-		GRASS(type -> new ServerTileType(type, true,
+		GRASS(type -> new ServerTileType(type,
 			new DestructionManager.DestructibleBuilder(type, 1, false)
 				.require(new RequiredTool(ToolType.Shovel))
 				.make(),
@@ -126,14 +113,14 @@ public class ServerTileType extends TileType {
 			)
 		)),
 		
-		STONE_PATH(type -> new ServerTileType(type, true,
+		STONE_PATH(type -> new ServerTileType(type,
 			new DestructionManager(type,
 				new ItemDrop(ResourceType.Stone.get(), 2),
 				new RequiredTool(ToolType.Pickaxe)
 			)
 		)),
 		
-		SNOW(type -> new ServerTileType(type, true,
+		SNOW(type -> new ServerTileType(type,
 			new DestructionManager.DestructibleBuilder(type, true)
 				.drops(false,
 					new ItemDrop(FoodType.Snow_Berries.get(), 0, 1, .1f)
@@ -142,11 +129,11 @@ public class ServerTileType extends TileType {
 				.make()
 		)),
 		
-		FLINT(type -> new ServerTileType(type, true,
+		FLINT(type -> new ServerTileType(type,
 			new DestructionManager(type)
 		)),
 		
-		WATER(type -> new ServerTileType(type, true, 0.6f,
+		WATER(type -> new ServerTileType(type,
 			DestructionManager.INDESTRUCTIBLE(type),
 			
 			P.UPDATE.as(type1 -> new UpdateManager(type1,
@@ -160,60 +147,60 @@ public class ServerTileType extends TileType {
 		TUNGSTEN(type -> ServerTileFactory.ore(type, 45)),
 		RUBY(type -> ServerTileFactory.ore(type, 60)),
 		
-		STONE(type -> new ServerTileType(type, false,
+		STONE(type -> new ServerTileType(type,
 			new DestructionManager(type, 40,
 				new PreferredTool(ToolType.Pickaxe, 5),
 				new ItemDrop(ResourceType.Stone.get(), 2, 3)
 			)
 		)),
 		
-		STONE_FLOOR(type -> new ServerTileType(type, true,
+		STONE_FLOOR(type -> new ServerTileType(type,
 			new DestructionManager(type, new RequiredTool(ToolType.Pickaxe))
 		)),
 		
-		WOOD_WALL(type -> new ServerTileType(type, false,
+		WOOD_WALL(type -> new ServerTileType(type,
 			new DestructionManager(type, 20, new PreferredTool(ToolType.Axe, 3))
 		)),
 		
-		STONE_WALL(type -> new ServerTileType(type, false,
+		STONE_WALL(type -> new ServerTileType(type,
 			new DestructionManager(type, 40, new PreferredTool(ToolType.Pickaxe, 5))
 		)),
 		
-		DOOR_OPEN(type -> new ServerTileType(type, true,
+		OPEN_DOOR(type -> new ServerTileType(type,
 			new DestructionManager(type,
-				new ItemDrop(TileItem.get(TileTypeEnum.DOOR_CLOSED)),
+				new ItemDrop(TileItem.get(TileTypeEnum.CLOSED_DOOR)),
 				new RequiredTool(ToolType.Axe)
 			),
 			
 			P.TRANS.as(enumType -> new TransitionManager(enumType)
-				.addEntranceAnimations(new ServerTileTransition("open", 3/24f, TileTypeEnum.DOOR_CLOSED))
-				.addExitAnimations(new ServerTileTransition("close", 3/24f, TileTypeEnum.DOOR_CLOSED))
+				.addEntranceAnimations(new ServerTileTransition("open", 3/24f, TileTypeEnum.CLOSED_DOOR))
+				.addExitAnimations(new ServerTileTransition("close", 3/24f, TileTypeEnum.CLOSED_DOOR))
 			)
 		) {
 			@Override
 			public boolean interact(@NotNull ServerTile tile, Player player, @Nullable Item item) {
-				tile.replaceTile(DOOR_CLOSED.getType());
+				tile.replaceTile(CLOSED_DOOR.getType());
 				return true;
 			}
 		}),
 		
-		DOOR_CLOSED(type -> new ServerTileType(type, false,
+		CLOSED_DOOR(type -> new ServerTileType(type,
 			new DestructionManager(type, new RequiredTool(ToolType.Axe))
 		) {
 			@Override
 			public boolean interact(@NotNull ServerTile tile, Player player, @Nullable Item item) {
-				tile.replaceTile(DOOR_OPEN.getType());
+				tile.replaceTile(OPEN_DOOR.getType());
 				return true;
 			}
 		}),
 		
-		TORCH(type -> new ServerTileType(type, true,
+		TORCH(type -> new ServerTileType(type,
 			new DestructionManager(type),
 			P.TRANS.as(type1 -> new TransitionManager(type1)
 				.addEntranceAnimations(new ServerTileTransition("enter", 3/12f)))
 		)),
 		
-		CACTUS(type -> new ServerTileType(type, false,
+		CACTUS(type -> new ServerTileType(type,
 			new DestructionManager(type, 12, null,
 				new ItemDrop(FoodType.Cactus_Fruit.get(), 1, 2, .15f)
 			)
@@ -249,7 +236,7 @@ public class ServerTileType extends TileType {
 	
 	private interface ServerTileFactory {
 		static ServerTileType ore(TileTypeEnum type, int health) {
-			return new ServerTileType(type, false,
+			return new ServerTileType(type,
 				new DestructionManager(type, health,
 					new PreferredTool(ToolType.Pickaxe, 5),
 					new ItemDrop(ResourceType.Iron.get(), 3, 4)
@@ -258,7 +245,7 @@ public class ServerTileType extends TileType {
 		}
 		
 		static ServerTileType tree(TileTypeEnum type) {
-			return new ServerTileType(type, false,
+			return new ServerTileType(type,
 				new DestructionManager(type, 24,
 					new PreferredTool(ToolType.Axe, 2),
 					new ItemDrop(ResourceType.Log.get(), 2),

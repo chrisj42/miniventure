@@ -12,6 +12,7 @@ import miniventure.game.world.ClientLevel;
 import miniventure.game.world.Level;
 import miniventure.game.world.TimeOfDay;
 import miniventure.game.world.entity.mob.ClientPlayer;
+import miniventure.game.world.tile.ClientTile;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.Gdx;
@@ -109,10 +110,10 @@ public class GameScreen {
 			ClientPlayer p = ClientCore.getWorld().getMainPlayer();
 			try {
 				//noinspection ConstantConditions
-				Tile t = p.getLevel().getClosestTile(p.getCenter());
+				ClientTile t = (ClientTile) p.getLevel().getClosestTile(p.getCenter());
 				t.updateSprites();
 				for(Tile o: t.getAdjacentTiles(true))
-					o.updateSprites();
+					((ClientTile)o).updateSprites();
 			} catch(NullPointerException ignored) {}
 		}
 		
