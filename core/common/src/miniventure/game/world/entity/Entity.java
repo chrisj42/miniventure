@@ -137,6 +137,7 @@ public abstract class Entity implements WorldObject {
 		return entity.checkMove(level, oldRect, newRect, false);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private boolean checkMove(@NotNull Level level, Rectangle oldRect, Rectangle newRect, boolean interact) {
 		
 		// check and see if the entity can go to the new coordinates.
@@ -279,7 +280,7 @@ public abstract class Entity implements WorldObject {
 	public EntityTag getTag() { return new EntityTag(eid); }
 	
 	@Override
-	public String toString() { return Integer.toHexString(super.hashCode())+"_"+getClass().getSimpleName()+"-"+eid; }
+	public String toString() { return Integer.toHexString(super.hashCode())+'_'+getClass().getSimpleName()+'-'+eid; }
 	
 	public int superHash() { return super.hashCode(); }
 }
