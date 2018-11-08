@@ -2,6 +2,7 @@ package miniventure.game.chat.command;
 
 import java.util.Arrays;
 
+import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.PositionUpdate;
 import miniventure.game.chat.MessageBuilder;
 import miniventure.game.chat.command.Argument.ArgValidator;
@@ -163,6 +164,13 @@ public enum Command {
 		new CommandUsageForm(true, "", "Print various pieces of info about the server.", (executor, args, out, err) -> ServerCore.getServer().printStatus(out))
 	),
 	
+	DEBUG("Toggles debug mode.", "This will show some extra things, and also allow certain cheats executed from a client to affect the server.",
+		new CommandUsageForm(true, "on", "Enable debug mode.",
+			((executor, args, out, err) -> GameCore.debug = true), Argument.get(ArgValidator.exactString(false, "on", "true", "1", "yes"))),
+		new CommandUsageForm(true, "off", "Disable debug mode.",
+			((executor, args, out, err) -> GameCore.debug = false), Argument.get(ArgValidator.exactString(false, "off", "false", "0", "no")))
+	),
+	
 	STOP("Stops the server.",
 		new CommandUsageForm(true, "", "Stops the server.", executor -> true, (executor, args, out, err) -> ServerCore.quit())
 	);
@@ -238,7 +246,7 @@ public enum Command {
 		Array<Command> commands = new Array<>(Command.class);
 		boolean op = ServerCore.getServer().isAdmin(player);
 		for(Command c: Command.values())
-			if(op || !c.restricted)
+			if((op || !c.restricted) && (c != DEBUG || player == null))
 				commands.add(c);
 		
 		return commands.shrink();
