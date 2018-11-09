@@ -2,11 +2,6 @@ package miniventure.game.world.entity.mob;
 
 import java.util.EnumMap;
 
-import miniventure.game.GameCore;
-import miniventure.game.item.Hands;
-import miniventure.game.item.Inventory;
-import miniventure.game.texture.TextureHolder;
-
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
@@ -15,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 public interface Player extends Mob {
 	
 	int INV_SIZE = 50;
+	int HOTBAR_SIZE = 5;
 	float MOVE_SPEED = 5;
 	
 	enum Stat {
@@ -29,7 +25,6 @@ public interface Player extends Mob {
 		public final int max, initial;
 		final int iconCount;
 		final String icon, outlineIcon;
-		final int iconWidth, iconHeight;
 		
 		Stat(String icon, int iconCount, int max) { this(icon, iconCount, max, max); }
 		Stat(String icon, int iconCount, int max, int initial) {
@@ -38,14 +33,6 @@ public interface Player extends Mob {
 			this.icon = icon;
 			this.outlineIcon = icon+"-outline";
 			this.iconCount = iconCount;
-			
-			if(icon.length() > 0) {
-				TextureHolder fullIcon = GameCore.icons.get(icon);
-				TextureHolder emptyIcon = GameCore.icons.get(outlineIcon);
-				iconWidth = Math.max(fullIcon.width, emptyIcon.width);
-				iconHeight = Math.max(fullIcon.height, emptyIcon.height);
-			} else
-				iconWidth = iconHeight = 0;
 		}
 		
 		public static final Stat[] values = Stat.values();
@@ -78,8 +65,4 @@ public interface Player extends Mob {
 		bounds.y += dirVector.y*9/10;
 		return bounds;
 	}
-	
-	Inventory getInventory();
-	Hands getHands();
-	
 }

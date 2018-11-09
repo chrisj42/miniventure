@@ -1,6 +1,7 @@
 package miniventure.game.world.tile;
 
-import miniventure.game.item.Item;
+import miniventure.game.item.ServerItem;
+import miniventure.game.item.ServerItem;
 import miniventure.game.item.TileItem;
 import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolItem.Material;
@@ -141,12 +142,12 @@ public class DestructionManager {
 		}
 	}
 	
-	boolean tileAttacked(@NotNull ServerTile tile, @NotNull WorldObject attacker, @Nullable Item item, int damage) {
+	boolean tileAttacked(@NotNull ServerTile tile, @NotNull WorldObject attacker, @Nullable ServerItem item, int damage) {
 		damage = getDamage(item, damage);
 		
 		if(damage > 0) {
 			//if(tile.getServerLevel() != null)
-			//	tile.getLevel().getWorld().getSender().sendData(new Hurt(attacker.getTag(), tile.getTag(), damage, Item.save(item)));
+			//	tile.getLevel().getWorld().getSender().sendData(new Hurt(attacker.getTag(), tile.getTag(), damage, ServerItem.save(item)));
 			
 			// add damage particle
 			ServerCore.getServer().broadcastParticle(new ActionParticleData(ActionType.IMPACT), tile);
@@ -173,7 +174,7 @@ public class DestructionManager {
 		return false;
 	}
 	
-	private int getDamage(@Nullable Item attackItem, int damage) {
+	private int getDamage(@Nullable ServerItem attackItem, int damage) {
 		if(damageConditions.length > 0) {
 			// must satisfy at least one condition
 			boolean doDamage = true;
@@ -212,7 +213,7 @@ public class DestructionManager {
 	
 	@FunctionalInterface
 	interface DamageConditionCheck {
-		boolean isDamagedBy(@Nullable Item attackItem);
+		boolean isDamagedBy(@Nullable ServerItem attackItem);
 	}
 	
 	static class RequiredTool implements DamageConditionCheck {
@@ -229,7 +230,7 @@ public class DestructionManager {
 		}
 		
 		@Override
-		public boolean isDamagedBy(@Nullable Item attackItem) {
+		public boolean isDamagedBy(@Nullable ServerItem attackItem) {
 			if(attackItem == null || !(attackItem instanceof ToolItem))
 				return false;
 			

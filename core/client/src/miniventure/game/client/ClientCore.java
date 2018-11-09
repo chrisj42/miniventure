@@ -10,6 +10,7 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.HashMap;
 
 import miniventure.game.GameCore;
+import miniventure.game.GameProtocol.InventoryRequest;
 import miniventure.game.GameProtocol.InventoryUpdate;
 import miniventure.game.GameProtocol.Message;
 import miniventure.game.chat.InfoMessage;
@@ -122,7 +123,8 @@ public class ClientCore extends ApplicationAdapter {
 	public static void setScreen(@Nullable MenuScreen screen) {
 		if(menuScreen instanceof InventoryScreen) {
 			//System.out.println("sending held item request to server for "+clientWorld.getMainPlayer().getHands().getUsableItem());
-			getClient().send(new InventoryUpdate(clientWorld.getMainPlayer()));
+			// TODO send inventory request with the changes; will have to do it in InventoryScreen because it requires referencing inventory indices.
+			// getClient().send(new InventoryRequest(clientWorld.getMainPlayer().getHands()));
 		}
 		
 		if(menuScreen != null && screen != null && screen == menuScreen.getParent()) {

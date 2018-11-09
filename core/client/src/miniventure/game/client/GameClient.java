@@ -194,7 +194,7 @@ public class GameClient implements GameProtocol {
 					
 					HashMap<Integer, Entity> loaded = new HashMap<>();
 					for(Entity e: level.getEntities())
-						if(e != player)
+						if(e != player && !(e instanceof ClientParticle))
 							loaded.put(e.getId(), e);
 					
 					for(int i = 0; i < list.ids.length; i++) {
@@ -224,14 +224,22 @@ public class GameClient implements GameProtocol {
 						e.remove();
 				});
 				
-				forPacket(object, InventoryUpdate.class, newInv -> {
+				forPacket(object, HotbarUpdate.class, update -> {
 					if(player == null) return;
-					if(newInv.inventory != null)
-						player.getInventory().loadItems(newInv.inventory);
-					if(newInv.hotbar != null)
-						player.getHands().loadItemShortcuts(newInv.hotbar);
-					// if it's null, then that means the hotbar was valid.
+					// TODO don't execute this on inventory screen
+					player.getHands().updateItems(update.itemStacks, update.fillPercent);
 				});
+				
+				/*forPacket(object, InventoryUpdate.class, newInv -> {
+					if(!(ClientCore.getScreen() instanceof InventoryScreen))
+						return;
+					// TODO call inventory screen to handle this
+					// if(newInv.hotbar != null)
+					// 	player.getHands().loadItemShortcuts(newInv.hotbar);
+					// if it's null, then that means the hotbar was valid.
+				});*/
+				
+				// TODO handle InventoryAddition packets by calling the inventory screen
 				
 				forPacket(object, PositionUpdate.class, newPos -> {
 					if(player == null || newPos.levelDepth == null) return;

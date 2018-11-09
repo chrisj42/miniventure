@@ -1,5 +1,7 @@
 package miniventure.game.item;
 
+import java.util.Objects;
+
 import miniventure.game.GameCore;
 import miniventure.game.screen.util.ColorBackground;
 import miniventure.game.util.MyUtils;
@@ -19,6 +21,7 @@ public class ItemSlot extends Widget {
 	
 	private static final float SPACING = 10, XPADDING = 3, YPADDING = 2;
 	public static final float HEIGHT = Item.ICON_SIZE+2+YPADDING*2;
+	private static final float USABILITY_BAR_HEIGHT = Item.ICON_SIZE/8; // 4 pixels?
 	
 	private final boolean showName;
 	@Nullable private Item item;
@@ -51,12 +54,12 @@ public class ItemSlot extends Widget {
 		setItem(item);
 	}
 	
-	@NotNull
-	public Item getItem() { return item == null ? new HandItem() : item; }
+	@Nullable
+	public Item getItem() { return item; }
 	
 	public ItemSlot setItem(@Nullable Item item) {
-		if(this.item == item) return this; // no action is needed.
-		this.item = item instanceof HandItem ? null : item;
+		if(Objects.equals(this.item, item)) return this; // no action is needed.
+		this.item = item;
 		if(!showName) return this; // the layout is always the same.
 		else if(item == null) prefWidth = Item.ICON_SIZE * 2;
 		else prefWidth = Item.ICON_SIZE + 2 + SPACING + GameCore.getTextLayout(item.getName()).width;
@@ -101,7 +104,8 @@ public class ItemSlot extends Widget {
 			batch.draw(item.getTexture().texture, getX()+XPADDING+xoff, getY()+YPADDING+yoff);
 			batch.setColor(prev);
 			batch.draw(item.getTexture().texture, getX()+2+XPADDING+xoff, getY()+2+YPADDING+yoff);
-			item.renderIconExtras(batch, getX()+2+XPADDING, getY()+2+YPADDING);
+			
+			renderUsability(batch, getX()+2+XPADDING, getY()+2+YPADDING, item.getUsabilityStatus());
 			
 			if(showName || showCount()) {
 				BitmapFont font = GameCore.getFont();
@@ -114,7 +118,7 @@ public class ItemSlot extends Widget {
 				}
 				
 				if(showCount())
-					font.draw(batch, getCount() + "", getX() + 2, getY() + 2 + font.getLineHeight());
+					font.draw(batch, String.valueOf(getCount()), getX() + 2, getY() + 2 + font.getLineHeight());
 			}
 		}
 		// else
@@ -122,5 +126,13 @@ public class ItemSlot extends Widget {
 		
 		if(selected)
 			MyUtils.fillRect(getX(), getY(), getWidth(), getHeight(), selectionColor, parentAlpha, batch);
+	}
+	
+	private void renderUsability(Batch batch, float x, float y, float usability) {
+		if(usability <= 0) return;
+		// draw a colored bar for the durability left
+		float width = Item.ICON_SIZE * usability;
+		Color barColor = usability >= 0.5f ? Color.GREEN : usability >= 0.2f ? Color.YELLOW : Color.RED;
+		MyUtils.fillRect(x, y, width, USABILITY_BAR_HEIGHT, barColor, batch);
 	}
 }

@@ -1,8 +1,11 @@
 package miniventure.game.item;
 
+import java.util.Objects;
+
 import miniventure.game.client.ClientCore;
 import miniventure.game.screen.util.ColorBackground;
 import miniventure.game.world.entity.mob.ClientPlayer;
+import miniventure.game.world.entity.mob.Player;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
@@ -18,7 +21,7 @@ public class HotbarTable extends Table {
 		pad(5);
 		defaults().pad(5);
 		
-		slots = new ItemSlot[Hands.HOTBAR_SIZE];
+		slots = new ItemSlot[Player.HOTBAR_SIZE];
 		for(int i = 0; i < slots.length; i++) {
 			slots[i] = new ItemSlot(false, null, InventoryDisplayGroup.slotBackgroundColor);
 			add(slots[i]);
@@ -32,19 +35,20 @@ public class HotbarTable extends Table {
 	public void draw(Batch batch, float parentAlpha) {
 		ClientPlayer player = ClientCore.getWorld().getMainPlayer();
 		ClientHands hands = player.getHands();
-		
+		if(hands.getFillPercent() != fillBar.getValue()) invalidate();
 		int selection = hands.getSelection();
 		boolean diff = false;
 		for(int i = 0; i < slots.length; i++) {
-			Item item = hands.getItem(i);
-			int count = item instanceof HandItem ? 1 : player.getInventory().getCount(item);
-			if(count == 0) {
+			ItemStack itemStack = hands.getHotbarItem(i);
+			Item item = itemStack == null ? null : itemStack.item;
+			int count = itemStack == null ? 1 : itemStack.count;
+			/*if(count == 0) {
 				hands.removeItem(i);
 				item = hands.getItem(i);
 				count = 1;
 				diff = true;
-			}
-			if(!item.equals(slots[i].getItem())) diff = true;
+			}*/
+			if(!Objects.equals(item, slots[i].getItem())) diff = true;
 			boolean diffCount = count != slots[i].getCount();
 			slots[i].setItem(item);
 			slots[i].setCount(count);
@@ -66,7 +70,7 @@ public class HotbarTable extends Table {
 		if(ClientCore.getWorld() == null) return;
 		ClientPlayer player = ClientCore.getWorld().getMainPlayer();
 		if(player == null) return;
-		fillBar.setValue(player.getInventory().getPercentFilled());
+		fillBar.setValue(player.getHands().getFillPercent());
 		filled = true;
 	}
 }

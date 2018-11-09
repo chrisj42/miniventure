@@ -28,7 +28,7 @@ public abstract class EntityRenderer {
 	
 	private float elapsedTime = 0;
 	
-	protected abstract String[] save();
+	protected abstract String[] serialize();
 	
 	public void update(float delta) { elapsedTime += delta; }
 	//public void reset() { elapsedTime = 0; }
@@ -61,7 +61,7 @@ public abstract class EntityRenderer {
 		}
 		
 		@Override
-		protected String[] save() { return new String[] {spriteName}; }
+		protected String[] serialize() { return new String[] {spriteName}; }
 		
 		public String getName() { return spriteName; }
 		
@@ -83,11 +83,11 @@ public abstract class EntityRenderer {
 		}
 		
 		protected ItemSpriteRenderer(String[] data) {
-			this(Item.load(data));
+			this(Item.deserialize(data));
 		}
 		
 		@Override
-		protected String[] save() { return item.save(); }
+		protected String[] serialize() { return item.serialize(); }
 	}
 	
 	
@@ -121,7 +121,7 @@ public abstract class EntityRenderer {
 		}
 		
 		@Override
-		protected String[] save() {
+		protected String[] serialize() {
 			return new String[] {animationName, String.valueOf(duration), String.valueOf(isFrameDuration), String.valueOf(loopAnimation)};
 		}
 		
@@ -173,13 +173,13 @@ public abstract class EntityRenderer {
 		}
 		
 		@Override
-		protected String[] save() {
+		protected String[] serialize() {
 			String[] data = new String[animations.size()+1];
 			data[0] = dir.name();
 			
 			int i = 1;
 			for(Direction dir: Direction.values) {
-				data[i] = MyUtils.encodeStringArray(animations.get(dir).save());
+				data[i] = MyUtils.encodeStringArray(animations.get(dir).serialize());
 				i++;
 			}
 			
@@ -221,7 +221,7 @@ public abstract class EntityRenderer {
 		}
 		
 		@Override
-		protected String[] save() { return new String[] {text, main.toString(), shadow.toString()}; }
+		protected String[] serialize() { return new String[] {text, main.toString(), shadow.toString()}; }
 		
 		@Override
 		public void render(float x, float y, Batch batch, float drawableHeight) {
@@ -267,7 +267,7 @@ public abstract class EntityRenderer {
 		}
 		
 		@Override
-		protected String[] save() {
+		protected String[] serialize() {
 			return new String[] {
 				MyUtils.encodeStringArray(EntityRenderer.serialize(mainRenderer)),
 				blinkColor==null?"null":blinkColor.toString(),
@@ -309,12 +309,12 @@ public abstract class EntityRenderer {
 	public static final EntityRenderer BLANK = new EntityRenderer() {
 		@Override public void render(float x, float y, Batch batch, float drawableHeight) {}
 		@Override public Vector2 getSize() { return new Vector2(); }
-		@Override protected String[] save() { return new String[0]; }
+		@Override protected String[] serialize() { return new String[0]; }
 	};
 	
 	
 	public static String[] serialize(EntityRenderer renderer) {
-		String[] data = renderer.save();
+		String[] data = renderer.serialize();
 		String[] allData = new String[data.length+1];
 		
 		String className = renderer.getClass().getCanonicalName();

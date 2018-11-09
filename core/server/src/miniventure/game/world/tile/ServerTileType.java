@@ -1,7 +1,8 @@
 package miniventure.game.world.tile;
 
 import miniventure.game.item.FoodType;
-import miniventure.game.item.Item;
+import miniventure.game.item.ServerItem;
+import miniventure.game.item.ServerItem;
 import miniventure.game.item.ResourceType;
 import miniventure.game.item.TileItem;
 import miniventure.game.item.ToolType;
@@ -75,9 +76,9 @@ public class ServerTileType extends TileType {
 	}
 	
 	
-	public boolean interact(@NotNull ServerTile tile, Player player, @Nullable Item item) { return false; }
+	public boolean interact(@NotNull ServerTile tile, Player player, @Nullable ServerItem item) { return false; }
 	
-	public boolean attacked(@NotNull ServerTile tile, WorldObject source, @Nullable Item item, int damage) {
+	public boolean attacked(@NotNull ServerTile tile, WorldObject source, @Nullable ServerItem item, int damage) {
 		return destructionManager.tileAttacked(tile, source, item, damage);
 	}
 	
@@ -178,7 +179,7 @@ public class ServerTileType extends TileType {
 			)
 		) {
 			@Override
-			public boolean interact(@NotNull ServerTile tile, Player player, @Nullable Item item) {
+			public boolean interact(@NotNull ServerTile tile, Player player, @Nullable ServerItem item) {
 				tile.replaceTile(CLOSED_DOOR.getType());
 				return true;
 			}
@@ -188,7 +189,7 @@ public class ServerTileType extends TileType {
 			new DestructionManager(type, new RequiredTool(ToolType.Axe))
 		) {
 			@Override
-			public boolean interact(@NotNull ServerTile tile, Player player, @Nullable Item item) {
+			public boolean interact(@NotNull ServerTile tile, Player player, @Nullable ServerItem item) {
 				tile.replaceTile(OPEN_DOOR.getType());
 				return true;
 			}

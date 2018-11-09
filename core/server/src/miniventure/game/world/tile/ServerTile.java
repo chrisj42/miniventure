@@ -3,7 +3,7 @@ package miniventure.game.world.tile;
 import java.util.HashSet;
 
 import miniventure.game.item.Item;
-import miniventure.game.server.ServerCore;
+import miniventure.game.item.ServerItem;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
@@ -19,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /** @noinspection EqualsAndHashcode*/
-public class ServerTile extends Tile<ServerTileType> {
+public class ServerTile extends Tile {
 	
 	public ServerTile(@NotNull ServerLevel level, int x, int y, @NotNull TileTypeEnum[] types) {
 		super(level, x, y, types);
@@ -33,8 +33,11 @@ public class ServerTile extends Tile<ServerTileType> {
 		return new ServerTileStack(types);
 	}
 	
-	@NotNull @Override
+	@Override @NotNull
 	public ServerLevel getLevel() { return (ServerLevel) super.getLevel(); }
+	
+	@Override
+	public ServerTileType getType() { return (ServerTileType) super.getType(); }
 	
 	@Override
 	public ServerTileStack getTypeStack() {
@@ -117,7 +120,7 @@ public class ServerTile extends Tile<ServerTileType> {
 	
 	private void moveEntities(ServerTileType newType) {
 		// check for entities that will not be allowed on the new tile, and move them to the closest adjacent tile they are allowed on.
-		HashSet<Tile<ServerTileType>> surroundingTileSet = getAdjacentTiles(true);
+		HashSet<Tile> surroundingTileSet = getAdjacentTiles(true);
 		Tile[] surroundingTiles = surroundingTileSet.toArray(new Tile[surroundingTileSet.size()]);
 		for(Entity entity: getLevel().getOverlappingEntities(getBounds())) {
 			// for each entity, check if it can walk on the new tile type. If not, fetch the surrounding tiles, remove those the entity can't walk on, and then fetch the closest tile of the remaining ones.
@@ -176,14 +179,14 @@ public class ServerTile extends Tile<ServerTileType> {
 	public boolean attackedBy(WorldObject obj, @Nullable Item item, int damage) {
 		if(getType().transitionManager.playingExitAnimation(this))
 			return false;
-		return getType().attacked(this, obj, item, damage);
+		return getType().attacked(this, obj, (ServerItem) item, damage);
 	}
 	
 	@Override
 	public boolean interactWith(Player player, @Nullable Item heldItem) {
 		if(getType().transitionManager.playingExitAnimation(this))
 			return false;
-		return getType().interact(this, player, heldItem);
+		return getType().interact(this, player, (ServerItem) heldItem);
 	}
 	
 	@Override

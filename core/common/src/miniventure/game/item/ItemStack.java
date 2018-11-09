@@ -3,6 +3,7 @@ package miniventure.game.item;
 import java.util.Arrays;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class ItemStack {
 	
@@ -14,10 +15,10 @@ public class ItemStack {
 		this.count = count;
 	}
 	
-	public String[] save() { return save(item, count); }
+	public String[] serialize() { return serialize(item, count); }
 	
-	public static String[] save(Item item, int count) {
-		String[] itemData = item.save();
+	public static String[] serialize(@NotNull Item item, int count) {
+		String[] itemData = item.serialize();
 		String[] data = new String[itemData.length+1];
 		System.arraycopy(itemData, 0, data, 1, itemData.length);
 		data[0] = String.valueOf(count);
@@ -25,12 +26,13 @@ public class ItemStack {
 		return data;
 	}
 	
-	public static ItemStack load(String[] data) {
+	@NotNull
+	public static ItemStack deserialize(@NotNull String[] data) {
 		int count = Integer.parseInt(data[0]);
-		Item item = Item.load(Arrays.copyOfRange(data, 1, data.length));
+		Item item = Item.deserialize(Arrays.copyOfRange(data, 1, data.length));
 		return new ItemStack(item, count);
 	}
 	
 	@Override
-	public String toString() { return "ItemStack("+count+" "+item+")"; }
+	public String toString() { return "ItemStack("+count+' '+item+')'; }
 }

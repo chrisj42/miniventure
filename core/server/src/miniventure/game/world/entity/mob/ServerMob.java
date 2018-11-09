@@ -7,6 +7,7 @@ import miniventure.game.GameProtocol.Hurt;
 import miniventure.game.GameProtocol.MobUpdate;
 import miniventure.game.GameProtocol.SpriteUpdate;
 import miniventure.game.item.Item;
+import miniventure.game.item.ServerItem;
 import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolType;
 import miniventure.game.server.ServerCore;

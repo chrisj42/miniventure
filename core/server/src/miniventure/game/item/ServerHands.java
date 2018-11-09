@@ -3,7 +3,6 @@ package miniventure.game.item;
 import java.util.Arrays;
 
 import miniventure.game.GameCore;
-import miniventure.game.GameProtocol.InventoryUpdate;
 import miniventure.game.server.ServerCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.ServerLevel;
@@ -16,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class ServerHands {
 	
-	private static final ServerHandItem hand = new ServerHandItem();
+	private static final HandItem hand = HandItem.hand;
 	
 	// holds the items in the player's hotbar.
 	
@@ -57,7 +56,7 @@ public class ServerHands {
 			if(attack) player.attack(item);
 			else player.interact(item);
 			
-			resetItemUsage(index);
+			resetItemUsage(item, index);
 		});
 	} 
 	
@@ -111,10 +110,9 @@ public class ServerHands {
 		return -1;
 	}
 	
-	private void resetItemUsage(int index) {
-		ServerItem item = hotbarItems[index];
-		
-		if(item == null || !item.isUsed()) return;
+	private void resetItemUsage(@NotNull ServerItem item, int index) {
+		if(!item.isUsed())
+			return;
 		
 		//System.out.println("used item "+item);
 		ServerItem newItem = item.resetUsage();
@@ -123,7 +121,7 @@ public class ServerHands {
 			player.changeStat(Stat.Stamina, -item.getStaminaUsage());
 		
 		// While I could consider this asking for trouble, I'm already stacking items, so any unspecified "individual" data is lost already.
-		if(item.equals(newItem))
+		if(item.equals(newItem)) // this is true for the hand item.
 			return; // there is literally zero difference in what the item is now, and what it was before.
 		
 		// the item has changed (possibly into nothing)
@@ -170,7 +168,8 @@ public class ServerHands {
 		if(!getInv().hasItem(item))
 			removeItem(item);
 		
-		ServerCore.getServer().sendToPlayer(player, new InventoryUpdate(player));
+		// we are never going to be in inventory mode here, because the client has just used an item; items can't be used with a menu open.
+		ServerCore.getServer().sendToPlayer(player, player.getHotbarUpdate());
 	}
 	
 	@NotNull
@@ -189,6 +188,13 @@ public class ServerHands {
 		return updated;
 	}
 	
+	public String[][] serialize() {
+		String[][] data = new String[hotbarItems.length][];
+		for(int i = 0; i < hotbarItems.length; i++)
+			data[i] = hotbarItems[i] == null ? null : ItemStack.serialize(hotbarItems[i], getInv().getCount(hotbarItems[i]));
+		return data;
+	}
+	
 	public String[] save() {
 		// make sure we don't save out-of-date information.
 		validate();
@@ -199,9 +205,22 @@ public class ServerHands {
 		return data;
 	}
 	
-	// FIXME this should contain a list of integers (representing inventory indices), not items.
 	public void loadItemShortcuts(String[] data) {
 		for(int i = 0; i < hotbarItems.length; i++)
 			hotbarItems[i] = ServerItem.load(MyUtils.parseLayeredString(data[i]));
+		
+		validate(); // it is intended that this method is run after loading the inventory.
+	}
+	
+	public void fromInventoryIndex(int[] indices) {
+		for(int i = 0; i < hotbarItems.length; i++)
+			hotbarItems[i] = indices[i] < 0 ? null : getInv().getItem(indices[i]);
+	}
+	
+	public int[] toInventoryIndex() {
+		int[] indices = new int[hotbarItems.length];
+		for(int i = 0; i < indices.length; i++)
+			indices[i] = getInv().getIndex(hotbarItems[i]);
+		return indices;
 	}
 }

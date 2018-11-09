@@ -1,100 +1,85 @@
 package miniventure.game.item;
 
-import java.util.Arrays;
-
 import miniventure.game.GameCore;
 import miniventure.game.texture.TextureHolder;
-import miniventure.game.world.WorldObject;
-import miniventure.game.world.entity.mob.Player;
-
-import com.badlogic.gdx.graphics.g2d.Batch;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-public abstract class Item {
+public class Item {
 	
 	public static final int ICON_SIZE = 32;
 	
-	// TODO allow items to be animated
+	// TO-DO allow items to be animated
 	
-	// NOTE: all data aspects should be final, because one item instance is used to represent a whole stack. Now, with this in mind, one can set a temp var to determine what sort of item to return from the use() method. It should be reset following that, however.
-	
-	@NotNull private final TextureHolder texture;
 	@NotNull private final String name;
-	@NotNull private final ItemType type;
+	@NotNull private final TextureHolder texture;
+	private final int spaceUsage;
+	private final float usability; // displayed as a little bar in the item icon.
 	
-	private boolean used = false;
-	
-	Item(@NotNull ItemType type, @NotNull String name) {
-		this(type, name.replace("_", " "), GameCore.icons.get("items/"+name.toLowerCase()));
-	}
-	Item(@NotNull ItemType type, @NotNull String name, @NotNull TextureHolder texture) {
-		this.texture = texture;
+	Item(@NotNull String name, @NotNull TextureHolder texture) {
 		this.name = name;
-		this.type = type;
+		this.texture = texture;
+		this.spaceUsage = getSpaceUsage(); // since this is a server constructor and the server overrides this method, it will give the right number.
+		this.usability = getUsabilityStatus(); // same as with space usage.
+	}
+	
+	private Item(@NotNull String name, @NotNull TextureHolder texture, int spaceUsage, float usability) {
+		this.name = name;
+		this.texture = texture;
+		this.spaceUsage = spaceUsage;
+		this.usability = usability;
 	}
 	
 	@NotNull public TextureHolder getTexture() { return texture; }
 	@NotNull public String getName() { return name; }
-	@NotNull public ItemType getType() { return type; }
-	public int getStaminaUsage() { return 1; } // default; note that without a successful attack or interaction, no stamina is lost.
-	public int getSpaceUsage() { return 1; } // default
+	public int getSpaceUsage() { return spaceUsage; }
+	// This returns a value used 
+	public float getUsabilityStatus() { return usability; }
 	
-	public abstract String[] save();
-	
-	// called to reset the item
-	@Nullable public final Item resetUsage() {
-		Item newItem = getUsedItem();
-		used = false;
-		return newItem;
-	}
-	
-	/// The item has been used. For most items, this means the item is now depleted, and can no longer be used. Note that there is a contract with this method; it should not modify the state of the current item, however it can return a slightly modified version to be used instead. (space usage shouldn't change)
-	// overridden by subclasses to return a new item instance with any change in state that should happen when the item is used; usually though, using an item results in it disappearing.
-	@Nullable
-	protected Item getUsedItem() { return null; }
-	
-	public void use() { used = true; }
-	public boolean isUsed() { return used; }
-	
-	// these three below are in case the item has anything to do with the events.
-	
-	public boolean attack(WorldObject obj, Player player) { return obj.attackedBy(player, this, 1); }
-	
-	public boolean interact(WorldObject obj, Player player) { return obj.interactWith(player, this); }
-	// this is called after all interaction attempts.
-	public void interact(Player player) {} // interact reflexively.
-	
-	void renderIconExtras(Batch batch, float x, float y) {}
-	
+	// make sure this continues to reflect all important state in subclass implementations. Usually it will be covered by the name, but otherwise (such as with tools and their durability) the subclass ought to take that state into account.
 	@Override
 	public boolean equals(Object other) {
+		if(other == null) return false;
 		if(!getClass().equals(other.getClass())) return false;
 		Item o = (Item) other;
 		return name.equals(o.name);
 	}
 	
 	@Override
-	public int hashCode() {
-		return name.hashCode();
-	}
-	
-	public abstract Item copy();
+	public int hashCode() { return name.hashCode(); }
 	
 	@Override
-	public String toString() {
-		return name + " Item";
+	public String toString() { return name + " Item"; }
+	
+	public String[] serialize() {
+		return new String[] {
+			name,
+			texture.name,
+			String.valueOf(spaceUsage),
+			String.valueOf(getUsabilityStatus())
+		};
 	}
 	
-	public static String[] save(Item item) {
-		if(item == null) return null;
-		return item.save();
+	@NotNull
+	public static Item deserialize(@NotNull String[] info) {
+		TextureHolder t = GameCore.icons.get(info[1]);
+		if(t == null)
+			t = GameCore.tileAtlas.findRegion(info[1]);
+		if(t == null)
+			t = GameCore.entityAtlas.findRegion(info[1]);
+		if(t == null)
+			throw new SpriteNotFoundException("item texture "+info[1]+" not found in icon, tile, or entity atlas.");
+		return new Item(
+			info[0],
+			t,
+			Integer.parseInt(info[2]),
+			Float.parseFloat(info[3])
+		);
 	}
 	
-	public static Item load(String[] data) {
-		if(data == null) return null;
-		ItemType type = ItemType.valueOf(data[0]);
-		return type.load(Arrays.copyOfRange(data, 1, data.length));
+	private static class SpriteNotFoundException extends RuntimeException {
+		SpriteNotFoundException(String msg) {
+			super(msg);
+		}
 	}
 }

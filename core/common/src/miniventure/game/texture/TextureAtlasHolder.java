@@ -13,6 +13,8 @@ public class TextureAtlasHolder {
 	
 	public TextureAtlasHolder(TextureAtlas atlas) {
 		this.atlas = atlas;
+		for(AtlasRegion r: atlas.getRegions())
+			r.name = TextureHolder.fixPath(r.name);
 		regions = null;
 	}
 	public TextureAtlasHolder(TextureAtlasData data) {

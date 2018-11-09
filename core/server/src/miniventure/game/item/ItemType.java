@@ -12,6 +12,8 @@ import org.jetbrains.annotations.NotNull;
 
 public enum ItemType {
 	
+	// TODO add EntityItem, an item that becomes an entity when placed (like TileItems become tiles when placed). This will mainly be used for various types of furniture.
+	
 	Tool(data -> new ToolItem(ToolType.valueOf(data[0]), Material.valueOf(data[1]), Integer.parseInt(data[2]))),
 	
 	Food(data -> FoodType.valueOf(data[0]).get()),
@@ -35,7 +37,7 @@ public enum ItemType {
 					}
 				}
 			}
-			return (Item) clazz.getMethod("load", String[].class).invoke(null, (Object)Arrays.copyOfRange(data, 1, data.length));
+			return (ServerItem) clazz.getMethod("load", String[].class).invoke(null, (Object)Arrays.copyOfRange(data, 1, data.length));
 		} catch(ClassNotFoundException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
 			e.printStackTrace();
 		}
@@ -45,7 +47,7 @@ public enum ItemType {
 	
 	/*
 		This is mainly for saving and loading.
-		Each item type should specify a method to turn a String into an Item, and an item into a String.
+		Each item type should specify a method to turn a String into an ServerItem, and an item into a String.
 		There should also be some external connection, or something, so that you can fetch the ItemType from the item.
 		
 		instances of the item class require an ItemType instance in the constructor.
@@ -53,7 +55,7 @@ public enum ItemType {
 	
 	@FunctionalInterface
 	interface ItemFetcher {
-		Item load(String[] data);
+		ServerItem load(String[] data);
 	}
 	
 	private ItemFetcher fetcher;
@@ -61,12 +63,12 @@ public enum ItemType {
 		this.fetcher = fetcher;
 	}
 	
-	public Item load(String[] data) {
+	public ServerItem load(String[] data) {
 		return fetcher.load(data);
 	}
 	
 	
-	static abstract class SimpleEnumItem extends Item {
+	static abstract class SimpleEnumItem extends ServerItem {
 		
 		SimpleEnumItem(@NotNull ItemType type, @NotNull String name) {
 			super(type, name);
@@ -82,6 +84,6 @@ public enum ItemType {
 		}
 		
 		@Override
-		public Item copy() { return this; }
+		public ServerItem copy() { return this; }
 	}
 }

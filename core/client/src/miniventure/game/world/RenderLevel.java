@@ -1,7 +1,6 @@
 package miniventure.game.world;
 
 import miniventure.game.world.entity.Entity;
-import miniventure.game.world.tile.ClientTileType;
 import miniventure.game.world.tile.RenderTile;
 import miniventure.game.world.tile.Tile;
 
@@ -13,7 +12,7 @@ import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
 
-public abstract class RenderLevel extends Level<ClientTileType> {
+public abstract class RenderLevel extends Level {
 	
 	protected RenderLevel(@NotNull WorldManager world, int depth, int width, int height) {
 		super(world, depth, width, height);
@@ -21,7 +20,7 @@ public abstract class RenderLevel extends Level<ClientTileType> {
 	
 	public abstract void render(Rectangle renderSpace, SpriteBatch batch, float delta, Vector2 posOffset);
 	
-	public static void render(Array<Tile<ClientTileType>> tiles, Array<Entity> entities, SpriteBatch batch, float delta, Vector2 posOffset) {
+	public static void render(Array<Tile> tiles, Array<Entity> entities, SpriteBatch batch, float delta, Vector2 posOffset) {
 		// pass the offset vector to all objects being rendered.
 		
 		Array<WorldObject> objects = new Array<>();
@@ -33,8 +32,8 @@ public abstract class RenderLevel extends Level<ClientTileType> {
 			else
 				objects.add(e);
 		}
-		for(Tile<ClientTileType> t: tiles) {
-			if(t.getType().getZOffset() > 0) // TODO instead, use "not permeable by player"
+		for(Tile t: tiles) {
+			if(!t.getType().isWalkable()) // used to check if z offset > 0
 				objects.add(t);
 			else
 				under.add(t);

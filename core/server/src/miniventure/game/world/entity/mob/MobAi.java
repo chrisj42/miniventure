@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import miniventure.game.item.Item;
+import miniventure.game.item.ServerItem;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.ItemDrop;
@@ -90,7 +91,7 @@ public class MobAi extends ServerMob {
 	
 	@Override
 	public boolean attackedBy(WorldObject obj, @Nullable Item attackItem, int damage) {
-		if(aiType.onHit != null) aiType.onHit.onHit(this, obj, attackItem);
+		if(aiType.onHit != null) aiType.onHit.onHit(this, obj, (ServerItem)attackItem);
 		return super.attackedBy(obj, attackItem, damage);
 	}
 	

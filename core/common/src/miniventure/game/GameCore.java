@@ -98,8 +98,10 @@ public class GameCore {
 		
 		entityAtlas = new TextureAtlasHolder(entityData);
 		tileAtlas = new TextureAtlasHolder(tileData);
-		for(Region region: iconData.getRegions())
-			icons.put(region.name, new TextureHolder(region));
+		for(Region region: iconData.getRegions()) {
+			TextureHolder tex = new TextureHolder(region);
+			icons.put(tex.name, tex);
+		}
 	}
 	
 	public static void dispose () {

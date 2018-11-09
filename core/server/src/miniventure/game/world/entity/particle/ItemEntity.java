@@ -3,7 +3,7 @@ package miniventure.game.world.entity.particle;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import miniventure.game.item.Item;
+import miniventure.game.item.ServerItem;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueFunction;
@@ -25,11 +25,11 @@ public class ItemEntity extends ServerEntity {
 	private final LifetimeTracker lifetime;
 	private final BounceBehavior bounceBehavior;
 	
-	private final Item item;
+	private final ServerItem item;
 	private final boolean delayPickup;
 	
-	public ItemEntity(Item item, @Nullable Vector2 goalDir) { this(item, goalDir, false); }
-	public ItemEntity(Item item, @Nullable Vector2 goalDir, boolean delayPickup) {
+	public ItemEntity(ServerItem item, @Nullable Vector2 goalDir) { this(item, goalDir, false); }
+	public ItemEntity(ServerItem item, @Nullable Vector2 goalDir, boolean delayPickup) {
 		this.lifetime = new LifetimeTracker(this, 180f);
 		this.bounceBehavior = new BounceBehavior(goalDir);
 		bounceBehavior.scaleVelocity(MathUtils.random(1f, 2f));
@@ -43,7 +43,7 @@ public class ItemEntity extends ServerEntity {
 		super(allData, version, modifier);
 		ArrayList<String> data = allData.get(1);
 		delayPickup = false;
-		item = Item.load(MyUtils.parseLayeredString(data.get(0)));
+		item = ServerItem.load(MyUtils.parseLayeredString(data.get(0)));
 		bounceBehavior = new BounceBehavior(MyUtils.parseLayeredString(data.get(1)));
 		lifetime = new LifetimeTracker(this, Float.parseFloat(data.get(2)), bounceBehavior.getTime());
 	}

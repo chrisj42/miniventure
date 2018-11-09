@@ -31,7 +31,7 @@ public class TextureHolder {
 		Note that there should not be any files as direct children of folders ending in "_", only subfolders.
 		All files should be contained in said subfolders.
 	 */
-	private static String fixPath(String name) {
+	static String fixPath(String name) {
 		return name.replaceAll("(\\w+)_/(\\w+)", "$2_$1");
 	}
 	

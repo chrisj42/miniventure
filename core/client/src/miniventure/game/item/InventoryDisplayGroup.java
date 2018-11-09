@@ -20,8 +20,11 @@ import com.badlogic.gdx.utils.Array;
 import com.kotcrab.vis.ui.widget.VisLabel;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class InventoryDisplayGroup extends Table {
+	
+	// FIXME BORKED
 	
 	/*
 		This will be used both for container screens and inventory screens. It should ideally take only half the screen horizontally at most, so that a second inventory screen can be placed next to it, for transfers between chests.
@@ -44,8 +47,8 @@ public class InventoryDisplayGroup extends Table {
 	
 	private static final float MIN_SPACING = 5;
 	
-	private final Inventory inventory;
-	private final Array<ItemSlot> itemSlots;
+	private final ClientHands inventory;
+	private Array<ItemSlot> itemSlots;
 	private final ProgressBar fillBar;
 	private final Table invGroup;
 	private final PageCounter pageCounter;
@@ -53,7 +56,7 @@ public class InventoryDisplayGroup extends Table {
 	private int selectionIndex = 0;
 	private int cellsPerColumn, numColumns;
 	
-	public InventoryDisplayGroup(final Inventory inventory, final float maxHeight) {
+	public InventoryDisplayGroup(final ClientHands inventory, final float maxHeight) {
 		this.inventory = inventory;
 		
 		defaults().space(5f).center();
@@ -61,7 +64,7 @@ public class InventoryDisplayGroup extends Table {
 		
 		// fill bar
 		fillBar = new ProgressBar(0, 1, .01f, false, GameCore.getSkin());
-		fillBar.setValue(inventory.getPercentFilled());
+		fillBar.setValue(inventory.getFillPercent());
 		add(fillBar).growX().row();
 		
 		invGroup = new Table() {
@@ -84,13 +87,13 @@ public class InventoryDisplayGroup extends Table {
 		float cellHeight = ItemSlot.HEIGHT + MIN_SPACING;
 		int invSpaces = Math.max(1, (int) (heightAvailable / cellHeight));
 		
-		Item[] allItems = inventory.getUniqueItems();
+		/*Item[] allItems = inventory.getUniqueItems();
 		
 		itemSlots = new Array<>(ItemSlot.class);
 		for(int i = 0; i < invSpaces; i++) {
 			ItemSlot slot;
 			if(i >= allItems.length)
-				slot = new ItemSlot(true, new HandItem(), slotBackgroundColor);
+				slot = new ItemSlot(true, null, slotBackgroundColor);
 			else
 				slot = new ItemSlot(true, allItems[i], inventory.getCount(allItems[i]), slotBackgroundColor);
 			
@@ -103,7 +106,7 @@ public class InventoryDisplayGroup extends Table {
 			
 			itemSlots.add(slot);
 			invGroup.add(slot).row();
-		}
+		}*/
 		
 		// configure the height to be something that equalizes the slots in as few columns as possible.
 		numColumns = Math.max(1, MathUtils.ceil(this.itemSlots.size / (float)invSpaces));
@@ -137,24 +140,8 @@ public class InventoryDisplayGroup extends Table {
 	public void act(float delta) {
 		super.act(delta);
 		
-		if(ClientCore.input.pressingKey(Keys.Q) && !(getSelectedItem() instanceof HandItem)) {
-			Item item = getSelectedItem();
-			if(Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)) {
-				int removed = inventory.removeItemStack(item);
-				resetSlot(selectionIndex);
-				if(removed > 0)
-					ClientCore.getClient().send(new ItemDropRequest(new ItemStack(item, removed)));
-			} else {
-				// remove the highlighted item only
-				if(inventory.removeItem(item)) {
-					if(!inventory.hasItem(item))
-						resetSlot(selectionIndex);
-					else
-						itemSlots.get(selectionIndex).changeCount(-1);
-					ClientCore.getClient().send(new ItemDropRequest(new ItemStack(item, 1)));
-				}
-			}
-			fillBar.setValue(inventory.getPercentFilled());
+		if(ClientCore.input.pressingKey(Keys.Q) && getSelectedItem() != null) {
+			ClientCore.getClient().send(new ItemDropRequest(false, selectionIndex, Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)));
 		}
 		
 		
@@ -170,13 +157,13 @@ public class InventoryDisplayGroup extends Table {
 	
 	private void resetSlot(int idx) {
 		ItemSlot slot = itemSlots.get(idx);
-		slot.setItem(new HandItem())
+		slot.setItem(null)
 			.setCount(1)
 			.setBackground(new ColorBackground(slot, slotBackgroundColor));
 		invGroup.invalidateHierarchy();
 	}
 	
-	@NotNull
+	@Nullable
 	Item getSelectedItem() { return itemSlots.get(selectionIndex).getItem(); }
 	
 	void setHotbarHighlight(Item item, boolean set) {
@@ -189,7 +176,7 @@ public class InventoryDisplayGroup extends Table {
 	}
 	void setHotbarHighlight(boolean set) { setHotbarHighlight(itemSlots.get(selectionIndex), set); }
 	private void setHotbarHighlight(ItemSlot slot, boolean set) {
-		if(set && slot.getItem() instanceof HandItem) return; // don't do it
+		if(set && slot.getItem() == null) return; // don't do it
 		slot.setBackground(new ColorBackground(slot, set ? hotbarBackground : slotBackgroundColor));
 	}
 	

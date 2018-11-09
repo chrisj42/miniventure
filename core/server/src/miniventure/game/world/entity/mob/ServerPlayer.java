@@ -4,18 +4,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
 
+import miniventure.game.GameProtocol.HotbarUpdate;
+import miniventure.game.GameProtocol.InventoryAddition;
 import miniventure.game.GameProtocol.InventoryUpdate;
 import miniventure.game.GameProtocol.StatUpdate;
-import miniventure.game.item.Hands;
-import miniventure.game.item.Inventory;
 import miniventure.game.item.Item;
 import miniventure.game.item.ServerHands;
+import miniventure.game.item.Inventory;
+import miniventure.game.item.ServerItem;
+import miniventure.game.server.GameServer;
 import miniventure.game.server.ServerCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.Boundable;
-import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.particle.ActionType;
@@ -39,7 +41,7 @@ public class ServerPlayer extends ServerMob implements Player {
 	private final EnumMap<Stat, Integer> stats = new EnumMap<>(Stat.class);
 	
 	@NotNull private final ServerHands hands;
-	private Inventory inventory;
+	@NotNull private final Inventory inventory;
 	
 	private final String name;
 	
@@ -57,6 +59,7 @@ public class ServerPlayer extends ServerMob implements Player {
 		ArrayList<String> data = allData.get(2);
 		
 		name = data.get(0);
+		inventory = new Inventory(INV_SIZE);
 		hands = new ServerHands(this);
 		reset();
 		
@@ -98,6 +101,9 @@ public class ServerPlayer extends ServerMob implements Player {
 		hands.reset();
 	}
 	
+	public InventoryUpdate getInventoryUpdate() { return new InventoryUpdate(inventory.serialize(), hands.toInventoryIndex()); }
+	public HotbarUpdate getHotbarUpdate() { return new HotbarUpdate(hands.serialize(), inventory.getPercentFilled()); }
+	
 	@Override
 	public int getStat(@NotNull Stat stat) {
 		return stats.get(stat);
@@ -129,12 +135,10 @@ public class ServerPlayer extends ServerMob implements Player {
 		if(update.stat == Stat.Health) setHealth(update.amount);
 	}
 	
-	@Override
+	/*@Override
 	public void update(float delta) {
 		super.update(delta);
-		
-		hands.resetItemUsage();
-	}
+	}*/
 	
 	// public boolean moveTo(float x, float y, float z) { return moveTo(new Vector3(x, y, z)); }
 	// public boolean moveTo(Vector3 pos) { return move(pos.cpy().sub(getLocation())); }
@@ -146,16 +150,23 @@ public class ServerPlayer extends ServerMob implements Player {
 	public void setDirection(@NotNull Direction dir) { super.setDirection(dir); }
 	
 	/// These two methods are ONLY to be accessed by GameScreen, so far.
-	@NotNull @Override
-	public Hands getHands() { return hands; }
-	@Override
+	@NotNull
+	public ServerHands getHands() { return hands; }
+	@NotNull
 	public Inventory getInventory() { return inventory; }
 	
-	public boolean takeItem(@NotNull Item item) {
+	public boolean canUseItem(ServerItem item) { return !item.isUsed() && getStat(Stat.Stamina) >= item.getStaminaUsage(); }
+	
+	public boolean takeItem(@NotNull ServerItem item) {
 		if(inventory.addItem(item)) {
 			hands.addItem(item); // add to open hotbar slot if it exists
-			ServerCore.getServer().playEntitySound("pickup", this, false);
-			ServerCore.getServer().sendToPlayer(this, new InventoryUpdate(this));
+			GameServer server = ServerCore.getServer();
+			server.playEntitySound("pickup", this, false);
+			
+			if(server.isInventoryMode(this))
+				server.sendToPlayer(this, new InventoryAddition(item));
+			else
+				server.sendToPlayer(this, getHotbarUpdate());
 			return true;
 		}
 		
@@ -167,7 +178,7 @@ public class ServerPlayer extends ServerMob implements Player {
 		Array<WorldObject> objects = new Array<>();
 		
 		// get level, and don't interact if level is not found
-		ServerLevel level = getWorld().getEntityLevel(this);
+		ServerLevel level = getLevel();
 		if(level == null) return objects;
 		
 		Rectangle interactionBounds = getInteractionRect();
@@ -182,12 +193,11 @@ public class ServerPlayer extends ServerMob implements Player {
 		return objects;
 	}
 	
-	public void attack() {
+	public void attack(ServerItem heldItem) {
 		//System.out.println("server player attacking; item = "+hands.getSelectedItem());
-		if(!hands.hasUsableItem()) return; // only ever not true for attacks in the same frame or if not enough stamina
+		if(!canUseItem(heldItem)) return; // only ever not true for attacks in the same frame or if not enough stamina
 		
-		Level level = getLevel();
-		Item heldItem = hands.getSelectedItem();
+		ServerLevel level = getLevel();
 		
 		boolean success = false;
 		for(WorldObject obj: getInteractionQueue()) {
@@ -219,11 +229,9 @@ public class ServerPlayer extends ServerMob implements Player {
 			ServerCore.getServer().playEntitySound("swing", this);
 	}
 	
-	public void interact() {
+	public void interact(ServerItem heldItem) {
 		//System.out.println("server player interacting; item = "+hands.getSelectedItem());
-		if(!hands.hasUsableItem()) return;
-		
-		Item heldItem = hands.getSelectedItem();
+		if(!canUseItem(heldItem)) return;
 		
 		boolean success = false;
 		for(WorldObject obj: getInteractionQueue()) {

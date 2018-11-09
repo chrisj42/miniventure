@@ -3,14 +3,18 @@ package miniventure.game.item;
 import miniventure.game.client.ClientCore;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.util.RelPos;
+import miniventure.game.world.entity.mob.Player;
 
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class InventoryScreen extends MenuScreen {
+	
+	// FIXME BORKED
 	
 	/*
 		This will be handled as follows:
@@ -30,19 +34,19 @@ public class InventoryScreen extends MenuScreen {
 	
 	private final ClientHands hands;
 	
-	private final InventoryDisplayGroup invGroup;
+	private InventoryDisplayGroup invGroup;
 	
 	public InventoryScreen(ClientHands hands) {
 		super(false);
 		this.hands = hands;
 		
-		invGroup = new InventoryDisplayGroup(hands.getInv(), getHeight() * 2 / 3);
+		/*invGroup = new InventoryDisplayGroup(hands.getInv(), getHeight() * 2 / 3);
 		addMainGroup(invGroup, RelPos.TOP_RIGHT, 0, -10);
 		
 		invGroup.addListener(new InputListener() {
 			@Override
 			public boolean keyDown(InputEvent event, int keycode) {
-				for(int i = 0; i < Hands.HOTBAR_SIZE; i++) {
+				for(int i = 0; i < Player.HOTBAR_SIZE; i++) {
 					if(keycode == Keys.NUM_1 + i) {
 						toggleHotbarItem(i, invGroup.getSelectedItem(), true);
 						return true;
@@ -59,8 +63,8 @@ public class InventoryScreen extends MenuScreen {
 			}
 		});
 		
-		for(int i = 0; i < Hands.HOTBAR_SIZE; i++)
-			invGroup.setHotbarHighlight(hands.getItem(i), true);
+		for(int i = 0; i < Player.HOTBAR_SIZE; i++)
+			invGroup.setHotbarHighlight(hands.getItem(i), true);*/
 	}
 	
 	@Override
@@ -70,9 +74,9 @@ public class InventoryScreen extends MenuScreen {
 	}
 	
 	// this method deals with setting the special inventory highlight for items that are in the hotbar.
-	private void toggleHotbarItem(int hotbarIndex, @NotNull Item item, boolean toggleOff) {
+	private void toggleHotbarItem(int hotbarIndex, @Nullable Item item, boolean toggleOff) {
 		
-		if(item instanceof HandItem) {
+		/*if(item == null) {
 			// we're taking an item off the hotbar (by replacing it with a hand)
 			Item prevItem = hands.removeItem(hotbarIndex);
 			invGroup.setHotbarHighlight(prevItem, false);
@@ -101,6 +105,6 @@ public class InventoryScreen extends MenuScreen {
 				// we need to make sure to unset this item as a hotbar item, since it was replaced.
 				invGroup.setHotbarHighlight(prevItem, false);
 			}
-		}
+		}*/
 	}
 }

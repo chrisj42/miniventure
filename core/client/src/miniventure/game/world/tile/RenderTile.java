@@ -1,10 +1,6 @@
 package miniventure.game.world.tile;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.NavigableMap;
-import java.util.TreeMap;
+import java.util.*;
 
 import miniventure.game.item.Item;
 import miniventure.game.texture.TextureHolder;
@@ -22,7 +18,7 @@ import com.badlogic.gdx.math.Vector2;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class RenderTile extends Tile<ClientTileType> {
+public class RenderTile extends Tile {
 	
 	private ArrayList<TileAnimation<TextureHolder>> spriteStack;
 	private ArrayList<ClientTileType> typeStack;
@@ -30,7 +26,7 @@ public class RenderTile extends Tile<ClientTileType> {
 	
 	private final Object spriteLock = new Object();
 	
-	public RenderTile(@NotNull Level<ClientTileType> level, int x, int y, @NotNull TileTypeEnum[] types, @Nullable SerialMap[] data) {
+	public RenderTile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, @Nullable SerialMap[] data) {
 		super(level, x, y, types);
 		
 		for(int i = 0; i < types.length; i++)
@@ -38,14 +34,13 @@ public class RenderTile extends Tile<ClientTileType> {
 	}
 	
 	@Override
-	TileStack<ClientTileType> makeStack(@NotNull TileTypeEnum[] types) {
-		return new ClientTileStack(types);
-	}
+	ClientTileStack makeStack(@NotNull TileTypeEnum[] types) { return new ClientTileStack(types); }
 	
 	@Override
-	public ClientTileStack getTypeStack() {
-		return (ClientTileStack) super.getTypeStack();
-	}
+	public ClientTileStack getTypeStack() { return (ClientTileStack) super.getTypeStack(); }
+	
+	@Override
+	public ClientTileType getType() { return (ClientTileType) super.getType(); }
 	
 	@Override
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
@@ -98,7 +93,7 @@ public class RenderTile extends Tile<ClientTileType> {
 			int x = rp.getX();
 			int y = rp.getY();
 			RenderTile oTile = (RenderTile) getLevel().getTile(this.x + x, this.y + y);
-			ClientTileType[] aroundTypes = oTile != null ? oTile.getTypeStack().getTypes() : new ClientTileType[0];
+			List<ClientTileType> aroundTypes = oTile != null ? oTile.getTypeStack().getTypes() : Collections.emptyList();
 			
 			EnumMap<TileTypeEnum, ClientTileType> typeMap = new EnumMap<>(TileTypeEnum.class);
 			for(ClientTileType type: aroundTypes) {
@@ -119,10 +114,10 @@ public class RenderTile extends Tile<ClientTileType> {
 		//EnumMap<TileTypeEnum, EnumSet<RelPos>> typePositions = OverlapManager.mapTileTypesAround(this);
 		
 		// iterate through main stack from bottom to top, adding connection and overlap sprites each level.
-		ClientTileType[] types = getTypeStack().getTypes();
-		for(int i = 1; i <= types.length; i++) {
-			ClientTileType cur = i < types.length ? types[i] : null;
-			ClientTileType prev = types[i-1];
+		List<ClientTileType> types = getTypeStack().getTypes();
+		for(int i = 1; i <= types.size(); i++) {
+			ClientTileType cur = i < types.size() ? types.get(i) : null;
+			ClientTileType prev = types.get(i-1);
 			
 			// add connection sprite (or transition) for prev
 			TileAnimation<TextureHolder> animation = prev.getRenderer().getConnectionSprite(this, typesAtPositions);

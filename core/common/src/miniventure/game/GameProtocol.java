@@ -6,8 +6,7 @@ import java.util.Objects;
 
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.chat.InfoMessageLine;
-import miniventure.game.item.Hands;
-import miniventure.game.item.Inventory;
+import miniventure.game.item.Item;
 import miniventure.game.item.ItemStack;
 import miniventure.game.util.Version;
 import miniventure.game.world.Boundable;
@@ -18,15 +17,14 @@ import miniventure.game.world.Point;
 import miniventure.game.world.Taggable.Tag;
 import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
-import miniventure.game.world.entity.particle.ActionType;
-import miniventure.game.world.entity.particle.ParticleData;
 import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.Entity.EntityTag;
 import miniventure.game.world.entity.EntityRenderer;
 import miniventure.game.world.entity.mob.Mob;
-import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.mob.Player.Stat;
+import miniventure.game.world.entity.particle.ActionType;
+import miniventure.game.world.entity.particle.ParticleData;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.Tile.TileData;
 import miniventure.game.world.tile.Tile.TileTag;
@@ -37,8 +35,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.esotericsoftware.kryo.Kryo;
-
-import org.jetbrains.annotations.Nullable;
 
 public interface GameProtocol {
 	
@@ -70,6 +66,7 @@ public interface GameProtocol {
 		kryo.register(InfoMessage.class);
 		
 		kryo.register(String[].class);
+		kryo.register(String[][].class);
 		kryo.register(int[].class);
 		kryo.register(Integer.class);
 		kryo.register(Integer[].class);
@@ -208,14 +205,13 @@ public interface GameProtocol {
 	
 	class SpawnData {
 		public final EntityAddition playerData;
-		public final InventoryUpdate inventory;
+		public final HotbarUpdate hotbar;
 		public final Integer[] stats;
 		
 		private SpawnData() { this(null, null, null); }
-		public SpawnData(EntityAddition playerData, Player player) { this(playerData, new InventoryUpdate(player), player.saveStats()); }
-		public SpawnData(EntityAddition playerData, InventoryUpdate inventory, Integer[] stats) {
+		public SpawnData(EntityAddition playerData, HotbarUpdate hotbar, Integer[] stats) {
 			this.playerData = playerData;
-			this.inventory = inventory;
+			this.hotbar = hotbar;
 			this.stats = stats;
 		}
 	}
@@ -309,7 +305,7 @@ public interface GameProtocol {
 		public final Point[] chunks;
 		
 		private EntityValidation() { this(0, null, null); }
-		public EntityValidation(Level<?> level, Rectangle area, Entity... excluded) {
+		public EntityValidation(Level level, Rectangle area, Entity... excluded) {
 			this.levelDepth = level.getDepth();
 			
 			Array<Entity> entities = level.getOverlappingEntities(area, excluded);
@@ -450,6 +446,7 @@ public interface GameProtocol {
 	}
 	
 	// a stat changed; sent by both the client and the server. When the client sends it, the amount is the total, but when the server sends it to a client, it is a delta.
+	// TODO change this; server should be the only one sending these, and they should be absolute values; the server should be handling the stats.
 	class StatUpdate {
 		public final Stat stat;
 		public final int amount;
@@ -463,15 +460,76 @@ public interface GameProtocol {
 	
 	// sent by client to drop an item from the inventory
 	class ItemDropRequest {
-		// TODO only send inventory/hotbar index, boolean for hotbar, and boolean for whole stack.
-		public final String[] stackData;
+		public final boolean hotbar; // if true, the index is translated to an inventory slot.
+		public final int index;
+		public final boolean all;
 		
-		private ItemDropRequest() { this((String[])null); }
-		public ItemDropRequest(ItemStack stack) {
-			this(stack.save());
+		private ItemDropRequest() { this(false, 0, false); }
+		public ItemDropRequest(boolean hotbar, int index, boolean all) {
+			this.hotbar = hotbar;
+			this.index = index;
+			this.all = all;
 		}
-		public ItemDropRequest(String[] stackData) {
-			this.stackData = stackData;
+	}
+	
+	// sent server -> client; special packet for when the client has the inventory screen open, which is communicated through an InventoryRequest with no hotbar array. This packet includes all the inventory items and the inventory indices of all the hotbar items.
+	class InventoryUpdate {
+		public final String[][] itemStacks; // the item list
+		public final int[] hotbar; // only not null the first time
+		
+		private InventoryUpdate() { this((String[][])null, null); }
+		public InventoryUpdate(ItemStack[] inventory, int[] hotbar) {
+			this.hotbar = hotbar;
+			itemStacks = new String[inventory.length][];
+			for(int i = 0; i < inventory.length; i++)
+				itemStacks[i] = inventory[i].serialize();
+		}
+		public InventoryUpdate(String[][] itemStacks, int[] hotbar) {
+			this.itemStacks = itemStacks;
+			this.hotbar = hotbar;
+		}
+	}
+	
+	// sent server -> client; for any items added to the inventory after server sends InventoryUpdate, and before server receives InventoryRequest.
+	class InventoryAddition {
+		public final String[] newItem;
+		
+		private InventoryAddition() { this((String[])null); }
+		public InventoryAddition(Item item) { this(item.serialize()); }
+		public InventoryAddition(String[] item) {
+			newItem = item;
+		}
+	}
+	
+	// sent client -> server; when received, server will stop sending InventoryUpdates and resume sending HotbarUpdates. It will also use the given array to update its hotbar options. If the given array is null, then this means to start sending InventoryUpdates rather than HotbarUpdates.
+	// the server sends back a HotbarUpdate after getting this to make sure both it and the client are on the same page and the client is displaying the right items.
+	class InventoryRequest {
+		// the likelihood of this being necessary is very small. If it becomes necessary I will implement it.
+		// public final int requestID; // to prevent confusion regarding late responses
+		public final int[] hotbar;
+		
+		private InventoryRequest() { this(null); }
+		public InventoryRequest(int[] hotbar) {
+			this.hotbar = hotbar;
+		}
+	}
+	
+	// sent by server to update clients' inventory, after dropping items and attacking/interacting.
+	// sent server -> client; holds ItemStack data for all hotbar items, and fill percent of inventory.
+	class HotbarUpdate {
+		public final float fillPercent; // % filled of the inventory
+		public final String[][] itemStacks; // the item list
+		
+		private HotbarUpdate() { this((String[][])null, 0); }
+		public HotbarUpdate(ItemStack[] itemStacks, float fillPercent) {
+			this.fillPercent = fillPercent;
+			this.itemStacks = new String[itemStacks.length][];
+			for(int i = 0; i < this.itemStacks.length; i++)
+				this.itemStacks[i] = itemStacks[i].serialize();
+		}
+		public HotbarUpdate(String[][] itemStacks, float fillPercent) {
+			this.itemStacks = itemStacks;
+			this.fillPercent = fillPercent;
 		}
 	}
 	
@@ -481,25 +539,6 @@ public interface GameProtocol {
 		private CraftRequest() { this(0); }
 		public CraftRequest(int recipeIndex) {
 			this.recipeIndex = recipeIndex;
-		}
-	}
-	
-	// sent by server to update clients' inventory, after dropping items and attacking/interacting.
-	class InventoryUpdate {
-		public final String[] inventory;
-		public final String[] hotbar;
-		
-		private InventoryUpdate() { this((String[])null, null); }
-		public InventoryUpdate(Player player) { this(player.getInventory(), player.getHands()); }
-		public InventoryUpdate(@Nullable Inventory inv, @Nullable Hands hands) {
-			this(
-				inv == null ? null : inv.save(),
-				hands == null ? null : hands.save()
-			);
-		}
-		public InventoryUpdate(String[] inventory, String[] hotbar) {
-			this.inventory = inventory;
-			this.hotbar = hotbar;
 		}
 	}
 	

@@ -12,9 +12,8 @@ import miniventure.game.GameProtocol.SpawnData;
 import miniventure.game.GameProtocol.StatUpdate;
 import miniventure.game.client.ClientCore;
 import miniventure.game.item.ClientHands;
-import miniventure.game.item.Hands;
-import miniventure.game.item.Inventory;
 import miniventure.game.item.InventoryScreen;
+import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClientEntity;
@@ -36,6 +35,17 @@ import org.jetbrains.annotations.NotNull;
 
 public class ClientPlayer extends ClientEntity implements Player {
 	
+	static {
+		// a quick one-time assertion that checks the stat icon sizes. Just make sure that initGdx is called before ClientPlayer is referenced.
+		for(Stat stat: Stat.values) {
+			if(stat.icon.length() == 0) continue; // unimplemented stat
+			TextureHolder fullIcon = GameCore.icons.get(stat.icon);
+			TextureHolder emptyIcon = GameCore.icons.get(stat.outlineIcon);
+			if(fullIcon.width != emptyIcon.width || fullIcon.height != emptyIcon.height)
+				throw new IconSizeMismatchException("full/empty icons for player stat "+stat+" have different dimensions; full="+fullIcon.width+'x'+fullIcon.height+", empty="+emptyIcon.width+'x'+emptyIcon.height);
+		}
+	}
+	
 	// TODO move the stat handling to the server, because it is important info that is saved, and all such info ought to be tracked and handled by the server.
 	
 	interface StatEvolver { void update(float delta); }
@@ -56,7 +66,6 @@ public class ClientPlayer extends ClientEntity implements Player {
 	
 	private final EnumMap<Stat, Integer> stats = new EnumMap<>(Stat.class);
 	
-	private Inventory inventory;
 	private ClientHands hands;
 	
 	private float moveSpeed = Player.MOVE_SPEED;
@@ -70,11 +79,9 @@ public class ClientPlayer extends ClientEntity implements Player {
 		
 		dir = Direction.DOWN;
 		
-		inventory = new Inventory(INV_SIZE);
-		hands = new ClientHands(inventory);
+		hands = new ClientHands();
 		
-		hands.loadItemShortcuts(data.inventory.hotbar);
-		inventory.loadItems(data.inventory.inventory);
+		hands.updateItems(data.hotbar.itemStacks, data.hotbar.fillPercent);
 		
 		Stat.load(data.stats, this.stats);
 		
@@ -105,8 +112,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 	}
 	
 	@Override @NotNull public Direction getDirection() { return dir; }
-	@Override public Inventory getInventory() { return inventory; }
-	@Override public ClientHands getHands() { return hands; }
+	public ClientHands getHands() { return hands; }
 	
 	@Override
 	public boolean isKnockedBack() { return knockbackController.hasKnockback(); }
@@ -185,18 +191,18 @@ public class ClientPlayer extends ClientEntity implements Player {
 		// the server will update the client hotbar as necessary when item stock changes.
 		// hands.resetItemUsage();
 		
-		for(int i = 0; i < Hands.HOTBAR_SIZE; i++)
+		for(int i = 0; i < Player.HOTBAR_SIZE; i++)
 			if(Gdx.input.isKeyJustPressed(Keys.NUM_1+i))
 				hands.setSelection(i);
 		
 		if(!ClientCore.hasMenu()) {
-			if(ClientCore.input.pressingKey(Keys.E)) {
+			/*if(ClientCore.input.pressingKey(Keys.E)) {
 				// do nothing here; instead, tell the server to set the held item once selected (aka on inventory menu exit). The inventory should be up to date already, generally speaking.
 				ClientCore.setScreen(new InventoryScreen(hands));
-			} else /*if(ClientCore.input.pressingKey(Keys.Z))
+			} else *//*if(ClientCore.input.pressingKey(Keys.Z))
 				ClientCore.setScreen(new CraftingScreen(Recipes.recipes, inventory));
 			else */if(ClientCore.input.pressingKey(Keys.Q)) {
-				hands.dropInvItems(hands.getSelectedItem(), Gdx.input.isKeyPressed(Keys.SHIFT_LEFT));
+				hands.dropInvItems(Gdx.input.isKeyPressed(Keys.SHIFT_LEFT));
 			}
 		}
 		
@@ -245,7 +251,9 @@ public class ClientPlayer extends ClientEntity implements Player {
 		TextureRegion fullIcon = GameCore.icons.get(stat.icon).texture;
 		TextureRegion emptyIcon = GameCore.icons.get(stat.outlineIcon).texture;
 		
-		int iconWidth = stat.iconWidth + spacing;
+		final int statWidth = fullIcon.getRegionWidth();
+		final int statHeight = fullIcon.getRegionHeight();
+		final int iconWidth = statWidth + spacing;
 		
 		// for each icon...
 		for(int i = 0; i < stat.iconCount; i++) {
@@ -253,19 +261,19 @@ public class ClientPlayer extends ClientEntity implements Player {
 			float iconFillAmount = Math.min(Math.max(0, stats.get(stat) - i * pointsPerIcon) / pointsPerIcon, 1);
 			
 			// converts it to a pixel width
-			int fullWidth = (int) (iconFillAmount * fullIcon.getRegionWidth());
+			int fullWidth = (int) (iconFillAmount * statWidth);
 			float fullX = rightSide ? x+i*iconWidth : x - i*iconWidth - fullWidth;
 			if(fullWidth > 0)
-				batch.draw(fullIcon.getTexture(), fullX, y, fullIcon.getRegionX() + (rightSide?0:fullIcon.getRegionWidth()-fullWidth), fullIcon.getRegionY(), fullWidth, fullIcon.getRegionHeight());
+				batch.draw(fullIcon.getTexture(), fullX, y, fullIcon.getRegionX() + (rightSide?0:statWidth-fullWidth), fullIcon.getRegionY(), fullWidth, statHeight);
 			
 			// now draw the rest of the icon with the empty sprite.
-			int emptyWidth = emptyIcon.getRegionWidth()-fullWidth;
+			int emptyWidth = statWidth-fullWidth;
 			float emptyX = rightSide ? x+i*iconWidth+fullWidth : x - (i+1)*iconWidth;
 			if(emptyWidth > 0)
-				batch.draw(emptyIcon.getTexture(), emptyX, y, emptyIcon.getRegionX() + (rightSide?fullWidth:0), emptyIcon.getRegionY(), emptyWidth, emptyIcon.getRegionHeight());
+				batch.draw(emptyIcon.getTexture(), emptyX, y, emptyIcon.getRegionX() + (rightSide?fullWidth:0), emptyIcon.getRegionY(), emptyWidth, statHeight);
 		}
 		
-		return new Vector2(iconWidth * stat.iconCount, stat.iconHeight);
+		return new Vector2(iconWidth * stat.iconCount, statHeight);
 	}
 	
 	

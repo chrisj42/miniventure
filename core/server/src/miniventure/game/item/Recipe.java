@@ -7,22 +7,22 @@ import org.jetbrains.annotations.Nullable;
 
 public class Recipe {
 	
-	@NotNull private final ItemStack result;
-	@NotNull private final ItemStack[] costs;
+	@NotNull private final ServerItemStack result;
+	@NotNull private final ServerItemStack[] costs;
 	
-	public Recipe(@NotNull Item result, @NotNull ItemStack... costs) {
-		this(new ItemStack(result, 1), costs);
+	public Recipe(@NotNull ServerItem result, @NotNull ServerItemStack... costs) {
+		this(new ServerItemStack(result, 1), costs);
 	}
-	public Recipe(@NotNull ItemStack result, @NotNull ItemStack... costs) {
+	public Recipe(@NotNull ServerItemStack result, @NotNull ServerItemStack... costs) {
 		this.result = result;
 		this.costs = costs;
 	}
 	
-	@NotNull ItemStack getResult() { return result; }
-	@NotNull ItemStack[] getCosts() { return costs; }
+	@NotNull ServerItemStack getResult() { return result; }
+	@NotNull ServerItemStack[] getCosts() { return costs; }
 	
 	public boolean canCraft(Inventory inv) {
-		for(ItemStack cost: costs)
+		for(ServerItemStack cost: costs)
 			if(!inv.hasItem(cost.item, cost.count))
 				return false;
 		
@@ -31,13 +31,13 @@ public class Recipe {
 	
 	// returns any items that couldn't be added to the inventory, or null if the inventory doesn't have the items required for crafting.
 	@Nullable
-	public Item[] tryCraft(Inventory inv) {
+	public ServerItem[] tryCraft(Inventory inv) {
 		if(!canCraft(inv))
 			return null;
 		
-		Array<Item> leftover = new Array<>(Item.class);
+		Array<ServerItem> leftover = new Array<>(ServerItem.class);
 		
-		for(ItemStack cost: costs) 
+		for(ServerItemStack cost: costs) 
 			for(int i = 0; i < cost.count; i++)
 				inv.removeItem(cost.item);
 		

@@ -5,11 +5,13 @@ import miniventure.game.util.MyUtils;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;
 
-final class ServerHandItem extends ServerItem {
+final class HandItem extends ServerItem {
 	
 	// this is to be used only for the purposes of interaction; the inventory should not have them, and the hotbar ought to be filled with nulls for empty spaces.
 	
-	ServerHandItem() {
+	public static final HandItem hand = new HandItem();
+	
+	private HandItem() {
 		super(ItemType.Misc, "Hand", GameCore.icons.get("blank"));
 	}
 	
@@ -20,12 +22,12 @@ final class ServerHandItem extends ServerItem {
 	public String[] save() {
 		return new String[] {
 			ItemType.Misc.name(),
-			MyUtils.encodeStringArray(ServerHandItem.class.getSimpleName())
+			MyUtils.encodeStringArray(miniventure.game.item.HandItem.class.getSimpleName())
 		};
 	}
 	
 	/** @noinspection Contract*/
-	public static ServerItem load(String[] data) { return new ServerHandItem(); }
+	public static ServerItem load(String[] data) { return hand; }
 	
 	@Override public ServerItem getUsedItem() { return this; }
 	@Override public ServerItem copy() { return this; }

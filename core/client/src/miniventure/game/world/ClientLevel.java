@@ -12,7 +12,6 @@ import miniventure.game.client.ClientWorld;
 import miniventure.game.screen.RespawnScreen;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.tile.ClientTile;
-import miniventure.game.world.tile.ClientTileType;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.Tile.TileData;
 
@@ -51,7 +50,7 @@ public class ClientLevel extends RenderLevel {
 		renderSpace = new Rectangle(Math.max(0, renderSpace.x), Math.max(0, renderSpace.y), Math.min(getWidth()-renderSpace.x, renderSpace.width), Math.min(getHeight()-renderSpace.y, renderSpace.height));
 		// pass the offset vector to all objects being rendered.
 		
-		Array<Tile<ClientTileType>> tiles = getOverlappingTiles(renderSpace);
+		Array<Tile> tiles = getOverlappingTiles(renderSpace);
 		Array<Entity> entities = getOverlappingEntities(renderSpace);
 		
 		if(ClientCore.getScreen() instanceof RespawnScreen)

@@ -5,7 +5,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import miniventure.game.client.ClientCore;
-import miniventure.game.world.WorldManager;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -20,36 +19,36 @@ public class ClientTileStack extends TileStack<ClientTileType> {
 	}
 	
 	public ClientTileStack() {
-		super(ClientTileType.class, ClientCore.getWorld());
+		super(ClientCore.getWorld());
 	}
 	
 	public ClientTileStack(ClientTileType[] types) {
-		super(ClientTileType.class, types);
+		super(types);
 	}
 	
 	public ClientTileStack(TileTypeEnum[] enumTypes) {
-		super(ClientTileType.class, ClientCore.getWorld(), enumTypes);
+		super(ClientCore.getWorld(), enumTypes);
 	}
 	
 	public ClientTileType getLowestVisibleLayer() { return opaqueStack.peekLast(); }
 	
 	@Override
-	public ClientTileType[] getTypes() { return getTypes(false); }
-	public ClientTileType[] getTypes(boolean includeCovered) {
-		ClientTileType[] types = super.getTypes();
+	public List<ClientTileType> getTypes() { return getTypes(false); }
+	public List<ClientTileType> getTypes(boolean includeCovered) {
+		List<ClientTileType> types = super.getTypes();
 		if(includeCovered)
 			return types;
 		else
-			return Arrays.copyOfRange(types, Arrays.asList(types).indexOf(opaqueStack.peekLast()), types.length);
+			return types.subList(types.indexOf(opaqueStack.peekLast()), types.size());
 	}
 	
 	@Override
 	public TileTypeEnum[] getEnumTypes() { return getEnumTypes(false); }
 	public TileTypeEnum[] getEnumTypes(boolean includeCovered) {
-		ClientTileType[] tileTypes = getTypes(includeCovered);
-		TileTypeEnum[] types = new TileTypeEnum[tileTypes.length];
+		List<ClientTileType> tileTypes = getTypes(includeCovered);
+		TileTypeEnum[] types = new TileTypeEnum[tileTypes.size()];
 		for(int i = 0; i < types.length; i++)
-			types[i] = tileTypes[i].getTypeEnum();
+			types[i] = tileTypes.get(i).getTypeEnum();
 		return types;
 	}
 	

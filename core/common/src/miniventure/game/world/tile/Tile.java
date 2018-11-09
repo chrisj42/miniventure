@@ -14,7 +14,7 @@ import com.badlogic.gdx.math.Vector2;
 
 import org.jetbrains.annotations.NotNull;
 
-public abstract class Tile<T extends TileType> implements WorldObject {
+public abstract class Tile implements WorldObject {
 	
 	/*
 		So. The client, in terms of properties, doesn't have to worry about tile interaction properties. It always sends a request to the server when interactions should occur.
@@ -34,29 +34,29 @@ public abstract class Tile<T extends TileType> implements WorldObject {
 	
 	public static final int SIZE = 32;
 	
-	private TileStack<T> tileStack;
+	private TileStack tileStack;
 	private final Object dataLock = new Object();
 	
-	@NotNull private final Level<T> level;
+	@NotNull private final Level level;
 	final int x, y;
 	final EnumMap<TileTypeEnum, SerialMap> dataMaps = new EnumMap<>(TileTypeEnum.class);
 	
 	// the TileType array is ALWAYS expected in order of bottom to top.
-	Tile(@NotNull Level<T> level, int x, int y, @NotNull TileTypeEnum[] types) {
+	Tile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types) {
 		this.level = level;
 		this.x = x;
 		this.y = y;
 		setTileStack(makeStack(types));
 	}
 	
-	abstract TileStack<T> makeStack(@NotNull TileTypeEnum[] types);
+	abstract TileStack makeStack(@NotNull TileTypeEnum[] types);
 	
-	void setTileStack(TileStack<T> stack) { this.tileStack = stack; }
+	void setTileStack(TileStack stack) { this.tileStack = stack; }
 	
 	@NotNull @Override
 	public WorldManager getWorld() { return level.getWorld(); }
 	
-	@NotNull @Override public Level<T> getLevel() { return level; }
+	@NotNull @Override public Level getLevel() { return level; }
 	
 	@NotNull
 	@Override public Rectangle getBounds() { return new Rectangle(x, y, 1, 1); }
@@ -65,19 +65,19 @@ public abstract class Tile<T extends TileType> implements WorldObject {
 	public Point getLocation() { return new Point(x, y); }
 	
 	
-	public T getType() { return tileStack.getTopLayer(); }
-	public TileStack<T> getTypeStack() { return tileStack; }
+	public TileType getType() { return tileStack.getTopLayer(); }
+	public TileStack getTypeStack() { return tileStack; }
 	
 	public SerialMap getDataMap() { return getDataMap(getType().getTypeEnum()); }
-	public SerialMap getDataMap(T tileType) { return getDataMap(tileType.getTypeEnum()); }
+	public SerialMap getDataMap(TileType tileType) { return getDataMap(tileType.getTypeEnum()); }
 	public SerialMap getDataMap(TileTypeEnum tileType) { return dataMaps.get(tileType); }
 	
 	
-	public HashSet<Tile<T>> getAdjacentTiles(boolean includeCorners) {
+	public HashSet<Tile> getAdjacentTiles(boolean includeCorners) {
 		if(includeCorners)
 			return level.getAreaTiles(x, y, 1, false);
 		else {
-			HashSet<Tile<T>> tiles = new HashSet<>();
+			HashSet<Tile> tiles = new HashSet<>();
 			if(x > 0) tiles.add(level.getTile(x-1, y));
 			if(y < level.getHeight()-1) tiles.add(level.getTile(x, y+1));
 			if(x < level.getWidth()-1) tiles.add(level.getTile(x+1, y));
@@ -136,7 +136,7 @@ public abstract class Tile<T extends TileType> implements WorldObject {
 				
 				this.data = new String[tileTypes.length];
 				for(int i = 0; i < data.length; i++)
-					data[i] = ((EnumMap<TileTypeEnum, SerialMap>)tile.dataMaps).get(tileTypes[i]).serialize();
+					data[i] = tile.dataMaps.get(tileTypes[i]).serialize();
 			}
 		}
 		
@@ -159,13 +159,13 @@ public abstract class Tile<T extends TileType> implements WorldObject {
 		
 	}
 	
-	public static class TileTag<T extends TileType> implements Tag<Tile<T>> {
+	public static class TileTag implements Tag<Tile> {
 		public final int x;
 		public final int y;
 		public final int levelDepth;
 		
 		private TileTag() { this(0, 0, 0); }
-		public TileTag(Tile<T> tile) { this(tile.x, tile.y, tile.getLevel().getDepth()); }
+		public TileTag(Tile tile) { this(tile.x, tile.y, tile.getLevel().getDepth()); }
 		public TileTag(int x, int y, int levelDepth) {
 			this.x = x;
 			this.y = y;
@@ -174,8 +174,8 @@ public abstract class Tile<T extends TileType> implements WorldObject {
 		
 		@Override
 		@SuppressWarnings("unchecked")
-		public Tile<T> getObject(WorldManager world) {
-			Level<T> level = (Level<T>) world.getLevel(levelDepth);
+		public Tile getObject(WorldManager world) {
+			Level level = world.getLevel(levelDepth);
 			if(level != null)
 				return level.getTile(x, y);
 			return null;
@@ -183,5 +183,5 @@ public abstract class Tile<T extends TileType> implements WorldObject {
 	}
 	
 	@Override
-	public Tag<Tile<T>> getTag() { return new TileTag<>(this); }
+	public Tag<Tile> getTag() { return new TileTag(this); }
 }

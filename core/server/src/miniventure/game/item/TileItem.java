@@ -2,13 +2,14 @@ package miniventure.game.item;
 
 import java.util.Arrays;
 import java.util.EnumMap;
-import java.util.HashMap;
 
 import miniventure.game.GameCore;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Player;
+import miniventure.game.world.tile.ServerTile;
+import miniventure.game.world.tile.ServerTileType;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileTypeEnum;
 
@@ -17,7 +18,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class TileItem extends Item {
+public class TileItem extends ServerItem {
 	
 	private static final EnumMap<TileTypeEnum, TileItem> items = new EnumMap<>(TileTypeEnum.class);
 	
@@ -54,14 +55,13 @@ public class TileItem extends Item {
 		return items.get(tile).copy();
 	}
 	
-	@NotNull private TileTypeEnum result;
-	@Nullable private TileTypeEnum[] canPlaceOn;
+	@NotNull private final TileTypeEnum result;
+	@Nullable private final TileTypeEnum[] canPlaceOn;
 	
 	private TileItem(@NotNull TileTypeEnum type, @Nullable TileTypeEnum... canPlaceOn) {
 		this(MyUtils.toTitleCase(type.name()), GameCore.tileAtlas.findRegion(type.name().toLowerCase()+"/c00"), type, canPlaceOn); // so, if the placeOn is null, then...
 	}
 	
-	private TileItem(String name, AtlasRegion texture, @NotNull TileTypeEnum result, @Nullable TileTypeEnum... placeOn) { this(name, new TextureHolder(texture, Tile.SIZE, Tile.SIZE), result, placeOn); }
 	private TileItem(String name, TextureHolder texture, @NotNull TileTypeEnum result, @Nullable TileTypeEnum... placeOn) {
 		super(ItemType.Tile, name, texture);
 		this.canPlaceOn = placeOn;
@@ -70,8 +70,8 @@ public class TileItem extends Item {
 	
 	@Override
 	public boolean interact(WorldObject obj, Player player) {
-		if(!isUsed() && obj instanceof Tile) {
-			Tile tile = (Tile) obj;
+		if(!isUsed() && obj instanceof ServerTile) {
+			ServerTile tile = (ServerTile) obj;
 			boolean canPlace = canPlaceOn == null;
 			if(!canPlace) {
 				for (TileTypeEnum underType : canPlaceOn) {
@@ -82,8 +82,7 @@ public class TileItem extends Item {
 				}
 			}
 			
-			// FIXME comment is just to make it compile
-			if(canPlace/* && tile.addTile(result.getTypeInstance(tile.getWorld()))*/) {
+			if(canPlace && tile.addTile(ServerTileType.get(result))) {
 				use();
 				return true;
 			}

@@ -10,9 +10,7 @@ import miniventure.game.util.SynchronizedAccessor;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.TileType;
 
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
@@ -20,7 +18,7 @@ import com.badlogic.gdx.utils.Array;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class Level<T extends TileType> implements Taggable<Level<T>> {
+public abstract class Level implements Taggable<Level> {
 	
 	public static final int X_LOAD_RADIUS = 4, Y_LOAD_RADIUS = 2;
 	
@@ -132,10 +130,10 @@ public abstract class Level<T extends TileType> implements Taggable<Level<T>> {
 	}
 	
 	@Nullable
-	public Tile<T> getTile(Vector2 pos) { return getTile(pos.x, pos.y); }
+	public Tile getTile(Vector2 pos) { return getTile(pos.x, pos.y); }
 	@Nullable
 	@SuppressWarnings("unchecked")
-	public Tile<T> getTile(float x, float y) {
+	public Tile getTile(float x, float y) {
 		if(x < 0 || y < 0 || x > getWidth() || y > getHeight())
 			return null;
 		
@@ -148,7 +146,7 @@ public abstract class Level<T extends TileType> implements Taggable<Level<T>> {
 		
 		Chunk chunk = getLoadedChunk(new Point(chunkX, chunkY));
 		if(chunk != null)
-			return (Tile<T>) chunk.getTile(xt, yt);
+			return (Tile) chunk.getTile(xt, yt);
 		
 		return null;
 	}
@@ -169,12 +167,12 @@ public abstract class Level<T extends TileType> implements Taggable<Level<T>> {
 		return overlappingTiles;
 	}
 	
-	public Array<Tile<T>> getOverlappingTiles(Rectangle rect) {
-		Array<Tile<T>> overlappingTiles = new Array<>();
+	public Array<Tile> getOverlappingTiles(Rectangle rect) {
+		Array<Tile> overlappingTiles = new Array<>();
 		Array<Point> points = getOverlappingTileCoords(rect);
 		
 		for(Point p: points) {
-			Tile<T> tile = getTile(p.x, p.y);
+			Tile tile = getTile(p.x, p.y);
 			if (tile != null)
 				overlappingTiles.add(tile);
 		}
@@ -216,10 +214,10 @@ public abstract class Level<T extends TileType> implements Taggable<Level<T>> {
 		return objects;
 	}
 	
-	public HashSet<Tile<T>> getAreaTiles(Point tilePos, int radius, boolean includeCenter) { return getAreaTiles(tilePos.x, tilePos.y, radius, includeCenter); }
-	public HashSet<Tile<T>> getAreaTiles(int x, int y, int radius, boolean includeCenter) {
+	public HashSet<Tile> getAreaTiles(Point tilePos, int radius, boolean includeCenter) { return getAreaTiles(tilePos.x, tilePos.y, radius, includeCenter); }
+	public HashSet<Tile> getAreaTiles(int x, int y, int radius, boolean includeCenter) {
 		
-		HashSet<Tile<T>> tiles = new HashSet<>();
+		HashSet<Tile> tiles = new HashSet<>();
 		for(int xo = Math.max(0, x-radius); xo <= Math.min(getWidth()-1, x+radius); xo++)
 			for(int yo = Math.max(0, y-radius); yo <= Math.min(getHeight()-1, y+radius); yo++)
 				tiles.add(getTile(xo, yo));
@@ -255,8 +253,8 @@ public abstract class Level<T extends TileType> implements Taggable<Level<T>> {
 	}
 	
 	@Nullable
-	public Tile<T> getClosestTile(Rectangle rect) { return getClosestTile(rect.getCenter(new Vector2())); }
-	public Tile<T> getClosestTile(Vector2 center) { return getTile(center.x, center.y); }
+	public Tile getClosestTile(Rectangle rect) { return getClosestTile(rect.getCenter(new Vector2())); }
+	public Tile getClosestTile(Vector2 center) { return getTile(center.x, center.y); }
 	
 	@Nullable
 	public Player getClosestPlayer(final Vector2 pos) {
@@ -294,15 +292,16 @@ public abstract class Level<T extends TileType> implements Taggable<Level<T>> {
 	
 	@Override
 	public boolean equals(Object other) { return other instanceof Level && ((Level)other).depth == depth; }
-	@Override public int hashCode() { return depth; }
+	@Override
+	public int hashCode() { return depth; }
 	
 	@Override
 	public String toString() { return getClass().getSimpleName()+"(depth="+depth+")"; }
 	
 	@Override
-	public LevelTag<T> getTag() { return new LevelTag<>(depth); }
+	public LevelTag getTag() { return new LevelTag(depth); }
 	
-	public static class LevelTag<T extends TileType> implements Tag<Level<T>> {
+	public static class LevelTag implements Tag<Level> {
 		
 		private final int depth;
 		
@@ -310,8 +309,8 @@ public abstract class Level<T extends TileType> implements Taggable<Level<T>> {
 		
 		@Override
 		@SuppressWarnings("unchecked")
-		public Level<T> getObject(WorldManager world) {
-			return (Level<T>) world.getLevel(depth);
+		public Level getObject(WorldManager world) {
+			return world.getLevel(depth);
 		}
 	}
 }

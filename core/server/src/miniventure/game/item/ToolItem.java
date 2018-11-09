@@ -8,9 +8,7 @@ import miniventure.game.world.entity.mob.Player;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 
-public class ToolItem extends Item {
-	
-	private static final float DURABILITY_BAR_HEIGHT = 4; // 8 pixels.
+public class ToolItem extends ServerItem {
 	
 	public enum Material {
 		Flint(50, 1, 3),
@@ -62,23 +60,14 @@ public class ToolItem extends Item {
 	@Override
 	public int getStaminaUsage() { return material.staminaUsage; }
 	
+	// the the Item class will have the wrong value, but it only references it through this method so this override will negate any effects.
+	@Override
+	public float getUsabilityStatus() { return material == null ? 0 : durability / (float) material.maxDurability; }
+	
 	@Override public boolean attack(WorldObject obj, Player player) {
 		boolean success = obj.attackedBy(player, this, material.damageMultiplier);
 		if(success) use();
 		return success;
-	}
-	
-	@Override
-	public void renderIconExtras(Batch batch, float x, float y) {
-		super.renderIconExtras(batch, x, y);
-		
-		if(durability == material.maxDurability) return; // no bar
-		
-		// draw a colored bar for the durability left
-		float durPerc = durability*1f / material.maxDurability;
-		float width = Item.ICON_SIZE * durPerc;
-		Color barColor = durPerc >= 0.5f ? Color.GREEN : durPerc >= 0.2f ? Color.YELLOW : Color.RED;
-		MyUtils.fillRect(x, y, width, DURABILITY_BAR_HEIGHT, barColor, batch);
 	}
 	
 	@Override

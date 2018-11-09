@@ -15,11 +15,7 @@ import miniventure.game.chat.InfoMessageLine;
 import miniventure.game.chat.MessageBuilder;
 import miniventure.game.chat.command.Command;
 import miniventure.game.chat.command.CommandInputParser;
-import miniventure.game.item.Hands;
-import miniventure.game.item.Item;
-import miniventure.game.item.ItemStack;
-import miniventure.game.item.Recipe;
-import miniventure.game.item.Recipes;
+import miniventure.game.item.*;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.Chunk.ChunkData;
@@ -58,6 +54,9 @@ public class GameServer implements GameProtocol {
 		final InfoMessageBuilder toClientOut, toClientErr;
 		boolean op;
 		final Timer validationTimer;
+		
+		/** @see GameProtocol.InventoryRequest */
+		private boolean inventoryMode = false; // send hotbar updates at first
 		
 		PlayerData(Connection connection, @NotNull ServerPlayer player) {
 			this.connection = connection;
@@ -132,7 +131,7 @@ public class GameServer implements GameProtocol {
 							connection.sendTCP(new ChunkData(chunk, level));
 							entityRect = entityRect == null ? chunk.getBounds() : entityRect.merge(chunk.getBounds());
 						}
-						connection.sendTCP(new SpawnData(new EntityAddition(player), player));
+						connection.sendTCP(new SpawnData(new EntityAddition(player), player.getHotbarUpdate(), player.saveStats()));
 						for(Entity e: level.getOverlappingEntities(entityRect, player))
 							connection.sendTCP(new EntityAddition(e));
 						
@@ -204,53 +203,68 @@ public class GameServer implements GameProtocol {
 						connection.sendTCP(new PositionUpdate(client)); // fix the player's position
 					
 					client.setDirection(r.dir);
-					client.getHands().setSelection(r.hotbarIndex);
-					if(r.attack) client.attack();
-					else client.interact();
+					client.getHands().useItem(r.hotbarIndex, r.attack);
 				}
 				
 				forPacket(object, ItemDropRequest.class, drop -> {
-					ItemStack stack = ItemStack.load(drop.stackData);
-					int removed = 0;
-					while(removed < stack.count && client.getInventory().removeItem(stack.item))
-						removed++;
-					if(client.getHands().validate())
-						connection.sendTCP(new InventoryUpdate(null, client.getHands()));
+					ServerHands hands = client.getHands();
+					Inventory inv = client.getInventory();
+					ServerItem item;
+					
+					if(clientData.inventoryMode)
+						// dropped from the inventory screen
+						item = inv.getItem(drop.index);
+					else
+						// dropped from the hotbar
+						item = hands.getItem(drop.index);
+					
+					ServerItemStack drops;
+					if(drop.all)
+						drops = new ServerItemStack(item, client.getInventory().removeItemStack(item));
+					else
+						drops = new ServerItemStack(item, client.getInventory().removeItem(item) ? 1 : 0);
+					
+					if(!clientData.inventoryMode) {
+						hands.validate();
+						connection.sendTCP(client.getHotbarUpdate());
+					}
+					// inventory screen mode: don't send back item removals, the client should manage by itself. Only send back additions.
+					
 					ServerLevel level = client.getLevel();
 					if(level == null) return;
 					// get target pos, which is one tile in front of player.
 					Vector2 targetPos = client.getCenter();
 					targetPos.add(client.getDirection().getVector().scl(2)); // adds 2 in the direction of the player.
-					for(int i = 0; i < removed; i++)
-						level.dropItem(stack.item.copy(), true, client.getCenter(), targetPos);
+					for(int i = 0; i < drops.count; i++)
+						level.dropItem(drops.item.copy(), true, client.getCenter(), targetPos);
 				});
 				
-				forPacket(object, InventoryUpdate.class, update -> {
-					// update the server hotbar with the one sent by the client. then, validate the hotbar.
-					
-					Hands hotbar = client.getHands();
-					hotbar.loadItemShortcuts(update.hotbar);
-					boolean updated = hotbar.validate();
-					
-					connection.sendTCP(new InventoryUpdate(client.getInventory(), updated ? hotbar : null));
+				forPacket(object, InventoryRequest.class, req -> {
+					clientData.inventoryMode = req.hotbar == null;
+					if(req.hotbar != null) {
+						client.getHands().fromInventoryIndex(req.hotbar);
+						connection.sendTCP(client.getHotbarUpdate());
+					}
+					else
+						connection.sendTCP(client.getInventoryUpdate());
 				});
 				
 				forPacket(object, CraftRequest.class, req -> {
 					Recipe recipe = Recipes.recipes[req.recipeIndex];
-					Item[] left = recipe.tryCraft(client.getInventory());
+					ServerItem[] left = recipe.tryCraft(client.getInventory());
 					if(left != null) {
 						ServerLevel level = client.getLevel();
 						if(level != null)
-							for(Item item : left)
+							for(ServerItem item : left)
 								level.dropItem(item, client.getPosition(), null);
 					}
-					connection.sendTCP(new InventoryUpdate(client));
+					connection.sendTCP(client.getHotbarUpdate());
 				});
 				
 				if(object.equals(DatalessRequest.Respawn)) {
 					//ServerPlayer client = connectionToPlayerDataMap.get(connection).player;
 					world.respawnPlayer(client);
-					connection.sendTCP(new SpawnData(new EntityAddition(client), client));
+					connection.sendTCP(new SpawnData(new EntityAddition(client), client.getHotbarUpdate(), client.saveStats()));
 				}
 				
 				if(object.equals(DatalessRequest.Tile)) {
@@ -382,6 +396,11 @@ public class GameServer implements GameProtocol {
 				return player;
 		
 		return null;
+	}
+	
+	public boolean isInventoryMode(@NotNull ServerPlayer player) {
+		PlayerData data = connectionToPlayerDataMap.get(playerToConnectionMap.get(player));
+		return data != null && data.inventoryMode;
 	}
 	
 	public boolean isAdmin(@Nullable ServerPlayer player) {

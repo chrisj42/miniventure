@@ -1,7 +1,8 @@
 package miniventure.game.world.tile;
 
-import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 import miniventure.game.world.WorldManager;
 
@@ -14,43 +15,34 @@ public class TileStack<T extends TileType> {
 	
 	// For now, TileStacks cannot have multiple of the same TileType... has this been enforced?
 	
-	private final Class<T> typeClass;
 	// bottom tile is first, top tile is last.
 	private LinkedList<T> stack = new LinkedList<>();
 	
 	@SuppressWarnings("unchecked")
-	TileStack(Class<T> typeClass, @NotNull WorldManager world) {
-		this.typeClass = typeClass;
+	TileStack(@NotNull WorldManager world) {
 		addLayer((T) baseType.getTypeInstance(world));
 	}
-	TileStack(Class<T> typeClass, T[] types) {
-		this.typeClass = typeClass;
+	TileStack(T[] types) {
 		for(T type: types)
 			addLayer(type);
 	}
 	@SuppressWarnings("unchecked")
-	TileStack(Class<T> typeClass, @NotNull WorldManager world, TileTypeEnum[] enumTypes) {
-		this.typeClass = typeClass;
+	TileStack(@NotNull WorldManager world, TileTypeEnum[] enumTypes) {
 		for(TileTypeEnum type: enumTypes)
 			addLayer((T) type.getTypeInstance(world));
-	}
-	
-	@SuppressWarnings("unchecked")
-	private T[] emptyTypeArray() {
-		return (T[]) Array.newInstance(typeClass, 0);
 	}
 	
 	public int size() { return stack.size(); }
 	
 	public T getTopLayer() { return stack.peekLast(); }
 	
-	public T[] getTypes() { return stack.toArray(emptyTypeArray()); }
+	public List<T> getTypes() { return new ArrayList<>(stack); }
 	
 	public TileTypeEnum[] getEnumTypes() {
-		T[] tileTypes = getTypes();
-		TileTypeEnum[] types = new TileTypeEnum[tileTypes.length];
+		List<T> tileTypes = getTypes();
+		TileTypeEnum[] types = new TileTypeEnum[tileTypes.size()];
 		for(int i = 0; i < types.length; i++)
-			types[i] = tileTypes[i].getTypeEnum();
+			types[i] = tileTypes.get(i).getTypeEnum();
 		return types;
 	}
 	

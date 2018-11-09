@@ -5,6 +5,7 @@ import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.RelPos;
@@ -84,10 +85,10 @@ public class OverlapManager {
 	private static EnumMap<TileTypeEnum, EnumSet<RelPos>> mapTileTypesAround(@NotNull ClientTile tile, boolean excludeCovered) {
 		EnumMap<TileTypeEnum, EnumSet<RelPos>> typeMap = new EnumMap<>(TileTypeEnum.class);
 		
-		HashSet<Tile<ClientTileType>> aroundTiles = tile.getAdjacentTiles(true);
+		HashSet<Tile> aroundTiles = tile.getAdjacentTiles(true);
 		
-		for(Tile<ClientTileType> aroundTile: aroundTiles) {
-			ClientTileType[] types = ((ClientTileStack)aroundTile.getTypeStack()).getTypes(!excludeCovered);
+		for(Tile aroundTile: aroundTiles) {
+			List<ClientTileType> types = ((ClientTileStack)aroundTile.getTypeStack()).getTypes(!excludeCovered);
 			
 			Point thisPos = tile.getLocation();
 			Point otherPos = aroundTile.getLocation();
