@@ -3,7 +3,6 @@ package miniventure.game.item;
 import java.util.Arrays;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class ItemStack {
 	
@@ -31,6 +30,19 @@ public class ItemStack {
 		int count = Integer.parseInt(data[0]);
 		Item item = Item.deserialize(Arrays.copyOfRange(data, 1, data.length));
 		return new ItemStack(item, count);
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if(this == o) return true;
+		if(!(o instanceof ItemStack)) return false;
+		ItemStack itemStack = (ItemStack) o;
+		return count == itemStack.count && item.equals(itemStack.item);
+	}
+	
+	@Override
+	public int hashCode() {
+		return count * 51 + item.hashCode() * 31;
 	}
 	
 	@Override

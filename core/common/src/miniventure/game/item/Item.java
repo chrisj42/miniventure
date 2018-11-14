@@ -42,7 +42,7 @@ public class Item {
 		if(other == null) return false;
 		if(!getClass().equals(other.getClass())) return false;
 		Item o = (Item) other;
-		return name.equals(o.name);
+		return name.equals(o.name) && usability == o.usability;
 	}
 	
 	@Override

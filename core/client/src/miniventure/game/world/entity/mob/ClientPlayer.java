@@ -196,10 +196,9 @@ public class ClientPlayer extends ClientEntity implements Player {
 				hands.setSelection(i);
 		
 		if(!ClientCore.hasMenu()) {
-			/*if(ClientCore.input.pressingKey(Keys.E)) {
-				// do nothing here; instead, tell the server to set the held item once selected (aka on inventory menu exit). The inventory should be up to date already, generally speaking.
+			if(ClientCore.input.pressingKey(Keys.E)) {
 				ClientCore.setScreen(new InventoryScreen(hands));
-			} else *//*if(ClientCore.input.pressingKey(Keys.Z))
+			} else /*if(ClientCore.input.pressingKey(Keys.Z))
 				ClientCore.setScreen(new CraftingScreen(Recipes.recipes, inventory));
 			else */if(ClientCore.input.pressingKey(Keys.Q)) {
 				hands.dropInvItems(Gdx.input.isKeyPressed(Keys.SHIFT_LEFT));

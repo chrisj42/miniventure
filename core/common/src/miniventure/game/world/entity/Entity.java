@@ -252,7 +252,7 @@ public abstract class Entity implements WorldObject {
 	@Override
 	public boolean isPermeable() { return false; }
 	
-	public boolean canPermeate(Tile tile) { return isPermeable() || tile.isPermeable(); }
+	public boolean canPermeate(Tile tile) { return isFloating() || tile.isPermeable(); }
 	
 	@Override
 	public boolean attackedBy(WorldObject obj, @Nullable Item attackItem, int damage) { return false; }

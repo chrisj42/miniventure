@@ -9,6 +9,7 @@ import java.util.HashMap;
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol;
 import miniventure.game.chat.InfoMessage;
+import miniventure.game.item.InventoryScreen;
 import miniventure.game.screen.ChatScreen;
 import miniventure.game.screen.ErrorScreen;
 import miniventure.game.screen.MainMenu;
@@ -23,11 +24,11 @@ import miniventure.game.world.Level;
 import miniventure.game.world.Point;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClientEntity;
-import miniventure.game.world.entity.particle.ClientParticle;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.EntityRenderer;
 import miniventure.game.world.entity.EntityRenderer.DirectionalAnimationRenderer;
 import miniventure.game.world.entity.mob.ClientPlayer;
+import miniventure.game.world.entity.particle.ClientParticle;
 import miniventure.game.world.tile.ClientTile;
 
 import com.badlogic.gdx.Gdx;
@@ -225,21 +226,23 @@ public class GameClient implements GameProtocol {
 				});
 				
 				forPacket(object, HotbarUpdate.class, update -> {
-					if(player == null) return;
-					// TODO don't execute this on inventory screen
+					if(player == null || ClientCore.getScreen() instanceof InventoryScreen)
+						return;
+					
 					player.getHands().updateItems(update.itemStacks, update.fillPercent);
 				});
 				
-				/*forPacket(object, InventoryUpdate.class, newInv -> {
-					if(!(ClientCore.getScreen() instanceof InventoryScreen))
-						return;
-					// TODO call inventory screen to handle this
-					// if(newInv.hotbar != null)
-					// 	player.getHands().loadItemShortcuts(newInv.hotbar);
-					// if it's null, then that means the hotbar was valid.
-				});*/
+				forPacket(object, InventoryUpdate.class, newInv -> {
+					MenuScreen screen = ClientCore.getScreen();
+					if(screen instanceof InventoryScreen)
+						((InventoryScreen)screen).inventoryUpdate(newInv);
+				});
 				
-				// TODO handle InventoryAddition packets by calling the inventory screen
+				forPacket(object, InventoryAddition.class, addition -> {
+					MenuScreen screen = ClientCore.getScreen();
+					if(screen instanceof InventoryScreen)
+						((InventoryScreen)screen).itemAdded(addition);
+				});
 				
 				forPacket(object, PositionUpdate.class, newPos -> {
 					if(player == null || newPos.levelDepth == null) return;

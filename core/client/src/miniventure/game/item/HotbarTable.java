@@ -1,7 +1,5 @@
 package miniventure.game.item;
 
-import java.util.Objects;
-
 import miniventure.game.client.ClientCore;
 import miniventure.game.screen.util.ColorBackground;
 import miniventure.game.world.entity.mob.ClientPlayer;
@@ -23,11 +21,11 @@ public class HotbarTable extends Table {
 		
 		slots = new ItemSlot[Player.HOTBAR_SIZE];
 		for(int i = 0; i < slots.length; i++) {
-			slots[i] = new ItemSlot(false, null, InventoryDisplayGroup.slotBackgroundColor);
+			slots[i] = new ItemSlot(false, null, InventoryScreen.slotBackground);
 			add(slots[i]);
 		}
 		row();
-		background(new ColorBackground(this, InventoryDisplayGroup.background));
+		background(new ColorBackground(this, InventoryScreen.tableBackground));
 		pack();
 	}
 	
@@ -40,22 +38,13 @@ public class HotbarTable extends Table {
 		boolean diff = false;
 		for(int i = 0; i < slots.length; i++) {
 			ItemStack itemStack = hands.getHotbarItem(i);
-			Item item = itemStack == null ? null : itemStack.item;
-			int count = itemStack == null ? 1 : itemStack.count;
-			/*if(count == 0) {
-				hands.removeItem(i);
-				item = hands.getItem(i);
-				count = 1;
-				diff = true;
-			}*/
-			if(!Objects.equals(item, slots[i].getItem())) diff = true;
-			boolean diffCount = count != slots[i].getCount();
-			slots[i].setItem(item);
-			slots[i].setCount(count);
+			slots[i].setItem(itemStack == null ? null : itemStack.item);
+			if(itemStack != null)
+				slots[i].setCount(itemStack.count);
 			slots[i].setSelected(i == selection);
-			if(diff) invalidateHierarchy();
-			else if(diffCount) invalidate();
 		}
+		
+		fillBar.setVisible(!(ClientCore.getScreen() instanceof InventoryScreen));
 		
 		super.draw(batch, parentAlpha);
 		

@@ -2,6 +2,7 @@ package miniventure.game.screen.util;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.utils.Layout;
 
 public class ColorBackground extends ColorDrawable {
 	
@@ -22,7 +23,7 @@ public class ColorBackground extends ColorDrawable {
 	
 	@Override
 	public float getLeftWidth() {
-		return actor.getWidth()/2;
+		return (actor instanceof Layout ? ((Layout)actor).getPrefWidth() : actor.getWidth())/2;
 	}
 	
 	@Override
@@ -30,7 +31,7 @@ public class ColorBackground extends ColorDrawable {
 	
 	@Override
 	public float getRightWidth() {
-		return actor.getWidth()/2;
+		return (actor instanceof Layout ? ((Layout)actor).getPrefWidth() : actor.getWidth())/2;
 	}
 	
 	@Override
@@ -38,7 +39,7 @@ public class ColorBackground extends ColorDrawable {
 	
 	@Override
 	public float getTopHeight() {
-		return actor.getHeight()/2;
+		return (actor instanceof Layout ? ((Layout)actor).getPrefHeight() : actor.getHeight())/2;
 	}
 	
 	@Override
@@ -46,7 +47,7 @@ public class ColorBackground extends ColorDrawable {
 	
 	@Override
 	public float getBottomHeight() {
-		return actor.getHeight()/2;
+		return (actor instanceof Layout ? ((Layout)actor).getPrefHeight() : actor.getHeight())/2;
 	}
 	
 	@Override
@@ -54,7 +55,7 @@ public class ColorBackground extends ColorDrawable {
 	
 	@Override
 	public float getMinWidth() {
-		return actor.getWidth();
+		return actor instanceof Layout ? ((Layout)actor).getMinWidth() : actor.getWidth();
 	}
 	
 	@Override
@@ -62,7 +63,7 @@ public class ColorBackground extends ColorDrawable {
 	
 	@Override
 	public float getMinHeight() {
-		return actor.getHeight();
+		return actor instanceof Layout ? ((Layout)actor).getMinHeight() : actor.getHeight();
 	}
 	
 	@Override

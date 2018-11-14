@@ -213,7 +213,7 @@ public class ServerHands {
 	}
 	
 	public void fromInventoryIndex(int[] indices) {
-		for(int i = 0; i < hotbarItems.length; i++)
+		for(int i = 0; i < indices.length; i++)
 			hotbarItems[i] = indices[i] < 0 ? null : getInv().getItem(indices[i]);
 	}
 	

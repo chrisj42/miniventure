@@ -9,10 +9,10 @@ import miniventure.game.util.MyUtils;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Widget;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ItemSlot extends Widget {
@@ -20,8 +20,8 @@ public class ItemSlot extends Widget {
 	private static final Color selectionColor = new Color(.8f, .8f, .8f, 0.5f);
 	
 	private static final float SPACING = 10, XPADDING = 3, YPADDING = 2;
-	public static final float HEIGHT = Item.ICON_SIZE+2+YPADDING*2;
-	private static final float USABILITY_BAR_HEIGHT = Item.ICON_SIZE/8; // 4 pixels?
+	static final float HEIGHT = Item.ICON_SIZE+2+YPADDING*2;
+	private static final float USABILITY_BAR_HEIGHT = Item.ICON_SIZE/8f; // 4 pixels?
 	
 	private final boolean showName;
 	@Nullable private Item item;
@@ -52,6 +52,7 @@ public class ItemSlot extends Widget {
 		}
 		setCount(count);
 		setItem(item);
+		setTouchable(Touchable.enabled);
 	}
 	
 	@Nullable
@@ -129,7 +130,7 @@ public class ItemSlot extends Widget {
 	}
 	
 	private void renderUsability(Batch batch, float x, float y, float usability) {
-		if(usability <= 0) return;
+		if(usability <= 0 || usability >= 1) return;
 		// draw a colored bar for the durability left
 		float width = Item.ICON_SIZE * usability;
 		Color barColor = usability >= 0.5f ? Color.GREEN : usability >= 0.2f ? Color.YELLOW : Color.RED;

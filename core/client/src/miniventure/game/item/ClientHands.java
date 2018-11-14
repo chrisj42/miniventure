@@ -2,10 +2,9 @@ package miniventure.game.item;
 
 import miniventure.game.GameProtocol.ItemDropRequest;
 import miniventure.game.client.ClientCore;
-import miniventure.game.util.MyUtils;
 import miniventure.game.world.entity.mob.Player;
 
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class ClientHands {
 	
@@ -39,4 +38,10 @@ public class ClientHands {
 		for(int i = 0; i < hotbar.length; i++)
 			hotbar[i] = data[i] == null ? null : ItemStack.deserialize(data[i]);
 	}
+	
+	void updateItem(int index, @Nullable ItemStack stack) {
+		hotbar[index] = stack;
+	}
+	
+	void setFillPercent(float fillPercent) { this.fillPercent = fillPercent; }
 }

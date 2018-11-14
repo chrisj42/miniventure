@@ -10,8 +10,6 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.HashMap;
 
 import miniventure.game.GameCore;
-import miniventure.game.GameProtocol.InventoryRequest;
-import miniventure.game.GameProtocol.InventoryUpdate;
 import miniventure.game.GameProtocol.Message;
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.item.InventoryScreen;
@@ -48,6 +46,8 @@ public class ClientCore extends ApplicationAdapter {
 	
 	private static boolean hasMenu = false;
 	private static MenuScreen menuScreen;
+	
+	private static final Object screenLock = new Object();
 	
 	private final ServerManager serverStarter;
 	
@@ -112,69 +112,71 @@ public class ClientCore extends ApplicationAdapter {
 		if (clientWorld != null && clientWorld.worldLoaded())
 			clientWorld.update(GameCore.getDeltaTime()); // renders as well
 		
-		hasMenu = menuScreen != null;
-		
-		if (menuScreen != null)
-			menuScreen.act();
-		if (menuScreen != null)
-			menuScreen.draw();
+		synchronized (screenLock) {
+			hasMenu = menuScreen != null;
+			
+			if(menuScreen != null)
+				menuScreen.act();
+			if(menuScreen != null)
+				menuScreen.draw();
+		}
 	}
 	
 	public static void setScreen(@Nullable MenuScreen screen) {
-		if(menuScreen instanceof InventoryScreen) {
-			//System.out.println("sending held item request to server for "+clientWorld.getMainPlayer().getHands().getUsableItem());
-			// TODO send inventory request with the changes; will have to do it in InventoryScreen because it requires referencing inventory indices.
-			// getClient().send(new InventoryRequest(clientWorld.getMainPlayer().getHands()));
-		}
-		
-		if(menuScreen != null && screen != null && screen == menuScreen.getParent()) {
-			backToParentScreen();
-			return;
-		}
-		
-		if(menuScreen instanceof MainMenu && screen instanceof ErrorScreen)
-			return; // ignore it.
-		
-		if(menuScreen instanceof BackgroundProvider && screen instanceof BackgroundInheritor)
-			((BackgroundInheritor)screen).setBackground((BackgroundProvider)menuScreen);
-		
-		if(screen != null) {
-			// error and loading (and chat) screens can have parents, but cannot be parents.
-			screen.setParent(menuScreen);
-			screen.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		}
-		else if(menuScreen != null && (gameScreen == null || menuScreen != gameScreen.chatScreen))
-			menuScreen.dispose();
-		
-		System.out.println("setting screen to " + screen);
-		
-		if(gameScreen != null) {
-			if(screen instanceof MainMenu) {
-				gameScreen.chatScreen.reset();
-				gameScreen.chatOverlay.reset();
+		synchronized (screenLock) {
+			if(menuScreen instanceof InventoryScreen) {
+				((InventoryScreen) menuScreen).close();
 			}
+			
+			if(menuScreen != null && screen != null && screen == menuScreen.getParent()) {
+				backToParentScreen();
+				return;
+			}
+			
+			if(menuScreen instanceof MainMenu && screen instanceof ErrorScreen)
+				return; // ignore it.
+			
+			if(menuScreen instanceof BackgroundProvider && screen instanceof BackgroundInheritor)
+				((BackgroundInheritor) screen).setBackground((BackgroundProvider) menuScreen);
+			
+			if(screen != null) {
+				// error and loading (and chat) screens can have parents, but cannot be parents.
+				screen.setParent(menuScreen);
+				screen.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+			} else if(menuScreen != null && (gameScreen == null || menuScreen != gameScreen.chatScreen))
+				menuScreen.dispose();
+			
+			System.out.println("setting screen to " + screen);
+			
+			if(gameScreen != null) {
+				if(screen instanceof MainMenu) {
+					gameScreen.chatScreen.reset();
+					gameScreen.chatOverlay.reset();
+				}
+			}
+			
+			menuScreen = screen;
+			if(menuScreen != null) menuScreen.focus();
+			if(gameScreen == null) {
+				Gdx.input.setInputProcessor(menuScreen == null ? input : menuScreen);
+			} else {
+				Gdx.input.setInputProcessor(menuScreen == null ? new InputMultiplexer(gameScreen.getGuiStage(), input) : new InputMultiplexer(menuScreen, gameScreen.getGuiStage()));
+			}
+			input.reset();
 		}
-		
-		menuScreen = screen;
-		if(menuScreen != null) menuScreen.focus();
-		if(gameScreen == null) {
-			Gdx.input.setInputProcessor(menuScreen == null ? input : menuScreen);
-		}
-		else {
-			Gdx.input.setInputProcessor(menuScreen == null ? new InputMultiplexer(gameScreen.getGuiStage(), input) : new InputMultiplexer(menuScreen, gameScreen.getGuiStage()));
-		}
-		input.reset();
 	}
 	public static void backToParentScreen() {
-		if(menuScreen != null && menuScreen.getParent() != null) {
-			MenuScreen screen = menuScreen.getParent();
-			System.out.println("setting screen back to " + screen);
-			if(gameScreen == null || menuScreen != gameScreen.chatScreen)
-				menuScreen.dispose(false);
-			screen.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-			menuScreen = screen;
-			Gdx.input.setInputProcessor(menuScreen);
-			input.reset();
+		synchronized (screenLock) {
+			if(menuScreen != null && menuScreen.getParent() != null) {
+				MenuScreen screen = menuScreen.getParent();
+				System.out.println("setting screen back to " + screen);
+				if(gameScreen == null || menuScreen != gameScreen.chatScreen)
+					menuScreen.dispose(false);
+				screen.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+				menuScreen = screen;
+				Gdx.input.setInputProcessor(menuScreen);
+				input.reset();
+			}
 		}
 	}
 	
@@ -221,10 +223,10 @@ public class ClientCore extends ApplicationAdapter {
 	}
 	
 	
-	public static boolean hasMenu() { return hasMenu; }
+	public static boolean hasMenu() { synchronized (screenLock) { return hasMenu; } }
 	
 	@Nullable
-	public static MenuScreen getScreen() { return menuScreen; }
+	public static MenuScreen getScreen() { synchronized (screenLock) { return menuScreen; } }
 	
 	public static ClientWorld getWorld() { return clientWorld; }
 	public static GameClient getClient() { return clientWorld.getClient(); }
