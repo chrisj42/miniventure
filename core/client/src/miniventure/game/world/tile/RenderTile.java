@@ -3,6 +3,7 @@ package miniventure.game.world.tile;
 import java.util.*;
 
 import miniventure.game.item.Item;
+import miniventure.game.item.Result;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.RelPos;
@@ -10,7 +11,7 @@ import miniventure.game.util.customenum.SerialMap;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
-import miniventure.game.world.entity.mob.Player;
+import miniventure.game.world.entity.mob.player.Player;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
@@ -71,8 +72,8 @@ public class RenderTile extends Tile {
 	}
 	
 	@Override public boolean isPermeable() { return getType().isWalkable(); }
-	@Override public boolean interactWith(Player player, @Nullable Item heldItem) { return false; }
-	@Override public boolean attackedBy(WorldObject obj, @Nullable Item item, int dmg) { return false; }
+	@Override public Result interactWith(Player player, @Nullable Item heldItem) { return Result.NONE; }
+	@Override public Result attackedBy(WorldObject obj, @Nullable Item item, int dmg) { return Result.NONE; }
 	@Override public boolean touchedBy(Entity entity) { return false; }
 	@Override public void touching(Entity entity) {}
 	

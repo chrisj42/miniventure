@@ -1,4 +1,4 @@
-package miniventure.game.world.entity.mob;
+package miniventure.game.world.entity.mob.player;
 
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -19,6 +19,8 @@ import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClientEntity;
 import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.KnockbackController;
+import miniventure.game.world.entity.mob.Mob;
+import miniventure.game.world.entity.mob.MobAnimationController;
 import miniventure.game.world.entity.mob.MobAnimationController.AnimationState;
 import miniventure.game.world.tile.ClientTile;
 

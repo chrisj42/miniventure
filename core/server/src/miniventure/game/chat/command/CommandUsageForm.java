@@ -3,7 +3,7 @@ package miniventure.game.chat.command;
 import miniventure.game.chat.MessageBuilder;
 import miniventure.game.server.ServerCore;
 import miniventure.game.util.function.MapFunction;
-import miniventure.game.world.entity.mob.ServerPlayer;
+import miniventure.game.world.entity.mob.player.ServerPlayer;
 
 public class CommandUsageForm {
 	

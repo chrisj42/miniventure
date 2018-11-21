@@ -2,8 +2,8 @@ package miniventure.game.item;
 
 import miniventure.game.client.ClientCore;
 import miniventure.game.screen.util.ColorBackground;
-import miniventure.game.world.entity.mob.ClientPlayer;
-import miniventure.game.world.entity.mob.Player;
+import miniventure.game.world.entity.mob.player.ClientPlayer;
+import miniventure.game.world.entity.mob.player.Player;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;

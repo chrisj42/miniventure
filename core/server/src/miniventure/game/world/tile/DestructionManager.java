@@ -1,6 +1,6 @@
 package miniventure.game.world.tile;
 
-import miniventure.game.item.ServerItem;
+import miniventure.game.item.Result;
 import miniventure.game.item.ServerItem;
 import miniventure.game.item.TileItem;
 import miniventure.game.item.ToolItem;
@@ -142,7 +142,7 @@ public class DestructionManager {
 		}
 	}
 	
-	boolean tileAttacked(@NotNull ServerTile tile, @NotNull WorldObject attacker, @Nullable ServerItem item, int damage) {
+	Result tileAttacked(@NotNull ServerTile tile, @NotNull WorldObject attacker, @Nullable ServerItem item, int damage) {
 		damage = getDamage(item, damage);
 		
 		if(damage > 0) {
@@ -168,10 +168,10 @@ public class DestructionManager {
 				ServerCore.getServer().playTileSound("hit", tile, tileType);
 			}
 			
-			return true;
+			return item instanceof ToolItem ? Result.USED : Result.INTERACT;
 		}
 		
-		return false;
+		return Result.NONE;
 	}
 	
 	private int getDamage(@Nullable ServerItem attackItem, int damage) {

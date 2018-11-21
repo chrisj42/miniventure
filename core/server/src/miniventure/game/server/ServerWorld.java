@@ -21,7 +21,7 @@ import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ServerEntity;
-import miniventure.game.world.entity.mob.ServerPlayer;
+import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.levelgen.LevelGenerator;
 import miniventure.game.world.tile.ServerTileType;
 import miniventure.game.world.tile.TileType;

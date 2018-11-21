@@ -7,13 +7,10 @@ import miniventure.game.GameCore;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.WorldObject;
-import miniventure.game.world.entity.mob.Player;
+import miniventure.game.world.entity.mob.player.Player;
 import miniventure.game.world.tile.ServerTile;
 import miniventure.game.world.tile.ServerTileType;
-import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileTypeEnum;
-
-import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -69,8 +66,8 @@ public class TileItem extends ServerItem {
 	}
 	
 	@Override
-	public boolean interact(WorldObject obj, Player player) {
-		if(!isUsed() && obj instanceof ServerTile) {
+	public Result interact(WorldObject obj, Player player) {
+		if(obj instanceof ServerTile) {
 			ServerTile tile = (ServerTile) obj;
 			boolean canPlace = canPlaceOn == null;
 			if(!canPlace) {
@@ -83,8 +80,7 @@ public class TileItem extends ServerItem {
 			}
 			
 			if(canPlace && tile.addTile(ServerTileType.get(result))) {
-				use();
-				return true;
+				return Result.USED;
 			}
 		}
 		

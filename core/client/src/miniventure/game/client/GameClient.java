@@ -27,7 +27,7 @@ import miniventure.game.world.entity.ClientEntity;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.EntityRenderer;
 import miniventure.game.world.entity.EntityRenderer.DirectionalAnimationRenderer;
-import miniventure.game.world.entity.mob.ClientPlayer;
+import miniventure.game.world.entity.mob.player.ClientPlayer;
 import miniventure.game.world.entity.particle.ClientParticle;
 import miniventure.game.world.tile.ClientTile;
 

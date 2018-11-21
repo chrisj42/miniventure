@@ -1,21 +1,23 @@
-package miniventure.game.item;
+package miniventure.game.world.entity.mob.player;
 
 import java.util.Arrays;
 
 import miniventure.game.GameCore;
+import miniventure.game.item.Inventory;
+import miniventure.game.item.ItemStack;
+import miniventure.game.item.ItemType;
+import miniventure.game.item.Result;
+import miniventure.game.item.ServerItem;
 import miniventure.game.server.ServerCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.ServerLevel;
-import miniventure.game.world.entity.mob.Player;
-import miniventure.game.world.entity.mob.Player.Stat;
-import miniventure.game.world.entity.mob.ServerPlayer;
+import miniventure.game.world.WorldObject;
+import miniventure.game.world.entity.mob.player.Player.Stat;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ServerHands {
-	
-	private static final HandItem hand = HandItem.hand;
 	
 	// holds the items in the player's hotbar.
 	
@@ -38,35 +40,29 @@ public class ServerHands {
 	private ServerPlayer player;
 	private final ServerItem[] hotbarItems;
 	
-	public ServerHands(ServerPlayer player) {
+	ServerHands(ServerPlayer player) {
 		this.player = player;
 		hotbarItems = new ServerItem[Player.HOTBAR_SIZE];
-		reset();
 	}
 	
-	public void reset() { Arrays.fill(hotbarItems, null); }
+	ServerHands(ServerPlayer player, String[] itemData) {
+		this(player);
+		
+		for(int i = 0; i < hotbarItems.length; i++)
+			hotbarItems[i] = ServerItem.load(MyUtils.parseLayeredString(itemData[i]));
+	}
+	
+	void reset() { Arrays.fill(hotbarItems, null); }
 	
 	private Inventory getInv() { return player.getInventory(); }
 	
-	// use the item at the given hotbar index
-	public void useItem(int index, boolean attack) {
-		ServerCore.postRunnable(() -> {
-			ServerItem item = getItem(index);
-			
-			if(attack) player.attack(item);
-			else player.interact(item);
-			
-			resetItemUsage(item, index);
-		});
-	} 
-	
 	// note, the server hotbar does not track item count, only item reference.
 	// when sending to the client, it fetches the counts from the inventory. 
-	void setSlot(int idx, @Nullable ServerItem item) {
+	private void setSlot(int idx, @Nullable ServerItem item) {
 		hotbarItems[idx] = item;
 	}
 	
-	public boolean addItem(@NotNull ServerItem item) { return addItem(item, 0); }
+	boolean addItem(@NotNull ServerItem item) { return addItem(item, 0); }
 	private boolean addItem(@NotNull ServerItem item, int fromIndex) {
 		// if(item instanceof HandItem)
 		// 	return false; // just kinda ignore these
@@ -90,12 +86,12 @@ public class ServerHands {
 	}
 	
 	@Nullable
-	ServerItem removeItem(int idx) {
+	private ServerItem removeItem(int idx) {
 		ServerItem prevItem = hotbarItems[idx];
 		hotbarItems[idx] = null;
 		return prevItem;
 	}
-	public boolean removeItem(@NotNull ServerItem item) {
+	private boolean removeItem(@NotNull ServerItem item) {
 		int idx = findItem(item);
 		if(idx < 0) return false;
 		removeItem(idx);
@@ -110,12 +106,15 @@ public class ServerHands {
 		return -1;
 	}
 	
-	private void resetItemUsage(@NotNull ServerItem item, int index) {
-		if(!item.isUsed())
-			return;
-		
-		//System.out.println("used item "+item);
-		ServerItem newItem = item.resetUsage();
+	@NotNull
+	ServerItem getHeldItem(int index) {
+		ServerItem item = getItem(index);
+		if(item == null) item = HandItem.hand;
+		return item;
+	}
+	
+	void resetItemUsage(@NotNull ServerItem item, int index) {
+		ServerItem newItem = item.getUsedItem();
 		
 		if(!GameCore.debug)
 			player.changeStat(Stat.Stamina, -item.getStaminaUsage());
@@ -150,9 +149,6 @@ public class ServerHands {
 					hotbarItems[index] = newItem;
 				else {
 					// original item still exists; decide if new item should replace it or not
-					// idea is, items checked for equality excluding metadata like durability.
-					// if the metadata is the only change, then the new item replaces the current stack.
-					// otherwise, the new item is added separately.
 					if(newItem.getName().equals(item.getName())) {
 						// metadata changed, same item, replace stack
 						setSlot(index, newItem);
@@ -172,14 +168,14 @@ public class ServerHands {
 		ServerCore.getServer().sendToPlayer(player, player.getHotbarUpdate());
 	}
 	
-	@NotNull
-	public ServerItem getItem(int idx) { return hotbarItems[idx] == null ? hand : hotbarItems[idx]; }
+	@Nullable
+	public ServerItem getItem(int idx) { return hotbarItems[idx]; }
 	
 	// check each slot and remove any that points to an item not in the inventory. Return true if an update occurs.
 	public boolean validate() {
 		boolean updated = false;
 		for(int i = 0; i < hotbarItems.length; i++) {
-			if(!player.getInventory().hasItem(hotbarItems[i])) {
+			if(!getInv().hasItem(hotbarItems[i])) {
 				hotbarItems[i] = null;
 				updated = true;
 			}
@@ -205,13 +201,6 @@ public class ServerHands {
 		return data;
 	}
 	
-	public void loadItemShortcuts(String[] data) {
-		for(int i = 0; i < hotbarItems.length; i++)
-			hotbarItems[i] = ServerItem.load(MyUtils.parseLayeredString(data[i]));
-		
-		validate(); // it is intended that this method is run after loading the inventory.
-	}
-	
 	public void fromInventoryIndex(int[] indices) {
 		for(int i = 0; i < indices.length; i++)
 			hotbarItems[i] = indices[i] < 0 ? null : getInv().getItem(indices[i]);
@@ -222,5 +211,44 @@ public class ServerHands {
 		for(int i = 0; i < indices.length; i++)
 			indices[i] = getInv().getIndex(hotbarItems[i]);
 		return indices;
+	}
+	
+	private static final class HandItem extends ServerItem {
+		
+		// this is to be used only for the purposes of interaction; the inventory should not have them, and the hotbar ought to be filled with nulls for empty spaces.
+		
+		static final HandItem hand = new HandItem();
+		
+		private HandItem() {
+			super(ItemType.Misc, "Hand", GameCore.icons.get("blank"));
+		}
+		
+		@Override
+		public int getSpaceUsage() { return 0; }
+		
+		@Override
+		public String[] save() {
+			throw new IllegalMethodReferenceException("save"); // hand items cannot be saved 
+		}
+		
+		public static ServerItem load(String[] data) {
+			throw new IllegalMethodReferenceException("load"); // hand items cannot be loaded
+		}
+		
+		@Override public ServerItem getUsedItem() { return this; }
+		@Override public ServerItem copy() { return this; }
+		
+		@Override public Result interact(WorldObject obj, Player player) {
+			return obj.interactWith(player, null);
+		}
+		@Override public Result attack(WorldObject obj, Player player) {
+			return obj.attackedBy(player, null, 1);
+		}
+		
+		private static class IllegalMethodReferenceException extends RuntimeException {
+			IllegalMethodReferenceException(String method) {
+				super("Method '"+method+"' cannot be called on objects of type HandItem.");
+			}
+		}
 	}
 }

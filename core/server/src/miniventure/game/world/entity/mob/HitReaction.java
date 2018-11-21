@@ -4,6 +4,7 @@ import miniventure.game.item.ServerItem;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.PursuePattern.FleePattern;
+import miniventure.game.world.entity.mob.player.Player;
 
 @FunctionalInterface
 public interface HitReaction {

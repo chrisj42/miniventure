@@ -3,12 +3,13 @@ package miniventure.game.world.tile;
 import java.util.HashSet;
 
 import miniventure.game.item.Item;
+import miniventure.game.item.Result;
 import miniventure.game.item.ServerItem;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
-import miniventure.game.world.entity.mob.Player;
+import miniventure.game.world.entity.mob.player.Player;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
@@ -176,16 +177,16 @@ public class ServerTile extends Tile {
 	}
 	
 	@Override
-	public boolean attackedBy(WorldObject obj, @Nullable Item item, int damage) {
+	public Result attackedBy(WorldObject obj, @Nullable Item item, int damage) {
 		if(getType().transitionManager.playingExitAnimation(this))
-			return false;
+			return Result.NONE;
 		return getType().attacked(this, obj, (ServerItem) item, damage);
 	}
 	
 	@Override
-	public boolean interactWith(Player player, @Nullable Item heldItem) {
+	public Result interactWith(Player player, @Nullable Item heldItem) {
 		if(getType().transitionManager.playingExitAnimation(this))
-			return false;
+			return Result.NONE;
 		return getType().interact(this, player, (ServerItem) heldItem);
 	}
 	

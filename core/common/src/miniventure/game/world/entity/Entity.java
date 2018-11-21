@@ -1,12 +1,13 @@
 package miniventure.game.world.entity;
 
 import miniventure.game.item.Item;
+import miniventure.game.item.Result;
 import miniventure.game.util.blinker.Blinker;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.EntityRenderer.BlinkRenderer;
-import miniventure.game.world.entity.mob.Player;
+import miniventure.game.world.entity.mob.player.Player;
 import miniventure.game.world.entity.particle.ParticleData;
 import miniventure.game.world.tile.Tile;
 
@@ -102,7 +103,7 @@ public abstract class Entity implements WorldObject {
 	}
 	
 	@Override
-	public boolean interactWith(Player player, @Nullable Item item) { return false; }
+	public Result interactWith(Player player, @Nullable Item item) { return Result.NONE; }
 	
 	public boolean move(Vector2 v) { return move(v.x, v.y); }
 	public boolean move(Vector3 v) { return move(v.x, v.y, v.z); }
@@ -255,7 +256,7 @@ public abstract class Entity implements WorldObject {
 	public boolean canPermeate(Tile tile) { return isFloating() || tile.isPermeable(); }
 	
 	@Override
-	public boolean attackedBy(WorldObject obj, @Nullable Item attackItem, int damage) { return false; }
+	public Result attackedBy(WorldObject obj, @Nullable Item attackItem, int damage) { return Result.NONE; }
 	
 	@Override
 	public boolean equals(Object other) { return other instanceof Entity && ((Entity)other).eid == eid; }

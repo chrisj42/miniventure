@@ -1,16 +1,17 @@
-package miniventure.game.world.entity.mob;
+package miniventure.game.world.entity.mob.player;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
 
+import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.HotbarUpdate;
 import miniventure.game.GameProtocol.InventoryAddition;
 import miniventure.game.GameProtocol.InventoryUpdate;
 import miniventure.game.GameProtocol.StatUpdate;
 import miniventure.game.item.Item;
-import miniventure.game.item.ServerHands;
 import miniventure.game.item.Inventory;
+import miniventure.game.item.Result;
 import miniventure.game.item.ServerItem;
 import miniventure.game.server.GameServer;
 import miniventure.game.server.ServerCore;
@@ -20,6 +21,7 @@ import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.Boundable;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
+import miniventure.game.world.entity.mob.ServerMob;
 import miniventure.game.world.entity.particle.ActionType;
 import miniventure.game.world.entity.ClassDataList;
 import miniventure.game.world.entity.particle.ParticleData.ActionParticleData;
@@ -60,8 +62,7 @@ public class ServerPlayer extends ServerMob implements Player {
 		
 		name = data.get(0);
 		inventory = new Inventory(INV_SIZE);
-		hands = new ServerHands(this);
-		reset();
+		hands = new ServerHands(this, MyUtils.parseLayeredString(data.get(4)));
 		
 		stats.put(Stat.Health, getHealth());
 		stats.put(Stat.Hunger, Integer.parseInt(data.get(1)));
@@ -69,7 +70,6 @@ public class ServerPlayer extends ServerMob implements Player {
 		//stats.put(Stat.Armor, Integer.parseInt(data.get(3)));
 		
 		inventory.loadItems(MyUtils.parseLayeredString(data.get(3)));
-		hands.loadItemShortcuts(MyUtils.parseLayeredString(data.get(4)));
 	}
 	
 	@Override
@@ -146,16 +146,11 @@ public class ServerPlayer extends ServerMob implements Player {
 	@Override
 	public Integer[] saveStats() { return Stat.save(stats); }
 	
-	@Override
-	public void setDirection(@NotNull Direction dir) { super.setDirection(dir); }
-	
 	/// These two methods are ONLY to be accessed by GameScreen, so far.
 	@NotNull
 	public ServerHands getHands() { return hands; }
 	@NotNull
 	public Inventory getInventory() { return inventory; }
-	
-	public boolean canUseItem(ServerItem item) { return !item.isUsed() && getStat(Stat.Stamina) >= item.getStaminaUsage(); }
 	
 	public boolean takeItem(@NotNull ServerItem item) {
 		if(inventory.addItem(item)) {
@@ -193,74 +188,70 @@ public class ServerPlayer extends ServerMob implements Player {
 		return objects;
 	}
 	
-	public void attack(ServerItem heldItem) {
-		//System.out.println("server player attacking; item = "+hands.getSelectedItem());
-		if(!canUseItem(heldItem)) return; // only ever not true for attacks in the same frame or if not enough stamina
-		
-		ServerLevel level = getLevel();
-		
-		boolean success = false;
-		for(WorldObject obj: getInteractionQueue()) {
-			if (heldItem.attack(obj, this)) {
-				success = true;
-				break;
+	// this method gets called by GameServer, so in order to ensure it doesn't mix badly with server world updates, we'll post it as a runnable to the server world update thread.
+	public void doInteract(Direction dir, int index, boolean attack) {
+		ServerCore.postRunnable(() -> {
+			setDirection(dir);
+			ServerItem heldItem = hands.getHeldItem(index);
+			if(getStat(Stat.Stamina) < heldItem.getStaminaUsage())
+				return;
+			
+			ServerLevel level = getLevel();
+			
+			Result result = Result.NONE;
+			for(WorldObject obj: getInteractionQueue()) {
+				if(attack)
+					result = heldItem.attack(obj, this);
+				else
+					result = heldItem.interact(obj, this);
+				
+				if(result.success)
+					break;
 			}
-		}
-		
-		if(!heldItem.isUsed())
-			changeStat(Stat.Stamina, -1); // for trying...
-		
-		if (level != null) {
-			if(success)
-				ServerCore.getServer().broadcastParticle(
-					new ActionParticleData(ActionType.SLASH, getDirection()),
-					level,
-					getCenter().add(getDirection().getVector().scl(getSize().scl(0.5f)))
-				);
-			else
-				ServerCore.getServer().broadcastParticle(
-					new ActionParticleData(ActionType.PUNCH, getDirection()),
-					level,
-					getInteractionRect().getCenter(new Vector2())
-				);
-		}
-		
-		if(!success) // if successful, then the sound will be taken care of. This sound is of an empty swing.
-			ServerCore.getServer().playEntitySound("swing", this);
-	}
-	
-	public void interact(ServerItem heldItem) {
-		//System.out.println("server player interacting; item = "+hands.getSelectedItem());
-		if(!canUseItem(heldItem)) return;
-		
-		boolean success = false;
-		for(WorldObject obj: getInteractionQueue()) {
-			if (heldItem.interact(obj, this)) {
-				success = true;
-				break;
+			
+			if(!attack && !result.success)
+				// none of the above interactions were successful, do the reflexive use.
+				result = heldItem.interact(this);
+			
+			if (attack && level != null) {
+				if(result.success)
+					ServerCore.getServer().broadcastParticle(
+						new ActionParticleData(ActionType.SLASH, getDirection()),
+						level,
+						getCenter().add(getDirection().getVector().scl(getSize().scl(0.5f)))
+					);
+				else
+					ServerCore.getServer().broadcastParticle(
+						new ActionParticleData(ActionType.PUNCH, getDirection()),
+						level,
+						getInteractionRect().getCenter(new Vector2())
+					);
 			}
-		}
-		
-		if(!success)
-			// none of the above interactions were successful, do the reflexive use.
-			heldItem.interact(this);
-		
-		if(!heldItem.isUsed()) {
-			changeStat(Stat.Stamina, -1); // for trying...
-			// TODO failed interaction sound
-		}
+			
+			if(result == Result.USED)
+				changeStat(Stat.Stamina, -heldItem.getStaminaUsage());
+			else {
+				changeStat(Stat.Stamina, -1); // for trying...
+				
+				// successful interaction sounds have been taken care of; this sound is of an empty swing.
+				ServerCore.getServer().playEntitySound("swing", this);
+			}
+			
+			if(result == Result.USED && !GameCore.debug)
+				hands.resetItemUsage(heldItem, index);
+		});
 	}
 	
 	@Override
-	public boolean attackedBy(WorldObject source, @Nullable Item item, int dmg) {
-		if(super.attackedBy(source, item, dmg)) {
+	public Result attackedBy(WorldObject source, @Nullable Item item, int dmg) {
+		Result res = super.attackedBy(source, item, dmg);
+		if(res.success) {
 			int health = stats.get(Stat.Health);
-			if (health == 0) return false;
+			if (health == 0) return Result.NONE;
 			changeStat(Stat.Health, -dmg);
-			// here is where I'd make a death chest, and show the death screen.
-			return true;
+			// TO-DO here is where I'd make a death chest, and show the death screen.
 		}
-		return false;
+		return res;
 	}
 	
 	@Override

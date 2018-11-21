@@ -8,7 +8,7 @@ import miniventure.game.util.function.FetchFunction;
 import miniventure.game.util.function.MapFunction;
 import miniventure.game.world.Config;
 import miniventure.game.world.TimeOfDay;
-import miniventure.game.world.entity.mob.ServerPlayer;
+import miniventure.game.world.entity.mob.player.ServerPlayer;
 
 import org.jetbrains.annotations.NotNull;
 

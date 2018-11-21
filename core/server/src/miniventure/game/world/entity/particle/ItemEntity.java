@@ -11,7 +11,7 @@ import miniventure.game.world.entity.ClassDataList;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.EntityRenderer.ItemSpriteRenderer;
 import miniventure.game.world.entity.ServerEntity;
-import miniventure.game.world.entity.mob.ServerPlayer;
+import miniventure.game.world.entity.mob.player.ServerPlayer;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;

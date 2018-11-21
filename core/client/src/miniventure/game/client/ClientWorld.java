@@ -19,10 +19,9 @@ import miniventure.game.world.TimeOfDay;
 import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
-import miniventure.game.world.entity.mob.ClientPlayer;
+import miniventure.game.world.entity.mob.player.ClientPlayer;
 import miniventure.game.world.tile.ClientTile;
 import miniventure.game.world.tile.ClientTileType;
-import miniventure.game.world.tile.TileEnumMapper;
 import miniventure.game.world.tile.TileType;
 import miniventure.game.world.tile.TileTypeEnum;
 

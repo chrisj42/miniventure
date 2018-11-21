@@ -2,7 +2,7 @@ package miniventure.game.item;
 
 import miniventure.game.GameProtocol.ItemDropRequest;
 import miniventure.game.client.ClientCore;
-import miniventure.game.world.entity.mob.Player;
+import miniventure.game.world.entity.mob.player.Player;
 
 import org.jetbrains.annotations.Nullable;
 

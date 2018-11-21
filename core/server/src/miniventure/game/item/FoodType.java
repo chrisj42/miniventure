@@ -2,8 +2,8 @@ package miniventure.game.item;
 
 import miniventure.game.GameCore;
 import miniventure.game.item.ItemType.SimpleEnumItem;
-import miniventure.game.world.entity.mob.Player;
-import miniventure.game.world.entity.mob.Player.Stat;
+import miniventure.game.world.entity.mob.player.Player;
+import miniventure.game.world.entity.mob.player.Player.Stat;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -27,11 +27,11 @@ public enum FoodType {
 			super(ItemType.Food, name(), GameCore.icons.get("items/food/"+name().toLowerCase()));
 		}
 		
-		@Override public void interact(Player player) {
+		@Override public Result interact(Player player) {
 			int gained = player.changeStat(Stat.Hunger, healthGained);
-			if(gained > 0) {
-				use();
-			}
+			if(gained > 0)
+				return Result.USED;
+			return Result.NONE;
 		}
 	}
 }

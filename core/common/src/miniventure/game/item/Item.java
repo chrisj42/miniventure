@@ -40,6 +40,8 @@ public class Item {
 	@Override
 	public boolean equals(Object other) {
 		if(other == null) return false;
+		if(usability > 0 && usability < 1)
+			return this == other; // anything with partial durability cannot ever stack. 
 		if(!getClass().equals(other.getClass())) return false;
 		Item o = (Item) other;
 		return name.equals(o.name) && usability == o.usability;

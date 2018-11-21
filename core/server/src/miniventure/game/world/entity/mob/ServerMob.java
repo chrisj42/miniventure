@@ -7,7 +7,7 @@ import miniventure.game.GameProtocol.Hurt;
 import miniventure.game.GameProtocol.MobUpdate;
 import miniventure.game.GameProtocol.SpriteUpdate;
 import miniventure.game.item.Item;
-import miniventure.game.item.ServerItem;
+import miniventure.game.item.Result;
 import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolType;
 import miniventure.game.server.ServerCore;
@@ -16,6 +16,8 @@ import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClassDataList;
+import miniventure.game.world.entity.mob.player.Player;
+import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.entity.particle.ParticleData.TextParticleData;
 import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.KnockbackController;
@@ -154,15 +156,19 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 	}
 	
 	@Override
-	public boolean attackedBy(WorldObject obj, @Nullable Item item, int damage) {
-		if(invulnerableTime > 0) return false; // this ought to return false because returning true would use up weapons and such, and that's not fair. Downside is, it'll then try to interact with other things...
+	public Result attackedBy(WorldObject obj, @Nullable Item item, int damage) {
+		if(invulnerableTime > 0) return Result.INTERACT; // consume the event, but not the item.
 		
+		boolean use = false;
 		if(item instanceof ToolItem) {
+			use = true;
 			ToolItem ti = (ToolItem) item;
 			if(ti.getToolType() == ToolType.Sword)
 				damage *= 3;
-			if(ti.getToolType() == ToolType.Axe)
+			else if(ti.getToolType() == ToolType.Axe)
 				damage *= 2;
+			else
+				use = false;
 		}
 		
 		health -= Math.min(damage, health);
@@ -185,10 +191,10 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 		if (health == 0)
 			die();
 		
-		return true;
+		return use ? Result.USED : Result.INTERACT;
 	}
 	
-	void regenHealth(int amount) { health = Math.min(maxHealth, health + amount); }
+	protected void regenHealth(int amount) { health = Math.min(maxHealth, health + amount); }
 	
 	public void die() { remove(); }
 	

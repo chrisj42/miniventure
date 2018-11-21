@@ -1,12 +1,8 @@
 package miniventure.game.item;
 
 import miniventure.game.GameCore;
-import miniventure.game.util.MyUtils;
 import miniventure.game.world.WorldObject;
-import miniventure.game.world.entity.mob.Player;
-
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.Batch;
+import miniventure.game.world.entity.mob.player.Player;
 
 public class ToolItem extends ServerItem {
 	
@@ -40,7 +36,7 @@ public class ToolItem extends ServerItem {
 	
 	public ToolItem(ToolType type, Material material) { this(type, material, material.maxDurability); }
 	public ToolItem(ToolType type, Material material, int durability) {
-		super(ItemType.Tool, material.name() + " " + type.name(), GameCore.icons.get("items/tools/"+material.name().toLowerCase()+"_"+type.name().toLowerCase()));
+		super(ItemType.Tool, material.name() + ' ' + type.name(), GameCore.icons.get("items/tools/"+material.name().toLowerCase()+'_'+type.name().toLowerCase()));
 		this.toolType = type;
 		this.material = material;
 		this.durability = durability;
@@ -64,12 +60,6 @@ public class ToolItem extends ServerItem {
 	@Override
 	public float getUsabilityStatus() { return material == null ? 0 : durability / (float) material.maxDurability; }
 	
-	@Override public boolean attack(WorldObject obj, Player player) {
-		boolean success = obj.attackedBy(player, this, material.damageMultiplier);
-		if(success) use();
-		return success;
-	}
-	
 	@Override
 	public boolean equals(Object other) {
 		return super.equals(other) && ((ToolItem)other).durability == durability;
@@ -83,8 +73,8 @@ public class ToolItem extends ServerItem {
 	
 	@Override
 	public String[] save() {
-		return new String[] {getType().name(), toolType.name(), material.name(), durability+""};
+		return new String[] {getType().name(), toolType.name(), material.name(), String.valueOf(durability)};
 	}
 	
-	@Override public String toString() { return "ToolItem("+material+" "+toolType+",dura="+durability+")"; }
+	@Override public String toString() { return "ToolItem("+material+' '+toolType+",dura="+durability+')'; }
 }

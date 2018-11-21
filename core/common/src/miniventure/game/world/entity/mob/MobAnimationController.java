@@ -48,7 +48,7 @@ public class MobAnimationController<M extends Entity & Mob> {
 	}
 	
 	// the animation time is reset in getFrame, so this will never overflow.
-	void requestState(@NotNull AnimationState rState) {
+	public void requestState(@NotNull AnimationState rState) {
 		try {
 			requestedAnimations.add(rState);
 		} catch(NullPointerException ex) {
@@ -63,7 +63,7 @@ public class MobAnimationController<M extends Entity & Mob> {
 		return new SpriteUpdate(renderer);
 	}
 	
-	boolean setDirection(@NotNull Direction dir) {
+	public boolean setDirection(@NotNull Direction dir) {
 		if(mob.getDirection() == dir)
 			return false; // no change.
 		
@@ -87,7 +87,7 @@ public class MobAnimationController<M extends Entity & Mob> {
 		return true;
 	}
 	
-	void progressAnimation(float delta) {
+	public void progressAnimation(float delta) {
 		// update the animation
 		if(renderer != null)
 			renderer.update(delta);
@@ -103,7 +103,7 @@ public class MobAnimationController<M extends Entity & Mob> {
 		if(state != prevState) {
 			animationChanged = true;
 			
-			String textureName = mobSpriteName + "/" + state.name().toLowerCase() + "-";
+			String textureName = mobSpriteName + '/' + state.name().toLowerCase() + '-';
 			renderer = new DirectionalAnimationRenderer(mob.getDirection(), dir -> textureName+dir.name().toLowerCase(), state.loopDuration, false, true);
 			mob.setRenderer(renderer);
 		}

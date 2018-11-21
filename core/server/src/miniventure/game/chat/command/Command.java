@@ -12,7 +12,7 @@ import miniventure.game.util.MyUtils;
 import miniventure.game.world.Config;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.TimeOfDay;
-import miniventure.game.world.entity.mob.ServerPlayer;
+import miniventure.game.world.entity.mob.player.ServerPlayer;
 
 import com.badlogic.gdx.utils.Array;
 

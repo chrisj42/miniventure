@@ -28,7 +28,7 @@ public enum ItemType {
 		
 		try {
 			String[] enclosingClasses = MyUtils.parseLayeredString(data[0]);
-			Class<?> clazz = Class.forName(ItemType.class.getPackage().getName()+"."+enclosingClasses[0]);
+			Class<?> clazz = Class.forName(ItemType.class.getPackage().getName()+'.'+enclosingClasses[0]);
 			for(int i = 1; i < enclosingClasses.length; i++) {
 				for(Class<?> inner: clazz.getDeclaredClasses()) {
 					if(inner.getSimpleName().equals(enclosingClasses[i])) {
@@ -58,7 +58,7 @@ public enum ItemType {
 		ServerItem load(String[] data);
 	}
 	
-	private ItemFetcher fetcher;
+	private final ItemFetcher fetcher;
 	ItemType(ItemFetcher fetcher) {
 		this.fetcher = fetcher;
 	}
@@ -68,7 +68,10 @@ public enum ItemType {
 	}
 	
 	
+	/** @noinspection AbstractClassWithoutAbstractMethods*/
 	static abstract class SimpleEnumItem extends ServerItem {
+		
+		// you should be extending this, not making instances of it
 		
 		SimpleEnumItem(@NotNull ItemType type, @NotNull String name) {
 			super(type, name);

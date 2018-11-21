@@ -22,7 +22,7 @@ import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.Entity.EntityTag;
 import miniventure.game.world.entity.EntityRenderer;
 import miniventure.game.world.entity.mob.Mob;
-import miniventure.game.world.entity.mob.Player.Stat;
+import miniventure.game.world.entity.mob.player.Player.Stat;
 import miniventure.game.world.entity.particle.ActionType;
 import miniventure.game.world.entity.particle.ParticleData;
 import miniventure.game.world.tile.Tile;

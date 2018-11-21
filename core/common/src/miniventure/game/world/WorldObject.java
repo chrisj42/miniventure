@@ -1,8 +1,9 @@
 package miniventure.game.world;
 
 import miniventure.game.item.Item;
+import miniventure.game.item.Result;
 import miniventure.game.world.entity.Entity;
-import miniventure.game.world.entity.mob.Player;
+import miniventure.game.world.entity.mob.player.Player;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
@@ -24,10 +25,10 @@ public interface WorldObject extends Boundable, Taggable<WorldObject> {
 	boolean isPermeable();
 	
 	// returns whether interaction had any effect (should we look for other objects to interact with?)
-	boolean interactWith(Player player, @Nullable Item heldItem);
+	Result interactWith(Player player, @Nullable Item heldItem);
 	
 	// returns whether attack had any effect (should we look for other objects to attack?)
-	boolean attackedBy(WorldObject obj, @Nullable Item item, int dmg);
+	Result attackedBy(WorldObject obj, @Nullable Item item, int dmg);
 	
 	boolean touchedBy(Entity entity);
 	

@@ -1,4 +1,4 @@
-package miniventure.game.world.entity.mob;
+package miniventure.game.world.entity.mob.player;
 
 public class IconSizeMismatchException extends RuntimeException {
 	

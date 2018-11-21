@@ -11,7 +11,7 @@ import miniventure.game.util.RelPos;
 import miniventure.game.world.ClientLevel;
 import miniventure.game.world.Level;
 import miniventure.game.world.TimeOfDay;
-import miniventure.game.world.entity.mob.ClientPlayer;
+import miniventure.game.world.entity.mob.player.ClientPlayer;
 import miniventure.game.world.tile.ClientTile;
 import miniventure.game.world.tile.Tile;
 

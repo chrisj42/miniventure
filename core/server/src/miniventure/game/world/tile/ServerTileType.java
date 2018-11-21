@@ -1,7 +1,7 @@
 package miniventure.game.world.tile;
 
 import miniventure.game.item.FoodType;
-import miniventure.game.item.ServerItem;
+import miniventure.game.item.Result;
 import miniventure.game.item.ServerItem;
 import miniventure.game.item.ResourceType;
 import miniventure.game.item.TileItem;
@@ -14,7 +14,7 @@ import miniventure.game.util.param.Value;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
-import miniventure.game.world.entity.mob.Player;
+import miniventure.game.world.entity.mob.player.Player;
 import miniventure.game.world.tile.DestructionManager.PreferredTool;
 import miniventure.game.world.tile.DestructionManager.RequiredTool;
 import miniventure.game.world.tile.SpreadUpdateAction.FloatFetcher;
@@ -76,9 +76,9 @@ public class ServerTileType extends TileType {
 	}
 	
 	
-	public boolean interact(@NotNull ServerTile tile, Player player, @Nullable ServerItem item) { return false; }
+	public Result interact(@NotNull ServerTile tile, Player player, @Nullable ServerItem item) { return Result.NONE; }
 	
-	public boolean attacked(@NotNull ServerTile tile, WorldObject source, @Nullable ServerItem item, int damage) {
+	public Result attacked(@NotNull ServerTile tile, WorldObject source, @Nullable ServerItem item, int damage) {
 		return destructionManager.tileAttacked(tile, source, item, damage);
 	}
 	
@@ -179,9 +179,9 @@ public class ServerTileType extends TileType {
 			)
 		) {
 			@Override
-			public boolean interact(@NotNull ServerTile tile, Player player, @Nullable ServerItem item) {
+			public Result interact(@NotNull ServerTile tile, Player player, @Nullable ServerItem item) {
 				tile.replaceTile(CLOSED_DOOR.getType());
-				return true;
+				return Result.INTERACT;
 			}
 		}),
 		
@@ -189,9 +189,9 @@ public class ServerTileType extends TileType {
 			new DestructionManager(type, new RequiredTool(ToolType.Axe))
 		) {
 			@Override
-			public boolean interact(@NotNull ServerTile tile, Player player, @Nullable ServerItem item) {
+			public Result interact(@NotNull ServerTile tile, Player player, @Nullable ServerItem item) {
 				tile.replaceTile(OPEN_DOOR.getType());
-				return true;
+				return Result.INTERACT;
 			}
 		}),
 		
@@ -208,7 +208,7 @@ public class ServerTileType extends TileType {
 		) {
 			@Override
 			public boolean touched(@NotNull ServerTile tile, Entity entity, boolean initial) {
-				return entity.attackedBy(tile, null, 1);
+				return entity.attackedBy(tile, null, 1).success;
 			}
 		}),
 		

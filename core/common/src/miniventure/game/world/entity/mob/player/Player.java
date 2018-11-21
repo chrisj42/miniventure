@@ -1,6 +1,8 @@
-package miniventure.game.world.entity.mob;
+package miniventure.game.world.entity.mob.player;
 
 import java.util.EnumMap;
+
+import miniventure.game.world.entity.mob.Mob;
 
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;

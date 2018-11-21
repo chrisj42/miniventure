@@ -22,11 +22,12 @@ import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
+import miniventure.game.world.entity.mob.player.ServerHands;
 import miniventure.game.world.entity.particle.ParticleData;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ServerEntity;
-import miniventure.game.world.entity.mob.Player;
-import miniventure.game.world.entity.mob.ServerPlayer;
+import miniventure.game.world.entity.mob.player.Player;
+import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileTypeEnum;
 
@@ -175,6 +176,7 @@ public class GameServer implements GameProtocol {
 						connection.sendTCP(new EntityAddition(e));
 				});
 				
+				// TODO don't allow client to update server stats
 				forPacket(object, StatUpdate.class, client::loadStat);
 				
 				forPacket(object, MovementRequest.class, move -> {
@@ -202,8 +204,7 @@ public class GameServer implements GameProtocol {
 					if(r.playerPosition.variesFrom(client))
 						connection.sendTCP(new PositionUpdate(client)); // fix the player's position
 					
-					client.setDirection(r.dir);
-					client.getHands().useItem(r.hotbarIndex, r.attack);
+					client.doInteract(r.dir, r.hotbarIndex, r.attack);
 				}
 				
 				forPacket(object, ItemDropRequest.class, drop -> {
@@ -217,6 +218,13 @@ public class GameServer implements GameProtocol {
 					else
 						// dropped from the hotbar
 						item = hands.getItem(drop.index);
+					
+					if(item == null) {
+						// no item; client must have made a mistake (it shouldn't be sending a request if there isn't an item); if it came from their hotbar, update it, but in inventory mode it would get too messy so just ignore it; we'll update the inv once they close the menu in that case.
+						if(!clientData.inventoryMode)
+							connection.sendTCP(client.getHotbarUpdate());
+						return;
+					}
 					
 					ServerItemStack drops;
 					if(drop.all)
@@ -370,9 +378,9 @@ public class GameServer implements GameProtocol {
 		
 		broadcast(obj, true, players);
 	}
-	public void broadcast(Object obj, @NotNull ServerEntity excludeEntity) {
-		if(excludeEntity instanceof ServerPlayer)
-			broadcast(obj, false, (ServerPlayer)excludeEntity);
+	public void broadcast(Object obj, @NotNull ServerEntity excludeIfPlayer) {
+		if(excludeIfPlayer instanceof ServerPlayer)
+			broadcast(obj, false, (ServerPlayer)excludeIfPlayer);
 		else
 			broadcast(obj);
 	}
