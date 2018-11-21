@@ -9,6 +9,8 @@ import miniventure.game.GameProtocol.EntityAddition;
 import miniventure.game.GameProtocol.EntityRemoval;
 import miniventure.game.GameProtocol.WorldData;
 import miniventure.game.ProgressPrinter;
+import miniventure.game.item.FoodType;
+import miniventure.game.item.ResourceType;
 import miniventure.game.item.TileItem;
 import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolItem.Material;
@@ -180,10 +182,39 @@ public class ServerWorld extends WorldManager {
 		
 		respawnPlayer(player);
 		
-		if(GameCore.debug)
+		if(GameCore.debug) {
 			player.getInventory().addItem(new ToolItem(ToolType.Shovel, Material.Ruby));
-		for(int i = 0; i < 10; i++)
-			player.getInventory().addItem(TileItem.get(TileTypeEnum.STONE_PATH));
+			player.getInventory().addItem(new ToolItem(ToolType.Shovel, Material.Ruby));
+			player.getInventory().addItem(new ToolItem(ToolType.Shovel, Material.Ruby));
+			for(int i = 0; i < 10; i++)
+				player.getInventory().addItem(TileItem.get(TileTypeEnum.STONE_PATH));
+			player.getInventory().addItem(TileItem.get(TileTypeEnum.CACTUS));
+			// player.getInventory().addItem(TileItem.get(TileTypeEnum.STONE));
+			player.getInventory().addItem(TileItem.get(TileTypeEnum.STONE_FLOOR));
+			player.getInventory().addItem(TileItem.get(TileTypeEnum.STONE_WALL));
+			player.getInventory().addItem(TileItem.get(TileTypeEnum.WOOD_WALL));
+			// player.getInventory().addItem(TileItem.get(TileTypeEnum.FLINT));
+			player.getInventory().addItem(TileItem.get(TileTypeEnum.GRASS));
+			player.getInventory().addItem(TileItem.get(TileTypeEnum.DIRT));
+			player.getInventory().addItem(TileItem.get(TileTypeEnum.TORCH));
+			// player.getInventory().addItem(TileItem.get(TileTypeEnum.COAL));
+			// player.getInventory().addItem(TileItem.get(TileTypeEnum.TUNGSTEN));
+			player.getInventory().addItem(TileItem.get(TileTypeEnum.SAND));
+			player.getInventory().addItem(ResourceType.Stone.get());
+			player.getInventory().addItem(ResourceType.Tungsten.get());
+			player.getInventory().addItem(ResourceType.Flint.get());
+			player.getInventory().addItem(ResourceType.Fabric.get());
+			player.getInventory().addItem(ResourceType.Cotton.get());
+			player.getInventory().addItem(FoodType.Pear.get());
+			player.getInventory().addItem(FoodType.Raw_Bacon.get());
+			player.getInventory().addItem(FoodType.Cooked_Bacon.get());
+			player.getInventory().addItem(FoodType.Gooseberry.get());
+			player.getInventory().addItem(FoodType.Snow_Berries.get());
+			player.getInventory().addItem(FoodType.Gooseberry.get());
+			player.getInventory().addItem(FoodType.Snow_Berries.get());
+			player.getInventory().addItem(new ToolItem(ToolType.Pickaxe, Material.Iron));
+			player.getInventory().addItem(new ToolItem(ToolType.Pickaxe, Material.Ruby));
+		}
 		return player;
 	}
 	

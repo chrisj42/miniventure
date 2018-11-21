@@ -127,14 +127,22 @@ public class InventoryScreen extends MenuScreen {
 			}
 		});
 		
-		scrollPane = new ScrollPane(slotTable, GameCore.getSkin());
+		scrollPane = new ScrollPane(slotTable, GameCore.getSkin()) {
+			@Override
+			public float getPrefHeight() {
+				return InventoryScreen.this.getHeight()*2/3;
+			}
+		};
 		
-		scrollPane.setHeight(getHeight()*2/3);
+		// scrollPane.setHeight(getHeight()*2/3);
+		scrollPane.setScrollingDisabled(true, false);
+		scrollPane.setFadeScrollBars(false);
 		
 		mainGroup.addActor(fillBar);
 		mainGroup.addActor(scrollPane);
 		
 		setKeyboardFocus(slotTable);
+		setScrollFocus(scrollPane);
 	}
 	
 	@Override
@@ -246,6 +254,7 @@ public class InventoryScreen extends MenuScreen {
 			selection %= inventory.size();
 		slotsById.remove(data.id);
 		spaceUsed -= data.getCount() * data.getItem().getSpaceUsage();
+		slotTable.getCell(data.slot).minHeight(0);
 		slotTable.removeActor(data.slot);
 		refresh();
 	}
