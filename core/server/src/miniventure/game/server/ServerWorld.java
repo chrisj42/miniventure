@@ -193,6 +193,7 @@ public class ServerWorld extends WorldManager {
 			player.getInventory().addItem(TileItem.get(TileTypeEnum.STONE_FLOOR));
 			player.getInventory().addItem(TileItem.get(TileTypeEnum.STONE_WALL));
 			player.getInventory().addItem(TileItem.get(TileTypeEnum.WOOD_WALL));
+			player.getInventory().addItem(TileItem.get(TileTypeEnum.CLOSED_DOOR));
 			// player.getInventory().addItem(TileItem.get(TileTypeEnum.FLINT));
 			player.getInventory().addItem(TileItem.get(TileTypeEnum.GRASS));
 			player.getInventory().addItem(TileItem.get(TileTypeEnum.DIRT));

@@ -34,7 +34,7 @@ public class UpdateManager {
 	public float update(@NotNull ServerTile tile, float delta) {
 		// if playing an exit animation, then don't update the tile.
 		TransitionManager man = ServerTileType.get(tileType).transitionManager;
-		if(man.playingExitAnimation(tile))
+		if(man.playingAnimation(tile))
 			return man.tryFinishAnimation(tile);
 		
 		float minWait = 0;

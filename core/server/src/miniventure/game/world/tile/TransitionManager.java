@@ -151,7 +151,8 @@ public class TransitionManager {
 			tile.breakTile(false);
 			if(nextType != null)
 				tile.addTile(ServerTileType.get(nextType));
-		}
+		} else
+			tile.getLevel().onTileUpdate(tile);
 		
 		return 0;
 	}

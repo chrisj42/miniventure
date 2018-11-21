@@ -1,6 +1,8 @@
 package miniventure.game.world.tile;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -131,12 +133,15 @@ public class ClientTileType extends TileType {
 		WOOD_WALL(ClientTileFactory::wall),
 		STONE_WALL(ClientTileFactory::wall),
 		
-		OPEN_DOOR(ClientTileFactory::door),
-		CLOSED_DOOR(ClientTileFactory::door),
+		OPEN_DOOR(type -> ClientTileFactory.door(type, true)),
+		CLOSED_DOOR(type -> ClientTileFactory.door(type, false)),
 		
 		TORCH(type -> new ClientTileType(type, false,
 			new ConnectionManager(type, new RenderStyle(1/12f)),
-			P.lightRadius.as(2f)
+			P.lightRadius.as(2f),
+			P.transitions.as(Collections.singletonList(
+				new TransitionAnimation(type, "enter", new RenderStyle(3 / 12f, false))
+			))
 		)),
 		
 		CACTUS(type -> new ClientTileType(type, false)),
@@ -178,9 +183,14 @@ public class ClientTileType extends TileType {
 			);
 		}
 		
-		static ClientTileType door(TileTypeEnum type) {
+		static ClientTileType door(TileTypeEnum type, boolean open) {
 			return new ClientTileType(type, false,
-				P.zOffset.as(0.4f)
+				P.zOffset.as(0.4f),
+				P.transitions.as(open?Arrays.asList(
+					new TransitionAnimation(type, "open", new RenderStyle(PlayMode.NORMAL, 3/24f, false)),
+					new TransitionAnimation(type, "close", new RenderStyle(PlayMode.NORMAL, 3/24f, false))
+					):new ArrayList<>(0)
+				)
 			);
 		}
 		
