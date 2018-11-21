@@ -88,7 +88,7 @@ public class ItemSlot extends Widget {
 	}
 	public Color getTextColor() { return textColor; }
 	
-	@Override public float getPrefWidth() { return prefWidth; }
+	@Override public float getPrefWidth() { return prefWidth+(showName?20:0); }
 	@Override public float getPrefHeight() { return HEIGHT; }
 	
 	@Override public void draw(Batch batch, float parentAlpha) {
@@ -129,7 +129,7 @@ public class ItemSlot extends Widget {
 			MyUtils.fillRect(getX(), getY(), getWidth(), getHeight(), selectionColor, parentAlpha, batch);
 	}
 	
-	private void renderUsability(Batch batch, float x, float y, float usability) {
+	private static void renderUsability(Batch batch, float x, float y, float usability) {
 		if(usability <= 0 || usability >= 1) return;
 		// draw a colored bar for the durability left
 		float width = Item.ICON_SIZE * usability;

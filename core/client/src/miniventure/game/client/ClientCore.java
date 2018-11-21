@@ -29,6 +29,7 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Color;
 import com.kotcrab.vis.ui.VisUI;
 
 import org.jetbrains.annotations.NotNull;
@@ -109,6 +110,8 @@ public class ClientCore extends ApplicationAdapter {
 	public void render() {
 		input.update();
 		
+		GameCore.getBatch().setColor(new Color(1, 1, 1, 1));
+		
 		if (clientWorld != null && clientWorld.worldLoaded())
 			clientWorld.update(GameCore.getDeltaTime()); // renders as well
 		
@@ -155,14 +158,14 @@ public class ClientCore extends ApplicationAdapter {
 				}
 			}
 			
+			input.resetDelay();
 			menuScreen = screen;
 			if(menuScreen != null) menuScreen.focus();
 			if(gameScreen == null) {
-				Gdx.input.setInputProcessor(menuScreen == null ? input : menuScreen);
+				Gdx.input.setInputProcessor(menuScreen == null ? input : new InputMultiplexer(input, menuScreen));
 			} else {
-				Gdx.input.setInputProcessor(menuScreen == null ? new InputMultiplexer(gameScreen.getGuiStage(), input) : new InputMultiplexer(menuScreen, gameScreen.getGuiStage()));
+				Gdx.input.setInputProcessor(menuScreen == null ? new InputMultiplexer(gameScreen.getGuiStage(), input) : new InputMultiplexer(input.repressDelay(.1f), menuScreen, gameScreen.getGuiStage()));
 			}
-			input.reset();
 		}
 	}
 	public static void backToParentScreen() {

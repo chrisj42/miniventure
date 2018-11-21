@@ -2,6 +2,7 @@ package miniventure.game.client;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map.Entry;
 
 import miniventure.game.GameCore;
 
@@ -14,6 +15,8 @@ public class InputHandler implements InputProcessor {
 	private static final float INITIAL_DELAY = 0.5f; // delay between initial press and first simulated press.
 	private static final float REPEAT_DELAY = 0.2f; // delay between each simulated press.
 	
+	private float repressDelay = REPEAT_DELAY;
+	
 	private final HashMap<Integer, Float> keyPresses = new HashMap<>(); // keys in here are currently being held down. The value stored is the initial time of press.
 	private final HashSet<Integer> pressedKeys = new HashSet<>(); // keys here are treated as being just pressed down.
 	private float prevUpdate;
@@ -25,16 +28,16 @@ public class InputHandler implements InputProcessor {
 		
 		final float elapTime = GameCore.getElapsedProgramTime();
 		
-		for(Integer keycode: keyPresses.keySet()) {
-			final float curTime = elapTime - keyPresses.get(keycode);
-			final float prevUpdate = this.prevUpdate - keyPresses.get(keycode);
+		for(Entry<Integer, Float> pressTime : keyPresses.entrySet()) {
+			final float curTime = elapTime - pressTime.getValue();
+			final float prevUpdate = this.prevUpdate - pressTime.getValue();
 			if(prevUpdate < INITIAL_DELAY && curTime >= INITIAL_DELAY)
-				pressedKeys.add(keycode);
+				pressedKeys.add(pressTime.getKey());
 			else if(prevUpdate >= INITIAL_DELAY) {
-				float prevTime = (prevUpdate - INITIAL_DELAY) % REPEAT_DELAY;
+				float prevTime = (prevUpdate - INITIAL_DELAY) % repressDelay;
 				float delta = curTime - prevUpdate;
-				if(prevTime + delta >= REPEAT_DELAY)
-					pressedKeys.add(keycode);
+				if(prevTime + delta >= repressDelay)
+					pressedKeys.add(pressTime.getKey());
 			}
 		}
 		
@@ -43,6 +46,13 @@ public class InputHandler implements InputProcessor {
 	
 	void reset() {
 		keyPresses.clear();
+	}
+	
+	InputHandler resetDelay() { return repressDelay(REPEAT_DELAY); }
+	InputHandler repressDelay(float delay) {
+		this.repressDelay = delay;
+		reset();
+		return this;
 	}
 	
 	/**

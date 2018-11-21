@@ -137,6 +137,7 @@ public class InventoryScreen extends MenuScreen {
 		// scrollPane.setHeight(getHeight()*2/3);
 		scrollPane.setScrollingDisabled(true, false);
 		scrollPane.setFadeScrollBars(false);
+		scrollPane.setScrollbarsOnTop(false);
 		
 		mainGroup.addActor(fillBar);
 		mainGroup.addActor(scrollPane);
@@ -298,6 +299,10 @@ public class InventoryScreen extends MenuScreen {
 		int newSel = selection + amt;
 		while(newSel < 0) newSel += inventory.size();
 		selection = newSel % inventory.size();
+		scrollPane.setSmoothScrolling(false);
+		scrollPane.scrollTo(0, inventory.get(selection).slot.getY(), 0, ItemSlot.HEIGHT);
+		scrollPane.updateVisualScroll();
+		scrollPane.setSmoothScrolling(true);
 	}
 	
 	private static int counter = 0;

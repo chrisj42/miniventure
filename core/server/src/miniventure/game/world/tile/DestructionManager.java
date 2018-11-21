@@ -162,13 +162,13 @@ public class DestructionManager {
 				ServerCore.getServer().playTileSound("break", tile, tileType);
 				tile.breakTile();
 				for(ItemDrop drop: drops)
-					((ServerLevel)tile.getLevel()).dropItems(drop, tile, attacker);
+					tile.getLevel().dropItems(drop, tile, attacker);
 			} else {
 				dataMap.put(TileCacheTag.Health, health);
 				ServerCore.getServer().playTileSound("hit", tile, tileType);
 			}
 			
-			return item instanceof ToolItem ? Result.USED : Result.INTERACT;
+			return damage > 1 ? Result.USED : Result.INTERACT;
 		}
 		
 		return Result.NONE;
@@ -231,7 +231,7 @@ public class DestructionManager {
 		
 		@Override
 		public boolean isDamagedBy(@Nullable ServerItem attackItem) {
-			if(attackItem == null || !(attackItem instanceof ToolItem))
+			if(!(attackItem instanceof ToolItem))
 				return false;
 			
 			ToolItem tool = (ToolItem) attackItem;
@@ -240,5 +240,5 @@ public class DestructionManager {
 	}
 	
 	@Override
-	public String toString() { return "DestructibleProperty[conditions="+damageConditions.length+"]"; }
+	public String toString() { return "DestructibleProperty[conditions="+damageConditions.length+']'; }
 }
