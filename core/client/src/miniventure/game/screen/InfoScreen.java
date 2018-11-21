@@ -19,10 +19,10 @@ public class InfoScreen extends BackgroundInheritor {
 		public InstructionsScreen() {
 			super("Use mouse or arrow keys to move around.",
 				"C to attack, V to interact.",
-				"E to open your inventory, Z to craft items.",
-				"Q to drop an item from your inventory/hotbar. Use Shift-Q to drop all items of that type.",
-				"1,2,3 keys (or click) to select hotbar items.",
-				"With the inventory open, click or press enter on an inventory item to swap it with the selected hotbar item.",
+				"E to open your inventory, Z to craft items (crafting missing in this update, sorry!).",
+				"Q to drop an item from your inventory/hotbar. Use Shift-Q to drop all items in the stack.",
+				"1-5 keys to select hotbar items.",
+				"Inventory Screen: to put an item in your hotbar, press the 1-5 key matching the hotbar slot, with the inventory item you want to be there selected.",
 				"+ and - keys to zoom in and out.",
 				"Press \"t\" to chat with other players, and \"/\" to use commands.",
 				"(Hint: use the up key to repeat messages, and tab to autocomplete command names.)",
@@ -35,8 +35,9 @@ public class InfoScreen extends BackgroundInheritor {
 		public CreditsScreen() {
 			super(
 				"Lead Developer: Chris J",
-				"Music made by TrstN",
-				"Sprites made by RiverOaken and MadDest"
+				/*"Music made by TrstN",*/
+				"Sprites made by RiverOaken and Ross, with contributions by Theta and MadDest",
+				"Sound effects made by Chris J"
 			);
 		}
 	}
