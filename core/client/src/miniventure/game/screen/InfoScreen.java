@@ -8,21 +8,21 @@ import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 public class InfoScreen extends BackgroundInheritor {
 	
 	private InfoScreen(String... text) { this(false, text); }
-	private InfoScreen(boolean replaceButton, String... text) {
+	private InfoScreen(boolean addButton, String... text) {
 		VerticalGroup vGroup = useVGroup(30);
 		
 		vGroup.addActor(makeLabel(String.join("\n", text)));
 		
-		if(replaceButton)
+		if(addButton)
 			vGroup.addActor(makeButton("Start Game", () -> ClientCore.getWorld().createWorld(0, 0)));
-		else
-			vGroup.addActor(makeButton("Back to Main Menu", ClientCore::backToParentScreen));
+		
+		vGroup.addActor(makeButton("Back to Main Menu", ClientCore::backToParentScreen));
 	}
 	
 	public static class InstructionsScreen extends InfoScreen {
 		public InstructionsScreen() { this(false); }
-		public InstructionsScreen(boolean replaceButton) {
-			super(replaceButton, "Use mouse or arrow keys to move around.",
+		public InstructionsScreen(boolean addButton) {
+			super(addButton, "Use mouse or arrow keys to move around.",
 				"C to attack, V to interact and do other things.",
 				"E to open your inventory, Z to craft items.",
 				"Q to drop an item from your inventory/hotbar. Use Shift-Q to drop all items in the stack.",
