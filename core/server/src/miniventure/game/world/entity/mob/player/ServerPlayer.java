@@ -247,9 +247,8 @@ public class ServerPlayer extends ServerMob implements Player {
 		Result res = super.attackedBy(source, item, dmg);
 		if(res.success) {
 			int health = stats.get(Stat.Health);
-			if (health == 0) return Result.NONE;
+			if (health == 0) return Result.NONE; // TO-DO here is where I'd make a death chest, and show the death screen.
 			changeStat(Stat.Health, getHealth() - health);
-			// TO-DO here is where I'd make a death chest, and show the death screen.
 		}
 		return res;
 	}
