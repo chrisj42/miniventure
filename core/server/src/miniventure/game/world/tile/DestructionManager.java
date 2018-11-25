@@ -168,7 +168,7 @@ public class DestructionManager {
 				ServerCore.getServer().playTileSound("hit", tile, tileType);
 			}
 			
-			return damage > 1 ? Result.USED : Result.INTERACT;
+			return damage > 1 || damageConditions.length > 0 ? Result.USED : Result.INTERACT;
 		}
 		
 		return Result.NONE;
