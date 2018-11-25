@@ -131,7 +131,7 @@ public class ServerTileType extends TileType {
 		)),
 		
 		FLINT(type -> new ServerTileType(type,
-			new DestructionManager(type)
+			new DestructionManager(type, new ItemDrop(ResourceType.Flint.get()))
 		)),
 		
 		WATER(type -> new ServerTileType(type,
@@ -143,10 +143,10 @@ public class ServerTileType extends TileType {
 			))
 		)),
 		
-		COAL(type -> ServerTileFactory.ore(type, 25)),
-		IRON(type -> ServerTileFactory.ore(type, 35)),
-		TUNGSTEN(type -> ServerTileFactory.ore(type, 45)),
-		RUBY(type -> ServerTileFactory.ore(type, 60)),
+		COAL(type -> ServerTileFactory.ore(type, ResourceType.Coal, 25)),
+		IRON(type -> ServerTileFactory.ore(type, ResourceType.Iron, 35)),
+		TUNGSTEN(type -> ServerTileFactory.ore(type, ResourceType.Tungsten, 45)),
+		RUBY(type -> ServerTileFactory.ore(type, ResourceType.Ruby, 60)),
 		
 		STONE(type -> new ServerTileType(type,
 			new DestructionManager(type, 40,
@@ -236,11 +236,11 @@ public class ServerTileType extends TileType {
 	}
 	
 	private interface ServerTileFactory {
-		static ServerTileType ore(TileTypeEnum type, int health) {
+		static ServerTileType ore(TileTypeEnum type, ResourceType oreType, int health) {
 			return new ServerTileType(type,
 				new DestructionManager(type, health,
 					new PreferredTool(ToolType.Pickaxe, 5),
-					new ItemDrop(ResourceType.Iron.get(), 3, 4)
+					new ItemDrop(oreType.get(), 3, 4)
 				)
 			);
 		}

@@ -273,6 +273,7 @@ public class GameServer implements GameProtocol {
 							for(ServerItem item : left)
 								level.dropItem(item, client.getPosition(), null);
 					}
+					client.getHands().validate();
 					connection.sendTCP(client.getHotbarUpdate());
 					connection.sendTCP(new RecipeStockUpdate(client.getInventory().getItemStacks()));
 				});

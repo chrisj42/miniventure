@@ -1,5 +1,7 @@
 package miniventure.game.item;
 
+import java.util.Arrays;
+
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
@@ -32,8 +34,12 @@ public class Recipe {
 	// returns any items that couldn't be added to the inventory, or null if the inventory doesn't have the items required for crafting.
 	@Nullable
 	public ServerItem[] tryCraft(Inventory inv) {
+		System.out.println("trying to craft "+this+" with inventory "+ Arrays.toString(inv.getItemStacks()));
+		
 		if(!canCraft(inv))
 			return null;
+		
+		System.out.println("crafting "+this);
 		
 		Array<ServerItem> leftover = new Array<>(ServerItem.class);
 		
