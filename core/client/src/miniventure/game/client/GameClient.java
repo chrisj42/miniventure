@@ -251,6 +251,12 @@ public class GameClient implements GameProtocol {
 						((CraftingScreen)screen).recipeUpdate(req);
 				});
 				
+				forPacket(object, RecipeStockUpdate.class, stockUpdate -> {
+					MenuScreen screen = ClientCore.getScreen();
+					if(screen instanceof CraftingScreen)
+						((CraftingScreen)screen).refreshCraftability(stockUpdate);
+				});
+				
 				forPacket(object, PositionUpdate.class, newPos -> {
 					if(player == null || newPos.levelDepth == null) return;
 					//player.updatePos(newPos);

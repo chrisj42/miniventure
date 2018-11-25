@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import miniventure.game.GameCore;
+import miniventure.game.GameProtocol.CraftRequest;
 import miniventure.game.GameProtocol.RecipeRequest;
 import miniventure.game.GameProtocol.RecipeStockUpdate;
 import miniventure.game.GameProtocol.SerialRecipe;
@@ -16,11 +17,13 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 
 import org.jetbrains.annotations.NotNull;
@@ -52,8 +55,9 @@ public class CraftingScreen extends MenuScreen {
 	
 	private final Table craftableTable;
 	private final Table costTable;
-	private Label resultLabel;
-	private final HashMap<String, Label> costLabels = new HashMap<>();
+	private Label resultStockLabel;
+	private final HashMap<String, Label> costStockLabels = new HashMap<>();
+	private final HashMap<String, ItemSlot> costSlots = new HashMap<>();
 	
 	private final ScrollPane scrollPane;
 	private final Table recipeListTable;
@@ -66,7 +70,7 @@ public class CraftingScreen extends MenuScreen {
 		mainGroup = useTable(Align.topLeft, false);
 		addMainGroup(mainGroup, RelPos.TOP_LEFT);
 		
-		mainGroup.add(makeLabel("personal crafting", 12)).colspan(2).row();
+		mainGroup.add(makeLabel("personal crafting", 12)).row();
 		
 		craftableTable = new Table(GameCore.getSkin());
 		craftableTable.defaults().pad(2f);
@@ -75,7 +79,7 @@ public class CraftingScreen extends MenuScreen {
 		
 		costTable = new Table(GameCore.getSkin());
 		costTable.pad(5f);
-		costTable.defaults().pad(2f);
+		costTable.defaults().pad(2f).align(Align.left);
 		costTable.add(makeLabel("Waiting for crafting data...", false));
 		
 		recipeListTable = new Table(GameCore.getSkin()) {
@@ -110,7 +114,7 @@ public class CraftingScreen extends MenuScreen {
 				synchronized (CraftingScreen.this) {
 					if(recipes.size() > 0) {
 						if(keycode == Keys.ENTER) {
-							// TODO send craft request
+							craftSelected();
 							return true;
 						}
 					}
@@ -174,6 +178,21 @@ public class CraftingScreen extends MenuScreen {
 					costs[i] = ItemStack.deserialize(serialRecipe.costs[i]);
 				
 				RecipeSlot slot = new RecipeSlot(new ClientRecipe(result, costs));
+				slot.addListener(new InputListener() {
+					@Override
+					public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+						synchronized (CraftingScreen.this) {
+							selection = recipes.indexOf(slot);
+							itemChanged();
+						}
+					}
+				});
+				slot.addListener(new ClickListener() {
+					@Override
+					public void clicked(InputEvent event, float x, float y) {
+						craftSelected();
+					}
+				});
 				slot.updateCanCraft(inventoryCounts);
 				recipes.add(slot);
 				recipeListTable.add(slot).row();
@@ -199,18 +218,23 @@ public class CraftingScreen extends MenuScreen {
 			craftableTable.clearChildren();
 			craftableTable.add(new ItemIcon(recipe.result.item, recipe.result.count)).row();
 			craftableTable.add(makeLabel(recipe.result.item.getName(), false)).row();
-			craftableTable.add(resultLabel = makeLabel("Stock: "+getCount(recipe.result.item), false)).row();
+			craftableTable.add(resultStockLabel = makeLabel("Stock: "+getCount(recipe.result.item), false)).row();
 			
 			costTable.clearChildren();
 			costTable.add(makeLabel("Stock", 14));
-			costTable.add(makeLabel("Req'd", 18));
+			costTable.add(makeLabel("Required", 18));
 			costTable.row();
-			costLabels.clear();
+			costSlots.clear();
 			for(ItemStack cost: recipe.costs) {
 				Label costLabel = makeLabel(String.valueOf(getCount(cost.item)), false);
-				costLabels.put(cost.item.getName(), costLabel);
+				costStockLabels.put(cost.item.getName(), costLabel);
 				costTable.add(costLabel);
-				costTable.add(new ItemIcon(cost.item, cost.count));
+				
+				Color background = getCount(cost.item) >= cost.count ? craftableBackground : notCraftableBackground;
+				ItemSlot slot = new ItemSlot(true, cost.item, cost.count, background);
+				costSlots.put(cost.item.getName(), slot);
+				costTable.add(slot);
+				// costTable.add(new ItemIcon(cost.item, cost.count));
 				costTable.row();
 			}
 			
@@ -220,7 +244,7 @@ public class CraftingScreen extends MenuScreen {
 	}
 	
 	// called after crafting an item
-	private synchronized void refreshCraftability(RecipeStockUpdate stocks) {
+	public synchronized void refreshCraftability(RecipeStockUpdate stocks) {
 		// update inventory item count
 		inventoryCounts.clear();
 		for(int i = 0; i < stocks.inventoryItemCounts.length; i++)
@@ -232,11 +256,21 @@ public class CraftingScreen extends MenuScreen {
 		
 		// update stock labels
 		ClientRecipe recipe = recipes.get(selection).recipe;
-		if(resultLabel != null)
-			resultLabel.setText("Stock: "+getCount(recipe.result.item));
+		if(resultStockLabel != null)
+			resultStockLabel.setText("Stock: "+getCount(recipe.result.item));
 		//noinspection KeySetIterationMayUseEntrySet
-		for(String name: costLabels.keySet())
-			costLabels.get(name).setText(String.valueOf(getCount(name)));
+		for(String name: costSlots.keySet()) {
+			Label costStockLabel = costStockLabels.get(name);
+			costStockLabel.setText(String.valueOf(getCount(name)));
+			
+			ItemSlot slot = costSlots.get(name);
+			Color background = getCount(name) >= slot.getCount() ? craftableBackground : notCraftableBackground; 
+			slot.setBackground(new ColorBackground(slot, background));
+		}
+	}
+	
+	private synchronized void craftSelected() {
+		ClientCore.getClient().send(new CraftRequest(selection));
 	}
 	
 	@Override

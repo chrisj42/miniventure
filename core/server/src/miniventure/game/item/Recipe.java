@@ -48,4 +48,9 @@ public class Recipe {
 		
 		return leftover.shrink();
 	}
+	
+	@Override
+	public String toString() {
+		return result.toString()+" Recipe";
+	}
 }
