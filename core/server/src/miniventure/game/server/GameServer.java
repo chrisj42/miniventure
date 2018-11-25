@@ -15,19 +15,23 @@ import miniventure.game.chat.InfoMessageLine;
 import miniventure.game.chat.MessageBuilder;
 import miniventure.game.chat.command.Command;
 import miniventure.game.chat.command.CommandInputParser;
-import miniventure.game.item.*;
+import miniventure.game.item.Inventory;
+import miniventure.game.item.Recipe;
+import miniventure.game.item.Recipes;
+import miniventure.game.item.ServerItem;
+import miniventure.game.item.ServerItemStack;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
-import miniventure.game.world.entity.mob.player.ServerHands;
-import miniventure.game.world.entity.particle.ParticleData;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.player.Player;
+import miniventure.game.world.entity.mob.player.ServerHands;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
+import miniventure.game.world.entity.particle.ParticleData;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileTypeEnum;
 
@@ -502,6 +506,7 @@ public class GameServer implements GameProtocol {
 	}
 	
 	public void printStatus(MessageBuilder out) {
+		out.println("Miniventure Version: "+GameCore.VERSION);
 		out.println("Server Running: "+(server.getUpdateThread() != null));
 		out.println("FPS: " + ServerCore.getFPS());
 		out.println("Players connected: "+playerToConnectionMap.size());
