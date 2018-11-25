@@ -23,7 +23,7 @@ public class ColorBackground extends ColorDrawable {
 	
 	@Override
 	public float getLeftWidth() {
-		return (actor instanceof Layout ? ((Layout)actor).getPrefWidth() : actor.getWidth())/2;
+		return 0;
 	}
 	
 	@Override
@@ -31,7 +31,7 @@ public class ColorBackground extends ColorDrawable {
 	
 	@Override
 	public float getRightWidth() {
-		return (actor instanceof Layout ? ((Layout)actor).getPrefWidth() : actor.getWidth())/2;
+		return 0;
 	}
 	
 	@Override
@@ -39,7 +39,7 @@ public class ColorBackground extends ColorDrawable {
 	
 	@Override
 	public float getTopHeight() {
-		return (actor instanceof Layout ? ((Layout)actor).getPrefHeight() : actor.getHeight())/2;
+		return 0;
 	}
 	
 	@Override
@@ -47,7 +47,7 @@ public class ColorBackground extends ColorDrawable {
 	
 	@Override
 	public float getBottomHeight() {
-		return (actor instanceof Layout ? ((Layout)actor).getPrefHeight() : actor.getHeight())/2;
+		return 0;
 	}
 	
 	@Override
@@ -55,7 +55,7 @@ public class ColorBackground extends ColorDrawable {
 	
 	@Override
 	public float getMinWidth() {
-		return actor instanceof Layout ? ((Layout)actor).getMinWidth() : actor.getWidth();
+		return 0;
 	}
 	
 	@Override
@@ -63,7 +63,7 @@ public class ColorBackground extends ColorDrawable {
 	
 	@Override
 	public float getMinHeight() {
-		return actor instanceof Layout ? ((Layout)actor).getMinHeight() : actor.getHeight();
+		return 0;
 	}
 	
 	@Override

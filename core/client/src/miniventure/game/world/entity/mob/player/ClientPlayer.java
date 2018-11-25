@@ -12,6 +12,7 @@ import miniventure.game.GameProtocol.SpawnData;
 import miniventure.game.GameProtocol.StatUpdate;
 import miniventure.game.client.ClientCore;
 import miniventure.game.item.ClientHands;
+import miniventure.game.item.CraftingScreen;
 import miniventure.game.item.InventoryScreen;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
@@ -200,9 +201,9 @@ public class ClientPlayer extends ClientEntity implements Player {
 		if(!ClientCore.hasMenu()) {
 			if(ClientCore.input.pressingKey(Keys.E)) {
 				ClientCore.setScreen(new InventoryScreen(hands));
-			} else /*if(ClientCore.input.pressingKey(Keys.Z))
-				ClientCore.setScreen(new CraftingScreen(Recipes.recipes, inventory));
-			else */if(ClientCore.input.pressingKey(Keys.Q)) {
+			} else if(ClientCore.input.pressingKey(Keys.Z))
+				ClientCore.setScreen(new CraftingScreen());
+			else if(ClientCore.input.pressingKey(Keys.Q)) {
 				hands.dropInvItems(Gdx.input.isKeyPressed(Keys.SHIFT_LEFT));
 			}
 		}

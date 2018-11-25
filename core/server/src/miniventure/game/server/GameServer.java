@@ -257,6 +257,13 @@ public class GameServer implements GameProtocol {
 						connection.sendTCP(client.getInventoryUpdate());
 				});
 				
+				forPacket(object, RecipeRequest.class, req ->
+					connection.sendTCP(new RecipeRequest(
+						Recipes.serializeRecipes(),
+						new RecipeStockUpdate(client.getInventory().getItemStacks())
+					))
+				);
+				
 				forPacket(object, CraftRequest.class, req -> {
 					Recipe recipe = Recipes.recipes[req.recipeIndex];
 					ServerItem[] left = recipe.tryCraft(client.getInventory());

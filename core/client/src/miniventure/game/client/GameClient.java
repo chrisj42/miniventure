@@ -9,6 +9,7 @@ import java.util.HashMap;
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol;
 import miniventure.game.chat.InfoMessage;
+import miniventure.game.item.CraftingScreen;
 import miniventure.game.item.InventoryScreen;
 import miniventure.game.screen.ChatScreen;
 import miniventure.game.screen.ErrorScreen;
@@ -242,6 +243,12 @@ public class GameClient implements GameProtocol {
 					MenuScreen screen = ClientCore.getScreen();
 					if(screen instanceof InventoryScreen)
 						((InventoryScreen)screen).itemAdded(addition);
+				});
+				
+				forPacket(object, RecipeRequest.class, req -> {
+					MenuScreen screen = ClientCore.getScreen();
+					if(screen instanceof CraftingScreen)
+						((CraftingScreen)screen).recipeUpdate(req);
 				});
 				
 				forPacket(object, PositionUpdate.class, newPos -> {

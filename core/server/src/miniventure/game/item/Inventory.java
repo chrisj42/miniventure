@@ -39,6 +39,13 @@ public class Inventory {
 	public ServerItem getItem(int idx) { return uniqueItems.get(idx); }
 	public ServerItemStack getItemStack(int idx) { return new ServerItemStack(getItem(idx), getCount(getItem(idx))); }
 	
+	public ServerItemStack[] getItemStacks() {
+		ServerItemStack[] stacks = new ServerItemStack[uniqueItems.size()];
+		for(int i = 0; i < stacks.length; i++)
+			stacks[i] = getItemStack(i);
+		return stacks;
+	}
+	
 	public int getIndex(ServerItem item) { return uniqueItems.indexOf(item); }
 	
 	public boolean addItem(ServerItem item) {

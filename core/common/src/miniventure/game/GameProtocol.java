@@ -64,6 +64,7 @@ public interface GameProtocol {
 		kryo.register(InfoMessageLine.class);
 		kryo.register(InfoMessageLine[].class);
 		kryo.register(InfoMessage.class);
+		kryo.register(SerialRecipe[].class);
 		
 		kryo.register(String[].class);
 		kryo.register(String[][].class);
@@ -530,6 +531,54 @@ public interface GameProtocol {
 		public HotbarUpdate(String[][] itemStacks, float fillPercent) {
 			this.itemStacks = itemStacks;
 			this.fillPercent = fillPercent;
+		}
+	}
+	
+	class RecipeStockUpdate {
+		public final String[] inventoryItemNames;
+		public final int[] inventoryItemCounts;
+		
+		private RecipeStockUpdate() { this(null, null); }
+		public RecipeStockUpdate(ItemStack[] inventory) {
+			inventoryItemNames = new String[inventory.length];
+			inventoryItemCounts = new int[inventory.length];
+			for(int i = 0; i < inventory.length; i++) {
+				inventoryItemNames[i] = inventory[i].item.getName();
+				inventoryItemCounts[i] = inventory[i].count;
+			}
+		}
+		public RecipeStockUpdate(String[] inventoryItemNames, int[] inventoryItemCounts) {
+			this.inventoryItemNames = inventoryItemNames;
+			this.inventoryItemCounts = inventoryItemCounts;
+		} 
+	}
+	
+	// called by the client with no parameters, server responds with filled parameters.
+	class RecipeRequest {
+		public final SerialRecipe[] recipes;
+		public final RecipeStockUpdate stockUpdate;
+		
+		public RecipeRequest() { this(null, null); }
+		public RecipeRequest(SerialRecipe[] recipes, RecipeStockUpdate stockUpdate) {
+			this.recipes = recipes;
+			this.stockUpdate = stockUpdate;
+		}
+	}
+	
+	class SerialRecipe {
+		public final String[] result;
+		public final String[][] costs;
+		
+		private SerialRecipe() { this((String[])null, null); }
+		public SerialRecipe(ItemStack result, ItemStack[] costs) {
+			this.result = result.serialize();
+			this.costs = new String[costs.length][];
+			for(int i = 0; i < costs.length; i++)
+				this.costs[i] = costs[i].serialize();
+		}
+		public SerialRecipe(String[] result, String[][] costs) {
+			this.result = result;
+			this.costs = costs;
 		}
 	}
 	

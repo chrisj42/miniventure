@@ -12,6 +12,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Group;
@@ -105,9 +106,18 @@ public class MenuScreen extends Stage {
 		return button;
 	}
 	
-	protected static VisLabel makeLabel(String text) {
+	protected static VisLabel makeLabel(String text, int size) { return makeLabel(text, size, false); }
+	protected static VisLabel makeLabel(String text, int size, boolean wrapText) {
+		VisLabel label = makeLabel(text, wrapText);
+		LabelStyle style = label.getStyle();
+		style.font = GameCore.getFont(size);
+		label.setStyle(style);
+		return label;
+	}
+	protected static VisLabel makeLabel(String text) { return makeLabel(text, true); }
+	protected static VisLabel makeLabel(String text, boolean wrapText) {
 		VisLabel label = new VisLabel(text, new LabelStyle(GameCore.getFont(), Color.WHITE));
-		label.setWrap(true);
+		label.setWrap(wrapText);
 		label.setAlignment(Align.center, Align.left);
 		return label;
 	}

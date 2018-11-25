@@ -1,5 +1,6 @@
 package miniventure.game.item;
 
+import miniventure.game.GameProtocol.SerialRecipe;
 import miniventure.game.item.ToolItem.Material;
 import miniventure.game.world.tile.TileTypeEnum;
 
@@ -69,4 +70,14 @@ public class Recipes {
 			new ServerItemStack(TileItem.get(TileTypeEnum.STONE), 1)
 		)
 	};
+	
+	public static final SerialRecipe[] serializeRecipes() {
+		SerialRecipe[] serialRecipes = new SerialRecipe[Recipes.recipes.length];
+		for(int i = 0; i < recipes.length; i++) {
+			Recipe r = recipes[i];
+			serialRecipes[i] = new SerialRecipe(r.getResult(), r.getCosts());
+		}
+		
+		return serialRecipes;
+	}
 }

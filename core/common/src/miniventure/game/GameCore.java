@@ -108,8 +108,9 @@ public class GameCore {
 		batch.dispose();
 		skin.dispose();
 		fontGenerator.dispose();
-		if(defaultFont != null)
-			defaultFont.dispose();
+		for(BitmapFont font: fonts.values())
+			font.dispose();
+		fonts.clear();
 		
 		entityAtlas.dispose();
 		tileAtlas.dispose();
@@ -132,11 +133,11 @@ public class GameCore {
 		return batch;
 	}
 	
-	private static BitmapFont defaultFont;
+	private static HashMap<Integer, BitmapFont> fonts = new HashMap<>();
 	
-	private static FreeTypeFontParameter getDefaultFontConfig() {
+	private static FreeTypeFontParameter getDefaultFontConfig(int size) {
 		FreeTypeFontParameter params = new FreeTypeFontParameter();
-		params.size = 15;
+		params.size = size;
 		params.color = Color.WHITE;
 		params.borderColor = Color.BLACK;
 		params.borderWidth = 1;
@@ -148,14 +149,19 @@ public class GameCore {
 		return params;
 	}
 	
-	public static BitmapFont getFont() {
-		if(defaultFont == null) {
-			defaultFont = fontGenerator.generateFont(getDefaultFontConfig());
-			defaultFont.setUseIntegerPositions(true);
+	public static BitmapFont getFont(int size) {
+		if(!fonts.containsKey(size)) {
+			BitmapFont font = fontGenerator.generateFont(getDefaultFontConfig(size));
+			font.setUseIntegerPositions(true);
+			fonts.put(size, font);
 		}
 		
-		defaultFont.setColor(Color.WHITE);
-		return defaultFont;
+		BitmapFont font = fonts.get(size);
+		font.setColor(Color.WHITE);
+		return font;
+	}
+	public static BitmapFont getFont() {
+		return getFont(15);
 	}
 	
 	public static float getElapsedProgramTime() { return (System.nanoTime() - START_TIME)/1E9f; }
