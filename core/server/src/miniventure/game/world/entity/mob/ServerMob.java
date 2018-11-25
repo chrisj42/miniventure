@@ -16,13 +16,13 @@ import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClassDataList;
-import miniventure.game.world.entity.mob.player.Player;
-import miniventure.game.world.entity.mob.player.ServerPlayer;
-import miniventure.game.world.entity.particle.ParticleData.TextParticleData;
 import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.KnockbackController;
 import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.MobAnimationController.AnimationState;
+import miniventure.game.world.entity.mob.player.Player;
+import miniventure.game.world.entity.mob.player.ServerPlayer;
+import miniventure.game.world.entity.particle.ParticleData.TextParticleData;
 import miniventure.game.world.tile.TileTypeEnum;
 
 import com.badlogic.gdx.graphics.Color;

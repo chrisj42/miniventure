@@ -248,7 +248,7 @@ public class ServerPlayer extends ServerMob implements Player {
 		if(res.success) {
 			int health = stats.get(Stat.Health);
 			if (health == 0) return Result.NONE;
-			changeStat(Stat.Health, -dmg);
+			changeStat(Stat.Health, getHealth() - health);
 			// TO-DO here is where I'd make a death chest, and show the death screen.
 		}
 		return res;
