@@ -234,22 +234,34 @@ public class LevelGenerator {
 			.addRegion(DARK_TREE, .5f)
 			;
 		
+		NoiseMapper ores = new GroupNoiseMapper("Ores", detailNoise)
+			.addRegion(STONE, .3f)
+			.addRegion(IRON, 1f)
+			.addRegion(COAL, 2f)
+			// .addRegion(FLINT, 1f)
+			.addRegion(TUNGSTEN, .75f)
+			.addRegion(RUBY, .5f)
+			;
+		
 		NoiseMapper canyonBiome = new NoiseMapper("Canyons", detailNoise)
-			.addRegion(STONE, 20)
+			.addRegion(STONE, 8)
+			.addRegion(ores, 1)
+			.addRegion(STONE, 8)
+			.addRegion(ores, 1)
+			.addRegion(STONE, 8)
+			.addRegion(ores, 1)
+			.addRegion(STONE, 8)
 			.addRegion(FLINT, 1)
 			.addRegion(GRASS, 10)
 			.addRegion(PINE_TREE, 1)
 			.addRegion(GRASS, 10)
-			.addRegion(STONE, 20)
-			;
-		
-		NoiseMapper ores = new GroupNoiseMapper("Ores", detailNoise)
-			.addRegion(STONE, 1f)
-			.addRegion(COAL, 1f)
-			// .addRegion(FLINT, 1f)
-			.addRegion(IRON, 1f)
-			.addRegion(TUNGSTEN, 1f)
-			.addRegion(RUBY, 1f)
+			.addRegion(STONE, 8)
+			.addRegion(ores, 1)
+			.addRegion(STONE, 8)
+			.addRegion(ores, 1)
+			.addRegion(STONE, 8)
+			.addRegion(ores, 1)
+			.addRegion(STONE, 8)
 			;
 		
 		NoiseMapper mountainBiome = new NoiseMapper("Mountains", biomeNoise)

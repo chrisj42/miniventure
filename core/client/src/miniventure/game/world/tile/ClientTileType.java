@@ -123,6 +123,7 @@ public class ClientTileType extends TileType {
 		RUBY(ClientTileFactory::ore),
 		
 		STONE(type -> new ClientTileType(type, true,
+			new ConnectionManager(type, RenderStyle.SINGLE_FRAME, COAL.mainEnum, IRON.mainEnum, TUNGSTEN.mainEnum, RUBY.mainEnum),
 			new OverlapManager(type, RenderStyle.SINGLE_FRAME)
 		)),
 		
@@ -155,9 +156,11 @@ public class ClientTileType extends TileType {
 		/** @noinspection NonFinalFieldInEnum*/
 		private ClientTileType type = null;
 		private final P fetcher;
+		private final TileTypeEnum mainEnum;
 		
 		ClientTileTypeEnum(P fetcher) {
 			this.fetcher = fetcher;
+			mainEnum = TileTypeEnum.value(ordinal());
 		}
 		
 		public ClientTileType getType() {
@@ -173,7 +176,7 @@ public class ClientTileType extends TileType {
 	private interface ClientTileFactory {
 		static ClientTileType ore(TileTypeEnum type) {
 			return new ClientTileType(type, false,
-				new OverlapManager(type, RenderStyle.SINGLE_FRAME)
+				new ConnectionManager(type, RenderStyle.SINGLE_FRAME, TileTypeEnum.STONE)
 			);
 		}
 		
