@@ -35,10 +35,13 @@ import com.kotcrab.vis.ui.VisUI;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/** @noinspection StaticNonFinalField*/
 public class ClientCore extends ApplicationAdapter {
 	
 	private static GameScreen gameScreen;
 	private static ClientWorld clientWorld;
+	
+	public static boolean viewedInstructions = false;
 	
 	private static Music song;
 	private static final HashMap<String, Sound> soundEffects = new HashMap<>();

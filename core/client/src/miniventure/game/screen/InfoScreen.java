@@ -7,27 +7,39 @@ import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 
 public class InfoScreen extends BackgroundInheritor {
 	
-	private InfoScreen(String... text) {
+	private InfoScreen(String... text) { this(false, text); }
+	private InfoScreen(boolean replaceButton, String... text) {
 		VerticalGroup vGroup = useVGroup(30);
 		
 		vGroup.addActor(makeLabel(String.join("\n", text)));
 		
-		vGroup.addActor(makeButton("Back to Main Menu", ClientCore::backToParentScreen));
+		if(replaceButton)
+			vGroup.addActor(makeButton("Start Game", () -> ClientCore.getWorld().createWorld(0, 0)));
+		else
+			vGroup.addActor(makeButton("Back to Main Menu", ClientCore::backToParentScreen));
 	}
 	
 	public static class InstructionsScreen extends InfoScreen {
-		public InstructionsScreen() {
-			super("Use mouse or arrow keys to move around.",
-				"C to attack, V to interact.",
-				"E to open your inventory, Z to craft items (crafting missing in this update, sorry!).",
+		public InstructionsScreen() { this(false); }
+		public InstructionsScreen(boolean replaceButton) {
+			super(replaceButton, "Use mouse or arrow keys to move around.",
+				"C to attack, V to interact and do other things.",
+				"E to open your inventory, Z to craft items.",
 				"Q to drop an item from your inventory/hotbar. Use Shift-Q to drop all items in the stack.",
 				"1-5 keys to select hotbar items.",
-				"Inventory Screen: to put an item in your hotbar, press the 1-5 key matching the hotbar slot, with the inventory item you want to be there selected.",
+				"Inventory Screen: to put an item in your hotbar, press the 1-5 key matching the hotbar slot,",
+				"    with the inventory item you want to be there selected.",
+				"Crafting Screen: Click or press enter to craft the selected item.",
 				"+ and - keys to zoom in and out.",
 				"Press \"t\" to chat with other players, and \"/\" to use commands.",
 				"(Hint: use the up key to repeat messages, and tab to autocomplete command names.)",
 				"",
 				"Toggle Debug display: Shift-D");
+		}
+		
+		@Override
+		public void focus() {
+			ClientCore.viewedInstructions = true;
 		}
 	}
 	

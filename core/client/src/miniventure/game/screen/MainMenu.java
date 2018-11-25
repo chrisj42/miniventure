@@ -63,7 +63,10 @@ public class MainMenu extends BackgroundProvider implements ParentScreen {
 			@Override
 			public void clicked(InputEvent e, float x, float y) {
 				if(dialog) return;
-				world.createWorld(0, 0);
+				if(!ClientCore.viewedInstructions)
+					ClientCore.setScreen(new InstructionsScreen(true));
+				else
+					world.createWorld(0, 0);
 			}
 		});
 		
