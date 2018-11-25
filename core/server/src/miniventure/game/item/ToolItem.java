@@ -7,15 +7,15 @@ import miniventure.game.world.entity.mob.player.Player;
 public class ToolItem extends ServerItem {
 	
 	public enum Material {
-		Flint(50, 1, 3),
+		Flint(50, 1, 1),
 		
-		Stone(120, 2, 3),
+		Stone(120, 2, 1),
 		
-		Iron(250, 4, 3),
+		Iron(250, 4, 1),
 		
-		Tungsten(600, 6, 2),
+		Tungsten(600, 6, 1),
 		
-		Ruby(1500, 8, 2);
+		Ruby(1500, 8, 1);
 		
 		public final int maxDurability; // the number of uses this level of tool gets.
 		public final int damageMultiplier; // damage done by this tool is multiplied by this number.
