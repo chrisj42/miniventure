@@ -7,8 +7,11 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 
 public class ErrorScreen extends BackgroundInheritor {
 	
+	private final String error;
+	
 	public ErrorScreen(String error) { this(error, true); }
 	public ErrorScreen(String error, boolean allowRejoin) {
+		this.error = error;
 		
 		Table table = useTable();
 		
@@ -24,4 +27,9 @@ public class ErrorScreen extends BackgroundInheritor {
 	}
 	
 	@Override public void focus() { ClientCore.stopMusic(); super.focus(); }
+	
+	@Override
+	public String toString() {
+		return "ErrorScreen("+error+')';
+	}
 }
