@@ -230,12 +230,12 @@ public class ServerPlayer extends ServerMob implements Player {
 			
 			if(result == Result.USED)
 				changeStat(Stat.Stamina, -heldItem.getStaminaUsage());
-			else {
+			else
 				changeStat(Stat.Stamina, -1); // for trying...
-				
-				// successful interaction sounds have been taken care of; this sound is of an empty swing.
+			
+			if(!result.success)
+				// this sound is of an empty swing; successful interaction sounds are taken care of elsewhere.
 				ServerCore.getServer().playEntitySound("swing", this);
-			}
 			
 			if(result == Result.USED && !GameCore.debug)
 				hands.resetItemUsage(heldItem, index);
