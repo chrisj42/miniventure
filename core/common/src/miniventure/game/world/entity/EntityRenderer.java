@@ -37,6 +37,8 @@ public abstract class EntityRenderer {
 	
 	public abstract Vector2 getSize();
 	
+	protected Class<? extends EntityRenderer> getRendererClass() { return getClass(); }
+	
 	public static class SpriteRenderer extends EntityRenderer {
 		
 		private static final HashMap<String, TextureHolder> textures = new HashMap<>();
@@ -202,49 +204,35 @@ public abstract class EntityRenderer {
 	
 	public static class TextRenderer extends EntityRenderer {
 		
-		@NotNull private final String text;
-		private final Color main;
-		private final Color shadow;
-		private final float width;
-		private final float height;
+		@NotNull final String text;
+		final Color main;
+		final Color shadow;
 		
 		public TextRenderer(@NotNull String text, Color main, Color shadow) {
 			this.text = text;
 			this.main = main;
 			this.shadow = shadow;
-			GlyphLayout layout = GameCore.getTextLayout(text);
-			this.width = layout.width;
-			this.height = layout.height;
 		}
 		private TextRenderer(String[] data) {
 			this(data[0], Color.valueOf(data[1]), Color.valueOf(data[2]));
 		}
 		
+		TextRenderer(TextRenderer model) { this(model.text, model.main, model.shadow); }
+		
 		@Override
 		protected String[] serialize() { return new String[] {text, main.toString(), shadow.toString()}; }
 		
 		@Override
-		public void render(float x, float y, Batch batch, float drawableHeight) {
-			BitmapFont font = GameCore.getFont();
-			font.setColor(shadow);
-			font.draw(batch, text, x-1, y+1, 0, Align.center, false);
-			font.setColor(main);
-			try {
-				font.draw(batch, text, x, y, 0, Align.center, false);
-			} catch(Exception e) {
-				System.err.println("error drawing text");
-				e.printStackTrace();
-			}
-		}
+		public void render(float x, float y, Batch batch, float drawableHeight) {}
 		
 		@Override
-		public Vector2 getSize() { return new Vector2(width, height); }
+		public Vector2 getSize() { return new Vector2(); }
 	}
 	
 	// NOTE, I won't be using this for mobs. I want to just enforce blinking no matter the sprite underneath, and only for a period of time...
 	public static class BlinkRenderer extends EntityRenderer {
 		
-		private EntityRenderer mainRenderer;
+		EntityRenderer mainRenderer;
 		private final boolean blinkFirst;
 		private final float initialDuration;
 		@Nullable private final Color blinkColor;
@@ -317,7 +305,7 @@ public abstract class EntityRenderer {
 		String[] data = renderer.serialize();
 		String[] allData = new String[data.length+1];
 		
-		String className = renderer.getClass().getCanonicalName();
+		String className = renderer.getRendererClass().getCanonicalName();
 		if(className == null)
 			allData[0] = "";
 		else
@@ -329,7 +317,7 @@ public abstract class EntityRenderer {
 	}
 	
 	@NotNull
-	public static EntityRenderer deserialize(String[] allData) {
+	static EntityRenderer deserialize(String[] allData) {
 		if(allData[0].length() == 0) return BLANK;
 		
 		String className = allData[0];
