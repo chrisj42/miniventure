@@ -34,7 +34,7 @@ public class GameScreen {
 	
 	@NotNull private final LevelViewport levelView;
 	
-	private SpriteBatch batch = GameCore.getBatch();
+	private SpriteBatch batch = ClientCore.getBatch();
 	private MenuScreen guiStage;
 	
 	private final OrthographicCamera uiCamera;
@@ -46,7 +46,7 @@ public class GameScreen {
 		uiCamera = new OrthographicCamera();
 		guiStage = new MenuScreen(false, new DiscreteViewport(uiCamera), batch) {
 			{
-				ProgressBar fillBar = new ProgressBar(0, 1, .01f, true, GameCore.getSkin()) {
+				ProgressBar fillBar = new ProgressBar(0, 1, .01f, true, ClientCore.getSkin()) {
 					@Override
 					public float getPrefHeight() {
 						return uiCamera.viewportHeight * 2 / 5;
@@ -180,7 +180,7 @@ public class GameScreen {
 		
 		if(!showDebug) {
 			if(GameCore.debug) {
-				BitmapFont f = GameCore.getFont();
+				BitmapFont f = ClientCore.getFont();
 				f.setColor(Color.ORANGE);
 				f.draw(batch, "Debug Mode ENABLED", 0, uiCamera.viewportHeight - 5);
 			}
@@ -210,7 +210,7 @@ public class GameScreen {
 		
 		debugInfo.add("Time: " + TimeOfDay.getTimeString(ClientCore.getWorld().getDaylightOffset()));
 		
-		BitmapFont font = GameCore.getFont();
+		BitmapFont font = ClientCore.getFont();
 		if(GameCore.debug) font.setColor(Color.ORANGE);
 		for(int i = 0; i < debugInfo.size; i++) {
 			if(GameCore.debug && i == 1)

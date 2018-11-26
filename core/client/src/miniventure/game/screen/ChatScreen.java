@@ -61,7 +61,7 @@ public class ChatScreen extends MenuScreen implements ParentScreen {
 		messageStream.columnAlign(Align.topRight);
 		messageStream.space(5);
 		
-		input = new TextField("", GameCore.getSkin()) {
+		input = new TextField("", ClientCore.getSkin()) {
 			@Override
 			public void draw(Batch batch, float parentAlpha) {
 				if(ClientCore.getScreen() == ChatScreen.this)
@@ -223,7 +223,7 @@ public class ChatScreen extends MenuScreen implements ParentScreen {
 		private final boolean connect;
 		
 		TimerLabel(String text, Color color, boolean connect) {
-			super(text, new LabelStyle(GameCore.getFont(), color));
+			super(text, new LabelStyle(ClientCore.getFont(), color));
 			this.connect = connect;
 			timeLeft = MESSAGE_LIFE_TIME;
 			setAlignment(Align.left);

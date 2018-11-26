@@ -2,7 +2,7 @@ package miniventure.game.item;
 
 import java.util.Objects;
 
-import miniventure.game.GameCore;
+import miniventure.game.client.ClientCore;
 import miniventure.game.screen.util.ColorBackground;
 import miniventure.game.util.MyUtils;
 
@@ -63,7 +63,7 @@ public class ItemSlot extends Widget {
 		this.item = item;
 		if(!showName) return this; // the layout is always the same.
 		else if(item == null) prefWidth = Item.ICON_SIZE * 2;
-		else prefWidth = Item.ICON_SIZE + 2 + SPACING + GameCore.getTextLayout(item.getName()).width;
+		else prefWidth = Item.ICON_SIZE + 2 + SPACING + ClientCore.getTextLayout(item.getName()).width;
 		prefWidth += XPADDING * 2;
 		return this;
 	}
@@ -109,7 +109,7 @@ public class ItemSlot extends Widget {
 			renderUsability(batch, getX()+2+XPADDING, getY()+2+YPADDING, item.getUsabilityStatus());
 			
 			if(showName || showCount()) {
-				BitmapFont font = GameCore.getFont();
+				BitmapFont font = ClientCore.getFont();
 				font.setColor(getTextColor());
 				
 				if(showName) {

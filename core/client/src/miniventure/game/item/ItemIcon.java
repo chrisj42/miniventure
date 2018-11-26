@@ -1,6 +1,6 @@
 package miniventure.game.item;
 
-import miniventure.game.GameCore;
+import miniventure.game.client.ClientCore;
 import miniventure.game.util.MyUtils;
 
 import com.badlogic.gdx.graphics.Color;
@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.ui.Widget;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ItemIcon extends Widget {
@@ -44,7 +43,7 @@ public class ItemIcon extends Widget {
 			renderUsability(batch, getX()+2, getY()+2, item.getUsabilityStatus());
 			
 			if(showCount()) {
-				BitmapFont font = GameCore.getFont();
+				BitmapFont font = ClientCore.getFont();
 				
 				font.draw(batch, String.valueOf(count), getX() + 2, getY() + 2 + font.getLineHeight());
 			}

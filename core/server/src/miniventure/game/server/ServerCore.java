@@ -42,7 +42,7 @@ public class ServerCore {
 				int width = Integer.parseInt(args[sizeIdx]);
 				int height = Integer.parseInt(args[sizeIdx+1]);
 				
-				GameCore.initNonGdx();
+				GameCore.initNonGdxTextures();
 				ServerTileType.init();
 				
 				System.out.println("loading server world...");

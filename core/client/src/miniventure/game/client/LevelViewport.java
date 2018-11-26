@@ -3,8 +3,6 @@ package miniventure.game.client;
 import miniventure.game.GameCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Chunk;
-import miniventure.game.world.ClientLevel;
-import miniventure.game.world.Level;
 import miniventure.game.world.RenderLevel;
 import miniventure.game.world.tile.Tile;
 
@@ -46,7 +44,7 @@ public class LevelViewport {
 	
 	private boolean debug = false;
 	
-	public LevelViewport() { this(GameCore.getBatch(), new OrthographicCamera()); }
+	public LevelViewport() { this(ClientCore.getBatch(), new OrthographicCamera()); }
 	public LevelViewport(SpriteBatch batch, OrthographicCamera lightingCamera) {
 		this.batch = batch;
 		camera = new OrthographicCamera();

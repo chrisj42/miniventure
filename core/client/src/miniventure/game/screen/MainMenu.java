@@ -172,7 +172,7 @@ public class MainMenu extends BackgroundProvider implements ParentScreen {
 			// add a message saying you have the latest version, or a hyperlink message to the newest jar file.
 			VersionInfo latestVersion = GameCore.getLatestVersion();
 			if(latestVersion.version.compareTo(GameCore.VERSION) > 0) // link new version
-				table.getCell(label).setActor(new MyLinkLabel("Miniventure " + latestVersion.releaseName + " Now Available! Click here to download.", latestVersion.assetUrl, new LinkLabelStyle(GameCore.getFont(), Color.SKY, new ColorRect(Color.SKY))));
+				table.getCell(label).setActor(new MyLinkLabel("Miniventure " + latestVersion.releaseName + " Now Available! Click here to download.", latestVersion.assetUrl, new LinkLabelStyle(ClientCore.getFont(), Color.SKY, new ColorRect(Color.SKY))));
 			else if(latestVersion.releaseName.length() > 0)
 				label.setText("You have the latest version.");
 			else

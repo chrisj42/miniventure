@@ -3,7 +3,6 @@ package miniventure.game.item;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.InventoryAddition;
 import miniventure.game.GameProtocol.InventoryRequest;
 import miniventure.game.GameProtocol.InventoryUpdate;
@@ -74,9 +73,9 @@ public class InventoryScreen extends MenuScreen {
 		mainGroup = useVGroup(2f, Align.right, false);
 		addMainGroup(mainGroup, RelPos.RIGHT);
 		
-		fillBar = new ProgressBar(0, 1, .01f, false, GameCore.getSkin());
+		fillBar = new ProgressBar(0, 1, .01f, false, ClientCore.getSkin());
 		
-		slotTable = new Table(GameCore.getSkin()) {
+		slotTable = new Table(ClientCore.getSkin()) {
 			@Override
 			protected void drawChildren(Batch batch, float parentAlpha) {
 				boolean done = false;
@@ -96,7 +95,7 @@ public class InventoryScreen extends MenuScreen {
 		slotTable.defaults().fillX().minSize(Item.ICON_SIZE * 3, ItemSlot.HEIGHT/2);
 		slotTable.pad(10f);
 		slotTable.background(new ColorBackground(slotTable, tableBackground));
-		slotTable.add(new Label("Waiting for inventory data...", new LabelStyle(GameCore.getFont(), Color.WHITE)));
+		slotTable.add(new Label("Waiting for inventory data...", new LabelStyle(ClientCore.getFont(), Color.WHITE)));
 		
 		slotTable.addListener(new InputListener() {
 			@Override
@@ -127,7 +126,7 @@ public class InventoryScreen extends MenuScreen {
 			}
 		});
 		
-		scrollPane = new ScrollPane(slotTable, GameCore.getSkin()) {
+		scrollPane = new ScrollPane(slotTable, ClientCore.getSkin()) {
 			@Override
 			public float getPrefHeight() {
 				return InventoryScreen.this.getHeight()*2/3;

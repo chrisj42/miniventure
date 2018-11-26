@@ -2,7 +2,7 @@ package miniventure.game.screen;
 
 import java.util.LinkedList;
 
-import miniventure.game.GameCore;
+import miniventure.game.client.ClientCore;
 import miniventure.game.screen.util.DiscreteViewport;
 import miniventure.game.screen.util.ParentScreen;
 import miniventure.game.util.RelPos;
@@ -12,7 +12,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Group;
@@ -34,7 +33,7 @@ public class MenuScreen extends Stage {
 	
 	private final LinkedList<ActorAnchor> anchoredActors = new LinkedList<>();
 	
-	public MenuScreen(final boolean clearGdxBackground) { this(clearGdxBackground, new DiscreteViewport(), GameCore.getBatch()); }
+	public MenuScreen(final boolean clearGdxBackground) { this(clearGdxBackground, new DiscreteViewport(), ClientCore.getBatch()); }
 	public MenuScreen(final boolean clearGdxBackground, Viewport viewport, Batch batch) {
 		super(viewport, batch);
 		this.clearGdxBackground = clearGdxBackground;
@@ -110,13 +109,13 @@ public class MenuScreen extends Stage {
 	protected static VisLabel makeLabel(String text, int size, boolean wrapText) {
 		VisLabel label = makeLabel(text, wrapText);
 		LabelStyle style = label.getStyle();
-		style.font = GameCore.getFont(size);
+		style.font = ClientCore.getFont(size);
 		label.setStyle(style);
 		return label;
 	}
 	protected static VisLabel makeLabel(String text) { return makeLabel(text, true); }
 	protected static VisLabel makeLabel(String text, boolean wrapText) {
-		VisLabel label = new VisLabel(text, new LabelStyle(GameCore.getFont(), Color.WHITE));
+		VisLabel label = new VisLabel(text, new LabelStyle(ClientCore.getFont(), Color.WHITE));
 		label.setWrap(wrapText);
 		label.setAlignment(Align.center, Align.left);
 		return label;

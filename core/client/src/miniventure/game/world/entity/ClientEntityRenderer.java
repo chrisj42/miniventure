@@ -1,6 +1,6 @@
 package miniventure.game.world.entity;
 
-import miniventure.game.GameCore;
+import miniventure.game.client.ClientCore;
 import miniventure.game.world.entity.EntityRenderer.BlinkRenderer;
 import miniventure.game.world.entity.EntityRenderer.TextRenderer;
 
@@ -40,7 +40,7 @@ public class ClientEntityRenderer {
 		
 		@Override
 		public void render(float x, float y, Batch batch, float drawableHeight) {
-			BitmapFont font = GameCore.getFont();
+			BitmapFont font = ClientCore.getFont();
 			font.setColor(shadow);
 			font.draw(batch, text, x-1, y+1, 0, Align.center, false);
 			font.setColor(main);

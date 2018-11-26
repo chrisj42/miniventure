@@ -30,6 +30,12 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.kotcrab.vis.ui.VisUI;
 
 import org.jetbrains.annotations.NotNull;
@@ -38,6 +44,8 @@ import org.jetbrains.annotations.Nullable;
 /** @noinspection StaticNonFinalField*/
 public class ClientCore extends ApplicationAdapter {
 	
+	public static final int DEFAULT_SCREEN_WIDTH = 800;
+	public static final int DEFAULT_SCREEN_HEIGHT = 450;
 	private static GameScreen gameScreen;
 	private static ClientWorld clientWorld;
 	
@@ -52,6 +60,11 @@ public class ClientCore extends ApplicationAdapter {
 	private static MenuScreen menuScreen;
 	
 	private static final Object screenLock = new Object();
+	private static SpriteBatch batch;
+	private static FreeTypeFontGenerator fontGenerator;
+	private static GlyphLayout layout = new GlyphLayout();
+	private static Skin skin;
+	private static HashMap<Integer, BitmapFont> fonts = new HashMap<>();
 	
 	private final ServerManager serverStarter;
 	
@@ -88,7 +101,13 @@ public class ClientCore extends ApplicationAdapter {
 		//System.out.println("start delay");
 		MyUtils.delay(0, () -> Gdx.app.postRunnable(() -> {
 			//System.out.println("end delay");
-			GameCore.initGdx();
+			GameCore.initGdxTextures();
+			if(batch == null)
+				batch = new SpriteBatch();
+			fontGenerator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/arial.ttf"));
+			skin = new Skin(Gdx.files.internal("skins/visui/uiskin.json"));
+			
+			getFont(); // initialize default font
 			ClientTileType.init();
 			
 			gameScreen = new GameScreen();
@@ -100,6 +119,13 @@ public class ClientCore extends ApplicationAdapter {
 	
 	@Override
 	public void dispose () {
+		batch.dispose();
+		skin.dispose();
+		fontGenerator.dispose();
+		for(BitmapFont font: fonts.values())
+			font.dispose();
+		fonts.clear();
+		
 		if(gameScreen != null)
 			gameScreen.dispose();
 		
@@ -113,7 +139,7 @@ public class ClientCore extends ApplicationAdapter {
 	public void render() {
 		input.update();
 		
-		GameCore.getBatch().setColor(new Color(1, 1, 1, 1));
+		getBatch().setColor(new Color(1, 1, 1, 1));
 		
 		if (clientWorld != null && clientWorld.worldLoaded())
 			clientWorld.update(GameCore.getDeltaTime()); // renders as well
@@ -228,6 +254,49 @@ public class ClientCore extends ApplicationAdapter {
 			menu.resize(width, height);
 	}
 	
+	
+	public static Skin getSkin() { return skin; }
+	
+	public static SpriteBatch getBatch() {
+		if(batch == null) batch = new SpriteBatch();
+		return batch;
+	}
+	
+	public static GlyphLayout getTextLayout(String text) {
+		if(fontGenerator != null)
+			layout.setText(getFont(), text);
+		return layout;
+	}
+	
+	private static FreeTypeFontParameter getDefaultFontConfig(int size) {
+		FreeTypeFontParameter params = new FreeTypeFontParameter();
+		params.size = size;
+		params.color = Color.WHITE;
+		params.borderColor = Color.BLACK;
+		params.borderWidth = 1;
+		params.spaceX = -1;
+		//params.magFilter = TextureFilter.Linear;
+		params.shadowOffsetX = 1;
+		params.shadowOffsetY = 1;
+		params.shadowColor = Color.BLACK;
+		return params;
+	}
+	
+	public static BitmapFont getFont(int size) {
+		if(!fonts.containsKey(size)) {
+			BitmapFont font = fontGenerator.generateFont(getDefaultFontConfig(size));
+			font.setUseIntegerPositions(true);
+			fonts.put(size, font);
+		}
+		
+		BitmapFont font = fonts.get(size);
+		font.setColor(Color.WHITE);
+		return font;
+	}
+	
+	public static BitmapFont getFont() {
+		return getFont(15);
+	}
 	
 	public static boolean hasMenu() { synchronized (screenLock) { return hasMenu; } }
 	

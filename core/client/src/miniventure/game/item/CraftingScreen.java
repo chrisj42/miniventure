@@ -3,7 +3,6 @@ package miniventure.game.item;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.CraftRequest;
 import miniventure.game.GameProtocol.RecipeRequest;
 import miniventure.game.GameProtocol.RecipeStockUpdate;
@@ -72,17 +71,17 @@ public class CraftingScreen extends MenuScreen {
 		
 		mainGroup.add(makeLabel("personal crafting", 12)).row();
 		
-		craftableTable = new Table(GameCore.getSkin());
+		craftableTable = new Table(ClientCore.getSkin());
 		craftableTable.defaults().pad(2f);
 		craftableTable.pad(10f);
 		craftableTable.add(makeLabel("Waiting for crafting data...", false));
 		
-		costTable = new Table(GameCore.getSkin());
+		costTable = new Table(ClientCore.getSkin());
 		costTable.pad(5f);
-		costTable.defaults().pad(2f).align(Align.left);
+		costTable.defaults().pad(2f).align(Align.center);
 		costTable.add(makeLabel("Waiting for crafting data...", false));
 		
-		recipeListTable = new Table(GameCore.getSkin()) {
+		recipeListTable = new Table(ClientCore.getSkin()) {
 			@Override
 			protected void drawChildren(Batch batch, float parentAlpha) {
 				boolean done = false;
@@ -124,7 +123,7 @@ public class CraftingScreen extends MenuScreen {
 			}
 		});
 		
-		scrollPane = new ScrollPane(recipeListTable, GameCore.getSkin()) {
+		scrollPane = new ScrollPane(recipeListTable, ClientCore.getSkin()) {
 			@Override
 			public float getPrefHeight() {
 				return CraftingScreen.this.getHeight()/2;
@@ -233,8 +232,7 @@ public class CraftingScreen extends MenuScreen {
 				Color background = getCount(cost.item) >= cost.count ? craftableBackground : notCraftableBackground;
 				ItemSlot slot = new ItemSlot(true, cost.item, cost.count, background);
 				costSlots.put(cost.item.getName(), slot);
-				costTable.add(slot);
-				// costTable.add(new ItemIcon(cost.item, cost.count));
+				costTable.add(slot).align(Align.left);
 				costTable.row();
 			}
 			
