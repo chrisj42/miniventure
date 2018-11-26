@@ -22,3 +22,4 @@
 		* Forced player to view instructions
 		* Fixed ores to actually appear in the map (soon to be obsolete in 1.6/1.7)
 		* Removed excessive stamina drain from tools
+		* Improved a number of tile and item sprites
