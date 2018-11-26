@@ -5,3 +5,5 @@ walking animations continue playing on respawn screen
 player jumps back whenever walking into an entity that is moving toward it, when the server is remote. I'm pretty sure this is due to the delay between server updates and the server updating the client. The client thinks it can move somewhere, because the server hasn't had a chance to tell it otherwise, so it tries to move. The server then corrects it, causing the "jump-back".
 
 player position becomes a bit spazzy occasionally, and it takes a little bit for it to go back to normal.
+
+ui positions wrong when fullscreen during respawn; screen resize fixes it
