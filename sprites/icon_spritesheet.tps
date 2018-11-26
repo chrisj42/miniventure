@@ -240,6 +240,7 @@
             </struct>
             <key type="filename">icon-sprites/items/coal.png</key>
             <key type="filename">icon-sprites/items/cotton.png</key>
+            <key type="filename">icon-sprites/items/dirt.png</key>
             <key type="filename">icon-sprites/items/fabric.png</key>
             <key type="filename">icon-sprites/items/flint.png</key>
             <key type="filename">icon-sprites/items/food/apple.png</key>

@@ -40,6 +40,8 @@ public class TileItem extends ServerItem {
 		items.put(TileTypeEnum.CLOSED_DOOR, new TileItem("Door", GameCore.tileAtlas.findRegion("closed_door/c00"), TileTypeEnum.CLOSED_DOOR, groundTypes));
 		items.put(TileTypeEnum.OPEN_DOOR, items.get(TileTypeEnum.CLOSED_DOOR));
 		
+		items.put(TileTypeEnum.DIRT, new TileItem("Dirt", GameCore.icons.get("items/dirt"), TileTypeEnum.DIRT, TileTypeEnum.HOLE));
+		
 		addItem(TileTypeEnum.STONE_FLOOR, TileTypeEnum.HOLE/*, TileTypeEnum.DIRT*/);
 		
 		addItem(TileTypeEnum.STONE_PATH, TileTypeEnum.DIRT, TileTypeEnum.SAND, TileTypeEnum.GRASS, TileTypeEnum.SNOW);
