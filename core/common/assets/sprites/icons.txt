@@ -178,156 +178,170 @@ items/ruby
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/stone
+items/sand
   rotate: false
   xy: 103, 119
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tools/flint_axe
+items/snow
   rotate: false
   xy: 3, 153
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tools/flint_pickaxe
+items/stone
   rotate: false
   xy: 23, 153
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tools/flint_shovel
+items/tools/flint_axe
   rotate: false
   xy: 83, 139
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tools/flint_sword
+items/tools/flint_pickaxe
   rotate: false
   xy: 63, 155
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tools/iron_axe
+items/tools/flint_shovel
   rotate: false
   xy: 43, 171
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tools/iron_pickaxe
+items/tools/flint_sword
   rotate: false
   xy: 103, 139
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tools/iron_shovel
+items/tools/iron_axe
   rotate: false
   xy: 3, 173
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tools/iron_sword
+items/tools/iron_pickaxe
   rotate: false
   xy: 23, 173
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tools/ruby_axe
+items/tools/iron_shovel
   rotate: false
   xy: 83, 159
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tools/ruby_pickaxe
+items/tools/iron_sword
   rotate: false
   xy: 63, 175
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tools/ruby_shovel
+items/tools/ruby_axe
   rotate: false
   xy: 43, 191
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tools/ruby_sword
+items/tools/ruby_pickaxe
   rotate: false
   xy: 103, 159
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tools/stone_axe
+items/tools/ruby_shovel
   rotate: false
   xy: 3, 193
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tools/stone_pickaxe
+items/tools/ruby_sword
   rotate: false
   xy: 23, 193
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tools/stone_shovel
+items/tools/stone_axe
   rotate: false
   xy: 3, 213
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tools/stone_sword
+items/tools/stone_pickaxe
   rotate: false
   xy: 3, 233
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tools/tungsten_axe
+items/tools/stone_shovel
   rotate: false
   xy: 23, 213
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tools/tungsten_pickaxe
+items/tools/stone_sword
   rotate: false
   xy: 23, 233
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tools/tungsten_shovel
+items/tools/tungsten_axe
   rotate: false
   xy: 83, 179
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tools/tungsten_sword
+items/tools/tungsten_pickaxe
   rotate: false
   xy: 63, 195
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tungsten
+items/tools/tungsten_shovel
   rotate: false
   xy: 43, 211
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+items/tools/tungsten_sword
+  rotate: false
+  xy: 103, 179
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+items/tungsten
+  rotate: false
+  xy: 43, 231
   size: 16, 16
   orig: 16, 16
   offset: 0, 0

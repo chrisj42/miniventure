@@ -25,8 +25,6 @@ public class DestructionManager {
 		return new DestructibleBuilder(tileType, -1).require(item -> false).make();
 	}
 	
-	static final int HEALTH_IDX = 0;
-	
 	final TileTypeEnum tileType;
 	final int totalHealth;
 	

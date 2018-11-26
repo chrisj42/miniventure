@@ -123,15 +123,15 @@ public class Recipes {
 		),
 		
 		new Recipe(TileItem.get(TileTypeEnum.STONE_WALL),
-			new ServerItemStack(TileItem.get(TileTypeEnum.STONE), 3)
+			new ServerItemStack(ResourceType.Stone.get(), 3)
 		),
 		
 		new Recipe(TileItem.get(TileTypeEnum.STONE_FLOOR),
-			new ServerItemStack(TileItem.get(TileTypeEnum.STONE), 1)
+			new ServerItemStack(ResourceType.Stone.get(), 1)
 		),
 		
 		new Recipe(new ServerItemStack(TileItem.get(TileTypeEnum.STONE_PATH), 2),
-			new ServerItemStack(TileItem.get(TileTypeEnum.STONE), 1)
+			new ServerItemStack(ResourceType.Stone.get(), 1)
 		)
 	};
 	

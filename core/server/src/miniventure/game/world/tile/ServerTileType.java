@@ -122,8 +122,9 @@ public class ServerTileType extends TileType {
 		)),
 		
 		SNOW(type -> new ServerTileType(type,
-			new DestructionManager.DestructibleBuilder(type, true)
-				.drops(false,
+			new DestructionManager.DestructibleBuilder(type, false)
+				.drops(
+					new ItemDrop(ResourceType.Snow.get()),
 					new ItemDrop(FoodType.Snow_Berries.get(), 0, 1, .1f)
 				)
 				.require(new RequiredTool(ToolType.Shovel))

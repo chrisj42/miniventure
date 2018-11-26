@@ -256,6 +256,8 @@
             <key type="filename">icon-sprites/items/iron.png</key>
             <key type="filename">icon-sprites/items/log.png</key>
             <key type="filename">icon-sprites/items/ruby.png</key>
+            <key type="filename">icon-sprites/items/sand.png</key>
+            <key type="filename">icon-sprites/items/snow.png</key>
             <key type="filename">icon-sprites/items/stone.png</key>
             <key type="filename">icon-sprites/items/tools/flint_axe.png</key>
             <key type="filename">icon-sprites/items/tools/flint_pickaxe.png</key>
