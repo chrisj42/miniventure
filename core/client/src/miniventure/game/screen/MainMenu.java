@@ -6,10 +6,10 @@ import miniventure.game.GameCore;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.ClientWorld;
 import miniventure.game.client.LevelViewport;
+import miniventure.game.client.Style;
 import miniventure.game.screen.InfoScreen.CreditsScreen;
 import miniventure.game.screen.InfoScreen.InstructionsScreen;
 import miniventure.game.screen.util.BackgroundProvider;
-import miniventure.game.screen.util.ColorRect;
 import miniventure.game.screen.util.MyLinkLabel;
 import miniventure.game.screen.util.ParentScreen;
 import miniventure.game.util.VersionInfo;
@@ -22,10 +22,8 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.kotcrab.vis.ui.widget.LinkLabel.LinkLabelStyle;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 
@@ -45,7 +43,7 @@ public class MainMenu extends BackgroundProvider implements ParentScreen {
 	private static final float PAN_SPEED = 4.5f; // in tiles/second.
 	
 	public MainMenu() {
-		super(false, true); // level renderer clears it
+		super(false, true, new ScreenViewport()); // level renderer clears it
 		
 		ClientWorld world = ClientCore.getWorld();
 		
@@ -57,42 +55,34 @@ public class MainMenu extends BackgroundProvider implements ParentScreen {
 		VisLabel updateLabel = addLabel("Checking for higher versions...", 45);
 		setVersionUpdateLabel(updateLabel);
 		
-		VisTextButton playButton = new VisTextButton("Play");
-		
-		playButton.addListener(new ClickListener() {
-			@Override
-			public void clicked(InputEvent e, float x, float y) {
-				if(dialog) return;
-				if(!ClientCore.viewedInstructions)
-					ClientCore.setScreen(new InstructionsScreen(true));
-				else
-					world.createWorld(0, 0);
-			}
+		VisTextButton playButton = makeButton("Play", () -> {
+			if(dialog) return;
+			if(!ClientCore.viewedInstructions)
+				ClientCore.setScreen(new InstructionsScreen(true));
+			else
+				world.createWorld(0, 0);
 		});
 		
 		table.add(playButton).spaceBottom(20);
 		table.row();
 		
-		VisTextButton joinBtn = new VisTextButton("Join Server");
-		joinBtn.addListener(new ClickListener() {
-			@Override
-			public void clicked(InputEvent e, float x, float y) {
-				if(dialog) return;
-				dialog = true;
-				LoadingScreen loader = new LoadingScreen();
-				loader.pushMessage("Preparing to connect...");
-				ClientCore.setScreen(loader);
-				new Thread(() -> {
-					String ipAddress = JOptionPane.showInputDialog("Enter the IP Address you want to connect to.");
-					Gdx.app.postRunnable(() -> {
-						if(ipAddress != null)
-							world.createWorld(ipAddress);
-						else
-							ClientCore.backToParentScreen();
-					});
-					dialog = false;
-				}).start();
-			}
+		VisTextButton joinBtn = makeButton("Join Server", () -> {
+			if(dialog) return;
+			dialog = true;
+			LoadingScreen loader = new LoadingScreen();
+			loader.pushMessage("Preparing to connect...");
+			ClientCore.setScreen(loader);
+			//noinspection CallToThreadStartDuringObjectConstruction
+			new Thread(() -> {
+				String ipAddress = JOptionPane.showInputDialog("Enter the IP Address you want to connect to.");
+				Gdx.app.postRunnable(() -> {
+					if(ipAddress != null)
+						world.createWorld(ipAddress);
+					else
+						ClientCore.backToParentScreen();
+				});
+				dialog = false;
+			}).start();
 		});
 		
 		table.add(joinBtn).spaceBottom(20).row();
@@ -171,9 +161,12 @@ public class MainMenu extends BackgroundProvider implements ParentScreen {
 		else {
 			// add a message saying you have the latest version, or a hyperlink message to the newest jar file.
 			VersionInfo latestVersion = GameCore.getLatestVersion();
-			if(latestVersion.version.compareTo(GameCore.VERSION) > 0) // link new version
-				table.getCell(label).setActor(new MyLinkLabel("Miniventure " + latestVersion.releaseName + " Now Available! Click here to download.", latestVersion.assetUrl, new LinkLabelStyle(ClientCore.getFont(), Color.SKY, new ColorRect(Color.SKY))));
-			else if(latestVersion.releaseName.length() > 0)
+			if(latestVersion.version.compareTo(GameCore.VERSION) > 0) { // link new version
+				MyLinkLabel linkLabel = new MyLinkLabel("Miniventure " + latestVersion.releaseName + " Now Available! Click here to download.", latestVersion.assetUrl, Style.LinkLabel.getName());
+				deregisterLabel(label);
+				table.getCell(label).setActor(linkLabel);
+				registerLabel(Style.LinkLabel, linkLabel);
+			} else if(latestVersion.releaseName.length() > 0)
 				label.setText("You have the latest version.");
 			else
 				label.setText("Connection failed, could not check for updates.");

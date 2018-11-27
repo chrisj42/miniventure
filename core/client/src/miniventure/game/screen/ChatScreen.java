@@ -11,6 +11,7 @@ import miniventure.game.GameProtocol.TabResponse;
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.chat.InfoMessageLine;
 import miniventure.game.client.ClientCore;
+import miniventure.game.client.Style;
 import miniventure.game.screen.util.ParentScreen;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.RelPos;
@@ -25,6 +26,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.utils.Align;
+import com.kotcrab.vis.ui.VisUI;
 
 public class ChatScreen extends MenuScreen implements ParentScreen {
 	
@@ -61,7 +63,7 @@ public class ChatScreen extends MenuScreen implements ParentScreen {
 		messageStream.columnAlign(Align.topRight);
 		messageStream.space(5);
 		
-		input = new TextField("", ClientCore.getSkin()) {
+		input = new TextField("", VisUI.getSkin()) {
 			@Override
 			public void draw(Batch batch, float parentAlpha) {
 				if(ClientCore.getScreen() == ChatScreen.this)
@@ -194,8 +196,12 @@ public class ChatScreen extends MenuScreen implements ParentScreen {
 		Gdx.app.postRunnable(() -> {
 			messageStream.addActorAt(0, label);
 			labelQueue.add(label);
-			if(messageStream.getChildren().size > 10)
-				messageStream.removeActor(labelQueue.poll());
+			registerLabel(Style.Default, label);
+			if(messageStream.getChildren().size > 10) {
+				Label oldLabel = labelQueue.poll();
+				deregisterLabel(oldLabel);
+				messageStream.removeActor(oldLabel);
+			}
 		});
 	}
 	
@@ -245,6 +251,7 @@ public class ChatScreen extends MenuScreen implements ParentScreen {
 				Gdx.app.postRunnable(() -> {
 					messageStream.removeActor(this);
 					labelQueue.remove(this);
+					deregisterLabel(this);
 				});
 			}
 		}

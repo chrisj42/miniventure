@@ -4,11 +4,14 @@ import miniventure.game.client.ClientCore;
 import miniventure.game.screen.util.BackgroundInheritor;
 
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 public class InfoScreen extends BackgroundInheritor {
 	
 	private InfoScreen(String... text) { this(false, text); }
 	private InfoScreen(boolean addButton, String... text) {
+		super(new ScreenViewport());
+		
 		VerticalGroup vGroup = useVGroup(30);
 		
 		vGroup.addActor(makeLabel(String.join("\n", text)));

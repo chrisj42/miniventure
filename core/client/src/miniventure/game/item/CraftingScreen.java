@@ -8,6 +8,7 @@ import miniventure.game.GameProtocol.RecipeRequest;
 import miniventure.game.GameProtocol.RecipeStockUpdate;
 import miniventure.game.GameProtocol.SerialRecipe;
 import miniventure.game.client.ClientCore;
+import miniventure.game.client.Style;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.util.ColorBackground;
 import miniventure.game.util.RelPos;
@@ -24,6 +25,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
+import com.kotcrab.vis.ui.VisUI;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -69,19 +71,19 @@ public class CraftingScreen extends MenuScreen {
 		mainGroup = useTable(Align.topLeft, false);
 		addMainGroup(mainGroup, RelPos.TOP_LEFT);
 		
-		mainGroup.add(makeLabel("personal crafting", 12)).row();
+		mainGroup.add(makeLabel("personal crafting", Style.CrafterHeader, false)).row();
 		
-		craftableTable = new Table(ClientCore.getSkin());
+		craftableTable = new Table(VisUI.getSkin());
 		craftableTable.defaults().pad(2f);
 		craftableTable.pad(10f);
 		craftableTable.add(makeLabel("Waiting for crafting data...", false));
 		
-		costTable = new Table(ClientCore.getSkin());
+		costTable = new Table(VisUI.getSkin());
 		costTable.pad(5f);
 		costTable.defaults().pad(2f).align(Align.center);
 		costTable.add(makeLabel("Waiting for crafting data...", false));
 		
-		recipeListTable = new Table(ClientCore.getSkin()) {
+		recipeListTable = new Table(VisUI.getSkin()) {
 			@Override
 			protected void drawChildren(Batch batch, float parentAlpha) {
 				boolean done = false;
@@ -123,7 +125,7 @@ public class CraftingScreen extends MenuScreen {
 			}
 		});
 		
-		scrollPane = new ScrollPane(recipeListTable, ClientCore.getSkin()) {
+		scrollPane = new ScrollPane(recipeListTable, VisUI.getSkin()) {
 			@Override
 			public float getPrefHeight() {
 				return CraftingScreen.this.getHeight()/2;
@@ -216,16 +218,16 @@ public class CraftingScreen extends MenuScreen {
 			
 			craftableTable.clearChildren();
 			craftableTable.add(new ItemIcon(recipe.result.item, recipe.result.count)).row();
-			craftableTable.add(makeLabel(recipe.result.item.getName(), false)).row();
-			craftableTable.add(resultStockLabel = makeLabel("Stock: "+getCount(recipe.result.item), false)).row();
+			craftableTable.add(makeLabel(recipe.result.item.getName(), Style.KeepSize, false)).row();
+			craftableTable.add(resultStockLabel = makeLabel("Stock: "+getCount(recipe.result.item), Style.KeepSize, false)).row();
 			
 			costTable.clearChildren();
-			costTable.add(makeLabel("Stock", 14));
-			costTable.add(makeLabel("Required", 18));
+			costTable.add(makeLabel("Stock", Style.StockHeader, false));
+			costTable.add(makeLabel("Required", Style.CostHeader, false));
 			costTable.row();
 			costSlots.clear();
 			for(ItemStack cost: recipe.costs) {
-				Label costLabel = makeLabel(String.valueOf(getCount(cost.item)), false);
+				Label costLabel = makeLabel(String.valueOf(getCount(cost.item)), Style.KeepSize, false);
 				costStockLabels.put(cost.item.getName(), costLabel);
 				costTable.add(costLabel);
 				

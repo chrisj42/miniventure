@@ -17,6 +17,7 @@ import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -27,6 +28,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.utils.Array;
+import com.kotcrab.vis.ui.VisUI;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -38,15 +40,17 @@ public class GameScreen {
 	private MenuScreen guiStage;
 	
 	private final OrthographicCamera uiCamera;
+	private final OrthographicCamera noScaleCamera;
 	
 	final ChatScreen chatOverlay, chatScreen;
 	private boolean showDebug = false;
 	
 	public GameScreen() {
 		uiCamera = new OrthographicCamera();
+		noScaleCamera = new OrthographicCamera();
 		guiStage = new MenuScreen(false, new DiscreteViewport(uiCamera), batch) {
 			{
-				ProgressBar fillBar = new ProgressBar(0, 1, .01f, true, ClientCore.getSkin()) {
+				ProgressBar fillBar = new ProgressBar(0, 1, .01f, true, VisUI.getSkin()) {
 					@Override
 					public float getPrefHeight() {
 						return uiCamera.viewportHeight * 2 / 5;
@@ -68,7 +72,7 @@ public class GameScreen {
 			}
 		};
 		
-		levelView = new LevelViewport(batch, uiCamera); // uses uiCamera for rendering lighting to the screen.
+		levelView = new LevelViewport(batch, noScaleCamera); // uses uiCamera for rendering lighting to the screen.
 		
 		chatOverlay = new ChatScreen(true);
 		chatScreen = new ChatScreen(false);
@@ -178,11 +182,14 @@ public class GameScreen {
 		// draw UI for stats
 		mainPlayer.drawGui(new Rectangle(0, 0, uiCamera.viewportWidth, uiCamera.viewportHeight), batch);
 		
+		batch.setProjectionMatrix(noScaleCamera.combined);
+		
 		if(!showDebug) {
 			if(GameCore.debug) {
 				BitmapFont f = ClientCore.getFont();
 				f.setColor(Color.ORANGE);
-				f.draw(batch, "Debug Mode ENABLED", 0, uiCamera.viewportHeight - 5);
+				f.draw(batch, "Debug Mode ENABLED", 0, noScaleCamera.viewportHeight - 5);
+				f.setColor(Color.WHITE);
 			}
 			return;
 		}
@@ -215,7 +222,7 @@ public class GameScreen {
 		for(int i = 0; i < debugInfo.size; i++) {
 			if(GameCore.debug && i == 1)
 				font.setColor(Color.WHITE);
-			font.draw(batch, debugInfo.get(i), 0, uiCamera.viewportHeight - 5 - 15 * i);
+			font.draw(batch, debugInfo.get(i), 0, noScaleCamera.viewportHeight - 5 - font.getLineHeight() * i);
 		}
 	}
 	
@@ -223,6 +230,7 @@ public class GameScreen {
 		levelView.resize(width, height);
 		guiStage.getViewport().update(width, height, true);
 		chatOverlay.resize(width, height);
+		// noScaleCamera.setToOrtho(false, width, height);
 	}
 	
 	public Stage getGuiStage() { return guiStage; }

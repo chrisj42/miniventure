@@ -3,9 +3,11 @@ package miniventure.game.item;
 import java.util.Objects;
 
 import miniventure.game.client.ClientCore;
+import miniventure.game.client.Style;
 import miniventure.game.screen.util.ColorBackground;
 import miniventure.game.util.MyUtils;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -62,8 +64,9 @@ public class ItemSlot extends Widget {
 		if(Objects.equals(this.item, item)) return this; // no action is needed.
 		this.item = item;
 		if(!showName) return this; // the layout is always the same.
-		else if(item == null) prefWidth = Item.ICON_SIZE * 2;
-		else prefWidth = Item.ICON_SIZE + 2 + SPACING + ClientCore.getTextLayout(item.getName()).width;
+		
+		if(item == null) prefWidth = Item.ICON_SIZE * 2;
+		else prefWidth = Item.ICON_SIZE + 2 + SPACING + ClientCore.getTextLayout(ClientCore.getBaseFont(), item.getName()).width;
 		prefWidth += XPADDING * 2;
 		return this;
 	}
@@ -109,7 +112,7 @@ public class ItemSlot extends Widget {
 			renderUsability(batch, getX()+2+XPADDING, getY()+2+YPADDING, item.getUsabilityStatus());
 			
 			if(showName || showCount()) {
-				BitmapFont font = ClientCore.getFont();
+				BitmapFont font = ClientCore.getFont(Style.KeepSize);
 				font.setColor(getTextColor());
 				
 				if(showName) {
@@ -118,8 +121,9 @@ public class ItemSlot extends Widget {
 					font.draw(batch, item.getName().replace("_", " "), getX() + Item.ICON_SIZE + 2 + SPACING + XPADDING, getY() + yo + YPADDING);
 				}
 				
-				if(showCount())
+				if(showCount()) {
 					font.draw(batch, String.valueOf(getCount()), getX() + 2, getY() + 2 + font.getLineHeight());
+				}
 			}
 		}
 		// else

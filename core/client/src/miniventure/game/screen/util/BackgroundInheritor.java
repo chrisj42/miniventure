@@ -1,11 +1,17 @@
 package miniventure.game.screen.util;
 
+import com.badlogic.gdx.utils.viewport.Viewport;
+
 public class BackgroundInheritor extends BackgroundProvider {
 	
 	private BackgroundProvider gdxBackground;
 	
 	public BackgroundInheritor() {
 		super(false);
+		// the background provider will clear the background if needed
+	}
+	public BackgroundInheritor(Viewport viewport) {
+		super(false, viewport);
 		// the background provider will clear the background if needed
 	}
 	

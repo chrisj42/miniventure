@@ -8,6 +8,7 @@ import miniventure.game.GameProtocol.InventoryRequest;
 import miniventure.game.GameProtocol.InventoryUpdate;
 import miniventure.game.GameProtocol.ItemDropRequest;
 import miniventure.game.client.ClientCore;
+import miniventure.game.client.Style;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.util.ColorBackground;
 import miniventure.game.util.RelPos;
@@ -27,6 +28,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.utils.Align;
+import com.kotcrab.vis.ui.VisUI;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -73,9 +75,9 @@ public class InventoryScreen extends MenuScreen {
 		mainGroup = useVGroup(2f, Align.right, false);
 		addMainGroup(mainGroup, RelPos.RIGHT);
 		
-		fillBar = new ProgressBar(0, 1, .01f, false, ClientCore.getSkin());
+		fillBar = new ProgressBar(0, 1, .01f, false, VisUI.getSkin());
 		
-		slotTable = new Table(ClientCore.getSkin()) {
+		slotTable = new Table(VisUI.getSkin()) {
 			@Override
 			protected void drawChildren(Batch batch, float parentAlpha) {
 				boolean done = false;
@@ -95,7 +97,7 @@ public class InventoryScreen extends MenuScreen {
 		slotTable.defaults().fillX().minSize(Item.ICON_SIZE * 3, ItemSlot.HEIGHT/2);
 		slotTable.pad(10f);
 		slotTable.background(new ColorBackground(slotTable, tableBackground));
-		slotTable.add(new Label("Waiting for inventory data...", new LabelStyle(ClientCore.getFont(), Color.WHITE)));
+		slotTable.add(makeLabel("Waiting for inventory data...", Style.KeepSize, false));
 		
 		slotTable.addListener(new InputListener() {
 			@Override
@@ -126,7 +128,7 @@ public class InventoryScreen extends MenuScreen {
 			}
 		});
 		
-		scrollPane = new ScrollPane(slotTable, ClientCore.getSkin()) {
+		scrollPane = new ScrollPane(slotTable, VisUI.getSkin()) {
 			@Override
 			public float getPrefHeight() {
 				return InventoryScreen.this.getHeight()*2/3;
@@ -161,6 +163,7 @@ public class InventoryScreen extends MenuScreen {
 			requested = true;
 			ClientCore.getClient().send(new InventoryRequest(null));
 		}
+		
 	}
 	
 	// should only be called by the LibGDX Application thread

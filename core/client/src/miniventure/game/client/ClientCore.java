@@ -12,6 +12,9 @@ import java.util.HashMap;
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.Message;
 import miniventure.game.chat.InfoMessage;
+import miniventure.game.client.Style.FontParameterLoader;
+import miniventure.game.client.Style.ResizeText;
+import miniventure.game.client.Style.StyleNotFoundException;
 import miniventure.game.item.InventoryScreen;
 import miniventure.game.screen.ErrorScreen;
 import miniventure.game.screen.LoadingScreen;
@@ -36,6 +39,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.kotcrab.vis.ui.VisUI;
 
 import org.jetbrains.annotations.NotNull;
@@ -61,10 +65,11 @@ public class ClientCore extends ApplicationAdapter {
 	
 	private static final Object screenLock = new Object();
 	private static SpriteBatch batch;
+	private static Skin skin;
+	private static BitmapFont basefont;
 	private static FreeTypeFontGenerator fontGenerator;
 	private static GlyphLayout layout = new GlyphLayout();
-	private static Skin skin;
-	private static HashMap<Integer, BitmapFont> fonts = new HashMap<>();
+	// private static HashMap<Integer, BitmapFont> fonts = new HashMap<>();
 	
 	private final ServerManager serverStarter;
 	
@@ -93,7 +98,11 @@ public class ClientCore extends ApplicationAdapter {
 	
 	@Override
 	public void create () {
-		VisUI.load(Gdx.files.internal("skins/visui/uiskin.json"));
+		fontGenerator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/arial.ttf"));
+		skin = new Skin(Gdx.files.internal("skins/visui/uiskin.json"));
+		Style.loadStyles(skin);
+		VisUI.load(skin);
+		basefont = getFont(); // initialize default font
 		
 		LoadingScreen loader = new LoadingScreen();
 		loader.pushMessage("Initializing...", true);
@@ -104,10 +113,7 @@ public class ClientCore extends ApplicationAdapter {
 			GameCore.initGdxTextures();
 			if(batch == null)
 				batch = new SpriteBatch();
-			fontGenerator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/arial.ttf"));
-			skin = new Skin(Gdx.files.internal("skins/visui/uiskin.json"));
 			
-			getFont(); // initialize default font
 			ClientTileType.init();
 			
 			gameScreen = new GameScreen();
@@ -120,10 +126,11 @@ public class ClientCore extends ApplicationAdapter {
 	@Override
 	public void dispose () {
 		batch.dispose();
-		skin.dispose();
+		
 		fontGenerator.dispose();
-		for(BitmapFont font: fonts.values())
-			font.dispose();
+		for(HashMap<Integer, BitmapFont> sizedFonts: fonts.values())
+			for(BitmapFont font: sizedFonts.values())
+				font.dispose();
 		fonts.clear();
 		
 		if(gameScreen != null)
@@ -133,6 +140,7 @@ public class ClientCore extends ApplicationAdapter {
 			menuScreen.dispose();
 		
 		GameCore.dispose();
+		VisUI.dispose();
 	}
 	
 	@Override
@@ -255,47 +263,55 @@ public class ClientCore extends ApplicationAdapter {
 	}
 	
 	
-	public static Skin getSkin() { return skin; }
-	
 	public static SpriteBatch getBatch() {
 		if(batch == null) batch = new SpriteBatch();
 		return batch;
 	}
 	
-	public static GlyphLayout getTextLayout(String text) {
+	public static GlyphLayout getTextLayout(String text) { return getTextLayout(getFont(), text); }
+	public static GlyphLayout getTextLayout(BitmapFont font, String text) {
 		if(fontGenerator != null)
-			layout.setText(getFont(), text);
+			layout.setText(font, text);
 		return layout;
 	}
 	
-	private static FreeTypeFontParameter getDefaultFontConfig(int size) {
-		FreeTypeFontParameter params = new FreeTypeFontParameter();
-		params.size = size;
-		params.color = Color.WHITE;
-		params.borderColor = Color.BLACK;
-		params.borderWidth = 1;
-		params.spaceX = -1;
-		//params.magFilter = TextureFilter.Linear;
-		params.shadowOffsetX = 1;
-		params.shadowOffsetY = 1;
-		params.shadowColor = Color.BLACK;
-		return params;
-	}
+	/** @noinspection MapReplaceableByEnumMap*/
+	private static HashMap<String, HashMap<Integer, BitmapFont>> fonts = new HashMap<>();
 	
-	public static BitmapFont getFont(int size) {
-		if(!fonts.containsKey(size)) {
-			BitmapFont font = fontGenerator.generateFont(getDefaultFontConfig(size));
-			font.setUseIntegerPositions(true);
-			fonts.put(size, font);
+	public static BitmapFont getBaseFont() { return basefont; }
+	
+	public static BitmapFont getFont() { return getFont(Style.Default); }
+	public static BitmapFont getFont(Style fontStyle) { return getFont(fontStyle.getName()); }
+	// this is for existing styles only
+	public static BitmapFont getFont(String fontStyle) {
+		try {
+			boolean resize = skin.optional(fontStyle, ResizeText.class) != ResizeText.CONSTANT;
+			FontParameterLoader loader = skin.optional(fontStyle, FontParameterLoader.class);
+			if(loader == null)
+				loader = skin.get(Style.Default.getName(), FontParameterLoader.class);
+			return getFont(loader, fontStyle, resize);
+		} catch(GdxRuntimeException e) {
+			throw new StyleNotFoundException("Style "+fontStyle+" does not specify a FontParameterLoader", e);
 		}
-		
-		BitmapFont font = fonts.get(size);
-		font.setColor(Color.WHITE);
-		return font;
 	}
-	
-	public static BitmapFont getFont() {
-		return getFont(15);
+	private static BitmapFont getFont(FontParameterLoader loader, String fontStyle, boolean resize) {
+		// determine size difference in current window size vs default/minimum window size
+		int minDefault = Math.min(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT);
+		int minCurrent = Math.min(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		
+		// get the font parameter object named by the given style (throw error if none found)
+		HashMap<Integer, BitmapFont> sizeFonts = fonts.computeIfAbsent(fontStyle, style -> new HashMap<>());
+		
+		FreeTypeFontParameter params = loader.get();
+		// apply font size modification
+		// the process should maintain the ratios: orig font size / min default screen = new font size / min current screen
+		// aka, new font size = orig font size * min current size / min default size
+		if(resize)
+			params.size = params.size * minCurrent / minDefault;
+		
+		// System.out.println("min default="+minDefault+" minCurrent="+minCurrent+"; size = "+params.size);
+		
+		return sizeFonts.computeIfAbsent(params.size, fontSize -> fontGenerator.generateFont(params));
 	}
 	
 	public static boolean hasMenu() { synchronized (screenLock) { return hasMenu; } }

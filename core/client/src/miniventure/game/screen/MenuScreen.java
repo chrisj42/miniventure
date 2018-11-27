@@ -1,8 +1,11 @@
 package miniventure.game.screen;
 
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 import miniventure.game.client.ClientCore;
+import miniventure.game.client.Style;
 import miniventure.game.screen.util.DiscreteViewport;
 import miniventure.game.screen.util.ParentScreen;
 import miniventure.game.util.RelPos;
@@ -17,12 +20,16 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.Layout;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 
@@ -32,6 +39,8 @@ public class MenuScreen extends Stage {
 	private MenuScreen parent;
 	
 	private final LinkedList<ActorAnchor> anchoredActors = new LinkedList<>();
+	
+	private HashMap<Label, Style> labels = new HashMap<>();
 	
 	public MenuScreen(final boolean clearGdxBackground) { this(clearGdxBackground, new DiscreteViewport(), ClientCore.getBatch()); }
 	public MenuScreen(final boolean clearGdxBackground, Viewport viewport, Batch batch) {
@@ -94,8 +103,10 @@ public class MenuScreen extends Stage {
 		super.dispose();
 	}
 	
-	protected static VisTextButton makeButton(String text, Action onClick) {
+	protected VisTextButton makeButton(String text, Action onClick) {
 		VisTextButton button = new VisTextButton(text);
+		button.pad(6f);
+		labels.put(button.getLabel(), Style.Default);
 		button.addListener(new ClickListener() {
 			@Override
 			public void clicked (InputEvent event, float x, float y) {
@@ -105,21 +116,20 @@ public class MenuScreen extends Stage {
 		return button;
 	}
 	
-	protected static VisLabel makeLabel(String text, int size) { return makeLabel(text, size, false); }
-	protected static VisLabel makeLabel(String text, int size, boolean wrapText) {
-		VisLabel label = makeLabel(text, wrapText);
-		LabelStyle style = label.getStyle();
-		style.font = ClientCore.getFont(size);
-		label.setStyle(style);
-		return label;
+	protected VisLabel makeLabel(String text) { return makeLabel(text, true); }
+	protected VisLabel makeLabel(String text, boolean wrapText) {
+		return makeLabel(text, Style.Default, wrapText);
 	}
-	protected static VisLabel makeLabel(String text) { return makeLabel(text, true); }
-	protected static VisLabel makeLabel(String text, boolean wrapText) {
-		VisLabel label = new VisLabel(text, new LabelStyle(ClientCore.getFont(), Color.WHITE));
-		label.setWrap(wrapText);
+	protected VisLabel makeLabel(String text, Style labelStyle, boolean wrap) {
+		VisLabel label = new VisLabel(text, new LabelStyle(ClientCore.getFont(labelStyle), null));
+		label.setWrap(wrap);
 		label.setAlignment(Align.center, Align.left);
+		labels.put(label, labelStyle);
 		return label;
 	}
+	
+	protected void registerLabel(Style style, Label label) { labels.put(label, style); }
+	protected void deregisterLabel(Label label) { labels.remove(label); }
 	
 	protected VerticalGroup useVGroup(float space) { return useVGroup(space, true); }
 	protected VerticalGroup useVGroup(float space, int alignment) { return useVGroup(space, alignment, true); }
@@ -148,6 +158,21 @@ public class MenuScreen extends Stage {
 	public void resize(int width, int height) {
 		getViewport().update(width, height, true);
 		// System.out.println("menu screen resized to "+width+","+height+"; current menu stage size: "+getWidth()+","+getHeight()+"; new viewport: "+getViewport().getWorldWidth()+","+getViewport().getWorldHeight()+" world, "+getViewport().getScreenWidth()+","+getViewport().getScreenHeight()+" screen.");
+		
+		for(Map.Entry<Label, Style> labelStyle: labels.entrySet()) {
+			LabelStyle style = labelStyle.getKey().getStyle();
+			// float prev = style.font.getLineHeight();
+			style.font = ClientCore.getFont(labelStyle.getValue());
+			// System.out.println("font height changed from "+prev+" to "+style.font.getLineHeight());
+			labelStyle.getKey().setStyle(style);
+			labelStyle.getKey().invalidateHierarchy();
+		}
+		
+		for(ActorAnchor actor: anchoredActors)
+			if(actor.mainGroup instanceof Layout)
+				((Layout)actor.mainGroup).pack();
+				
+		
 		layoutActors();
 	}
 	
