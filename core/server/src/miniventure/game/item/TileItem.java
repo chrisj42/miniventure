@@ -61,7 +61,7 @@ public class TileItem extends ServerItem {
 		this(MyUtils.toTitleCase(type.name()), GameCore.tileAtlas.findRegion(type.name().toLowerCase()+"/c00"), type, canPlaceOn); // so, if the placeOn is null, then...
 	}
 	
-	private TileItem(String name, TextureHolder texture, @NotNull TileTypeEnum result, @Nullable TileTypeEnum... placeOn) {
+	private TileItem(String name, @NotNull TextureHolder texture, @NotNull TileTypeEnum result, @Nullable TileTypeEnum... placeOn) {
 		super(ItemType.Tile, name, texture);
 		this.canPlaceOn = placeOn;
 		this.result = result;

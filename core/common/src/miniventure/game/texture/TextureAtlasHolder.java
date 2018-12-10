@@ -20,6 +20,8 @@ public class TextureAtlasHolder {
 	public TextureAtlasHolder(TextureAtlasData data) {
 		atlas = null;
 		regions = data.getRegions();
+		for(Region r: regions)
+			r.name = TextureHolder.fixPath(r.name);
 	}
 	
 	public TextureHolder findRegion(String name) {
