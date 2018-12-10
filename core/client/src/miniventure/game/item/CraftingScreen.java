@@ -113,7 +113,7 @@ public class CraftingScreen extends MenuScreen {
 				}
 				
 				synchronized (CraftingScreen.this) {
-					if(recipes.size() > 0) {
+					if(recipes != null && recipes.size() > 0) {
 						if(keycode == Keys.ENTER) {
 							craftSelected();
 							return true;

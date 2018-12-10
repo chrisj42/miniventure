@@ -108,7 +108,7 @@ public class InventoryScreen extends MenuScreen {
 				}
 				
 				synchronized (InventoryScreen.this) {
-					if(inventory.size() > 0) {
+					if(inventory != null && inventory.size() > 0) {
 						for(int i = 0; i < Player.HOTBAR_SIZE; i++) {
 							if(keycode == Keys.NUM_1 + i) {
 								setHotbar(i, selection);
