@@ -7,7 +7,6 @@ import java.util.HashMap;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.RelPos;
-import miniventure.game.world.tile.TileTypeEnum;
 
 import com.badlogic.gdx.utils.Array;
 

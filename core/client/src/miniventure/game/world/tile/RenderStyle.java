@@ -4,7 +4,6 @@ import java.util.EnumMap;
 import java.util.HashMap;
 
 import miniventure.game.texture.TextureHolder;
-import miniventure.game.world.tile.TileTypeEnum;
 
 import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 import com.badlogic.gdx.utils.Array;

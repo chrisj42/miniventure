@@ -1,9 +1,9 @@
 package miniventure.game.world.tile;
 
 import miniventure.game.item.FoodType;
+import miniventure.game.item.ResourceType;
 import miniventure.game.item.Result;
 import miniventure.game.item.ServerItem;
-import miniventure.game.item.ResourceType;
 import miniventure.game.item.TileItem;
 import miniventure.game.item.ToolType;
 import miniventure.game.util.customenum.SerialMap;

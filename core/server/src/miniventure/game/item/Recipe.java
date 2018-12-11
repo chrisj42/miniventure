@@ -1,7 +1,5 @@
 package miniventure.game.item;
 
-import java.util.Arrays;
-
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;

@@ -10,7 +10,6 @@ import miniventure.game.server.ServerCore;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.customenum.SerialMap;
 import miniventure.game.world.ItemDrop;
-import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.particle.ActionType;
 import miniventure.game.world.entity.particle.ParticleData.ActionParticleData;

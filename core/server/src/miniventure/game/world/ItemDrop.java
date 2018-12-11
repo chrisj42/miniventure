@@ -1,7 +1,6 @@
 package miniventure.game.world;
 
 import miniventure.game.item.ServerItem;
-import miniventure.game.item.ServerItem;
 
 import com.badlogic.gdx.math.MathUtils;
 

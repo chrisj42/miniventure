@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import miniventure.game.world.entity.Entity;
-import miniventure.game.world.tile.TileEnumMapper;
 import miniventure.game.world.tile.TileType;
 import miniventure.game.world.tile.TileTypeEnum;
 

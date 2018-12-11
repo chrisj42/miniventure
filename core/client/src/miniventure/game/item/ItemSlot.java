@@ -7,7 +7,6 @@ import miniventure.game.client.Style;
 import miniventure.game.screen.util.ColorBackground;
 import miniventure.game.util.MyUtils;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;

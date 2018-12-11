@@ -2,13 +2,7 @@ package miniventure.game.world.tile;
 
 import java.util.EnumSet;
 
-import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
-
-import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
-import com.badlogic.gdx.utils.Array;
-
-import org.jetbrains.annotations.NotNull;
 
 public class ServerTileTransition {
 	

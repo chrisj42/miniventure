@@ -4,7 +4,6 @@ import miniventure.game.world.Level;
 import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.tile.ClientTileType;
-import miniventure.game.world.tile.TileEnumMapper;
 import miniventure.game.world.tile.TileType;
 import miniventure.game.world.tile.TileTypeEnum;
 

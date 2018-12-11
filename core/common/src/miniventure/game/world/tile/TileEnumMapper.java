@@ -3,7 +3,6 @@ package miniventure.game.world.tile;
 import java.util.EnumMap;
 
 import miniventure.game.util.function.MapFunction;
-import miniventure.game.world.tile.TileTypeEnum;
 
 import org.jetbrains.annotations.NotNull;
 

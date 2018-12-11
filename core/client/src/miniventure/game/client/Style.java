@@ -1,16 +1,12 @@
 package miniventure.game.client;
 
-import miniventure.game.GameCore;
 import miniventure.game.screen.util.ColorRect;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
-import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
-import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.LinkLabel.LinkLabelStyle;
-import com.kotcrab.vis.ui.widget.VisTextField.VisTextFieldStyle;
 
 public enum Style {
 	

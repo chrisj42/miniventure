@@ -2,7 +2,6 @@ package miniventure.game.screen.util;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.utils.Layout;
 
 public class ColorBackground extends ColorDrawable {
 	

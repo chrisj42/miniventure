@@ -25,7 +25,6 @@ import miniventure.game.world.Level;
 import miniventure.game.world.Point;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClientEntity;
-import miniventure.game.world.entity.ClientEntityRenderer;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.EntityRenderer;
 import miniventure.game.world.entity.EntityRenderer.DirectionalAnimationRenderer;

@@ -1,7 +1,6 @@
 package miniventure.game.chat.command;
 
 import java.util.Arrays;
-import java.util.Objects;
 
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.PositionUpdate;
@@ -17,7 +16,6 @@ import miniventure.game.world.entity.mob.player.ServerPlayer;
 
 import com.badlogic.gdx.utils.Array;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public enum Command {
