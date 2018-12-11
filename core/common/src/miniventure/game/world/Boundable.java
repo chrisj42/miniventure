@@ -23,8 +23,8 @@ public interface Boundable {
 	static Vector2 toLevelCoords(@Nullable Level level, Vector3 pos) { return toLevelCoords(level, new Vector2(pos.x, pos.y)); }
 	static Vector2 toLevelCoords(@Nullable Level level, Vector2 pos) {
 		if(level != null) {
-			pos.x -= level.getWidth() / 2;
-			pos.y -= level.getHeight() / 2;
+			pos.x -= level.getWidth() / 2f;
+			pos.y -= level.getHeight() / 2f;
 		}
 		return pos;
 	}

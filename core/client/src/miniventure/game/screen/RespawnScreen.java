@@ -8,6 +8,7 @@ import miniventure.game.world.ClientLevel;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 public class RespawnScreen extends BackgroundProvider {
 	
@@ -17,7 +18,7 @@ public class RespawnScreen extends BackgroundProvider {
 	private final LevelViewport backgroundRenderer;
 	
 	public RespawnScreen(Vector2 deathPos, Color lighting, ClientLevel level, LevelViewport backgroundRenderer) {
-		super(false, true); // level renderer clears it
+		super(false, true, new ScreenViewport()); // level renderer clears it
 		this.deathPos = deathPos;
 		this.lighting = lighting;
 		this.level = level;

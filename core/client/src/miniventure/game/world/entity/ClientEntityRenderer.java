@@ -1,6 +1,7 @@
 package miniventure.game.world.entity;
 
 import miniventure.game.client.ClientCore;
+import miniventure.game.client.Style;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -34,7 +35,7 @@ public class ClientEntityRenderer {
 		
 		@Override
 		public void render(float x, float y, Batch batch, float drawableHeight) {
-			BitmapFont font = ClientCore.getFont();
+			BitmapFont font = ClientCore.getFont(Style.KeepSize);
 			font.setColor(shadow);
 			font.draw(batch, text, x-1, y+1, 0, Align.center, false);
 			font.setColor(main);

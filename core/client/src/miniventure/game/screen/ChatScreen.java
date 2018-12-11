@@ -26,6 +26,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
 
 public class ChatScreen extends MenuScreen implements ParentScreen {
@@ -51,7 +52,7 @@ public class ChatScreen extends MenuScreen implements ParentScreen {
 	private String manualInput = ""; // this is the part of the command that the user entered manually, and so should not be changed when tabbing.
 	
 	public ChatScreen(boolean timeOutMessages) {
-		super(false);
+		super(false, new ScreenViewport(), ClientCore.getBatch());
 		useTimer = timeOutMessages;
 		
 		VerticalGroup vGroup = useVGroup(0, Align.topRight, false);

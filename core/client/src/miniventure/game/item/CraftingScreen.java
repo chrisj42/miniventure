@@ -76,12 +76,12 @@ public class CraftingScreen extends MenuScreen {
 		craftableTable = new Table(VisUI.getSkin());
 		craftableTable.defaults().pad(2f);
 		craftableTable.pad(10f);
-		craftableTable.add(makeLabel("Waiting for crafting data...", false));
+		craftableTable.add(makeLabel("Waiting for crafting data...", Style.KeepSize, false));
 		
 		costTable = new Table(VisUI.getSkin());
 		costTable.pad(5f);
 		costTable.defaults().pad(2f).align(Align.center);
-		costTable.add(makeLabel("Waiting for crafting data...", false));
+		costTable.add(makeLabel("Waiting for crafting data...", Style.KeepSize, false));
 		
 		recipeListTable = new Table(VisUI.getSkin()) {
 			@Override

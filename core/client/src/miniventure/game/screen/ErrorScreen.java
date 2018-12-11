@@ -4,6 +4,7 @@ import miniventure.game.client.ClientCore;
 import miniventure.game.screen.util.BackgroundInheritor;
 
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 public class ErrorScreen extends BackgroundInheritor {
 	
@@ -11,6 +12,7 @@ public class ErrorScreen extends BackgroundInheritor {
 	
 	public ErrorScreen(String error) { this(error, true); }
 	public ErrorScreen(String error, boolean allowRejoin) {
+		super(new ScreenViewport());
 		this.error = error;
 		
 		Table table = useTable();
