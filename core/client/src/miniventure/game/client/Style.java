@@ -1,5 +1,6 @@
 package miniventure.game.client;
 
+import miniventure.game.GameCore;
 import miniventure.game.screen.util.ColorRect;
 
 import com.badlogic.gdx.graphics.Color;
@@ -93,7 +94,6 @@ public enum Style {
 		char[] name = name().toCharArray();
 		name[0] = Character.toLowerCase(name[0]);
 		this.name = new String(name);
-		System.out.println(name);
 	}
 	
 	public String getName() { return name; }
@@ -132,7 +132,6 @@ public enum Style {
 		
 		void add(Object obj) { add(obj, obj.getClass()); }
 		void add(Object obj, Class type) {
-			System.out.println("adding "+obj+" to skin as class "+type);
 			skin.add(name, obj, type);
 		}
 		
