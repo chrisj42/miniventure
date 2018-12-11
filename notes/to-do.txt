@@ -5,5 +5,3 @@ quick reminders / in prog stuff:
  - when menu system is done, add a volume option
 
 - give item entities shadows like the water thing
-
-- fix font handling to resize with window as before?
