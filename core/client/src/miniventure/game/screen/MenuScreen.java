@@ -1,6 +1,7 @@
 package miniventure.game.screen;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -22,6 +23,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Layout;
@@ -38,6 +40,7 @@ public class MenuScreen extends Stage {
 	private final LinkedList<ActorAnchor> anchoredActors = new LinkedList<>();
 	
 	private HashMap<Label, Style> labels = new HashMap<>();
+	private HashSet<TextField> textFields = new HashSet<>();
 	
 	public MenuScreen(final boolean clearGdxBackground) { this(clearGdxBackground, new DiscreteViewport(), ClientCore.getBatch()); }
 	public MenuScreen(final boolean clearGdxBackground, Viewport viewport, Batch batch) {
@@ -126,7 +129,13 @@ public class MenuScreen extends Stage {
 	}
 	
 	protected void registerLabel(Style style, Label label) { labels.put(label, style); }
-	protected void deregisterLabel(Label label) { labels.remove(label); }
+	protected void deregisterLabels(Label... labels) {
+		for(Label label: labels)
+			this.labels.remove(label);
+	}
+	
+	protected void registerField(TextField field) { textFields.add(field); }
+	protected void deregisterField(TextField field) { textFields.remove(field); }
 	
 	protected VerticalGroup useVGroup(float space) { return useVGroup(space, true); }
 	protected VerticalGroup useVGroup(float space, int alignment) { return useVGroup(space, alignment, true); }
@@ -162,7 +171,13 @@ public class MenuScreen extends Stage {
 			style.font = ClientCore.getFont(labelStyle.getValue());
 			// System.out.println("font height changed from "+prev+" to "+style.font.getLineHeight());
 			labelStyle.getKey().setStyle(style);
-			labelStyle.getKey().invalidateHierarchy();
+			labelStyle.getKey().pack();
+		}
+		
+		for(TextField field: textFields) {
+			field.getStyle().font = ClientCore.getFont(Style.TextFieldFont);
+			field.setStyle(field.getStyle());
+			field.pack();
 		}
 		
 		for(ActorAnchor actor: anchoredActors)

@@ -25,7 +25,6 @@ import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
-import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -79,6 +78,7 @@ public class ChatScreen extends MenuScreen implements ParentScreen {
 				return ChatScreen.this.getWidth()/3;
 			}
 		};
+		registerField(input);
 		
 		vGroup.addActor(input);
 		
@@ -88,7 +88,7 @@ public class ChatScreen extends MenuScreen implements ParentScreen {
 			ScrollPane scrollPane = new ScrollPane(messageStream, VisUI.getSkin()) {
 				@Override
 				public float getPrefHeight() {
-					return ChatScreen.this.getHeight()*2/3;
+					return Math.min(messageStream.getPrefHeight(), ChatScreen.this.getHeight()*2/3);
 				}
 			};
 			scrollPane.setScrollingDisabled(true, false);
@@ -180,6 +180,7 @@ public class ChatScreen extends MenuScreen implements ParentScreen {
 	
 	public void reset() {
 		previousCommands.clear();
+		deregisterLabels(labelQueue.toArray(new Label[0]));
 		labelQueue.clear();
 		messageStream.clearChildren();
 	}
@@ -219,7 +220,7 @@ public class ChatScreen extends MenuScreen implements ParentScreen {
 			registerLabel(Style.Default, label);
 			if(messageStream.getChildren().size > (useTimer ? MESSAGE_DISPLAY_SIZE : MESSAGE_BUFFER_SIZE)) {
 				Label oldLabel = labelQueue.poll();
-				deregisterLabel(oldLabel);
+				deregisterLabels(oldLabel);
 				messageStream.removeActor(oldLabel);
 			}
 		});
@@ -237,11 +238,11 @@ public class ChatScreen extends MenuScreen implements ParentScreen {
 	@Override
 	protected void layoutActors() {
 		// pack all the things so they will resize properly
-		input.getStyle().font = ClientCore.getFont(Style.TextFieldFont);
-		input.setStyle(input.getStyle());
+		// input.getStyle().font = ClientCore.getFont(Style.TextFieldFont);
+		// input.setStyle(input.getStyle());
 		messageStream.pack();
-		for(TimerLabel label: labelQueue)
-			label.pack();
+		// for(TimerLabel label: labelQueue)
+		// 	label.pack();
 		super.layoutActors();
 	}
 	
@@ -272,7 +273,7 @@ public class ChatScreen extends MenuScreen implements ParentScreen {
 				Gdx.app.postRunnable(() -> {
 					messageStream.removeActor(this);
 					labelQueue.remove(this);
-					deregisterLabel(this);
+					deregisterLabels(this);
 				});
 			}
 		}

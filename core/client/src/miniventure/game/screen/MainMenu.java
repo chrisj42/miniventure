@@ -163,7 +163,7 @@ public class MainMenu extends BackgroundProvider implements ParentScreen {
 			VersionInfo latestVersion = GameCore.getLatestVersion();
 			if(latestVersion.version.compareTo(GameCore.VERSION) > 0) { // link new version
 				MyLinkLabel linkLabel = new MyLinkLabel("Miniventure " + latestVersion.releaseName + " Now Available! Click here to download.", latestVersion.assetUrl, Style.LinkLabel.getName());
-				deregisterLabel(label);
+				deregisterLabels(label);
 				table.getCell(label).setActor(linkLabel);
 				registerLabel(Style.LinkLabel, linkLabel);
 			} else if(latestVersion.releaseName.length() > 0)
