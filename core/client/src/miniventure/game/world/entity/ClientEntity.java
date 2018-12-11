@@ -33,7 +33,7 @@ public class ClientEntity extends Entity {
 		this.descriptor = data.descriptor;
 		this.cutHeight = data.cutHeight;
 		this.canFloat = data.canFloat;
-		setRenderer(ClientEntityRenderer.deserialize(data.spriteUpdate.rendererData));
+		setRenderer(EntityRenderer.deserialize(data.spriteUpdate.rendererData));
 	}
 	
 	// for locally updated entities. Assumes traits of a particle.

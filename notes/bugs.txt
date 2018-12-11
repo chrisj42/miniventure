@@ -1,5 +1,3 @@
-text particles have stopped appearing
-
 "tp playername" crashes game when used on client
 
 walking animations continue playing on respawn screen

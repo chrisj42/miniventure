@@ -37,8 +37,6 @@ public abstract class EntityRenderer {
 	
 	public abstract Vector2 getSize();
 	
-	protected Class<? extends EntityRenderer> getRendererClass() { return getClass(); }
-	
 	public static class SpriteRenderer extends EntityRenderer {
 		
 		private static final HashMap<String, TextureHolder> textures = new HashMap<>();
@@ -201,34 +199,6 @@ public abstract class EntityRenderer {
 		public Vector2 getSize() { return animations.get(dir).getSize(); }
 	}
 	
-	
-	public static class TextRenderer extends EntityRenderer {
-		
-		@NotNull final String text;
-		final Color main;
-		final Color shadow;
-		
-		public TextRenderer(@NotNull String text, Color main, Color shadow) {
-			this.text = text;
-			this.main = main;
-			this.shadow = shadow;
-		}
-		private TextRenderer(String[] data) {
-			this(data[0], Color.valueOf(data[1]), Color.valueOf(data[2]));
-		}
-		
-		TextRenderer(TextRenderer model) { this(model.text, model.main, model.shadow); }
-		
-		@Override
-		protected String[] serialize() { return new String[] {text, main.toString(), shadow.toString()}; }
-		
-		@Override
-		public void render(float x, float y, Batch batch, float drawableHeight) {}
-		
-		@Override
-		public Vector2 getSize() { return new Vector2(); }
-	}
-	
 	// NOTE, I won't be using this for mobs. I want to just enforce blinking no matter the sprite underneath, and only for a period of time...
 	public static class BlinkRenderer extends EntityRenderer {
 		
@@ -305,11 +275,7 @@ public abstract class EntityRenderer {
 		String[] data = renderer.serialize();
 		String[] allData = new String[data.length+1];
 		
-		String className = renderer.getRendererClass().getCanonicalName();
-		if(className == null)
-			allData[0] = "";
-		else
-			allData[0] = className.replace(EntityRenderer.class.getCanonicalName()+".", "");
+		allData[0] = renderer.getClass().getName();
 		
 		System.arraycopy(data, 0, allData, 1, data.length);
 		
@@ -317,30 +283,20 @@ public abstract class EntityRenderer {
 	}
 	
 	@NotNull
-	static EntityRenderer deserialize(String[] allData) {
+	public static EntityRenderer deserialize(String[] allData) {
 		if(allData[0].length() == 0) return BLANK;
 		
 		String className = allData[0];
 		String[] data = Arrays.copyOfRange(allData, 1, allData.length);
 		
 		try {
-			//Class<?> clazz = Class.forName(EntityRenderer.class.getPackage().getName()+"."+className);
-			for(Class<?> inner: EntityRenderer.class.getDeclaredClasses()) {
-				//System.out.println("found inner class " + inner.getSimpleName());
-				if(inner.getSimpleName().equals(className)) {
-					
-					Class<? extends EntityRenderer> erClass = inner.asSubclass(EntityRenderer.class);
-					//noinspection JavaReflectionMemberAccess
-					Constructor<? extends EntityRenderer> constructor = erClass.getDeclaredConstructor(String[].class);
-					
-					constructor.setAccessible(true);
-					return constructor.newInstance((Object)data);
-				}
-			}
 			
-			throw new ClassNotFoundException(className);
+			Class<?> erClass = Class.forName(className);
+			Constructor<?> constructor = erClass.getDeclaredConstructor(String[].class);
+			constructor.setAccessible(true);
+			return (EntityRenderer) constructor.newInstance((Object)data);
 			
-		} catch(ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+		} catch(ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException | ClassCastException e) {
 			e.printStackTrace();
 			return BLANK;
 		}

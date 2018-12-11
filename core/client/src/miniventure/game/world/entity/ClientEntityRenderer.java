@@ -1,12 +1,11 @@
 package miniventure.game.world.entity;
 
 import miniventure.game.client.ClientCore;
-import miniventure.game.world.entity.EntityRenderer.BlinkRenderer;
-import miniventure.game.world.entity.EntityRenderer.TextRenderer;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Align;
 
 import org.jetbrains.annotations.NotNull;
@@ -15,28 +14,23 @@ public class ClientEntityRenderer {
 	
 	private ClientEntityRenderer() {}
 	
-	public static EntityRenderer deserialize(String[] data) {
-		EntityRenderer orig = EntityRenderer.deserialize(data);
-		if(orig instanceof TextRenderer)
-			return new ClientTextRenderer((TextRenderer)orig);
+	public static class TextRenderer extends EntityRenderer {
 		
-		if(orig instanceof BlinkRenderer) {
-			EntityRenderer main = ((BlinkRenderer)orig).mainRenderer;
-			if(main instanceof TextRenderer)
-				((BlinkRenderer)orig).mainRenderer = new ClientTextRenderer((TextRenderer)main);
+		@NotNull private final String text;
+		private final Color main;
+		private final Color shadow;
+		
+		public TextRenderer(@NotNull String text, Color main, Color shadow) {
+			this.text = text;
+			this.main = main;
+			this.shadow = shadow;
+		}
+		private TextRenderer(String[] data) {
+			this(data[0], Color.valueOf(data[1]), Color.valueOf(data[2]));
 		}
 		
-		return orig;
-	}
-	
-	public static class ClientTextRenderer extends TextRenderer {
-		public ClientTextRenderer(@NotNull String text, Color main, Color shadow) {
-			super(text, main, shadow);
-		}
-		
-		private ClientTextRenderer(TextRenderer model) {
-			super(model);
-		}
+		@Override
+		protected String[] serialize() { return new String[] {text, main.toString(), shadow.toString()}; }
 		
 		@Override
 		public void render(float x, float y, Batch batch, float drawableHeight) {
@@ -51,5 +45,8 @@ public class ClientEntityRenderer {
 				e.printStackTrace();
 			}
 		}
+		
+		@Override
+		public Vector2 getSize() { return new Vector2(); }
 	}
 }

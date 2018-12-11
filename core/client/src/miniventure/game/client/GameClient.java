@@ -165,7 +165,7 @@ public class GameClient implements GameProtocol {
 						}
 					}
 					if(newSprite != null) {
-						e.setRenderer(ClientEntityRenderer.deserialize(newSprite.rendererData));
+						e.setRenderer(EntityRenderer.deserialize(newSprite.rendererData));
 					}
 				}
 				
