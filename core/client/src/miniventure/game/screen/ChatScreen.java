@@ -23,6 +23,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
@@ -37,6 +38,8 @@ public class ChatScreen extends MenuScreen implements ParentScreen {
 	private static final Color BACKGROUND = Color.GRAY.cpy().sub(0, 0, 0, 0.25f);
 	
 	private static final int COMMAND_BUFFER_SIZE = 30;
+	private static final int MESSAGE_BUFFER_SIZE = 30;
+	private static final int MESSAGE_DISPLAY_SIZE = 10;
 	
 	private final Deque<TimerLabel> labelQueue = new ArrayDeque<>();
 	private final LinkedList<String> previousCommands = new LinkedList<>();
@@ -65,7 +68,6 @@ public class ChatScreen extends MenuScreen implements ParentScreen {
 		messageStream.columnAlign(Align.topRight);
 		messageStream.space(5);
 		
-		// TODO fix input field font; get it to use the one in the Style class.
 		input = new TextField("", VisUI.getSkin()) {
 			@Override
 			public void draw(Batch batch, float parentAlpha) {
@@ -79,7 +81,22 @@ public class ChatScreen extends MenuScreen implements ParentScreen {
 		};
 		
 		vGroup.addActor(input);
-		vGroup.addActor(messageStream);
+		
+		if(useTimer)
+			vGroup.addActor(messageStream);
+		else {
+			ScrollPane scrollPane = new ScrollPane(messageStream, VisUI.getSkin()) {
+				@Override
+				public float getPrefHeight() {
+					return ChatScreen.this.getHeight()*2/3;
+				}
+			};
+			scrollPane.setScrollingDisabled(true, false);
+			scrollPane.setFadeScrollBars(false);
+			scrollPane.setScrollbarsOnTop(true);
+			vGroup.addActor(scrollPane);
+			setScrollFocus(scrollPane);
+		}
 		
 		input.addListener(new InputListener() {
 			@Override
@@ -200,7 +217,7 @@ public class ChatScreen extends MenuScreen implements ParentScreen {
 			messageStream.addActorAt(0, label);
 			labelQueue.add(label);
 			registerLabel(Style.Default, label);
-			if(messageStream.getChildren().size > 10) {
+			if(messageStream.getChildren().size > (useTimer ? MESSAGE_DISPLAY_SIZE : MESSAGE_BUFFER_SIZE)) {
 				Label oldLabel = labelQueue.poll();
 				deregisterLabel(oldLabel);
 				messageStream.removeActor(oldLabel);
@@ -219,11 +236,12 @@ public class ChatScreen extends MenuScreen implements ParentScreen {
 	
 	@Override
 	protected void layoutActors() {
-		// invalidate all the things so they will resize properly
-		input.invalidateHierarchy();
-		messageStream.invalidate();
+		// pack all the things so they will resize properly
+		input.getStyle().font = ClientCore.getFont(Style.TextFieldFont);
+		input.setStyle(input.getStyle());
+		messageStream.pack();
 		for(TimerLabel label: labelQueue)
-			label.invalidate();
+			label.pack();
 		super.layoutActors();
 	}
 	

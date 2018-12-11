@@ -151,8 +151,8 @@ public class GameScreen {
 		guiStage.act();
 		guiStage.draw();
 		
+		chatOverlay.act();
 		if(!(ClientCore.getScreen() instanceof ChatScreen)) {
-			chatOverlay.act();
 			chatOverlay.draw();
 		}
 	}
