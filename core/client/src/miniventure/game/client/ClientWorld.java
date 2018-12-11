@@ -197,7 +197,6 @@ public class ClientWorld extends WorldManager {
 	
 	public void spawnPlayer(SpawnData data) {
 		// this has to come before making the new client player, because it has the same eid and so will overwrite some things.
-		//fixme hotbar table
 		if(this.mainPlayer != null) {
 			super.deregisterEntity(this.mainPlayer.getId());
 			// gameScreen.getHudPanel().remove(this.mainPlayer.getHands().getHotbarTable());

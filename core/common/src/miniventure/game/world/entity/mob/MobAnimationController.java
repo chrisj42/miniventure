@@ -48,7 +48,7 @@ public class MobAnimationController<M extends Entity & Mob> {
 	}
 	
 	// the animation time is reset in getFrame, so this will never overflow.
-	public void requestState(@NotNull AnimationState rState) {
+	public synchronized void requestState(@NotNull AnimationState rState) {
 		try {
 			requestedAnimations.add(rState);
 		} catch(NullPointerException ex) {
@@ -57,13 +57,13 @@ public class MobAnimationController<M extends Entity & Mob> {
 		}
 	}
 	
-	public SpriteUpdate getSpriteUpdate() {
+	public synchronized SpriteUpdate getSpriteUpdate() {
 		if(!animationChanged) return null;
 		animationChanged = false;
 		return new SpriteUpdate(renderer);
 	}
 	
-	public boolean setDirection(@NotNull Direction dir) {
+	public synchronized boolean setDirection(@NotNull Direction dir) {
 		if(mob.getDirection() == dir)
 			return false; // no change.
 		
@@ -87,7 +87,7 @@ public class MobAnimationController<M extends Entity & Mob> {
 		return true;
 	}
 	
-	public void progressAnimation(float delta) {
+	public synchronized void progressAnimation(float delta) {
 		// update the animation
 		if(renderer != null)
 			renderer.update(delta);

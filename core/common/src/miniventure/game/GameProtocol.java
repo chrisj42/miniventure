@@ -346,7 +346,7 @@ public interface GameProtocol {
 			this.rendererData = rendererData;
 		}
 		
-		@Override public String toString() { return "SpriteUpdate("+ Arrays.toString(rendererData)+")"; }
+		@Override public String toString() { return "SpriteUpdate("+Arrays.toString(rendererData)+')'; }
 	}
 	
 	// sent in EntityUpdate, EntityAddition, ParticleAddition.
