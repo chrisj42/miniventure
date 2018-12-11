@@ -24,6 +24,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -31,8 +32,8 @@ import com.kotcrab.vis.ui.VisUI;
 
 public class ChatScreen extends MenuScreen implements ParentScreen {
 	
-	private static final float MESSAGE_LIFE_TIME = 15; // time from post to removal.
-	private static final float MESSAGE_FADE_TIME = 3; // duration taken to go from full opaque to fully transparent.
+	private static final float MESSAGE_LIFE_TIME = 6; // time from post to removal.
+	private static final float MESSAGE_FADE_TIME = 2; // duration taken to go from full opaque to fully transparent.
 	private static final Color BACKGROUND = Color.GRAY.cpy().sub(0, 0, 0, 0.25f);
 	
 	private static final int COMMAND_BUFFER_SIZE = 30;
@@ -64,6 +65,7 @@ public class ChatScreen extends MenuScreen implements ParentScreen {
 		messageStream.columnAlign(Align.topRight);
 		messageStream.space(5);
 		
+		// TODO fix input field font; get it to use the one in the Style class.
 		input = new TextField("", VisUI.getSkin()) {
 			@Override
 			public void draw(Batch batch, float parentAlpha) {
@@ -193,8 +195,8 @@ public class ChatScreen extends MenuScreen implements ParentScreen {
 	
 	private void addMessage(String msg, String color) { addMessage(msg, color, false); }
 	private void addMessage(String msg, String color, boolean connect) {
-		TimerLabel label = new TimerLabel(msg, Color.valueOf(color), connect);
 		Gdx.app.postRunnable(() -> {
+			TimerLabel label = new TimerLabel(msg, Color.valueOf(color), connect);
 			messageStream.addActorAt(0, label);
 			labelQueue.add(label);
 			registerLabel(Style.Default, label);
