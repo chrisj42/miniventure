@@ -219,6 +219,7 @@ public class GameScreen {
 		
 		BitmapFont font = ClientCore.getFont();
 		if(GameCore.debug) font.setColor(Color.ORANGE);
+		else font.setColor(Color.WHITE);
 		for(int i = 0; i < debugInfo.size; i++) {
 			if(GameCore.debug && i == 1)
 				font.setColor(Color.WHITE);
