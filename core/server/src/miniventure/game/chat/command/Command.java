@@ -1,6 +1,7 @@
 package miniventure.game.chat.command;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.PositionUpdate;
@@ -16,23 +17,27 @@ import miniventure.game.world.entity.mob.player.ServerPlayer;
 
 import com.badlogic.gdx.utils.Array;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public enum Command {
 	
 	HELP("List and show usage of various commands.",
 		new CommandUsageForm(false, "","list all available commands.", (executor, args, out, err) -> {
-			for(Command c : Command.valuesFor(executor))
+			for(Command c: Command.valuesFor(executor))
 				c.printHelp(executor, out, true, false, false);
 		}),
 		
 		new CommandUsageForm(false, "<command>", "show detailed help for the given command.", (executor, args, out, err) -> {
 			Command c = ArgValidator.COMMAND.get(args[0]);
-			c.printHelpAdvanced(executor, out);
+			if(c.canExecute(executor))
+				c.printHelpAdvanced(executor, out);
+			else
+				err.println("You do not have access to that command.");
 		}, Argument.get(ArgValidator.COMMAND)),
 		
 		new CommandUsageForm(false, "--all", "list all commands in detail", (executor, args, out, err) -> {
-			for(Command c: Command.values()) {
+			for(Command c: Command.valuesFor(executor)) {
 				c.printHelpAdvanced(executor, out);
 				out.println();
 			}
@@ -79,7 +84,7 @@ public enum Command {
 	),
 	
 	TP("Teleport a player to a location in the world.",
-		new CommandUsageForm(true, "<playername> <playername>", "Teleport the first player to the second player.", executor -> true, ((executor, args, out, err) -> {
+		new CommandUsageForm(true, "<playername> <playername>", "Teleport the first player to the second player.", ((executor, args, out, err) -> {
 			ServerPlayer toMove = ArgValidator.PLAYER.get(args[0]);
 			ServerPlayer dest = ArgValidator.PLAYER.get(args[1]);
 			
@@ -97,18 +102,17 @@ public enum Command {
 			Command.valueOf("TP").execute(new String[] {source, args[0]}, executor, out, err);
 		}), Argument.get(ArgValidator.PLAYER)),
 		
-		new CommandUsageForm(true, "<playername> <x> <y>", "Teleports the specified player to the specified location.", executor -> true, ((executor, args, out, err) -> {
+		new CommandUsageForm(true, "<playername> <x> <y>", "Teleports the specified player to the specified location.", ((executor, args, out, err) -> {
 			ServerPlayer player = ArgValidator.PLAYER.get(args[0]);
 			float x = ArgValidator.DECIMAL.get(args[1]);
 			float y = ArgValidator.DECIMAL.get(args[2]);
-			// TODO later, add command forms without a level that redirect to the same form, but using the player's current level.
 			ServerLevel level = player.getLevel();
 			if(level != null) {
-				x += level.getWidth()/2;
-				y += level.getHeight()/2;
+				x += level.getWidth()/2f;
+				y += level.getHeight()/2f;
 				player.moveTo(level, x, y);
 				ServerCore.getServer().sendToPlayer(player, new PositionUpdate(player));
-				out.println("teleported "+player.getName()+" to "+player.getPosition(true)+".");
+				out.println("teleported "+player.getName()+" to "+player.getPosition(true)+'.');
 			} else
 				err.println("player "+player.getName()+" is not on a valid level; cannot be teleported.");
 		}), Argument.get(ArgValidator.PLAYER, ArgValidator.DECIMAL, ArgValidator.DECIMAL)),
@@ -149,14 +153,14 @@ public enum Command {
 	),
 	
 	OP("Give another player access to all commands, or take it away.",
-		new CommandUsageForm(true, "<playername> <isAdmin>", "Give or take admin permissions for the specified player. (isAdmin = true OR false)", executor -> true, ((executor, args, out, err) -> {
+		new CommandUsageForm(true, "<playername> <isAdmin>", "Give or take admin permissions for the specified player. (isAdmin = true OR false)", ((executor, args, out, err) -> {
 			ServerPlayer player = ArgValidator.PLAYER.get(args[0]);
 			boolean give = ArgValidator.BOOLEAN.get(args[1]);
 			boolean success = ServerCore.getServer().setAdmin(player, give);
 			if(success)
-				out.println("Admin permissions "+(give?"granted":"removed")+" for player "+player.getName()+".");
+				out.println("Admin permissions "+(give?"granted":"removed")+" for player "+player.getName()+'.');
 			else
-				err.println("failed to change admin permissions of player "+player.getName()+".");
+				err.println("failed to change admin permissions of player "+player.getName()+'.');
 		}), Argument.get(ArgValidator.PLAYER, ArgValidator.BOOLEAN))
 	),
 	
@@ -172,7 +176,7 @@ public enum Command {
 	),
 	
 	STOP("Stops the server.",
-		new CommandUsageForm(true, "", "Stops the server.", executor -> true, (executor, args, out, err) -> ServerCore.quit())
+		new CommandUsageForm(true, "", "Stops the server.", (executor, args, out, err) -> ServerCore.quit())
 	);
 	
 	static Command getCommand(String commandName, ServerPlayer executor) {
@@ -181,7 +185,7 @@ public enum Command {
 			c = Enum.valueOf(Command.class, commandName.toUpperCase());
 		} catch(IllegalArgumentException ignored) {}
 		
-		if(c != null && c.restricted && !ServerCore.getServer().isAdmin(executor))
+		if(c != null && !c.canExecute(executor))
 			c = null; // not allowed to access.
 		
 		return c;
@@ -206,10 +210,14 @@ public enum Command {
 	}
 	
 	public void execute(String[] args, @Nullable ServerPlayer executor, MessageBuilder out, MessageBuilder err) {
-		for(CommandUsageForm form: forms) {
+		if(!canExecute(executor)) {
+			err.println("You do not have access to that command.");
+			return;
+		}
+		
+		for(CommandUsageForm form: forms)
 			if(form.execute(executor, args, out, err))
 				return;
-		}
 		
 		// no form matched, print help to error stream
 		printHelpBasic(executor, err);
@@ -218,18 +226,15 @@ public enum Command {
 	private static final String tab = "    ";
 	
 	private void printHelp(ServerPlayer executor, MessageBuilder out, boolean printDescription, boolean printUsage, boolean printDetails) {
-		boolean admin = ServerCore.getServer().isAdmin(executor);
-		
 		if(printDescription) out.println(name + " - " + description);
 		
 		if(printDetails && details != null) out.println(tab+details);
 		
 		if(printUsage) {
 			out.println("Usages:");
-			for(CommandUsageForm form : forms) {
+			for(CommandUsageForm form: forms) {
 				if(!form.executorCheck.get(executor)) continue;
-				if(form.restricted && !admin) continue;
-				out.println(tab+name + " " + form.usage);
+				out.println(tab+name + ' ' + form.usage);
 				if(printDetails) out.println(tab+tab + form.details);
 			}
 		}
@@ -237,16 +242,23 @@ public enum Command {
 	
 	public void printHelpAdvanced(ServerPlayer executor, MessageBuilder out) { printHelp(executor, out, true, true, true); }
 	public void printHelpBasic(ServerPlayer executor, MessageBuilder out) {
-		out.print(name+" ");
+		out.print(name+' ');
 		printHelp(executor, out, false, true, false);
 		out.println("type \"/help " + name + "\" for more info.");
 	}
 	
+	private boolean canExecute(@Nullable ServerPlayer executor) {
+		for(CommandUsageForm form: forms)
+			if(form.executorCheck.get(executor))
+				return true;
+		
+		return false;
+	}
+	
 	private static Command[] valuesFor(@Nullable ServerPlayer player) {
-		Array<Command> commands = new Array<>(Command.class);
-		boolean op = ServerCore.getServer().isAdmin(player);
+		Array<Command> commands = new Array<>(true, Command.values().length, Command.class);
 		for(Command c: Command.values())
-			if((op || !c.restricted) && (c != DEBUG || player == null))
+			if(c.canExecute(player) && !(c == DEBUG && player != null)) // only list debug command on server console; but all admins are still capable of *using* the debug command.
 				commands.add(c);
 		
 		return commands.shrink();

@@ -26,9 +26,13 @@ public class CommandUsageForm {
 		this.restricted = restricted;
 		this.usage = usage;
 		this.details = details;
-		this.executorCheck = executorCheck;
 		this.args = args;
 		this.executionBehavior = executionBehavior;
+		
+		if(restricted)
+			this.executorCheck = executor -> executorCheck.get(executor) && ServerCore.getServer().isAdmin(executor);
+		else
+			this.executorCheck = executorCheck;
 	}
 	
 	public boolean execute(ServerPlayer executor, String[] args, MessageBuilder out, MessageBuilder err) {
