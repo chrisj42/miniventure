@@ -197,10 +197,10 @@ public class LevelGenerator {
 		put(DIRT, HOLE);
 		put(GRASS, DIRT);
 		put(STONE, DIRT);
-		put(RUBY, DIRT);
-		put(TUNGSTEN, DIRT);
-		put(IRON, DIRT);
-		put(COAL, DIRT);
+		put(RUBY_ORE, DIRT);
+		put(TUNGSTEN_ORE, DIRT);
+		put(IRON_ORE, DIRT);
+		put(COAL_ORE, DIRT);
 		put(FLINT, GRASS);
 		put(SNOW, GRASS);
 		// put(TORCH, DIRT);
@@ -236,11 +236,11 @@ public class LevelGenerator {
 		
 		NoiseMapper ores = new GroupNoiseMapper("Ores", detailNoise)
 			.addRegion(STONE, .3f)
-			.addRegion(IRON, 1f)
-			.addRegion(COAL, 2f)
+			.addRegion(IRON_ORE, 1f)
+			.addRegion(COAL_ORE, 2f)
 			// .addRegion(FLINT, 1f)
-			.addRegion(TUNGSTEN, .75f)
-			.addRegion(RUBY, .5f)
+			.addRegion(TUNGSTEN_ORE, .75f)
+			.addRegion(RUBY_ORE, .5f)
 			;
 		
 		NoiseMapper canyonBiome = new NoiseMapper("Canyons", detailNoise)

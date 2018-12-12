@@ -117,13 +117,13 @@ public class ClientTileType extends TileType {
 			P.swimAnimation.as(new SwimAnimation(type))
 		)),
 		
-		COAL(ClientTileFactory::ore),
-		IRON(ClientTileFactory::ore),
-		TUNGSTEN(ClientTileFactory::ore),
-		RUBY(ClientTileFactory::ore),
+		COAL_ORE(ClientTileFactory::ore),
+		IRON_ORE(ClientTileFactory::ore),
+		TUNGSTEN_ORE(ClientTileFactory::ore),
+		RUBY_ORE(ClientTileFactory::ore),
 		
 		STONE(type -> new ClientTileType(type, true,
-			new ConnectionManager(type, RenderStyle.SINGLE_FRAME, COAL.mainEnum, IRON.mainEnum, TUNGSTEN.mainEnum, RUBY.mainEnum),
+			new ConnectionManager(type, RenderStyle.SINGLE_FRAME, COAL_ORE.mainEnum, IRON_ORE.mainEnum, TUNGSTEN_ORE.mainEnum, RUBY_ORE.mainEnum),
 			new OverlapManager(type, RenderStyle.SINGLE_FRAME)
 		)),
 		
@@ -176,7 +176,8 @@ public class ClientTileType extends TileType {
 	private interface ClientTileFactory {
 		static ClientTileType ore(TileTypeEnum type) {
 			return new ClientTileType(type, false,
-				new ConnectionManager(type, RenderStyle.SINGLE_FRAME, TileTypeEnum.STONE)
+				new ConnectionManager(type, RenderStyle.SINGLE_FRAME, TileTypeEnum.STONE),
+				new OverlapManager(type, RenderStyle.SINGLE_FRAME)
 			);
 		}
 		

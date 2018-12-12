@@ -144,10 +144,10 @@ public class ServerTileType extends TileType {
 			))
 		)),
 		
-		COAL(type -> ServerTileFactory.ore(type, ResourceType.Coal, 25)),
-		IRON(type -> ServerTileFactory.ore(type, ResourceType.Iron, 35)),
-		TUNGSTEN(type -> ServerTileFactory.ore(type, ResourceType.Tungsten, 45)),
-		RUBY(type -> ServerTileFactory.ore(type, ResourceType.Ruby, 60)),
+		COAL_ORE(type -> ServerTileFactory.ore(type, ResourceType.Coal, 25)),
+		IRON_ORE(type -> ServerTileFactory.ore(type, ResourceType.Iron, 35)),
+		TUNGSTEN_ORE(type -> ServerTileFactory.ore(type, ResourceType.Tungsten, 45)),
+		RUBY_ORE(type -> ServerTileFactory.ore(type, ResourceType.Ruby, 60)),
 		
 		STONE(type -> new ServerTileType(type,
 			new DestructionManager(type, 40,
