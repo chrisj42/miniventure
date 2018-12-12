@@ -36,8 +36,6 @@ import org.jetbrains.annotations.Nullable;
  */
 public abstract class ServerMob extends ServerEntity implements Mob {
 	
-	private static final float HURT_COOLDOWN = 0.5f; // minimum time between taking damage, in seconds; prevents a mob from getting hurt multiple times in quick succession. 
-	
 	@NotNull private Direction dir;
 	@NotNull private MobAnimationController animator;
 	

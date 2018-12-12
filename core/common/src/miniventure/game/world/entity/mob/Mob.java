@@ -13,6 +13,8 @@ public interface Mob extends WorldObject {
 	float MAX_KNOCKBACK_TIME = 0.25f;
 	float DAMAGE_PERCENT_FOR_MAX_PUSH = 0.2f;
 	
+	float HURT_COOLDOWN = 0.25f; // minimum time between taking damage, in seconds; prevents a mob from getting hurt multiple times in quick succession.
+	
 	static float shortenSprite(float height) { return height / 2; }
 	
 	Direction getDirection();

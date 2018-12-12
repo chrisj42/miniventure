@@ -86,7 +86,7 @@ public class ClientEntity extends Entity {
 	
 	// power = health percent, loosely
 	public void hurt(WorldObject source, float power) {
-		setBlinker(Color.RED, 0.5f, true, new FrameBlinker(5, 1, false));
+		setBlinker(Color.RED, Mob.HURT_COOLDOWN, true, new FrameBlinker(5, 1, false));
 	}
 	
 	public boolean move(Vector2 moveDist, boolean validate) { return move(moveDist.x, moveDist.y, validate); }
