@@ -98,6 +98,7 @@ public class GameScreen {
 					float value = Float.parseFloat(newSpeed);
 					player.setSpeed(value);
 				} catch(NumberFormatException ignored) {}
+				ClientCore.setScreen(null);
 			}));
 		}
 		
