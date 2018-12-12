@@ -28,7 +28,7 @@ public class InputScreen extends BackgroundInheritor {
 		
 		TextField field = new TextField("", VisUI.getSkin());
 		registerField(field);
-		table.add(field).colspan(2);
+		table.add(field).colspan(2).fillX();
 		
 		table.row().pad(10);
 		VisTextButton confirmBtn = makeButton("Confirm", () -> onConfirm.act(field.getText()));
