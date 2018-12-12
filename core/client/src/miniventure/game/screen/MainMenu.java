@@ -1,7 +1,5 @@
 package miniventure.game.screen;
 
-import javax.swing.JOptionPane;
-
 import miniventure.game.GameCore;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.ClientWorld;
@@ -31,8 +29,6 @@ import org.jetbrains.annotations.NotNull;
 
 public class MainMenu extends BackgroundProvider implements ParentScreen {
 	
-	private boolean dialog = false;
-	
 	private final Table table;
 	
 	private final DisplayLevel backgroundLevel;
@@ -56,7 +52,6 @@ public class MainMenu extends BackgroundProvider implements ParentScreen {
 		setVersionUpdateLabel(updateLabel);
 		
 		VisTextButton playButton = makeButton("Play", () -> {
-			if(dialog) return;
 			if(!ClientCore.viewedInstructions)
 				ClientCore.setScreen(new InstructionsScreen(true));
 			else
@@ -66,24 +61,7 @@ public class MainMenu extends BackgroundProvider implements ParentScreen {
 		table.add(playButton).spaceBottom(20);
 		table.row();
 		
-		VisTextButton joinBtn = makeButton("Join Server", () -> {
-			if(dialog) return;
-			dialog = true;
-			LoadingScreen loader = new LoadingScreen();
-			loader.pushMessage("Preparing to connect...");
-			ClientCore.setScreen(loader);
-			//noinspection CallToThreadStartDuringObjectConstruction
-			new Thread(() -> {
-				String ipAddress = JOptionPane.showInputDialog("Enter the IP Address you want to connect to.");
-				Gdx.app.postRunnable(() -> {
-					if(ipAddress != null)
-						world.createWorld(ipAddress);
-					else
-						ClientCore.backToParentScreen();
-				});
-				dialog = false;
-			}).start();
-		});
+		VisTextButton joinBtn = makeButton("Join Server", () -> ClientCore.setScreen(new InputScreen("Enter the IP Address you want to connect to:", world::createWorld)));
 		
 		table.add(joinBtn).spaceBottom(20).row();
 		

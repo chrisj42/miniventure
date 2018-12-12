@@ -1,10 +1,10 @@
 package miniventure.game.client;
 
-import javax.swing.JOptionPane;
-
 import miniventure.game.GameCore;
 import miniventure.game.item.HotbarTable;
 import miniventure.game.screen.ChatScreen;
+import miniventure.game.screen.ConfirmScreen;
+import miniventure.game.screen.InputScreen;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.util.DiscreteViewport;
 import miniventure.game.util.RelPos;
@@ -88,19 +88,17 @@ public class GameScreen {
 		chatScreen.dispose();
 	}
 	
-	private boolean dialog = false;
-	public void handleInput(@NotNull ClientPlayer player) {
-		if(dialog) return;
-		
+	void handleInput(@NotNull ClientPlayer player) {
 		player.handleInput(getMouseInput());
 		
 		boolean shift = Gdx.input.isKeyPressed(Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Keys.SHIFT_RIGHT);
 		if(shift && GameCore.debug && Gdx.input.isKeyJustPressed(Keys.S)) {
-			String newSpeed = JOptionPane.showInputDialog("Enter new Player Speed:", player.getSpeed());
-			try {
-				float value = Float.parseFloat(newSpeed);
-				player.setSpeed(value);
-			} catch(NumberFormatException | NullPointerException ignored) {}
+			ClientCore.setScreen(new InputScreen("Enter new Player Speed:", newSpeed -> {
+				try {
+					float value = Float.parseFloat(newSpeed);
+					player.setSpeed(value);
+				} catch(NumberFormatException ignored) {}
+			}));
 		}
 		
 		levelView.handleInput();
@@ -128,13 +126,7 @@ public class GameScreen {
 				chatScreen.focus("/");
 			
 			else if(ClientCore.input.pressingKey(Keys.ESCAPE)) {
-				dialog = true;
-				new Thread(() -> {
-					int choice = JOptionPane.showConfirmDialog(null, "Leave Server?", "Confirmation", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-					if(choice == JOptionPane.YES_OPTION)
-						Gdx.app.postRunnable(() -> ClientCore.getWorld().exitWorld());
-					dialog = false;
-				}).start();
+				ClientCore.setScreen(new ConfirmScreen("Leave Server?", () -> ClientCore.getWorld().exitWorld()));
 			}
 		}
 	}

@@ -12,7 +12,6 @@ import miniventure.game.chat.InfoMessage;
 import miniventure.game.chat.InfoMessageLine;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.Style;
-import miniventure.game.screen.util.ParentScreen;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.RelPos;
 
@@ -30,7 +29,7 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
 
-public class ChatScreen extends MenuScreen implements ParentScreen {
+public class ChatScreen extends MenuScreen {
 	
 	private static final float MESSAGE_LIFE_TIME = 6; // time from post to removal.
 	private static final float MESSAGE_FADE_TIME = 2; // duration taken to go from full opaque to fully transparent.

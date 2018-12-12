@@ -1,8 +1,5 @@
 package miniventure.game.client;
 
-import javax.swing.JOptionPane;
-
-import java.awt.EventQueue;
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -13,10 +10,10 @@ import miniventure.game.item.CraftingScreen;
 import miniventure.game.item.InventoryScreen;
 import miniventure.game.screen.ChatScreen;
 import miniventure.game.screen.ErrorScreen;
-import miniventure.game.screen.MainMenu;
+import miniventure.game.screen.InputScreen;
+import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.util.MyUtils;
-import miniventure.game.util.ProgressLogger;
 import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.Chunk.ChunkData;
@@ -306,9 +303,9 @@ public class GameClient implements GameProtocol {
 	public void send(Object obj) { client.sendTCP(obj); }
 	public void addListener(Listener listener) { client.addListener(listener); }
 	
-	public boolean connectToServer(@NotNull ProgressLogger logger, String host, ValueFunction<Boolean> callback) { return connectToServer(logger, host, GameProtocol.PORT, callback); }
-	public boolean connectToServer(@NotNull ProgressLogger logger, String host, int port, ValueFunction<Boolean> callback) {
-		logger.pushMessage("connecting to server at "+host+":"+port+"...");
+	public boolean connectToServer(@NotNull LoadingScreen logger, String host, ValueFunction<Boolean> callback) { return connectToServer(logger, host, GameProtocol.PORT, callback); }
+	public boolean connectToServer(@NotNull LoadingScreen logger, String host, int port, ValueFunction<Boolean> callback) {
+		logger.pushMessage("connecting to server at "+host+':'+port+"...");
 		
 		try {
 			client.connect(5000, host, port);
@@ -323,25 +320,18 @@ public class GameClient implements GameProtocol {
 			return false;
 		}
 		
-		logger.editMessage("logging in...");
-		
-		EventQueue.invokeLater(() -> {
-			username = JOptionPane.showInputDialog("Specify username:", username);
-			if(username == null) {
-				disconnect();
-				MenuScreen parent = ClientCore.getScreen() == null ? null : ClientCore.getScreen().getParent();
-				Gdx.app.postRunnable(() -> {
-					ClientCore.setScreen(parent == null ? new MainMenu() : parent);
-					callback.act(false);
-				});
-				return;
-			}
-			
+		Gdx.app.postRunnable(() -> ClientCore.setScreen(new InputScreen("Specify username:", username -> {
+			this.username = username;
 			send(new Login(username, GameCore.VERSION));
 			
 			logger.editMessage("Loading world from server...");
+			ClientCore.setScreen(logger);
 			callback.act(true);
-		});
+		}, () -> {
+			disconnect();
+			ClientCore.backToParentScreen();
+			callback.act(false);
+		})));
 		
 		return true;
 	}

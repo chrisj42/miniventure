@@ -164,6 +164,8 @@ public class ClientCore extends ApplicationAdapter {
 	
 	public static void setScreen(@Nullable MenuScreen screen) {
 		synchronized (screenLock) {
+			if(screen == menuScreen) return;
+			
 			if(menuScreen instanceof InventoryScreen) {
 				((InventoryScreen) menuScreen).close();
 			}
@@ -216,6 +218,12 @@ public class ClientCore extends ApplicationAdapter {
 				menuScreen = screen;
 				Gdx.input.setInputProcessor(menuScreen);
 				input.reset();
+			}
+			else {
+				if(clientWorld.worldLoaded())
+					setScreen(null);
+				else if(!(menuScreen instanceof MainMenu))
+					setScreen(new MainMenu());
 			}
 		}
 	}

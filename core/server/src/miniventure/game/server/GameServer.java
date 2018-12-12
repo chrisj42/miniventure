@@ -41,6 +41,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.esotericsoftware.kryonet.Connection;
+import com.esotericsoftware.kryonet.FrameworkMessage.KeepAlive;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 
@@ -99,6 +100,9 @@ public class GameServer implements GameProtocol {
 		addListener(/*new LagListener(lagMin, lagMax, */new Listener() {
 			@Override
 			public void received (Connection connection, Object object) {
+				if(object instanceof KeepAlive)
+					return; // we don't care about these, they are internal packets
+				
 				ServerWorld world = ServerCore.getWorld();
 				
 				if(object instanceof Login) {
