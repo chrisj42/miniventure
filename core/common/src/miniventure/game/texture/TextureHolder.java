@@ -3,19 +3,22 @@ package miniventure.game.texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.TextureAtlasData.Region;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 public class TextureHolder {
 	
 	public final AtlasRegion texture;
 	public final int width, height;
 	public final String name;
 	
-	public TextureHolder(AtlasRegion texture) {
+	public TextureHolder(@NotNull AtlasRegion texture) {
 		this(texture, texture.name, texture.getRegionWidth(), texture.getRegionHeight());
 	}
 	
-	public TextureHolder(Region region) { this(null, region.name, region.width, region.height); }
+	public TextureHolder(@NotNull Region region) { this(null, region.name, region.width, region.height); }
 	
-	private TextureHolder(AtlasRegion texture, String name, int width, int height) {
+	private TextureHolder(@Nullable AtlasRegion texture, String name, int width, int height) {
 		this.texture = texture;
 		this.name = fixPath(name);
 		this.width = width;

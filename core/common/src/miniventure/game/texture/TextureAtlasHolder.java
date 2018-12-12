@@ -25,8 +25,10 @@ public class TextureAtlasHolder {
 	}
 	
 	public TextureHolder findRegion(String name) {
-		if(atlas != null)
-			return new TextureHolder(atlas.findRegion(name));
+		if(atlas != null) {
+			AtlasRegion region = atlas.findRegion(name);
+			return region == null ? null : new TextureHolder(region);
+		}
 		
 		for(Region region: regions)
 			if(region.name.equals(name))

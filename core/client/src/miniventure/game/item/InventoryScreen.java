@@ -194,7 +194,7 @@ public class InventoryScreen extends MenuScreen {
 			slotTable.clearChildren();
 			
 			for(String[] data: update.itemStacks)
-				addItem(data);
+				addItemStack(data);
 			
 			for(int i = 0; i < hotbar.length; i++) {
 				if(hotbar[i] >= 0) {
@@ -219,9 +219,9 @@ public class InventoryScreen extends MenuScreen {
 		}
 	}
 	
-	private void addItem(String[] data) {
-		Item item = Item.deserialize(data);
-		ItemStack stack = new ItemStack(item, 1);
+	private void addItem(String[] data) { addItemStack(new ItemStack(Item.deserialize(data), 1)); }
+	private void addItemStack(String[] data) { addItemStack(ItemStack.deserialize(data)); }
+	private void addItemStack(ItemStack stack) {
 		SlotData slot = new SlotData(stack);
 		inventory.add(slot);
 		slotsById.put(slot.id, slot);

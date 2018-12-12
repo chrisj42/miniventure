@@ -65,6 +65,7 @@ public class Item {
 	@NotNull
 	public static Item deserialize(@NotNull String[] info) {
 		TextureHolder t = GameCore.icons.get(info[1]);
+		System.out.println(info[1]);
 		if(t == null)
 			t = GameCore.tileAtlas.findRegion(info[1]);
 		if(t == null)
