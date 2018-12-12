@@ -220,7 +220,8 @@ public class InventoryScreen extends MenuScreen {
 	}
 	
 	private void addItem(String[] data) {
-		ItemStack stack = ItemStack.deserialize(data);
+		Item item = Item.deserialize(data);
+		ItemStack stack = new ItemStack(item, 1);
 		SlotData slot = new SlotData(stack);
 		inventory.add(slot);
 		slotsById.put(slot.id, slot);
