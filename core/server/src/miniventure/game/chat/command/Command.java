@@ -50,7 +50,7 @@ public enum Command {
 	),
 	
 	PMSG("Send a private message to another player.",
-		new CommandUsageForm(false, "<playername> <message...>", "Send a message to the specified player, that only they can see.", MyUtils::notNull, ((executor, args, out, err) -> {
+		new CommandUsageForm(false, "<playername> <message...>", "Send a message to the specified player, that only they can see.", ((executor, args, out, err) -> {
 			ServerPlayer player = ArgValidator.PLAYER.get(args[0]);
 			String msg = String.join("", Arrays.copyOfRange(args, 1, args.length));
 			
