@@ -329,4 +329,13 @@ public class ClientCore extends ApplicationAdapter {
 	
 	public static ClientWorld getWorld() { return clientWorld; }
 	public static GameClient getClient() { return clientWorld.getClient(); }
+	
+	@Override
+	public void resume() {
+		synchronized (screenLock) {
+			if(menuScreen != null) {
+				menuScreen.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+			}
+		}
+	}
 }
