@@ -88,7 +88,7 @@ public interface GameProtocol {
 	}
 	
 	enum DatalessRequest {
-		Respawn, Tile
+		Respawn, Tile, Clear_Console
 	}
 	
 	class Login {

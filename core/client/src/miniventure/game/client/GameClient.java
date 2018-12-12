@@ -278,6 +278,9 @@ public class GameClient implements GameProtocol {
 				forPacket(object, LoginFailure.class, failure -> Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen(failure.message))));
 				
 				forPacket(object, SoundRequest.class, sound -> ClientCore.playSound(sound.sound));
+				
+				if(object == DatalessRequest.Clear_Console)
+					ClientCore.clearMessages();
 			}
 			
 			@Override

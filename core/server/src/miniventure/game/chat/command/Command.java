@@ -3,6 +3,7 @@ package miniventure.game.chat.command;
 import java.util.Arrays;
 
 import miniventure.game.GameCore;
+import miniventure.game.GameProtocol.DatalessRequest;
 import miniventure.game.GameProtocol.PositionUpdate;
 import miniventure.game.chat.MessageBuilder;
 import miniventure.game.chat.command.Argument.ArgValidator;
@@ -40,6 +41,10 @@ public enum Command {
 				out.println();
 			}
 		}, Argument.get(ArgValidator.exactString(false, "--all")))
+	),
+	
+	CLEAR("Clear the chat console.",
+		new CommandUsageForm(false, "", "Clears all messages from the chat screen scroll area.", MyUtils::notNull, (executor, args, out, err) -> ServerCore.getServer().sendToPlayer(executor, DatalessRequest.Clear_Console))
 	),
 	
 	MSG("Broadcast a message for all players to see.",

@@ -259,6 +259,10 @@ public class ClientCore extends ApplicationAdapter {
 		gameScreen.chatOverlay.addMessage(msg);
 		gameScreen.chatScreen.addMessage(msg);
 	}
+	static void clearMessages() {
+		gameScreen.chatOverlay.reset();
+		gameScreen.chatScreen.reset();
+	}
 	
 	@Override
 	public void resize(int width, int height) {
