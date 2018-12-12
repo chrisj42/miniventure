@@ -24,8 +24,8 @@ public abstract class RenderLevel extends Level {
 		// pass the offset vector to all objects being rendered.
 		
 		Array<WorldObject> objects = new Array<>();
-		Array<WorldObject> under = new Array<>(); // ground tiles
-		Array<WorldObject> over = new Array<>();
+		Array<Tile> under = new Array<>(); // ground tiles
+		Array<Entity> over = new Array<>();
 		for(Entity e: entities) {
 			if(e.isFloating())
 				over.add(e);
@@ -44,7 +44,9 @@ public abstract class RenderLevel extends Level {
 		// then particles
 		
 		// entities second
+		under.sort((e1, e2) -> Float.compare(e2.getCenter().y, e1.getCenter().y));
 		objects.sort((e1, e2) -> Float.compare(e2.getCenter().y, e1.getCenter().y));
+		over.sort((e1, e2) -> Float.compare(e2.getCenter().y, e1.getCenter().y));
 		//objects.addAll(entities);
 		
 		for(WorldObject obj: under)
@@ -53,14 +55,6 @@ public abstract class RenderLevel extends Level {
 			obj.render(batch, delta, posOffset);
 		for(WorldObject obj: over)
 			obj.render(batch, delta, posOffset);
-	}
-	
-	public Array<Vector3> renderLighting(Rectangle renderSpace) {
-		Array<WorldObject> objects = new Array<>();
-		objects.addAll(getOverlappingTiles(renderSpace));
-		objects.addAll(getOverlappingEntities(renderSpace));
-		
-		return renderLighting(objects);
 	}
 	
 	public static Array<Vector3> renderLighting(Array<WorldObject> objects) {

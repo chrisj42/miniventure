@@ -4,6 +4,7 @@ import miniventure.game.GameCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.RenderLevel;
+import miniventure.game.world.entity.mob.player.ClientPlayer;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.Gdx;
@@ -137,6 +138,27 @@ public class LevelViewport {
 			}
 			for (int y = minY; y <= maxY; y += Chunk.SIZE) {
 				MyUtils.fillRect((minX - offset.x) * Tile.SIZE, (y - offset.y) * Tile.SIZE-lineThickness, (maxX - minX) * Tile.SIZE, lineThickness*2+1, Color.PINK, batch);
+			}
+			
+			ClientPlayer player = ClientCore.getWorld().getMainPlayer();
+			if(player != null) {
+				Rectangle rect = player.getInteractionRect();
+				Tile closest = level.getClosestTile(rect);
+				
+				rect.x = (rect.x - offset.x) * Tile.SIZE;
+				rect.y = (rect.y - offset.y) * Tile.SIZE;
+				rect.width *= Tile.SIZE;
+				rect.height *= Tile.SIZE;
+				MyUtils.drawRect(rect, 1, Color.BLACK, batch);
+				
+				if(closest != null) {
+					rect = closest.getBounds();
+					rect.x = (rect.x - offset.x) * Tile.SIZE;
+					rect.y = (rect.y - offset.y) * Tile.SIZE;
+					rect.width *= Tile.SIZE;
+					rect.height *= Tile.SIZE;
+					MyUtils.drawRect(rect, 1, Color.BLACK, batch);
+				}
 			}
 		}
 		

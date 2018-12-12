@@ -18,7 +18,7 @@ public interface Player extends Mob {
 	enum Stat {
 		Health("heart", 10, 20),
 		
-		Stamina("bolt", 12, 100),
+		Stamina("bolt", 10, 50),
 		
 		Hunger("burger", 10, 20),
 		
@@ -62,9 +62,13 @@ public interface Player extends Mob {
 	
 	default Rectangle getInteractionRect() {
 		Rectangle bounds = getBounds();
-		Vector2 dirVector = getDirection().getVector();
-		bounds.x += dirVector.x*7/10;
-		bounds.y += dirVector.y*7/10;
+		bounds.height = Mob.unshortenSprite(bounds.height);
+		Vector2 center = bounds.getCenter(new Vector2());
+		Vector2 dir = getDirection().getVector();
+		bounds.setSize(Math.abs(bounds.width*(1.5f*dir.x+1*dir.y)), Math.abs(bounds.height*(1*dir.x+1.5f*dir.y)));
+		bounds.setCenter(center);
+		bounds.x += dir.x*bounds.width*.75f;
+		bounds.y += dir.y*bounds.height*.75f;
 		return bounds;
 	}
 }

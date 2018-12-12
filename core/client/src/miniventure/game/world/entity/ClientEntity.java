@@ -1,12 +1,15 @@
 package miniventure.game.world.entity;
 
+import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.EntityAddition;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.ClientWorld;
+import miniventure.game.util.MyUtils;
 import miniventure.game.util.blinker.FrameBlinker;
 import miniventure.game.world.ClientLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Mob;
+import miniventure.game.world.entity.particle.ClientParticle;
 import miniventure.game.world.tile.ClientTile;
 import miniventure.game.world.tile.SwimAnimation;
 import miniventure.game.world.tile.Tile;
@@ -61,6 +64,15 @@ public class ClientEntity extends Entity {
 			}
 		}
 		getRenderer().render((x-posOffset.x) * Tile.SIZE, (y+z - posOffset.y) * Tile.SIZE, batch, drawableHeight);
+		
+		if(GameCore.debug && !(this instanceof ClientParticle)) {
+			Rectangle rect = getBounds();
+			rect.x = (rect.x - posOffset.x) * Tile.SIZE;
+			rect.y = (rect.y - posOffset.y) * Tile.SIZE;
+			rect.width *= Tile.SIZE;
+			rect.height *= Tile.SIZE;
+			MyUtils.drawRect(rect, 1, Color.BLACK, batch);
+		}
 	}
 	
 	@NotNull @Override

@@ -16,6 +16,7 @@ public interface Mob extends WorldObject {
 	float HURT_COOLDOWN = 0.25f; // minimum time between taking damage, in seconds; prevents a mob from getting hurt multiple times in quick succession.
 	
 	static float shortenSprite(float height) { return height / 2; }
+	static float unshortenSprite(float height) { return height * 2; }
 	
 	Direction getDirection();
 	boolean isKnockedBack();

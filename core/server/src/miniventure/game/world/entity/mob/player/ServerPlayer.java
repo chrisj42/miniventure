@@ -23,6 +23,7 @@ import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClassDataList;
 import miniventure.game.world.entity.Direction;
+import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.entity.mob.ServerMob;
 import miniventure.game.world.entity.particle.ActionType;
 import miniventure.game.world.entity.particle.ParticleData.ActionParticleData;
@@ -218,7 +219,7 @@ public class ServerPlayer extends ServerMob implements Player {
 					ServerCore.getServer().broadcastParticle(
 						new ActionParticleData(ActionType.SLASH, getDirection()),
 						level,
-						getCenter().add(getDirection().getVector().scl(getSize().scl(0.5f)))
+						getCenter().add(getDirection().getVector().scl(getSize().scl(0.5f, Mob.unshortenSprite(0.5f))))
 					);
 				else
 					ServerCore.getServer().broadcastParticle(

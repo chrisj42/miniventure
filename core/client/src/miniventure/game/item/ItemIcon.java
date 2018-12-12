@@ -35,13 +35,13 @@ public class ItemIcon extends Widget {
 			// draw icon
 			Color prev = batch.getColor();
 			batch.setColor(Color.BLACK);
-			int xoff = (Item.ICON_SIZE - item.getTexture().width) / 2;
-			int yoff = (Item.ICON_SIZE - item.getTexture().height) / 2;
-			batch.draw(item.getTexture().texture, getX()+xoff, getY()+yoff);
+			float xoff = (Item.ICON_SIZE - item.getTexture().width) / 2f;
+			float yoff = (Item.ICON_SIZE - item.getTexture().height) / 2f;
+			batch.draw(item.getTexture().texture, getX()-1+xoff, getY()-1+yoff);
 			batch.setColor(prev);
-			batch.draw(item.getTexture().texture, getX()+2+xoff, getY()+2+yoff);
+			batch.draw(item.getTexture().texture, getX()+1+xoff, getY()+1+yoff);
 			
-			renderUsability(batch, getX()+2, getY()+2, item.getUsabilityStatus());
+			renderUsability(batch, getX(), getY()+2, item.getUsabilityStatus());
 			
 			if(showCount()) {
 				BitmapFont font = ClientCore.getFont(Style.KeepSize);
