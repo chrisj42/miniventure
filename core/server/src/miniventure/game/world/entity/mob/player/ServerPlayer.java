@@ -155,7 +155,8 @@ public class ServerPlayer extends ServerMob implements Player {
 	
 	public boolean takeItem(@NotNull ServerItem item) {
 		if(inventory.addItem(item)) {
-			hands.addItem(item); // add to open hotbar slot if it exists
+			if(inventory.getCount(item) == 1) // don't add to hotbar if it already existed in inventory
+				hands.addItem(item); // add to open hotbar slot if it exists
 			GameServer server = ServerCore.getServer();
 			server.playEntitySound("pickup", this, false);
 			
