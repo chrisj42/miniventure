@@ -59,9 +59,3 @@ project(":core:desktop") {
 		compile "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
 	}
 }
-
-project(":gentest") {
-	dependencies {
-		compile project(":core:common")
-	}
-}
