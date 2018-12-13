@@ -79,14 +79,6 @@ public interface Argument {
 			
 			return obj;
 		}
-		static <T> T isTrue(FetchFunction<T> valueFunction, MapFunction<T, Boolean> boolFunction) throws IllegalArgumentException {
-			T obj = valueFunction.get();
-			if(!boolFunction.get(obj))
-				throw new IllegalArgumentException();
-			
-			return obj;
-		}
-		
 		
 		ArgValidator<String> ANY = arg -> arg;
 		ArgValidator<Integer> INTEGER = arg -> noException(() -> Integer.parseInt(arg));
@@ -132,11 +124,11 @@ public interface Argument {
 		static <T1, T2> ArgValidator<T2> map(ArgValidator<T1> orig, MapFunction<T1, T2> mapper) { return arg -> mapper.get(orig.get(arg)); }
 		
 		static ArgValidator<String> exactString(boolean matchCase, String... matches) { return exactString(str -> str, matchCase, matches); }
-		static <T> ArgValidator<T> exactString(MapFunction<String, T> mapper, boolean matchCase, String... matches) {
+		static <T> ArgValidator<T> exactString(MapFunction<String, T> resultMapper, boolean matchCase, String... matches) {
 			return arg -> {
 				for(String match : matches)
 					if(matchCase ? arg.equals(match) : arg.equalsIgnoreCase(match))
-						return mapper.get(arg);
+						return resultMapper.get(arg);
 				
 				throw new IllegalArgumentException();
 			};

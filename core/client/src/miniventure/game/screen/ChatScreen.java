@@ -30,6 +30,8 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
 
+import org.jetbrains.annotations.Nullable;
+
 public class ChatScreen extends MenuScreen {
 	
 	private static final float MESSAGE_LIFE_TIME = 6; // time from post to removal.
@@ -50,6 +52,9 @@ public class ChatScreen extends MenuScreen {
 	private final TextField input;
 	private final VerticalGroup messageStream;
 	
+	@Nullable
+	private final ScrollPane scrollPane;
+	
 	private boolean tabbing = false;
 	private int tabIndex = -1;
 	private String manualInput = ""; // this is the part of the command that the user entered manually, and so should not be changed when tabbing.
@@ -65,9 +70,8 @@ public class ChatScreen extends MenuScreen {
 		messageStream = new VerticalGroup() {
 			@Override
 			public float getPrefWidth() {
-				Group parent = getParent();
-				if(parent instanceof ScrollPane && ((ScrollPane)parent).getScrollWidth() != 0)
-					return ((ScrollPane)parent).getScrollWidth();
+				if(scrollPane != null)
+					return scrollPane.getScrollWidth();
 				else
 					return ChatScreen.this.getWidth() / 3;
 			}
@@ -91,10 +95,11 @@ public class ChatScreen extends MenuScreen {
 		
 		vGroup.addActor(input);
 		
-		if(useTimer)
+		if(useTimer) {
+			scrollPane = null;
 			vGroup.addActor(messageStream);
-		else {
-			ScrollPane scrollPane = new ScrollPane(messageStream, VisUI.getSkin()) {
+		} else {
+			scrollPane = new ScrollPane(messageStream, VisUI.getSkin()) {
 				@Override
 				public float getPrefWidth() {
 					return ChatScreen.this.getWidth() / 3;
@@ -201,6 +206,8 @@ public class ChatScreen extends MenuScreen {
 	public void focus(String initText) {
 		input.setText(initText);
 		input.setCursorPosition(initText.length());
+		if(scrollPane != null)
+			scrollPane.setScrollPercentY(0);
 		ClientCore.setScreen(this);
 	}
 	@Override

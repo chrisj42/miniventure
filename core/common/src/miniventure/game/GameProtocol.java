@@ -109,6 +109,20 @@ public interface GameProtocol {
 		public LoginFailure(String msg) { this.message = msg; }
 	}
 	
+	// pings always end up being started from the server.
+	// start is the time that the request was sent.
+	class Ping {
+		public final long start;
+		public final String source; // the name of the player who requested the ping. Null if initiated in server console.
+		
+		private Ping() { this(0, null); }
+		public Ping(String source) { this(System.nanoTime(), source); }
+		public Ping(long start, String source) {
+			this.start = start;
+			this.source = source;
+		}
+	}
+	
 	// this is sent by the client as a command, a single line. Chat messages are already prepended with "msg ". The server sends this whenever a player says something.
 	class Message {
 		public final String msg;

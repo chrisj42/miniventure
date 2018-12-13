@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.DatalessRequest;
+import miniventure.game.GameProtocol.Ping;
 import miniventure.game.GameProtocol.PositionUpdate;
 import miniventure.game.chat.MessageBuilder;
 import miniventure.game.chat.command.Argument.ArgValidator;
@@ -93,6 +94,20 @@ public enum Command {
 			else
 				err.println("failed to change admin permissions of player "+player.getName()+'.');
 		}), Argument.get(ArgValidator.PLAYER, ArgValidator.BOOLEAN))
+	),
+	
+	PING("Check client-server connection speed.",
+		new CommandUsageForm(false, "", "Sends a ping to the server, unless sent from the server console in which case all the clients are pinged.", (executor, args, out, err) -> {
+			// pings always come from the server.
+			if(executor == null)
+				ServerCore.getServer().broadcast(new Ping(null));
+			else
+				ServerCore.getServer().sendToPlayer(executor, new Ping(executor.getName()));
+		}),
+		new CommandUsageForm(true, "all", "Ping all clients", MyUtils::notNull,
+			(executor, args, out, err) -> ServerCore.getServer().broadcast(new Ping(executor.getName())), 
+			Argument.get(ArgValidator.exactString(false, "all"))
+		)
 	),
 	
 	PMSG("Send a private message to another player.",

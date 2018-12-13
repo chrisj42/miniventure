@@ -163,6 +163,24 @@ public class GameServer implements GameProtocol {
 				
 				ServerPlayer client = clientData.player;
 				
+				forPacket(object, Ping.class, ping -> {
+					long nano = System.nanoTime() - ping.start;
+					double time = nano / 1E9D;
+					String disp = time < 1 ? time*1E3+" ms." : time+" seconds.";
+					if(ping.source == null) // server origin
+						System.out.println("ping from "+client.getName()+": "+disp);
+					else {
+						Connection c;
+						if(ping.source.equals(client.getName()))
+							c = connection;
+						else
+							c = playerToConnectionMap.get(getPlayerByName(ping.source));
+						
+						if(c != null)
+							c.sendTCP(new Message("Ping for '"+client.getName()+"': "+disp, Color.SKY));
+					}
+				});
+				
 				if(object instanceof ChunkRequest) {
 					//System.out.println("server received chunk request");
 					ChunkRequest request = (ChunkRequest) object;
@@ -515,7 +533,7 @@ public class GameServer implements GameProtocol {
 		out.println("FPS: " + ServerCore.getFPS());
 		out.println("Players connected: "+playerToConnectionMap.size());
 		for(PlayerData pd: connectionToPlayerDataMap.values()) {
-			out.print("     Player \""+pd.player.getName()+"\" ");
+			out.print("     Player '"+pd.player.getName()+"' ");
 			if(pd.op) out.print("(admin) ");
 			out.print(pd.player.getLocation(true));
 			out.println();
