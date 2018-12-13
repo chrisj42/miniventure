@@ -55,7 +55,6 @@ public class GameCore {
 		tileConnectionAtlas = new TextureAtlas("sprites/tileconnectmap.txt");
 		iconAtlas = new TextureAtlas("sprites/icons.txt");
 		
-		//noinspection ConstantConditions
 		for(AtlasRegion region: iconAtlas.getRegions())
 			icons.put(region.name, new TextureHolder(region));
 	}
