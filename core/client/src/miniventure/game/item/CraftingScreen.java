@@ -1,5 +1,7 @@
 package miniventure.game.item;
 
+import javax.swing.Timer;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -150,6 +152,11 @@ public class CraftingScreen extends MenuScreen {
 		mainGroup.pack();
 		mainGroup.background(new ColorBackground(mainGroup, tableBackground));
 		
+		mainGroup.setVisible(false);
+		Timer t = new Timer(200, e -> mainGroup.setVisible(true));
+		t.setRepeats(false);
+		t.start();
+		
 		setKeyboardFocus(recipeListTable);
 		setScrollFocus(scrollPane);
 	}
@@ -204,6 +211,7 @@ public class CraftingScreen extends MenuScreen {
 			selection = 0;
 			itemChanged();
 			refreshCraftability(recipeRequest.stockUpdate);
+			Gdx.app.postRunnable(() -> mainGroup.setVisible(true)); // if the timer hasn't yet expired by now
 		}
 	}
 	

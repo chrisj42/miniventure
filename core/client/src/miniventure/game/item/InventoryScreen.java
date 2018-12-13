@@ -1,5 +1,7 @@
 package miniventure.game.item;
 
+import javax.swing.Timer;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -141,6 +143,11 @@ public class InventoryScreen extends MenuScreen {
 		mainGroup.addActor(fillBar);
 		mainGroup.addActor(scrollPane);
 		
+		mainGroup.setVisible(false);
+		Timer t = new Timer(200, e -> mainGroup.setVisible(true));
+		t.setRepeats(false);
+		t.start();
+		
 		setKeyboardFocus(slotTable);
 		setScrollFocus(scrollPane);
 	}
@@ -204,6 +211,7 @@ public class InventoryScreen extends MenuScreen {
 			}
 			
 			refresh();
+			mainGroup.setVisible(true); // in case the timer hasn't expired yet
 		}
 	}
 	
