@@ -21,47 +21,8 @@ import org.jetbrains.annotations.Nullable;
 
 public enum Command {
 	
-	HELP("List and show usage of various commands.",
-		new CommandUsageForm(false, "","list all available commands.", (executor, args, out, err) -> {
-			for(Command c: Command.valuesFor(executor))
-				c.printHelp(executor, out, true, false, false);
-		}),
-		
-		new CommandUsageForm(false, "<command>", "show detailed help for the given command.", (executor, args, out, err) -> {
-			Command c = ArgValidator.COMMAND.get(args[0]);
-			if(c.canExecute(executor))
-				c.printHelpAdvanced(executor, out);
-			else
-				err.println("You do not have access to that command.");
-		}, Argument.get(ArgValidator.COMMAND)),
-		
-		new CommandUsageForm(false, "--all", "list all commands in detail", (executor, args, out, err) -> {
-			for(Command c: Command.valuesFor(executor)) {
-				c.printHelpAdvanced(executor, out);
-				out.println();
-			}
-		}, Argument.get(ArgValidator.exactString(false, "--all")))
-	),
-	
 	CLEAR("Clear the chat console.",
 		new CommandUsageForm(false, "", "Clears all messages from the chat screen scroll area.", MyUtils::notNull, (executor, args, out, err) -> ServerCore.getServer().sendToPlayer(executor, DatalessRequest.Clear_Console))
-	),
-	
-	MSG("Broadcast a message for all players to see.",
-		new CommandUsageForm(false, "<message...>", "Everyone on the server will see the message.", (executor, args, out, err) -> {
-			String msg = String.join(" ", args);
-			ServerCore.getServer().broadcastMessage(executor, msg);
-		}, Argument.varArg(ArgValidator.ANY))
-	),
-	
-	PMSG("Send a private message to another player.",
-		new CommandUsageForm(false, "<playername> <message...>", "Send a message to the specified player, that only they can see.", ((executor, args, out, err) -> {
-			ServerPlayer player = ArgValidator.PLAYER.get(args[0]);
-			String msg = String.join("", Arrays.copyOfRange(args, 1, args.length));
-			
-			ServerCore.getServer().sendMessage(executor, player, msg);
-			
-		}), Argument.get(ArgValidator.PLAYER), Argument.varArg(ArgValidator.ANY))
 	),
 	
 	CONFIG("Edit configuration values for how the world works.",
@@ -84,6 +45,93 @@ public enum Command {
 			} else
 				err.println("Could not set config value.");
 		}, Argument.get(ArgValidator.exactString(false, "set"), ArgValidator.CONFIG_VALUE, ArgValidator.ANY))
+	),
+	
+	DEBUG("Toggles debug mode.", "This will show some extra things, and also allow certain cheats executed from a client to affect the server.",
+		new CommandUsageForm(true, "on", "Enable debug mode.",
+			((executor, args, out, err) -> GameCore.debug = true), Argument.get(ArgValidator.exactString(false, "on", "true", "1", "yes"))),
+		new CommandUsageForm(true, "off", "Disable debug mode.",
+			((executor, args, out, err) -> GameCore.debug = false), Argument.get(ArgValidator.exactString(false, "off", "false", "0", "no")))
+	),
+	
+	HELP("List and show usage of various commands.",
+		new CommandUsageForm(false, "","list all available commands.", (executor, args, out, err) -> {
+			for(Command c: Command.valuesFor(executor))
+				c.printHelp(executor, out, true, false, false);
+		}),
+		
+		new CommandUsageForm(false, "<command>", "show detailed help for the given command.", (executor, args, out, err) -> {
+			Command c = ArgValidator.COMMAND.get(args[0]);
+			if(c.canExecute(executor))
+				c.printHelpAdvanced(executor, out);
+			else
+				err.println("You do not have access to that command.");
+		}, Argument.get(ArgValidator.COMMAND)),
+		
+		new CommandUsageForm(false, "--all", "list all commands in detail", (executor, args, out, err) -> {
+			for(Command c: Command.valuesFor(executor)) {
+				c.printHelpAdvanced(executor, out);
+				out.println();
+			}
+		}, Argument.get(ArgValidator.exactString(false, "--all")))
+	),
+	
+	MSG("Broadcast a message for all players to see.",
+		new CommandUsageForm(false, "<message...>", "Everyone on the server will see the message.", (executor, args, out, err) -> {
+			String msg = String.join(" ", args);
+			ServerCore.getServer().broadcastMessage(executor, msg);
+		}, Argument.varArg(ArgValidator.ANY))
+	),
+	
+	OP("Give another player access to all commands, or take it away.",
+		new CommandUsageForm(true, "<playername> <isAdmin>", "Give or take admin permissions for the specified player. (isAdmin = true OR false)", ((executor, args, out, err) -> {
+			ServerPlayer player = ArgValidator.PLAYER.get(args[0]);
+			boolean give = ArgValidator.BOOLEAN.get(args[1]);
+			boolean success = ServerCore.getServer().setAdmin(player, give);
+			if(success)
+				out.println("Admin permissions "+(give?"granted":"removed")+" for player "+player.getName()+'.');
+			else
+				err.println("failed to change admin permissions of player "+player.getName()+'.');
+		}), Argument.get(ArgValidator.PLAYER, ArgValidator.BOOLEAN))
+	),
+	
+	PMSG("Send a private message to another player.",
+		new CommandUsageForm(false, "<playername> <message...>", "Send a message to the specified player, that only they can see.", ((executor, args, out, err) -> {
+			ServerPlayer player = ArgValidator.PLAYER.get(args[0]);
+			String msg = String.join("", Arrays.copyOfRange(args, 1, args.length));
+			
+			ServerCore.getServer().sendMessage(executor, player, msg);
+			
+		}), Argument.get(ArgValidator.PLAYER), Argument.varArg(ArgValidator.ANY))
+	),
+	
+	TIME("Get or set the time of day.", "Note, the \"clocktime\" parameter used below refers to the time format \"HH:MM\", with the hour(HH) in the range 0-23, and the minute(MM) in the range 0-59, as one expects from a normal 24-hour clock.",
+		new CommandUsageForm(false, "get", "Print the time of day, in 24 hour clock format, along with the current time \"range\" (day, night, etc).", (executor, args, out, err) -> {
+			float daylightOffset = ServerCore.getWorld().getDaylightOffset();
+			out.println(TimeOfDay.getTimeString(daylightOffset));
+		}, Argument.get(ArgValidator.exactString(false, "get"))),
+		
+		new CommandUsageForm(true, "set <clocktime | "+ ArrayUtils.arrayToString(TimeOfDay.names, "", ">", " | "), "Set time given clocktime, or to start of specified range.", (executor, args, out, err) -> {
+			float dayTime = ArgValidator.TIME.get(args[1]);
+			ServerCore.getWorld().setTimeOfDay(dayTime);
+			dayTime = ServerCore.getWorld().getDaylightOffset();
+			out.println("Set time of day to "+TimeOfDay.getClockString(dayTime)+" ("+TimeOfDay.getTimeOfDay(dayTime)+")");
+		}, Argument.get(ArgValidator.exactString(false, "set"), ArgValidator.TIME)
+		),
+		
+		new CommandUsageForm(true, "add <HH:MM>", "Add the specified number of hours and minutes to the current time.", (executor, args, out, err) -> {
+			float diffTime = ArgValidator.CLOCK_DURATION.get(args[1]);
+			float dayTime = ServerCore.getWorld().changeTimeOfDay(diffTime);
+			out.println("Added "+TimeOfDay.getClockString(diffTime-TimeOfDay.SECONDS_START_TIME_OFFSET)+" to the current time; new time: "+TimeOfDay.getClockString(dayTime)+" ("+TimeOfDay.getTimeOfDay(dayTime)+")");
+			
+		}, Argument.get(ArgValidator.exactString(false, "add"), ArgValidator.CLOCK_DURATION)),
+		
+		new CommandUsageForm(true, "sub <HH:MM>", "Subtract the specified number of hours and minutes from the current time.", (executor, args, out, err) -> {
+			float diffTime = ArgValidator.CLOCK_DURATION.get(args[1]);
+			float dayTime = ServerCore.getWorld().changeTimeOfDay(-diffTime);
+			out.println("Subtracted "+TimeOfDay.getClockString(diffTime-TimeOfDay.SECONDS_START_TIME_OFFSET)+" from the current time; new time: "+TimeOfDay.getClockString(dayTime)+" ("+TimeOfDay.getTimeOfDay(dayTime)+")");
+			
+		}, Argument.get(ArgValidator.exactString(false, "sub"), ArgValidator.CLOCK_DURATION))
 	),
 	
 	TP("Teleport a player to a location in the world.",
@@ -126,56 +174,8 @@ public enum Command {
 		}), Argument.get(ArgValidator.DECIMAL, ArgValidator.DECIMAL))
 	),
 	
-	TIME("Get or set the time of day.", "Note, the \"clocktime\" parameter used below refers to the time format \"HH:MM\", with the hour(HH) in the range 0-23, and the minute(MM) in the range 0-59, as one expects from a normal 24-hour clock.",
-		new CommandUsageForm(false, "get", "Print the time of day, in 24 hour clock format, along with the current time \"range\" (day, night, etc).", (executor, args, out, err) -> {
-			float daylightOffset = ServerCore.getWorld().getDaylightOffset();
-			out.println(TimeOfDay.getTimeString(daylightOffset));
-		}, Argument.get(ArgValidator.exactString(false, "get"))),
-		
-		new CommandUsageForm(true, "set <clocktime | "+ ArrayUtils.arrayToString(TimeOfDay.names, "", ">", " | "), "Set time given clocktime, or to start of specified range.", (executor, args, out, err) -> {
-			float dayTime = ArgValidator.TIME.get(args[1]);
-			ServerCore.getWorld().setTimeOfDay(dayTime);
-			dayTime = ServerCore.getWorld().getDaylightOffset();
-			out.println("Set time of day to "+TimeOfDay.getClockString(dayTime)+" ("+TimeOfDay.getTimeOfDay(dayTime)+")");
-		}, Argument.get(ArgValidator.exactString(false, "set"), ArgValidator.TIME)
-		),
-		
-		new CommandUsageForm(true, "add <HH:MM>", "Add the specified number of hours and minutes to the current time.", (executor, args, out, err) -> {
-			float diffTime = ArgValidator.CLOCK_DURATION.get(args[1]);
-			float dayTime = ServerCore.getWorld().changeTimeOfDay(diffTime);
-			out.println("Added "+TimeOfDay.getClockString(diffTime-TimeOfDay.SECONDS_START_TIME_OFFSET)+" to the current time; new time: "+TimeOfDay.getClockString(dayTime)+" ("+TimeOfDay.getTimeOfDay(dayTime)+")");
-			
-		}, Argument.get(ArgValidator.exactString(false, "add"), ArgValidator.CLOCK_DURATION)),
-		
-		new CommandUsageForm(true, "sub <HH:MM>", "Subtract the specified number of hours and minutes from the current time.", (executor, args, out, err) -> {
-			float diffTime = ArgValidator.CLOCK_DURATION.get(args[1]);
-			float dayTime = ServerCore.getWorld().changeTimeOfDay(-diffTime);
-			out.println("Subtracted "+TimeOfDay.getClockString(diffTime-TimeOfDay.SECONDS_START_TIME_OFFSET)+" from the current time; new time: "+TimeOfDay.getClockString(dayTime)+" ("+TimeOfDay.getTimeOfDay(dayTime)+")");
-			
-		}, Argument.get(ArgValidator.exactString(false, "sub"), ArgValidator.CLOCK_DURATION))
-	),
-	
-	OP("Give another player access to all commands, or take it away.",
-		new CommandUsageForm(true, "<playername> <isAdmin>", "Give or take admin permissions for the specified player. (isAdmin = true OR false)", ((executor, args, out, err) -> {
-			ServerPlayer player = ArgValidator.PLAYER.get(args[0]);
-			boolean give = ArgValidator.BOOLEAN.get(args[1]);
-			boolean success = ServerCore.getServer().setAdmin(player, give);
-			if(success)
-				out.println("Admin permissions "+(give?"granted":"removed")+" for player "+player.getName()+'.');
-			else
-				err.println("failed to change admin permissions of player "+player.getName()+'.');
-		}), Argument.get(ArgValidator.PLAYER, ArgValidator.BOOLEAN))
-	),
-	
 	STATUS("Print the server's status on various things.",
 		new CommandUsageForm(true, "", "Print various pieces of info about the server.", (executor, args, out, err) -> ServerCore.getServer().printStatus(out))
-	),
-	
-	DEBUG("Toggles debug mode.", "This will show some extra things, and also allow certain cheats executed from a client to affect the server.",
-		new CommandUsageForm(true, "on", "Enable debug mode.",
-			((executor, args, out, err) -> GameCore.debug = true), Argument.get(ArgValidator.exactString(false, "on", "true", "1", "yes"))),
-		new CommandUsageForm(true, "off", "Disable debug mode.",
-			((executor, args, out, err) -> GameCore.debug = false), Argument.get(ArgValidator.exactString(false, "off", "false", "0", "no")))
 	),
 	
 	STOP("Stops the server.",
