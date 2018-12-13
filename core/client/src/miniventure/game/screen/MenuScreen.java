@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import miniventure.game.client.ClientCore;
-import miniventure.game.client.Style;
+import miniventure.game.client.FontStyle;
 import miniventure.game.screen.util.DiscreteViewport;
 import miniventure.game.screen.util.ParentScreen;
 import miniventure.game.util.RelPos;
@@ -39,7 +39,7 @@ public class MenuScreen extends Stage {
 	
 	private final LinkedList<ActorAnchor> anchoredActors = new LinkedList<>();
 	
-	private HashMap<Label, Style> labels = new HashMap<>();
+	private HashMap<Label, FontStyle> labels = new HashMap<>();
 	private HashSet<TextField> textFields = new HashSet<>();
 	
 	public MenuScreen(final boolean clearGdxBackground) { this(clearGdxBackground, new DiscreteViewport(), ClientCore.getBatch()); }
@@ -106,7 +106,7 @@ public class MenuScreen extends Stage {
 	protected VisTextButton makeButton(String text, Action onClick) {
 		VisTextButton button = new VisTextButton(text);
 		button.pad(6f);
-		labels.put(button.getLabel(), Style.Default);
+		labels.put(button.getLabel(), FontStyle.Default);
 		button.addListener(new ClickListener() {
 			@Override
 			public void clicked (InputEvent event, float x, float y) {
@@ -118,17 +118,17 @@ public class MenuScreen extends Stage {
 	
 	protected VisLabel makeLabel(String text) { return makeLabel(text, true); }
 	protected VisLabel makeLabel(String text, boolean wrapText) {
-		return makeLabel(text, Style.Default, wrapText);
+		return makeLabel(text, FontStyle.Default, wrapText);
 	}
-	protected VisLabel makeLabel(String text, Style labelStyle, boolean wrap) {
-		VisLabel label = new VisLabel(text, new LabelStyle(ClientCore.getFont(labelStyle), null));
+	protected VisLabel makeLabel(String text, FontStyle style, boolean wrap) {
+		VisLabel label = new VisLabel(text, new LabelStyle(ClientCore.getFont(style), null));
 		label.setWrap(wrap);
 		label.setAlignment(Align.center, Align.left);
-		labels.put(label, labelStyle);
+		labels.put(label, style);
 		return label;
 	}
 	
-	protected void registerLabel(Style style, Label label) { labels.put(label, style); }
+	protected void registerLabel(FontStyle style, Label label) { labels.put(label, style); }
 	protected void deregisterLabels(Label... labels) {
 		for(Label label: labels)
 			this.labels.remove(label);
@@ -165,32 +165,25 @@ public class MenuScreen extends Stage {
 		getViewport().update(width, height, true);
 		// System.out.println("menu screen resized to "+width+","+height+"; current menu stage size: "+getWidth()+","+getHeight()+"; new viewport: "+getViewport().getWorldWidth()+","+getViewport().getWorldHeight()+" world, "+getViewport().getScreenWidth()+","+getViewport().getScreenHeight()+" screen.");
 		
-		for(Map.Entry<Label, Style> labelStyle: labels.entrySet()) {
+		for(Map.Entry<Label, FontStyle> labelStyle: labels.entrySet()) {
 			LabelStyle style = labelStyle.getKey().getStyle();
-			// float prev = style.font.getLineHeight();
 			style.font = ClientCore.getFont(labelStyle.getValue());
-			// System.out.println("font height changed from "+prev+" to "+style.font.getLineHeight());
 			labelStyle.getKey().setStyle(style);
-			labelStyle.getKey().pack();
 		}
 		
 		for(TextField field: textFields) {
-			field.getStyle().font = ClientCore.getFont(Style.TextFieldFont);
+			field.getStyle().font = ClientCore.getFont(FontStyle.TextField);
 			field.setStyle(field.getStyle());
-			field.pack();
+			// this is a hack to make the text field update its cursor position, which otherwise would be displayed wrong; the data is right, but the cached screen position is wrong.
+			field.setPasswordMode(false);
 		}
-		
-		for(ActorAnchor actor: anchoredActors)
-			if(actor.mainGroup instanceof Layout)
-				((Layout)actor.mainGroup).pack();
-				
 		
 		layoutActors();
 	}
 	
 	@Override
 	public String toString() {
-		return getClass().getSimpleName()+"@"+Integer.toHexString(hashCode());
+		return getClass().getSimpleName()+'@'+Integer.toHexString(hashCode());
 	}
 	
 	
@@ -211,6 +204,9 @@ public class MenuScreen extends Stage {
 		}
 		
 		void layout() {
+			if(mainGroup instanceof Layout)
+				((Layout) mainGroup).pack();
+			
 			Vector2 containerPos = mainContainerAnchor.ofRectangle(new Rectangle(offX, offY, getWidth(), getHeight()));
 			mainGroup.setPosition(containerPos.x, containerPos.y, mainGroupAnchor.getGdxAlign());
 		}

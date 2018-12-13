@@ -8,7 +8,7 @@ import miniventure.game.GameProtocol.InventoryRequest;
 import miniventure.game.GameProtocol.InventoryUpdate;
 import miniventure.game.GameProtocol.ItemDropRequest;
 import miniventure.game.client.ClientCore;
-import miniventure.game.client.Style;
+import miniventure.game.client.FontStyle;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.util.ColorBackground;
 import miniventure.game.util.RelPos;
@@ -95,7 +95,7 @@ public class InventoryScreen extends MenuScreen {
 		slotTable.defaults().fillX().minSize(Item.ICON_SIZE * 3, ItemSlot.HEIGHT/2);
 		slotTable.pad(10f);
 		slotTable.background(new ColorBackground(slotTable, tableBackground));
-		slotTable.add(makeLabel("Waiting for inventory data...", Style.KeepSize, false));
+		slotTable.add(makeLabel("Waiting for inventory data...", FontStyle.KeepSize, false));
 		
 		slotTable.addListener(new InputListener() {
 			@Override

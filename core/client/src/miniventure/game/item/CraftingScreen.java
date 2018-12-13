@@ -8,7 +8,7 @@ import miniventure.game.GameProtocol.RecipeRequest;
 import miniventure.game.GameProtocol.RecipeStockUpdate;
 import miniventure.game.GameProtocol.SerialRecipe;
 import miniventure.game.client.ClientCore;
-import miniventure.game.client.Style;
+import miniventure.game.client.FontStyle;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.util.ColorBackground;
 import miniventure.game.util.RelPos;
@@ -71,17 +71,17 @@ public class CraftingScreen extends MenuScreen {
 		mainGroup = useTable(Align.topLeft, false);
 		addMainGroup(mainGroup, RelPos.TOP_LEFT);
 		
-		mainGroup.add(makeLabel("personal crafting", Style.CrafterHeader, false)).row();
+		mainGroup.add(makeLabel("personal crafting", FontStyle.CrafterHeader, false)).row();
 		
 		craftableTable = new Table(VisUI.getSkin());
 		craftableTable.defaults().pad(2f);
 		craftableTable.pad(10f);
-		craftableTable.add(makeLabel("Waiting for crafting data...", Style.KeepSize, false));
+		craftableTable.add(makeLabel("Waiting for crafting data...", FontStyle.KeepSize, false));
 		
 		costTable = new Table(VisUI.getSkin());
 		costTable.pad(5f);
 		costTable.defaults().pad(2f).align(Align.center);
-		costTable.add(makeLabel("Waiting for crafting data...", Style.KeepSize, false));
+		costTable.add(makeLabel("Waiting for crafting data...", FontStyle.KeepSize, false));
 		
 		recipeListTable = new Table(VisUI.getSkin()) {
 			@Override
@@ -218,16 +218,16 @@ public class CraftingScreen extends MenuScreen {
 			
 			craftableTable.clearChildren();
 			craftableTable.add(new ItemIcon(recipe.result.item, recipe.result.count)).row();
-			craftableTable.add(makeLabel(recipe.result.item.getName(), Style.KeepSize, false)).row();
-			craftableTable.add(resultStockLabel = makeLabel("Stock: "+getCount(recipe.result.item), Style.KeepSize, false)).row();
+			craftableTable.add(makeLabel(recipe.result.item.getName(), FontStyle.KeepSize, false)).row();
+			craftableTable.add(resultStockLabel = makeLabel("Stock: "+getCount(recipe.result.item), FontStyle.KeepSize, false)).row();
 			
 			costTable.clearChildren();
-			costTable.add(makeLabel("Stock", Style.StockHeader, false));
-			costTable.add(makeLabel("Required", Style.CostHeader, false));
+			costTable.add(makeLabel("Stock", FontStyle.StockHeader, false));
+			costTable.add(makeLabel("Required", FontStyle.CostHeader, false));
 			costTable.row();
 			costSlots.clear();
 			for(ItemStack cost: recipe.costs) {
-				Label costLabel = makeLabel(String.valueOf(getCount(cost.item)), Style.KeepSize, false);
+				Label costLabel = makeLabel(String.valueOf(getCount(cost.item)), FontStyle.KeepSize, false);
 				costStockLabels.put(cost.item.getName(), costLabel);
 				costTable.add(costLabel);
 				
@@ -238,7 +238,6 @@ public class CraftingScreen extends MenuScreen {
 				costTable.row();
 			}
 			
-			mainGroup.pack();
 			layoutActors();
 		});
 	}

@@ -1,7 +1,7 @@
 package miniventure.game.item;
 
 import miniventure.game.client.ClientCore;
-import miniventure.game.client.Style;
+import miniventure.game.client.FontStyle;
 import miniventure.game.util.MyUtils;
 
 import com.badlogic.gdx.graphics.Color;
@@ -44,7 +44,7 @@ public class ItemIcon extends Widget {
 			renderUsability(batch, getX(), getY()+2, item.getUsabilityStatus());
 			
 			if(showCount()) {
-				BitmapFont font = ClientCore.getFont(Style.KeepSize);
+				BitmapFont font = ClientCore.getFont(FontStyle.KeepSize);
 				
 				font.draw(batch, String.valueOf(count), getX() + 2, getY() + 2 + font.getLineHeight());
 			}

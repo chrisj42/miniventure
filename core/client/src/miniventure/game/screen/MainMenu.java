@@ -3,8 +3,8 @@ package miniventure.game.screen;
 import miniventure.game.GameCore;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.ClientWorld;
+import miniventure.game.client.FontStyle;
 import miniventure.game.client.LevelViewport;
-import miniventure.game.client.Style;
 import miniventure.game.screen.InfoScreen.CreditsScreen;
 import miniventure.game.screen.InfoScreen.InstructionsScreen;
 import miniventure.game.screen.util.BackgroundProvider;
@@ -140,10 +140,10 @@ public class MainMenu extends BackgroundProvider implements ParentScreen {
 			// add a message saying you have the latest version, or a hyperlink message to the newest jar file.
 			VersionInfo latestVersion = GameCore.getLatestVersion();
 			if(latestVersion.version.compareTo(GameCore.VERSION) > 0) { // link new version
-				MyLinkLabel linkLabel = new MyLinkLabel("Miniventure " + latestVersion.releaseName + " Now Available! Click here to download.", latestVersion.assetUrl, Style.LinkLabel.getName());
+				MyLinkLabel linkLabel = new MyLinkLabel("Miniventure " + latestVersion.releaseName + " Now Available! Click here to download.", latestVersion.assetUrl);
 				deregisterLabels(label);
 				table.getCell(label).setActor(linkLabel);
-				registerLabel(Style.LinkLabel, linkLabel);
+				registerLabel(FontStyle.OnlyResize, linkLabel);
 			} else if(latestVersion.releaseName.length() > 0)
 				label.setText("You have the latest version.");
 			else

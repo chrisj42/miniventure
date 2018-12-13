@@ -3,7 +3,7 @@ package miniventure.game.item;
 import java.util.Objects;
 
 import miniventure.game.client.ClientCore;
-import miniventure.game.client.Style;
+import miniventure.game.client.FontStyle;
 import miniventure.game.screen.util.ColorBackground;
 import miniventure.game.util.MyUtils;
 
@@ -65,7 +65,7 @@ public class ItemSlot extends Widget {
 		if(!showName) return this; // the layout is always the same.
 		
 		if(item == null) prefWidth = Item.ICON_SIZE * 2;
-		else prefWidth = Item.ICON_SIZE + 2 + SPACING + ClientCore.getTextLayout(ClientCore.getBaseFont(), item.getName()).width;
+		else prefWidth = Item.ICON_SIZE + 2 + SPACING + ClientCore.getTextLayout(ClientCore.getFont(FontStyle.KeepSize), item.getName()).width;
 		prefWidth += XPADDING * 2;
 		return this;
 	}
@@ -111,7 +111,7 @@ public class ItemSlot extends Widget {
 			renderUsability(batch, getX()+2+XPADDING, getY()+2+YPADDING, item.getUsabilityStatus());
 			
 			if(showName || showCount()) {
-				BitmapFont font = ClientCore.getFont(Style.KeepSize);
+				BitmapFont font = ClientCore.getFont(FontStyle.KeepSize);
 				font.setColor(getTextColor());
 				
 				if(showName) {

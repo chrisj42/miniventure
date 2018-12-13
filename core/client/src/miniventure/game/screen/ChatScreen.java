@@ -11,7 +11,7 @@ import miniventure.game.GameProtocol.TabResponse;
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.chat.InfoMessageLine;
 import miniventure.game.client.ClientCore;
-import miniventure.game.client.Style;
+import miniventure.game.client.FontStyle;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.RelPos;
 
@@ -19,6 +19,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -61,7 +62,16 @@ public class ChatScreen extends MenuScreen {
 		addMainGroup(vGroup, RelPos.TOP_RIGHT);
 		vGroup.padTop(10).padRight(10);
 		
-		messageStream = new VerticalGroup();
+		messageStream = new VerticalGroup() {
+			@Override
+			public float getPrefWidth() {
+				Group parent = getParent();
+				if(parent instanceof ScrollPane && ((ScrollPane)parent).getScrollWidth() != 0)
+					return ((ScrollPane)parent).getScrollWidth();
+				else
+					return ChatScreen.this.getWidth() / 3;
+			}
+		};
 		messageStream.align(Align.topRight);
 		messageStream.columnAlign(Align.topRight);
 		messageStream.space(5);
@@ -86,13 +96,17 @@ public class ChatScreen extends MenuScreen {
 		else {
 			ScrollPane scrollPane = new ScrollPane(messageStream, VisUI.getSkin()) {
 				@Override
+				public float getPrefWidth() {
+					return ChatScreen.this.getWidth() / 3;
+				}
+				
+				@Override
 				public float getPrefHeight() {
 					return Math.min(messageStream.getPrefHeight(), ChatScreen.this.getHeight()*2/3);
 				}
 			};
 			scrollPane.setScrollingDisabled(true, false);
 			scrollPane.setFadeScrollBars(false);
-			scrollPane.setScrollbarsOnTop(true);
 			vGroup.addActor(scrollPane);
 			setScrollFocus(scrollPane);
 		}
@@ -216,7 +230,7 @@ public class ChatScreen extends MenuScreen {
 			TimerLabel label = new TimerLabel(msg, Color.valueOf(color), connect);
 			messageStream.addActorAt(0, label);
 			labelQueue.add(label);
-			registerLabel(Style.Default, label);
+			registerLabel(FontStyle.Default, label);
 			if(messageStream.getChildren().size > (useTimer ? MESSAGE_DISPLAY_SIZE : MESSAGE_BUFFER_SIZE)) {
 				Label oldLabel = labelQueue.poll();
 				deregisterLabels(oldLabel);
@@ -229,20 +243,9 @@ public class ChatScreen extends MenuScreen {
 		if(!tabbing) return; // abandoned request
 		if(!manualInput.equals(response.manualText)) return; // response doesn't match the current state
 		Gdx.app.postRunnable(() -> {
-			input.setText("/"+response.completion);
+			input.setText('/'+response.completion);
 			input.setCursorPosition(input.getText().length());
 		});
-	}
-	
-	@Override
-	protected void layoutActors() {
-		// pack all the things so they will resize properly
-		// input.getStyle().font = ClientCore.getFont(Style.TextFieldFont);
-		// input.setStyle(input.getStyle());
-		messageStream.pack();
-		// for(TimerLabel label: labelQueue)
-		// 	label.pack();
-		super.layoutActors();
 	}
 	
 	private class TimerLabel extends Label {
@@ -259,7 +262,11 @@ public class ChatScreen extends MenuScreen {
 		
 		@Override
 		public float getPrefWidth() {
-			return ChatScreen.this.getWidth() / 3;
+			Group parent = getParent();
+			if(parent != null)
+				return parent.getWidth();
+			else
+				return ChatScreen.this.getWidth() / 3;
 		}
 		
 		@Override
