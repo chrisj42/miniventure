@@ -1,17 +1,19 @@
 package miniventure.game.world.entity.mob;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import miniventure.game.item.Item;
-import miniventure.game.server.ServerCore;
+import miniventure.game.item.Result;
+import miniventure.game.item.ServerItem;
 import miniventure.game.util.Version;
+import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.ServerLevel;
-import miniventure.game.world.TimeOfDay;
 import miniventure.game.world.WorldObject;
+import miniventure.game.world.entity.ClassDataList;
 import miniventure.game.world.entity.Entity;
-
-import com.badlogic.gdx.utils.Array;
+import miniventure.game.world.tile.TileTypeEnum;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -40,32 +42,31 @@ public class MobAi extends ServerMob {
 	@Nullable private MovementPattern tempMovePattern = null;
 	private float tempTimeLeft = 0;
 	
-	public MobAi(@NotNull AiType aiType) {
+	protected MobAi(@NotNull AiType aiType) {
 		super(aiType.name().toLowerCase(), aiType.health);
 		this.aiType = aiType;
 		this.itemDrops = aiType.deathDrops;
 		this.movePattern = aiType.defaultPattern.copy();
 	}
 	
-	protected MobAi(String[][] allData, Version version) {
-		super(Arrays.copyOfRange(allData, 0, allData.length-1), version);
-		String[] data = allData[allData.length-1];
-		aiType = AiType.valueOf(data[0]);
+	// if a subclass was made of this, then it may not save the ai type.
+	protected MobAi(ClassDataList allData, final Version version, ValueFunction<ClassDataList> modifier) {
+		super(allData, version, modifier);
+		ArrayList<String> data = allData.get(2);
+		aiType = AiType.valueOf(data.get(0));
 		this.itemDrops = aiType.deathDrops;
 		this.movePattern = aiType.defaultPattern.copy();
 	}
 	
-	public MobAi(MobAi model) { this(model.aiType); }
-	
 	@Override
-	public Array<String[]> save() {
-		Array<String[]> data = super.save();
-		
-		data.add(new String[] {
+	public ClassDataList save() {
+		ClassDataList allData = super.save();
+		ArrayList<String> data = new ArrayList<>(Arrays.asList(
 			aiType.name()
-		});
+		));
 		
-		return data;
+		allData.add(data);
+		return allData;
 	}
 	
 	public AiType getType() { return aiType; }
@@ -90,8 +91,8 @@ public class MobAi extends ServerMob {
 	}
 	
 	@Override
-	public boolean attackedBy(WorldObject obj, @Nullable Item attackItem, int damage) {
-		if(aiType.onHit != null) aiType.onHit.onHit(this, obj, attackItem);
+	public Result attackedBy(WorldObject obj, @Nullable Item attackItem, int damage) {
+		if(aiType.onHit != null) aiType.onHit.onHit(this, obj, (ServerItem)attackItem);
 		return super.attackedBy(obj, attackItem, damage);
 	}
 	
@@ -113,8 +114,13 @@ public class MobAi extends ServerMob {
 	
 	@Override
 	public boolean maySpawn() {
-		if(!aiType.daySpawn && TimeOfDay.getTimeOfDay(ServerCore.getWorld().getDaylightOffset()) != TimeOfDay.Night)
-			return false;
-		return super.maySpawn();
+		return super.maySpawn() && aiType.spawnBehavior.maySpawn(this);
+	}
+	
+	@Override
+	public boolean maySpawn(TileTypeEnum type) {
+		if(!aiType.spawnBehavior.hasTiles())
+			return super.maySpawn(type);
+		return aiType.spawnBehavior.maySpawn(type);
 	}
 }

@@ -1,43 +1,37 @@
 package miniventure.game.screen;
 
 import miniventure.game.client.ClientCore;
+import miniventure.game.screen.util.BackgroundInheritor;
 
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.kotcrab.vis.ui.widget.VisLabel;
-import com.kotcrab.vis.ui.widget.VisTextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
-public class ErrorScreen extends MenuScreen {
+public class ErrorScreen extends BackgroundInheritor {
 	
-	public ErrorScreen(String error) {
-		
-		addActor(vGroup);
-		
-		vGroup.addActor(new VisLabel(error));
-		
-		vGroup.space(50);
-		
-		
-		VisTextButton retryBtn = new VisTextButton("Reconnect");
-		retryBtn.addListener(new ClickListener() {
-			@Override
-			public void clicked(InputEvent e, float x, float y) {
-				ClientCore.getWorld().rejoinWorld();
-			}
-		});
-		vGroup.addActor(retryBtn);
-		
-		vGroup.space(10);
-		
-		VisTextButton returnBtn = new VisTextButton("Back to main menu");
-		returnBtn.addListener(new ClickListener() {
-			@Override
-			public void clicked(InputEvent e, float x, float y) {
-				ClientCore.setScreen(new MainMenu());
-			}
-		});
-		vGroup.addActor(returnBtn);
-	} 
+	private final String error;
 	
-	@Override public void focus() { ClientCore.stopMusic(); }
+	public ErrorScreen(String error) { this(error, true); }
+	public ErrorScreen(String error, boolean allowRejoin) {
+		super(new ScreenViewport());
+		this.error = error;
+		
+		Table table = useTable();
+		
+		table.add(makeLabel(error)).row();
+		
+		if(allowRejoin)
+			table.add(makeButton("Reconnect", () -> ClientCore.getWorld().rejoinWorld())).spaceTop(50).row();
+		
+		table.add(
+			makeButton("Back to main menu", () -> ClientCore.setScreen(getParent() != null ? getParent() : new MainMenu()))
+		).spaceTop(10).row();
+		
+	}
+	
+	@Override public void focus() { ClientCore.stopMusic(); super.focus(); }
+	
+	@Override
+	public String toString() {
+		return "ErrorScreen("+error+')';
+	}
 }

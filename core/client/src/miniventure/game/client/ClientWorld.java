@@ -5,11 +5,12 @@ import miniventure.game.GameProtocol.LevelData;
 import miniventure.game.GameProtocol.PositionUpdate;
 import miniventure.game.GameProtocol.SpawnData;
 import miniventure.game.GameProtocol.WorldData;
+import miniventure.game.screen.ErrorScreen;
 import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.RespawnScreen;
-import miniventure.game.util.Action;
+import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.ClientLevel;
@@ -18,10 +19,13 @@ import miniventure.game.world.TimeOfDay;
 import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
-import miniventure.game.world.entity.mob.ClientPlayer;
+import miniventure.game.world.entity.mob.player.ClientPlayer;
 import miniventure.game.world.tile.ClientTile;
-import miniventure.game.world.tile.TileEnumMapper;
+import miniventure.game.world.tile.ClientTileType;
+import miniventure.game.world.tile.TileType;
+import miniventure.game.world.tile.TileTypeEnum;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.Array;
 
@@ -42,7 +46,7 @@ public class ClientWorld extends WorldManager {
 		GameScreen... game screen won't do much, just do the rendering. 
 	 */
 	
-	private final ServerStarter serverStarter;
+	private final ServerManager serverManager;
 	private String ipAddress;
 	
 	private final GameScreen gameScreen;
@@ -53,10 +57,8 @@ public class ClientWorld extends WorldManager {
 	
 	private boolean doDaylightCycle = true;
 	
-	ClientWorld(ServerStarter serverStarter, GameScreen gameScreen) {
-		super(new TileEnumMapper<>(tileType -> tileType));
-		
-		this.serverStarter = serverStarter;
+	ClientWorld(ServerManager serverManager, GameScreen gameScreen) {
+		this.serverManager = serverManager;
 		this.gameScreen = gameScreen;
 		
 		client = new GameClient(); // doesn't automatically connect
@@ -71,15 +73,10 @@ public class ClientWorld extends WorldManager {
 		MenuScreen menu = ClientCore.getScreen();
 		
 		ClientLevel level = mainPlayer.getLevel();
-		if(level == null) {
-			if(!(menu instanceof RespawnScreen))
-				ClientCore.setScreen(new RespawnScreen());
-			return;
-		}
+		if(level == null) return;
 		
 		if(menu == null)
 			gameScreen.handleInput(mainPlayer);
-		//mainPlayer.updateStats(delta);
 		
 		level.updateEntities(getEntities(level), delta);
 		
@@ -121,12 +118,25 @@ public class ClientWorld extends WorldManager {
 		
 		new Thread(() -> {
 			// with a server running, attempt to connect the client. If successful, it will set the screen to null.
-			Action connect = () -> client.connectToServer(loadingScreen, "localhost");
+			ValueFunction<Boolean> connect = serverSuccess -> {
+				if(!serverSuccess)
+					Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen("Error starting local server. The port may already be in use.\nPress 'reconnect' to attempt to connect to the existing server.")));
+				else
+					client.connectToServer(loadingScreen, "localhost", success -> {
+						if(!success) {
+							serverManager.closeServer();
+							client = new GameClient();
+						}
+					});
+			};
 			
 			if(startServer) // start server, then connect
-				serverStarter.startServer(width, height, connect);
+				serverManager.startServer(width, height, connect);
 			else // server should already be running; just connect
-				client.connectToServer(loadingScreen, ipAddress);
+				client.connectToServer(loadingScreen, ipAddress, success -> {
+					if(!success)
+						client = new GameClient();
+				});
 			
 		}).start();
 	}
@@ -138,6 +148,7 @@ public class ClientWorld extends WorldManager {
 		mainPlayer = null;
 		clearLevels();
 		ClientCore.setScreen(new MainMenu());
+		client = new GameClient();
 	}
 	
 	// TODO add lighting overlays, based on level and/or time of day, depending on the level and perhaps other things.
@@ -161,7 +172,7 @@ public class ClientWorld extends WorldManager {
 			return;
 		}
 		
-		level.loadChunk(new Chunk(level, data, (p, types, dataMaps) -> new ClientTile(level, p.x, p.y, types, dataMaps)));
+		level.loadChunk(new Chunk(level, data, (x, y, types, dataMaps) -> new ClientTile(level, x, y, types, dataMaps)));
 	}
 	
 	
@@ -171,21 +182,31 @@ public class ClientWorld extends WorldManager {
 	@Override
 	public boolean isKeepAlive(@NotNull WorldObject obj) { return obj.equals(mainPlayer); }
 	
+	@Override
+	public void deregisterEntity(final int eid) {
+		if(mainPlayer != null && eid == mainPlayer.getId()) {
+			Gdx.app.postRunnable(() -> ClientCore.setScreen(new RespawnScreen(mainPlayer.getCenter(), getLightingOverlay(), mainPlayer.getLevel(), gameScreen.getLevelView())));
+		}
+		else
+			super.deregisterEntity(eid);
+	}
+	
 	
 	/*  --- PLAYER MANAGEMENT --- */
 	
 	
 	public void spawnPlayer(SpawnData data) {
 		// this has to come before making the new client player, because it has the same eid and so will overwrite some things.
-		if(this.mainPlayer != null)
-			this.mainPlayer.remove();
+		if(this.mainPlayer != null) {
+			super.deregisterEntity(this.mainPlayer.getId());
+			// gameScreen.getHudPanel().remove(this.mainPlayer.getHands().getHotbarTable());
+		}
 		
 		ClientPlayer mainPlayer = new ClientPlayer(data);
 		PositionUpdate newPos = data.playerData.positionUpdate;
 		mainPlayer.moveTo(newPos.x, newPos.y, newPos.z);
 		
-		gameScreen.getGuiStage().clear();
-		gameScreen.getGuiStage().addActor(mainPlayer.getHands().getHotbarTable());
+		// gameScreen.getHudPanel().add(mainPlayer.getHands().getHotbarTable());
 		
 		this.mainPlayer = mainPlayer;
 		
@@ -199,7 +220,7 @@ public class ClientWorld extends WorldManager {
 	public void respawnPlayer() {
 		LoadingScreen loader = new LoadingScreen();
 		ClientCore.setScreen(loader);
-		loader.pushMessage("respawning...");
+		loader.pushMessage("Respawning...");
 		client.send(DatalessRequest.Respawn);
 	}
 	
@@ -216,6 +237,9 @@ public class ClientWorld extends WorldManager {
 		
 		return playerHolder;
 	}
+	
+	@Override
+	public TileType getTileType(TileTypeEnum type) { return ClientTileType.get(type); }
 	
 	public GameClient getClient() { return client; }
 	

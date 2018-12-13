@@ -1,13 +1,17 @@
 package miniventure.game.client;
 
-import javax.swing.JOptionPane;
-
 import miniventure.game.GameCore;
+import miniventure.game.item.HotbarTable;
 import miniventure.game.screen.ChatScreen;
+import miniventure.game.screen.ConfirmScreen;
+import miniventure.game.screen.InputScreen;
+import miniventure.game.screen.MenuScreen;
+import miniventure.game.screen.util.DiscreteViewport;
+import miniventure.game.util.RelPos;
 import miniventure.game.world.ClientLevel;
 import miniventure.game.world.Level;
 import miniventure.game.world.TimeOfDay;
-import miniventure.game.world.entity.mob.ClientPlayer;
+import miniventure.game.world.entity.mob.player.ClientPlayer;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.Gdx;
@@ -19,8 +23,10 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Container;
+import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.kotcrab.vis.ui.VisUI;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -28,62 +34,90 @@ public class GameScreen {
 	
 	@NotNull private final LevelViewport levelView;
 	
-	private SpriteBatch batch = GameCore.getBatch();
-	private Stage guiStage;
+	private SpriteBatch batch = ClientCore.getBatch();
+	private MenuScreen guiStage;
 	
 	private final OrthographicCamera uiCamera;
+	private final OrthographicCamera noScaleCamera;
 	
 	final ChatScreen chatOverlay, chatScreen;
 	private boolean showDebug = false;
 	
 	public GameScreen() {
 		uiCamera = new OrthographicCamera();
-		guiStage = new Stage(new ExtendViewport(GameCore.DEFAULT_SCREEN_WIDTH, GameCore.DEFAULT_SCREEN_HEIGHT, uiCamera), batch);
+		noScaleCamera = new OrthographicCamera();
+		guiStage = new MenuScreen(false, new DiscreteViewport(uiCamera), batch) {
+			{
+				ProgressBar fillBar = new ProgressBar(0, 1, .01f, true, VisUI.getSkin()) {
+					@Override
+					public float getPrefHeight() {
+						return uiCamera.viewportHeight * 2 / 5;
+					}
+					
+					/*@Override
+					public float getPrefWidth() {
+						return 20f;
+					}*/
+				};
+				fillBar.pack();
+				Container<ProgressBar> box = new Container<>(fillBar);
+				box.fill().prefWidth(20f);
+				box.pack();
+				addMainGroup(box, RelPos.RIGHT);
+				
+				HotbarTable hotbar = new HotbarTable(fillBar);
+				addMainGroup(hotbar, RelPos.BOTTOM_RIGHT);
+			}
+		};
 		
-		levelView = new LevelViewport(batch, uiCamera);
-		
-		resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		levelView = new LevelViewport(batch, noScaleCamera); // uses uiCamera for rendering lighting to the screen.
 		
 		chatOverlay = new ChatScreen(true);
 		chatScreen = new ChatScreen(false);
+		
+		resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 	}
+	
+	@NotNull LevelViewport getLevelView() { return levelView; }
 	
 	void dispose() {
 		levelView.dispose();
 		guiStage.dispose();
+		chatOverlay.dispose();
+		chatScreen.dispose();
 	}
 	
-	private boolean dialog = false;
-	public void handleInput(@NotNull ClientPlayer player) {
-		if(dialog) return;
-		
+	void handleInput(@NotNull ClientPlayer player) {
 		player.handleInput(getMouseInput());
 		
 		boolean shift = Gdx.input.isKeyPressed(Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Keys.SHIFT_RIGHT);
 		if(shift && GameCore.debug && Gdx.input.isKeyJustPressed(Keys.S)) {
-			String newSpeed = JOptionPane.showInputDialog("Enter new Player Speed:", player.getSpeed());
-			try {
-				float value = Float.parseFloat(newSpeed);
-				player.setSpeed(value);
-			} catch(NumberFormatException ignored) {}
+			ClientCore.setScreen(new InputScreen("Enter new Player Speed:", newSpeed -> {
+				try {
+					float value = Float.parseFloat(newSpeed);
+					player.setSpeed(value);
+				} catch(NumberFormatException ignored) {}
+				ClientCore.setScreen(null);
+			}));
 		}
 		
 		levelView.handleInput();
 		
-		if(shift && Gdx.input.isKeyJustPressed(Keys.D) && !Gdx.input.isKeyPressed(Keys.TAB))
-			showDebug = !showDebug;
-		
-		if(shift && ClientCore.input.pressingKey(Keys.T)) {
-			//ClientCore.getClient().send(DatalessRequest.Tile); // debug
-			ClientPlayer p = ClientCore.getWorld().getMainPlayer();
-			try {
-				//noinspection ConstantConditions
-				Tile t = p.getLevel().getClosestTile(p.getCenter());
-				t.updateSprites();
-				for(Tile o: t.getAdjacentTiles(true))
-					o.updateSprites();
-			} catch(NullPointerException ignored) {}
+		if(shift) {
+			if(Gdx.input.isKeyJustPressed(Keys.D) && !Gdx.input.isKeyPressed(Keys.TAB))
+				ClientCore.debugInfo = !ClientCore.debugInfo;
+			
+			if(Gdx.input.isKeyJustPressed(Keys.T))
+				ClientCore.debugTile = !ClientCore.debugTile;
+			
+			if(Gdx.input.isKeyJustPressed(Keys.B))
+				ClientCore.debugBounds = !ClientCore.debugBounds;
+			
+			if(Gdx.input.isKeyJustPressed(Keys.I))
+				ClientCore.debugInteract = !ClientCore.debugInteract;
 		}
+		else if(Gdx.input.isKeyJustPressed(Keys.B))
+			ClientCore.debugChunk = !ClientCore.debugChunk;
 		
 		if(!ClientCore.hasMenu()) {
 			if(!shift && ClientCore.input.pressingKey(Keys.T))
@@ -93,13 +127,7 @@ public class GameScreen {
 				chatScreen.focus("/");
 			
 			else if(ClientCore.input.pressingKey(Keys.ESCAPE)) {
-				dialog = true;
-				new Thread(() -> {
-					int choice = JOptionPane.showConfirmDialog(null, "Leave Server?", "Confirmation", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-					if(choice == JOptionPane.YES_OPTION)
-						Gdx.app.postRunnable(() -> ClientCore.getWorld().exitWorld());
-					dialog = false;
-				}).start();
+				ClientCore.setScreen(new ConfirmScreen("Leave Server?", () -> ClientCore.getWorld().exitWorld()));
 			}
 		}
 	}
@@ -112,11 +140,12 @@ public class GameScreen {
 		batch.begin();
 		renderGui(mainPlayer, level);
 		batch.end();
-		guiStage.act(Gdx.graphics.getDeltaTime());
+		guiStage.focus();
+		guiStage.act();
 		guiStage.draw();
 		
+		chatOverlay.act();
 		if(!(ClientCore.getScreen() instanceof ChatScreen)) {
-			chatOverlay.act(Gdx.graphics.getDeltaTime());
 			chatOverlay.draw();
 		}
 	}
@@ -128,7 +157,7 @@ public class GameScreen {
 			mousePos.y = Gdx.graphics.getHeight() - mousePos.y; // origin is top left corner, so reverse Y dir
 			
 			// player is always in the center of the screen.
-			Vector2 screenCenter = new Vector2(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
+			Vector2 screenCenter = new Vector2(Gdx.graphics.getWidth()/2f, Gdx.graphics.getHeight()/2f);
 			
 			Vector2 mouseMove = mousePos.cpy().sub(screenCenter);
 			mouseMove.nor();
@@ -142,14 +171,17 @@ public class GameScreen {
 	private void renderGui(@NotNull ClientPlayer mainPlayer, @NotNull Level level) {
 		batch.setProjectionMatrix(uiCamera.combined);
 		
-		// draw UI for current item, and stats
+		// draw UI for stats
 		mainPlayer.drawGui(new Rectangle(0, 0, uiCamera.viewportWidth, uiCamera.viewportHeight), batch);
 		
-		if(!showDebug) {
+		batch.setProjectionMatrix(noScaleCamera.combined);
+		
+		if(!ClientCore.debugInfo) {
 			if(GameCore.debug) {
-				BitmapFont f = GameCore.getFont();
+				BitmapFont f = ClientCore.getFont();
 				f.setColor(Color.ORANGE);
-				f.draw(batch, "Debug Mode ENABLED", 0, uiCamera.viewportHeight - 5);
+				f.draw(batch, "Debug Mode ENABLED", 0, noScaleCamera.viewportHeight - 5);
+				f.setColor(Color.WHITE);
 			}
 			return;
 		}
@@ -177,16 +209,22 @@ public class GameScreen {
 		
 		debugInfo.add("Time: " + TimeOfDay.getTimeString(ClientCore.getWorld().getDaylightOffset()));
 		
-		BitmapFont font = GameCore.getFont();
+		BitmapFont font = ClientCore.getFont();
 		if(GameCore.debug) font.setColor(Color.ORANGE);
+		else font.setColor(Color.WHITE);
 		for(int i = 0; i < debugInfo.size; i++) {
 			if(GameCore.debug && i == 1)
 				font.setColor(Color.WHITE);
-			font.draw(batch, debugInfo.get(i), 0, uiCamera.viewportHeight - 5 - 15 * i);
+			font.draw(batch, debugInfo.get(i), 0, noScaleCamera.viewportHeight - 5 - font.getLineHeight() * i);
 		}
 	}
 	
-	void resize(int width, int height) { levelView.resize(width, height); }
+	void resize(int width, int height) {
+		levelView.resize(width, height);
+		guiStage.getViewport().update(width, height, true);
+		chatOverlay.resize(width, height);
+		// noScaleCamera.setToOrtho(false, width, height);
+	}
 	
 	public Stage getGuiStage() { return guiStage; }
 }

@@ -8,10 +8,10 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import miniventure.game.chat.ConsoleMessageBuilder;
 import miniventure.game.chat.MessageBuilder;
-import miniventure.game.server.ServerCore;
 import miniventure.game.util.MyUtils;
-import miniventure.game.world.entity.mob.ServerPlayer;
+import miniventure.game.world.entity.mob.player.ServerPlayer;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -51,8 +51,6 @@ public class CommandInputParser implements Runnable {
 			executeCommand(input, null, out, err);
 			out.println();
 		}
-		
-		ServerCore.quit();
 	}
 	
 	// a null player indicates that it is from the server console.
@@ -102,9 +100,9 @@ public class CommandInputParser implements Runnable {
 			command = Command.getCommand(commandName, executor);
 		}
 		if(command == null)
-			err.println("Command not recognized: \""+commandName+"\". Type \"help\" for a list of commands.");
+			err.println("Command not recognized: \""+commandName+"\". Type \"/help\" for a list of commands.");
 		else
-			command.execute(args.toArray(new String[args.size()]), executor, out, err);
+			command.execute(args.toArray(new String[0]), executor, out, err);
 	}
 	
 	public void end() { shouldRun = false; }

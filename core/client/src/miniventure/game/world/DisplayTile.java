@@ -1,7 +1,7 @@
 package miniventure.game.world;
 
 import miniventure.game.world.tile.RenderTile;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.TileTypeEnum;
 
 import org.jetbrains.annotations.NotNull;
 

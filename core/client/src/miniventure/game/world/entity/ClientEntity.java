@@ -1,16 +1,20 @@
 package miniventure.game.world.entity;
 
+import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.EntityAddition;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.ClientWorld;
+import miniventure.game.util.MyUtils;
 import miniventure.game.util.blinker.FrameBlinker;
 import miniventure.game.world.ClientLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Mob;
+import miniventure.game.world.entity.particle.ClientParticle;
+import miniventure.game.world.tile.ClientTile;
 import miniventure.game.world.tile.SwimAnimation;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.data.PropertyTag;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -21,28 +25,37 @@ import org.jetbrains.annotations.Nullable;
 
 public class ClientEntity extends Entity {
 	
-	private final boolean particle;
 	private final boolean permeable;
 	private final String descriptor;
 	private final boolean cutHeight;
+	private final boolean canFloat;
 	
 	public ClientEntity(EntityAddition data) {
 		super(ClientCore.getWorld(), data.eid);
-		this.particle = data.particle;
 		this.permeable = data.permeable;
 		this.descriptor = data.descriptor;
 		this.cutHeight = data.cutHeight;
+		this.canFloat = data.canFloat;
 		setRenderer(EntityRenderer.deserialize(data.spriteUpdate.rendererData));
+	}
+	
+	// for locally updated entities. Assumes traits of a particle.
+	protected ClientEntity() {
+		super(ClientCore.getWorld());
+		permeable = true;
+		canFloat = true;
+		cutHeight = false;
+		descriptor = getClass().getSimpleName();
 	}
 	
 	@Override
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
 		super.render(batch, delta, posOffset);
 		float drawableHeight = 1;
-		if(!particle) {
-			Tile closest = getClosestTile();
+		if(!canFloat) {
+			ClientTile closest = (ClientTile) getClosestTile();
 			if(closest != null) {
-				SwimAnimation swimAnimation = closest.getType().getPropertyOrDefault(PropertyTag.Swim, null);
+				SwimAnimation swimAnimation = closest.getType().getSwimAnimation();
 				if(swimAnimation != null) {
 					Vector2 pos = getCenter().sub(posOffset).sub(0, getSize().y / 2).scl(Tile.SIZE);
 					swimAnimation.drawSwimAnimation(batch, pos, getWorld());
@@ -51,6 +64,15 @@ public class ClientEntity extends Entity {
 			}
 		}
 		getRenderer().render((x-posOffset.x) * Tile.SIZE, (y+z - posOffset.y) * Tile.SIZE, batch, drawableHeight);
+		
+		if(ClientCore.debugBounds && !(this instanceof ClientParticle)) {
+			Rectangle rect = getBounds();
+			rect.x = (rect.x - posOffset.x) * Tile.SIZE;
+			rect.y = (rect.y - posOffset.y) * Tile.SIZE;
+			rect.width *= Tile.SIZE;
+			rect.height *= Tile.SIZE;
+			MyUtils.drawRect(rect, 1, Color.BLACK, batch);
+		}
 	}
 	
 	@NotNull @Override
@@ -62,7 +84,7 @@ public class ClientEntity extends Entity {
 	@Override
 	public boolean isMob() { return cutHeight; } // this is probably a bad idea but currently it is exactly the value I'm looking for...
 	@Override
-	public boolean isParticle() { return particle; }
+	public boolean isFloating() { return canFloat; }
 	
 	@NotNull @Override
 	public Rectangle getBounds() {
@@ -76,7 +98,7 @@ public class ClientEntity extends Entity {
 	
 	// power = health percent, loosely
 	public void hurt(WorldObject source, float power) {
-		setBlinker(0.5f, true, new FrameBlinker(5, 1, false));
+		setBlinker(Color.RED, Mob.HURT_COOLDOWN, true, new FrameBlinker(5, 1, false));
 	}
 	
 	public boolean move(Vector2 moveDist, boolean validate) { return move(moveDist.x, moveDist.y, validate); }

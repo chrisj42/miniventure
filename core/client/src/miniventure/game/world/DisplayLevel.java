@@ -9,7 +9,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
-public class DisplayLevel extends Level {
+public class DisplayLevel extends RenderLevel {
 	
 	private final LevelGenerator generator;
 	//private final HashMap<Point, Chunk> chunks = new HashMap<>();
@@ -32,7 +32,7 @@ public class DisplayLevel extends Level {
 	
 	@Override
 	public void render(Rectangle renderSpace, SpriteBatch batch, float delta, Vector2 posOffset) {
-		ClientLevel.render(getOverlappingTiles(renderSpace), new Array<>(Entity.class), batch, delta, posOffset);
+		RenderLevel.render(getOverlappingTiles(renderSpace), new Array<>(Entity.class), batch, delta, posOffset);
 	}
 	
 	@Override

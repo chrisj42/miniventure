@@ -3,3 +3,12 @@ quick reminders / in prog stuff:
  - I think a big part of the new Tile System was *supposed* to be the ability to lump DOOR_OPEN and DOOR_CLOSED, amoung other things, into the same TileType. However, I don't seem to be doing that at all. I ought to see that it happens.
  
  - when menu system is done, add a volume option
+
+
+- give item entities shadows like the water thing
+
+- cut some decimals off of the ping time display
+
+- display a message when a player dies (a generic one)
+
+- reconsider rendering rules when player is in a hole; currently clips adjacent tiles. Check if the same happens with water.

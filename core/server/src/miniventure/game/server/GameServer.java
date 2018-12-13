@@ -15,23 +15,25 @@ import miniventure.game.chat.InfoMessageLine;
 import miniventure.game.chat.MessageBuilder;
 import miniventure.game.chat.command.Command;
 import miniventure.game.chat.command.CommandInputParser;
-import miniventure.game.item.Hands;
 import miniventure.game.item.Inventory;
-import miniventure.game.item.Item;
-import miniventure.game.item.ItemStack;
 import miniventure.game.item.Recipe;
 import miniventure.game.item.Recipes;
+import miniventure.game.item.ServerItem;
+import miniventure.game.item.ServerItemStack;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
+import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ServerEntity;
-import miniventure.game.world.entity.mob.Player;
-import miniventure.game.world.entity.mob.ServerPlayer;
+import miniventure.game.world.entity.mob.player.Player;
+import miniventure.game.world.entity.mob.player.ServerHands;
+import miniventure.game.world.entity.mob.player.ServerPlayer;
+import miniventure.game.world.entity.particle.ParticleData;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.TileTypeEnum;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;
@@ -39,6 +41,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.esotericsoftware.kryonet.Connection;
+import com.esotericsoftware.kryonet.FrameworkMessage.KeepAlive;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 
@@ -47,6 +50,10 @@ import org.jetbrains.annotations.Nullable;
 
 public class GameServer implements GameProtocol {
 	
+	private static final Color SERVER_CHAT_COLOR = Color.WHITE;
+	private static final Color STATUS_MSG_COLOR = Color.ORANGE;
+	private static final Color ERROR_CHAT_COLOR = Color.RED;
+	
 	private class PlayerData {
 		final Connection connection;
 		@NotNull final ServerPlayer player;
@@ -54,12 +61,15 @@ public class GameServer implements GameProtocol {
 		boolean op;
 		final Timer validationTimer;
 		
+		/** @see GameProtocol.InventoryRequest */
+		private boolean inventoryMode = false; // send hotbar updates at first
+		
 		PlayerData(Connection connection, @NotNull ServerPlayer player) {
 			this.connection = connection;
 			this.player = player;
 			
-			toClientOut = new InfoMessageBuilder(text -> new InfoMessageLine(Color.WHITE, text));
-			toClientErr = new InfoMessageBuilder(toClientOut, text -> new InfoMessageLine(Color.RED, text));
+			toClientOut = new InfoMessageBuilder(text -> new InfoMessageLine(GameCore.DEFAULT_CHAT_COLOR, text));
+			toClientErr = new InfoMessageBuilder(toClientOut, text -> new InfoMessageLine(ERROR_CHAT_COLOR, text));
 			
 			op = connection.getRemoteAddressTCP().getAddress().isLoopbackAddress();
 			
@@ -90,6 +100,9 @@ public class GameServer implements GameProtocol {
 		addListener(/*new LagListener(lagMin, lagMax, */new Listener() {
 			@Override
 			public void received (Connection connection, Object object) {
+				if(object instanceof KeepAlive)
+					return; // we don't care about these, they are internal packets
+				
 				ServerWorld world = ServerCore.getWorld();
 				
 				if(object instanceof Login) {
@@ -127,7 +140,7 @@ public class GameServer implements GameProtocol {
 							connection.sendTCP(new ChunkData(chunk, level));
 							entityRect = entityRect == null ? chunk.getBounds() : entityRect.merge(chunk.getBounds());
 						}
-						connection.sendTCP(new SpawnData(new EntityAddition(player), player));
+						connection.sendTCP(new SpawnData(new EntityAddition(player), player.getHotbarUpdate(), player.saveStats()));
 						for(Entity e: level.getOverlappingEntities(entityRect, player))
 							connection.sendTCP(new EntityAddition(e));
 						
@@ -135,7 +148,7 @@ public class GameServer implements GameProtocol {
 						
 						playerData.validationTimer.start();
 						
-						broadcast(new Message(player.getName()+" joined the server.", Color.ORANGE), false, player);
+						broadcast(new Message(player.getName()+" joined the server.", STATUS_MSG_COLOR), false, player);
 					}
 					else connection.sendTCP(new LoginFailure("Server world is not initialized."));
 					
@@ -149,6 +162,24 @@ public class GameServer implements GameProtocol {
 				}
 				
 				ServerPlayer client = clientData.player;
+				
+				forPacket(object, Ping.class, ping -> {
+					long nano = System.nanoTime() - ping.start;
+					double time = nano / 1E9D;
+					String disp = time < 1 ? time*1E3+" ms." : time+" seconds.";
+					if(ping.source == null) // server origin
+						System.out.println("ping from "+client.getName()+": "+disp);
+					else {
+						Connection c;
+						if(ping.source.equals(client.getName()))
+							c = connection;
+						else
+							c = playerToConnectionMap.get(getPlayerByName(ping.source));
+						
+						if(c != null)
+							c.sendTCP(new Message("Ping for '"+client.getName()+"': "+disp, Color.SKY));
+					}
+				});
 				
 				if(object instanceof ChunkRequest) {
 					//System.out.println("server received chunk request");
@@ -171,6 +202,7 @@ public class GameServer implements GameProtocol {
 						connection.sendTCP(new EntityAddition(e));
 				});
 				
+				// TODO don't allow client to update server stats
 				forPacket(object, StatUpdate.class, client::loadStat);
 				
 				forPacket(object, MovementRequest.class, move -> {
@@ -183,6 +215,8 @@ public class GameServer implements GameProtocol {
 					}
 					// move given dist
 					Vector3 moveDist = move.getMoveDist();
+					if(!GameCore.debug) // TODO replace this static check with something that determines the player's speed with respect to their situation.
+						moveDist.clamp(0, Math.min(.5f, 3.5f*Player.MOVE_SPEED/Math.min(ServerCore.getFPS(), 60))); // the server will not allow the client to move fast (unless in debug mode)
 					client.move(moveDist);
 					// compare against given end pos
 					if(move.endPos.variesFrom(client)) {
@@ -196,84 +230,91 @@ public class GameServer implements GameProtocol {
 					if(r.playerPosition.variesFrom(client))
 						connection.sendTCP(new PositionUpdate(client)); // fix the player's position
 					
-					client.setDirection(r.dir);
-					client.getHands().setSelection(r.hotbarIndex);
-					if(r.attack) client.attack();
-					else client.interact();
+					client.doInteract(r.dir, r.hotbarIndex, r.attack);
 				}
 				
 				forPacket(object, ItemDropRequest.class, drop -> {
-					ItemStack stack = ItemStack.load(drop.stackData);
-					int removed = 0;
-					while(removed < stack.count && client.getHands().removeItem(stack.item))
-						removed++;
+					ServerHands hands = client.getHands();
+					Inventory inv = client.getInventory();
+					ServerItem item;
+					
+					if(clientData.inventoryMode)
+						// dropped from the inventory screen
+						item = inv.getItem(drop.index);
+					else
+						// dropped from the hotbar
+						item = hands.getItem(drop.index);
+					
+					if(item == null) {
+						// no item; client must have made a mistake (it shouldn't be sending a request if there isn't an item); if it came from their hotbar, update it, but in inventory mode it would get too messy so just ignore it; we'll update the inv once they close the menu in that case.
+						if(!clientData.inventoryMode)
+							connection.sendTCP(client.getHotbarUpdate());
+						return;
+					}
+					
+					ServerItemStack drops;
+					if(drop.all)
+						drops = new ServerItemStack(item, client.getInventory().removeItemStack(item));
+					else
+						drops = new ServerItemStack(item, client.getInventory().removeItem(item) ? 1 : 0);
+					
+					if(!clientData.inventoryMode) {
+						hands.validate();
+						connection.sendTCP(client.getHotbarUpdate());
+					}
+					// inventory screen mode: don't send back item removals, the client should manage by itself. Only send back additions.
+					
 					ServerLevel level = client.getLevel();
 					if(level == null) return;
 					// get target pos, which is one tile in front of player.
 					Vector2 targetPos = client.getCenter();
 					targetPos.add(client.getDirection().getVector().scl(2)); // adds 2 in the direction of the player.
-					for(int i = 0; i < removed; i++)
-						level.dropItem(stack.item.copy(), true, client.getCenter(), targetPos);
+					for(int i = 0; i < drops.count; i++)
+						level.dropItem(drops.item.copy(), true, client.getCenter(), targetPos);
 				});
 				
-				forPacket(object, InventoryUpdate.class, update -> {
-					// so, we need to check the sent over inventory and hotbar data, and make sure that all the items in the sent over match all the items of the server player. 
-					Inventory inv = client.getInventory();
-					Hands hotbar = client.getHands();
-					Array<Item> items = new Array<>(Item.class);
-					items.addAll(inv.getItems());
-					items.addAll(hotbar.getItems());
-					
-					// clear inventory and hand of items, load given items, and add them one by one
-					inv.loadItems(update.inventory);
-					hotbar.loadItems(update.hotbar);
-					
-					for(Item item: inv.getItems()) {
-						if(!items.contains(item, false)) {
-							// client sent over item that the server doesn't have
-							inv.removeItem(item);
-						}
-						else items.removeValue(item, false);
+				forPacket(object, InventoryRequest.class, req -> {
+					clientData.inventoryMode = req.hotbar == null;
+					if(req.hotbar != null) {
+						client.getHands().fromInventoryIndex(req.hotbar);
+						connection.sendTCP(client.getHotbarUpdate());
 					}
-					for(Item item: hotbar.getItems()) {
-						if(!items.contains(item, false)) {
-							// client sent over item that the server doesn't have
-							hotbar.removeItem(item);
-						}
-						else items.removeValue(item, false);
-					}
-					
-					// now check for any remaining items that the server had, but not the client, and add them back
-					for(Item item: items.shrink()) {
-						hotbar.addItem(item);
-					}
-					
-					connection.sendTCP(new InventoryUpdate(client));
+					else
+						connection.sendTCP(client.getInventoryUpdate());
 				});
+				
+				forPacket(object, RecipeRequest.class, req ->
+					connection.sendTCP(new RecipeRequest(
+						Recipes.serializeRecipes(),
+						new RecipeStockUpdate(client.getInventory().getItemStacks())
+					))
+				);
 				
 				forPacket(object, CraftRequest.class, req -> {
 					Recipe recipe = Recipes.recipes[req.recipeIndex];
-					Item[] left = recipe.tryCraft(client.getHands());
+					ServerItem[] left = recipe.tryCraft(client.getInventory());
 					if(left != null) {
 						ServerLevel level = client.getLevel();
 						if(level != null)
-							for(Item item : left)
+							for(ServerItem item : left)
 								level.dropItem(item, client.getPosition(), null);
 					}
-					connection.sendTCP(new InventoryUpdate(client));
+					client.getHands().validate();
+					connection.sendTCP(client.getHotbarUpdate());
+					connection.sendTCP(new RecipeStockUpdate(client.getInventory().getItemStacks()));
 				});
 				
 				if(object.equals(DatalessRequest.Respawn)) {
 					//ServerPlayer client = connectionToPlayerDataMap.get(connection).player;
 					world.respawnPlayer(client);
-					connection.sendTCP(new SpawnData(new EntityAddition(client), client));
+					connection.sendTCP(new SpawnData(new EntityAddition(client), client.getHotbarUpdate(), client.saveStats()));
 				}
 				
 				if(object.equals(DatalessRequest.Tile)) {
 					Level level = client.getLevel();
 					if(level != null) {
 						Tile t = level.getClosestTile(client.getInteractionRect());
-						connection.sendTCP(new Message(client+" looking at "+(t==null?null:t.toLocString()), Color.WHITE));
+						connection.sendTCP(new Message(client+" looking at "+(t==null?null:t.toLocString()), GameCore.DEFAULT_CHAT_COLOR));
 					}
 				}
 				
@@ -306,7 +347,7 @@ public class GameServer implements GameProtocol {
 						matches.sort(String::compareToIgnoreCase);
 						
 						if(request.tabIndex < 0)
-							connection.sendTCP(new Message(ArrayUtils.arrayToString(matches.shrink(), "", "", ", "), Color.WHITE));
+							connection.sendTCP(new Message(ArrayUtils.arrayToString(matches.shrink(), "", "", ", "), GameCore.DEFAULT_CHAT_COLOR));
 						else {
 							// actually autocomplete
 							connection.sendTCP(new TabResponse(request.manualText, matches.get(request.tabIndex % matches.size)));
@@ -335,7 +376,7 @@ public class GameServer implements GameProtocol {
 				player.getWorld().removePlayer(player);
 				connectionToPlayerDataMap.remove(connection);
 				playerToConnectionMap.remove(player);
-				broadcast(new Message(player.getName()+" left the server.", Color.ORANGE));
+				broadcast(new Message(player.getName()+" left the server.", STATUS_MSG_COLOR));
 				//System.out.println("server disconnected from client: " + connection.getRemoteAddressTCP().getHostString());
 				
 				if(connectionToPlayerDataMap.size() == 0 && !standalone)
@@ -348,16 +389,9 @@ public class GameServer implements GameProtocol {
 	
 	public void addListener(Listener listener) { server.addListener(listener); }
 	
-	public boolean startServer() { return startServer(GameProtocol.PORT); }
-	public boolean startServer(int port) {
-		try {
-			server.bind(port);
-		} catch(IOException e) {
-			e.printStackTrace();
-			return false;
-		}
-		
-		return true;
+	public void startServer() throws IOException { startServer(GameProtocol.PORT); }
+	public void startServer(int port) throws IOException {
+		server.bind(port);
 	}
 	
 	public void sendToPlayer(@NotNull ServerPlayer player, Object obj) {
@@ -379,9 +413,9 @@ public class GameServer implements GameProtocol {
 		
 		broadcast(obj, true, players);
 	}
-	public void broadcast(Object obj, @NotNull ServerEntity excludeEntity) {
-		if(excludeEntity instanceof ServerPlayer)
-			broadcast(obj, false, (ServerPlayer)excludeEntity);
+	public void broadcast(Object obj, @NotNull ServerEntity excludeIfPlayer) {
+		if(excludeIfPlayer instanceof ServerPlayer)
+			broadcast(obj, false, (ServerPlayer)excludeIfPlayer);
 		else
 			broadcast(obj);
 	}
@@ -407,6 +441,11 @@ public class GameServer implements GameProtocol {
 		return null;
 	}
 	
+	public boolean isInventoryMode(@NotNull ServerPlayer player) {
+		PlayerData data = connectionToPlayerDataMap.get(playerToConnectionMap.get(player));
+		return data != null && data.inventoryMode;
+	}
+	
 	public boolean isAdmin(@Nullable ServerPlayer player) {
 		if(player == null) return true; // from server command prompt
 		PlayerData data = connectionToPlayerDataMap.get(playerToConnectionMap.get(player));
@@ -429,8 +468,15 @@ public class GameServer implements GameProtocol {
 	}
 	
 	public Message getMessage(@Nullable ServerPlayer sender, String msg) {
-		if(sender == null) return new Message("Server: "+msg, Color.LIGHT_GRAY);
-		return new Message(sender.getName()+": "+msg, Color.WHITE);
+		if(sender == null) return new Message("Server: "+msg, SERVER_CHAT_COLOR);
+		return new Message(sender.getName()+": "+msg, GameCore.DEFAULT_CHAT_COLOR);
+	}
+	
+	public void broadcastParticle(ParticleData data, WorldObject posMarker) {
+		broadcastParticle(data, posMarker.getLevel(), posMarker.getCenter());
+	}
+	public void broadcastParticle(ParticleData data, Level level, Vector2 pos) {
+		broadcast(new ParticleAddition(data, new PositionUpdate(level, pos)));
 	}
 	
 	private void sendEntityValidation(@NotNull PlayerData pData) {
@@ -482,15 +528,18 @@ public class GameServer implements GameProtocol {
 	}
 	
 	public void printStatus(MessageBuilder out) {
+		out.println("Miniventure Version: "+GameCore.VERSION);
 		out.println("Server Running: "+(server.getUpdateThread() != null));
 		out.println("FPS: " + ServerCore.getFPS());
 		out.println("Players connected: "+playerToConnectionMap.size());
 		for(PlayerData pd: connectionToPlayerDataMap.values()) {
-			out.print("     Player \""+pd.player.getName()+"\" ");
+			out.print("     Player '"+pd.player.getName()+"' ");
 			if(pd.op) out.print("(admin) ");
 			out.print(pd.player.getLocation(true));
 			out.println();
 		}
+		if(GameCore.debug)
+			out.println("Debug mode is enabled.");
 	}
 	
 	void stop() { server.stop(); }

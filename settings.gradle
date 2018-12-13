@@ -1,2 +1,2 @@
 // this specifies the folder names in which to find the subprojects. by default, these are also the subproject names.
-include 'desktop', 'core:game', 'core:client', 'core:server', 'gentest'
+include 'core:desktop', 'core:common', 'core:client', 'core:server'

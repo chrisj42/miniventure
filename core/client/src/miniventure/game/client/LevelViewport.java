@@ -3,8 +3,8 @@ package miniventure.game.client;
 import miniventure.game.GameCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Chunk;
-import miniventure.game.world.ClientLevel;
-import miniventure.game.world.Level;
+import miniventure.game.world.RenderLevel;
+import miniventure.game.world.entity.mob.player.ClientPlayer;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.Gdx;
@@ -28,7 +28,7 @@ public class LevelViewport {
 	
 	private static final float OFF_SCREEN_LIGHT_RADIUS = 5; // in tiles; used to render light halos when the object creating said halo could be off screen. any halos bigger than this in radius will appear to disappear suddenly when the object casting it goes too far off screen; but increasing this value means iterating through a lot more objects. Your average halo isn't going to bigger than 5 tiles in radius, though, so 5 is a good enough value.
 	
-	private static final float DEFAULT_VIEWPORT_SIZE = 20; // in tiles
+	private static final float DEFAULT_VIEWPORT_SIZE = 16; // in tiles
 	
 	private static final int MIN_ZOOM = -3, MAX_ZOOM = 5;
 	
@@ -45,7 +45,7 @@ public class LevelViewport {
 	
 	private boolean debug = false;
 	
-	public LevelViewport() { this(GameCore.getBatch(), new OrthographicCamera()); }
+	public LevelViewport() { this(ClientCore.getBatch(), new OrthographicCamera()); }
 	public LevelViewport(SpriteBatch batch, OrthographicCamera lightingCamera) {
 		this.batch = batch;
 		camera = new OrthographicCamera();
@@ -63,12 +63,9 @@ public class LevelViewport {
 			zoom(-1);
 		if(Gdx.input.isKeyJustPressed(Keys.EQUALS) || Gdx.input.isKeyJustPressed(Keys.PLUS))
 			zoom(1);
-		
-		if(Gdx.input.isKeyJustPressed(Keys.B))
-			debug = !debug;
 	}
 	
-	public void render(@NotNull Vector2 cameraCenter, Color ambientLighting, @NotNull Level level) {
+	public void render(@NotNull Vector2 cameraCenter, Color ambientLighting, @NotNull RenderLevel level) {
 		// get the size of the area of the game on screen by projecting the application window dimensions into world space.
 		Vector3 screenSize = new Vector3(Gdx.graphics.getWidth(), 0, 0); // because unproject has origin at the top, so the upper right corner is at (width, 0).
 		camera.unproject(screenSize); // screen to render coords
@@ -101,7 +98,7 @@ public class LevelViewport {
 		
 		batch.setBlendFunction(GL20.GL_ZERO, GL20.GL_ONE_MINUS_SRC_ALPHA);
 		
-		Array<Vector3> lights = ClientLevel.renderLighting(level.getOverlappingObjects(lightRenderSpace));
+		Array<Vector3> lights = RenderLevel.renderLighting(level.getOverlappingObjects(lightRenderSpace));
 		final TextureRegion lightTexture = GameCore.icons.get("light").texture;
 		
 		for(Vector3 light: lights) {
@@ -124,7 +121,7 @@ public class LevelViewport {
 		//System.out.println("rendering level in bounds "+renderSpace+" to camera at "+camera.position+" with offset "+offset);
 		level.render(renderSpace, batch, GameCore.getDeltaTime(), offset); // renderSpace in world coords, but offset can give render coords
 		
-		if(debug) {
+		if(ClientCore.debugChunk) {
 			// render chunk boundaries
 			int minX = MathUtils.ceil(renderSpace.x) / Chunk.SIZE * Chunk.SIZE;
 			int minY = MathUtils.ceil(renderSpace.y) / Chunk.SIZE * Chunk.SIZE;
@@ -138,6 +135,34 @@ public class LevelViewport {
 			}
 			for (int y = minY; y <= maxY; y += Chunk.SIZE) {
 				MyUtils.fillRect((minX - offset.x) * Tile.SIZE, (y - offset.y) * Tile.SIZE-lineThickness, (maxX - minX) * Tile.SIZE, lineThickness*2+1, Color.PINK, batch);
+			}
+		}
+		
+		if(ClientCore.debugInteract || ClientCore.debugTile) {
+			ClientPlayer player = ClientCore.getWorld().getMainPlayer();
+			if(player != null) {
+				if(ClientCore.debugInteract) {
+					// render player interaction rect
+					Rectangle rect = player.getInteractionRect();
+					rect.x = (rect.x - offset.x) * Tile.SIZE;
+					rect.y = (rect.y - offset.y) * Tile.SIZE;
+					rect.width *= Tile.SIZE;
+					rect.height *= Tile.SIZE;
+					MyUtils.drawRect(rect, 1, Color.BLACK, batch);
+				}
+				
+				if(ClientCore.debugTile) {
+					// outline "looking at" tile
+					Tile closest = level.getClosestTile(player.getInteractionRect());
+					if(closest != null) {
+						Rectangle rect = closest.getBounds();
+						rect.x = (rect.x - offset.x) * Tile.SIZE;
+						rect.y = (rect.y - offset.y) * Tile.SIZE;
+						rect.width *= Tile.SIZE;
+						rect.height *= Tile.SIZE;
+						MyUtils.drawRect(rect, 1, Color.BLACK, batch);
+					}
+				}
 			}
 		}
 		
@@ -172,7 +197,7 @@ public class LevelViewport {
 		camera.setToOrtho(false, viewportWidth, viewportHeight);
 	}
 	
-	void resize(int width, int height) {
+	public void resize(int width, int height) {
 		resetCamera(width, height);
 		
 		lightingCamera.setToOrtho(false, width, height);

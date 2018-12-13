@@ -4,11 +4,11 @@ import java.util.Arrays;
 
 import miniventure.game.server.ServerCore;
 import miniventure.game.util.MyUtils;
-import miniventure.game.util.function.ValueFunction;
-import miniventure.game.util.function.MonoValueFunction;
+import miniventure.game.util.function.FetchFunction;
+import miniventure.game.util.function.MapFunction;
 import miniventure.game.world.Config;
 import miniventure.game.world.TimeOfDay;
-import miniventure.game.world.entity.mob.ServerPlayer;
+import miniventure.game.world.entity.mob.player.ServerPlayer;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -63,13 +63,13 @@ public interface Argument {
 	}
 	
 	interface ArgValidator<T> {
-		static <T> T notNull(ValueFunction<T> function) throws IllegalArgumentException {
+		static <T> T notNull(FetchFunction<T> function) throws IllegalArgumentException {
 			T obj = function.get();
 			if(obj == null)
 				throw new IllegalArgumentException();
 			return obj;
 		}
-		static <T> T noException(ValueFunction<T> function) throws IllegalArgumentException {
+		static <T> T noException(FetchFunction<T> function) throws IllegalArgumentException {
 			T obj;
 			try {
 				obj = function.get();
@@ -79,14 +79,6 @@ public interface Argument {
 			
 			return obj;
 		}
-		static <T> T isTrue(ValueFunction<T> valueFunction, MonoValueFunction<T, Boolean> boolFunction) throws IllegalArgumentException {
-			T obj = valueFunction.get();
-			if(!boolFunction.get(obj))
-				throw new IllegalArgumentException();
-			
-			return obj;
-		}
-		
 		
 		ArgValidator<String> ANY = arg -> arg;
 		ArgValidator<Integer> INTEGER = arg -> noException(() -> Integer.parseInt(arg));
@@ -129,14 +121,14 @@ public interface Argument {
 			};
 		}
 		
-		static <T1, T2> ArgValidator<T2> map(ArgValidator<T1> orig, MonoValueFunction<T1, T2> mapper) { return arg -> mapper.get(orig.get(arg)); }
+		static <T1, T2> ArgValidator<T2> map(ArgValidator<T1> orig, MapFunction<T1, T2> mapper) { return arg -> mapper.get(orig.get(arg)); }
 		
 		static ArgValidator<String> exactString(boolean matchCase, String... matches) { return exactString(str -> str, matchCase, matches); }
-		static <T> ArgValidator<T> exactString(MonoValueFunction<String, T> mapper, boolean matchCase, String... matches) {
+		static <T> ArgValidator<T> exactString(MapFunction<String, T> resultMapper, boolean matchCase, String... matches) {
 			return arg -> {
 				for(String match : matches)
 					if(matchCase ? arg.equals(match) : arg.equalsIgnoreCase(match))
-						return mapper.get(arg);
+						return resultMapper.get(arg);
 				
 				throw new IllegalArgumentException();
 			};

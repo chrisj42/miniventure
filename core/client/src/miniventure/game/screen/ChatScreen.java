@@ -11,25 +11,36 @@ import miniventure.game.GameProtocol.TabResponse;
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.chat.InfoMessageLine;
 import miniventure.game.client.ClientCore;
+import miniventure.game.client.FontStyle;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.RelPos;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
+import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.kotcrab.vis.ui.VisUI;
+
+import org.jetbrains.annotations.Nullable;
 
 public class ChatScreen extends MenuScreen {
 	
-	private static final float MESSAGE_LIFE_TIME = 15; // time from post to removal.
-	private static final float MESSAGE_FADE_TIME = 3; // duration taken to go from full opaque to fully transparent.
+	private static final float MESSAGE_LIFE_TIME = 6; // time from post to removal.
+	private static final float MESSAGE_FADE_TIME = 2; // duration taken to go from full opaque to fully transparent.
 	private static final Color BACKGROUND = Color.GRAY.cpy().sub(0, 0, 0, 0.25f);
 	
 	private static final int COMMAND_BUFFER_SIZE = 30;
+	private static final int MESSAGE_BUFFER_SIZE = 30;
+	private static final int MESSAGE_DISPLAY_SIZE = 10;
 	
 	private final Deque<TimerLabel> labelQueue = new ArrayDeque<>();
 	private final LinkedList<String> previousCommands = new LinkedList<>();
@@ -39,30 +50,71 @@ public class ChatScreen extends MenuScreen {
 	private final boolean useTimer;
 	
 	private final TextField input;
+	private final VerticalGroup messageStream;
+	
+	@Nullable
+	private final ScrollPane scrollPane;
 	
 	private boolean tabbing = false;
 	private int tabIndex = -1;
 	private String manualInput = ""; // this is the part of the command that the user entered manually, and so should not be changed when tabbing.
 	
 	public ChatScreen(boolean timeOutMessages) {
+		super(false, new ScreenViewport(), ClientCore.getBatch());
 		useTimer = timeOutMessages;
 		
-		addActor(vGroup);
+		VerticalGroup vGroup = useVGroup(0, Align.topRight, false);
+		addMainGroup(vGroup, RelPos.TOP_RIGHT);
+		vGroup.padTop(10).padRight(10);
 		
-		vGroup.align(Align.topLeft);
-		vGroup.columnAlign(Align.left);
-		vGroup.space(5);
-		vGroup.setWidth(getWidth()/2);
+		messageStream = new VerticalGroup() {
+			@Override
+			public float getPrefWidth() {
+				if(scrollPane != null)
+					return scrollPane.getScrollWidth();
+				else
+					return ChatScreen.this.getWidth() / 3;
+			}
+		};
+		messageStream.align(Align.topRight);
+		messageStream.columnAlign(Align.topRight);
+		messageStream.space(5);
 		
-		input = new TextField("", GameCore.getSkin()) {
+		input = new TextField("", VisUI.getSkin()) {
 			@Override
 			public void draw(Batch batch, float parentAlpha) {
 				if(ClientCore.getScreen() == ChatScreen.this)
 					super.draw(batch, parentAlpha);
 			}
+			@Override
+			public float getPrefWidth() {
+				return ChatScreen.this.getWidth()/3;
+			}
 		};
-		input.setWidth(getWidth()/2);
-		input.setAlignment(Align.left);
+		registerField(input);
+		
+		vGroup.addActor(input);
+		
+		if(useTimer) {
+			scrollPane = null;
+			vGroup.addActor(messageStream);
+		} else {
+			scrollPane = new ScrollPane(messageStream, VisUI.getSkin()) {
+				@Override
+				public float getPrefWidth() {
+					return ChatScreen.this.getWidth() / 3;
+				}
+				
+				@Override
+				public float getPrefHeight() {
+					return Math.min(messageStream.getPrefHeight(), ChatScreen.this.getHeight()*2/3);
+				}
+			};
+			scrollPane.setScrollingDisabled(true, false);
+			scrollPane.setFadeScrollBars(false);
+			vGroup.addActor(scrollPane);
+			setScrollFocus(scrollPane);
+		}
 		
 		input.addListener(new InputListener() {
 			@Override
@@ -72,9 +124,10 @@ public class ChatScreen extends MenuScreen {
 					if(text.length() == 0) return true;
 					if(text.equals("/")) return true;
 					
-					// valid command
+					// not nothing
 					
-					if(prevCommandIdx != 0) // don't add the entry if we are just redoing the previous action
+					// don't add the entry if we are just redoing the previous action
+					if(prevCommandIdx != 0 || !text.equals(previousCommands.get(prevCommandIdx)))
 						previousCommands.push(text);
 					prevCommandIdx = -1;
 					if(previousCommands.size() > COMMAND_BUFFER_SIZE)
@@ -85,7 +138,7 @@ public class ChatScreen extends MenuScreen {
 					else
 						text = text.substring(1);
 					
-					ClientCore.getClient().send(new Message(text, (String)null));
+					ClientCore.getClient().send(new Message(text, GameCore.DEFAULT_CHAT_COLOR));
 					ClientCore.setScreen(null);
 					return true;
 				}
@@ -141,20 +194,25 @@ public class ChatScreen extends MenuScreen {
 				return false;
 			}
 		});
-		
-		addActor(input);
-		repack();
+	}
+	
+	public void reset() {
+		previousCommands.clear();
+		deregisterLabels(labelQueue.toArray(new Label[0]));
+		labelQueue.clear();
+		messageStream.clearChildren();
 	}
 	
 	public void focus(String initText) {
 		input.setText(initText);
 		input.setCursorPosition(initText.length());
+		if(scrollPane != null)
+			scrollPane.setScrollPercentY(0);
 		ClientCore.setScreen(this);
 	}
 	@Override
 	public void focus() {
-		input.pack();
-		input.setWidth(getWidth()/2);
+		super.focus();
 		setKeyboardFocus(input);
 	}
 	
@@ -163,58 +221,59 @@ public class ChatScreen extends MenuScreen {
 			// add in reverse order
 			for(int i = msg.lines.length - 1; i >= 0; i--) {
 				InfoMessageLine line = msg.lines[i];
-				addMessage(new Label(line.line, new Label.LabelStyle(GameCore.getFont(), Color.valueOf(line.color))), i != 0);
+				addMessage(line.line, line.color, i != 0);
 			}
 		}
 	}
 	public void addMessage(Message msg) {
 		synchronized (labelQueue) {
-			addMessage(new Label(msg.msg, new Label.LabelStyle(GameCore.getFont(), Color.valueOf(msg.color))));
+			addMessage(msg.msg, msg.color);
 		}
 	}
 	
-	private void addMessage(Label msg) { addMessage(msg, false); }
-	private void addMessage(Label msg, boolean connect) {
-		msg.setWrap(true);
-		TimerLabel label = new TimerLabel(msg, connect);
-		vGroup.addActorAt(0, label);
-		labelQueue.add(label);
-		if(vGroup.getChildren().size > 10)
-			vGroup.removeActor(labelQueue.poll());
-		repack();
+	private void addMessage(String msg, String color) { addMessage(msg, color, false); }
+	private void addMessage(String msg, String color, boolean connect) {
+		Gdx.app.postRunnable(() -> {
+			TimerLabel label = new TimerLabel(msg, Color.valueOf(color), connect);
+			messageStream.addActorAt(0, label);
+			labelQueue.add(label);
+			registerLabel(FontStyle.Default, label);
+			if(messageStream.getChildren().size > (useTimer ? MESSAGE_DISPLAY_SIZE : MESSAGE_BUFFER_SIZE)) {
+				Label oldLabel = labelQueue.poll();
+				deregisterLabels(oldLabel);
+				messageStream.removeActor(oldLabel);
+			}
+		});
 	}
 	
 	public void autocomplete(TabResponse response) {
 		if(!tabbing) return; // abandoned request
 		if(!manualInput.equals(response.manualText)) return; // response doesn't match the current state
-		input.setText("/"+response.completion);
-		input.setCursorPosition(input.getText().length());
+		Gdx.app.postRunnable(() -> {
+			input.setText('/'+response.completion);
+			input.setCursorPosition(input.getText().length());
+		});
 	}
 	
-	@Override
-	public boolean usesWholeScreen() { return false; }
-	
-	private void repack() {
-		input.pack();
-		input.setWidth(getWidth()/2);
-		input.setPosition(getWidth() / 2, getHeight() - input.getHeight());
-		try {
-			vGroup.pack();
-		} catch(IndexOutOfBoundsException e) {
-			e.printStackTrace();
-		}
-		vGroup.setPosition(getWidth() / 2, input.getY() - 10 - vGroup.getHeight());
-	}
-	
-	private class TimerLabel extends Container<Label> {
+	private class TimerLabel extends Label {
 		float timeLeft;
 		private final boolean connect;
 		
-		TimerLabel(Label label, boolean connect) {
-			super(label);
+		TimerLabel(String text, Color color, boolean connect) {
+			super(text, new LabelStyle(ClientCore.getFont(), color));
 			this.connect = connect;
-			width(ChatScreen.this.getWidth()/2);
 			timeLeft = MESSAGE_LIFE_TIME;
+			setAlignment(Align.left);
+			setWrap(true);
+		}
+		
+		@Override
+		public float getPrefWidth() {
+			Group parent = getParent();
+			if(parent != null)
+				return parent.getWidth();
+			else
+				return ChatScreen.this.getWidth() / 3;
 		}
 		
 		@Override
@@ -224,9 +283,11 @@ public class ChatScreen extends MenuScreen {
 			if(!useTimer) return;
 			timeLeft = Math.max(0, timeLeft-delta);
 			if(timeLeft == 0) {
-				vGroup.removeActor(this);
-				repack();
-				labelQueue.remove(this);
+				Gdx.app.postRunnable(() -> {
+					messageStream.removeActor(this);
+					labelQueue.remove(this);
+					deregisterLabels(this);
+				});
 			}
 		}
 		
@@ -238,9 +299,14 @@ public class ChatScreen extends MenuScreen {
 			if(timeLeft < MESSAGE_FADE_TIME)
 				alpha *= (timeLeft / MESSAGE_FADE_TIME);
 			
-			MyUtils.fillRect(getX(), getY(), ChatScreen.this.getWidth()/2, getHeight()+(connect?vGroup.getSpace():0), BACKGROUND, alpha, batch);
+			MyUtils.fillRect(getX(), getY(), getWidth(), getHeight()+(connect?messageStream.getSpace():0), BACKGROUND, alpha, batch);
 			
-			super.draw(batch, alpha);
+			try {
+				super.draw(batch, alpha);
+			} catch(Exception e) {
+				System.err.println("error rendering TimerLabel text");
+				e.printStackTrace();
+			}
 		}
 	}
 }

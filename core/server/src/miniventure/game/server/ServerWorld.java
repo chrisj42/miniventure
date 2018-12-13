@@ -1,28 +1,36 @@
 package miniventure.game.server;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Objects;
-import java.util.Random;
 
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.EntityAddition;
 import miniventure.game.GameProtocol.EntityRemoval;
 import miniventure.game.GameProtocol.WorldData;
 import miniventure.game.ProgressPrinter;
+import miniventure.game.item.FoodType;
+import miniventure.game.item.ResourceType;
+import miniventure.game.item.TileItem;
 import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolItem.Material;
 import miniventure.game.item.ToolType;
-import miniventure.game.world.*;
+import miniventure.game.world.Config;
+import miniventure.game.world.Level;
+import miniventure.game.world.ServerLevel;
+import miniventure.game.world.TimeOfDay;
+import miniventure.game.world.WorldManager;
+import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ServerEntity;
-import miniventure.game.world.entity.mob.ServerPlayer;
+import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.levelgen.LevelGenerator;
 import miniventure.game.world.tile.ServerTileType;
-import miniventure.game.world.tile.TileEnumMapper;
+import miniventure.game.world.tile.TileType;
+import miniventure.game.world.tile.TileTypeEnum;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
@@ -49,9 +57,7 @@ public class ServerWorld extends WorldManager {
 	
 	private final HashSet<WorldObject> keepAlives = new HashSet<>(); // always keep chunks around these objects loaded.
 	
-	public ServerWorld(boolean standalone) {
-		super(new TileEnumMapper<>(ServerTileType::new));
-		
+	public ServerWorld(boolean standalone) throws IOException {
 		server = new GameServer(standalone);
 		server.startServer();
 	}
@@ -111,7 +117,7 @@ public class ServerWorld extends WorldManager {
 		int numLevels = 1;
 		int minDepth = 0;
 		for(int i = 0; i < numLevels; i++) {
-			logger.editMessage("Loading level "+(i+1)+"/"+numLevels+"...");
+			logger.editMessage("Loading level "+(i+1)+'/'+numLevels+"...");
 			addLevel(new ServerLevel(this, i + minDepth, levelGenerator));
 		}
 		logger.popMessage();
@@ -176,8 +182,23 @@ public class ServerWorld extends WorldManager {
 		
 		respawnPlayer(player);
 		
-		if(GameCore.debug)
-			player.getInventory().addItem(new ToolItem(ToolType.Shovel, Material.Gem));
+		if(GameCore.debug) {
+			player.getInventory().addItem(new ToolItem(ToolType.Shovel, Material.Ruby));
+			player.getInventory().addItem(new ToolItem(ToolType.Shovel, Material.Ruby));
+			player.getInventory().addItem(new ToolItem(ToolType.Shovel, Material.Ruby));
+			player.getInventory().addItem(new ToolItem(ToolType.Pickaxe, Material.Iron));
+			player.getInventory().addItem(new ToolItem(ToolType.Pickaxe, Material.Ruby));
+			player.getInventory().addItem(TileItem.get(TileTypeEnum.CLOSED_DOOR));
+			player.getInventory().addItem(TileItem.get(TileTypeEnum.TORCH));
+			for(int i = 0; i < 7; i++)
+				player.getInventory().addItem(ResourceType.Log.get());
+			player.getInventory().addItem(ResourceType.Tungsten.get());
+			player.getInventory().addItem(ResourceType.Flint.get());
+			player.getInventory().addItem(ResourceType.Fabric.get());
+			player.getInventory().addItem(ResourceType.Cotton.get());
+			for(FoodType food: FoodType.values())
+				player.getInventory().addItem(food.get());
+		}
 		return player;
 	}
 	
@@ -210,6 +231,7 @@ public class ServerWorld extends WorldManager {
 	/*  --- GET METHODS --- */
 	
 	
+	@Override
 	public Array<WorldObject> getKeepAlives(@NotNull Level level) {
 		Array<WorldObject> keepAlives = new Array<>();
 		for(WorldObject obj: this.keepAlives)
@@ -218,6 +240,9 @@ public class ServerWorld extends WorldManager {
 		
 		return keepAlives;
 	}
+	
+	@Override
+	public TileType getTileType(TileTypeEnum type) { return ServerTileType.get(type); }
 	
 	public GameServer getServer() { return server; }
 	

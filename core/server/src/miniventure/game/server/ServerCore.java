@@ -1,6 +1,9 @@
 package miniventure.game.server;
 
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import miniventure.game.GameCore;
@@ -8,8 +11,11 @@ import miniventure.game.chat.command.CommandInputParser;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.VersionInfo;
+import miniventure.game.world.tile.ServerTileType;
 
 import com.badlogic.gdx.math.MathUtils;
+
+import org.jetbrains.annotations.NotNull;
 
 public class ServerCore {
 	
@@ -36,7 +42,8 @@ public class ServerCore {
 				int width = Integer.parseInt(args[sizeIdx]);
 				int height = Integer.parseInt(args[sizeIdx+1]);
 				
-				GameCore.initNonGdx();
+				GameCore.initNonGdxTextures();
+				ServerTileType.init();
 				
 				System.out.println("loading server world...");
 				
@@ -63,12 +70,19 @@ public class ServerCore {
 		}
 	}
 	
-	public static void initServer(int width, int height, boolean standalone) {
+	public static boolean initServer(int width, int height, boolean standalone) {
 		if(serverWorld != null)
 			serverWorld.exitWorld();
 		
-		serverWorld = new ServerWorld(standalone);
+		try {
+			serverWorld = new ServerWorld(standalone);
+		} catch(IOException e) {
+			e.printStackTrace();
+			serverWorld = null;
+			return false;
+		}
 		serverWorld.createWorld(width, height);
+		return true;
 	}
 	
 	private static final float[] frameTimes = new float[20];
@@ -82,6 +96,14 @@ public class ServerCore {
 			totalTime += duration;
 		
 		return ((loopedFrames ? frameTimes.length : timeIdx) * FRAME_INTERVAL) / totalTime;
+	}
+	
+	private static final List<Runnable> runnables = Collections.synchronizedList(new LinkedList<>());
+	
+	public static void postRunnable(@NotNull Runnable r) {
+		synchronized (runnables) {
+			runnables.add(r);
+		}
 	}
 	
 	public static void run() {
@@ -112,6 +134,16 @@ public class ServerCore {
 			
 			try {
 				serverWorld.update(MathUtils.clamp((now - lastNow) / 1E9f, 0, GameCore.MAX_DELTA));
+				
+				// run any runnables that were posted during the above update
+				Runnable[] lastRunnables;
+				synchronized (runnables) {
+					lastRunnables = runnables.toArray(new Runnable[0]);
+					runnables.clear();
+				}
+				for(Runnable r: lastRunnables)
+					r.run(); // any runnables added here will be run next update
+				
 			} catch(Throwable t) {
 				getServer().stop();
 				throw t;
@@ -123,6 +155,7 @@ public class ServerCore {
 		}
 		
 		commandParser.end();
+		serverWorld = null;
 	}
 	
 	// stop the server.

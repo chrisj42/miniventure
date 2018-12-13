@@ -1,13 +1,21 @@
 package miniventure.game.item;
 
-import java.util.Arrays;
+import javax.swing.Timer;
 
-import miniventure.game.GameCore;
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import miniventure.game.GameProtocol.CraftRequest;
+import miniventure.game.GameProtocol.RecipeRequest;
+import miniventure.game.GameProtocol.RecipeStockUpdate;
+import miniventure.game.GameProtocol.SerialRecipe;
 import miniventure.game.client.ClientCore;
+import miniventure.game.client.FontStyle;
 import miniventure.game.screen.MenuScreen;
-import miniventure.game.util.MyUtils;
+import miniventure.game.screen.util.ColorBackground;
+import miniventure.game.util.RelPos;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -15,183 +23,328 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
+import com.kotcrab.vis.ui.VisUI;
 
+import org.jetbrains.annotations.NotNull;
+
+/** @noinspection SynchronizeOnThis*/
 public class CraftingScreen extends MenuScreen {
 	
-	private static final Color background = new Color(.2f, .4f, 1f, 1);
+	// private static final Color slotBackground = Color.BLUE.cpy().lerp(Color.WHITE, .1f);
+	private static final Color tableBackground = Color.SKY.cpy().lerp(Color.BLACK, .2f);
+	private static final Color craftableBackground = Color.GREEN.cpy().lerp(tableBackground, .5f);
+	private static final Color notCraftableBackground = Color.FIREBRICK.cpy().lerp(tableBackground, .3f);
 	
-	private final Inventory playerInv;
+	/*
+		general system:
+		
+		- client normally has no reference to inventory at all, only hotbar
+			- server sends hotbar updates as necessary
+		- when inventory screen opened, client requests inventory data
+			- server sends back InventoryUpdate with inventory data and hotbar indices
+		
+	 */
 	
-	private final CraftableItem[] list;
-	private final ItemSelectionTable table;
+	private boolean requested = false;
 	
-	private final ItemStackSlot invCount = new ItemStackSlot(true, null, 0, null) {
-		@Override protected boolean showCount() { return getItem() != null; }
-	};
-	private final VerticalGroup inInv = new OpaqueVerticalGroup(background);
-	private final VerticalGroup costs = new OpaqueVerticalGroup(background);
+	private ArrayList<RecipeSlot> recipes = null;
+	private final HashMap<String, Integer> inventoryCounts = new HashMap<>();
 	
-	private static class OpaqueVerticalGroup extends VerticalGroup {
-		private final Color color;
-		
-		public OpaqueVerticalGroup(Color color) {
-			this.color = color;
-			pad(5);
-		}
-		
-		@Override
-		public void draw(Batch batch, float parentAlpha) {
-			MyUtils.fillRect(getX(), getY(), getWidth(), getHeight(), color, parentAlpha, batch);
-			super.draw(batch, parentAlpha);
-		}
-	}
+	private final Table mainGroup;
 	
-	private static class CraftableRecipe {
-		private Recipe recipe;
-		private boolean canCraft;
-		private int index;
-		CraftableRecipe(int arrayIndex, Recipe r, Inventory inv) {
-			this.index = arrayIndex;
-			this.recipe = r;
-			canCraft = r.canCraft(inv);
-		}
-	}
+	private final Table craftableTable;
+	private final Table costTable;
+	private Label resultStockLabel;
+	private final HashMap<String, Label> costStockLabels = new HashMap<>();
+	private final HashMap<String, ItemSlot> costSlots = new HashMap<>();
 	
-	public CraftingScreen(Recipe[] recipes, Inventory playerInventory) {
-		this.playerInv = playerInventory;
+	private final ScrollPane scrollPane;
+	private final Table recipeListTable;
+	
+	private int selection;
+	
+	public CraftingScreen() {
+		super(false);
 		
-		CraftableRecipe[] recipeCache = new CraftableRecipe[recipes.length];
-		for(int i = 0; i < recipeCache.length; i++)
-			recipeCache[i] = new CraftableRecipe(i, recipes[i], playerInventory);
+		mainGroup = useTable(Align.topLeft, false);
+		addMainGroup(mainGroup, RelPos.TOP_LEFT);
 		
-		Arrays.sort(recipeCache, (r1, r2) -> {
-			if(r1.canCraft == r2.canCraft) return 0;
-			if(r1.canCraft) return -1;
-			return 1;
-		});
+		mainGroup.add(makeLabel("personal crafting", FontStyle.CrafterHeader, false)).row();
 		
-		list = new CraftableItem[recipeCache.length];
-		for(int i = 0; i < list.length; i++) {
-			CraftableItem craftEntry = new CraftableItem(recipeCache[i].recipe, i, recipeCache[i].index);
-			list[i] = craftEntry;
-			craftEntry.addListener(new ClickListener() {
-				@Override
-				public void clicked(InputEvent e, float x, float y) {
-					craft(craftEntry);
-				}
-			});
-			craftEntry.addListener(new InputListener() {
-				@Override
-				public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-					table.setSelection(craftEntry.getSlotIndex());
-				}
-			});
-		}
+		craftableTable = new Table(VisUI.getSkin());
+		craftableTable.defaults().pad(2f);
+		craftableTable.pad(10f);
+		craftableTable.add(makeLabel("Waiting for crafting data...", FontStyle.KeepSize, false));
 		
-		refreshCanCraft();
+		costTable = new Table(VisUI.getSkin());
+		costTable.pad(5f);
+		costTable.defaults().pad(2f).align(Align.center);
+		costTable.add(makeLabel("Waiting for crafting data...", FontStyle.KeepSize, false));
 		
-		table = new ItemSelectionTable(list, getHeight()) {
+		recipeListTable = new Table(VisUI.getSkin()) {
 			@Override
-			public void setSelection(int index) {
-				super.setSelection(index);
-				CraftingScreen.this.setHighlightedRecipe(list[index].recipe);
+			protected void drawChildren(Batch batch, float parentAlpha) {
+				boolean done = false;
+				synchronized (CraftingScreen.this) {
+					if(recipes != null) {
+						done = true;
+						if(recipes.size() > 0)
+							recipes.get(selection).setSelected(true);
+						super.drawChildren(batch, parentAlpha);
+						if(recipes.size() > 0) recipes.get(selection).setSelected(false);
+					}
+				}
+				if(!done)
+					super.drawChildren(batch, parentAlpha);
 			}
 		};
-		table.addListener(new InputListener() {
+		recipeListTable.defaults().pad(1f).fillX().minSize(Item.ICON_SIZE * 3, ItemSlot.HEIGHT/2);
+		recipeListTable.pad(10f);
+		recipeListTable.add(makeLabel("Waiting for crafting data...", false));
+		
+		recipeListTable.addListener(new InputListener() {
 			@Override
-			public boolean keyDown (InputEvent event, int keycode) {
-				if(keycode == Keys.ENTER) {
-					craft(list[table.getSelection()]);
+			public boolean keyDown(InputEvent event, int keycode) {
+				if(keycode == Keys.Z || keycode == Keys.ESCAPE) {
+					ClientCore.setScreen(null);
 					return true;
 				}
+				
+				synchronized (CraftingScreen.this) {
+					if(recipes != null && recipes.size() > 0) {
+						if(keycode == Keys.ENTER) {
+							craftSelected();
+							return true;
+						}
+					}
+				}
+				
 				return false;
 			}
 		});
-		addActor(table);
 		
-		inInv.columnAlign(Align.left);
-		inInv.space(5);
-		inInv.addActor(new Label("In inventory:", GameCore.getSkin()));
-		inInv.addActor(invCount);
-		addActor(inInv);
-		
-		costs.columnAlign(Align.left);
-		costs.space(5);
-		addActor(costs);
-		
-		
-		table.setPosition(0, getHeight(), Align.topLeft);
-		table.pack();
-		
-		getRoot().addListener(new InputListener() {
+		scrollPane = new ScrollPane(recipeListTable, VisUI.getSkin()) {
 			@Override
-			public boolean keyDown (InputEvent event, int keycode) {
-				if(keycode == Keys.Z || keycode == Keys.ESCAPE)
-					ClientCore.setScreen(null);
-				return true;
+			public float getPrefHeight() {
+				return CraftingScreen.this.getHeight()/2;
 			}
-		});
+		};
 		
-		setKeyboardFocus(table);
+		// scrollPane.setHeight(getHeight()*2/3);
+		scrollPane.setScrollingDisabled(true, false);
+		scrollPane.setFadeScrollBars(false);
+		scrollPane.setScrollbarsOnTop(false);
+		
+		Table leftTable = new Table();
+		leftTable.pad(0);
+		leftTable.defaults().pad(0);
+		
+		leftTable.add(craftableTable).row();
+		leftTable.add(scrollPane).row();
+		
+		mainGroup.add(leftTable);
+		mainGroup.add(costTable).align(Align.top);
+		
+		mainGroup.pack();
+		mainGroup.background(new ColorBackground(mainGroup, tableBackground));
+		
+		mainGroup.setVisible(false);
+		Timer t = new Timer(200, e -> mainGroup.setVisible(true));
+		t.setRepeats(false);
+		t.start();
+		
+		setKeyboardFocus(recipeListTable);
+		setScrollFocus(scrollPane);
+	}
+	
+	// should only be called by the LibGDX Application thread
+	@Override
+	public synchronized void focus() {
+		super.focus();
+		if(!requested) {
+			requested = true;
+			ClientCore.getClient().send(new RecipeRequest());
+		}
+	}
+	
+	// should only be called by GameClient thread.
+	public void recipeUpdate(RecipeRequest recipeRequest) {
+		if(ClientCore.getScreen() != this)
+			return; // don't care
+		
+		synchronized (this) {
+			recipes = new ArrayList<>(recipeRequest.recipes.length);
+			recipeListTable.clearChildren();
+			for(SerialRecipe serialRecipe : recipeRequest.recipes) {
+				ItemStack result = ItemStack.deserialize(serialRecipe.result);
+				ItemStack[] costs = new ItemStack[serialRecipe.costs.length];
+				for(int i = 0; i < costs.length; i++)
+					costs[i] = ItemStack.deserialize(serialRecipe.costs[i]);
+				
+				RecipeSlot slot = new RecipeSlot(new ClientRecipe(result, costs));
+				slot.addListener(new InputListener() {
+					@Override
+					public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+						synchronized (CraftingScreen.this) {
+							selection = recipes.indexOf(slot);
+							itemChanged();
+						}
+					}
+				});
+				slot.addListener(new ClickListener() {
+					@Override
+					public void clicked(InputEvent event, float x, float y) {
+						craftSelected();
+					}
+				});
+				slot.updateCanCraft(inventoryCounts);
+				recipes.add(slot);
+				recipeListTable.add(slot).row();
+			}
+			
+			recipeListTable.pack();
+			recipeListTable.invalidateHierarchy();
+			selection = 0;
+			itemChanged();
+			refreshCraftability(recipeRequest.stockUpdate);
+			Gdx.app.postRunnable(() -> mainGroup.setVisible(true)); // if the timer hasn't yet expired by now
+		}
+	}
+	
+	private int getCount(Item item) { return inventoryCounts.getOrDefault(item.getName(), 0); }
+	private int getCount(String itemName) { return inventoryCounts.getOrDefault(itemName, 0); }
+	
+	// called after item selection changes; resets info in InfoTable
+	private void itemChanged() {
+		Gdx.app.postRunnable(() -> {
+			// I probably have to synchronize this manually since it's in a postRunnable.
+			ClientRecipe recipe = recipes.get(selection).recipe;
+			
+			craftableTable.clearChildren();
+			craftableTable.add(new ItemIcon(recipe.result.item, recipe.result.count)).row();
+			craftableTable.add(makeLabel(recipe.result.item.getName(), FontStyle.KeepSize, false)).row();
+			craftableTable.add(resultStockLabel = makeLabel("Stock: "+getCount(recipe.result.item), FontStyle.KeepSize, false)).row();
+			
+			costTable.clearChildren();
+			costTable.add(makeLabel("Stock", FontStyle.StockHeader, false));
+			costTable.add(makeLabel("Required", FontStyle.CostHeader, false));
+			costTable.row();
+			costSlots.clear();
+			for(ItemStack cost: recipe.costs) {
+				Label costLabel = makeLabel(String.valueOf(getCount(cost.item)), FontStyle.KeepSize, false);
+				costStockLabels.put(cost.item.getName(), costLabel);
+				costTable.add(costLabel);
+				
+				Color background = getCount(cost.item) >= cost.count ? craftableBackground : notCraftableBackground;
+				ItemSlot slot = new ItemSlot(true, cost.item, cost.count, background);
+				costSlots.put(cost.item.getName(), slot);
+				costTable.add(slot).align(Align.left);
+				costTable.row();
+			}
+			
+			layoutActors();
+		});
+	}
+	
+	// called after crafting an item
+	public synchronized void refreshCraftability(RecipeStockUpdate stocks) {
+		// update inventory item count
+		inventoryCounts.clear();
+		for(int i = 0; i < stocks.inventoryItemCounts.length; i++)
+			inventoryCounts.put(stocks.inventoryItemNames[i], stocks.inventoryItemCounts[i]);
+		
+		// update slot highlights
+		for(RecipeSlot slot: recipes)
+			slot.updateCanCraft(inventoryCounts);
+		
+		// update stock labels
+		ClientRecipe recipe = recipes.get(selection).recipe;
+		if(resultStockLabel != null)
+			resultStockLabel.setText("Stock: "+getCount(recipe.result.item));
+		//noinspection KeySetIterationMayUseEntrySet
+		for(String name: costSlots.keySet()) {
+			Label costStockLabel = costStockLabels.get(name);
+			costStockLabel.setText(String.valueOf(getCount(name)));
+			
+			ItemSlot slot = costSlots.get(name);
+			Color background = getCount(name) >= slot.getCount() ? craftableBackground : notCraftableBackground; 
+			slot.setBackground(new ColorBackground(slot, background));
+		}
+	}
+	
+	private synchronized void craftSelected() {
+		ClientCore.getClient().send(new CraftRequest(selection));
 	}
 	
 	@Override
-	public boolean usesWholeScreen() { return false; }
-	
-	private void craft(CraftableItem item) {
-		if(item.recipe.tryCraft(playerInv) != null)
-			refreshCanCraft();
-		
-		// tell server about the attempt
-		ClientCore.getClient().send(new CraftRequest(item.getRecipeIndex()));
+	public synchronized void draw() {
+		super.draw();
 	}
 	
-	private void setHighlightedRecipe(Recipe recipe) {
-		inInv.removeActor(invCount);
-		invCount.setItem(recipe.getResult().item);
-		invCount.setCount(playerInv.getCount(invCount.getItem()));
-		inInv.addActor(invCount);
+	@Override
+	public void act(float delta) {
+		super.act(delta);
 		
-		costs.clearChildren();
-		costs.addActor(new Label("Costs:", GameCore.getSkin()));
-		for(ItemStack cost: recipe.getCosts())
-			costs.addActor(new ItemStackSlot(true, cost.item, cost.count, null));
-		
-		inInv.invalidate();
-		inInv.pack();
-		costs.invalidate();
-		costs.pack();
-		
-		inInv.setPosition(table.getPrefWidth() + 10, getHeight() - inInv.getHeight());
-		costs.setPosition(table.getPrefWidth() + 10, getHeight() - inInv.getHeight() - 10 - costs.getHeight());
+		if(ClientCore.input.pressingKey(Keys.UP))
+			moveSelection(-1);
+		if(ClientCore.input.pressingKey(Keys.DOWN))
+			moveSelection(1);
 	}
 	
-	private void refreshCanCraft() {
-		for(CraftableItem item: list)
-			item.canCraft = item.recipe.canCraft(playerInv);
-		if(invCount.getItem() != null)
-			invCount.setCount(playerInv.getCount(invCount.getItem()));
+	private synchronized void moveSelection(int amt) {
+		if(recipes.size() == 0) return;
+		int newSel = selection + amt;
+		while(newSel < 0) newSel += recipes.size();
+		selection = newSel % recipes.size();
+		scrollPane.setSmoothScrolling(false);
+		scrollPane.scrollTo(0, recipes.get(selection).getY(), 0, ItemSlot.HEIGHT);
+		scrollPane.updateVisualScroll();
+		scrollPane.setSmoothScrolling(true);
+		itemChanged();
 	}
 	
-	private class CraftableItem extends ItemStackSlot {
+	
+	private static class ClientRecipe extends Item {
 		
-		private final Recipe recipe;
+		private final ItemStack result;
+		private final ItemStack[] costs;
 		private boolean canCraft;
-		private final int recipeIndex;
 		
-		private CraftableItem(Recipe recipe, int idx, int recipeIndex) {
-			super(idx, true, recipe.getResult().item, recipe.getResult().count);
-			this.recipe = recipe;
-			this.recipeIndex = recipeIndex;
-			canCraft = recipe.canCraft(playerInv);
+		ClientRecipe(@NotNull ItemStack result, ItemStack... costs) {
+			super(result.item.getName(), result.item.getTexture());
+			this.result = result;
+			this.costs = costs;
 		}
 		
-		@Override
-		public Color getTextColor() { return canCraft ? Color.WHITE : Color.RED; }
+		public void updateCanCraft(HashMap<String, Integer> itemCounts) {
+			boolean canCraft = true;
+			for(ItemStack cost: costs) {
+				if(itemCounts.getOrDefault(cost.item.getName(), 0) < cost.count) {
+					canCraft = false;
+					break;
+				}
+			}
+			
+			this.canCraft = canCraft;
+		}
+	}
+	
+	private static final class RecipeSlot extends ItemSlot {
 		
-		public int getRecipeIndex() { return recipeIndex; }
+		private final ClientRecipe recipe;
+		
+		RecipeSlot(ClientRecipe recipe) {
+			super(true, recipe.result.item, recipe.result.count);
+			this.recipe = recipe;
+		}
+		
+		public void updateCanCraft(HashMap<String, Integer> itemCounts) {
+			recipe.updateCanCraft(itemCounts);
+			setBackground(new ColorBackground(this, recipe.canCraft ? craftableBackground : notCraftableBackground));
+		}
 	}
 }

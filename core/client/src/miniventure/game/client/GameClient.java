@@ -1,19 +1,20 @@
 package miniventure.game.client;
 
-import javax.swing.JOptionPane;
-
 import java.io.IOException;
 import java.util.HashMap;
 
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol;
 import miniventure.game.chat.InfoMessage;
+import miniventure.game.item.CraftingScreen;
+import miniventure.game.item.InventoryScreen;
 import miniventure.game.screen.ChatScreen;
 import miniventure.game.screen.ErrorScreen;
-import miniventure.game.screen.MainMenu;
+import miniventure.game.screen.InputScreen;
+import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.util.MyUtils;
-import miniventure.game.util.ProgressLogger;
+import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.Chunk;
 import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.ClientLevel;
@@ -24,7 +25,8 @@ import miniventure.game.world.entity.ClientEntity;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.EntityRenderer;
 import miniventure.game.world.entity.EntityRenderer.DirectionalAnimationRenderer;
-import miniventure.game.world.entity.mob.ClientPlayer;
+import miniventure.game.world.entity.mob.player.ClientPlayer;
+import miniventure.game.world.entity.particle.ClientParticle;
 import miniventure.game.world.tile.ClientTile;
 
 import com.badlogic.gdx.Gdx;
@@ -53,9 +55,11 @@ public class GameClient implements GameProtocol {
 				ClientWorld world = ClientCore.getWorld();
 				ClientPlayer player = world.getMainPlayer();
 				
-				if(object instanceof WorldData) {
+				if(object instanceof Ping)
+					connection.sendTCP(object);
+				
+				if(object instanceof WorldData)
 					world.init((WorldData)object);
-				}
 				
 				if(object instanceof LevelData) {
 					System.out.println("client received level");
@@ -72,12 +76,14 @@ public class GameClient implements GameProtocol {
 					SpawnData data = (SpawnData) object;
 					world.spawnPlayer(data);
 					ClientCore.setScreen(null);
-					Music song = ClientCore.setMusicTrack(Gdx.files.internal("audio/music/game.mp3"));
-					song.setOnCompletionListener(music -> {
-						music.stop();
-						MyUtils.delay(MathUtils.random(30_000, 90_000), music::play);
-					});
-					MyUtils.delay(10_000, song::play);
+					if(ClientCore.PLAY_MUSIC) {
+						Music song = ClientCore.setMusicTrack(Gdx.files.internal("audio/music/game.mp3"));
+						song.setOnCompletionListener(music -> {
+							music.stop();
+							MyUtils.delay(MathUtils.random(30_000, 90_000), () -> MyUtils.tryPlayMusic(music));
+						});
+						MyUtils.delay(10_000, () -> MyUtils.tryPlayMusic(song));
+					}
 				}
 				
 				if(object instanceof TileUpdate) {
@@ -102,6 +108,16 @@ public class GameClient implements GameProtocol {
 					if(target instanceof ClientEntity)
 						((ClientEntity)target).hurt(source, hurt.power);
 				}
+				
+				forPacket(object, ParticleAddition.class, addition -> {
+					ClientLevel level = world.getLevel(addition.positionUpdate.levelDepth);
+					if(level == null || (player != null && !level.equals(player.getLevel()))) return;
+					
+					ClientParticle e = ClientParticle.get(addition.particleData);
+					PositionUpdate newPos = addition.positionUpdate;
+					Vector2 size = e.getSize();
+					e.moveTo(level, newPos.x - size.x/2, newPos.y - size.y/2, newPos.z); // center entity
+				});
 				
 				if(object instanceof EntityAddition) {
 					//System.out.println("client received entity addition");
@@ -179,7 +195,7 @@ public class GameClient implements GameProtocol {
 					
 					HashMap<Integer, Entity> loaded = new HashMap<>();
 					for(Entity e: level.getEntities())
-						if(e != player)
+						if(e != player && !(e instanceof ClientParticle))
 							loaded.put(e.getId(), e);
 					
 					for(int i = 0; i < list.ids.length; i++) {
@@ -209,10 +225,35 @@ public class GameClient implements GameProtocol {
 						e.remove();
 				});
 				
+				forPacket(object, HotbarUpdate.class, update -> {
+					if(player == null || ClientCore.getScreen() instanceof InventoryScreen)
+						return;
+					
+					player.getHands().updateItems(update.itemStacks, update.fillPercent);
+				});
+				
 				forPacket(object, InventoryUpdate.class, newInv -> {
-					if(player == null) return;
-					player.getInventory().loadItems(newInv.inventory);
-					player.getHands().loadItems(newInv.hotbar);
+					MenuScreen screen = ClientCore.getScreen();
+					if(screen instanceof InventoryScreen)
+						((InventoryScreen)screen).inventoryUpdate(newInv);
+				});
+				
+				forPacket(object, InventoryAddition.class, addition -> {
+					MenuScreen screen = ClientCore.getScreen();
+					if(screen instanceof InventoryScreen)
+						((InventoryScreen)screen).itemAdded(addition);
+				});
+				
+				forPacket(object, RecipeRequest.class, req -> {
+					MenuScreen screen = ClientCore.getScreen();
+					if(screen instanceof CraftingScreen)
+						((CraftingScreen)screen).recipeUpdate(req);
+				});
+				
+				forPacket(object, RecipeStockUpdate.class, stockUpdate -> {
+					MenuScreen screen = ClientCore.getScreen();
+					if(screen instanceof CraftingScreen)
+						((CraftingScreen)screen).refreshCraftability(stockUpdate);
 				});
 				
 				forPacket(object, PositionUpdate.class, newPos -> {
@@ -239,6 +280,9 @@ public class GameClient implements GameProtocol {
 				forPacket(object, LoginFailure.class, failure -> Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen(failure.message))));
 				
 				forPacket(object, SoundRequest.class, sound -> ClientCore.playSound(sound.sound));
+				
+				if(object == DatalessRequest.Clear_Console)
+					ClientCore.clearMessages();
 			}
 			
 			@Override
@@ -249,6 +293,7 @@ public class GameClient implements GameProtocol {
 		});//);
 		
 		new Thread(client) {
+			@Override
 			public void start() {
 				client.start();
 				client.getUpdateThread().setUncaughtExceptionHandler((t, e) -> {
@@ -263,9 +308,9 @@ public class GameClient implements GameProtocol {
 	public void send(Object obj) { client.sendTCP(obj); }
 	public void addListener(Listener listener) { client.addListener(listener); }
 	
-	public boolean connectToServer(@NotNull ProgressLogger logger, String host) { return connectToServer(logger, host, GameProtocol.PORT); }
-	public boolean connectToServer(@NotNull ProgressLogger logger, String host, int port) {
-		logger.pushMessage("connecting to server at "+host+":"+port+"...");
+	public boolean connectToServer(@NotNull LoadingScreen logger, String host, ValueFunction<Boolean> callback) { return connectToServer(logger, host, GameProtocol.PORT, callback); }
+	public boolean connectToServer(@NotNull LoadingScreen logger, String host, int port, ValueFunction<Boolean> callback) {
+		logger.pushMessage("connecting to server at "+host+':'+port+"...");
 		
 		try {
 			client.connect(5000, host, port);
@@ -273,23 +318,25 @@ public class GameClient implements GameProtocol {
 			System.err.println("(caught IOException:)");
 			e.printStackTrace();
 			// error screen
-			Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen("failed to connect to server.")));
+			Gdx.app.postRunnable(() -> {
+				ClientCore.setScreen(new ErrorScreen("failed to connect to server."));
+				callback.act(false);
+			});
 			return false;
 		}
 		
-		logger.editMessage("logging in...");
-		
-		new Thread(() -> {
-			username = JOptionPane.showInputDialog("Specify username:", username);
-			if(username == null) {
-				client.close();
-				Gdx.app.postRunnable(() -> ClientCore.setScreen(new MainMenu()));
-			}
-			
+		Gdx.app.postRunnable(() -> ClientCore.setScreen(new InputScreen("Specify username:", username -> {
+			this.username = username;
 			send(new Login(username, GameCore.VERSION));
 			
 			logger.editMessage("Loading world from server...");
-		}).start();
+			ClientCore.setScreen(logger);
+			callback.act(true);
+		}, () -> {
+			disconnect();
+			ClientCore.backToParentScreen();
+			callback.act(false);
+		})));
 		
 		return true;
 	}

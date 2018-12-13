@@ -1,41 +1,48 @@
 package miniventure.game.screen;
 
 import miniventure.game.client.ClientCore;
+import miniventure.game.screen.util.BackgroundInheritor;
 
-import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.Array;
-import com.kotcrab.vis.ui.widget.VisLabel;
-import com.kotcrab.vis.ui.widget.VisTextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
-public class InfoScreen extends MenuScreen {
+public class InfoScreen extends BackgroundInheritor {
 	
-	private InfoScreen(String... text) {
-		Array<String> lines = new Array<>(text);
-		//"(press b to show/hide chunk boundaries)",
-		VisLabel instructions = new VisLabel(String.join(System.lineSeparator(), lines.items));
-		instructions.setWrap(true);
-		instructions.setPosition(getWidth()/2, getHeight() - instructions.getPrefHeight() - 10, Align.center);
-		addActor(instructions);
+	private InfoScreen(String... text) { this(false, text); }
+	private InfoScreen(boolean addButton, String... text) {
+		super(new ScreenViewport());
 		
-		VisTextButton returnBtn = makeButton("Back to Main Menu", ClientCore::backToParentScreen);
-		returnBtn.setPosition(getWidth()/2, returnBtn.getPrefHeight()*3/2, Align.center);
-		addActor(returnBtn);
+		VerticalGroup vGroup = useVGroup(30);
+		
+		vGroup.addActor(makeLabel(String.join("\n", text)));
+		
+		if(addButton)
+			vGroup.addActor(makeButton("Start Game", () -> ClientCore.getWorld().createWorld(0, 0)));
+		
+		vGroup.addActor(makeButton("Back to Main Menu", ClientCore::backToParentScreen));
 	}
 	
-	
 	public static class InstructionsScreen extends InfoScreen {
-		public InstructionsScreen() {
-			super("Use mouse or arrow keys to move around.",
-				"C to attack, V to interact.",
+		public InstructionsScreen() { this(false); }
+		public InstructionsScreen(boolean addButton) {
+			super(addButton, "Use mouse or arrow keys to move around.",
+				"C to attack, V to interact and do other things.",
 				"E to open your inventory, Z to craft items.",
-				"Q to drop an item from your inventory/hotbar. Use Shift-Q to drop all items of that type.",
-				"1,2,3 keys (or click) to select hotbar items.",
-				"With the inventory open, click or press enter on an inventory item to swap it with the selected hotbar item.",
+				"Q to drop an item from your inventory/hotbar. Use Shift-Q to drop all items in the stack.",
+				"1-5 keys to select hotbar items.",
+				"Inventory Screen: to put an item in your hotbar, press the 1-5 key matching the hotbar slot,",
+				"    with the inventory item you want to be there selected.",
+				"Crafting Screen: Click or press enter to craft the selected item.",
 				"+ and - keys to zoom in and out.",
 				"Press \"t\" to chat with other players, and \"/\" to use commands.",
 				"(Hint: use the up key to repeat messages, and tab to autocomplete command names.)",
 				"",
 				"Toggle Debug display: Shift-D");
+		}
+		
+		@Override
+		public void focus() {
+			ClientCore.viewedInstructions = true;
 		}
 	}
 	
@@ -43,8 +50,9 @@ public class InfoScreen extends MenuScreen {
 		public CreditsScreen() {
 			super(
 				"Lead Developer: Chris J",
-				"Music made by TrstN",
-				"Sprites made by RiverOaken and MadDest"
+				/*"Music made by TrstN",*/
+				"Sprites made by RiverOaken and Ross, with contributions by Theta and MadDest",
+				"Sound effects made by Chris J"
 			);
 		}
 	}

@@ -2,8 +2,8 @@ package miniventure.game.chat.command;
 
 import miniventure.game.chat.MessageBuilder;
 import miniventure.game.server.ServerCore;
-import miniventure.game.util.function.MonoValueFunction;
-import miniventure.game.world.entity.mob.ServerPlayer;
+import miniventure.game.util.function.MapFunction;
+import miniventure.game.world.entity.mob.player.ServerPlayer;
 
 public class CommandUsageForm {
 	
@@ -14,7 +14,7 @@ public class CommandUsageForm {
 	final boolean restricted;
 	final String usage;
 	final String details;
-	final MonoValueFunction<ServerPlayer, Boolean> executorCheck;
+	final MapFunction<ServerPlayer, Boolean> executorCheck;
 	private final Argument[] args;
 	private final ExecutionBehavior executionBehavior;
 	
@@ -22,13 +22,17 @@ public class CommandUsageForm {
 	CommandUsageForm(boolean restricted, String usage, String details, ExecutionBehavior executionBehavior, Argument... args) {
 		this(restricted, usage, details, executor -> true, executionBehavior, args);
 	}
-	CommandUsageForm(boolean restricted, String usage, String details, MonoValueFunction<ServerPlayer, Boolean> executorCheck, ExecutionBehavior executionBehavior, Argument... args) {
+	CommandUsageForm(boolean restricted, String usage, String details, MapFunction<ServerPlayer, Boolean> executorCheck, ExecutionBehavior executionBehavior, Argument... args) {
 		this.restricted = restricted;
 		this.usage = usage;
 		this.details = details;
-		this.executorCheck = executorCheck;
 		this.args = args;
 		this.executionBehavior = executionBehavior;
+		
+		if(restricted)
+			this.executorCheck = executor -> executorCheck.get(executor) && ServerCore.getServer().isAdmin(executor);
+		else
+			this.executorCheck = executorCheck;
 	}
 	
 	public boolean execute(ServerPlayer executor, String[] args, MessageBuilder out, MessageBuilder err) {

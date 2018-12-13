@@ -5,21 +5,18 @@ import java.util.*;
 import miniventure.game.GameProtocol.EntityAddition;
 import miniventure.game.GameProtocol.EntityRemoval;
 import miniventure.game.GameProtocol.TileUpdate;
-import miniventure.game.item.Item;
+import miniventure.game.item.ServerItem;
 import miniventure.game.server.ServerCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.AiType;
-import miniventure.game.world.entity.mob.MobAi;
-import miniventure.game.world.entity.mob.Player;
 import miniventure.game.world.entity.mob.ServerMob;
 import miniventure.game.world.entity.particle.ItemEntity;
 import miniventure.game.world.levelgen.LevelGenerator;
 import miniventure.game.world.tile.ServerTile;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.TileTypeEnum;
 
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -60,9 +57,6 @@ public class ServerLevel extends Level {
 				ServerCore.getServer().broadcast(new EntityRemoval(entity), this);
 		}
 	}
-	
-	@Override
-	public void render(Rectangle renderSpace, SpriteBatch batch, float delta, Vector2 posOffset) {}
 	
 	public void onTileUpdate(ServerTile tile) {
 		ServerCore.getServer().broadcast(new TileUpdate(tile), this);
@@ -137,7 +131,7 @@ public class ServerLevel extends Level {
 		
 		// go through and update all the tiles that need it; if it specifies a delay until next update, add it to the update queue.
 		for(Tile tile: tilesToUpdate) {
-			float interval = tile.update();
+			float interval = ((ServerTile)tile).update();
 			if(interval > 0)
 				tileUpdateQueue.put(tile, interval);
 		}
@@ -147,19 +141,19 @@ public class ServerLevel extends Level {
 		updateEntities(entities, delta);
 		
 		if(entities.length < getMobCap() && MathUtils.randomBoolean(0.01f))
-			spawnMob(new MobAi(AiType.values[MathUtils.random(AiType.values.length-1)]));
+			spawnMob(AiType.values[MathUtils.random(AiType.values.length-1)].makeMob());
 	}
 	
 	public void dropItems(@NotNull ItemDrop drop, @NotNull WorldObject source, @Nullable WorldObject target) {
 		dropItems(drop, source.getCenter(), target == null ? null : target.getCenter());
 	}
 	public void dropItems(@NotNull ItemDrop drop, Vector2 dropPos, @Nullable Vector2 targetPos) {
-		for(Item item: drop.getDroppedItems())
+		for(ServerItem item: drop.getDroppedItems())
 			dropItem(item, dropPos, targetPos);
 	}
 	
-	public void dropItem(@NotNull Item item, @NotNull Vector2 dropPos, @Nullable Vector2 targetPos) { dropItem(item, false, dropPos, targetPos); }
-	public void dropItem(@NotNull Item item, boolean delayPickup, @NotNull Vector2 dropPos, @Nullable Vector2 targetPos) {
+	public void dropItem(@NotNull ServerItem item, @NotNull Vector2 dropPos, @Nullable Vector2 targetPos) { dropItem(item, false, dropPos, targetPos); }
+	public void dropItem(@NotNull ServerItem item, boolean delayPickup, @NotNull Vector2 dropPos, @Nullable Vector2 targetPos) {
 		
 		/* this drops the itemEntity at the given coordinates, with the given direction (random if null).
 		 	However, if the given coordinates reside within a solid tile, the adjacent tiles are checked.
@@ -179,12 +173,12 @@ public class ServerLevel extends Level {
 			return;
 		}
 		
-		if(!closest.isPermeableBy(ie)) {
+		if(!ie.canPermeate(closest)) {
 			// we need to look around for a tile that the item *can* be placed on.
 			HashSet<Tile> adjacent = closest.getAdjacentTiles(true);
 			Boundable.sortByDistance(new Array<>(adjacent.toArray(new Tile[adjacent.size()])), targetPos == null ? dropPos : targetPos);
 			for(Tile adj: adjacent) {
-				if(adj.isPermeableBy(ie)) {
+				if(ie.canPermeate(adj)) {
 					closest = adj;
 					break;
 				}
@@ -210,17 +204,17 @@ public class ServerLevel extends Level {
 	}
 	
 	
-	private void spawnMob(ServerMob mob, Tile[] tiles) {
+	private void spawnMob(ServerMob mob, ServerTile[] tiles) {
 		if(tiles.length == 0) throw new IllegalArgumentException("Tile array for spawning mobs must have at least one tile in it. (tried to spawn mob "+mob+")");
 		
 		if(!mob.maySpawn()) return;
 		
-		Tile spawnTile;
+		ServerTile spawnTile;
 		if(tiles.length == 1)
 			spawnTile = tiles[0];
 		else {
 			do spawnTile = tiles[MathUtils.random(tiles.length - 1)];
-			while (spawnTile == null || !mob.maySpawn(spawnTile.getType().getEnumType()));
+			while (spawnTile == null || !mob.maySpawn(spawnTile.getType().getTypeEnum()));
 		}
 		
 		mob.moveTo(spawnTile);
@@ -255,7 +249,7 @@ public class ServerLevel extends Level {
 					TileTypeEnum[] types = levelGenerator.generateTile(x, y);
 					type = types[types.length-1];
 				} else
-					type = tile.getType().getEnumType();
+					type = tile.getType().getTypeEnum();
 			} while(!mob.maySpawn(type));
 			
 			loadChunk(Chunk.getCoords(x, y));

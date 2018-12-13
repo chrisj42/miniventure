@@ -4,9 +4,7 @@
         <key>fileFormatVersion</key>
         <int>4</int>
         <key>texturePackerVersion</key>
-        <string>4.6.3</string>
-        <key>fileName</key>
-        <string>/home/chris/Documents/minicraft/miniventure/sprites/icon_spritesheet.tps</string>
+        <string>4.10.0</string>
         <key>autoSDSettings</key>
         <array>
             <struct type="AutoSDSettings">
@@ -58,7 +56,7 @@
         <key>jxrCompressionLevel</key>
         <uint>0</uint>
         <key>ditherType</key>
-        <enum type="SettingsBase::DitherType">NearestNeighbour</enum>
+        <enum type="SettingsBase::DitherType">PngQuantLow</enum>
         <key>backgroundColor</key>
         <uint>0</uint>
         <key>libGdx</key>
@@ -84,7 +82,7 @@
         <key>atfFormats</key>
         <string></string>
         <key>textureFormat</key>
-        <enum type="SettingsBase::TextureFormat">png</enum>
+        <enum type="SettingsBase::TextureFormat">png8</enum>
         <key>borderPadding</key>
         <uint>1</uint>
         <key>maxTextureSize</key>
@@ -134,7 +132,7 @@
             <key>data</key>
             <struct type="DataFile">
                 <key>name</key>
-                <filename>../core/game/assets/sprites/icons.txt</filename>
+                <filename>../core/common/assets/sprites/icons.txt</filename>
             </struct>
         </map>
         <key>multiPack</key>
@@ -183,7 +181,6 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
-            <key type="filename">icon-sprites/apple.png</key>
             <key type="filename">icon-sprites/blank.png</key>
             <key type="filename">icon-sprites/tile-frame.png</key>
             <key type="filename">icon-sprites/white.png</key>
@@ -227,20 +224,6 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">icon-sprites/gem-sword.png</key>
-            <key type="filename">icon-sprites/log.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>4,4,8,8</rect>
-                <key>scale9Paddings</key>
-                <rect>4,4,8,8</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
             <key type="filename">icon-sprites/heart-outline.png</key>
             <key type="filename">icon-sprites/heart.png</key>
             <struct type="IndividualSpriteSettings">
@@ -252,6 +235,61 @@
                 <rect>3,3,6,6</rect>
                 <key>scale9Paddings</key>
                 <rect>3,3,6,6</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">icon-sprites/items/coal.png</key>
+            <key type="filename">icon-sprites/items/cotton.png</key>
+            <key type="filename">icon-sprites/items/dirt.png</key>
+            <key type="filename">icon-sprites/items/fabric.png</key>
+            <key type="filename">icon-sprites/items/flint.png</key>
+            <key type="filename">icon-sprites/items/food/apple.png</key>
+            <key type="filename">icon-sprites/items/food/cactus_fruit.png</key>
+            <key type="filename">icon-sprites/items/food/cherry.png</key>
+            <key type="filename">icon-sprites/items/food/cooked_bacon.png</key>
+            <key type="filename">icon-sprites/items/food/cooked_meat.png</key>
+            <key type="filename">icon-sprites/items/food/gooseberry.png</key>
+            <key type="filename">icon-sprites/items/food/pear.png</key>
+            <key type="filename">icon-sprites/items/food/raw_bacon.png</key>
+            <key type="filename">icon-sprites/items/food/raw_meat.png</key>
+            <key type="filename">icon-sprites/items/food/snow_berries.png</key>
+            <key type="filename">icon-sprites/items/food/strawberry.png</key>
+            <key type="filename">icon-sprites/items/iron.png</key>
+            <key type="filename">icon-sprites/items/log.png</key>
+            <key type="filename">icon-sprites/items/ruby.png</key>
+            <key type="filename">icon-sprites/items/sand.png</key>
+            <key type="filename">icon-sprites/items/snow.png</key>
+            <key type="filename">icon-sprites/items/stone.png</key>
+            <key type="filename">icon-sprites/items/tools/flint_axe.png</key>
+            <key type="filename">icon-sprites/items/tools/flint_pickaxe.png</key>
+            <key type="filename">icon-sprites/items/tools/flint_shovel.png</key>
+            <key type="filename">icon-sprites/items/tools/flint_sword.png</key>
+            <key type="filename">icon-sprites/items/tools/iron_axe.png</key>
+            <key type="filename">icon-sprites/items/tools/iron_pickaxe.png</key>
+            <key type="filename">icon-sprites/items/tools/iron_shovel.png</key>
+            <key type="filename">icon-sprites/items/tools/iron_sword.png</key>
+            <key type="filename">icon-sprites/items/tools/ruby_axe.png</key>
+            <key type="filename">icon-sprites/items/tools/ruby_pickaxe.png</key>
+            <key type="filename">icon-sprites/items/tools/ruby_shovel.png</key>
+            <key type="filename">icon-sprites/items/tools/ruby_sword.png</key>
+            <key type="filename">icon-sprites/items/tools/stone_axe.png</key>
+            <key type="filename">icon-sprites/items/tools/stone_pickaxe.png</key>
+            <key type="filename">icon-sprites/items/tools/stone_shovel.png</key>
+            <key type="filename">icon-sprites/items/tools/stone_sword.png</key>
+            <key type="filename">icon-sprites/items/tools/tungsten_axe.png</key>
+            <key type="filename">icon-sprites/items/tools/tungsten_pickaxe.png</key>
+            <key type="filename">icon-sprites/items/tools/tungsten_shovel.png</key>
+            <key type="filename">icon-sprites/items/tools/tungsten_sword.png</key>
+            <key type="filename">icon-sprites/items/tungsten.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,4,8,8</rect>
+                <key>scale9Paddings</key>
+                <rect>4,4,8,8</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>

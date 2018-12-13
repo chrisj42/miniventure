@@ -1,25 +1,26 @@
 package miniventure.game.world.tile;
 
+import miniventure.game.util.customenum.SerialMap;
 import miniventure.game.world.ClientLevel;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
-import miniventure.game.world.tile.data.DataMap;
 
 import org.jetbrains.annotations.NotNull;
 
 public class ClientTile extends RenderTile {
 	
-	@NotNull private final ClientLevel level;
-	
-	public ClientTile(@NotNull ClientLevel level, int x, int y, @NotNull TileTypeEnum[] types, DataMap[] data) {
+	public ClientTile(@NotNull ClientLevel level, int x, int y, @NotNull TileTypeEnum[] types, @NotNull SerialMap[] data) {
 		super(level, x, y, types, data);
-		this.level = level;
 	}
 	
 	@NotNull @Override
-	public ClientLevel getLevel() { return level; }
+	public ClientLevel getLevel() { return (ClientLevel) super.getLevel(); }
 	
-	@Override public boolean addTile(@NotNull TileType newType) { return false; }
-	@Override boolean breakTile() { return false; }
-	@Override boolean breakTile(boolean checkForExitAnim) { return false; }
-	@Override boolean replaceTile(@NotNull TileType newType) { return false; }
+	public void apply(TileData tileData) {
+		TileTypeEnum[] types = tileData.getTypes();
+		SerialMap[] maps = tileData.getDataMaps();
+		
+		setTileStack(makeStack(types));
+		dataMaps.clear();
+		for(int i = 0; i < tileData.data.length; i++)
+			dataMaps.put(types[i], maps[i]);
+	}
 }

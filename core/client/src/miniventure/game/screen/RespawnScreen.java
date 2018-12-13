@@ -1,25 +1,43 @@
 package miniventure.game.screen;
 
 import miniventure.game.client.ClientCore;
+import miniventure.game.client.LevelViewport;
+import miniventure.game.screen.util.BackgroundProvider;
+import miniventure.game.world.ClientLevel;
 
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.kotcrab.vis.ui.widget.VisLabel;
-import com.kotcrab.vis.ui.widget.VisTextButton;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
-public class RespawnScreen extends MenuScreen {
+public class RespawnScreen extends BackgroundProvider {
 	
-	public RespawnScreen() {
-		super();
-		addActor(vGroup);
+	private final Vector2 deathPos;
+	private final Color lighting;
+	private final ClientLevel level;
+	private final LevelViewport backgroundRenderer;
+	
+	public RespawnScreen(Vector2 deathPos, Color lighting, ClientLevel level, LevelViewport backgroundRenderer) {
+		super(false, true, new ScreenViewport()); // level renderer clears it
+		this.deathPos = deathPos;
+		this.lighting = lighting;
+		this.level = level;
+		this.backgroundRenderer = backgroundRenderer;
 		
-		vGroup.addActor(new VisLabel("You died!"));
+		VerticalGroup vGroup = useVGroup(20);
 		
-		vGroup.addActor(new VisTextButton("Respawn", new ChangeListener() {
-			@Override
-			public void changed(ChangeEvent event, Actor actor) {
-				ClientCore.getWorld().respawnPlayer();
-			}
-		}));
+		vGroup.addActor(makeLabel("You died!"));
+		vGroup.addActor(makeButton("Respawn", () -> ClientCore.getWorld().respawnPlayer()));
+	}
+	
+	@Override
+	public void renderBackground() {
+		if(level != null)
+			backgroundRenderer.render(deathPos, lighting, level);
+	}
+	
+	@Override
+	public void resizeBackground(int width, int height) {
+		backgroundRenderer.resize(width, height);
 	}
 }

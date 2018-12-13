@@ -14,4 +14,23 @@
 	v4:
 		* Changed level generation drastically
 	v5:
-			
+		+ Added/fixed/finalized inventory screen
+		- Removed crafting screen temporarily
+	v6:
+		+ Added crafting screen
+		+ Added recipes for all tool variants
+		* Forced player to view instructions
+		* Fixed ores to actually appear in the map (soon to be obsolete in 1.6/1.7)
+		* Removed excessive stamina drain from tools
+		* Improved a number of tile and item sprites
+	v7:
+		* Fixed a whole bunch of bugs in a whole bunch of areas
+		* Updated interaction bounds
+		- Decreased stamina
+		- Decreased hurt cooldown
+		* Made all prompt menus screens instead of popups
+		- Decreased chat message display time
+		+ Made Chat screen scroll to display more messages
+		* Made items in your inventory but not hotbar stay out of your hotbar if you 
+pickup another item of the same type
+		+ Added command to clear chat
