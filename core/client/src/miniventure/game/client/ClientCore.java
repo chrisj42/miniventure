@@ -325,8 +325,10 @@ public class ClientCore extends ApplicationAdapter {
 		// apply font size modification
 		// the process should maintain the ratios: orig font size / min default screen = new font size / min current screen
 		// aka, new font size = orig font size * min current size / min default size
-		if(resize)
+		if(resize) {
 			params.size = params.size * minCurrent / minDefault;
+			params.borderWidth = params.borderWidth * minCurrent / minDefault;
+		}
 		
 		// System.out.println("min default="+minDefault+" minCurrent="+minCurrent+"; size = "+params.size);
 		
