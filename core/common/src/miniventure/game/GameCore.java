@@ -27,7 +27,7 @@ import org.jetbrains.annotations.NotNull;
 /** @noinspection StaticNonFinalField*/
 public class GameCore {
 	
-	public static final Version VERSION = new Version("1.5");
+	public static final Version VERSION = new Version("1.6.1.dev");
 	
 	public static final float MAX_DELTA = 0.25f; // the maximum time that the game will clamp getDeltaTime to, to prevent huge jumps after a lag spike.
 	
