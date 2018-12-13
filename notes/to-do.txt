@@ -4,4 +4,11 @@ quick reminders / in prog stuff:
  
  - when menu system is done, add a volume option
 
+
 - give item entities shadows like the water thing
+
+- cut some decimals off of the ping time display
+
+- display a message when a player dies (a generic one)
+
+- reconsider rendering rules when player is in a hole; currently clips adjacent tiles. Check if the same happens with water.
