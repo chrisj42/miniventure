@@ -55,6 +55,13 @@ public class ClientCore extends ApplicationAdapter {
 	
 	public static boolean viewedInstructions = false;
 	
+	// debug flags
+	static boolean debugInfo = false;
+	static boolean debugChunk = false;
+	static boolean debugTile = false;
+	static boolean debugInteract = false;
+	public static boolean debugBounds = false;
+	
 	private static Music song;
 	private static final HashMap<String, Sound> soundEffects = new HashMap<>();
 	

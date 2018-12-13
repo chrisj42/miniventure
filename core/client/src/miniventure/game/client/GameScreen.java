@@ -12,7 +12,6 @@ import miniventure.game.world.ClientLevel;
 import miniventure.game.world.Level;
 import miniventure.game.world.TimeOfDay;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
-import miniventure.game.world.tile.ClientTile;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.Gdx;
@@ -104,20 +103,21 @@ public class GameScreen {
 		
 		levelView.handleInput();
 		
-		if(shift && Gdx.input.isKeyJustPressed(Keys.D) && !Gdx.input.isKeyPressed(Keys.TAB))
-			showDebug = !showDebug;
-		
-		if(shift && ClientCore.input.pressingKey(Keys.T)) {
-			//ClientCore.getClient().send(DatalessRequest.Tile); // debug
-			ClientPlayer p = ClientCore.getWorld().getMainPlayer();
-			try {
-				//noinspection ConstantConditions
-				ClientTile t = (ClientTile) p.getLevel().getClosestTile(p.getCenter());
-				t.updateSprites();
-				for(Tile o: t.getAdjacentTiles(true))
-					((ClientTile)o).updateSprites();
-			} catch(NullPointerException ignored) {}
+		if(shift) {
+			if(Gdx.input.isKeyJustPressed(Keys.D) && !Gdx.input.isKeyPressed(Keys.TAB))
+				ClientCore.debugInfo = !ClientCore.debugInfo;
+			
+			if(Gdx.input.isKeyJustPressed(Keys.T))
+				ClientCore.debugTile = !ClientCore.debugTile;
+			
+			if(Gdx.input.isKeyJustPressed(Keys.B))
+				ClientCore.debugBounds = !ClientCore.debugBounds;
+			
+			if(Gdx.input.isKeyJustPressed(Keys.I))
+				ClientCore.debugInteract = !ClientCore.debugInteract;
 		}
+		else if(Gdx.input.isKeyJustPressed(Keys.B))
+			ClientCore.debugChunk = !ClientCore.debugChunk;
 		
 		if(!ClientCore.hasMenu()) {
 			if(!shift && ClientCore.input.pressingKey(Keys.T))
@@ -176,7 +176,7 @@ public class GameScreen {
 		
 		batch.setProjectionMatrix(noScaleCamera.combined);
 		
-		if(!showDebug) {
+		if(!ClientCore.debugInfo) {
 			if(GameCore.debug) {
 				BitmapFont f = ClientCore.getFont();
 				f.setColor(Color.ORANGE);

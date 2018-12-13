@@ -65,7 +65,7 @@ public class ClientEntity extends Entity {
 		}
 		getRenderer().render((x-posOffset.x) * Tile.SIZE, (y+z - posOffset.y) * Tile.SIZE, batch, drawableHeight);
 		
-		if(GameCore.debug && !(this instanceof ClientParticle)) {
+		if(ClientCore.debugBounds && !(this instanceof ClientParticle)) {
 			Rectangle rect = getBounds();
 			rect.x = (rect.x - posOffset.x) * Tile.SIZE;
 			rect.y = (rect.y - posOffset.y) * Tile.SIZE;
