@@ -137,7 +137,7 @@ public class MapPanel extends JPanel implements Runnable {
 	private void genTile(int x, int y) {
 		if(!mapsValid) return;
 		TileTypeEnum type = generator.getTileType(x, y);
-		tiles.put(new Point(x, y), type.color);
+		// tiles.put(new Point(x, y), type.color); // fixme separate this module and specify tile colors
 	}
 	
 	@Override

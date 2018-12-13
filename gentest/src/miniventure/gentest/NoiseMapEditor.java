@@ -303,7 +303,7 @@ public class NoiseMapEditor extends MyPanel implements NamedObject, Scrollable {
 				}
 			}
 			else {
-				g.setColor(regions[i].getTileType().color);
+				// g.setColor(regions[i].getTileType().color); // fixme separate this module and specify tile colors
 				g.fillRect(xOff, 0, width, barHeight);
 				if(drawSeparators && width > 1) {
 					g.drawRect(lastOff, 0, width+(xOff-lastOff), barHeight);
