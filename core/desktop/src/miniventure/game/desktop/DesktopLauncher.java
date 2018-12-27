@@ -30,7 +30,7 @@ public class DesktopLauncher {
 		} else {
 			Thread.setDefaultUncaughtExceptionHandler(ClientCore.exceptionHandler);
 			LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-			config.title = "Miniventure " + GameCore.VERSION;
+			config.title = "Miniventure - " + GameCore.VERSION;
 			config.width = ClientCore.DEFAULT_SCREEN_WIDTH;
 			config.height = ClientCore.DEFAULT_SCREEN_HEIGHT;
 			new LwjglApplication(new ClientCore(new ServerManager() {

@@ -46,7 +46,7 @@ public class MainMenu extends BackgroundProvider implements ParentScreen {
 		table = useTable();
 		
 		addLabel("Welcome to Miniventure!", 20);
-		addLabel("You are playing version " + GameCore.VERSION, 25);
+		addLabel("You are playing " + GameCore.VERSION.toString().replace("The","the"), 25);
 		
 		VisLabel updateLabel = addLabel("Checking for higher versions...", 45);
 		setVersionUpdateLabel(updateLabel);
@@ -140,7 +140,7 @@ public class MainMenu extends BackgroundProvider implements ParentScreen {
 			// add a message saying you have the latest version, or a hyperlink message to the newest jar file.
 			VersionInfo latestVersion = GameCore.getLatestVersion();
 			if(latestVersion.version.compareTo(GameCore.VERSION) > 0) { // link new version
-				MyLinkLabel linkLabel = new MyLinkLabel("Miniventure " + latestVersion.releaseName + " Now Available! Click here to download.", latestVersion.assetUrl);
+				MyLinkLabel linkLabel = new MyLinkLabel(latestVersion.releaseName + " Now Available! Click here to download.", latestVersion.assetUrl);
 				deregisterLabels(label);
 				table.getCell(label).setActor(linkLabel);
 				registerLabel(FontStyle.OnlyResize, linkLabel);

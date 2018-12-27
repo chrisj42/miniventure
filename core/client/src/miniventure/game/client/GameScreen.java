@@ -192,7 +192,7 @@ public class GameScreen {
 		if(GameCore.debug)
 			debugInfo.add("Debug Mode ENABLED");
 		
-		debugInfo.add("Version " + GameCore.VERSION);
+		debugInfo.add("Version: " + GameCore.VERSION);
 		
 		// player coordinates, for debug
 		Rectangle playerBounds = mainPlayer.getBounds();
