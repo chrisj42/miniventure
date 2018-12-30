@@ -111,6 +111,8 @@ public final class MyUtils {
 		if(val.compareTo(max) > 0) return max;
 		return val;
 	}
+	public static int clamp(int val, int min, int max) { return clamp((Integer)val, (Integer)min, (Integer)max); }
+	public static float clamp(float val, float min, float max) { return clamp((Float)val, (Float)min, (Float)max); }
 	
 	public static void drawRect(Rectangle rect, int thickness, Color c, Batch batch) {
 		drawRect(rect.x, rect.y, rect.width, rect.height, thickness, c, batch);

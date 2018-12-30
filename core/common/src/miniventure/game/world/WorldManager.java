@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import miniventure.game.util.ArrayUtils;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.tile.TileType;
 import miniventure.game.world.tile.TileTypeEnum;
@@ -13,6 +14,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * this class contains all the levels in the game, and generally manages world-level data.
@@ -20,12 +22,13 @@ import org.jetbrains.annotations.NotNull;
 public abstract class WorldManager {
 	
 	private static final int INITIAL_ENTITY_BUFFER = 128;
+	private static final int MAX_LEVEL_COUNT = 20;
 	
 	protected float gameTime, daylightOffset;
 	private final HashMap<Integer, Entity> entityIDMap = new HashMap<>(INITIAL_ENTITY_BUFFER);
 	
-	private final HashMap<Integer, Level> levels = new HashMap<>(INITIAL_ENTITY_BUFFER);
-	private final HashMap<Level, Set<Entity>> levelEntities = new HashMap<>(4);
+	private final HashMap<Integer, Level> loadedLevels = new HashMap<>(MAX_LEVEL_COUNT);
+	private final HashMap<Level, Set<Entity>> levelEntities = new HashMap<>(MAX_LEVEL_COUNT);
 	private final HashMap<Entity, Level> entityLevels = new HashMap<>(INITIAL_ENTITY_BUFFER);
 	
 	@FunctionalInterface
@@ -90,25 +93,45 @@ public abstract class WorldManager {
 		}
 	}
 	
-	public int getLevelCount() { return levelEntities.size(); }
 	public int getEntityCount(Level level) {
 		return getFromEntitySet(level, Set::size);
 	}
 	
 	protected Entity[] getEntities(Level level) {
-		return getFromEntitySet(level, set -> set.toArray(new Entity[set.size()]));
+		return getFromEntitySet(level, set -> set.toArray(new Entity[0]));
 	}
+	
+	protected boolean isLevelLoaded(int levelId) { return loadedLevels.containsKey(levelId); }
+	@Nullable protected Level getLoadedLevel(int levelId) { return loadedLevels.get(levelId); }
+	
+	public int getLoadedLevelCount() { return loadedLevels.size(); }
 	
 	protected void addLevel(@NotNull Level level) {
 		levelEntities.put(level, Collections.synchronizedSet(new HashSet<>()));
-		levels.put(level.getDepth(), level);
+		loadedLevels.put(level.getLevelId(), level);
 	}
+	
+	protected void unloadLevel(int levelId) {
+		Level level = getLoadedLevel(levelId);
+		if(level == null) return; // already unloaded
+		
+		//System.out.println("unloading level "+levelId);
+		
+		for(Entity e: levelEntities.remove(level)) {
+			entityLevels.remove(e);
+			e.remove();
+		}
+		
+		loadedLevels.remove(levelId);
+	}
+	
+	protected abstract void pruneLoadedLevels();
 	
 	// I might not ever actually need this.
 	protected void clearLevels() {
 		entityLevels.clear();
 		levelEntities.clear();
-		levels.clear();
+		loadedLevels.clear();
 		entityIDMap.clear();
 	}
 	
@@ -148,8 +171,8 @@ public abstract class WorldManager {
 		});
 		//System.out.println(this+": deregistered entity "+e);
 		
-		if(e != null && level != null)
-			level.entityMoved(e);
+		// if(e != null && level != null)
+		// 	level.entityMoved(e);
 	}
 	
 	// removes entity from levels, without deregistering it. Can only be done for keep alives.
@@ -167,7 +190,7 @@ public abstract class WorldManager {
 	}
 	
 	public void setEntityLevel(@NotNull Entity e, @NotNull Level level) {
-		if(!entityIDMap.containsKey(e.getId()) || !levels.containsKey(level.getDepth())) {
+		if(!entityIDMap.containsKey(e.getId()) || !loadedLevels.containsKey(level.getLevelId())) {
 			System.err.println(this + ": couldn't set entity level, entity " + e + " or level " + level + " is not registered. Ignoring request.");
 			return;
 		}
@@ -181,7 +204,7 @@ public abstract class WorldManager {
 			actOnEntitySet(oldLevel, set -> set.remove(e));
 		}
 		
-		level.entityMoved(e);
+		// level.entityMoved(e);
 	}
 	
 	/** should the level keep chunks around this object loaded? */
@@ -191,6 +214,8 @@ public abstract class WorldManager {
 	/*  --- GET METHODS --- */
 	
 	
+	public int[] getLoadedLevelIds() { return (int[]) ArrayUtils.unbox(loadedLevels.keySet().toArray(new Integer[0])); }
+	
 	/** get all keep-alive objects on the given level */
 	public abstract Array<WorldObject> getKeepAlives(Level level);
 	
@@ -198,7 +223,7 @@ public abstract class WorldManager {
 	
 	public Entity getEntity(int eid) { return entityIDMap.get(eid); }
 	
-	public Level getLevel(int depth) { return levels.get(depth); }
+	public Level getLevel(int levelId) { return loadedLevels.get(levelId); }
 	
 	public Level getEntityLevel(Entity e) { return entityLevels.get(e); }
 	

@@ -222,10 +222,10 @@ public abstract class Entity implements WorldObject {
 		this.x = x;
 		this.y = y;
 		
-		if(level.equals(getLevel()))
-			level.entityMoved(this);
+		if(!level.equals(getLevel()))
+			/*level.entityMoved(this);
 		else
-			world.setEntityLevel(this, level);
+			*/world.setEntityLevel(this, level);
 	}
 	public void moveTo(@NotNull Level level, float x, float y, float z) {
 		moveTo(level, x, y);

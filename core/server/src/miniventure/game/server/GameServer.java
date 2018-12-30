@@ -21,8 +21,6 @@ import miniventure.game.item.Recipes;
 import miniventure.game.item.ServerItem;
 import miniventure.game.item.ServerItemStack;
 import miniventure.game.util.ArrayUtils;
-import miniventure.game.world.Chunk;
-import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
@@ -36,7 +34,6 @@ import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileTypeEnum;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
@@ -133,16 +130,11 @@ public class GameServer implements GameProtocol {
 						PlayerData playerData = new PlayerData(connection, player);
 						connectionToPlayerDataMap.put(connection, playerData);
 						playerToConnectionMap.put(player, connection);
-						Array<Chunk> playerChunks = level.getAreaChunks(player.getCenter(), Level.X_LOAD_RADIUS, Level.Y_LOAD_RADIUS, true, true);
 						connection.sendTCP(new LevelData(level));
-						Rectangle entityRect = null;
-						for(Chunk chunk: playerChunks) {
-							connection.sendTCP(new ChunkData(chunk, level));
-							entityRect = entityRect == null ? chunk.getBounds() : entityRect.merge(chunk.getBounds());
-						}
 						connection.sendTCP(new SpawnData(new EntityAddition(player), player.getHotbarUpdate(), player.saveStats()));
-						for(Entity e: level.getOverlappingEntities(entityRect, player))
-							connection.sendTCP(new EntityAddition(e));
+						for(Entity e: level.getEntities())
+							if(e != player)
+								connection.sendTCP(new EntityAddition(e));
 						
 						System.out.println("Server: new player successfully connected: "+player.getName());
 						
@@ -181,7 +173,7 @@ public class GameServer implements GameProtocol {
 					}
 				});
 				
-				if(object instanceof ChunkRequest) {
+				/*if(object instanceof ChunkRequest) {
 					//System.out.println("server received chunk request");
 					ChunkRequest request = (ChunkRequest) object;
 					ServerLevel level = client.getLevel(); // assumes player wants for current level
@@ -194,7 +186,7 @@ public class GameServer implements GameProtocol {
 							connection.sendTCP(new EntityAddition(e));
 					} else
 						System.err.println("Server could not satisfy chunk request, player level is null");
-				}
+				}*/
 				
 				forPacket(object, EntityRequest.class, req -> {
 					Entity e = world.getEntity(req.eid);
@@ -313,7 +305,7 @@ public class GameServer implements GameProtocol {
 				if(object.equals(DatalessRequest.Tile)) {
 					Level level = client.getLevel();
 					if(level != null) {
-						Tile t = level.getClosestTile(client.getInteractionRect());
+						Tile t = level.getTile(client.getInteractionRect());
 						connection.sendTCP(new Message(client+" looking at "+(t==null?null:t.toLocString()), GameCore.DEFAULT_CHAT_COLOR));
 					}
 				}
@@ -493,17 +485,7 @@ public class GameServer implements GameProtocol {
 			return;
 		}
 		
-		
-		Rectangle area = null;
-		for(Chunk c: level.getAreaChunks(player.getCenter(), Level.X_LOAD_RADIUS+1, Level.Y_LOAD_RADIUS+1, true, false)) {
-			if(area == null)
-				area = c.getBounds();
-			else
-				area.merge(c.getBounds());
-		}
-		
-		//Array<Entity> entities = level.getOverlappingEntities(area, player);
-		EntityValidation validation = new EntityValidation(level, area, player);
+		EntityValidation validation = new EntityValidation(level, player);
 		pData.connection.sendTCP(validation);
 	}
 	

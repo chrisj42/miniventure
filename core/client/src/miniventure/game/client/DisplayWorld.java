@@ -28,6 +28,9 @@ public class DisplayWorld extends WorldManager {
 	public void exitWorld(boolean save) {}
 	
 	@Override
+	protected void pruneLoadedLevels() {}
+	
+	@Override
 	public boolean isKeepAlive(WorldObject obj) { return true; }
 	
 	@Override

@@ -1,15 +1,14 @@
 package miniventure.game.world;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
 
-import miniventure.game.util.SynchronizedAccessor;
+import miniventure.game.util.MyUtils;
+import miniventure.game.util.customenum.SerialMap;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.player.Player;
 import miniventure.game.world.tile.Tile;
+import miniventure.game.world.tile.Tile.TileData;
+import miniventure.game.world.tile.TileTypeEnum;
 
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -20,55 +19,88 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class Level implements Taggable<Level> {
 	
-	public static final int X_LOAD_RADIUS = 4, Y_LOAD_RADIUS = 2;
+	// public static final int X_LOAD_RADIUS = 4, Y_LOAD_RADIUS = 2;
 	
-	private final int depth, width, height;
+	private final int levelId;
+	private final int width;
+	private final int height;
 	
 	@NotNull private final WorldManager world;
-	final SynchronizedAccessor<Map<Point, Chunk>> loadedChunks = new SynchronizedAccessor<>(Collections.synchronizedMap(new HashMap<>(X_LOAD_RADIUS*2*Y_LOAD_RADIUS*2)));
+	@NotNull private Tile[][] tiles;
+	// final SynchronizedAccessor<Map<Point, Chunk>> loadedChunks = new SynchronizedAccessor<>(Collections.synchronizedMap(new HashMap<>(X_LOAD_RADIUS*2*Y_LOAD_RADIUS*2)));
 	//private int tileCount;
 	private int mobCount;
 	
 	// this is to track when entities go in and out of chunks
-	final HashMap<Entity, Point> entityChunks = new HashMap<>(X_LOAD_RADIUS*2*Y_LOAD_RADIUS*2);
+	// final HashMap<Entity, Point> entityChunks = new HashMap<>(X_LOAD_RADIUS*2*Y_LOAD_RADIUS*2);
 	
 	/** @noinspection FieldCanBeLocal*/
-	private int mobCap = 3; // per chunk
+	private int mobCap = 80;
 	
-	//protected Level(@NotNull WorldManager world) { this(world, 0, 0, 0); }
-	protected Level(@NotNull WorldManager world, int depth, int width, int height) {
+	@FunctionalInterface
+	public interface TileMaker {
+		Tile get(Level level, int x, int y, TileTypeEnum[] types);
+	}
+	
+	@FunctionalInterface
+	public interface TileLoader {
+		Tile get(Level level, int x, int y, TileTypeEnum[] types, SerialMap[] dataMaps);
+	}
+	
+	private Level(@NotNull WorldManager world, int levelId, int width, int height) {
 		this.world = world;
-		this.depth = depth;
+		this.levelId = levelId;
 		this.width = width;
 		this.height = height;
 		
-		/*
-			At any given time, I will load a chunk, and all the chunks in a 2 chunk radius.
-			
-			At the start, no chunks are loaded. There is a special set of WorldObjects around which the level will always keep the tiles loaded.
-			When an object is added to that set, the 9 chunks around it are loaded.
-				- If it moves to an adjacent chunk, then the next 3 chunks in that direction are loaded; but the original 9 remain loaded. (though perhaps the farthest 3 don't get updated?)
-				- any chunks more than 2 chunks away from an object in the set will be unloaded and saved to file.
-		 */
+		tiles = new Tile[width][height];
+	}
+	
+	protected Level(@NotNull WorldManager world, int levelId, @NotNull TileTypeEnum[][][] tileTypes, @NotNull TileMaker tileFetcher) {
+		this(world, levelId, tileTypes.length, tileTypes.length == 0 ? 0 : tileTypes[0].length);
+		
+		for(int x = 0; x < tiles.length; x++)
+			for(int y = 0; y < tiles[x].length; y++)
+				tiles[x][y] = tileFetcher.get(this, x, y, tileTypes[x][y]);
+	}
+	
+	protected Level(@NotNull WorldManager world, int levelId, TileData[][] tileData, TileLoader tileFetcher) {
+		this(world, levelId, tileData.length, tileData.length == 0 ? 0 : tileData[0].length);
+		
+		for(int x = 0; x < tileData.length; x++) {
+			for(int y = 0; y < tileData[x].length; y++) {
+				TileData data = tileData[x][y];
+				tiles[x][y] = tileFetcher.get(this, x, y, data.getTypes(), data.getDataMaps());
+			}
+		}
 	}
 	
 	public int getWidth() { return width; }
 	public int getHeight() { return height; }
-	public int getDepth() { return depth; }
+	public int getLevelId() { return levelId; }
 	@NotNull public WorldManager getWorld() { return world; }
-	public int getMobCap() { return mobCap *getLoadedChunkCount(); }
+	public int getMobCap() { return mobCap; }
 	public int getMobCount() { return mobCount; }
 	public int getEntityCount() { return world.getEntityCount(this); }
 	
 	public Entity[] getEntities() { return world.getEntities(this); }
 	
-	protected int getLoadedChunkCount() { return loadedChunks.get(Map::size); }
-	protected Chunk getLoadedChunk(Point p) { return loadedChunks.get(chunks -> chunks.get(p)); }
-	protected Chunk[] getLoadedChunkArray() { return loadedChunks.get(chunks -> chunks.values().toArray(new Chunk[chunks.size()])); }
-	public boolean isChunkLoaded(Point p) { return loadedChunks.get(chunks -> chunks.containsKey(p)); }
-	protected void putLoadedChunk(Point p, Chunk c) { loadedChunks.access(chunks -> chunks.put(p, c)); }
+	public TileData[][] getTileData() {
+		TileData[][] data = new TileData[width][height];
+		
+		for(int x = 0; x < tiles.length; x++)
+			for(int y = 0; y < tiles[x].length; y++)
+				data[x][y] = new TileData(tiles[x][y]);
+		
+		return data;
+	}
 	
-	public synchronized void entityMoved(Entity entity) {
+	// protected int getLoadedChunkCount() { return loadedChunks.get(Map::size); }
+	// protected Chunk getLoadedChunk(Point p) { return loadedChunks.get(chunks -> chunks.get(p)); }
+	// public boolean isChunkLoaded(Point p) { return loadedChunks.get(chunks -> chunks.containsKey(p)); }
+	// protected void putLoadedChunk(Point p, Chunk c) { loadedChunks.access(chunks -> chunks.put(p, c)); }
+	
+	/*public synchronized void entityMoved(Entity entity) {
 		Point prevChunk = entityChunks.get(entity);
 		Point curChunk = !this.equals(entity.getLevel()) ? null : Chunk.getCoords(entity.getCenter());
 		
@@ -93,9 +125,9 @@ public abstract class Level implements Taggable<Level> {
 				loadChunk(p);
 			}
 		}
-	}
+	}*/
 	
-	void pruneLoadedChunks() {
+	/*void pruneLoadedChunks() {
 		// check for any chunks that no longer need to be loaded
 		Array<Point> chunkCoords = new Array<>(loadedChunks.<Point[]>get(chunks -> chunks.keySet().toArray(new Point[chunks.size()])));
 		for(WorldObject obj: world.getKeepAlives(this)) // remove loaded chunks in radius
@@ -117,7 +149,7 @@ public abstract class Level implements Taggable<Level> {
 			// now, remove the chunk from the set of loaded chunks
 			unloadChunk(chunkCoord);
 		}
-	}
+	}*/
 	
 	public void updateEntities(Entity[] entities, float delta) {
 		int mobs = 0;
@@ -129,26 +161,51 @@ public abstract class Level implements Taggable<Level> {
 		this.mobCount = mobs;
 	}
 	
-	@Nullable
+	public Tile getTile(Rectangle rect) { return getTile(rect.getCenter(new Vector2())); }
 	public Tile getTile(Vector2 pos) { return getTile(pos.x, pos.y); }
-	@Nullable
-	@SuppressWarnings("unchecked")
 	public Tile getTile(float x, float y) {
-		if(x < 0 || y < 0 || x > getWidth() || y > getHeight())
+		if(x < 0 || y < 0 || x >= getWidth() || y >= getHeight())
 			return null;
+			// System.err.println("out of bounds tile request on level "+levelId+" at "+x+','+y+"; using nearest tile");
 		
-		int xt = (int) x;
-		int yt = (int) y;
-		int chunkX = xt / Chunk.SIZE;
-		int chunkY = yt / Chunk.SIZE;
-		xt -= chunkX * Chunk.SIZE;
-		yt -= chunkY * Chunk.SIZE;
+		int xt = (int)x;//MyUtils.clamp((int)x, 0, getWidth()-1);
+		int yt = (int)y;//MyUtils.clamp((int)y, 0, getHeight()-1);
 		
-		Chunk chunk = getLoadedChunk(new Point(chunkX, chunkY));
-		if(chunk != null)
-			return (Tile) chunk.getTile(xt, yt);
+		return tiles[xt][yt];
 		
-		return null;
+		// int chunkX = xt / Chunk.SIZE;
+		// int chunkY = yt / Chunk.SIZE;
+		// xt -= chunkX * Chunk.SIZE;
+		// yt -= chunkY * Chunk.SIZE;
+		
+		// Chunk chunk = getLoadedChunk(new Point(chunkX, chunkY));
+		// if(chunk != null)
+		// return (Tile) chunk.getTile(xt, yt);
+		
+		// return null;
+	}
+	
+	public Tile getClosestTile(Rectangle rect) { return getClosestTile(rect.getCenter(new Vector2())); }
+	public Tile getClosestTile(Vector2 center) { return getClosestTile(center.x, center.y); }
+	public Tile getClosestTile(float x, float y) {
+		x = MyUtils.clamp(x, 0, getWidth()-1);
+		y = MyUtils.clamp(y, 0, getHeight()-1);
+		return getTile(x, y);
+	}
+	
+	public HashSet<Tile> getAreaTiles(Point tilePos, int radius, boolean includeCenter) { return getAreaTiles(tilePos.x, tilePos.y, radius, includeCenter); }
+	public HashSet<Tile> getAreaTiles(int x, int y, int radius, boolean includeCenter) {
+		
+		HashSet<Tile> tiles = new HashSet<>();
+		for(int xo = Math.max(0, x-radius); xo <= Math.min(getWidth()-1, x+radius); xo++)
+			for(int yo = Math.max(0, y-radius); yo <= Math.min(getHeight()-1, y+radius); yo++)
+				tiles.add(getTile(xo, yo));
+		tiles.remove(null);
+		
+		if(!includeCenter)
+			tiles.remove(getTile(x, y));
+		
+		return tiles;
 	}
 	
 	private Array<Point> getOverlappingTileCoords(Rectangle rect) {
@@ -180,7 +237,7 @@ public abstract class Level implements Taggable<Level> {
 		return overlappingTiles;
 	}
 	
-	protected Array<Point> getOverlappingChunks(Rectangle rect) {
+	/*protected Array<Point> getOverlappingChunks(Rectangle rect) {
 		Array<Point> overlappingChunks = new Array<>();
 		Array<Point> points = getOverlappingTileCoords(rect);
 		
@@ -191,7 +248,7 @@ public abstract class Level implements Taggable<Level> {
 		}
 		
 		return overlappingChunks;
-	}
+	}*/
 	
 	public Array<Entity> getOverlappingEntities(Rectangle rect, Entity... exclude) {
 		Array<Entity> overlapping = new Array<>(Entity.class);
@@ -214,23 +271,8 @@ public abstract class Level implements Taggable<Level> {
 		return objects;
 	}
 	
-	public HashSet<Tile> getAreaTiles(Point tilePos, int radius, boolean includeCenter) { return getAreaTiles(tilePos.x, tilePos.y, radius, includeCenter); }
-	public HashSet<Tile> getAreaTiles(int x, int y, int radius, boolean includeCenter) {
-		
-		HashSet<Tile> tiles = new HashSet<>();
-		for(int xo = Math.max(0, x-radius); xo <= Math.min(getWidth()-1, x+radius); xo++)
-			for(int yo = Math.max(0, y-radius); yo <= Math.min(getHeight()-1, y+radius); yo++)
-				tiles.add(getTile(xo, yo));
-		tiles.remove(null);
-		
-		if(!includeCenter)
-			tiles.remove(getTile(x, y));
-		
-		return tiles;
-	}
-	
 	// chunkRadius is in chunks.
-	public Array<Point> getAreaChunkCoords(Vector2 tilePos, int chunkRadiusX, int chunkRadiusY, boolean loaded, boolean unloaded) {
+	/*public Array<Point> getAreaChunkCoords(Vector2 tilePos, int chunkRadiusX, int chunkRadiusY, boolean loaded, boolean unloaded) {
 		return getAreaChunkCoords(tilePos.x, tilePos.y, chunkRadiusX, chunkRadiusY, loaded, unloaded);
 	}
 	public Array<Point> getAreaChunkCoords(float x, float y, int radiusX, int radiusY, boolean loaded, boolean unloaded) {
@@ -250,11 +292,7 @@ public abstract class Level implements Taggable<Level> {
 		}
 		
 		return chunkCoords;
-	}
-	
-	@Nullable
-	public Tile getClosestTile(Rectangle rect) { return getClosestTile(rect.getCenter(new Vector2())); }
-	public Tile getClosestTile(Vector2 center) { return getTile(center.x, center.y); }
+	}*/
 	
 	@Nullable
 	public Player getClosestPlayer(final Vector2 pos) {
@@ -272,45 +310,44 @@ public abstract class Level implements Taggable<Level> {
 		return players.get(0);
 	}
 	
-	public boolean chunkExists(int cx, int cy) { return tileExists(cx * Chunk.SIZE, cy * Chunk.SIZE); }
-	public boolean tileExists(int tx, int ty) {
+	// public boolean chunkExists(int cx, int cy) { return tileExists(cx * Chunk.SIZE, cy * Chunk.SIZE); }
+	/*public boolean tileExists(int tx, int ty) {
 		if(tx < 0 || ty < 0) return false;
 		
 		if(tx >= getWidth() || ty >= getHeight())
 			return false;
 		
 		return true;
-	}
+	}*/
 	
-	protected abstract void loadChunk(Point chunkCoord);
-	protected abstract void unloadChunk(Point chunkCoord);
+	// protected abstract void loadChunk(Point chunkCoord);
+	// protected abstract void unloadChunk(Point chunkCoord);
 	
-	public void loadChunk(Chunk newChunk) {
+	/*public void loadChunk(Chunk newChunk) {
 		//tileCount += newChunk.width * newChunk.height;
 		putLoadedChunk(new Point(newChunk.chunkX, newChunk.chunkY), newChunk);
-	}
+	}*/
 	
 	@Override
-	public boolean equals(Object other) { return other instanceof Level && ((Level)other).depth == depth; }
+	public boolean equals(Object other) { return other instanceof Level && ((Level)other).levelId == levelId; }
 	@Override
-	public int hashCode() { return depth; }
+	public int hashCode() { return levelId; }
 	
 	@Override
-	public String toString() { return getClass().getSimpleName()+"(depth="+depth+")"; }
+	public String toString() { return getClass().getSimpleName()+"(levelId="+ levelId +')'; }
 	
 	@Override
-	public LevelTag getTag() { return new LevelTag(depth); }
+	public LevelTag getTag() { return new LevelTag(levelId); }
 	
 	public static class LevelTag implements Tag<Level> {
 		
-		private final int depth;
+		private final int levelId;
 		
-		public LevelTag(int depth) { this.depth = depth; }
+		public LevelTag(int levelId) { this.levelId = levelId; }
 		
 		@Override
-		@SuppressWarnings("unchecked")
 		public Level getObject(WorldManager world) {
-			return world.getLevel(depth);
+			return world.getLevel(levelId);
 		}
 	}
 }

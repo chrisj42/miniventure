@@ -6,6 +6,7 @@ import miniventure.game.item.Item;
 import miniventure.game.item.Result;
 import miniventure.game.item.ServerItem;
 import miniventure.game.util.MyUtils;
+import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
@@ -22,6 +23,9 @@ import org.jetbrains.annotations.Nullable;
 /** @noinspection EqualsAndHashcode*/
 public class ServerTile extends Tile {
 	
+	public ServerTile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types) {
+		this((ServerLevel)level, x, y, types);
+	}
 	public ServerTile(@NotNull ServerLevel level, int x, int y, @NotNull TileTypeEnum[] types) {
 		super(level, x, y, types);
 		

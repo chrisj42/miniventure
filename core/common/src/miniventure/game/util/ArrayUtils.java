@@ -107,6 +107,18 @@ public final class ArrayUtils {
 		return objAr;
 	}
 	
+	public static Object unbox(Object[] ar) {
+		try {
+			Class<?> clazz = (Class<?>) ar.getClass().getComponentType().getDeclaredField("TYPE").get(null);
+			Object primAr = Array.newInstance(clazz, ar.length);
+			for(int i = 0; i < ar.length; i++)
+				Array.set(primAr, i, ar[i]);
+			return primAr;
+		} catch(IllegalAccessException | NoSuchFieldException e) {
+			throw new IllegalArgumentException("array component type "+ar.getClass().getComponentType()+" is not a primitive wrapper class.", e);
+		}
+	}
+	
 	public static String deepToString(Object obj, MapFunction<String[], String> stringArrayJoiner, MapFunction<Object, String> stringifier) {
 		if(obj == null)
 			return "null";

@@ -1,8 +1,9 @@
 package miniventure.game.world;
 
 import miniventure.game.world.entity.Entity;
-import miniventure.game.world.tile.RenderTile;
 import miniventure.game.world.tile.Tile;
+import miniventure.game.world.tile.Tile.TileData;
+import miniventure.game.world.tile.TileTypeEnum;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
@@ -14,8 +15,12 @@ import org.jetbrains.annotations.NotNull;
 
 public abstract class RenderLevel extends Level {
 	
-	protected RenderLevel(@NotNull WorldManager world, int depth, int width, int height) {
-		super(world, depth, width, height);
+	protected RenderLevel(@NotNull WorldManager world, int levelId, @NotNull TileTypeEnum[][][] tileTypes, @NotNull TileMaker tileFetcher) {
+		super(world, levelId, tileTypes, tileFetcher);
+	}
+	
+	protected RenderLevel(@NotNull WorldManager world, int levelId, TileData[][] tileData, TileLoader tileFetcher) {
+		super(world, levelId, tileData, tileFetcher);
 	}
 	
 	public abstract void render(Rectangle renderSpace, SpriteBatch batch, float delta, Vector2 posOffset);
@@ -69,7 +74,7 @@ public abstract class RenderLevel extends Level {
 		return lighting;
 	}
 	
-	@Override
+	/*@Override
 	public void loadChunk(Chunk newChunk) {
 		super.loadChunk(newChunk);
 		
@@ -92,5 +97,5 @@ public abstract class RenderLevel extends Level {
 		Point p = ref.getLocation();
 		RenderTile tile = (RenderTile) getTile(p.x+ox, p.y+oy);
 		if(tile != null) tile.updateSprites();
-	}
+	}*/
 }

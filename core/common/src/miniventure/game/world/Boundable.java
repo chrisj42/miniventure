@@ -51,10 +51,15 @@ public interface Boundable {
 	}
 	
 	@Nullable
-	default Tile getClosestTile() {
+	default Tile getClosestTile() { return getClosestTile(false); }
+	@Nullable
+	default Tile getClosestTile(boolean clamp) {
 		Level level = getLevel();
 		if(level == null) return null;
-		return level.getClosestTile(getCenter());
+		if(clamp)
+			return level.getClosestTile(getCenter());
+		else
+			return level.getTile(getCenter());
 	}
 	
 	/** @noinspection UnusedReturnValue*/

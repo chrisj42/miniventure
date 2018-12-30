@@ -2,11 +2,15 @@ package miniventure.game.world.tile;
 
 import miniventure.game.util.customenum.SerialMap;
 import miniventure.game.world.ClientLevel;
+import miniventure.game.world.Level;
 
 import org.jetbrains.annotations.NotNull;
 
 public class ClientTile extends RenderTile {
 	
+	public ClientTile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, @NotNull SerialMap[] data) {
+		this((ClientLevel)level, x, y, types, data);
+	}
 	public ClientTile(@NotNull ClientLevel level, int x, int y, @NotNull TileTypeEnum[] types, @NotNull SerialMap[] data) {
 		super(level, x, y, types, data);
 	}

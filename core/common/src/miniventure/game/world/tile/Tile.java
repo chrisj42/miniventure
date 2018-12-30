@@ -101,7 +101,7 @@ public abstract class Tile implements WorldObject {
 	@Override
 	public String toString() { return getType().getName()+' '+getClass().getSimpleName(); }
 	
-	public String toLocString() { return (x-level.getWidth()/2)+","+(y-level.getHeight()/2)+" ("+toString()+")"; }
+	public String toLocString() { return (x-level.getWidth()/2)+","+(y-level.getHeight()/2)+" ("+toString()+')'; }
 	
 	@Override
 	public boolean equals(Object other) {
@@ -111,7 +111,7 @@ public abstract class Tile implements WorldObject {
 	}
 	
 	@Override
-	public int hashCode() { return Point.javaPointHashCode(x, y) + level.getDepth() * 17; }
+	public int hashCode() { return Point.javaPointHashCode(x, y) + level.getLevelId() * 17; }
 	
 	// I can use the string encoder and string parser in MyUtils to encode the tile data in a way so that I can always re-parse the encoded array. I can use this internally to, with other things, whenever I need to encode a list of objects and don't want to worry about finding the delimiter symbol in string somewhere I don't expect.
 	
@@ -124,7 +124,6 @@ public abstract class Tile implements WorldObject {
 			this.typeOrdinals = typeOrdinals;
 			this.data = data;
 		}
-		@SuppressWarnings("unchecked")
 		public TileData(Tile tile) {
 			synchronized (tile.dataLock) {
 				TileTypeEnum[] tileTypes = tile.getTypeStack().getEnumTypes();
@@ -162,20 +161,19 @@ public abstract class Tile implements WorldObject {
 	public static class TileTag implements Tag<Tile> {
 		public final int x;
 		public final int y;
-		public final int levelDepth;
+		public final int levelId;
 		
 		private TileTag() { this(0, 0, 0); }
-		public TileTag(Tile tile) { this(tile.x, tile.y, tile.getLevel().getDepth()); }
-		public TileTag(int x, int y, int levelDepth) {
+		public TileTag(Tile tile) { this(tile.x, tile.y, tile.getLevel().getLevelId()); }
+		public TileTag(int x, int y, int levelId) {
 			this.x = x;
 			this.y = y;
-			this.levelDepth = levelDepth;
+			this.levelId = levelId;
 		}
 		
 		@Override
-		@SuppressWarnings("unchecked")
 		public Tile getObject(WorldManager world) {
-			Level level = world.getLevel(levelDepth);
+			Level level = world.getLevel(levelId);
 			if(level != null)
 				return level.getTile(x, y);
 			return null;

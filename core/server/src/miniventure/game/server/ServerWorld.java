@@ -1,8 +1,10 @@
 package miniventure.game.server;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.EntityAddition;
@@ -25,12 +27,12 @@ import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.levelgen.LevelGenerator;
+import miniventure.game.world.mapgen.WorldGenerator;
 import miniventure.game.world.tile.ServerTileType;
 import miniventure.game.world.tile.TileType;
 import miniventure.game.world.tile.TileTypeEnum;
 
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
@@ -50,12 +52,12 @@ public class ServerWorld extends WorldManager {
 		GameScreen... game screen won't do much, just do the rendering. 
 	 */
 	
-	private LevelGenerator levelGenerator;
+	private WorldGenerator worldGenerator;
 	private GameServer server;
 	
 	private boolean worldLoaded = false;
 	
-	private final HashSet<WorldObject> keepAlives = new HashSet<>(); // always keep chunks around these objects loaded.
+	private final Set<WorldObject> keepAlives = Collections.synchronizedSet(new HashSet<>()); // always keep chunks around these objects loaded.
 	
 	public ServerWorld(boolean standalone) throws IOException {
 		server = new GameServer(standalone);
@@ -68,10 +70,12 @@ public class ServerWorld extends WorldManager {
 	public void update(float delta) {
 		
 		HashSet<ServerLevel> loadedLevels = new HashSet<>();
-		for(WorldObject obj: keepAlives) {
-			ServerLevel level = (ServerLevel) obj.getLevel();
-			if(level != null)
-				loadedLevels.add(level);
+		synchronized (keepAlives) {
+			for(WorldObject obj : keepAlives) {
+				ServerLevel level = (ServerLevel) obj.getLevel();
+				if(level != null)
+					loadedLevels.add(level);
+			}
 		}
 		
 		for(ServerLevel level: loadedLevels)
@@ -108,17 +112,17 @@ public class ServerWorld extends WorldManager {
 	@Override
 	public void createWorld(int width, int height) {
 		worldLoaded = false;
-		levelGenerator = new LevelGenerator(MathUtils.random.nextLong(), width, height);
 		
+		worldGenerator = new WorldGenerator(MathUtils.random.nextLong(), 100, 100);
 		ProgressPrinter logger = new ProgressPrinter();
 		
 		logger.pushMessage("");
 		clearLevels();
 		int numLevels = 1;
-		int minDepth = 0;
+		// int minId = 1;
 		for(int i = 0; i < numLevels; i++) {
 			logger.editMessage("Loading level "+(i+1)+'/'+numLevels+"...");
-			addLevel(new ServerLevel(this, i + minDepth, levelGenerator));
+			loadLevel(i);
 		}
 		logger.popMessage();
 		
@@ -133,9 +137,9 @@ public class ServerWorld extends WorldManager {
 	public void exitWorld(boolean save) {
 		if(!worldLoaded) return;
 		// dispose of level/world resources
-		keepAlives.clear();
+		synchronized (keepAlives) { keepAlives.clear(); }
 		clearLevels();
-		levelGenerator = null;
+		worldGenerator = null;
 		server.stop();
 		worldLoaded = false;
 		//spawnTile = null;
@@ -145,7 +149,39 @@ public class ServerWorld extends WorldManager {
 	/*  --- LEVEL MANAGEMENT --- */
 	
 	
+	protected void loadLevel(int levelId) {
+		// TODO this will need to get redone when loading from file
+		
+		if(isLevelLoaded(levelId)) return;
+		LevelGenerator levelGenerator = worldGenerator.getLevelGenerator(levelId);
+		
+		addLevel(new ServerLevel(this, levelId, levelGenerator));
+	}
 	
+	@Override
+	protected void unloadLevel(int levelId) {
+		// TODO save to file before calling super
+		super.unloadLevel(levelId);
+	}
+	
+	@Override
+	protected void pruneLoadedLevels() {
+		HashSet<Integer> safeIds = new HashSet<>(getLoadedLevelCount());
+		
+		// log which levels have a keep-alive
+		synchronized (keepAlives) {
+			for(WorldObject obj : keepAlives) {
+				Level level = obj.getLevel();
+				if(level != null)
+					safeIds.add(level.getLevelId());
+			}
+		}
+		
+		// unload any loaded level that didn't have a keep-alive
+		for(int id: getLoadedLevelIds())
+			if(!safeIds.contains(id))
+				unloadLevel(id);
+	}
 	
 	
 	/*  --- ENTITY MANAGEMENT --- */
@@ -167,7 +203,7 @@ public class ServerWorld extends WorldManager {
 	
 	@Override
 	public boolean isKeepAlive(WorldObject obj) {
-		return keepAlives.contains(obj);
+		synchronized (keepAlives) { return keepAlives.contains(obj); }
 	}
 	
 	
@@ -178,7 +214,9 @@ public class ServerWorld extends WorldManager {
 	public ServerPlayer addPlayer(String playerName) {
 		ServerPlayer player = new ServerPlayer(playerName);
 		
-		keepAlives.add(player);
+		synchronized (keepAlives) {
+			keepAlives.add(player);
+		}
 		
 		respawnPlayer(player);
 		
@@ -217,14 +255,15 @@ public class ServerWorld extends WorldManager {
 			throw new NullPointerException("Surface level found to be null while attempting to spawn player.");
 		
 		// find a good spawn location near the middle of the map
-		Rectangle spawnBounds = levelGenerator.getSpawnArea(new Rectangle());
+		// Rectangle spawnBounds = levelGenerator.getSpawnArea(new Rectangle());
 		
-		level.spawnMob(player, spawnBounds);
+		level.spawnMob(player);
 	}
 	
 	public void removePlayer(ServerPlayer player) {
-		keepAlives.remove(player);
-		
+		synchronized (keepAlives) {
+			keepAlives.remove(player);
+		}
 	}
 	
 	
@@ -234,9 +273,11 @@ public class ServerWorld extends WorldManager {
 	@Override
 	public Array<WorldObject> getKeepAlives(@NotNull Level level) {
 		Array<WorldObject> keepAlives = new Array<>();
-		for(WorldObject obj: this.keepAlives)
-			if(level.equals(obj.getLevel()))
-				keepAlives.add(obj);
+		synchronized (this.keepAlives) {
+			for(WorldObject obj : this.keepAlives)
+				if(level.equals(obj.getLevel()))
+					keepAlives.add(obj);
+		}
 		
 		return keepAlives;
 	}
@@ -247,7 +288,7 @@ public class ServerWorld extends WorldManager {
 	public GameServer getServer() { return server; }
 	
 	@Override
-	public ServerLevel getLevel(int depth) { return (ServerLevel) super.getLevel(depth); }
+	public ServerLevel getLevel(int levelId) { return (ServerLevel) super.getLevel(levelId); }
 	
 	@Override
 	public ServerLevel getEntityLevel(Entity e) { return (ServerLevel) super.getEntityLevel(e); }

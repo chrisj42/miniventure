@@ -78,11 +78,15 @@ public abstract class ServerEntity extends Entity {
 		Array<WorldObject> objects = new Array<>();
 		objects.addAll(level.getOverlappingEntities(getBounds(), this));
 		// we don't want to trigger things like getting hurt by lava until the entity is actually *in* the tile, so we'll only consider the closest one to be "touching".
-		Tile tile = level.getClosestTile(getBounds());
+		Tile tile = level.getTile(getBounds());
 		if(tile != null) objects.add(tile);
 		
 		for(WorldObject obj: objects)
 			obj.touching(this);
+		
+		// get the entity back on the map if they somehow end up on a null tile
+		if(tile == null)
+			moveTo(level, level.getClosestTile(getBounds()).getCenter());
 	}
 	
 	protected void updateSprite(SpriteUpdate newSprite) { this.newSprite = newSprite; }

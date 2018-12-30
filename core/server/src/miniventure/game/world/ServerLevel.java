@@ -1,9 +1,12 @@
 package miniventure.game.world;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
-import miniventure.game.GameProtocol.EntityAddition;
-import miniventure.game.GameProtocol.EntityRemoval;
 import miniventure.game.GameProtocol.TileUpdate;
 import miniventure.game.item.ServerItem;
 import miniventure.game.server.ServerCore;
@@ -38,12 +41,12 @@ public class ServerLevel extends Level {
 	
 	private final LevelGenerator levelGenerator;
 	
-	public ServerLevel(WorldManager world, int depth, LevelGenerator levelGenerator) {
-		super(world, depth, levelGenerator.worldWidth, levelGenerator.worldHeight);
+	public ServerLevel(WorldManager world, int levelId, LevelGenerator levelGenerator) {
+		super(world, levelId, levelGenerator.generateTiles(), ServerTile::new);
 		this.levelGenerator = levelGenerator;
 	}
 	
-	@Override
+	/*@Override
 	public void entityMoved(Entity entity) {
 		Point prevChunk = entityChunks.get(entity);
 		super.entityMoved(entity);
@@ -56,7 +59,7 @@ public class ServerLevel extends Level {
 			else
 				ServerCore.getServer().broadcast(new EntityRemoval(entity), this);
 		}
-	}
+	}*/
 	
 	public void onTileUpdate(ServerTile tile) {
 		ServerCore.getServer().broadcast(new TileUpdate(tile), this);
@@ -70,7 +73,7 @@ public class ServerLevel extends Level {
 	
 	//private float updateAllDelta = 0;
 	public void update(Entity[] entities, float delta) {
-		if(getLoadedChunkCount() == 0) return;
+		// if(getLoadedChunkCount() == 0) return;
 		
 		// update the tiles in the queue
 		
@@ -163,7 +166,7 @@ public class ServerLevel extends Level {
 		
 		ItemEntity ie = new ItemEntity(item, Vector2.Zero.cpy()); // this is a dummy variable.
 		
-		Tile closest = getTile(dropPos.x, dropPos.y);
+		Tile closest = getClosestTile(dropPos.x, dropPos.y);
 		
 		Rectangle itemBounds = ie.getBounds();
 		itemBounds.setPosition(dropPos);
@@ -176,7 +179,7 @@ public class ServerLevel extends Level {
 		if(!ie.canPermeate(closest)) {
 			// we need to look around for a tile that the item *can* be placed on.
 			HashSet<Tile> adjacent = closest.getAdjacentTiles(true);
-			Boundable.sortByDistance(new Array<>(adjacent.toArray(new Tile[adjacent.size()])), targetPos == null ? dropPos : targetPos);
+			Boundable.sortByDistance(new Array<>(adjacent.toArray(new Tile[0])), targetPos == null ? dropPos : targetPos);
 			for(Tile adj: adjacent) {
 				if(ie.canPermeate(adj)) {
 					closest = adj;
@@ -203,11 +206,9 @@ public class ServerLevel extends Level {
 		getWorld().setEntityLevel(ie, this);
 	}
 	
-	
-	private void spawnMob(ServerMob mob, ServerTile[] tiles) {
-		if(tiles.length == 0) throw new IllegalArgumentException("Tile array for spawning mobs must have at least one tile in it. (tried to spawn mob "+mob+")");
-		
-		if(!mob.maySpawn()) return;
+	// only spawns on the given tiles
+	/*private void spawnMob(ServerMob mob, ServerTile[] tiles) {
+		if(tiles.length == 0) throw new IllegalArgumentException("Tile array for spawning mobs must have at least one tile in it. (tried to spawn mob "+mob+')');
 		
 		ServerTile spawnTile;
 		if(tiles.length == 1)
@@ -218,49 +219,40 @@ public class ServerLevel extends Level {
 		}
 		
 		mob.moveTo(spawnTile);
-	}
+	}*/
 	
 	public void spawnMob(ServerMob mob) {
-		// only spawns on loaded chunks
-		Array<Tile> tiles = new Array<>(false, getLoadedChunkCount() * Chunk.SIZE * Chunk.SIZE, Tile.class);
-		for(Chunk chunk: loadedChunks.get(map -> map.values().toArray(new Chunk[map.size()])))
-			for(Tile[] chunkTiles: chunk.getTiles())
-				tiles.addAll(chunkTiles);
+		if(!mob.maySpawn()) return;
 		
-		tiles.shrink();
+		int x, y;
+		TileTypeEnum type;
+		do {
+			x = MathUtils.random(getWidth()-1);
+			y = MathUtils.random(getHeight()-1);
+			Tile tile = getTile(x, y);
+			if(tile == null) {
+				System.err.println("level contains null tile! "+x+","+y+"@level="+this);
+			}
+			type = tile.getType().getTypeEnum();
+		} while(!mob.maySpawn(type));
 		
-		spawnMob(mob, tiles.toArray(ServerTile.class));
+		// loadChunk(Chunk.getCoords(x, y));
+		mob.moveTo(getTile(x, y));
 	}
 	
 	// only spawns within the given area
-	public void spawnMob(ServerMob mob, Rectangle spawnArea) {
+	/*public void spawnMob(ServerMob mob, Rectangle spawnArea) {
 		// if the mob is a keepAlive mob, then unloaded tiles are considered; otherwise, they are not.
 		if(!getWorld().isKeepAlive(mob))
 			spawnMob(mob, getOverlappingTiles(spawnArea).toArray(Tile.class));
 		else {
 			if(!mob.maySpawn()) return; // if it can't spawn now at all, then don't try.
-			int x, y;
-			TileTypeEnum type;
-			do {
-				x = MathUtils.random((int)spawnArea.x, (int) (spawnArea.x+spawnArea.width));
-				y = MathUtils.random((int)spawnArea.y, (int) (spawnArea.y+spawnArea.height));
-				Tile tile = getTile(x, y);
-				if(tile == null) {
-					TileTypeEnum[] types = levelGenerator.generateTile(x, y);
-					type = types[types.length-1];
-				} else
-					type = tile.getType().getTypeEnum();
-			} while(!mob.maySpawn(type));
 			
-			loadChunk(Chunk.getCoords(x, y));
-			Tile spawnTile = getTile(x, y);
-			//noinspection ConstantConditions
-			mob.moveTo(spawnTile);
 		}
-	}
+	}*/
 	
 	// note that asking for unloaded chunks will load them.
-	public Array<Chunk> getAreaChunks(Vector2 tilePos, int radiusX, int radiusY, boolean loaded, boolean unloaded) {
+	/*public Array<Chunk> getAreaChunks(Vector2 tilePos, int radiusX, int radiusY, boolean loaded, boolean unloaded) {
 		return getAreaChunks(Chunk.getCoords(tilePos), radiusX, radiusY, loaded, unloaded);
 	}
 	public Array<Chunk> getAreaChunks(Point chunkCoords, int radiusX, int radiusY, boolean loaded, boolean unloaded) {
@@ -272,21 +264,18 @@ public class ServerLevel extends Level {
 		}
 		
 		return chunks;
-	}
+	}*/
 	
-	@Override
+	/*@Override
 	protected void loadChunk(Point chunkCoord) {
-		// TODO this will need to get redone when loading from file
 		
 		if(isChunkLoaded(chunkCoord)) return;
 		
 		loadChunk(new Chunk(chunkCoord.x, chunkCoord.y, this, levelGenerator.generateChunk(chunkCoord.x, chunkCoord.y), (x, y, types) -> new ServerTile(this, x, y, types)));
-	}
+	}*/
 	
-	@Override
+	/*@Override
 	protected void unloadChunk(Point chunkCoord) {
-		// TODO this will need to get redone when saving to file
-		
 		Chunk chunk = getLoadedChunk(chunkCoord);
 		if(chunk == null) return; // already unloaded
 		
@@ -297,14 +286,14 @@ public class ServerLevel extends Level {
 				e.remove(); // removed from entityChunks within
 		
 		loadedChunks.access(chunks -> chunks.remove(chunkCoord));
-	}
+	}*/
 	
-	@NotNull
+	/*@NotNull
 	public Chunk getChunk(int cx, int cy) {
 		Point p = new Point(cx, cy);
 		loadChunk(p);
 		return getLoadedChunk(p);
-	}
+	}*/
 	
 	@Override
 	public boolean equals(Object other) { return other instanceof ServerLevel && super.equals(other); }

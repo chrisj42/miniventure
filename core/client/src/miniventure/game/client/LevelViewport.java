@@ -2,7 +2,6 @@ package miniventure.game.client;
 
 import miniventure.game.GameCore;
 import miniventure.game.util.MyUtils;
-import miniventure.game.world.Chunk;
 import miniventure.game.world.RenderLevel;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
 import miniventure.game.world.tile.Tile;
@@ -121,7 +120,7 @@ public class LevelViewport {
 		//System.out.println("rendering level in bounds "+renderSpace+" to camera at "+camera.position+" with offset "+offset);
 		level.render(renderSpace, batch, GameCore.getDeltaTime(), offset); // renderSpace in world coords, but offset can give render coords
 		
-		if(ClientCore.debugChunk) {
+		/*if(ClientCore.debugChunk) {
 			// render chunk boundaries
 			int minX = MathUtils.ceil(renderSpace.x) / Chunk.SIZE * Chunk.SIZE;
 			int minY = MathUtils.ceil(renderSpace.y) / Chunk.SIZE * Chunk.SIZE;
@@ -136,32 +135,20 @@ public class LevelViewport {
 			for (int y = minY; y <= maxY; y += Chunk.SIZE) {
 				MyUtils.fillRect((minX - offset.x) * Tile.SIZE, (y - offset.y) * Tile.SIZE-lineThickness, (maxX - minX) * Tile.SIZE, lineThickness*2+1, Color.PINK, batch);
 			}
-		}
+		}*/
 		
 		if(ClientCore.debugInteract || ClientCore.debugTile) {
 			ClientPlayer player = ClientCore.getWorld().getMainPlayer();
 			if(player != null) {
-				if(ClientCore.debugInteract) {
+				if(ClientCore.debugInteract)
 					// render player interaction rect
-					Rectangle rect = player.getInteractionRect();
-					rect.x = (rect.x - offset.x) * Tile.SIZE;
-					rect.y = (rect.y - offset.y) * Tile.SIZE;
-					rect.width *= Tile.SIZE;
-					rect.height *= Tile.SIZE;
-					MyUtils.drawRect(rect, 1, Color.BLACK, batch);
-				}
+					drawOutline(offset, player.getInteractionRect(), batch);
 				
 				if(ClientCore.debugTile) {
 					// outline "looking at" tile
-					Tile closest = level.getClosestTile(player.getInteractionRect());
-					if(closest != null) {
-						Rectangle rect = closest.getBounds();
-						rect.x = (rect.x - offset.x) * Tile.SIZE;
-						rect.y = (rect.y - offset.y) * Tile.SIZE;
-						rect.width *= Tile.SIZE;
-						rect.height *= Tile.SIZE;
-						MyUtils.drawRect(rect, 1, Color.BLACK, batch);
-					}
+					Tile closest = level.getTile(player.getInteractionRect());
+					if(closest != null)
+						drawOutline(offset, closest.getBounds(), batch);
 				}
 			}
 		}
@@ -170,6 +157,14 @@ public class LevelViewport {
 		batch.draw(lightingBuffer.getColorBufferTexture(), 0, 0);
 		
 		batch.end();
+	}
+	
+	private static void drawOutline(Vector2 offset, Rectangle rect, SpriteBatch batch) {
+		rect.x = (rect.x - offset.x) * Tile.SIZE;
+		rect.y = (rect.y - offset.y) * Tile.SIZE;
+		rect.width *= Tile.SIZE;
+		rect.height *= Tile.SIZE;
+		MyUtils.drawRect(rect, 1, Color.BLACK, batch);
 	}
 	
 	public void zoom(int dir) {

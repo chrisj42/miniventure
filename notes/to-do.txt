@@ -5,6 +5,9 @@ quick reminders / in prog stuff:
  - when menu system is done, add a volume option
 
 
+- I ought to spend a bit of time, now and in the future, to redo some of the code in terms of error handling. What I currently do is make sure it breaks when something unexpected happens, but what I should do (where possible) is log that there was something unexpected, and then try to recover. Making sure the game doesn't crash during play should be a priority, but the problem should still bring attention to itself; just without crashing the game.
+
+
 - give item entities shadows like the water thing
 
 - cut some decimals off of the ping time display

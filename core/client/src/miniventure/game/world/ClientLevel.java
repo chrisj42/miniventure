@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import miniventure.game.GameProtocol.ChunkRequest;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.ClientWorld;
 import miniventure.game.screen.RespawnScreen;
@@ -28,20 +27,13 @@ public class ClientLevel extends RenderLevel {
 	
 	private final Map<ClientTile, TileData> tileUpdates = Collections.synchronizedMap(new HashMap<>());
 	
-	public ClientLevel(@NotNull ClientWorld world, int depth, int width, int height) {
-		super(world, depth, width, height);
+	public ClientLevel(@NotNull ClientWorld world, int levelId, TileData[][] tiles) {
+		super(world, levelId, tiles, ClientTile::new);
 		this.world = world;
 	}
 	
 	@Override @NotNull
 	public ClientWorld getWorld() { return world; }
-	
-	@Override
-	void pruneLoadedChunks() {
-		if(getWorld().getMainPlayer() == null) return; // don't prune chunks before the main player is loaded.
-		
-		super.pruneLoadedChunks();
-	}
 	
 	@Override
 	public void render(Rectangle renderSpace, SpriteBatch batch, float delta, Vector2 posOffset) {
@@ -84,16 +76,16 @@ public class ClientLevel extends RenderLevel {
 	}
 	
 	@Override
-	public ClientTile getTile(float x, float y) { return getTile(x, y, false); }
-	public ClientTile getTile(float x, float y, boolean loadIfNull) {
+	public ClientTile getTile(float x, float y) { return (ClientTile) super.getTile(x, y); }
+	/*public ClientTile getTile(float x, float y, boolean loadIfNull) {
 		ClientTile tile = (ClientTile) super.getTile(x, y);
 		if(tile == null && loadIfNull)
 			loadChunk(Chunk.getCoords(x, y));
 		
 		return tile;
-	}
+	}*/
 	
-	@Override
+	/*@Override
 	protected void loadChunk(Point chunkCoord) {
 		//System.out.println("Client requesting chunk "+chunkCoord);
 		ClientCore.getClient().send(new ChunkRequest(chunkCoord));
@@ -111,7 +103,7 @@ public class ClientLevel extends RenderLevel {
 				e.remove();
 		
 		loadedChunks.access(chunks -> chunks.remove(chunkCoord));
-	}
+	}*/
 	
 	
 }

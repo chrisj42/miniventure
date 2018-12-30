@@ -81,7 +81,7 @@ public class MainMenu extends BackgroundProvider implements ParentScreen {
 		TimeOfDay time = TimeOfDay.values[MathUtils.random(TimeOfDay.values.length-1)];
 		lightOverlay = TimeOfDay.getSkyColor(time.getStartOffsetSeconds());
 		
-		LevelGenerator generator = new LevelGenerator(MathUtils.random.nextLong(), 200, 100, true);
+		LevelGenerator generator = new LevelGenerator(MathUtils.random.nextLong(), 200, 100/*, true*/);
 		backgroundLevel = new DisplayLevel(generator);
 		
 		Vector2 size = new Vector2(levelView.getViewWidth(), levelView.getViewHeight());//.scl(0.5f);

@@ -15,11 +15,8 @@ import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.ValueFunction;
-import miniventure.game.world.Chunk;
-import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.ClientLevel;
 import miniventure.game.world.Level;
-import miniventure.game.world.Point;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClientEntity;
 import miniventure.game.world.entity.Entity;
@@ -66,11 +63,6 @@ public class GameClient implements GameProtocol {
 					world.addLevel((LevelData)object);
 				}
 				
-				if(object instanceof ChunkData) {
-					//System.out.println("client received chunk");
-					world.loadChunk((ChunkData)object);
-				}
-				
 				if(object instanceof SpawnData) {
 					System.out.println("client received player");
 					SpawnData data = (SpawnData) object;
@@ -89,7 +81,7 @@ public class GameClient implements GameProtocol {
 				if(object instanceof TileUpdate) {
 					// individual tile update
 					TileUpdate update = (TileUpdate) object;
-					ClientLevel level = world.getLevel(update.levelDepth);
+					ClientLevel level = world.getLevel(update.levelId);
 					if(level == null) return;
 					ClientTile tile = level.getTile(update.x, update.y);
 					if(tile != null)
@@ -110,7 +102,7 @@ public class GameClient implements GameProtocol {
 				}
 				
 				forPacket(object, ParticleAddition.class, addition -> {
-					ClientLevel level = world.getLevel(addition.positionUpdate.levelDepth);
+					ClientLevel level = world.getLevel(addition.positionUpdate.levelId);
 					if(level == null || (player != null && !level.equals(player.getLevel()))) return;
 					
 					ClientParticle e = ClientParticle.get(addition.particleData);
@@ -126,7 +118,7 @@ public class GameClient implements GameProtocol {
 					if(world.getEntity(addition.eid) != null) return; // entity is already loaded.
 					
 					if(player != null && addition.eid == player.getId()) return; // shouldn't pay attention to trying to set the client player like this.
-					ClientLevel level = world.getLevel(addition.positionUpdate.levelDepth);
+					ClientLevel level = world.getLevel(addition.positionUpdate.levelId);
 					if(level == null || (player != null && !level.equals(player.getLevel()))) return;
 					
 					ClientEntity e = new ClientEntity(addition);
@@ -156,7 +148,7 @@ public class GameClient implements GameProtocol {
 					}
 					
 					if(newPos != null) {
-						ClientLevel level = world.getLevel(newPos.levelDepth);
+						ClientLevel level = world.getLevel(newPos.levelId);
 						if(level != null) {
 							e.moveTo(level, newPos.x, newPos.y, newPos.z);
 							//System.out.println("moved client entity "+e+", new pos: "+e.getPosition(true));
@@ -188,7 +180,7 @@ public class GameClient implements GameProtocol {
 						return;
 					}
 					
-					if(level.getDepth() != list.levelDepth) {
+					if(level.getLevelId() != list.levelId) {
 						System.err.println("Client: player level does not match entity validation level; ignoring packet.");
 						return;
 					}
@@ -199,20 +191,15 @@ public class GameClient implements GameProtocol {
 							loaded.put(e.getId(), e);
 					
 					for(int i = 0; i < list.ids.length; i++) {
-						boolean chunkLoaded = level.isChunkLoaded(list.chunks[i]);
 						boolean entityLoaded = loaded.containsKey(list.ids[i]);
 						
 						// if the chunk is loaded, but the entity isn't, then request it from the server.
 						// if the entity is loaded, but the chunk isn't, then unload it.
 						// else, do nothing.
 						
-						if(chunkLoaded && !entityLoaded) {
+						if(!entityLoaded) {
 							//System.out.println("client requesting entity due to validation");
 							send(new EntityRequest(list.ids[i]));
-						}
-						if(entityLoaded && !chunkLoaded) {
-							//System.out.println("client unloading entity due to validation");
-							loaded.get(list.ids[i]).remove();
 						}
 						
 						loaded.remove(list.ids[i]);
@@ -257,9 +244,9 @@ public class GameClient implements GameProtocol {
 				});
 				
 				forPacket(object, PositionUpdate.class, newPos -> {
-					if(player == null || newPos.levelDepth == null) return;
+					if(player == null || newPos.levelId == null) return;
 					//player.updatePos(newPos);
-					player.moveTo(world.getLevel(newPos.levelDepth), newPos.x, newPos.y, newPos.z);
+					player.moveTo(world.getLevel(newPos.levelId), newPos.x, newPos.y, newPos.z);
 				});
 				
 				forPacket(object, StatUpdate.class, update -> {
@@ -345,12 +332,12 @@ public class GameClient implements GameProtocol {
 	
 	private boolean isPositionLoaded(PositionUpdate posUpdate) {
 		if(posUpdate == null) return false;
-		Level level = ClientCore.getWorld().getLevel(posUpdate.levelDepth);
+		Level level = ClientCore.getWorld().getLevel(posUpdate.levelId);
 		if(level == null) return false; // entity is on unloaded level
-		Vector2 pos = new Vector2(posUpdate.x, posUpdate.y);
-		Point cpos = Chunk.getCoords(pos);
-		if(!level.isChunkLoaded(cpos))
-			return false; // entity is on unloaded chunk
+		// Vector2 pos = new Vector2(posUpdate.x, posUpdate.y);
+		// Point cpos = Chunk.getCoords(pos);
+		// if(!level.isChunkLoaded(cpos))
+		// 	return false; // entity is on unloaded chunk
 		
 		return true;
 	}

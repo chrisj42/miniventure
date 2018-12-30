@@ -11,14 +11,14 @@ import com.badlogic.gdx.utils.Array;
 
 public class DisplayLevel extends RenderLevel {
 	
-	private final LevelGenerator generator;
+	// private final LevelGenerator generator;
 	//private final HashMap<Point, Chunk> chunks = new HashMap<>();
 	
 	public DisplayLevel(LevelGenerator generator) {
-		super(new DisplayWorld(), 0, generator.worldWidth, generator.worldHeight);
+		super(new DisplayWorld(), 0, generator.generateTiles(), DisplayTile::new);
 		
-		this.generator = generator;
-		int y = 0;
+		// this.generator = generator;
+		/*int y = 0;
 		while(y * Chunk.SIZE < generator.worldHeight) {
 			int x = 0;
 			while(x * Chunk.SIZE < generator.worldWidth) {
@@ -27,7 +27,7 @@ public class DisplayLevel extends RenderLevel {
 			}
 			
 			y++;
-		}
+		}*/
 	}
 	
 	@Override
@@ -35,11 +35,11 @@ public class DisplayLevel extends RenderLevel {
 		RenderLevel.render(getOverlappingTiles(renderSpace), new Array<>(Entity.class), batch, delta, posOffset);
 	}
 	
-	@Override
+	/*@Override
 	protected void loadChunk(Point chunkCoord) {
 		loadChunk(new Chunk(chunkCoord.x, chunkCoord.y, this, generator.generateChunk(chunkCoord.x, chunkCoord.y), (x, y, types) -> new DisplayTile(this, x, y, types)));
 	}
 	
 	@Override
-	protected void unloadChunk(Point chunkCoord) {}
+	protected void unloadChunk(Point chunkCoord) {}*/
 }

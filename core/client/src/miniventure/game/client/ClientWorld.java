@@ -11,8 +11,6 @@ import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.RespawnScreen;
 import miniventure.game.util.function.ValueFunction;
-import miniventure.game.world.Chunk;
-import miniventure.game.world.Chunk.ChunkData;
 import miniventure.game.world.ClientLevel;
 import miniventure.game.world.Level;
 import miniventure.game.world.TimeOfDay;
@@ -20,7 +18,6 @@ import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
-import miniventure.game.world.tile.ClientTile;
 import miniventure.game.world.tile.ClientTileType;
 import miniventure.game.world.tile.TileType;
 import miniventure.game.world.tile.TileTypeEnum;
@@ -99,7 +96,7 @@ public class ClientWorld extends WorldManager {
 	@Override protected boolean doDaylightCycle() { return doDaylightCycle; }
 	
 	@Override
-	public boolean worldLoaded() { return getLevelCount() > 0; }
+	public boolean worldLoaded() { return getLoadedLevelCount() > 0; }
 	
 	@Override
 	public void createWorld(int width, int height) { createWorld(width, height, true, ""); }
@@ -162,17 +159,30 @@ public class ClientWorld extends WorldManager {
 	
 	
 	public void addLevel(LevelData data) {
-		addLevel(new ClientLevel(this, data.depth, data.width, data.height));
+		addLevel(new ClientLevel(this, data.levelId, data.tiles));
 	}
 	
-	public void loadChunk(ChunkData data) {
-		ClientLevel level = getLevel(data.levelDepth);
+	/*public void loadChunk(ChunkData data) {
+		ClientLevel level = getLevel(data.levelId);
 		if(level == null) {
 			System.err.println("client could not load chunk because level is null");
 			return;
 		}
 		
 		level.loadChunk(new Chunk(level, data, (x, y, types, dataMaps) -> new ClientTile(level, x, y, types, dataMaps)));
+	}*/
+	
+	@Override
+	protected void pruneLoadedLevels() {
+		ClientPlayer p = getMainPlayer();
+		if(p == null) return;
+		Level current = p.getLevel();
+		if(current == null) return;
+		
+		// unload all levels besides the one the player is on.
+		for(int levelId: getLoadedLevelIds())
+			if(levelId != current.getLevelId())
+				unloadLevel(levelId);
 	}
 	
 	
@@ -210,7 +220,7 @@ public class ClientWorld extends WorldManager {
 		
 		this.mainPlayer = mainPlayer;
 		
-		Level level = getLevel(newPos.levelDepth);
+		Level level = getLevel(newPos.levelId);
 		if(level != null)
 			setEntityLevel(mainPlayer, level);
 		else
@@ -244,7 +254,7 @@ public class ClientWorld extends WorldManager {
 	public GameClient getClient() { return client; }
 	
 	@Override
-	public ClientLevel getLevel(int depth) { return (ClientLevel) super.getLevel(depth); }
+	public ClientLevel getLevel(int levelId) { return (ClientLevel) super.getLevel(levelId); }
 	
 	@Override
 	public ClientLevel getEntityLevel(Entity e) { return (ClientLevel) super.getEntityLevel(e); }

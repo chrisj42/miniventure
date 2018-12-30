@@ -183,7 +183,7 @@ public class ServerPlayer extends ServerMob implements Player {
 		objects.addAll(level.getOverlappingEntities(interactionBounds, this));
 		Boundable.sortByDistance(objects, getCenter());
 		
-		Tile tile = level.getClosestTile(interactionBounds);
+		Tile tile = level.getTile(interactionBounds);
 		if(tile != null)
 			objects.add(tile);
 		
