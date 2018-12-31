@@ -77,18 +77,6 @@ with a height map, the rendering coordinate system splits from the position coor
 
 IMPL PLAN
 - first is making the system for tracking vertical tiletypes and raising them up
-- prob: player position when traversing layers
-	
-	maybe ramp tile edges aren't such a good idea for a sandbox game..?
-	let's do ramp tiles instead. These can only ramp in one direction.	
-	- 
-	- for ramp tiles, the lower tile overlaps the "front-face" of the upper tile
-	- any distance covered perpendicular to the front-face, while the center of an entity is within the bounds of the front-face, is counted towards z instead of y. one z unit is then defined (for that direction) as the length of the front-face in the dimension perpendicular to the axis of the face.
-	- in terms of collision, and more for the purposes of high speed movement (speeds that technically shouldn't be allowed unless in debug mode, but I'll implement it for that and in case of some weird lag glitches or something), if a movement results in the sprite being on a tile with a different stack height than the starting tile...
-		- ...and is making an illegal collision, then the movement is re-tried with the tiletype at the same stack height as the entity.
-		- ...and is not making any illegal collisions, then the movement on the axis perpendicular to the face axis (for a wall along the y axis, it's the x movement, and vice versa) is lessened by the perpendicular face length times the number of levels of difference there are between the original and new positions. Then the level count is added to the z coordinate.
-			- note that in this approach, the entity is effectively scaling a cliff which is the side of the tile.
-			- This should work even if the ending position is overlapping a ramped face; simply compute the new z position of the center of the sprite at the new location, and use that as opposed to a simple integer.
-			- note that, when moving horizontally, this will move the entity up (or down) on screen (but the positional y coordinate will remain unchanged). Upward movement will not show any anomalies. Downward movement up a ramp will...
-			 	- ...make the entity move downward on screen slower than normal walk speed, assuming that the back end of the sprite is at least partly visible. Or, even with my proposed rendering system with overlap, if the 
-			 	- ...make the entity move upward on screen if the tile face is not at all visible, and the tile renders over the tile above it (in the y dir not z). In this case, the entity would go down on screen to the bottom of the tile with the lower z but greater y, and then it would go up the screen, increasing its positional z only (positional y is constant) until it matched the z of the upper tile.
+- player moving between layers
+	- auto-jump when approaching ledge with one level height difference
+	- NO LOSS OF SPEED compared to walking straight
