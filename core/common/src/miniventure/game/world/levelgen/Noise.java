@@ -80,10 +80,10 @@ class Noise {
 	}
 	
 	/// basically just calls the above method repeatedly with the given samplePeriods, and returns the results in a 2D array.
-	static float[][] smoothNoise2D(float[] noise, int width, int height, int... samplePeriods) {
+	static float[][] smoothNoise2D(float[] noise, int width, int height, int[] samplePeriods) {
 		return smoothNoise2D(noise, width, height, new float[0], samplePeriods);
 	}
-	static float[][] smoothNoise2D(float[] noise, int width, int height, float[] weights, int... samplePeriods) {
+	static float[][] smoothNoise2D(float[] noise, int width, int height, float[] weights, int[] samplePeriods) {
 		float[][] smoothedNoise = new float[samplePeriods.length][noise.length];
 		for(int i = 0; i < smoothedNoise.length; i++)
 			smoothedNoise[i] = smoothNoise2D(noise, width, height, weights, samplePeriods[i]);
@@ -92,10 +92,10 @@ class Noise {
 	}
 	
 	/// same as above, but instead of returning the results separately, it compounds each smoothing onto the same array.
-	static float[] smoothNoise2DProgressive(float[] noise, int width, int height, int... samplePeriods) {
+	static float[] smoothNoise2DProgressive(float[] noise, int width, int height, int[] samplePeriods) {
 		return smoothNoise2DProgressive(noise, width, height, new float[0], samplePeriods);
 	}
-	static float[] smoothNoise2DProgressive(float[] noise, int width, int height, float[] weights, int... samplePeriods) {
+	static float[] smoothNoise2DProgressive(float[] noise, int width, int height, float[] weights, int[] samplePeriods) {
 		float[] smoothedNoise = new float[noise.length];
 		System.arraycopy(noise, 0, smoothedNoise, 0, noise.length);
 		for(int i = 0; i < samplePeriods.length; i++)
@@ -105,9 +105,14 @@ class Noise {
 	}
 	
 	/// adds up the noise values from each array in parallel, giving each one a certain weight, stored in the weights array.
-	static float[] addNoiseWeighted(float[][] noiseMaps) {
+	static float[] addNoiseWeighted(float[][] noiseMaps, boolean increasingWeight) {
 		float[] weights = new float[noiseMaps.length];
-		Arrays.fill(weights, 1f);
+		if(increasingWeight) {
+			for(int i = 0; i < weights.length; i++)
+				weights[i] = (int)Math.pow(2, i);
+		}
+		else
+			Arrays.fill(weights, 1f);
 		return addNoiseWeighted(noiseMaps, weights);
 	}
 	static float[] addNoiseWeighted(float[][] noiseMaps, float... weights) {
