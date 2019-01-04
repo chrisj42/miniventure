@@ -1,10 +1,9 @@
 package miniventure.game.util;
 
 import java.lang.reflect.Array;
-import java.util.Arrays;
+import java.util.LinkedList;
 
 import miniventure.game.util.function.MapFunction;
-import miniventure.game.util.function.ValueFunction;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -12,20 +11,15 @@ import org.jetbrains.annotations.NotNull;
 public final class ArrayUtils {
 	private ArrayUtils() {}
 	
-	public static <T> T[] revCopyArray(T[] array) {
-		T[] newArray = Arrays.copyOf(array, array.length);
-		return revArray(newArray);
-	}
-	
-	public static <T> T[] revArray(T[] array) {
-		if(array.length < 2) return array;
+	public static void revArray(Object array) {
+		final int len = Array.getLength(array);
+		if(len < 2) return;
 		
-		for(int i = 0; i < array.length/2; i++) {
-			T temp = array[i];
-			array[i] = array[array.length-1-i];
-			array[array.length-1-i] = temp;
+		for(int i = 0; i < len/2; i++) {
+			Object temp = Array.get(array, i);
+			Array.set(array, i, Array.get(array, len-1-i));
+			Array.set(array, len-1-i, temp);
 		}
-		return array;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -38,35 +32,31 @@ public final class ArrayUtils {
 		return endValues;
 	}
 	
-	public static <E> void forEach(E[] array, ValueFunction<E> action) {
-		for(E e: array)
-			action.act(e);
-	}
-	
 	@NotNull
-	public static String arrayToString(@NotNull Object[] array, String start, String end, String delimiter) {
+	public static String arrayToString(@NotNull Object array, String start, String end, String delimiter) {
 		StringBuilder str = new StringBuilder(start);
-		for(int i = 0; i < array.length; i++) {
-			str.append(array[i]);
-			if(i < array.length-1)
+		
+		final int len = Array.getLength(array);
+		for(int i = 0; i < len; i++) {
+			str.append(Array.get(array, i));
+			if(i < len-1)
 				str.append(delimiter);
 		}
 		str.append(end);
 		return str.toString();
 	}
 	
-	@SafeVarargs
 	@SuppressWarnings("unchecked")
-	public static <T> T[] arrayJoin(Class<T> clazz, T[]... arrays) {
+	public static <T> T[] arrayJoin(Class<T> clazz, Object... arrays) {
 		int length = 0;
-		for(T[] ar: arrays)
-			length += ar.length;
+		for(Object ar: arrays)
+			length += Array.getLength(ar);
 		
 		T[] joined = (T[]) Array.newInstance(clazz, length);
 		int offset = 0;
-		for(T[] ar: arrays) {
-			System.arraycopy(ar, 0, joined, offset, ar.length);
-			offset += ar.length;
+		for(Object ar: arrays) {
+			System.arraycopy(ar, 0, joined, offset, Array.getLength(ar));
+			offset += Array.getLength(ar);
 		}
 		
 		return joined;
@@ -127,5 +117,65 @@ public final class ArrayUtils {
 			return stringifier.get(obj);
 		
 		return stringArrayJoiner.get(mapArray(boxArray(obj), String.class, elem -> deepToString(elem, stringArrayJoiner, stringifier)));
+	}
+	
+	public static void deepFill(Object array, Object value) {
+		for(int i = 0; i < Array.getLength(array); i++) {
+			Object stored = Array.get(array, i);
+			if(stored != null && stored.getClass().isArray())
+				deepFill(stored, value);
+			else
+				Array.set(array, i, value);
+		}
+	}
+	
+	// i realize that I don't need to track every array if I'm assuming the component type is a number; but I already did it.
+	public static void deepMapArray(Object array, float newmin, float newmax) {
+		if(Array.getLength(array) == 0) return;
+		
+		float[] extrema = getDeepMinMax(array);
+		final float min = extrema[0], max = extrema[1];
+		if(min == newmin && max == newmax) return; // goal already achieved
+		
+		LinkedList<Object> subarrays = new LinkedList<>();
+		subarrays.add(array);
+		
+		while(subarrays.size() > 0) {
+			Object curArray = subarrays.removeFirst();
+			final int len = Array.getLength(curArray);
+			for(int i = 0; i < len; i++) {
+				Object val = Array.get(curArray, i);
+				if(val == null) continue;
+				if(val.getClass().isArray())
+					subarrays.add(val);
+				else
+					Array.set(curArray, i, MyUtils.mapFloat((float)val, min, max, newmin, newmax));
+			}
+		}
+	}
+	
+	public static float[] getDeepMinMax(Object array) {
+		if(array == null) return null;
+		if(!array.getClass().isArray())
+			return new float[] {(float)array, (float)array};
+		
+		boolean set = false;
+		float min = 0, max = 0;
+		for(int i = 0; i < Array.getLength(array); i++) {
+			float[] extrema = getDeepMinMax(Array.get(array, i));
+			if(extrema == null) continue;
+			if(!set) {
+				set = true;
+				min = extrema[0];
+				max = extrema[1];
+			}
+			else {
+				min = Math.min(min, extrema[0]);
+				max = Math.max(max, extrema[1]);
+			}
+		}
+		
+		if(!set) return null;
+		return new float[] {min, max};
 	}
 }

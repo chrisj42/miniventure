@@ -1,11 +1,34 @@
-package miniventure.game.world.levelgen;
+package miniventure.game.world.levelgen.noise;
 
 import java.util.Arrays;
 import java.util.Random;
 
 import miniventure.game.util.MyUtils;
 
-class Noise {
+public class Noise implements NoiseGenerator {
+	
+	private final int[] samplePeriods;
+	private final int[] postSmoothing;
+	
+	public Noise(int[] samplePeriods, int[] postSmoothing) {
+		this.samplePeriods = samplePeriods;
+		this.postSmoothing = postSmoothing;
+	} 
+	
+	@Override
+	public float[][] get2DNoise(long seed, int width, int height) {
+		float[] noise = getWhiteNoise(seed, width*height);
+		float[][] noises = smoothNoise2D(noise, width, height, samplePeriods);
+		float[] smoothNoise = addNoiseWeighted(noises, true);
+		smoothNoise = smoothNoise2DProgressive(smoothNoise, width, height, postSmoothing);
+		
+		float[][] smoothNoise2D = new float[width][height];
+		for(int i = 0; i < smoothNoise2D.length; i++)
+			System.arraycopy(smoothNoise, i*height, smoothNoise2D[i], 0, height);
+		
+		return smoothNoise2D;
+	}
+	
 	static float[] getWhiteNoise(long seed, int length) {
 		float[] noise = new float[length];
 		Random random = new Random(new Random(seed).nextLong());

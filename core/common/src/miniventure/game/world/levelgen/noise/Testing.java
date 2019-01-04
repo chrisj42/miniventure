@@ -1,4 +1,4 @@
-package miniventure.game.world.levelgen;
+package miniventure.game.world.levelgen.noise;
 
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -7,6 +7,9 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.util.Random;
+
+import miniventure.game.world.levelgen.noise.NoiseConfig.WeightFetcher;
 
 public class Testing {
 	
@@ -26,28 +29,68 @@ public class Testing {
 	}
 	
 	public static void main(String[] args) {
-		final int width = 180;
+		final int width = 150;
 		// final int width = new Integer(args[0]);
-		final int height = 180;
+		final int height = 150;
 		// final int height = new Integer(args[1]);
-		final int scale = 4;
+		final int scale = 6;
 		// final int scale = new Integer(args[2]);
 		
 		// final int[] samplePeriods = parseInts(args[3]);
 		// final int[] postSmoothing = parseInts(args[4]);
 		
-		// make height map
-		NoiseMap heightMap = new NoiseMap(width, height, new int[] {1,32,8,2,4,16}, new int[] {4,2,1}, true, true);
-		// multiply height map by island mask
 		final float maxDist = (float) Math.hypot(width/2f, height/2f);
-		heightMap.multiply((value, x, y) -> {
+		WeightFetcher islandMask = (value, x, y) -> {
 			float xd = Math.abs(x-width/2f);
 			float yd = Math.abs(y-height/2f);
 			float dist = (float) Math.hypot(xd, yd);
 			float trans = 1 - dist/maxDist;
-			return trans == 0 ? 0 : (float) Math.pow(trans, 1.75);
-		});
-		// heightMap.multiply((value, x, y) -> value);
+			return trans;// == 0 ? 0 : (float) Math.pow(trans, 3);
+		};
+		
+		// make height map
+		NoiseGenerator noise = new Noise(new int[] {1,32,8,2,4,16}, new int[] {4,2,1});
+		NoiseGenerator func = new Coherent2DNoiseFunction(23, 2);
+		NoiseGenerator func2 = new Coherent2DNoiseFunction(12, 20);
+		NoiseGenerator func3 = new Coherent2DNoiseFunction(50, 8);
+		NoiseGenerator func4 = new Coherent2DNoiseFunction(32, 6);
+		
+		NoiseConfig mountains = new NoiseConfig(width, height, new Coherent2DNoiseFunction(23, 2), true, true);
+		mountains.multiply(new Coherent2DNoiseFunction(50, 8));
+		mountains.multiply(new Coherent2DNoiseFunction(32, 6));
+		mountains.multiply(islandMask);
+		mountains.multiply(islandMask);
+		
+		
+		NoiseConfig volcano = new NoiseConfig(width, height, new Coherent2DNoiseFunction(30, 2), true, true);
+		// plains.multiply(new Coherent2DNoiseFunction(50, 8));
+		// plains.multiply(new Coherent2DNoiseFunction(32, 6));
+		// plains.multiply(islandMask);
+		volcano.multiply(islandMask);
+		
+		NoiseConfig starter = new NoiseConfig(width, height, noise, true, true);
+		starter.multiply(islandMask);
+		starter.multiply(islandMask);
+		
+		NoiseConfiguration config = new NoiseConfiguration(
+			new Noise(new int[] {1,32,8,2,4,16}, new int[] {4,2,1}),
+			NoiseModifier.FILL_VALUE_RANGE,
+			NoiseModifier.ISLAND_MASK,
+			NoiseModifier.FILL_VALUE_RANGE
+		);
+		
+		// NoiseConfig noiseMap = new NoiseConfig(width, height, func, true, false);
+		// noiseMap.multiply((WeightFetcher) (value, x, y) -> 1/(float)Math.sqrt(value));
+		
+		// heightMap.multiply(func2);
+		
+		// multiply height map by island mask
+		// heightMap.multiply(noiseMap);
+		// heightMap.multiply(islandMask);
+		// heightMap.multiply(islandMask);
+		// heightMap.multiply(islandMask);
+		// heightMap.multiply((value, x, y) -> value);\
+		// heightMap.multiply(func);
 		
 		// make river map
 		// NoiseMap riverMap = new NoiseMap(width, height, new int[] {2,4,8,16,32}, new int[] {32,16,8,4,3,2,1}, true);
@@ -56,22 +99,24 @@ public class Testing {
 		
 		
 		// display end result
-		final boolean isCount = false;
+		final boolean isCount = true;
 		// final boolean isCount = Boolean.parseBoolean(args[5]);
 		final float[] thresholds;
 		//noinspection ConstantConditions
 		if(isCount) {
-			final int count = 100;
+			final int count = 12;
 			// final int count = new Integer(args[6]);
 			thresholds = new float[count-1];
 			for(int i = 0; i < thresholds.length; i++)
 				thresholds[i] = (i+1)*1f/thresholds.length;
 		}
-		else thresholds = new float[] {.2f, .3f, .4f, .6f, .8f};
+		else thresholds = new float[] {.2f};
 		// else thresholds = parseFloats(args[6]);
 		
+		Random rand = new Random();
+		
 		boolean more = true;
-		while(more) more = displayNoise(width, height, scale, heightMap.getNoise(), thresholds, false);
+		while(more) more = displayNoise(width, height, scale, config.get2DNoise(rand.nextLong(), width, height), thresholds, false);
 	}
 	
 	/*private static float[][] addRivers(int count, float[][] noise) {
