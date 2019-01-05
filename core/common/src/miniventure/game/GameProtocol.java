@@ -36,8 +36,8 @@ import com.esotericsoftware.kryo.Kryo;
 public interface GameProtocol {
 	
 	int PORT = 8405;
-	int writeBufferSize = 16384*8;
-	int objectBufferSize = 16384*8;
+	int writeBufferSize = 1638400;
+	int objectBufferSize = 1638400;
 	
 	boolean lag = false;
 	int lagMin = lag?10:0, lagMax = lag?100:0;

@@ -113,7 +113,7 @@ public class ServerWorld extends WorldManager {
 	public void createWorld(int width, int height) {
 		worldLoaded = false;
 		
-		worldGenerator = new WorldGenerator(MathUtils.random.nextLong(), 100, 100);
+		worldGenerator = new WorldGenerator(MathUtils.random.nextLong(), 200, 200);
 		ProgressPrinter logger = new ProgressPrinter();
 		
 		logger.pushMessage("");

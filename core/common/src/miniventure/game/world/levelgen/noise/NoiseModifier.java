@@ -19,8 +19,8 @@ public interface NoiseModifier {
 		});
 	}
 	
-	static NoiseModifier multiply(NoiseGenerator generator, float genWeight) {
-		return forGenerator(generator, (origNoise, newNoise, x, y) -> origNoise * (float) Math.pow(newNoise, genWeight));
+	static NoiseModifier multiply(NoiseGenerator generator) {
+		return forGenerator(generator, (origNoise, newNoise, x, y) -> origNoise * newNoise);
 	}
 	
 	
