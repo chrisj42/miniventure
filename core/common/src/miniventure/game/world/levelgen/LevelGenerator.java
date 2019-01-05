@@ -34,6 +34,30 @@ public class LevelGenerator {
 	
 	/*
 		- many noise configs
+		- since there are multiple ways in which tiles can be filled, there ought to be a sequence of tile applications
+		- applications are valid only on certain tiles
+		- for each tile, go backward on the application list until you find one that is valid
+		
+		- in terms of biomes, I just need to diversify the flora and fauna there
+			- no plains, but instead just "woodland" or "tropical"
+				- open areas
+				- forested areas
+				- marshy areas
+				- lake areas
+				- maybe mountains..? or just hills?
+			- "arctic"
+				- similar to tropical but snow on everything
+				- foresty areas
+				- frozen lakes
+				- more mountains than tropical
+			- desert
+				- lots of sand dunes
+				- some oases
+				- variety of fauna, hopefully more plants than just "cactus"; maybe dead bushes?
+			- mountains/rocky
+				- lots of mountains
+				- pre-made caves?
+			
 	 */
 	
 	// public LevelGenerator(long seed) { this(seed, 0, 0); }
