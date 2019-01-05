@@ -1,13 +1,20 @@
 package miniventure.game.world.levelgen.noise;
 
+import java.util.LinkedList;
+
 public class NoiseConfiguration implements NoiseGenerator {
 	
 	private final NoiseGenerator generator;
-	private final NoiseModifier[] modifiers;
+	private final LinkedList<NoiseModifier> modifiers;
 	
-	public NoiseConfiguration(NoiseGenerator generator, NoiseModifier... modifiers) {
+	public NoiseConfiguration(NoiseGenerator generator) {
 		this.generator = generator;
-		this.modifiers = modifiers;
+		this.modifiers = new LinkedList<>();
+	}
+	
+	public NoiseConfiguration modify(NoiseModifier modifier) {
+		modifiers.add(modifier);
+		return this;
 	}
 	
 	@Override

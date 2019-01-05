@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 
 import miniventure.game.world.levelgen.noise.Noise;
-import miniventure.game.world.levelgen.noise.NoiseConfig;
 import miniventure.game.world.levelgen.noise.NoiseConfiguration;
+import miniventure.game.world.levelgen.noise.NoiseGenerator;
 import miniventure.game.world.levelgen.noise.NoiseModifier;
 import miniventure.game.world.tile.TileTypeEnum;
 
@@ -36,17 +36,10 @@ public class LevelGenerator {
 		levelWidth = width;
 		levelHeight = height;
 		
-		// make height map
-		// 
-		// NoiseConfig heightMap = new NoiseConfig(seed, width, height, ), true, true);
-		// multiply height map by island mask
-		// values = heightMap.getNoise();
-		NoiseConfiguration config = new NoiseConfiguration(
-			new Noise(new int[] {1,32,8,2,4,16}, new int[] {4,2,1}),
-			NoiseModifier.FILL_VALUE_RANGE,
-			NoiseModifier.ISLAND_MASK,
-			NoiseModifier.FILL_VALUE_RANGE
-		);
+		NoiseConfiguration config = new NoiseConfiguration(new Noise(new int[] {1,32,8,2,4,16}, new int[] {4,2,1}))
+			.modify(NoiseModifier.FILL_VALUE_RANGE)
+			.modify(NoiseModifier.combine(NoiseGenerator.ISLAND_MASK, 1))
+			.modify(NoiseModifier.FILL_VALUE_RANGE);
 		
 		values = config.get2DNoise(seed, width, height);
 	}

@@ -8,19 +8,20 @@ public interface NoiseModifier {
 	void modify(long seed, float[][] noise);
 	
 	
-	NoiseModifier ISLAND_MASK = constructLater((seed, width, height) -> {
-		final float maxDist = (float) Math.hypot(width/2f, height/2f);
-		return forEach((value, x, y) -> {
-			float xd = Math.abs(x-width/2f);
-			float yd = Math.abs(y-height/2f);
-			float dist = (float) Math.hypot(xd, yd);
-			float trans = 1 - dist/maxDist;
-			return value * (float) Math.pow(trans, 1.75);
-		});
-	});
-	
-	
 	NoiseModifier FILL_VALUE_RANGE = (seed, noise) -> ArrayUtils.deepMapArray(noise, 0, 1);
+	
+	
+	static NoiseModifier combine(NoiseGenerator generator, float genWeight) {
+		return forGenerator(generator, (origNoise, newNoise, x, y) -> {
+			float result = origNoise + newNoise * genWeight;
+			result /= genWeight + 1;
+			return result;
+		});
+	}
+	
+	static NoiseModifier multiply(NoiseGenerator generator, float genWeight) {
+		return forGenerator(generator, (origNoise, newNoise, x, y) -> origNoise * (float) Math.pow(newNoise, genWeight));
+	}
 	
 	
 	@FunctionalInterface
@@ -44,5 +45,18 @@ public interface NoiseModifier {
 	
 	static NoiseModifier constructLater(ModifierMaker modMaker) {
 		return (seed, noise) -> modMaker.init(seed, noise.length, noise[0].length).modify(seed, noise);
+	}
+	
+	
+	@FunctionalInterface
+	interface MatchValueFetcher {
+		float get(float origNoise, float newNoise, int x, int y);
+	}
+	
+	static NoiseModifier forGenerator(NoiseGenerator generator, MatchValueFetcher valueFunction) {
+		return constructLater((seed, width, height) -> {
+			float[][] values = generator.get2DNoise(seed+10, width, height);
+			return forEach((noise, x, y) -> valueFunction.get(noise, values[x][y], width, height));
+		});
 	}
 }
