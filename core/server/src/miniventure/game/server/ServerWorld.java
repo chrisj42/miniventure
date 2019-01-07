@@ -188,6 +188,15 @@ public class ServerWorld extends WorldManager {
 	
 	
 	@Override
+	public void deregisterEntity(int eid) {
+		Entity e = getEntity(eid);
+		ServerLevel prev = getEntityLevel(e);
+		super.deregisterEntity(eid);
+		if(e != null && prev != null)
+			server.broadcast(new EntityRemoval(e), prev, (ServerEntity) e);
+	}
+	
+	@Override
 	public void setEntityLevel(@NotNull Entity e, @NotNull Level level) {
 		ServerLevel previous = getEntityLevel(e);
 		super.setEntityLevel(e, level);
