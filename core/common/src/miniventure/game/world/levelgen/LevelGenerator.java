@@ -90,6 +90,12 @@ public class LevelGenerator {
 				if(terrainv < .1)
 					type = TileTypeEnum.WATER;
 				else if(featurev < .05)
+					type = TileTypeEnum.STONE4;
+				else if(featurev < .1)
+					type = TileTypeEnum.STONE3;
+				else if(featurev < .2)
+					type = TileTypeEnum.STONE2;
+				else if(featurev < .3)
 					type = TileTypeEnum.STONE;
 				else if(terrainv < .15)
 					type = TileTypeEnum.SAND;

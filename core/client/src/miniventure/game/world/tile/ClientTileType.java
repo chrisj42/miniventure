@@ -126,6 +126,18 @@ public class ClientTileType extends TileType {
 			new ConnectionManager(type, RenderStyle.SINGLE_FRAME, COAL_ORE.mainEnum, IRON_ORE.mainEnum, TUNGSTEN_ORE.mainEnum, RUBY_ORE.mainEnum),
 			new OverlapManager(type, RenderStyle.SINGLE_FRAME)
 		)),
+		STONE2(type -> new ClientTileType(type, true,
+			new ConnectionManager(type, RenderStyle.SINGLE_FRAME, COAL_ORE.mainEnum, IRON_ORE.mainEnum, TUNGSTEN_ORE.mainEnum, RUBY_ORE.mainEnum),
+			new OverlapManager(type, RenderStyle.SINGLE_FRAME)
+		)),
+		STONE3(type -> new ClientTileType(type, true,
+			new ConnectionManager(type, RenderStyle.SINGLE_FRAME, COAL_ORE.mainEnum, IRON_ORE.mainEnum, TUNGSTEN_ORE.mainEnum, RUBY_ORE.mainEnum),
+			new OverlapManager(type, RenderStyle.SINGLE_FRAME)
+		)),
+		STONE4(type -> new ClientTileType(type, true,
+			new ConnectionManager(type, RenderStyle.SINGLE_FRAME, COAL_ORE.mainEnum, IRON_ORE.mainEnum, TUNGSTEN_ORE.mainEnum, RUBY_ORE.mainEnum),
+			new OverlapManager(type, RenderStyle.SINGLE_FRAME)
+		)),
 		
 		STONE_FLOOR(type -> new ClientTileType(type, true,
 			new ConnectionManager(type, RenderStyle.SINGLE_FRAME, type)

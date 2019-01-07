@@ -8,7 +8,7 @@ public enum TileTypeEnum {
 	
 	HOLE(true), DIRT(true), SAND(true), GRASS(true), STONE_PATH(true), SNOW(true),
 	FLINT(true), WATER(true, 0.6f), COAL_ORE(false), IRON_ORE(false), TUNGSTEN_ORE(false), RUBY_ORE(false),
-	STONE(false), STONE_FLOOR(true), WOOD_WALL(false), STONE_WALL(false),
+	STONE(false), STONE2(false), STONE3(false), STONE4(false), STONE_FLOOR(true), WOOD_WALL(false), STONE_WALL(false),
 	OPEN_DOOR(true), CLOSED_DOOR(false), TORCH(true), CACTUS(false),
 	CARTOON_TREE(false), DARK_TREE(false), PINE_TREE(false), POOF_TREE(false);
 	
