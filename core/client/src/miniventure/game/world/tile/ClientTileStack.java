@@ -31,6 +31,17 @@ public class ClientTileStack extends TileStack<ClientTileType> {
 	
 	public ClientTileType getLowestVisibleLayer() { return opaqueStack.peekLast(); }
 	
+	public int getLowestRenderHeight() {
+		int height = 0;
+		for(ClientTileType type: getTypes(true)) {
+			if(!type.getRenderer().isOpaque())
+				break;
+			if(type.hasVerticality())
+				height++;
+		}
+		return height;
+	}
+	
 	@Override
 	public List<ClientTileType> getTypes() { return getTypes(false); }
 	public List<ClientTileType> getTypes(boolean includeCovered) {

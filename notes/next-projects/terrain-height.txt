@@ -1,8 +1,12 @@
 MISC
-- some tiles can be ramp-like, and bridge between tiles with different height levels (these should prob only bridge a one-layer difference) <-- <<this idea is fishy>>
-
 - mountains have many layers of rock; the top-most rock layer of any tile on the mountain will have dirt on it, maybe grass
 - the rock will still be visible on the edges
+
+
+INTER-LAYER TRAVEL
+- layers are separated by ledges
+- ladders may also be placed on a ledge (I'll do this later since it involves placing things between tiles
+	- I'll probably use data for the tile the ladder is on; it will also affect the tile the ladder faces, but it doesn't make sense for it to count as a layer
 
 
 LAYERS/CRUST
@@ -71,7 +75,7 @@ Another solution, though, is to not use door frames, and instead just have a hin
 COORDINATES
 with a height map, the rendering coordinate system splits from the position coordinate system.
 - Rendering has only x and y, but position has x, y, and z.
-- the z coordinate is a float too
+- the z coordinate is a float too... for entities.
 - 
 
 

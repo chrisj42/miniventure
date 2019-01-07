@@ -6,18 +6,41 @@ import org.jetbrains.annotations.NotNull;
 
 public enum TileTypeEnum {
 	
-	HOLE(true), DIRT(true), SAND(true), GRASS(true), STONE_PATH(true), SNOW(true),
-	FLINT(true), WATER(true, 0.6f), COAL_ORE(false), IRON_ORE(false), TUNGSTEN_ORE(false), RUBY_ORE(false),
-	STONE(false), STONE_FLOOR(true), WOOD_WALL(false), STONE_WALL(false),
-	OPEN_DOOR(true), CLOSED_DOOR(false), TORCH(true), CACTUS(false),
-	CARTOON_TREE(false), DARK_TREE(false), PINE_TREE(false), POOF_TREE(false);
+	HOLE(true),
+	DIRT(true),
+	SAND(true),
+	GRASS(true),
+	STONE_PATH(true),
+	SNOW(true),
+	FLINT(true),
+	WATER(true, 0.6f),
+	COAL_ORE(false),
+	IRON_ORE(false),
+	TUNGSTEN_ORE(false),
+	RUBY_ORE(false),
+	STONE(false),
+	STONE_FLOOR(true),
+	WOOD_WALL(false),
+	STONE_WALL(false),
+	OPEN_DOOR(true),
+	CLOSED_DOOR(false),
+	TORCH(true),
+	CACTUS(false),
+	CARTOON_TREE(false),
+	DARK_TREE(false),
+	PINE_TREE(false),
+	POOF_TREE(false);
 	
 	public final boolean walkable;
 	public final float speedRatio;
+	public final boolean verticality;
 	
 	TileTypeEnum(boolean walkable) { this(walkable, 1); }
-	TileTypeEnum(boolean walkable, float speedRatio) {
+	TileTypeEnum(boolean walkable, boolean verticality) { this(walkable, verticality, 1); }
+	TileTypeEnum(boolean walkable, float speedRatio) { this(walkable, false, speedRatio); }
+	TileTypeEnum(boolean walkable, boolean verticality, float speedRatio) {
 		this.walkable = walkable;
+		this.verticality = verticality;
 		this.speedRatio = speedRatio;
 	}
 	

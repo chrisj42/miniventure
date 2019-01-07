@@ -14,6 +14,7 @@ public abstract class TileType {
 	public float getSpeedRatio() {
 		return enumType.speedRatio;
 	}
+	public boolean hasVerticality() { return enumType.verticality; }
 	
 	public String getName() { return MyUtils.toTitleCase(enumType.name(), "_"); }
 	

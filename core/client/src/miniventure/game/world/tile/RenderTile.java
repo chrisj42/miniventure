@@ -5,7 +5,6 @@ import java.util.*;
 import miniventure.game.item.Item;
 import miniventure.game.item.Result;
 import miniventure.game.texture.TextureHolder;
-import miniventure.game.util.MyUtils;
 import miniventure.game.util.RelPos;
 import miniventure.game.util.customenum.SerialMap;
 import miniventure.game.world.Level;
@@ -21,8 +20,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class RenderTile extends Tile {
 	
-	private ArrayList<TileAnimation<TextureHolder>> spriteStack;
-	private ArrayList<ClientTileType> typeStack;
+	private TreeMap<Integer, ArrayList<TileAnimation<TextureHolder>>> spriteStacks;
+	private TreeMap<Integer, ArrayList<ClientTileType>> typeStacks;
 	private boolean updateSprites;
 	
 	private final Object spriteLock = new Object();
@@ -49,15 +48,20 @@ public class RenderTile extends Tile {
 		
 		synchronized (spriteLock) {
 			// cannot render if there are no sprites.
-			if(spriteStack == null || updateSprites)
+			if(spriteStacks == null || updateSprites)
 				compileSprites(); // since the lock can be reacquired by the same thread, this is fine to put in a synchronized statement.
 		}
 		
 		synchronized (spriteLock) {
-			for(int i = 0; i < spriteStack.size(); i++) {
-				TileAnimation<TextureHolder> animation = spriteStack.get(i);
-				//typeStack.get(i).getRenderer().transitionManager.tryFinishAnimation(this);
-				batch.draw(animation.getKeyFrame(this).texture, (x - posOffset.x) * SIZE, (y - posOffset.y + typeStack.get(i).getZOffset()) * SIZE);
+			//noinspection KeySetIterationMayUseEntrySet
+			for(int height: spriteStacks.keySet()) {
+				ArrayList<TileAnimation<TextureHolder>> spriteStack = spriteStacks.get(height);
+				ArrayList<ClientTileType> typeStack = typeStacks.get(height);
+				for(int i = 0; i < spriteStack.size(); i++) {
+					TileAnimation<TextureHolder> animation = spriteStack.get(i);
+					//typeStack.get(i).getRenderer().transitionManager.tryFinishAnimation(this);
+					batch.draw(animation.getKeyFrame(this).texture, (x - posOffset.x) * SIZE, (y - posOffset.y + typeStack.get(i).getZOffset()) * SIZE + height * SIZE/2f);
+				}
 			}
 		}
 	}
@@ -86,9 +90,10 @@ public class RenderTile extends Tile {
 	/** @noinspection ObjectAllocationInLoop*/
 	@SuppressWarnings("unchecked")
 	private void compileSprites() {
-		TreeMap<TileTypeEnum, ClientTileType> allTypes = new TreeMap<>(); // overlap
-		EnumMap<RelPos, EnumSet<TileTypeEnum>> typesAtPositions = new EnumMap<>(RelPos.class); // connection
-		EnumMap<TileTypeEnum, EnumSet<RelPos>> typePositions = new EnumMap<>(TileTypeEnum.class); // overlap
+		TreeMap<Integer, TreeMap<TileTypeEnum, ClientTileType>> allTypes = new TreeMap<>(); // overlap
+		TreeMap<Integer, EnumMap<RelPos, EnumSet<TileTypeEnum>>> typesAtPositions = new TreeMap<>(); // connection
+		TreeMap<Integer, EnumMap<TileTypeEnum, EnumSet<RelPos>>> typePositions = new TreeMap<>(); // overlap/overhang
+		// TreeMap<Integer, EnumSet<RelPos>> overhangPositions = new TreeMap<>(); // overhang; contains positions where there is overhang from the given tile, at the given height. Unlike overlap, overhang sprites are applied by the same tile and tile type that they are fetched from.
 		
 		for (RelPos rp: RelPos.values()) {
 			int x = rp.getX();
@@ -96,46 +101,83 @@ public class RenderTile extends Tile {
 			RenderTile oTile = (RenderTile) getLevel().getTile(this.x + x, this.y + y);
 			List<ClientTileType> aroundTypes = oTile != null ? oTile.getTypeStack().getTypes() : Collections.emptyList();
 			
-			EnumMap<TileTypeEnum, ClientTileType> typeMap = new EnumMap<>(TileTypeEnum.class);
+			// filling the type positions for overlap
+			EnumMap<TileTypeEnum, ClientTileType> typeMap = new EnumMap<>(TileTypeEnum.class); // for allTypes
+			EnumSet<TileTypeEnum> typeCache = EnumSet.noneOf(TileTypeEnum.class); // for typesAtPositions
+			int curHeight = 0;
+			// iterating over each visible TileType in the adjacent tile
 			for(ClientTileType type: aroundTypes) {
-				typeMap.put(type.getTypeEnum(), type);
-				typePositions.computeIfAbsent(type.getTypeEnum(), k -> EnumSet.noneOf(RelPos.class));
-				typePositions.get(type.getTypeEnum()).add(rp);
+				typeMap.put(type.getTypeEnum(), type); // for allTypes
+				typeCache.add(type.getTypeEnum()); // for typesAtPositions
+				typePositions.computeIfAbsent(curHeight, k -> new EnumMap<>(TileTypeEnum.class)).computeIfAbsent(type.getTypeEnum(), k -> EnumSet.noneOf(RelPos.class)).add(rp); // for typePositions
+				if(type.hasVerticality()) { // store types that were at this height
+					// only add 
+					// todo before I can progress any further, I need to know how overhang sprites will work for the sides and top of the sprites.
+					// overhangPositions.computeIfAbsent(curHeight, k -> new EnumMap<>(TileTypeEnum.class)).computeIfAbsent(type.getTypeEnum(), k -> EnumSet.noneOf(RelPos.class)).add(rp); // for overhangTypes
+					// store in bulk
+					allTypes.computeIfAbsent(curHeight, k -> new TreeMap<>()).putAll(typeMap);
+					System.out.println("added: "+typeMap);
+					typeMap.clear();
+					// store by position
+					typesAtPositions.computeIfAbsent(curHeight, k -> new EnumMap<>(RelPos.class)).computeIfAbsent(rp, k -> EnumSet.noneOf(TileTypeEnum.class)).addAll(typeCache);
+					typeCache.clear();
+					// inc height
+					curHeight++;
+				}
 			}
-			allTypes.putAll(typeMap);
-			typesAtPositions.put(rp, MyUtils.enumSet(typeMap.keySet()));
+			
+			allTypes.computeIfAbsent(curHeight, k -> new TreeMap<>()).putAll(typeMap);
+			// System.out.println("added: "+typeMap);
+			typeMap.clear();
+			// store by position
+			typesAtPositions.computeIfAbsent(curHeight, k -> new EnumMap<>(RelPos.class)).computeIfAbsent(rp, k -> EnumSet.noneOf(TileTypeEnum.class)).addAll(typeCache);
+			typeCache.clear();
 		}
 		
+		// System.out.println(allTypes);
+		
 		// all tile types have been fetched. Now accumulate the sprites.
-		ArrayList<TileAnimation<TextureHolder>> spriteStack = new ArrayList<>(16);
-		ArrayList<ClientTileType> typeStack = new ArrayList<>(16);
+		TreeMap<Integer, ArrayList<TileAnimation<TextureHolder>>> spriteStacks = new TreeMap<>();
+		TreeMap<Integer, ArrayList<ClientTileType>> typeStacks = new TreeMap<>();
+		// ArrayList<TileAnimation<TextureHolder>> spriteStack = new ArrayList<>(16);
+		// ArrayList<ClientTileType> typeStack = new ArrayList<>(16);
 		//ArrayList<String> spriteNames = new ArrayList<>(16);
 		
 		// get overlap data, in case it's needed
 		//EnumMap<TileTypeEnum, EnumSet<RelPos>> typePositions = OverlapManager.mapTileTypesAround(this);
 		
-		// iterate through main stack from bottom to top, adding connection and overlap sprites each level.
+		// iterate through main stack from bottom to top, adding connection and overlap and overhang sprites each level.
 		List<ClientTileType> types = getTypeStack().getTypes();
+		int curHeight = getTypeStack().getLowestRenderHeight();
 		for(int i = 1; i <= types.size(); i++) {
 			ClientTileType cur = i < types.size() ? types.get(i) : null;
 			ClientTileType prev = types.get(i-1);
+			int prevHeight = curHeight;
+			if(prev.hasVerticality())
+				curHeight++;
+			
+			ArrayList<TileAnimation<TextureHolder>> spriteStack = spriteStacks.computeIfAbsent(prevHeight, k -> new ArrayList<>(16));
+			ArrayList<ClientTileType> typeStack = typeStacks.computeIfAbsent(prevHeight, k -> new ArrayList<>(16));
 			
 			// add connection sprite (or transition) for prev
-			TileAnimation<TextureHolder> animation = prev.getRenderer().getConnectionSprite(this, typesAtPositions);
+			TileAnimation<TextureHolder> animation = prev.getRenderer().getConnectionSprite(this, typesAtPositions.get(prevHeight));
 			spriteStack.add(animation);
 			typeStack.add(prev);
 			//spriteNames.add(animation.getKeyFrames()[0].name);
 			
-			// check for overlaps that are above prev AND below cur
+			// check for overlaps that are above prev AND below cur; but they must be on the same level
 			NavigableMap<TileTypeEnum, ClientTileType> overlapMap;
-			if(cur == null)
-				overlapMap = allTypes.subMap(prev.getTypeEnum(), false, allTypes.lastKey(), !allTypes.lastKey().equals(prev.getTypeEnum()));
+			TreeMap<TileTypeEnum, ClientTileType> typesAtHeight = allTypes.get(prevHeight);
+			if(cur == null) // top of the stack
+				overlapMap = typesAtHeight.subMap(prev.getTypeEnum(), false, typesAtHeight.lastKey(), !typesAtHeight.lastKey().equals(prev.getTypeEnum()));
 			else
-				overlapMap = allTypes.subMap(prev.getTypeEnum(), false, cur.getTypeEnum(), false);
+				overlapMap = curHeight == prevHeight ? typesAtHeight.subMap(prev.getTypeEnum(), false, cur.getTypeEnum(), false) : new TreeMap<>();
+			
+			// we've found any overlap sprites; draw those, then check for overhang sprites
 			
 			if(overlapMap.size() > 0) { // add found overlaps
 				overlapMap.forEach((enumType, tileType) -> {
-					ArrayList<TileAnimation<TextureHolder>> sprites = tileType.getRenderer().getOverlapSprites(typePositions.get(enumType));
+					ArrayList<TileAnimation<TextureHolder>> sprites = tileType.getRenderer().getOverlapSprites(typePositions.get(prevHeight).get(enumType));
 					for(TileAnimation<TextureHolder> sprite: sprites) {
 						spriteStack.add(sprite);
 						typeStack.add(tileType);
@@ -143,6 +185,13 @@ public class RenderTile extends Tile {
 					}
 				});
 			}
+			
+			// also note that when rendering overhangs, in order to render, the tile type must be next to a tile with a lower minimum renderable height.
+			// overhang sprites are only considered when the prev tile type has verticality.
+			
+			// check for overhang sprites
+			// overhang sprites must have a greater level than those around to render
+			
 		}
 		
 		
@@ -157,8 +206,8 @@ public class RenderTile extends Tile {
 		// remember: minimize amount of code in synchronized statements (aka split up synchronized statements where possible), but obviously make sure any breaks in synchronization don't break things.
 		
 		synchronized (spriteLock) {
-			this.spriteStack = spriteStack;
-			this.typeStack = typeStack;
+			this.spriteStacks = spriteStacks;
+			this.typeStacks = typeStacks;
 			updateSprites = false;
 		}
 	}

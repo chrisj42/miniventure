@@ -15,35 +15,37 @@ import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
 
-public class OverlapManager {
+public class OverhangManager {
+	
+	// the main difference between overlap and overhang is that overhang sprites always render before the tile they are on top of, because since we are rendering by layer, the ground will have already rendered, and overhang will only render on non-solid or non-vertical sprites; anything solid and vertical makes for an overlap sprite instead. 
 	
 	static final EnumMap<TileTypeEnum, HashMap<String, Array<TextureHolder>>> tileAnimations = new EnumMap<>(TileTypeEnum.class);
 	
-	public static final OverlapManager NONE(@NotNull TileTypeEnum type) {
-		return new OverlapManager(type);
+	public static final OverhangManager NONE(@NotNull TileTypeEnum type) {
+		return new OverhangManager(type);
 	}
 	
 	private final TileTypeEnum type;
 	private final RenderStyle renderStyle;
 	private final HashMap<Integer, RenderStyle> overrides = new HashMap<>();
 	
-	public OverlapManager(@NotNull TileTypeEnum type, @NotNull RenderStyle renderStyle) {
+	public OverhangManager(@NotNull TileTypeEnum type, @NotNull RenderStyle renderStyle) {
 		this.type = type;
 		this.renderStyle = renderStyle;
 	}
-	private OverlapManager(@NotNull TileTypeEnum type) {
+	private OverhangManager(@NotNull TileTypeEnum type) {
 		this.type = type;
 		renderStyle = null;
 	}
 	
-	public OverlapManager overrideSprite(int spriteIndex, RenderStyle newStyle) {
+	public OverhangManager overrideSprite(int spriteIndex, RenderStyle newStyle) {
 		overrides.put(spriteIndex, newStyle);
 		return this;
 	}
 	
 	/// Boolean[] says if the overlappingType is present in each of the surrounding tiles.
 	// don't call this method with a typeToOverlap that this overlappingType isn't meant to overlap.
-	public ArrayList<TileAnimation<TextureHolder>> getOverlapSprites(EnumSet<RelPos> ovLayout) {
+	public ArrayList<TileAnimation<TextureHolder>> getOverhangSprites(EnumSet<RelPos> ovLayout) {
 		ArrayList<TileAnimation<TextureHolder>> animations = new ArrayList<>();
 		
 		if(renderStyle == null && overrides.size() == 0)
@@ -78,28 +80,4 @@ public class OverlapManager {
 		
 		return animations;
 	}
-	
-	
-	/*public static EnumMap<TileTypeEnum, EnumSet<RelPos>> mapTileTypesAround(@NotNull ClientTile tile) { return mapTileTypesAround(tile, true); }
-	// Exclude covered means that tile types beneath ground layers won't be included.
-	private static EnumMap<TileTypeEnum, EnumSet<RelPos>> mapTileTypesAround(@NotNull ClientTile tile, boolean excludeCovered) {
-		EnumMap<TileTypeEnum, EnumSet<RelPos>> typeMap = new EnumMap<>(TileTypeEnum.class);
-		
-		HashSet<Tile> aroundTiles = tile.getAdjacentTiles(true);
-		
-		for(Tile aroundTile: aroundTiles) {
-			List<ClientTileType> types = ((ClientTileStack)aroundTile.getTypeStack()).getTypes(!excludeCovered);
-			
-			Point thisPos = tile.getLocation();
-			Point otherPos = aroundTile.getLocation();
-			RelPos tilePos = RelPos.get(otherPos.x - thisPos.x, otherPos.y - thisPos.y);
-			
-			for(ClientTileType tileType: types) {
-				typeMap.putIfAbsent(tileType.getTypeEnum(), EnumSet.noneOf(RelPos.class));
-				typeMap.get(tileType.getTypeEnum()).add(tilePos);
-			}
-		}
-		
-		return typeMap;
-	}*/
 }

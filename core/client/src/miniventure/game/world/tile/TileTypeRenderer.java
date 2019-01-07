@@ -47,6 +47,7 @@ public class TileTypeRenderer {
 	private final boolean isOpaque;
 	private final ConnectionManager connectionManager;
 	private final OverlapManager overlapManager;
+	private final OverhangManager overhangManager;
 	
 	public TileTypeRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque) {
 		this(tileType, isOpaque, new ConnectionManager(tileType, RenderStyle.SINGLE_FRAME));
@@ -55,21 +56,28 @@ public class TileTypeRenderer {
 		this(tileType, isOpaque, connectionManager, OverlapManager.NONE(tileType));
 	}
 	public TileTypeRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque, OverlapManager overlapManager) {
-		this(tileType, isOpaque, new ConnectionManager(tileType, RenderStyle.SINGLE_FRAME), overlapManager);
+		this(tileType, isOpaque, overlapManager, OverhangManager.NONE(tileType));
 	}
 	public TileTypeRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque, ConnectionManager connectionManager, OverlapManager overlapManager) {
+		this(tileType, isOpaque, connectionManager, overlapManager, OverhangManager.NONE(tileType));
+	}
+	public TileTypeRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque, OverlapManager overlapManager, OverhangManager overhangManager) {
+		this(tileType, isOpaque, new ConnectionManager(tileType, RenderStyle.SINGLE_FRAME), overlapManager, overhangManager);
+	}
+	public TileTypeRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque, ConnectionManager connectionManager, OverlapManager overlapManager, OverhangManager overhangManager) {
 		this.tileType = tileType;
 		this.isOpaque = isOpaque;
 		this.connectionManager = connectionManager;
 		this.overlapManager = overlapManager;
+		this.overhangManager = overhangManager;
 	}
 	
-	public TileTypeRenderer(@NotNull TileTypeRenderer model, @Nullable ConnectionManager connectionManager, @Nullable OverlapManager overlapManager) {
+	/*public TileTypeRenderer(@NotNull TileTypeRenderer model, @Nullable ConnectionManager connectionManager, @Nullable OverlapManager overlapManager) {
 		this.tileType = model.tileType;
 		isOpaque = model.isOpaque;
 		this.connectionManager = connectionManager == null ? model.connectionManager : connectionManager;
 		this.overlapManager = overlapManager == null ? model.overlapManager : overlapManager;
-	}
+	}*/
 	
 	public boolean isOpaque() { return isOpaque; }
 	
