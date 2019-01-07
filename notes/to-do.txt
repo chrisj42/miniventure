@@ -14,4 +14,6 @@ quick reminders / in prog stuff:
 
 - display a message when a player dies (a generic one)
 
+- log to server console when commands are used (this includes chat, since server console doesn't display chat otherwise)
+
 - reconsider rendering rules when player is in a hole; currently clips adjacent tiles. Check if the same happens with water.

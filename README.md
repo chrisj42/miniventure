@@ -1,15 +1,15 @@
 # miniventure
-A remake of minicraft plus, taken in a new direction. After learning a bunch from the project, I wanted to start fresh, and try to make the best game possible. Let's see how it goes!
+Having started as a remake of [minicraft plus](https://github.com/chrisj42/minicraft-plus-revived), I originally just wanted to start fresh, after learning a bunch from the project. However, now, miniventure has taken a direction all its own, and I fully intend to make and release it as an entirely independent game, with only basic similarities.
 
-As of now, miniventure is still in alpha stage and probably lacks in actual gamplay, but the feature list continues to grow and change. Here's a list of the major features it has so far:
+As of now, miniventure is still in alpha stage and probably lacks in actual gameplay, but the feature list continues to grow and change. Here's a list of the major features it has so far:
 
   - Multiplayer functionality, allowing many people to play in the same world. The server can be run without a GUI.
-  - Random level generation based on perlin noise; effectively-infinite size
+  - Random level generation based on a custom variant of perlin noise
   - Sprite animations and smooth tile transitions
   - basic world interactions, breaking/placing tiles, hurting mobs
   - mob AI behaviors
   - an update-checker that tells you when there's a new update available, and gives you the link.
-  - a crafting system with mostly tools
+  - a crafting system (with mostly tools for now)
   - inventory/hotbar management
   - chat system with commands
 
