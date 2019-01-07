@@ -24,26 +24,24 @@ public class SwimAnimation {
 		this.tileType = enumType;
 		this.drawableHeight = drawableHeight;
 		
-		swimAnimations.computeIfAbsent(enumType, k ->
+		swim = swimAnimations.computeIfAbsent(enumType, k ->
 			new TileAnimation<>(false, 1/16f, 
 				GameCore.tileAtlas.findRegions(enumType.name().toLowerCase()+"/swim")
 			)
 		);
-		
-		swim = swimAnimations.get(enumType);
 	}
 	
 	public void drawSwimAnimation(@NotNull Batch batch, @NotNull Vector2 center, @NotNull WorldManager world) {
 		TextureHolder tex = swim.getKeyFrame(world.getGameTime());
-		batch.draw(tex.texture, center.x-tex.width/2, center.y-tex.height/2);
+		batch.draw(tex.texture, center.x-tex.width/2f, center.y-tex.height/2f);
 	}
 	
-	public String serialize() {
+	/*public String serialize() {
 		return tileType.name()+','+drawableHeight;
 	}
 	
 	public static SwimAnimation deserialize(String data) {
 		String[] parts = data.split(",");
 		return new SwimAnimation(TileTypeEnum.valueOf(parts[0]), Float.parseFloat(parts[1]));
-	}
+	}*/
 }

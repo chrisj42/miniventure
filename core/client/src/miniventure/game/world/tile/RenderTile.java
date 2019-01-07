@@ -99,8 +99,7 @@ public class RenderTile extends Tile {
 			EnumMap<TileTypeEnum, ClientTileType> typeMap = new EnumMap<>(TileTypeEnum.class);
 			for(ClientTileType type: aroundTypes) {
 				typeMap.put(type.getTypeEnum(), type);
-				typePositions.computeIfAbsent(type.getTypeEnum(), k -> EnumSet.noneOf(RelPos.class));
-				typePositions.get(type.getTypeEnum()).add(rp);
+				typePositions.computeIfAbsent(type.getTypeEnum(), k -> EnumSet.noneOf(RelPos.class)).add(rp);
 			}
 			allTypes.putAll(typeMap);
 			typesAtPositions.put(rp, MyUtils.enumSet(typeMap.keySet()));

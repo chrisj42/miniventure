@@ -36,9 +36,10 @@ public class TileTypeRenderer {
 					continue;
 			}
 			
-			animationMap.computeIfAbsent(tileType, k -> new HashMap<>());
-			animationMap.get(tileType).computeIfAbsent(spriteID, k -> new Array<>(TextureHolder.class));
-			animationMap.get(tileType).get(spriteID).add(region);
+			animationMap
+				.computeIfAbsent(tileType, k -> new HashMap<>())
+				.computeIfAbsent(spriteID, k -> new Array<>(TextureHolder.class))
+				.add(region);
 		}
 	}
 	
