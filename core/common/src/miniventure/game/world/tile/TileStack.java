@@ -55,9 +55,9 @@ public class TileStack<T extends TileType> {
 	}
 	
 	public T getLayerFromTop(int offset) { return getLayerFromTop(offset, false); }
-	public T getLayerFromTop(int offset, boolean clamp) { return stack.get(clamp(offset, clamp)); }
+	public T getLayerFromTop(int offset, boolean clamp) { return stack.get(clamp(size()-1-offset, clamp)); }
 	public T getLayerFromBottom(int offset) { return getLayerFromBottom(offset, false); }
-	public T getLayerFromBottom(int offset, boolean clamp) { return stack.get(clamp(size()-1-offset, clamp)); }
+	public T getLayerFromBottom(int offset, boolean clamp) { return stack.get(clamp(offset, clamp)); }
 	
 	private int clamp(int idx) { return clamp(idx, true); }
 	private int clamp(int idx, boolean doClamp) { return doClamp ? Math.max(Math.min(idx, size()-1), 0) : idx; }
