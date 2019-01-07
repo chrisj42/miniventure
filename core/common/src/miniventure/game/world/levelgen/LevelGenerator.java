@@ -168,6 +168,9 @@ public class LevelGenerator {
 		put(DIRT, HOLE);
 		put(GRASS, DIRT);
 		put(STONE, DIRT);
+		put(STONE2, STONE);
+		put(STONE3, STONE2);
+		put(STONE4, STONE3);
 		put(RUBY_ORE, DIRT);
 		put(TUNGSTEN_ORE, DIRT);
 		put(IRON_ORE, DIRT);
