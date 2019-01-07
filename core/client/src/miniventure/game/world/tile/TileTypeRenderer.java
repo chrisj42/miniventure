@@ -7,7 +7,6 @@ import java.util.HashMap;
 
 import miniventure.game.GameCore;
 import miniventure.game.texture.TextureHolder;
-import miniventure.game.util.InstanceCounter;
 import miniventure.game.util.RelPos;
 
 import com.badlogic.gdx.utils.Array;
@@ -87,7 +86,7 @@ public class TileTypeRenderer {
 	}
 	
 	// gets the overlap sprite (sides + any isolated corners) for this tiletype overlapping a tile at the given positions.
-	public ArrayList<TileAnimation<TextureHolder>> getOverlapSprites(InstanceCounter<RelPos> overlapPositions) {
+	public ArrayList<TileAnimation<TextureHolder>> getOverlapSprites(EnumSet<RelPos> overlapPositions) {
 		return overlapManager.getOverlapSprites(overlapPositions);
 	}
 	

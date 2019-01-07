@@ -5,7 +5,6 @@ import java.util.*;
 import miniventure.game.item.Item;
 import miniventure.game.item.Result;
 import miniventure.game.texture.TextureHolder;
-import miniventure.game.util.InstanceCounter;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.RelPos;
 import miniventure.game.util.customenum.SerialMap;
@@ -89,7 +88,7 @@ public class RenderTile extends Tile {
 	private void compileSprites() {
 		TreeSet<TileTypeEnum> allTypes = new TreeSet<>(); // overlap
 		EnumMap<RelPos, EnumSet<TileTypeEnum>> typesAtPositions = new EnumMap<>(RelPos.class); // connection
-		EnumMap<TileTypeEnum, InstanceCounter<RelPos>> typePositions = new EnumMap<>(TileTypeEnum.class); // overlap
+		EnumMap<TileTypeEnum, EnumSet<RelPos>> typePositions = new EnumMap<>(TileTypeEnum.class); // overlap
 		
 		for (RelPos rp: RelPos.values()) {
 			int x = rp.getX();
@@ -100,7 +99,7 @@ public class RenderTile extends Tile {
 			EnumSet<TileTypeEnum> typeMap = EnumSet.noneOf(TileTypeEnum.class);
 			for(ClientTileType type: aroundTypes) {
 				typeMap.add(type.getTypeEnum());
-				typePositions.computeIfAbsent(type.getTypeEnum(), k -> new InstanceCounter<>()).add(rp);
+				typePositions.computeIfAbsent(type.getTypeEnum(), k -> EnumSet.noneOf(RelPos.class)).add(rp);
 			}
 			allTypes.addAll(typeMap);
 			typesAtPositions.put(rp, typeMap);
@@ -128,11 +127,10 @@ public class RenderTile extends Tile {
 			
 			// check for overlaps that are above prev AND below cur
 			NavigableSet<TileTypeEnum> overlapSet;
-			boolean include = prev.getTypeEnum() == TileTypeEnum.STONE; // stone tiles will include other stone tiles when overlapping; the edge count must be greater than the middle count to do so.
 			if(cur == null)
-				overlapSet = allTypes.subSet(prev.getTypeEnum(), include, allTypes.last(), !allTypes.last().equals(prev.getTypeEnum()));
+				overlapSet = allTypes.subSet(prev.getTypeEnum(), false, allTypes.last(), !allTypes.last().equals(prev.getTypeEnum()));
 			else
-				overlapSet = allTypes.subSet(prev.getTypeEnum(), include, cur.getTypeEnum(), include);
+				overlapSet = allTypes.subSet(prev.getTypeEnum(), false, cur.getTypeEnum(), false);
 			
 			if(overlapSet.size() > 0) { // add found overlaps
 				overlapSet.forEach(enumType -> {

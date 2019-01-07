@@ -122,7 +122,7 @@ public class ClientTileType extends TileType {
 		TUNGSTEN_ORE(ClientTileFactory::ore),
 		RUBY_ORE(ClientTileFactory::ore),
 		
-		STONE(type -> new ClientTileType(type, false,
+		STONE(type -> new ClientTileType(type, true,
 			new ConnectionManager(type, RenderStyle.SINGLE_FRAME, COAL_ORE.mainEnum, IRON_ORE.mainEnum, TUNGSTEN_ORE.mainEnum, RUBY_ORE.mainEnum),
 			new OverlapManager(type, RenderStyle.SINGLE_FRAME)
 		)),

@@ -43,6 +43,4 @@ public class InstanceCounter<T> extends HashMap<T, Integer> {
 		//noinspection ConstantConditions // because it's wrong
 		return prevVal == null ? 0 : prevVal;
 	}
-	
-	public boolean contains(T instance) { return get(instance) > 0; }
 }
