@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import miniventure.game.texture.TextureHolder;
+import miniventure.game.util.InstanceCounter;
 import miniventure.game.util.RelPos;
 import miniventure.game.world.Point;
 
@@ -43,7 +44,8 @@ public class OverlapManager {
 	
 	/// Boolean[] says if the overlappingType is present in each of the surrounding tiles.
 	// don't call this method with a typeToOverlap that this overlappingType isn't meant to overlap.
-	public ArrayList<TileAnimation<TextureHolder>> getOverlapSprites(EnumSet<RelPos> ovLayout) {
+	public ArrayList<TileAnimation<TextureHolder>> getOverlapSprites(InstanceCounter<RelPos> ovLayout) { return getOverlapSprites(ovLayout, false); }
+	public ArrayList<TileAnimation<TextureHolder>> getOverlapSprites(InstanceCounter<RelPos> ovLayout, boolean checkCount) {
 		ArrayList<TileAnimation<TextureHolder>> animations = new ArrayList<>();
 		
 		if(renderStyle == null && overrides.size() == 0)
@@ -55,10 +57,10 @@ public class OverlapManager {
 		Array<Integer> indexes = new Array<>(Integer.class);
 		
 		int[] bits = new int[4];
-		if(ovLayout.contains(RelPos.LEFT))   bits[0] = 1; // 1
-		if(ovLayout.contains(RelPos.TOP))    bits[1] = 1; // 5
-		if(ovLayout.contains(RelPos.RIGHT))  bits[2] = 1; // 7
-		if(ovLayout.contains(RelPos.BOTTOM)) bits[3] = 1; // 3
+		if(check(ovLayout, RelPos.LEFT, checkCount))   bits[0] = 1; // 1
+		if(check(ovLayout, RelPos.TOP, checkCount))    bits[1] = 1; // 5
+		if(check(ovLayout, RelPos.RIGHT, checkCount))  bits[2] = 1; // 7
+		if(check(ovLayout, RelPos.BOTTOM, checkCount)) bits[3] = 1; // 3
 		int total = 0, value = 1;
 		for(int num: bits) {
 			total += num * value;
@@ -66,10 +68,10 @@ public class OverlapManager {
 		}
 		if(total > 0) indexes.add(total+3); // don't care to add if all zeros, because then it's just blank. Also, the +3 is to skip past the first 4 sprites, which are the corners (we add 3 instead of 4 because total will start at 1 rather than 0).
 		// four corners; NOTE, the artist should work on the corner sprites in one tile-sized image, to make sure that they only use a quarter of it at absolute most.
-		if(ovLayout.contains(RelPos.TOP_LEFT)     && bits[0] == 0 && bits[1] == 0) indexes.add(0); // 2
-		if(ovLayout.contains(RelPos.TOP_RIGHT)    && bits[1] == 0 && bits[2] == 0) indexes.add(1); // 8
-		if(ovLayout.contains(RelPos.BOTTOM_RIGHT) && bits[2] == 0 && bits[3] == 0) indexes.add(2); // 6
-		if(ovLayout.contains(RelPos.BOTTOM_LEFT)  && bits[3] == 0 && bits[0] == 0) indexes.add(3); // 0
+		if(check(ovLayout, RelPos.TOP_LEFT, checkCount)     && bits[0] == 0 && bits[1] == 0) indexes.add(0); // 2
+		if(check(ovLayout, RelPos.TOP_RIGHT, checkCount)    && bits[1] == 0 && bits[2] == 0) indexes.add(1); // 8
+		if(check(ovLayout, RelPos.BOTTOM_RIGHT, checkCount) && bits[2] == 0 && bits[3] == 0) indexes.add(2); // 6
+		if(check(ovLayout, RelPos.BOTTOM_LEFT, checkCount)  && bits[3] == 0 && bits[0] == 0) indexes.add(3); // 0
 		for(Integer idx: indexes) {
 			RenderStyle renderStyle = overrides.getOrDefault(idx, this.renderStyle);
 			if(renderStyle != null)
@@ -77,6 +79,10 @@ public class OverlapManager {
 		}
 		
 		return animations;
+	}
+	
+	private boolean check(InstanceCounter<RelPos> ovLayout, RelPos rp, boolean checkCount) {
+		return ovLayout.contains(rp) && (!checkCount || ovLayout.get(rp) > ovLayout.get(RelPos.CENTER));
 	}
 	
 	
