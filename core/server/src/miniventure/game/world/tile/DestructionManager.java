@@ -9,7 +9,6 @@ import miniventure.game.item.ToolType;
 import miniventure.game.server.ServerCore;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.customenum.SerialMap;
-import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.particle.ActionType;
@@ -31,20 +30,14 @@ public class DestructionManager {
 	@NotNull private final PreferredTool[] preferredTools;
 	@NotNull private final DamageConditionCheck[] damageConditions;
 	@NotNull final ItemDrop[] drops;
-	@NotNull private final ValueFunction<ServerTile> destroyAction;
 	
 	// main constructor
-	DestructionManager(@NotNull TileTypeEnum tileType, int totalHealth, @NotNull PreferredTool[] preferredTools, @NotNull DamageConditionCheck[] damageConditions, @NotNull ItemDrop[] drops, @NotNull ValueFunction<ServerTile> destroyAction) {
+	DestructionManager(@NotNull TileTypeEnum tileType, int totalHealth, @NotNull PreferredTool[] preferredTools, @NotNull DamageConditionCheck[] damageConditions, @NotNull ItemDrop[] drops) {
 		this.tileType = tileType;
 		this.totalHealth = totalHealth;
 		this.preferredTools = preferredTools;
 		this.damageConditions = damageConditions;
 		this.drops = drops;
-		this.destroyAction = destroyAction;
-	}
-	
-	DestructionManager(@NotNull TileTypeEnum tileType, int totalHealth, @NotNull PreferredTool[] preferredTools, @NotNull DamageConditionCheck[] damageConditions, @NotNull ItemDrop[] drops) {
-		this(tileType, totalHealth, preferredTools, damageConditions, drops, ServerTile::breakTile);
 	}
 	
 	// for those with health, preferred tools, and drops a tile item.
@@ -71,7 +64,6 @@ public class DestructionManager {
 		drops = model.drops;
 		preferredTools = model.preferredTools;
 		damageConditions = model.damageConditions;
-		destroyAction = model.destroyAction;
 	}
 	
 	public static class DestructibleBuilder {
@@ -81,7 +73,6 @@ public class DestructionManager {
 		private PreferredTool[] preferredTools;
 		private DamageConditionCheck[] damageConditions;
 		private ItemDrop[] drops;
-		private ValueFunction<ServerTile> destroyAction;
 		
 		public DestructibleBuilder(@NotNull TileTypeEnum type) { this(type, 1); }
 		public DestructibleBuilder(@NotNull TileTypeEnum type, int health) { this(type, health, health == 1); }
@@ -95,7 +86,6 @@ public class DestructionManager {
 				drops = new ItemDrop[] { new ItemDrop(TileItem.get(type)) };
 			else
 				drops = new ItemDrop[0];
-			destroyAction = ServerTile::breakTile;
 		}
 		
 		public DestructibleBuilder(@NotNull TileTypeEnum type, DestructionManager model) {
@@ -104,7 +94,6 @@ public class DestructionManager {
 			this.drops = model.drops;
 			this.preferredTools = model.preferredTools;
 			this.damageConditions = model.damageConditions;
-			this.destroyAction = model.destroyAction;
 		}
 		
 		public DestructibleBuilder tileType(@NotNull TileTypeEnum type) { this.type = type; return this; }
@@ -145,13 +134,8 @@ public class DestructionManager {
 			return this;
 		}
 		
-		public DestructibleBuilder onDestroy(ValueFunction<ServerTile> destroyAction) {
-			this.destroyAction = destroyAction;
-			return this;
-		}
-		
 		public DestructionManager make() {
-			return new DestructionManager(type, health, preferredTools, damageConditions, drops, destroyAction);
+			return new DestructionManager(type, health, preferredTools, damageConditions, drops);
 		}
 	}
 	
@@ -173,7 +157,7 @@ public class DestructionManager {
 				ServerCore.getServer().broadcastParticle(new TextParticleData(String.valueOf(damage)), tile);
 			if(health <= 0) {
 				ServerCore.getServer().playTileSound("break", tile, tileType);
-				destroyAction.act(tile);
+				tile.breakTile();
 				for(ItemDrop drop: drops)
 					tile.getLevel().dropItems(drop, tile, attacker);
 			} else {
