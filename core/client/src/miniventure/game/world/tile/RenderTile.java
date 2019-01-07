@@ -86,7 +86,7 @@ public class RenderTile extends Tile {
 	/** @noinspection ObjectAllocationInLoop*/
 	@SuppressWarnings("unchecked")
 	private void compileSprites() {
-		TreeMap<TileTypeEnum, ClientTileType> allTypes = new TreeMap<>(); // overlap
+		TreeSet<TileTypeEnum> allTypes = new TreeSet<>(); // overlap
 		EnumMap<RelPos, EnumSet<TileTypeEnum>> typesAtPositions = new EnumMap<>(RelPos.class); // connection
 		EnumMap<TileTypeEnum, EnumSet<RelPos>> typePositions = new EnumMap<>(TileTypeEnum.class); // overlap
 		
@@ -96,13 +96,13 @@ public class RenderTile extends Tile {
 			RenderTile oTile = (RenderTile) getLevel().getTile(this.x + x, this.y + y);
 			List<ClientTileType> aroundTypes = oTile != null ? oTile.getTypeStack().getTypes() : Collections.emptyList();
 			
-			EnumMap<TileTypeEnum, ClientTileType> typeMap = new EnumMap<>(TileTypeEnum.class);
+			EnumSet<TileTypeEnum> typeMap = EnumSet.noneOf(TileTypeEnum.class);
 			for(ClientTileType type: aroundTypes) {
-				typeMap.put(type.getTypeEnum(), type);
+				typeMap.add(type.getTypeEnum());
 				typePositions.computeIfAbsent(type.getTypeEnum(), k -> EnumSet.noneOf(RelPos.class)).add(rp);
 			}
-			allTypes.putAll(typeMap);
-			typesAtPositions.put(rp, MyUtils.enumSet(typeMap.keySet()));
+			allTypes.addAll(typeMap);
+			typesAtPositions.put(rp, typeMap);
 		}
 		
 		// all tile types have been fetched. Now accumulate the sprites.
@@ -126,14 +126,15 @@ public class RenderTile extends Tile {
 			//spriteNames.add(animation.getKeyFrames()[0].name);
 			
 			// check for overlaps that are above prev AND below cur
-			NavigableMap<TileTypeEnum, ClientTileType> overlapMap;
+			NavigableSet<TileTypeEnum> overlapSet;
 			if(cur == null)
-				overlapMap = allTypes.subMap(prev.getTypeEnum(), false, allTypes.lastKey(), !allTypes.lastKey().equals(prev.getTypeEnum()));
+				overlapSet = allTypes.subSet(prev.getTypeEnum(), false, allTypes.last(), !allTypes.last().equals(prev.getTypeEnum()));
 			else
-				overlapMap = allTypes.subMap(prev.getTypeEnum(), false, cur.getTypeEnum(), false);
+				overlapSet = allTypes.subSet(prev.getTypeEnum(), false, cur.getTypeEnum(), false);
 			
-			if(overlapMap.size() > 0) { // add found overlaps
-				overlapMap.forEach((enumType, tileType) -> {
+			if(overlapSet.size() > 0) { // add found overlaps
+				overlapSet.forEach(enumType -> {
+					ClientTileType tileType = ClientTileType.get(enumType);
 					ArrayList<TileAnimation<TextureHolder>> sprites = tileType.getRenderer().getOverlapSprites(typePositions.get(enumType));
 					for(TileAnimation<TextureHolder> sprite: sprites) {
 						spriteStack.add(sprite);
