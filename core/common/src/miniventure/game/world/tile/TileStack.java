@@ -17,7 +17,6 @@ public class TileStack<T extends TileType> {
 	
 	// bottom tile is first, top tile is last.
 	private LinkedList<T> stack = new LinkedList<>();
-	private int height;
 	
 	@SuppressWarnings("unchecked")
 	TileStack(@NotNull WorldManager world) {
@@ -36,8 +35,6 @@ public class TileStack<T extends TileType> {
 	public int size() { return stack.size(); }
 	
 	public T getTopLayer() { return stack.peekLast(); }
-	
-	public int getHeight() { return height; }
 	
 	public List<T> getTypes() { return new ArrayList<>(stack); }
 	
@@ -67,16 +64,11 @@ public class TileStack<T extends TileType> {
 	
 	void addLayer(@NotNull T newLayer) {
 		stack.addLast(newLayer);
-		if(newLayer.hasVerticality())
-			height++;
 	}
 	
 	@Nullable
 	T removeLayer() {
 		if(stack.size() == 1) return null;
-		T removed = stack.removeLast();
-		if(removed.hasVerticality())
-			height--;
-		return removed;
+		return stack.removeLast();
 	}
 }

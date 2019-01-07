@@ -80,8 +80,8 @@ public class OverlapManager {
 	}
 	
 	
-	/*public static EnumMap<TileTypeEnum, EnumSet<RelPos>> mapTileTypesAround(@NotNull ClientTile tile) { return mapTileTypesAround(tile, true); }
-	// Exclude covered means that tile types beneath ground layers won't be included.
+	public static EnumMap<TileTypeEnum, EnumSet<RelPos>> mapTileTypesAround(@NotNull ClientTile tile) { return mapTileTypesAround(tile, true); }
+	/** @noinspection SameParameterValue*/ // Exclude covered means that tile types beneath ground layers won't be included.
 	private static EnumMap<TileTypeEnum, EnumSet<RelPos>> mapTileTypesAround(@NotNull ClientTile tile, boolean excludeCovered) {
 		EnumMap<TileTypeEnum, EnumSet<RelPos>> typeMap = new EnumMap<>(TileTypeEnum.class);
 		
@@ -101,5 +101,5 @@ public class OverlapManager {
 		}
 		
 		return typeMap;
-	}*/
+	}
 }
