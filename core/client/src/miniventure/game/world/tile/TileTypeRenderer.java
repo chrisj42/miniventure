@@ -16,7 +16,11 @@ import org.jetbrains.annotations.Nullable;
 
 public class TileTypeRenderer {
 	
+	static void init() {}
+	
 	static {
+		if(GameCore.debug) System.out.println("reading tile sprites...");
+		
 		Array<TextureHolder> regions = GameCore.tileAtlas.getRegions();
 		for(TextureHolder region: regions) {
 			TileTypeEnum tileType = TileTypeEnum.valueOf(region.name.substring(0, region.name.indexOf('/')).toUpperCase());
@@ -41,6 +45,8 @@ public class TileTypeRenderer {
 				.computeIfAbsent(spriteID, k -> new Array<>(TextureHolder.class))
 				.add(region);
 		}
+		
+		if(GameCore.debug) System.out.println("tile sprites read successfully.");
 	}
 	
 	
@@ -49,15 +55,7 @@ public class TileTypeRenderer {
 	private final ConnectionManager connectionManager;
 	private final OverlapManager overlapManager;
 	
-	public TileTypeRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque) {
-		this(tileType, isOpaque, new ConnectionManager(tileType, RenderStyle.SINGLE_FRAME));
-	}
-	public TileTypeRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque, ConnectionManager connectionManager) {
-		this(tileType, isOpaque, connectionManager, OverlapManager.NONE(tileType));
-	}
-	public TileTypeRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque, OverlapManager overlapManager) {
-		this(tileType, isOpaque, new ConnectionManager(tileType, RenderStyle.SINGLE_FRAME), overlapManager);
-	}
+	
 	public TileTypeRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque, ConnectionManager connectionManager, OverlapManager overlapManager) {
 		this.tileType = tileType;
 		this.isOpaque = isOpaque;

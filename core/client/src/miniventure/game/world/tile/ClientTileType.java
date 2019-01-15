@@ -16,7 +16,11 @@ import org.jetbrains.annotations.NotNull;
 
 public class ClientTileType extends TileType {
 	
-	public static void init() {}
+	public static void init() {
+		TileTypeRenderer.init();
+		for(ClientTileTypeEnum type: ClientTileTypeEnum.values)
+			type.getType();
+	}
 	
 	@FunctionalInterface
 	private interface P {
@@ -35,19 +39,23 @@ public class ClientTileType extends TileType {
 	private final SwimAnimation swimAnimation;
 	private final HashMap<String, TransitionAnimation> transitions;
 	
+	// all default; goes to connection+overlap
 	private ClientTileType(@NotNull TileTypeEnum tileType, boolean isOpaque, Value... params) {
-		this(tileType, isOpaque, ConnectionManager.DEFAULT(tileType), params);
+		this(tileType, isOpaque, new ConnectionManager(tileType), new OverlapManager(tileType), params);
 	}
+	// connection only; goes to connection+overlap
 	private ClientTileType(@NotNull TileTypeEnum tileType, boolean isOpaque, ConnectionManager connectionManager, Value... params) {
-		this(tileType, isOpaque, connectionManager, OverlapManager.NONE(tileType), params);
+		this(tileType, isOpaque, connectionManager, new OverlapManager(tileType), params);
 	}
+	// overlap only; goes to connection+overlap
 	private ClientTileType(@NotNull TileTypeEnum tileType, boolean isOpaque, OverlapManager overlapManager, Value... params) {
-		this(tileType, isOpaque, ConnectionManager.DEFAULT(tileType), overlapManager, params);
+		this(tileType, isOpaque, new ConnectionManager(tileType, RenderStyle.SINGLE_FRAME), overlapManager, params);
 	}
+	// overlap+connection; goes to renderer
 	private ClientTileType(@NotNull TileTypeEnum tileType, boolean isOpaque, ConnectionManager connectionManager, OverlapManager overlapManager, Value... params) {
 		this(tileType, new TileTypeRenderer(tileType, isOpaque, connectionManager, overlapManager), params);
 	}
-	
+	// renderer; final
 	private ClientTileType(@NotNull TileTypeEnum tileType, TileTypeRenderer renderer, Value... params) {
 		super(tileType);
 		this.renderer = renderer;
@@ -93,21 +101,13 @@ public class ClientTileType extends TileType {
 		
 		DIRT(type -> new ClientTileType(type, true)),
 		
-		SAND(type -> new ClientTileType(type, true,
-			new OverlapManager(type, RenderStyle.SINGLE_FRAME)
-		)),
+		SAND(type -> new ClientTileType(type, true)),
 		
-		GRASS(type -> new ClientTileType(type, true,
-			new OverlapManager(type, RenderStyle.SINGLE_FRAME)
-		)),
+		GRASS(type -> new ClientTileType(type, true)),
 		
-		STONE_PATH(type -> new ClientTileType(type, true,
-			new OverlapManager(type, RenderStyle.SINGLE_FRAME)
-		)),
+		STONE_PATH(type -> new ClientTileType(type, true)),
 		
-		SNOW(type -> new ClientTileType(type, true,
-			new OverlapManager(type, RenderStyle.SINGLE_FRAME)
-		)),
+		SNOW(type -> new ClientTileType(type, true)),
 		
 		FLINT(type -> new ClientTileType(type, false)),
 		
@@ -122,14 +122,11 @@ public class ClientTileType extends TileType {
 		TUNGSTEN_ORE(ClientTileFactory::ore),
 		RUBY_ORE(ClientTileFactory::ore),
 		
-		STONE(type -> new ClientTileType(type, true,
-			new ConnectionManager(type, RenderStyle.SINGLE_FRAME, COAL_ORE.mainEnum, IRON_ORE.mainEnum, TUNGSTEN_ORE.mainEnum, RUBY_ORE.mainEnum),
-			new OverlapManager(type, RenderStyle.SINGLE_FRAME)
+		STONE(type -> new ClientTileType(type, true/*,
+			new ConnectionManager(type, RenderStyle.SINGLE_FRAME, COAL_ORE.mainEnum, IRON_ORE.mainEnum, TUNGSTEN_ORE.mainEnum, RUBY_ORE.mainEnum)*/
 		)),
 		
-		STONE_FLOOR(type -> new ClientTileType(type, true,
-			new ConnectionManager(type, RenderStyle.SINGLE_FRAME, type)
-		)),
+		STONE_FLOOR(type -> new ClientTileType(type, true)),
 		
 		WOOD_WALL(ClientTileFactory::wall),
 		STONE_WALL(ClientTileFactory::wall),
@@ -199,10 +196,7 @@ public class ClientTileType extends TileType {
 		}
 		
 		static ClientTileType tree(TileTypeEnum type) {
-			return new ClientTileType(type, false,
-				new ConnectionManager(type, RenderStyle.SINGLE_FRAME, type),
-				P.zOffset.as(0.25f)
-			);
+			return new ClientTileType(type, false, P.zOffset.as(0.25f));
 		}
 	}
 }

@@ -4,6 +4,7 @@ import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
 
+import miniventure.game.GameCore;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.RelPos;
@@ -15,36 +16,54 @@ import org.jetbrains.annotations.NotNull;
 public class ConnectionManager {
 	
 	static EnumMap<TileTypeEnum, HashMap<String, Array<TextureHolder>>> tileAnimations = new EnumMap<>(TileTypeEnum.class);
-	
-	public static ConnectionManager DEFAULT(@NotNull TileTypeEnum type) {
-		return NO_CONNECT(type, RenderStyle.SINGLE_FRAME);
-	}
-	public static ConnectionManager NO_CONNECT(@NotNull TileTypeEnum type, RenderStyle style) {
-		return new ConnectionManager(type, style);
-	}
+	private static final HashMap<String, Array<TextureHolder>> dummy = new HashMap<>(0);
 	
 	private final TileTypeEnum type;
 	private final RenderStyle renderStyle;
 	private final EnumSet<TileTypeEnum> connectingTypes;
 	private final HashMap<Integer, RenderStyle> overrides = new HashMap<>();
 	
+	// because the default sprite is part of the connecting sprite system, a "no connections" method/constructor is illogical; instead, the extra sprites are detected, and if found, they are "enabled".
+	public ConnectionManager(@NotNull TileTypeEnum type, TileTypeEnum... connectingTypes) {
+		this(type, RenderStyle.SINGLE_FRAME, connectingTypes);
+	}
 	public ConnectionManager(@NotNull TileTypeEnum type, RenderStyle renderStyle, TileTypeEnum... connectingTypes) {
 		this.type = type;
 		this.renderStyle = renderStyle;
-		this.connectingTypes = MyUtils.enumSet(connectingTypes);
+		
+		if(!tileAnimations.containsKey(type)) // debug check
+			System.out.println("warning: tiletype "+type+" has no connection sprites.");
+		
+		// if there is only one animation for this tiletype, then the connecting types are irrelevant because there's only one sprite to choose from.
+		if(tileAnimations.getOrDefault(type, dummy).size() <= 1) {
+			if(connectingTypes.length > 1) // so this doesn't kick me in the butt later, aka make me wonder what the issue is for hours
+				System.out.println("warning: multiple connecting types specified for "+type+", but there are not multiple connect animations; ignoring connections.");
+			this.connectingTypes = EnumSet.noneOf(TileTypeEnum.class);
+		}
+		else {
+			if(connectingTypes.length == 0) {// there are multiple connection sprites, but no connecting types; add the self as a connecting type, so the extra sprites are used.
+				connectingTypes = new TileTypeEnum[] {type};
+				if(GameCore.debug) System.out.println("connect sprites found for "+type+" with no types, adding self");
+			}
+			
+			this.connectingTypes = MyUtils.enumSet(connectingTypes);
+		}
 	}
 	
-	public ConnectionManager overrideSprite(int spriteIndex, RenderStyle newStyle) {
+	public ConnectionManager customStyle(int spriteIndex, RenderStyle newStyle) {
 		overrides.put(spriteIndex, newStyle);
 		return this;
 	}
 	
+	private TileAnimation<TextureHolder> getAnimation(int spriteIdx) {
+		return overrides.getOrDefault(spriteIdx, renderStyle).getAnimation(type, (spriteIdx<10?"0":"")+spriteIdx, tileAnimations);
+	}
 	
 	/// Checks the given aroundTypes for all types 
 	@NotNull
 	public TileAnimation<TextureHolder> getConnectionSprite(EnumMap<RelPos, EnumSet<TileTypeEnum>> aroundTypes) {
 		if(connectingTypes.size() == 0)
-			return renderStyle.getAnimation(type, "00", tileAnimations);
+			return getAnimation(0);
 		
 		EnumMap<RelPos, Boolean> tileConnections = new EnumMap<>(RelPos.class);
 		
@@ -68,7 +87,7 @@ public class ConnectionManager {
 			}
 		}
 		
-		return overrides.getOrDefault(spriteIdx, renderStyle).getAnimation(type, (spriteIdx<10?"0":"")+spriteIdx, tileAnimations);
+		return getAnimation(spriteIdx);
 	}
 	
 }

@@ -25,7 +25,10 @@ import org.jetbrains.annotations.Nullable;
 
 public class ServerTileType extends TileType {
 	
-	public static void init() {}
+	public static void init() {
+		for(ServerTileTypeEnum type: ServerTileTypeEnum.values)
+			type.getType();
+	}
 	
 	@FunctionalInterface
 	private interface ManagerFetcher<T> extends MapFunction<TileTypeEnum, T> {}
