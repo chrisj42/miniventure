@@ -25,7 +25,6 @@ public class ClientTileType extends TileType {
 	@FunctionalInterface
 	private interface P {
 		Param<Float> lightRadius = new Param<>(0f);
-		Param<Float> zOffset = new Param<>(0f);
 		Param<SwimAnimation> swimAnimation = new Param<>(null);
 		Param<List<TransitionAnimation>> transitions = new Param<>(new ArrayList<>(0));
 		
@@ -35,7 +34,6 @@ public class ClientTileType extends TileType {
 	private final TileTypeRenderer renderer;
 	
 	private final float lightRadius;
-	private final float zOffset;
 	private final SwimAnimation swimAnimation;
 	private final HashMap<String, TransitionAnimation> transitions;
 	
@@ -61,7 +59,6 @@ public class ClientTileType extends TileType {
 		this.renderer = renderer;
 		ParamMap map = new ParamMap(params);
 		lightRadius = map.get(P.lightRadius);
-		zOffset = map.get(P.zOffset);
 		swimAnimation = map.get(P.swimAnimation);
 		
 		List<TransitionAnimation> transitions = map.get(P.transitions);
@@ -80,10 +77,6 @@ public class ClientTileType extends TileType {
 	
 	public float getLightRadius() {
 		return lightRadius;
-	}
-	
-	public float getZOffset() {
-		return zOffset;
 	}
 	
 	public SwimAnimation getSwimAnimation() {
@@ -179,14 +172,11 @@ public class ClientTileType extends TileType {
 		}
 		
 		static ClientTileType wall(TileTypeEnum type) {
-			return new ClientTileType(type, false,
-				P.zOffset.as(0.4f)
-			);
+			return new ClientTileType(type, false);
 		}
 		
 		static ClientTileType door(TileTypeEnum type, boolean open) {
 			return new ClientTileType(type, false,
-				P.zOffset.as(0.4f),
 				P.transitions.as(open?Arrays.asList(
 					new TransitionAnimation(type, "open", new RenderStyle(PlayMode.NORMAL, 3/24f, false)),
 					new TransitionAnimation(type, "close", new RenderStyle(PlayMode.NORMAL, 3/24f, false))
@@ -196,7 +186,7 @@ public class ClientTileType extends TileType {
 		}
 		
 		static ClientTileType tree(TileTypeEnum type) {
-			return new ClientTileType(type, false, P.zOffset.as(0.25f));
+			return new ClientTileType(type, false);
 		}
 	}
 }

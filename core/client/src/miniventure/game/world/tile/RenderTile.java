@@ -56,7 +56,7 @@ public class RenderTile extends Tile {
 			for(int i = 0; i < spriteStack.size(); i++) {
 				TileAnimation<TextureHolder> animation = spriteStack.get(i);
 				//typeStack.get(i).getRenderer().transitionManager.tryFinishAnimation(this);
-				batch.draw(animation.getKeyFrame(this).texture, (x - posOffset.x) * SIZE, (y - posOffset.y + typeStack.get(i).getZOffset()) * SIZE);
+				batch.draw(animation.getKeyFrame(this).texture, (x - posOffset.x) * SIZE, (y - posOffset.y) * SIZE);
 			}
 		}
 	}
