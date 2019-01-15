@@ -104,12 +104,6 @@ public class ClientTileType extends TileType {
 		
 		FLINT(type -> new ClientTileType(type, false)),
 		
-		WATER(type -> new ClientTileType(type, true,
-			new ConnectionManager(type, new RenderStyle(PlayMode.LOOP_RANDOM, 0.2f)),
-			new OverlapManager(type, new RenderStyle(true, 1/24f)),
-			P.swimAnimation.as(new SwimAnimation(type))
-		)),
-		
 		AIR(type -> new ClientTileType(type, false,
 			new ConnectionManager(type, (tile, otherType) -> {
 				TileTypeEnum thisType = tile.getType().getTypeEnum();
@@ -119,6 +113,12 @@ public class ClientTileType extends TileType {
 				// ctype.
 				return valid; // would be better to be false but I want to see what happens.
 			})
+		)),
+		
+		WATER(type -> new ClientTileType(type, true,
+			new ConnectionManager(type, new RenderStyle(PlayMode.LOOP_RANDOM, 0.2f)),
+			new OverlapManager(type, new RenderStyle(true, 1/24f)),
+			P.swimAnimation.as(new SwimAnimation(type))
 		)),
 		
 		COAL_ORE(ClientTileFactory::ore),

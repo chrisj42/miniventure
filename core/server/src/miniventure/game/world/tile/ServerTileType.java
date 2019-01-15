@@ -138,6 +138,10 @@ public class ServerTileType extends TileType {
 			new DestructionManager(type, new ItemDrop(ResourceType.Flint.get()))
 		)),
 		
+		AIR(type -> new ServerTileType(type,
+			DestructionManager.INDESTRUCTIBLE(type)
+		)),
+		
 		WATER(type -> new ServerTileType(type,
 			DestructionManager.INDESTRUCTIBLE(type),
 			
@@ -145,10 +149,6 @@ public class ServerTileType extends TileType {
 				new SpreadUpdateAction(type1, 0.33f,
 					(newType, tile) -> tile.addTile(newType), TileTypeEnum.HOLE)
 			))
-		)),
-		
-		AIR(type -> new ServerTileType(type,
-			DestructionManager.INDESTRUCTIBLE(type)
 		)),
 		
 		COAL_ORE(type -> ServerTileFactory.ore(type, ResourceType.Coal, 25)),
