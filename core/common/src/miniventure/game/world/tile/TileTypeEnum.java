@@ -14,6 +14,7 @@ public enum TileTypeEnum {
 	SNOW(true),
 	FLINT(true),
 	WATER(true, 0.6f),
+	AIR(true),
 	COAL_ORE(false),
 	IRON_ORE(false),
 	TUNGSTEN_ORE(false),
@@ -30,7 +31,7 @@ public enum TileTypeEnum {
 	DARK_TREE(false),
 	PINE_TREE(false),
 	POOF_TREE(false),
-	AIR(true);
+	;
 	
 	public final boolean walkable;
 	public final float speedRatio;

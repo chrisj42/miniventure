@@ -147,6 +147,10 @@ public class ServerTileType extends TileType {
 			))
 		)),
 		
+		AIR(type -> new ServerTileType(type,
+			DestructionManager.INDESTRUCTIBLE(type)
+		)),
+		
 		COAL_ORE(type -> ServerTileFactory.ore(type, ResourceType.Coal, 25)),
 		IRON_ORE(type -> ServerTileFactory.ore(type, ResourceType.Iron, 35)),
 		TUNGSTEN_ORE(type -> ServerTileFactory.ore(type, ResourceType.Tungsten, 45)),
@@ -219,11 +223,7 @@ public class ServerTileType extends TileType {
 		CARTOON_TREE(ServerTileFactory::tree),
 		DARK_TREE(ServerTileFactory::tree),
 		PINE_TREE(ServerTileFactory::tree),
-		POOF_TREE(ServerTileFactory::tree),
-		
-		AIR(type -> new ServerTileType(type,
-			DestructionManager.INDESTRUCTIBLE(type)
-		));
+		POOF_TREE(ServerTileFactory::tree);
 		
 		/** @noinspection NonFinalFieldInEnum*/
 		private ServerTileType type = null;

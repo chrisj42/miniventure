@@ -110,6 +110,17 @@ public class ClientTileType extends TileType {
 			P.swimAnimation.as(new SwimAnimation(type))
 		)),
 		
+		AIR(type -> new ClientTileType(type, false,
+			new ConnectionManager(type, (tile, otherType) -> {
+				TileTypeEnum thisType = tile.getType().getTypeEnum();
+				boolean valid = otherType == TileTypeEnum.STONE && thisType != TileTypeEnum.STONE;
+				// todo after solid types / height is implemented, check it here; air matches with all tiles which have layer groups on higher levels than this air type.
+				// ClientTileType ctype = get(otherType);
+				// ctype.
+				return valid; // would be better to be false but I want to see what happens.
+			})
+		)),
+		
 		COAL_ORE(ClientTileFactory::ore),
 		IRON_ORE(ClientTileFactory::ore),
 		TUNGSTEN_ORE(ClientTileFactory::ore),
@@ -140,18 +151,7 @@ public class ClientTileType extends TileType {
 		CARTOON_TREE(ClientTileFactory::tree),
 		DARK_TREE(ClientTileFactory::tree),
 		PINE_TREE(ClientTileFactory::tree),
-		POOF_TREE(ClientTileFactory::tree),
-		
-		AIR(type -> new ClientTileType(type, false,
-			new ConnectionManager(type, (tile, otherType) -> {
-				TileTypeEnum thisType = tile.getType().getTypeEnum();
-				boolean valid = otherType == TileTypeEnum.STONE && thisType != TileTypeEnum.STONE;
-				// todo after solid types / height is implemented, check it here; air matches with all tiles which have layer groups on higher levels than this air type.
-				// ClientTileType ctype = get(otherType);
-				// ctype.
-				return valid; // would be better to be false but I want to see what happens.
-			})
-		));
+		POOF_TREE(ClientTileFactory::tree);
 		
 		
 		/** @noinspection NonFinalFieldInEnum*/

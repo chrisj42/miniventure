@@ -2,7 +2,6 @@ package miniventure.game.world.tile;
 
 import java.util.*;
 
-import miniventure.game.GameCore;
 import miniventure.game.item.Item;
 import miniventure.game.item.Result;
 import miniventure.game.texture.TextureHolder;
@@ -135,9 +134,9 @@ public class RenderTile extends Tile {
 			// check for overlaps that are above prev AND below cur
 			NavigableSet<TileTypeEnum> overlapSet;
 			if(cur == null)
-				overlapSet = allTypes.subSet(prev.getTypeEnum(), false, allTypes.last(), !allTypes.last().equals(prev.getTypeEnum()));
+				overlapSet = safeSubSet(allTypes, prev.getTypeEnum(), false, allTypes.last(), !allTypes.last().equals(prev.getTypeEnum()));
 			else
-				overlapSet = allTypes.subSet(prev.getTypeEnum(), false, cur.getTypeEnum(), false);
+				overlapSet = safeSubSet(allTypes, prev.getTypeEnum(), false, cur.getTypeEnum(), false);
 			
 			if(overlapSet.size() > 0) { // add found overlaps
 				overlapSet.forEach(enumType -> {
@@ -168,5 +167,14 @@ public class RenderTile extends Tile {
 			this.typeStack = typeStack;
 			updateSprites = false;
 		}
+	}
+	
+	private static <E extends Enum<E>> NavigableSet<E> safeSubSet(TreeSet<E> set,
+											 E fromElement, boolean fromInclusive,
+											 E toElement,   boolean toInclusive) {
+		if(fromElement.compareTo(toElement) > 0)
+			return new TreeSet<>();
+		else
+			return set.subSet(fromElement, fromInclusive, toElement, toInclusive);
 	}
 }
