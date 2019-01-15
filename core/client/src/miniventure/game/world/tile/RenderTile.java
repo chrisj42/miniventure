@@ -5,7 +5,6 @@ import java.util.*;
 import miniventure.game.item.Item;
 import miniventure.game.item.Result;
 import miniventure.game.texture.TextureHolder;
-import miniventure.game.util.MyUtils;
 import miniventure.game.util.RelPos;
 import miniventure.game.util.customenum.SerialMap;
 import miniventure.game.world.Level;
@@ -82,6 +81,8 @@ public class RenderTile extends Tile {
 			updateSprites = true;
 		}
 	}
+	
+	// TODO compile sprites in each layer group separately; additionally, for each layer, end it with an air tile. Transparency will be implemented afterwards, once I've implemented this and also changed tile stacks; see todo in TileStack.java. Following initial implementation of transparency, and the rest, test it out with the level gen.
 	
 	/** @noinspection ObjectAllocationInLoop*/
 	@SuppressWarnings("unchecked")

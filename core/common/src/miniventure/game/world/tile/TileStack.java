@@ -18,6 +18,8 @@ public class TileStack<T extends TileType> {
 	// bottom tile is first, top tile is last.
 	private LinkedList<T> stack = new LinkedList<>();
 	
+	// TODO this needs to be abstracted, so that this is a stack of layer groups, and each layer group is a stack of layers / tiletypes.
+	
 	@SuppressWarnings("unchecked")
 	TileStack(@NotNull WorldManager world) {
 		addLayer((T) baseType.getTypeInstance(world));
