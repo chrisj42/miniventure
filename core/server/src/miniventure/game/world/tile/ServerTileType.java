@@ -155,24 +155,6 @@ public class ServerTileType extends TileType {
 				new ItemDrop(ResourceType.Stone.get(), 2, 3)
 			)
 		)),
-		STONE2(type -> new ServerTileType(type,
-			new DestructionManager(type, 40,
-				new PreferredTool(ToolType.Pickaxe, 5),
-				new ItemDrop(ResourceType.Stone.get(), 2, 3)
-			)
-		)),
-		STONE3(type -> new ServerTileType(type,
-			new DestructionManager(type, 40,
-				new PreferredTool(ToolType.Pickaxe, 5),
-				new ItemDrop(ResourceType.Stone.get(), 2, 3)
-			)
-		)),
-		STONE4(type -> new ServerTileType(type,
-			new DestructionManager(type, 40,
-				new PreferredTool(ToolType.Pickaxe, 5),
-				new ItemDrop(ResourceType.Stone.get(), 2, 3)
-			)
-		)),
 		
 		STONE_FLOOR(type -> new ServerTileType(type,
 			new DestructionManager(type, new RequiredTool(ToolType.Pickaxe))

@@ -89,12 +89,12 @@ public class LevelGenerator {
 				TileTypeEnum type;
 				if(terrainv < .1)
 					type = TileTypeEnum.WATER;
-				else if(featurev < .05)
-					type = TileTypeEnum.STONE4;
-				else if(featurev < .1)
-					type = TileTypeEnum.STONE3;
-				else if(featurev < .2)
-					type = TileTypeEnum.STONE2;
+				// else if(featurev < .05)
+				// 	type = TileTypeEnum.STONE4;
+				// else if(featurev < .1)
+				// 	type = TileTypeEnum.STONE3;
+				// else if(featurev < .2)
+				// 	type = TileTypeEnum.STONE2;
 				else if(featurev < .3)
 					type = TileTypeEnum.STONE;
 				else if(terrainv < .15)
@@ -168,9 +168,6 @@ public class LevelGenerator {
 		put(DIRT, HOLE);
 		put(GRASS, DIRT);
 		put(STONE, DIRT);
-		put(STONE2, STONE);
-		put(STONE3, STONE2);
-		put(STONE4, STONE3);
 		put(RUBY_ORE, DIRT);
 		put(TUNGSTEN_ORE, DIRT);
 		put(IRON_ORE, DIRT);

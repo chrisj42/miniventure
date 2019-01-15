@@ -68,13 +68,7 @@ public class TileItem extends ServerItem {
 		
 		addItem(TileTypeEnum.STONE_FLOOR, TileTypeEnum.HOLE/*, TileTypeEnum.DIRT*/);
 		
-		PlacementCheck pathTiles = PlacementCheck.on(TileTypeEnum.DIRT, TileTypeEnum.SAND, TileTypeEnum.GRASS, TileTypeEnum.SNOW, TileTypeEnum.STONE, TileTypeEnum.STONE2, TileTypeEnum.STONE3, TileTypeEnum.STONE4);
-		addItem(TileTypeEnum.STONE_PATH, (tile, player) -> {
-			if(!pathTiles.canPlace(tile, player)) return false;
-			// todo check that the player tile is at a similar height to the target tile.
-			// fixme issue: player can break adjacent stone after placing path, which provides a way around the above check.
-			return true;
-		});
+		addItem(TileTypeEnum.STONE_PATH, TileTypeEnum.DIRT, TileTypeEnum.SAND, TileTypeEnum.GRASS, TileTypeEnum.SNOW, TileTypeEnum.STONE);
 	}
 	
 	@NotNull
