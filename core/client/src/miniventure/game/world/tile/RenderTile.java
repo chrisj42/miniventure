@@ -2,6 +2,7 @@ package miniventure.game.world.tile;
 
 import java.util.*;
 
+import miniventure.game.GameCore;
 import miniventure.game.item.Item;
 import miniventure.game.item.Result;
 import miniventure.game.texture.TextureHolder;
@@ -83,6 +84,7 @@ public class RenderTile extends Tile {
 	}
 	
 	// TODO compile sprites in each layer group separately; additionally, for each layer, end it with an air tile. Transparency will be implemented afterwards, once I've implemented this and also changed tile stacks; see todo in TileStack.java. Following initial implementation of transparency, and the rest, test it out with the level gen.
+	// fixme air shadow appears over stone overlap; needs to appear under. Air should technically be the top-most ground tile, or I suppose the bottom-most solid tile.
 	
 	/** @noinspection ObjectAllocationInLoop*/
 	@SuppressWarnings("unchecked")
@@ -116,6 +118,10 @@ public class RenderTile extends Tile {
 		
 		// iterate through main stack from bottom to top, adding connection and overlap sprites each level.
 		List<ClientTileType> types = getTypeStack().getTypes();
+		types.add(ClientTileType.get(TileTypeEnum.AIR));
+		allTypes.add(TileTypeEnum.AIR);
+		typesAtPositions.get(RelPos.CENTER).add(TileTypeEnum.AIR);
+		typePositions.computeIfAbsent(TileTypeEnum.AIR, k -> EnumSet.noneOf(RelPos.class)).add(RelPos.CENTER);
 		for(int i = 1; i <= types.size(); i++) {
 			ClientTileType cur = i < types.size() ? types.get(i) : null;
 			ClientTileType prev = types.get(i-1);

@@ -21,7 +21,18 @@ public class ConnectionManager {
 	private final TileTypeEnum type;
 	private final RenderStyle renderStyle;
 	private final EnumSet<TileTypeEnum> connectingTypes;
+	private final ConnectionCheck connectionCheck;
 	private final HashMap<Integer, RenderStyle> overrides = new HashMap<>();
+	
+	@FunctionalInterface
+	interface ConnectionCheck {
+		boolean connects(RenderTile tile, TileTypeEnum adjacentType);
+		
+		static ConnectionCheck list(TileTypeEnum... connectingTypes) {
+			final EnumSet<TileTypeEnum> matches = MyUtils.enumSet(connectingTypes);
+			return (tile, type) -> matches.contains(type);
+		}
+	}
 	
 	// because the default sprite is part of the connecting sprite system, a "no connections" method/constructor is illogical; instead, the extra sprites are detected, and if found, they are "enabled".
 	public ConnectionManager(@NotNull TileTypeEnum type, TileTypeEnum... connectingTypes) {
@@ -48,6 +59,21 @@ public class ConnectionManager {
 			
 			this.connectingTypes = MyUtils.enumSet(connectingTypes);
 		}
+		
+		connectionCheck = ConnectionCheck.list(connectingTypes);
+	}
+	public ConnectionManager(@NotNull TileTypeEnum type, ConnectionCheck connectionCheck) {
+		this(type, RenderStyle.SINGLE_FRAME, connectionCheck);
+	}
+	public ConnectionManager(@NotNull TileTypeEnum type, RenderStyle renderStyle, ConnectionCheck connectionCheck) {
+		this.type = type;
+		this.renderStyle = renderStyle;
+		this.connectionCheck = connectionCheck;
+		
+		if(!tileAnimations.containsKey(type)) // debug check
+			System.out.println("warning: tiletype "+type+" has no connection sprites.");
+		
+		connectingTypes = null;
 	}
 	
 	public ConnectionManager customStyle(int spriteIndex, RenderStyle newStyle) {
@@ -61,8 +87,8 @@ public class ConnectionManager {
 	
 	/// Checks the given aroundTypes for all types 
 	@NotNull
-	public TileAnimation<TextureHolder> getConnectionSprite(EnumMap<RelPos, EnumSet<TileTypeEnum>> aroundTypes) {
-		if(connectingTypes.size() == 0)
+	public TileAnimation<TextureHolder> getConnectionSprite(RenderTile tile, EnumMap<RelPos, EnumSet<TileTypeEnum>> aroundTypes) {
+		if(connectingTypes != null && connectingTypes.size() == 0)
 			return getAnimation(0);
 		
 		EnumMap<RelPos, Boolean> tileConnections = new EnumMap<>(RelPos.class);
@@ -71,7 +97,7 @@ public class ConnectionManager {
 			// check if each surrounding tile has something in the connectingTypes array
 			boolean connects = false;
 			for(TileTypeEnum aroundType: aroundTypes.get(rp)) {
-				if(connectingTypes.contains(aroundType)) {
+				if(connectionCheck.connects(tile, aroundType)) {
 					connects = true;
 					break;
 				}

@@ -29,7 +29,8 @@ public enum TileTypeEnum {
 	CARTOON_TREE(false),
 	DARK_TREE(false),
 	PINE_TREE(false),
-	POOF_TREE(false);
+	POOF_TREE(false),
+	AIR(true);
 	
 	public final boolean walkable;
 	public final float speedRatio;

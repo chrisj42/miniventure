@@ -88,7 +88,7 @@ public class ClientTileType extends TileType {
 	private enum ClientTileTypeEnum {
 		
 		HOLE(type -> new ClientTileType(type, true,
-			new ConnectionManager(type, RenderStyle.SINGLE_FRAME, type, TileTypeEnum.valueOf("WATER")),
+			new ConnectionManager(type, type, TileTypeEnum.WATER),
 			P.swimAnimation.as(new SwimAnimation(type, 0.75f))
 		)),
 		
@@ -140,7 +140,18 @@ public class ClientTileType extends TileType {
 		CARTOON_TREE(ClientTileFactory::tree),
 		DARK_TREE(ClientTileFactory::tree),
 		PINE_TREE(ClientTileFactory::tree),
-		POOF_TREE(ClientTileFactory::tree);
+		POOF_TREE(ClientTileFactory::tree),
+		
+		AIR(type -> new ClientTileType(type, false,
+			new ConnectionManager(type, (tile, otherType) -> {
+				TileTypeEnum thisType = tile.getType().getTypeEnum();
+				boolean valid = otherType == TileTypeEnum.STONE && thisType != TileTypeEnum.STONE;
+				// todo after solid types / height is implemented, check it here; air matches with all tiles which have layer groups on higher levels than this air type.
+				// ClientTileType ctype = get(otherType);
+				// ctype.
+				return valid; // would be better to be false but I want to see what happens.
+			})
+		));
 		
 		
 		/** @noinspection NonFinalFieldInEnum*/
@@ -166,8 +177,8 @@ public class ClientTileType extends TileType {
 	private interface ClientTileFactory {
 		static ClientTileType ore(TileTypeEnum type) {
 			return new ClientTileType(type, false,
-				new ConnectionManager(type, RenderStyle.SINGLE_FRAME, TileTypeEnum.STONE),
-				new OverlapManager(type, RenderStyle.SINGLE_FRAME)
+				new ConnectionManager(type, TileTypeEnum.STONE),
+				new OverlapManager(type)
 			);
 		}
 		

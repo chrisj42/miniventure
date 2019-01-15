@@ -66,7 +66,7 @@ public class TileTouchCheck {
 		for(int i = 0; i < map.length; i++) {
 			int matchRule = map[i];
 			if(matchRule == SKIP) continue;
-			
+			if(RelPos.values(i) == RelPos.CENTER) continue;
 			if(aroundMatches.get(RelPos.values(i)) != (matchRule == MATCH)) // if the actual match does not agree with the required match
 				return false;
 		}

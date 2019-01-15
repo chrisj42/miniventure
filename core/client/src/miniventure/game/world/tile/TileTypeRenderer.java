@@ -80,7 +80,7 @@ public class TileTypeRenderer {
 		if(name != null)
 			return ClientTileType.get(tileType).getTransition(name).getAnimation();
 		
-		return connectionManager.getConnectionSprite(aroundTypes);
+		return connectionManager.getConnectionSprite((RenderTile) tile, aroundTypes);
 	}
 	
 	// gets the overlap sprite (sides + any isolated corners) for this tiletype overlapping a tile at the given positions.

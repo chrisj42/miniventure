@@ -219,7 +219,11 @@ public class ServerTileType extends TileType {
 		CARTOON_TREE(ServerTileFactory::tree),
 		DARK_TREE(ServerTileFactory::tree),
 		PINE_TREE(ServerTileFactory::tree),
-		POOF_TREE(ServerTileFactory::tree);
+		POOF_TREE(ServerTileFactory::tree),
+		
+		AIR(type -> new ServerTileType(type,
+			DestructionManager.INDESTRUCTIBLE(type)
+		));
 		
 		/** @noinspection NonFinalFieldInEnum*/
 		private ServerTileType type = null;
