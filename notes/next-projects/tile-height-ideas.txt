@@ -1,0 +1,40 @@
+changes I need to make to level/tile system:
+
+------
+with the concept of tiles having height...
+--
+
+- tiles consist of an ordered collection of tile layer groups
+- each layer group consists of a top-solid layer at the bottom (the top of a solid layer below, or air) followed by any number of non-solid layers, and ending with a solid layer at the top (which may be air).
+- considering tile rendering:
+	- sprite compiling happens one tile at a time, though that's further split into each layer group at a time.
+	- sprite rendering, on the otherhand, happens across the screen on a per-layer-group basis, from the bottom up. Each new layer group will bring with it entities on that same layer.
+
+
+---
+other notes
+---
+
+
+- entities get final say on whether they can walk on a tile. This is the current system.
+
+- add shadows
+	- shadows will be a form of connection sprite for air...
+	- i have the option of making air connect to air, or higher tiles.
+
+
+---
+old
+---
+- consider for a layer: is walkable?, is solid?, if solid then is top walkable?
+- consider layer group transitions. A layer group is always grounded by a tiletype which embodies the top of a solid tiletype.
+	- the bottom group will have a special version of the upper-tile tiletype that points back to itself for the main type.
+
+
+- what *is* new is if non-walkable tiles should be walkable if you're on the layer above.
+	- is there the possibility that a tile is walkable both below and above?
+	- yes, and if an entity somehow enters the upper layer of these two, the entity will fall to the lower level
+
+- solid property contains solid bool and "walkable above" bool. If not solid, then the "walkable above" bool is ignored. Walkable bool is separate.
+	- default solid property constructor means not solid; a bool in the constructor means solid, and the bool specifies if the top is walkable.
+
