@@ -173,7 +173,7 @@ public class LevelViewport {
 		resetCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 	}
 	
-	private void resetCamera(int width, int height) {
+	private void resetCamera(final int width, final int height) {
 		float zoomFactor = (float) Math.pow(2, zoom);
 		
 		Rectangle window = new Rectangle(0, 0, width, height);
@@ -190,6 +190,15 @@ public class LevelViewport {
 		float viewportHeight = window.height * Tile.SIZE / zoomFactor;
 		
 		camera.setToOrtho(false, viewportWidth, viewportHeight);
+		if(GameCore.debug)
+			System.out.println("set level camera: "+width+'x'+height+" screen with "+viewportWidth+'x'+viewportHeight+" viewport ("+getZoomRatio(width/viewportWidth)+" actual px, "+getZoomRatio(width/viewportWidth*Tile.SCALE)+" apparent px)");
+	}
+	
+	private static String getZoomRatio(float ratio) {
+		if(ratio < 1)
+			return "1:"+(1/ratio);
+		else
+			return ratio+":1";
 	}
 	
 	public void resize(int width, int height) {

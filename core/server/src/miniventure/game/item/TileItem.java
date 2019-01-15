@@ -61,7 +61,7 @@ public class TileItem extends ServerItem {
 		addItem(TileTypeEnum.GRASS, TileTypeEnum.DIRT);
 		addItem(TileTypeEnum.STONE, TileTypeEnum.DIRT);
 		
-		items.put(TileTypeEnum.CLOSED_DOOR, new TileItem("Door", GameCore.tileAtlas.findRegion("closed_door/c00"), TileTypeEnum.CLOSED_DOOR, PlacementCheck.on(groundTypes)));
+		items.put(TileTypeEnum.CLOSED_DOOR, new TileItem("Door", GameCore.descaledTileAtlas.findRegion("closed_door/c00"), TileTypeEnum.CLOSED_DOOR, PlacementCheck.on(groundTypes)));
 		items.put(TileTypeEnum.OPEN_DOOR, items.get(TileTypeEnum.CLOSED_DOOR));
 		
 		items.put(TileTypeEnum.DIRT, new TileItem("Dirt", GameCore.icons.get("items/dirt"), TileTypeEnum.DIRT, PlacementCheck.on(TileTypeEnum.HOLE)));
@@ -82,7 +82,7 @@ public class TileItem extends ServerItem {
 	@NotNull private final PlacementCheck placementCheck;
 	
 	private TileItem(@NotNull TileTypeEnum type, @NotNull PlacementCheck placementCheck) {
-		this(MyUtils.toTitleCase(type.name()), GameCore.tileAtlas.findRegion(type.name().toLowerCase()+"/c00"), type, placementCheck);
+		this(MyUtils.toTitleCase(type.name()), GameCore.descaledTileAtlas.findRegion(type.name().toLowerCase()+"/c00"), type, placementCheck);
 	}
 	
 	private TileItem(String name, @NotNull TextureHolder texture, @NotNull TileTypeEnum result, @NotNull PlacementCheck placementCheck) {

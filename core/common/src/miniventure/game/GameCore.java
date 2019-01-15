@@ -39,7 +39,7 @@ public class GameCore {
 	
 	public static final Color DEFAULT_CHAT_COLOR = Color.WHITE;
 	
-	public static TextureAtlasHolder entityAtlas, tileAtlas;
+	public static TextureAtlasHolder entityAtlas, tileAtlas, descaledTileAtlas;
 	public static TextureAtlas tileConnectionAtlas = new TextureAtlas(); // tile overlap atlas not needed b/c the overlap sprite layout is simple enough to code; it goes in binary. However, the tile connection sprite layout is more complicated, so a map is needed to compare against.
 	
 	private static TextureAtlas iconAtlas;
@@ -51,12 +51,14 @@ public class GameCore {
 		if(initialized) return;
 		initialized = true;
 		entityAtlas = new TextureAtlasHolder(new TextureAtlas("sprites/entities.txt"));
-		tileAtlas = new TextureAtlasHolder(new TextureAtlas("sprites/tiles.txt"));
+		tileAtlas = new TextureAtlasHolder(new TextureAtlas("sprites/tiles4x.txt"));
 		tileConnectionAtlas = new TextureAtlas("sprites/tileconnectmap.txt");
 		iconAtlas = new TextureAtlas("sprites/icons.txt");
 		
 		for(AtlasRegion region: iconAtlas.getRegions())
 			icons.put(region.name, new TextureHolder(region));
+		
+		descaledTileAtlas = new TextureAtlasHolder(new TextureAtlas("sprites/tiles.txt"));
 	}
 	
 	public static void initNonGdxTextures() {
@@ -70,10 +72,11 @@ public class GameCore {
 		FileHandle spriteFolder = Gdx.files.internal("sprites");
 		TextureAtlasData entityData = new TextureAtlasData(spriteFolder.child("entities.txt"), spriteFolder, false);
 		TextureAtlasData iconData = new TextureAtlasData(spriteFolder.child("icons.txt"), spriteFolder, false);
-		TextureAtlasData tileData = new TextureAtlasData(spriteFolder.child("tiles.txt"), spriteFolder, false);
+		TextureAtlasData tileData = new TextureAtlasData(spriteFolder.child("tiles4x.txt"), spriteFolder, false);
 		
 		entityAtlas = new TextureAtlasHolder(entityData);
 		tileAtlas = new TextureAtlasHolder(tileData);
+		descaledTileAtlas = new TextureAtlasHolder(new TextureAtlasData(spriteFolder.child("tiles.txt"), spriteFolder, false));
 		for(Region region: iconData.getRegions()) {
 			TextureHolder tex = new TextureHolder(region);
 			icons.put(tex.name, tex);
@@ -83,6 +86,7 @@ public class GameCore {
 	public static void dispose () {
 		entityAtlas.dispose();
 		tileAtlas.dispose();
+		descaledTileAtlas.dispose();
 		tileConnectionAtlas.dispose();
 		iconAtlas.dispose();
 	}

@@ -24,6 +24,23 @@
                     <int>-1</int>
                 </QSize>
             </struct>
+            <struct type="AutoSDSettings">
+                <key>scale</key>
+                <double>4</double>
+                <key>extension</key>
+                <string>4x</string>
+                <key>spriteFilter</key>
+                <string></string>
+                <key>acceptFractionalValues</key>
+                <false/>
+                <key>maxTextureSize</key>
+                <QSize>
+                    <key>width</key>
+                    <int>-1</int>
+                    <key>height</key>
+                    <int>-1</int>
+                </QSize>
+            </struct>
         </array>
         <key>allowRotation</key>
         <false/>
@@ -74,7 +91,7 @@
         <key>jpgQuality</key>
         <uint>80</uint>
         <key>pngOptimizationLevel</key>
-        <uint>0</uint>
+        <uint>1</uint>
         <key>webpQualityLevel</key>
         <uint>101</uint>
         <key>textureSubPath</key>
@@ -88,9 +105,9 @@
         <key>maxTextureSize</key>
         <QSize>
             <key>width</key>
-            <int>2048</int>
+            <int>8192</int>
             <key>height</key>
-            <int>2048</int>
+            <int>8192</int>
         </QSize>
         <key>fixedTextureSize</key>
         <QSize>
@@ -108,7 +125,7 @@
             <key>sizeConstraints</key>
             <enum type="AlgorithmSettings::SizeConstraints">POT</enum>
             <key>forceSquared</key>
-            <false/>
+            <true/>
             <key>maxRects</key>
             <struct type="AlgorithmMaxRectsSettings">
                 <key>heuristic</key>
@@ -132,13 +149,13 @@
             <key>data</key>
             <struct type="DataFile">
                 <key>name</key>
-                <filename>../core/common/assets/sprites/tiles.txt</filename>
+                <filename>../core/common/assets/sprites/tiles{v}.txt</filename>
             </struct>
         </map>
         <key>multiPack</key>
         <false/>
         <key>forceIdenticalLayout</key>
-        <false/>
+        <true/>
         <key>outputFormat</key>
         <enum type="SettingsBase::OutputFormat">RGBA8888</enum>
         <key>alphaHandling</key>
@@ -161,7 +178,7 @@
             <key>scale</key>
             <double>1</double>
             <key>scaleMode</key>
-            <enum type="ScaleMode">Smooth</enum>
+            <enum type="ScaleMode">Fast</enum>
             <key>extrude</key>
             <uint>2</uint>
             <key>trimThreshold</key>
@@ -1418,11 +1435,13 @@
         <key>replaceList</key>
         <array/>
         <key>ignoredWarnings</key>
-        <array/>
+        <array>
+            <string>large-max-texture-size</string>
+        </array>
         <key>commonDivisorX</key>
-        <uint>36</uint>
+        <uint>1</uint>
         <key>commonDivisorY</key>
-        <uint>36</uint>
+        <uint>1</uint>
         <key>packNormalMaps</key>
         <false/>
         <key>autodetectNormalMaps</key>

@@ -1,354 +1,354 @@
 icons.png
-size: 128, 256
+size: 256, 256
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
 blank
   rotate: false
-  xy: 119, 71
+  xy: 3, 241
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
   index: -1
 bolt-outline
   rotate: false
-  xy: 71, 67
+  xy: 3, 163
   size: 20, 24
   orig: 20, 24
   offset: 0, 0
   index: -1
 bolt
   rotate: false
-  xy: 95, 71
+  xy: 3, 191
   size: 20, 24
   orig: 20, 24
   offset: 0, 0
   index: -1
 burger-outline
   rotate: false
-  xy: 3, 71
+  xy: 3, 219
   size: 20, 18
   orig: 20, 18
   offset: 0, 0
   index: -1
 burger
   rotate: false
-  xy: 27, 71
+  xy: 27, 163
   size: 20, 18
   orig: 20, 18
   offset: 0, 0
   index: -1
 heart-outline
   rotate: false
-  xy: 71, 39
+  xy: 3, 107
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 heart
   rotate: false
-  xy: 99, 43
+  xy: 3, 135
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 items/coal
   rotate: false
-  xy: 107, 3
+  xy: 31, 107
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/cotton
   rotate: false
-  xy: 107, 23
+  xy: 39, 71
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/dirt
   rotate: false
-  xy: 51, 71
+  xy: 31, 127
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/fabric
   rotate: false
-  xy: 51, 91
+  xy: 27, 185
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/flint
   rotate: false
-  xy: 71, 95
+  xy: 27, 205
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/food/apple
   rotate: false
-  xy: 91, 99
+  xy: 27, 225
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/food/cactus_fruit
   rotate: false
-  xy: 3, 93
+  xy: 47, 185
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/food/cherry
   rotate: false
-  xy: 23, 93
+  xy: 47, 205
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/food/cooked_bacon
   rotate: false
-  xy: 43, 111
+  xy: 47, 225
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/food/cooked_meat
   rotate: false
-  xy: 63, 115
+  xy: 51, 91
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/food/gooseberry
   rotate: false
-  xy: 3, 113
+  xy: 59, 71
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/food/pear
   rotate: false
-  xy: 23, 113
+  xy: 71, 3
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/food/raw_bacon
   rotate: false
-  xy: 43, 131
+  xy: 71, 23
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/food/raw_meat
   rotate: false
-  xy: 3, 133
+  xy: 71, 43
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/food/snow_berries
   rotate: false
-  xy: 23, 133
+  xy: 51, 111
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/food/strawberry
   rotate: false
-  xy: 83, 119
+  xy: 51, 131
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/iron
   rotate: false
-  xy: 63, 135
+  xy: 51, 151
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/log
   rotate: false
-  xy: 43, 151
+  xy: 67, 171
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/ruby
   rotate: false
-  xy: 103, 119
+  xy: 67, 191
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/sand
   rotate: false
-  xy: 3, 153
+  xy: 67, 211
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/snow
   rotate: false
-  xy: 23, 153
+  xy: 67, 231
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/stone
   rotate: false
-  xy: 83, 139
+  xy: 71, 91
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/tools/flint_axe
   rotate: false
-  xy: 63, 155
+  xy: 79, 63
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/tools/flint_pickaxe
   rotate: false
-  xy: 43, 171
+  xy: 91, 3
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/tools/flint_shovel
   rotate: false
-  xy: 103, 139
+  xy: 91, 23
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/tools/flint_sword
   rotate: false
-  xy: 3, 173
+  xy: 91, 43
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/tools/iron_axe
   rotate: false
-  xy: 23, 173
+  xy: 71, 111
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/tools/iron_pickaxe
   rotate: false
-  xy: 83, 159
+  xy: 71, 131
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/tools/iron_shovel
   rotate: false
-  xy: 63, 175
+  xy: 71, 151
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/tools/iron_sword
   rotate: false
-  xy: 43, 191
+  xy: 87, 171
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/tools/ruby_axe
   rotate: false
-  xy: 103, 159
+  xy: 87, 191
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/tools/ruby_pickaxe
   rotate: false
-  xy: 3, 193
+  xy: 87, 211
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/tools/ruby_shovel
   rotate: false
-  xy: 23, 193
+  xy: 87, 231
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/tools/ruby_sword
   rotate: false
-  xy: 3, 213
+  xy: 91, 83
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/tools/stone_axe
   rotate: false
-  xy: 3, 233
+  xy: 99, 63
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/tools/stone_pickaxe
   rotate: false
-  xy: 23, 213
+  xy: 111, 3
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/tools/stone_shovel
   rotate: false
-  xy: 23, 233
+  xy: 111, 23
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/tools/stone_sword
   rotate: false
-  xy: 83, 179
+  xy: 111, 43
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/tools/tungsten_axe
   rotate: false
-  xy: 63, 195
+  xy: 91, 103
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/tools/tungsten_pickaxe
   rotate: false
-  xy: 43, 211
+  xy: 91, 123
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/tools/tungsten_shovel
   rotate: false
-  xy: 103, 179
+  xy: 91, 143
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/tools/tungsten_sword
   rotate: false
-  xy: 43, 231
+  xy: 107, 163
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 items/tungsten
   rotate: false
-  xy: 63, 215
+  xy: 107, 183
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -362,14 +362,14 @@ light
   index: -1
 tile-frame
   rotate: false
-  xy: 71, 3
+  xy: 3, 71
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 white
   rotate: false
-  xy: 124, 71
+  xy: 3, 246
   size: 1, 1
   orig: 1, 1
   offset: 0, 0

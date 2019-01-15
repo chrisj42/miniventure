@@ -405,41 +405,41 @@ door_/open/topen
 flint/c00
   rotate: false
   xy: 830, 2
-  size: 32, 32
+  size: 16, 16
   orig: 16, 16
-  offset: 0, -16
+  offset: 0, 0
   index: -1
 floor_/stone/c00
   rotate: false
-  xy: 866, 2
+  xy: 850, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 floor_/stone/c01
   rotate: false
-  xy: 902, 2
+  xy: 886, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 floor_/stone/c02
   rotate: false
-  xy: 938, 2
+  xy: 922, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 floor_/stone/c03
   rotate: false
-  xy: 974, 2
+  xy: 958, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 floor_/stone/c04
   rotate: false
-  xy: 866, 2
+  xy: 850, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -453,7 +453,7 @@ floor_/stone/c05
   index: -1
 floor_/stone/c06
   rotate: false
-  xy: 938, 2
+  xy: 922, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -474,14 +474,14 @@ floor_/stone/c08
   index: -1
 floor_/stone/c09
   rotate: false
-  xy: 974, 2
+  xy: 958, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 floor_/stone/c10
   rotate: false
-  xy: 902, 2
+  xy: 886, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -502,14 +502,14 @@ floor_/stone/c12
   index: -1
 floor_/stone/c13
   rotate: false
-  xy: 974, 2
+  xy: 958, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 floor_/stone/c14
   rotate: false
-  xy: 902, 2
+  xy: 886, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0

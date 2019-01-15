@@ -1,5 +1,7 @@
 package miniventure.game.client;
 
+import miniventure.game.world.tile.Tile;
+
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 
@@ -28,6 +30,8 @@ public enum FontStyle {
 	}),
 	
 	KeepSize(Default.change(false)),
+	
+	KeepSizeScaled(KeepSize.change(KeepSize.get().font.size * Tile.SCALE)),
 	
 	CrafterHeader(KeepSize.change(12)),
 	
