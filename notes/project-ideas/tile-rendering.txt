@@ -1,0 +1,64 @@
+Tiles have a stack of types. But, the stack only goes down until a "ground" tile type. Then, any tile types below must be represented in the ground tile type's data.
+
+Examples of ground type tiletypes: Hole, Grass, Sand, Dirt.
+Ground tiletypes are opaque. They are always rendered behind all entities.
+
+Water is a Fluid type. Fluid types only render part of the sprites of entities on them, because they are "in" the fluid.
+
+Stone, Trees, Cactus, Door, Walls, etc. are Surface types. They render after other tiles, and after entities above them; but before entities below them.
+
+Note that this will require a little change in entity rendering, as well as Surface type tile rendering; sprites must specify a Z "depth" to their sprites. This allows the sprite to be halfway up the tile, minus half the depth, so whatever's in the sprite appears centered on the tile. The hitbox remains unchanged, so you can walk behind the sprite, to a degree.
+
+Applied to entities, this means that you can also walk behind entities to a degree, and appear on top of them a bit.
+
+
+Liquid tiles are required to have a "swim.png" sprite, that is rendered under mobs (and maybe other entities?) when they are in the liquid.
+These entities that go in the water are also expected to have a "swimming" sprite or something; otherwise, it will just render the top half of them. If possible, that is...
+
+
+
+
+
+Tile class has method to re-fetch all of its sprites.
+
+The "fetch" goes like this:
+
+ - get all layer types in 3x3 that are NOT under an opaque layer, and sort (while also keeping separate Sets of each tile's types)
+ - find highest opaque tile in main
+ - for each layer from highest opaque to top in main:
+ 	- add layer connection sprite (or transition)
+ 	- check for overlaps in total that go above cur layer AND below next layer (or next layer is null); add each overlap in sequence
+
+
+
+
+
+
+TileTypeRenderer
+
+- is opaque or not
+- get connection animation for a given tile
+- get overlap animation for a given tile
+
+- make all animations once, at tiletype creation.
+- use the given data (NO DEFAULTS):
+	- connection sprites
+		- Multiple? (if no, don't bother to calculate later on...)
+		- tiles to connect to? 
+		- are animated? if so, framerate?
+		- if certain ones have special framerates/animations, specify them individually; the first one is a "default".
+	
+	- overlap sprites
+		- exist?
+		- render style? (aka animated? framerate?)
+	
+	- transition animations (ani data extends AnimationData)
+		- name of each one
+		- req'd other tiles
+		- animation duration
+		- optional playmode
+	
+
+RenderStyle
+	- PlayMode and framerate
+	- or, use premade SINGLE_FRAME

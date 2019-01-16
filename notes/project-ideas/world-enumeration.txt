@@ -1,0 +1,302 @@
+	each enum value is a certain type, and they need to be able to be accessed, split, saved, and loaded.
+	
+	The resulting object that represents any one of these fundamental identities should contain simple
+	info that allow it to be reconstructed from the same source, or a source that can be determined from
+	the data.
+	
+	the data that identifies an identity should be readable by both the client and the server.
+	Both will have data associated with each identity.
+	Now, the server may have data that is important only to the server, and is not in the identity
+	data; this is fine, and it will be saved but not serialized for the client.
+	An example of this is wool color, or door material. Note that these are aesthetic changes... such
+	changes are easy to have in a variable.
+	
+	Often there will be data that both the client and server need to be aware of, but the data changes
+	over time. for example, position.
+	
+	One may say that this data constitutes an identity as much as anything else.
+	The key differentiator here is what changes behavior, and what changes looks.
+	The server needs to be aware of what changes behavior.
+	The client needs to be aware of what changes looks.
+	
+	Another key point that determines identity is usage by other parts of the code. If different sprites
+	are used in different circumstances, then that ought to be part of the identity.
+	
+	Ultimately, what determines identity is what can be referenced easily both in serialized form (and saved/loaded) and written form (in the code).
+	
+	Here's an idea: A subtype can inherit from other types; it just puts all the given types properties in a map or similar (overwriting any previous things that were already specified).
+	That's kinda what I'm doing already with trees.
+	
+	Another idea: tbh, what should be specified is all that is used when comparing two types.
+	Some data may change, some may not. Each entity bearing a type will have its own identifier,
+	and then any comparable/measurable properties will just be tacked on.
+	Behavior is something that often cannot be easily compared. But, if one could...
+	
+	ex.
+	Grass - spreads and has certain sprites, based on comparison to other types.
+	but sprite changes shade based on location.
+	
+	for this, the fact that it spreads can be kept to the type name. The color can be procedurally determined.
+	
+	ex.
+	tree - all similar in that they drop certain things... but still different...
+	
+	--
+	perhaps it would be best to truly separate all similar types? They can derive their properties from a common source, but they will still be represented different (it won't be the *exact* same source).
+	
+	Well, once we have the types all derived, what we must then consider is the distribution of properties between the client and server, and also the interaction between those properties.
+	
+	Let's lay some tiles out for examples. We'll put the identity type, then properties about it, and for each property say whether the server or client care about it, or both.
+	- DIRT
+		- walkable (server)
+		- can be dug with shovel and drops item (server)
+		- has sprite (client)
+	- GRASS
+		- walkable (server)
+		- can be dug with shovel and drops item (server)
+		- spreads to adjacent DIRT (server)
+		- has sprite (client)
+		- overlaps certain other types (client)
+	- WATER
+		- walkable but slow (server)
+		- half sprite (but SHOULDN'T change collision bounds; see below) (client technically)
+		- animated sprite and connection/overlap sprites (client)
+		- spreads to adjacent hole tiles (server)
+	- TREES (all 4 types have these rules)
+		- solid (server)
+		- sprite that connects (client)
+		- various item drops (server)
+		- axe does extra damage... or only axe does full damage (server)
+		- max and current health (client AND server)
+			- MAX_HEALTH and HEALTH are Property Tags (MAX_HEALTH is not saved to file(?))
+			- current health is sent in update packets
+	- CACTUS
+		- solid (server)
+		- hurt on contact (server)
+		- max and current health (server AND client)
+	- TORCH
+		- light radius (client (and server?))
+		- walkable (server)
+		- breakable with hand (server)
+		- main sprite (client)
+		- entrance transition (client AND server)
+			- server needs to know duration of transition, and trigger types.
+			- client needs to know animation sprites
+	
+	So from my tile listing alone, I get the idea that things shared by the client and server are properties that are easily serializable and put into a property map.
+	Aside from transitions. These do not belong in a property map that you send across, but rather classes you assign in the enum.
+	In the enum, you specify identity properties (not saved or serialized) and cache properties (saved and serialized).
+	
+	Client types will require a string of data to be created. This allows the server to specify things like max health. Or current health, even. Perhaps it will be an array of Property Tags only.
+	I'm thinking client types only have a property map, and the renderer checks for the presence of certain properties in the map to do things.
+	
+	Words ought to be said about tile type ordering; it will remain in the order of the enum.
+	
+	
+	Maybe do some entities too.
+	- PIG
+		- directional walking/idle renderer (client)
+		- direction (client AND server)
+			- Property tag
+		- directional collision bounds (server)
+		- ai movement / responses (server)
+		- health (server) (maybe client, if I give it a health bar)
+	- ITEM ENTITY
+		- item sprite (client)
+		- item identity (server)
+		- bounce position / updates (server)
+		- collision bounds (server)
+			- all item entities will be the same size
+	- ACTION PARTICLE
+		- animation (client)
+		- spawn (server)
+		- existence / updates (client)
+	- PLAYER
+		- directional walking/idle renderer (client)
+		- direction (client AND server)
+			- Property tag
+		- directional collision bounds (server)
+		- input (client)
+		- interactions (server)
+		- inventory/hotbar (server AND client)
+		- 
+	
+	
+	TileTypes have a separate transition renderer. Mobs have walking/idle renderers and directional renderers.
+	Hmm... I bet an enum for WalkState or AnimationState or something would do good for the walk/idle animations; servers could send the state over and the client would pick from there.
+	As for transitions... maybe a "Transition" Cache Tag? When present on the client, it would override the default animation. Hey, maybe it could just be an "AnimationOverride" tag. The data associated with the tag would just be the animation name.
+	
+	
+	And a couple items?
+	- tile items
+		- tile they can be placed on (server)
+		- tile they become (server)
+		- sprite (client)
+	- food
+		- sprite (client)
+		- hunger restored (server)
+	- tool
+		- durability (server AND client; it's like health. There will be a separate property map anyway though.)
+		- sprite (client)
+		- stamina use / power (server)
+	
+	
+	--
+	
+	There is data in client objects that is necessary for construction, but is never used after. Text particles need text and colors, but once got they are good; more importantly though, they are the only thing that would ever use a text or color property.
+	I was thinking, then, of trying to isolate the property somewhere... but maybe it's fine to just let it be there..?
+	A ClientEntity comes from an EntityType mixed with some info...
+	
+	You know what? I'm just going to have to do it: write a string on the server side, and parse it on the client side with different code.
+	ServerEntities now kinda do it already with save and load...
+	
+	Actually, we can do this with generic serial enums. Some classes will still need to be made though.
+	TextParticle 
+	
+	when creating a client type, we need to know what to do with the data we get, and then how to render the entity.
+	The data could be segmented
+	
+	
+	client type has these params:
+		- what to do with initial data
+		- what to do with update data
+		- how to render
+	generally, you add components to the ClientEntity in initial data read, modify correct components in update read, and fetch component data in order to render.
+		An update component may also be added to update the entity before each render batch.
+	In order for updates to work, server needs to know how to send data to client so the client will be able to parse it.
+	
+	--
+	
+	I'm wondering if maybe having the client try and handle particle behavior was a bad idea...
+	If I stick with it, I can either incorporate the particle behavior into ClientEntity, or make
+	ClientEntity subclasses. I definitely think subclasses are the way to go.
+	These are the ClientEntities with behavior, the ones that ought to be updated.
+	On the server, there could be a special "ClientUpdatable" class that is for entities and stuff
+	that the client updates instead of the server.
+	These are a separate packet from your normal entity addition; it's like, UpdatableAddition or something.
+	
+	Now we run into the difficult part, because while we could make client classes like we do server classes,
+	the difference here is that the server needs to know about them to tell the client which to use, while
+	the client doesn't need to know anything about the server classes.
+	
+	So clearly, some sort of middle ground is necessary here. A way for the server to setup new client
+	updatables, but only knowing the constructors.
+	
+	maybe we could make a class for that? For each ClientUpdatable, make a class that contains a constructor method. This ought to be able to be serialized and sent to the client where it creates an actual
+	ClientUpdatable, passing in the serial class instance.
+	
+	This process involves a mapping of EntityType with ClientUpdatable with constructor class.
+	the EntityType maps to a ClientUpdatable that takes the given kind of constructor class.
+	So, ClientUpdatable has a generic type; and instances are created in lambdas assigned to an EntityType.
+	The server uses the constructor class, and never looks at any EntityType instances.
+	
+	
+	Example time:
+		Text particle
+			- entity type: TEXT_PARTICLE
+			- constructor: TextParticleConstructor
+			- Updatable<TextParticleConstructor>:
+				- makes a text renderer out of the text and color data in the constructor
+				- returns a TextParticle instance (a class in the client module) with the right behaviors.
+	
+	
+---------- MAKING SERVER ENTITIES ----------
+	
+	-- note: the below group of text (until the NOTE) is obsolete.
+	
+	Speaking of knowing things, how should a ServerEntity be made? Probably (hopefully) the same basic principle, use ServerEntity's map of EntityTypes, setting a component or two.
+	The call should pass arbitrary components, and result in a new ServerEntity with a bunch of components;
+	updating data in a component should be easy:
+		- component fields are enumerable. They are enumerable in such a way that they are all the same class, but have generic types.
+			- their enumeration values are relative to their containing class, which unlike normal enums won't be the enumerable class itself.
+			- being SerialEnums the fields will all come with serialization handling.
+			- the component field updates start with a component identifier, then the field ordinal in that component, then the serialized value of that field.
+				- since components are stored in a ServerEntity by class, the component identifier will be the component class name in serialized cases, and the actual component class otherwise.
+	
+	NOTE: below, I decided to abandon having all component fields be enumerated because it seems to not be necessary.
+	
+	Examples of entity making:
+	- COW: ServerEntity.get(EntityTypes.COW)
+				.mod(PositionComponent.class, pos -> pos.pos.set(1, 1, 1))
+				.mod(DirectionComponent.class, dir -> {dir.dir = Direction.LEFT;});
+		- the get method takes an EntityType and a varargs of components, which are applied right after normal entity creation, and right before returning.
+			- maybe instead you can just pass new components to it?
+		- mod method looks for the given component, and if it exists, executes the given lambda passing in the component.
+			- the nature of this means that components cannot force all fields to be set in their constructor, as some entities may require tuning after creation, and stuff gets updated, etc.
+		- the downside here is that the code does not specify if you ought to be giving extra components / data on creation.
+			- take text particle: it needs text and colors on creation. You then ought to give a TextComponent in the get method.
+			- would it work to have each ServerEntityType instantiate an anonymous subclass that had a public get method with a custom signature, and that returned a ServerEntity with the right properties?
+		
+	
+	Alright, well I suppose constructor classes are the way to go on the server side, instead of a ServerEntityType class.
+	To both map the Type back to the constructor class, and help check that there is exactly one constructor class for every EntityType, I'll do this:
+		- ServerEntity will contain a static HashMap of EntityType to Class. At the top of every constructor class, I'll add its entry to the map.
+		- To check if each EntityType has a constructor, simply check for usages of each one, and it should show that line of being added to the HashMap.
+	Probably not all the data in the various components will be saved to file for each entity; a lot doesn't change.
+	Since the spawning class is the most likely to know what is constant and what's changed, ServerEntity will have an abstract save() method for writing an entity to file.
+	To load an entity, every constructor class will have a second constructor for loading the entity type from saved data.
+	
+	BASICALLY... I can keep most of the current server-side system. The difference, if any, is going to be in the usage of EntityTypes. Again, if any.
+	I think I'll optimize the "EntityType" constants for the client, since the server doesn't (and won't) rely on them for typing.
+	I'll do this by making types based on rendering modes:
+	- DIRECTIONAL
+		- 
+	
+	As for server tiles. Currently, tile types are getting away with not needing any extra data on creation.
+	
+---------- 2.5D PROBLEMS + Misc. ----------
+	
+	- I could technically name ClientEntity and ServerEntity just "Entity" if they don't have a common class; it would be less to write. But then it's more confusing and overall just creates more problems than it solves.
+	
+	--
+	server needs a collision box for each entity/tile.
+		- by default, a tile collision box is the size of a standard tile.
+		- by default, an entity collision box is the size of the first sprite.
+		- custom colliders can be given for a tile
+			- this is a rect (or mutiple rects? or shape..?) that denotes the collidable bounds
+		- entities can have different shaped colliders for facing different directions, but it remains a rectangle.
+			- the directional property must register the sprites
+		- 
+	
+	I need to store more information about animations in the sprite/spritesheet, instead of the code. There needs to be a way to specify:
+		- animation frame rate
+		- collision bounds (optional, default entire sprite)
+			- a rectangle that is considered the "feet" of the sprite, or just the area that's on the ground / interactable with.
+			- or, to be more sophisticated, an image of black/white pixels. Or just multiple rectangles.
+			- note: one should be very careful about this. Try to ensure that the only non-transparent pixels outside the collision box are above it, not to the left, to the right, or below. Because that will break things.
+	- note: tile sprites can be more than 32 pixels tall; the bottom 32 will be in the tile position, with the remaining pixels above. These pixels cannot be collidable.
+	
+	Side note about similar types:
+	To get around the pain of having to specify a load of similar types of something (for example, all the trees, or all the colors of wool), I could have type groups; anything that expects a list of types should instead expect a group. Or, have Group take a number of groups and turn in into a list; something like that. Maybe it could do set operations like all but this/these sort of thing; whatever works.
+	
+	-- wool color may actually not have to be different types; the thing with typing and identity is that what matters is what needs to reference it. Only a recipe list would need to specify it explicitly, and even then maybe not; perhaps it could use the color of an ingredient to determine the output color. This is details.
+	
+	--
+	When holes or water are shown, only part of the sprite is shown, but it shouldn't change the collision bounds. this means the collision bounds need to be specified separately from the sprite bounds.
+	This exists due to the strange 2.5D nature of the perspective of the game. If an angle can be decided, that would be good, but really I just need to figure out the perspective.
+	I REALLY need to figure out how I want to handle 2.5D stuff.
+	
+	----- SOME PROPERTY STUFF -----
+	
+	Everything here DEFINITELY needs to be serializable; this exists so
+	the client AND server can share common properties, so clearly this stuff
+	needs to be sent across the connection.
+	
+	examples of common properties:
+	- direction (enum)
+	- position (vector3)
+	- transition animation (name, frame rate, play mode) 
+	- inventory (item[]?)
+	- hotbar (int[])
+	- stats - these will all be separate (maybe); the client will have a pre-determined value-density for the stat icons.
+		- max health (int)
+		- current health (int)
+		- max stamina (int)
+		- current stamina (int)
+		- max hunger (int)
+		- current hunger (int)
+		- max armor (int)
+		- current armor (int)
+	- isMoving state (boolean)
+	- text color?
+	- text shadow?

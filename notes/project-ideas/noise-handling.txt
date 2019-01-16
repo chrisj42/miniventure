@@ -1,0 +1,10 @@
+- noise multiplexers combine noise parameter sets
+- noise parameter sets hold parameters capable of creating a certain style of random noise map
+	- parameters do not include width, height, or seed (but in certain cases perhaps they will and input values will be ignored)
+
+
+- to create the tile map:
+	1. generate the height map and vegetation map (and any others like a river map or something)
+	2. go through each tile sequentially
+		- determine each tile type from the bottom of the stack up, using the data from the various noise maps
+	3. maybe place in some structures

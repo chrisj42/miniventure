@@ -1,0 +1,49 @@
+Updating
+	Tiles are updated based on a map of "duration until update" per tile in the level class. The update method is called when the duration goes at or below zero. Because of this, the level can't pass a "delta". So, if a delta is needed, the tile will have to store the previous time itself.
+
+
+Something else I *could* do... is make the tilesystem just like the entity system. With the same universal initialization constructors. Compare things using instanceof. List TileType classes instead of constants. Just saying it's a possibility...
+
+
+name of chunk file (MiniVentureChunk format; need to check if "mvc" is already a known format):
+chunkX_chunkY.mvc
+Tile data format (per chunk):
+(groundtypeordinal,datamap,nexthighertypeordinal,datamap,nexthigher... toptypeordinal,datamap),([repeat for next tile]...)
+
+the type ordinals belong to the ordinals of instances of the TileType enum. The datamaps following each type contain that type's data for that specific tile.
+The order of iteration through the tiles in the chunk has yet to be decided.
+
+
+Tiles have a stack of types. But, the stack only goes down until a "ground" tile type. Then, any tile types below must be represented in the ground tile type's data.
+
+
+
+
+
+
+If the enum *creates* TileType instances, then I can pass it parameters! I'll give it a String to String map, and the TileType maker can do whatever it wants with it; it will vary for each tile. It will probably pass it to the TileType instance it creates, so its various properties can parse the contents (health, and stuff; maybe color, or type of tree; things like that).
+
+We'll use some of the same things from the original system, like overlap and connection sprites, and transitions. Probably.
+
+TileTypes need a ref to the enum type that created it. That is necessary, for comparision, and for recreating the tiletype.
+
+
+When comparing tiletypes, I guess I'll use the enum type, and give any data I want to check. Should I consider the whole "NBT Tag" thing? They seem complicated, but good...
+After looking at them, I think I'll make my own rendition of it.
+It'll be kinda like JSON, I guess. The big issue here is figuring out what data type it is, and comparing them. But maybe that's fine.
+
+There should be an enum that contains all possible tag names, just to make sure they don't overlap. It can specify a data type, perhaps.
+
+So, we've got comparing sorted out, I guess. Now on to definitions.
+We have to be able to create any tiletype without any data, so important data should have defaults. This can mean that all the tag names have default values...? I mean, only one property should be defining it, so it kinda makes sense to me...
+
+Each of the tiletype makers should list out somehow what it wants/uses. Perhaps it will list all the defaults it will use. All the values...
+the data probably won't contain things like health, or drops, but perhaps another data can be made for those things; an optional one. idk. Or maybe the TileType makers will just be separate.
+
+There can be a "woodType" tag... that's used to get the right sprite. value is one of a WoodType enum. "color" is another tag.
+
+Tag enum will have methods that take an object and convert it to the right type. Or, just put it in the data. Actually, the way to add data to a data map involves its key and value, and it will simply check to enforce that the value is of the key tag's specified type.
+
+
+Some Tile data should be saved to file, but some of it shouldn't. Many properties have "cache" data to hold things like the timestamp when a method was last called, or something like that. This can safely be forgotten when unloading the tile.
+A value is in the cache if there are no types which say it is necessary, and at least one that says it isn't. This is done through registering the DataTags used 
