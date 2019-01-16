@@ -93,17 +93,6 @@ public abstract class Tile implements WorldObject {
 		}
 	}
 	
-	/*
-	@Override @Nullable @SuppressWarnings("unchecked")
-	public Tile<T> getClosestTile(@NotNull Array<Tile> tiles) {
-		return (Tile<T>) WorldObject.super.getClosestTile(tiles);
-	}
-	@Override @Nullable @SuppressWarnings("unchecked")
-	public Tile<T> getClosestTile() {
-		return (Tile<T>) WorldObject.super.getClosestTile();
-	}
-	*/
-	
 	@Override
 	public String toString() { return getType().getName()+' '+getClass().getSimpleName(); }
 	

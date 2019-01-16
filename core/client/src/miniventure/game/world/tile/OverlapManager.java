@@ -4,13 +4,10 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 
 import miniventure.game.GameCore;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.RelPos;
-import miniventure.game.world.Point;
 
 import com.badlogic.gdx.utils.Array;
 
@@ -82,29 +79,5 @@ public class OverlapManager {
 		}
 		
 		return animations;
-	}
-	
-	
-	public static EnumMap<TileTypeEnum, EnumSet<RelPos>> mapTileTypesAround(@NotNull ClientTile tile) { return mapTileTypesAround(tile, true); }
-	/** @noinspection SameParameterValue*/ // Exclude covered means that tile types beneath ground layers won't be included.
-	private static EnumMap<TileTypeEnum, EnumSet<RelPos>> mapTileTypesAround(@NotNull ClientTile tile, boolean excludeCovered) {
-		EnumMap<TileTypeEnum, EnumSet<RelPos>> typeMap = new EnumMap<>(TileTypeEnum.class);
-		
-		HashSet<Tile> aroundTiles = tile.getAdjacentTiles(true);
-		
-		for(Tile aroundTile: aroundTiles) {
-			List<ClientTileType> types = ((ClientTileStack)aroundTile.getTypeStack()).getTypes(!excludeCovered);
-			
-			Point thisPos = tile.getLocation();
-			Point otherPos = aroundTile.getLocation();
-			RelPos tilePos = RelPos.get(otherPos.x - thisPos.x, otherPos.y - thisPos.y);
-			
-			for(ClientTileType tileType: types) {
-				typeMap.putIfAbsent(tileType.getTypeEnum(), EnumSet.noneOf(RelPos.class));
-				typeMap.get(tileType.getTypeEnum()).add(tilePos);
-			}
-		}
-		
-		return typeMap;
 	}
 }

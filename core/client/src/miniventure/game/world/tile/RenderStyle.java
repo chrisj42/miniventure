@@ -39,9 +39,9 @@ public class RenderStyle {
 			throw new SpriteNotFoundException("tile type "+tileType+" does not have any registered sprites in map "+mapName+". (discovered when attempting to fetch sprite \""+name+"\")");
 		if(!map.get(tileType).containsKey(name))
 			throw new SpriteNotFoundException("tile type "+tileType+" does not have sprite with name \""+name+"\" in map "+mapName+'.');
-		return getAnimation(tileType, map.get(tileType).get(name));
+		return getAnimation(map.get(tileType).get(name));
 	}
-	TileAnimation<TextureHolder> getAnimation(@NotNull TileTypeEnum tileType, Array<TextureHolder> frames) {
+	private TileAnimation<TextureHolder> getAnimation(Array<TextureHolder> frames) {
 		if(time == 0)
 			return new TileAnimation<>(sync, 1, frames.get(0));
 		else

@@ -21,7 +21,6 @@ import org.jetbrains.annotations.Nullable;
 public class RenderTile extends Tile {
 	
 	private ArrayList<TileAnimation<TextureHolder>> spriteStack;
-	// private ArrayList<ClientTileType> typeStack;
 	private boolean updateSprites;
 	
 	private final Object spriteLock = new Object();
@@ -106,11 +105,6 @@ public class RenderTile extends Tile {
 		
 		// all tile types have been fetched. Now accumulate the sprites.
 		ArrayList<TileAnimation<TextureHolder>> spriteStack = new ArrayList<>(16);
-		// ArrayList<ClientTileType> typeStack = new ArrayList<>(16);
-		//ArrayList<String> spriteNames = new ArrayList<>(16);
-		
-		// get overlap data, in case it's needed
-		//EnumMap<TileTypeEnum, EnumSet<RelPos>> typePositions = OverlapManager.mapTileTypesAround(this);
 		
 		// iterate through main stack from bottom to top, adding connection and overlap sprites each level.
 		List<ClientTileType> types = getTypeStack().getTypes();
@@ -120,8 +114,6 @@ public class RenderTile extends Tile {
 			
 			// add connection sprite (or transition) for prev
 			spriteStack.addAll(prev.getRenderer().getConnectionSprites(this, typesAtPositions));
-			// typeStack.add(prev); // would screw up if sprite stack added more than 1 sprite
-			//spriteNames.add(animation.getKeyFrames()[0].name);
 			
 			// check for overlaps that are above prev AND below cur
 			NavigableSet<TileTypeEnum> overlapSet;
@@ -139,20 +131,8 @@ public class RenderTile extends Tile {
 			}
 		}
 		
-		
-		// now that we have the new sprites, we need to make sure that the animations remain continuous.
-		// to do that, we need to store the run duration of each one, and keep it if the animation is still here.
-		// to do *that*, we need a way to identify animations: the ClientTileType name combined with the sprite name.
-		// So I'll have to store them together.
-		
-		// The code below: set the sprites, then check each name in the deltaMap against those in the sprite stack.
-		// if in both, don't touch. If in stack only, add to deltaMap with delta 0. If in map only, remove it.
-		
-		// remember: minimize amount of code in synchronized statements (aka split up synchronized statements where possible), but obviously make sure any breaks in synchronization don't break things.
-		
 		synchronized (spriteLock) {
 			this.spriteStack = spriteStack;
-			// this.typeStack = typeStack;
 			updateSprites = false;
 		}
 	}
