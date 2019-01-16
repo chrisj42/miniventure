@@ -103,7 +103,7 @@ public class GameServer implements GameProtocol {
 				ServerWorld world = ServerCore.getWorld();
 				
 				if(object instanceof Login) {
-					System.out.println("server received login");
+					if(GameCore.debug) System.out.println("server received login");
 					Login login = (Login) object;
 					
 					if(login.version.compareTo(GameCore.VERSION) != 0) {
@@ -207,7 +207,7 @@ public class GameServer implements GameProtocol {
 					}
 					// move given dist
 					Vector3 moveDist = move.getMoveDist();
-					if(!GameCore.debug) // TODO replace this static check with something that determines the player's speed with respect to their situation.
+					if(!GameCore.debug) // TODO replace this static speed check with something that determines the player's speed with respect to their situation.
 						moveDist.clamp(0, Math.min(.5f, 3.5f*Player.MOVE_SPEED/Math.min(ServerCore.getFPS(), 60))); // the server will not allow the client to move fast (unless in debug mode)
 					client.move(moveDist);
 					// compare against given end pos
@@ -481,7 +481,7 @@ public class GameServer implements GameProtocol {
 		
 		ServerLevel level = player.getLevel();
 		if(level == null) {
-			System.out.println("Server: Level of player "+player.getName()+" is null during entity validation attempt, skipping validation.");
+			if(GameCore.debug) System.out.println("Server: Level of player "+player.getName()+" is null during entity validation attempt, skipping validation.");
 			return;
 		}
 		

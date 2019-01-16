@@ -59,12 +59,12 @@ public class GameClient implements GameProtocol {
 					world.init((WorldData)object);
 				
 				if(object instanceof LevelData) {
-					System.out.println("client received level");
+					if(GameCore.debug) System.out.println("client received level");
 					world.addLevel((LevelData)object);
 				}
 				
 				if(object instanceof SpawnData) {
-					System.out.println("client received player");
+					if(GameCore.debug) System.out.println("client received player");
 					SpawnData data = (SpawnData) object;
 					world.spawnPlayer(data);
 					ClientCore.setScreen(null);
