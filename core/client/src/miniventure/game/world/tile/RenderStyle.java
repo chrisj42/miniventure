@@ -34,11 +34,11 @@ public class RenderStyle {
 		this.isFrameTime = isFrameTime;
 	}
 	
-	TileAnimation<TextureHolder> getAnimation(@NotNull TileTypeEnum tileType, String name, EnumMap<TileTypeEnum, HashMap<String, Array<TextureHolder>>> map) {
+	TileAnimation<TextureHolder> getAnimation(@NotNull TileTypeEnum tileType, String name, EnumMap<TileTypeEnum, HashMap<String, Array<TextureHolder>>> map, String mapName) {
 		if(!map.containsKey(tileType))
-			throw new SpriteNotFoundException("tile type "+tileType+" does not have any registered overlap sprites. (discovered when attempting to fetch sprite \""+name+"\")");
+			throw new SpriteNotFoundException("tile type "+tileType+" does not have any registered sprites in map "+mapName+". (discovered when attempting to fetch sprite \""+name+"\")");
 		if(!map.get(tileType).containsKey(name))
-			throw new SpriteNotFoundException("tile type "+tileType+" does not overlap sprites with name \""+name+"\".");
+			throw new SpriteNotFoundException("tile type "+tileType+" does not have sprite with name \""+name+"\" in map "+mapName+'.');
 		return getAnimation(tileType, map.get(tileType).get(name));
 	}
 	TileAnimation<TextureHolder> getAnimation(@NotNull TileTypeEnum tileType, Array<TextureHolder> frames) {

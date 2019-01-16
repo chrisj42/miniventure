@@ -3,6 +3,8 @@ package miniventure.game.world.tile;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Random;
 
 import miniventure.game.GameCore;
 import miniventure.game.texture.TextureHolder;
@@ -16,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 public class ConnectionManager {
 	
 	static EnumMap<TileTypeEnum, HashMap<String, Array<TextureHolder>>> tileAnimations = new EnumMap<>(TileTypeEnum.class);
+	static EnumMap<TileTypeEnum, HashMap<String, Array<TextureHolder>>> mainAnimations = new EnumMap<>(TileTypeEnum.class);
 	private static final HashMap<String, Array<TextureHolder>> dummy = new HashMap<>(0);
 	
 	private final TileTypeEnum type;
@@ -81,15 +84,20 @@ public class ConnectionManager {
 		return this;
 	}
 	
-	private TileAnimation<TextureHolder> getAnimation(int spriteIdx) {
-		return overrides.getOrDefault(spriteIdx, renderStyle).getAnimation(type, (spriteIdx<10?"0":"")+spriteIdx, tileAnimations);
+	private void addAnimations(LinkedList<TileAnimation<TextureHolder>> sprites, RenderTile tile, int spriteIdx) {
+		if(mainAnimations.containsKey(type)) {
+			int idx = new Random(tile.x * 17 + tile.y * 131).nextInt(mainAnimations.get(type).size());
+			sprites.add(RenderStyle.SINGLE_FRAME.getAnimation(type, (idx<10?"0":"")+idx, mainAnimations, "connection main"));
+		}
+		sprites.add(overrides.getOrDefault(spriteIdx, renderStyle).getAnimation(type, (spriteIdx<10?"0":"")+spriteIdx, tileAnimations, "connection"));
 	}
 	
-	/// Checks the given aroundTypes for all types 
-	@NotNull
-	public TileAnimation<TextureHolder> getConnectionSprite(RenderTile tile, EnumMap<RelPos, EnumSet<TileTypeEnum>> aroundTypes) {
-		if(connectingTypes != null && connectingTypes.size() == 0)
-			return getAnimation(0);
+	/// Checks the given aroundTypes for all types
+	public void addConnectionSprites(LinkedList<TileAnimation<TextureHolder>> sprites, RenderTile tile, EnumMap<RelPos, EnumSet<TileTypeEnum>> aroundTypes) {
+		if(connectingTypes != null && connectingTypes.size() == 0) {
+			addAnimations(sprites, tile, 0);
+			return;
+		}
 		
 		EnumMap<RelPos, Boolean> tileConnections = new EnumMap<>(RelPos.class);
 		
@@ -113,7 +121,7 @@ public class ConnectionManager {
 			}
 		}
 		
-		return getAnimation(spriteIdx);
+		addAnimations(sprites, tile, spriteIdx);
 	}
 	
 }

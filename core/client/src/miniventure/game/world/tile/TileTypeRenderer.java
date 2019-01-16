@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.LinkedList;
 
 import miniventure.game.GameCore;
 import miniventure.game.texture.TextureHolder;
@@ -32,6 +33,7 @@ public class TileTypeRenderer {
 			EnumMap<TileTypeEnum, HashMap<String, Array<TextureHolder>>> animationMap;
 			switch(prefix) {
 				case "c": animationMap = ConnectionManager.tileAnimations; break;
+				case "m": animationMap = ConnectionManager.mainAnimations; break;
 				case "o": animationMap = OverlapManager.tileAnimations; break;
 				case "t": animationMap = TransitionAnimation.tileAnimations; break;
 				default:
@@ -75,12 +77,15 @@ public class TileTypeRenderer {
 	// whenever a tile changes its TileTypeEnum stack in any way, all 9 tiles around it re-fetch their overlap and main animations. Then they keep that stack of animations until the next fetch.
 	
 	// gets the sprite for when this tiletype is surrounded by the given types.
-	public TileAnimation<TextureHolder> getConnectionSprite(@NotNull Tile tile, EnumMap<RelPos, EnumSet<TileTypeEnum>> aroundTypes) {
+	public LinkedList<TileAnimation<TextureHolder>> getConnectionSprites(@NotNull Tile tile, EnumMap<RelPos, EnumSet<TileTypeEnum>> aroundTypes) {
+		LinkedList<TileAnimation<TextureHolder>> sprites = new LinkedList<>();
 		String name = tile.getDataMap(tileType).get(TileCacheTag.TransitionName);
 		if(name != null)
-			return ClientTileType.get(tileType).getTransition(name).getAnimation();
+			sprites.add(ClientTileType.get(tileType).getTransition(name).getAnimation());
+		else
+			connectionManager.addConnectionSprites(sprites, (RenderTile) tile, aroundTypes);
 		
-		return connectionManager.getConnectionSprite((RenderTile) tile, aroundTypes);
+		return sprites;
 	}
 	
 	// gets the overlap sprite (sides + any isolated corners) for this tiletype overlapping a tile at the given positions.

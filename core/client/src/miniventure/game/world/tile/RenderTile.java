@@ -21,7 +21,7 @@ import org.jetbrains.annotations.Nullable;
 public class RenderTile extends Tile {
 	
 	private ArrayList<TileAnimation<TextureHolder>> spriteStack;
-	private ArrayList<ClientTileType> typeStack;
+	// private ArrayList<ClientTileType> typeStack;
 	private boolean updateSprites;
 	
 	private final Object spriteLock = new Object();
@@ -53,9 +53,7 @@ public class RenderTile extends Tile {
 		}
 		
 		synchronized (spriteLock) {
-			for(int i = 0; i < spriteStack.size(); i++) {
-				TileAnimation<TextureHolder> animation = spriteStack.get(i);
-				//typeStack.get(i).getRenderer().transitionManager.tryFinishAnimation(this);
+			for(TileAnimation<TextureHolder> animation: spriteStack) {
 				batch.draw(animation.getKeyFrame(this).texture, (x - posOffset.x) * SIZE, (y - posOffset.y) * SIZE);
 			}
 		}
@@ -83,7 +81,6 @@ public class RenderTile extends Tile {
 	}
 	
 	// TODO compile sprites in each layer group separately; additionally, for each layer, end it with an air tile. Transparency will be implemented afterwards, once I've implemented this and also changed tile stacks; see todo in TileStack.java. Following initial implementation of transparency, and the rest, test it out with the level gen.
-	// fixme air shadow appears over stone overlap; needs to appear under. Air should technically be the top-most ground tile, or I suppose the bottom-most solid tile.
 	
 	/** @noinspection ObjectAllocationInLoop*/
 	@SuppressWarnings("unchecked")
@@ -98,18 +95,18 @@ public class RenderTile extends Tile {
 			RenderTile oTile = (RenderTile) getLevel().getTile(this.x + x, this.y + y);
 			List<ClientTileType> aroundTypes = oTile != null ? oTile.getTypeStack().getTypes() : Collections.emptyList();
 			
-			EnumSet<TileTypeEnum> typeMap = EnumSet.noneOf(TileTypeEnum.class);
+			EnumSet<TileTypeEnum> typeSet = EnumSet.noneOf(TileTypeEnum.class);
 			for(ClientTileType type: aroundTypes) {
-				typeMap.add(type.getTypeEnum());
+				typeSet.add(type.getTypeEnum());
 				typePositions.computeIfAbsent(type.getTypeEnum(), k -> EnumSet.noneOf(RelPos.class)).add(rp);
 			}
-			allTypes.addAll(typeMap);
-			typesAtPositions.put(rp, typeMap);
+			allTypes.addAll(typeSet);
+			typesAtPositions.put(rp, typeSet);
 		}
 		
 		// all tile types have been fetched. Now accumulate the sprites.
 		ArrayList<TileAnimation<TextureHolder>> spriteStack = new ArrayList<>(16);
-		ArrayList<ClientTileType> typeStack = new ArrayList<>(16);
+		// ArrayList<ClientTileType> typeStack = new ArrayList<>(16);
 		//ArrayList<String> spriteNames = new ArrayList<>(16);
 		
 		// get overlap data, in case it's needed
@@ -117,18 +114,13 @@ public class RenderTile extends Tile {
 		
 		// iterate through main stack from bottom to top, adding connection and overlap sprites each level.
 		List<ClientTileType> types = getTypeStack().getTypes();
-		types.add(ClientTileType.get(TileTypeEnum.AIR));
-		allTypes.add(TileTypeEnum.AIR);
-		typesAtPositions.get(RelPos.CENTER).add(TileTypeEnum.AIR);
-		typePositions.computeIfAbsent(TileTypeEnum.AIR, k -> EnumSet.noneOf(RelPos.class)).add(RelPos.CENTER);
 		for(int i = 1; i <= types.size(); i++) {
 			ClientTileType cur = i < types.size() ? types.get(i) : null;
 			ClientTileType prev = types.get(i-1);
 			
 			// add connection sprite (or transition) for prev
-			TileAnimation<TextureHolder> animation = prev.getRenderer().getConnectionSprite(this, typesAtPositions);
-			spriteStack.add(animation);
-			typeStack.add(prev);
+			spriteStack.addAll(prev.getRenderer().getConnectionSprites(this, typesAtPositions));
+			// typeStack.add(prev); // would screw up if sprite stack added more than 1 sprite
 			//spriteNames.add(animation.getKeyFrames()[0].name);
 			
 			// check for overlaps that are above prev AND below cur
@@ -142,11 +134,7 @@ public class RenderTile extends Tile {
 				overlapSet.forEach(enumType -> {
 					ClientTileType tileType = ClientTileType.get(enumType);
 					ArrayList<TileAnimation<TextureHolder>> sprites = tileType.getRenderer().getOverlapSprites(typePositions.get(enumType));
-					for(TileAnimation<TextureHolder> sprite: sprites) {
-						spriteStack.add(sprite);
-						typeStack.add(tileType);
-						//spriteNames.add(sprite.getKeyFrames()[0].name);
-					}
+					spriteStack.addAll(sprites);
 				});
 			}
 		}
@@ -164,7 +152,7 @@ public class RenderTile extends Tile {
 		
 		synchronized (spriteLock) {
 			this.spriteStack = spriteStack;
-			this.typeStack = typeStack;
+			// this.typeStack = typeStack;
 			updateSprites = false;
 		}
 	}
