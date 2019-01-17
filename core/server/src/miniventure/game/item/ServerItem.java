@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import miniventure.game.GameCore;
 import miniventure.game.texture.TextureHolder;
+import miniventure.game.util.MyUtils;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.player.Player;
 
@@ -25,7 +26,13 @@ public abstract class ServerItem extends Item {
 	@NotNull private final ItemType type;
 	
 	protected ServerItem(@NotNull ItemType type, @NotNull String name) {
-		this(type, name.replace("_", " "), GameCore.icons.get("items/"+name.toLowerCase()));
+		this(type, name, true);
+	}
+	protected ServerItem(@NotNull ItemType type, @NotNull String name, boolean formatName) {
+		this(type, name, formatName, GameCore.icons.get("items/"+name.toLowerCase()));
+	}
+	protected ServerItem(@NotNull ItemType type, @NotNull String name, boolean formatName, @NotNull TextureHolder texture) {
+		this(type, formatName ? MyUtils.toTitleCase(name).replaceAll("_", " ") : name, texture);
 	}
 	protected ServerItem(@NotNull ItemType type, @NotNull String name, @NotNull TextureHolder texture) {
 		super(name, texture);

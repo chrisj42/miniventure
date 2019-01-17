@@ -1,7 +1,6 @@
 package miniventure.game.item;
 
-import miniventure.game.GameCore;
-import miniventure.game.item.ItemType.SimpleEnumItem;
+import miniventure.game.item.EnumItemType.EnumItem;
 import miniventure.game.world.entity.mob.player.Player;
 import miniventure.game.world.entity.mob.player.Player.Stat;
 
@@ -22,9 +21,9 @@ public enum FoodType {
 	@NotNull
 	public ServerItem get() { return new FoodItem(); }
 	
-	class FoodItem extends SimpleEnumItem {
+	class FoodItem extends EnumItem {
 		private FoodItem() {
-			super(ItemType.Food, name(), GameCore.icons.get("items/food/"+name().toLowerCase()));
+			super(EnumItemType.Food, FoodType.this);
 		}
 		
 		@Override public Result interact(Player player) {

@@ -238,11 +238,6 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">icon-sprites/items/coal.png</key>
-            <key type="filename">icon-sprites/items/cotton.png</key>
-            <key type="filename">icon-sprites/items/dirt.png</key>
-            <key type="filename">icon-sprites/items/fabric.png</key>
-            <key type="filename">icon-sprites/items/flint.png</key>
             <key type="filename">icon-sprites/items/food/apple.png</key>
             <key type="filename">icon-sprites/items/food/cactus_fruit.png</key>
             <key type="filename">icon-sprites/items/food/cherry.png</key>
@@ -254,12 +249,18 @@
             <key type="filename">icon-sprites/items/food/raw_meat.png</key>
             <key type="filename">icon-sprites/items/food/snow_berries.png</key>
             <key type="filename">icon-sprites/items/food/strawberry.png</key>
-            <key type="filename">icon-sprites/items/iron.png</key>
-            <key type="filename">icon-sprites/items/log.png</key>
-            <key type="filename">icon-sprites/items/ruby.png</key>
-            <key type="filename">icon-sprites/items/sand.png</key>
-            <key type="filename">icon-sprites/items/snow.png</key>
-            <key type="filename">icon-sprites/items/stone.png</key>
+            <key type="filename">icon-sprites/items/resource/coal.png</key>
+            <key type="filename">icon-sprites/items/resource/cotton.png</key>
+            <key type="filename">icon-sprites/items/resource/fabric.png</key>
+            <key type="filename">icon-sprites/items/resource/flint.png</key>
+            <key type="filename">icon-sprites/items/resource/iron.png</key>
+            <key type="filename">icon-sprites/items/resource/log.png</key>
+            <key type="filename">icon-sprites/items/resource/ruby.png</key>
+            <key type="filename">icon-sprites/items/resource/stone.png</key>
+            <key type="filename">icon-sprites/items/resource/tungsten.png</key>
+            <key type="filename">icon-sprites/items/tile/dirt.png</key>
+            <key type="filename">icon-sprites/items/tile/sand.png</key>
+            <key type="filename">icon-sprites/items/tile/snow.png</key>
             <key type="filename">icon-sprites/items/tools/flint_axe.png</key>
             <key type="filename">icon-sprites/items/tools/flint_pickaxe.png</key>
             <key type="filename">icon-sprites/items/tools/flint_shovel.png</key>
@@ -280,7 +281,6 @@
             <key type="filename">icon-sprites/items/tools/tungsten_pickaxe.png</key>
             <key type="filename">icon-sprites/items/tools/tungsten_shovel.png</key>
             <key type="filename">icon-sprites/items/tools/tungsten_sword.png</key>
-            <key type="filename">icon-sprites/items/tungsten.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>

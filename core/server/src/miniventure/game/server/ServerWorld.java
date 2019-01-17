@@ -13,7 +13,6 @@ import miniventure.game.GameProtocol.WorldData;
 import miniventure.game.ProgressPrinter;
 import miniventure.game.item.FoodType;
 import miniventure.game.item.ResourceType;
-import miniventure.game.item.TileItem;
 import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolItem.Material;
 import miniventure.game.item.ToolType;
@@ -235,8 +234,8 @@ public class ServerWorld extends WorldManager {
 			player.getInventory().addItem(new ToolItem(ToolType.Shovel, Material.Ruby));
 			player.getInventory().addItem(new ToolItem(ToolType.Pickaxe, Material.Iron));
 			player.getInventory().addItem(new ToolItem(ToolType.Pickaxe, Material.Ruby));
-			player.getInventory().addItem(TileItem.get(TileTypeEnum.CLOSED_DOOR));
-			player.getInventory().addItem(TileItem.get(TileTypeEnum.TORCH));
+			player.getInventory().addItem(ServerTileType.getItem(TileTypeEnum.CLOSED_DOOR));
+			player.getInventory().addItem(ServerTileType.getItem(TileTypeEnum.TORCH));
 			for(int i = 0; i < 7; i++)
 				player.getInventory().addItem(ResourceType.Log.get());
 			player.getInventory().addItem(ResourceType.Tungsten.get());

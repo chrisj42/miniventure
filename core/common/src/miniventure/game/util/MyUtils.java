@@ -22,7 +22,7 @@ public final class MyUtils {
 	
 	
 	public static String toTitleCase(String string) {
-		return toTitleCase(toTitleCase(string, ""), "_");
+		return toTitleCase(toTitleCase(string, " "), "_");
 	}
 	public static String toTitleCase(String string, String delimiter) {
 		String[] words = string.split(delimiter);

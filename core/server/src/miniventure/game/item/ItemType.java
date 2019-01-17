@@ -4,11 +4,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 
 import miniventure.game.item.ToolItem.Material;
-import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
+import miniventure.game.world.tile.ServerTileType;
 import miniventure.game.world.tile.TileTypeEnum;
-
-import org.jetbrains.annotations.NotNull;
 
 public enum ItemType {
 	
@@ -16,11 +14,9 @@ public enum ItemType {
 	
 	Tool(data -> new ToolItem(ToolType.valueOf(data[0]), Material.valueOf(data[1]), Integer.parseInt(data[2]))),
 	
-	Food(data -> FoodType.valueOf(data[0]).get()),
+	Enum(data -> EnumItemType.valueOf(data[0]).itemFetcher.get(data[1])),
 	
-	Tile(data -> TileItem.get(TileTypeEnum.valueOf(data[0]))),
-	
-	Resource(data -> ResourceType.valueOf(data[0]).get()),
+	Tile(data -> ServerTileType.getItem(TileTypeEnum.valueOf(data[0]))),
 	
 	Misc(data -> {
 		// The data all items has the item type as the first entry. This item type expects the next data string to be an encoded array of the enclosing classes needed to reach the class you're trying to reach, such as a HandItem. If the class is top-level, then the encoded array should just be the name of the class.
@@ -67,24 +63,4 @@ public enum ItemType {
 		return fetcher.load(data);
 	}
 	
-	
-	/** @noinspection AbstractClassWithoutAbstractMethods*/
-	static abstract class SimpleEnumItem extends ServerItem {
-		
-		// you should be extending this, not making instances of it
-		
-		SimpleEnumItem(@NotNull ItemType type, @NotNull String name) {
-			super(type, name);
-		}
-		
-		SimpleEnumItem(@NotNull ItemType type, @NotNull String name, @NotNull TextureHolder texture) {
-			super(type, name, texture);
-		}
-		
-		@Override
-		public String[] save() {
-			return new String[] {getType().name(), getName()};
-		}
-		
-	}
 }

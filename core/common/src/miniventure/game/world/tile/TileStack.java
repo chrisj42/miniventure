@@ -18,7 +18,7 @@ public class TileStack<T extends TileType> {
 	// bottom tile is first, top tile is last.
 	private LinkedList<T> stack = new LinkedList<>();
 	
-	// TODO this needs to be abstracted, so that this is a stack of layer groups, and each layer group is a stack of layers / tiletypes.
+	// TODO this needs to be abstracted, so that this is a stack of layer groups, and each layer group is a stack of layers / tiletypes. Air will be explicitly added to the stacks. Though perhaps solid blocks will have a special position or something. I will figure it out soon.
 	
 	@SuppressWarnings("unchecked")
 	TileStack(@NotNull WorldManager world) {

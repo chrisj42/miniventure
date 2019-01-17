@@ -72,11 +72,7 @@ public abstract class Tile implements WorldObject {
 	
 	public SerialMap getDataMap() { return getDataMap(getType().getTypeEnum()); }
 	public SerialMap getDataMap(TileType tileType) { return getDataMap(tileType.getTypeEnum()); }
-	public SerialMap getDataMap(TileTypeEnum tileType) { return dataMaps.computeIfAbsent(tileType, k -> {
-		if(tileType != TileTypeEnum.AIR)
-			System.err.println("warning: tiletype "+tileType+" without datamap on tile "+this+"; returning new map.");
-		return new SerialMap();
-	}); }
+	public SerialMap getDataMap(TileTypeEnum tileType) { return dataMaps.computeIfAbsent(tileType, k -> new SerialMap()); }
 	
 	
 	public HashSet<Tile> getAdjacentTiles(boolean includeCorners) {

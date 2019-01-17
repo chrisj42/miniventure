@@ -5,6 +5,7 @@ import miniventure.game.item.ResourceType;
 import miniventure.game.item.Result;
 import miniventure.game.item.ServerItem;
 import miniventure.game.item.TileItem;
+import miniventure.game.item.TileItem.PlacementCheck;
 import miniventure.game.item.ToolType;
 import miniventure.game.util.customenum.SerialMap;
 import miniventure.game.util.function.MapFunction;
@@ -30,13 +31,15 @@ public class ServerTileType extends TileType {
 			type.getType();
 	}
 	
+	// this exists because the each TileType needs its own manager objects; they can't share the same default object that a Param instance holds. This way, each call makes a new manager.
+	// besides, the managers need a reference to their TileType! so you can't even make a default.
 	@FunctionalInterface
-	private interface ManagerFetcher<T> extends MapFunction<TileTypeEnum, T> {}
+	private interface ValueFetcher<T> extends MapFunction<TileTypeEnum, T> {}
 	
 	@FunctionalInterface
 	private interface P {
-		Param<ManagerFetcher<UpdateManager>> UPDATE = new Param<>(UpdateManager::new);
-		Param<ManagerFetcher<TransitionManager>> TRANS = new Param<>(TransitionManager::new);
+		Param<ValueFetcher<UpdateManager>> UPDATE = new Param<>(UpdateManager::new);
+		Param<ValueFetcher<TransitionManager>> TRANS = new Param<>(TransitionManager::new);
 		// TODO interaction manager
 		
 		ServerTileType get(TileTypeEnum type);
@@ -56,6 +59,14 @@ public class ServerTileType extends TileType {
 	
 	public static ServerTileType get(TileTypeEnum type) {
 		return ServerTileTypeEnum.value(type.ordinal()).getType();
+	}
+	
+	// used initially by destruction manager to get tile type item while the ServerTileType object is still being constructed; also used normally throughout the code to get TileItems.
+	public static TileItem getItem(TileTypeEnum type) {
+		TileItem item = ServerTileTypeEnum.value(type.ordinal()).tileItem;
+		if(item == null)
+			System.err.println("warning! TileType "+type+" has no TileItem, but one is being requested. Null will be returned.");
+		return item;
 	}
 	
 	public SerialMap getInitialData() { return new SerialMap(); }
@@ -96,11 +107,11 @@ public class ServerTileType extends TileType {
 		
 		DIRT(type -> new ServerTileType(type,
 			new DestructionManager(type, new RequiredTool(ToolType.Shovel))
-		)),
+		), type -> new TileItem(type, true, PlacementCheck.on(TileTypeEnum.HOLE))),
 		
 		SAND(type -> new ServerTileType(type,
 			new DestructionManager(type, new RequiredTool(ToolType.Shovel))
-		)),
+		), type -> new TileItem(type, true, PlacementCheck.on(TileTypeEnum.DIRT))),
 		
 		GRASS(type -> new ServerTileType(type,
 			new DestructionManager.DestructibleBuilder(type, 1, false)
@@ -122,17 +133,17 @@ public class ServerTileType extends TileType {
 				new ItemDrop(ResourceType.Stone.get(), 2),
 				new RequiredTool(ToolType.Pickaxe)
 			)
-		)),
+		), type -> new TileItem(type, false, PlacementCheck.groundExcluding(type))),
 		
 		SNOW(type -> new ServerTileType(type,
 			new DestructionManager.DestructibleBuilder(type, false)
 				.drops(
-					new ItemDrop(ResourceType.Snow.get()),
+					new ItemDrop(getItem(TileTypeEnum.SNOW)),
 					new ItemDrop(FoodType.Snow_Berries.get(), 0, 1, .1f)
 				)
 				.require(new RequiredTool(ToolType.Shovel))
 				.make()
-		)),
+		), type -> new TileItem(type, true, PlacementCheck.groundExcluding(type))),
 		
 		FLINT(type -> new ServerTileType(type,
 			new DestructionManager(type, new ItemDrop(ResourceType.Flint.get()))
@@ -161,19 +172,19 @@ public class ServerTileType extends TileType {
 		
 		STONE_FLOOR(type -> new ServerTileType(type,
 			new DestructionManager(type, new RequiredTool(ToolType.Pickaxe))
-		)),
+		), type -> new TileItem(type, false, PlacementCheck.on(TileTypeEnum.HOLE))),
 		
 		WOOD_WALL(type -> new ServerTileType(type,
 			new DestructionManager(type, 20, new PreferredTool(ToolType.Axe, 3))
-		)),
+		), type -> new TileItem(type, false, PlacementCheck.GROUND)),
 		
 		STONE_WALL(type -> new ServerTileType(type,
 			new DestructionManager(type, 40, new PreferredTool(ToolType.Pickaxe, 5))
-		)),
+		), type -> new TileItem(type, false, PlacementCheck.GROUND)),
 		
 		OPEN_DOOR(type -> new ServerTileType(type,
 			new DestructionManager(type,
-				new ItemDrop(TileItem.get(TileTypeEnum.CLOSED_DOOR)),
+				new ItemDrop(getItem(TileTypeEnum.CLOSED_DOOR)),
 				new RequiredTool(ToolType.Axe)
 			),
 			
@@ -197,13 +208,14 @@ public class ServerTileType extends TileType {
 				tile.replaceTile(OPEN_DOOR.getType());
 				return Result.INTERACT;
 			}
-		}),
+		}, type -> new TileItem("Door", type, false, PlacementCheck.GROUND)),
 		
+		// note / to-do: I could pretty easily make torches melt adjacent snow...
 		TORCH(type -> new ServerTileType(type,
 			new DestructionManager(type),
 			P.TRANS.as(type1 -> new TransitionManager(type1)
 				.addEntranceAnimations(new ServerTileTransition("enter", 3/12f)))
-		)),
+		), type -> new TileItem(type, false, PlacementCheck.GROUND)),
 		
 		CACTUS(type -> new ServerTileType(type,
 			new DestructionManager(type, 12, null,
@@ -228,14 +240,19 @@ public class ServerTileType extends TileType {
 		/** @noinspection NonFinalFieldInEnum*/
 		private ServerTileType type = null;
 		private final P fetcher;
+		private final TileTypeEnum mainEnum;
+		private final TileItem tileItem;
 		
-		ServerTileTypeEnum(P fetcher) {
+		ServerTileTypeEnum(P fetcher) { this(fetcher, type -> null); }
+		ServerTileTypeEnum(P fetcher, MapFunction<TileTypeEnum, TileItem> itemFetcher) {
 			this.fetcher = fetcher;
+			mainEnum = TileTypeEnum.value(ordinal());
+			tileItem = itemFetcher.get(mainEnum);
 		}
 		
 		public ServerTileType getType() {
 			if(type == null)
-				type = fetcher.get(TileTypeEnum.value(ordinal()));
+				type = fetcher.get(mainEnum);
 			return type;
 		}
 		
