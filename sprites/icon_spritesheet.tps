@@ -24,6 +24,23 @@
                     <int>-1</int>
                 </QSize>
             </struct>
+            <struct type="AutoSDSettings">
+                <key>scale</key>
+                <double>4</double>
+                <key>extension</key>
+                <string>4x</string>
+                <key>spriteFilter</key>
+                <string></string>
+                <key>acceptFractionalValues</key>
+                <false/>
+                <key>maxTextureSize</key>
+                <QSize>
+                    <key>width</key>
+                    <int>-1</int>
+                    <key>height</key>
+                    <int>-1</int>
+                </QSize>
+            </struct>
         </array>
         <key>allowRotation</key>
         <false/>
@@ -132,13 +149,13 @@
             <key>data</key>
             <struct type="DataFile">
                 <key>name</key>
-                <filename>../core/common/assets/sprites/icons.txt</filename>
+                <filename>../core/common/assets/sprites/icons{v}.txt</filename>
             </struct>
         </map>
         <key>multiPack</key>
         <false/>
         <key>forceIdenticalLayout</key>
-        <false/>
+        <true/>
         <key>outputFormat</key>
         <enum type="SettingsBase::OutputFormat">RGBA8888</enum>
         <key>alphaHandling</key>

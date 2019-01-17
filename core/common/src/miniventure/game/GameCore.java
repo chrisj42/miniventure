@@ -39,7 +39,7 @@ public class GameCore {
 	
 	public static final Color DEFAULT_CHAT_COLOR = Color.WHITE;
 	
-	public static TextureAtlasHolder entityAtlas, tileAtlas, descaledTileAtlas;
+	public static TextureAtlasHolder entityAtlas, tileAtlas, descaledTileAtlas, scaledIconAtlas;
 	public static TextureAtlas tileConnectionAtlas = new TextureAtlas(); // tile overlap atlas not needed b/c the overlap sprite layout is simple enough to code; it goes in binary. However, the tile connection sprite layout is more complicated, so a map is needed to compare against.
 	
 	private static TextureAtlas iconAtlas;
@@ -54,6 +54,7 @@ public class GameCore {
 		tileAtlas = new TextureAtlasHolder(new TextureAtlas("sprites/tiles4x.txt"));
 		tileConnectionAtlas = new TextureAtlas("sprites/tileconnectmap.txt");
 		iconAtlas = new TextureAtlas("sprites/icons.txt");
+		scaledIconAtlas = new TextureAtlasHolder(new TextureAtlas("sprites/icons4x.txt"));
 		
 		for(AtlasRegion region: iconAtlas.getRegions())
 			icons.put(region.name, new TextureHolder(region));
@@ -89,6 +90,7 @@ public class GameCore {
 		descaledTileAtlas.dispose();
 		tileConnectionAtlas.dispose();
 		iconAtlas.dispose();
+		scaledIconAtlas.dispose();
 	}
 	
 	public static float getDeltaTime() { return MathUtils.clamp(Gdx.graphics.getDeltaTime(), 0, MAX_DELTA); }

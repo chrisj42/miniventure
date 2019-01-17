@@ -75,8 +75,15 @@ public abstract class EntityRenderer {
 		private final Item item;
 		
 		public ItemSpriteRenderer(Item item) {
-			super(item.getName(), item.getTexture());
+			super(item.getName(), mapTexture(item.getTexture()));
 			this.item = item;
+		}
+		
+		private static TextureHolder mapTexture(TextureHolder given) {
+			if(given.name.startsWith("items"))
+				return GameCore.scaledIconAtlas.findRegion(given.name);
+			else
+				return GameCore.descaledTileAtlas.findRegion(given.name);
 		}
 		
 		protected ItemSpriteRenderer(String[] data) {

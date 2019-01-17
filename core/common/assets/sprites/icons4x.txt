@@ -1,0 +1,376 @@
+icons4x.png
+size: 1024, 1024
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+blank
+  rotate: false
+  xy: 12, 964
+  size: 4, 4
+  orig: 4, 4
+  offset: 0, 0
+  index: -1
+bolt-outline
+  rotate: false
+  xy: 12, 652
+  size: 80, 96
+  orig: 80, 96
+  offset: 0, 0
+  index: -1
+bolt
+  rotate: false
+  xy: 12, 764
+  size: 80, 96
+  orig: 80, 96
+  offset: 0, 0
+  index: -1
+burger-outline
+  rotate: false
+  xy: 12, 876
+  size: 80, 72
+  orig: 80, 72
+  offset: 0, 0
+  index: -1
+burger
+  rotate: false
+  xy: 108, 652
+  size: 80, 72
+  orig: 80, 72
+  offset: 0, 0
+  index: -1
+heart-outline
+  rotate: false
+  xy: 12, 428
+  size: 96, 96
+  orig: 96, 96
+  offset: 0, 0
+  index: -1
+heart
+  rotate: false
+  xy: 12, 540
+  size: 96, 96
+  orig: 96, 96
+  offset: 0, 0
+  index: -1
+items/food/apple
+  rotate: false
+  xy: 124, 428
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/food/cactus_fruit
+  rotate: false
+  xy: 156, 284
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/food/cherry
+  rotate: false
+  xy: 124, 508
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/food/cooked_bacon
+  rotate: false
+  xy: 108, 740
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/food/cooked_meat
+  rotate: false
+  xy: 108, 820
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/food/gooseberry
+  rotate: false
+  xy: 108, 900
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/food/pear
+  rotate: false
+  xy: 188, 740
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/food/raw_bacon
+  rotate: false
+  xy: 188, 820
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/food/raw_meat
+  rotate: false
+  xy: 188, 900
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/food/snow_berries
+  rotate: false
+  xy: 204, 364
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/food/strawberry
+  rotate: false
+  xy: 236, 284
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/resource/coal
+  rotate: false
+  xy: 284, 12
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/resource/cotton
+  rotate: false
+  xy: 284, 92
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/resource/fabric
+  rotate: false
+  xy: 284, 172
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/resource/flint
+  rotate: false
+  xy: 204, 444
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/resource/iron
+  rotate: false
+  xy: 204, 524
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/resource/log
+  rotate: false
+  xy: 204, 604
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/resource/ruby
+  rotate: false
+  xy: 268, 684
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/resource/stone
+  rotate: false
+  xy: 268, 764
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/resource/tungsten
+  rotate: false
+  xy: 268, 844
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/tile/dirt
+  rotate: false
+  xy: 268, 924
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/tile/sand
+  rotate: false
+  xy: 284, 364
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/tile/snow
+  rotate: false
+  xy: 316, 252
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/tools/flint_axe
+  rotate: false
+  xy: 364, 12
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/tools/flint_pickaxe
+  rotate: false
+  xy: 364, 92
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/tools/flint_shovel
+  rotate: false
+  xy: 364, 172
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/tools/flint_sword
+  rotate: false
+  xy: 284, 444
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/tools/iron_axe
+  rotate: false
+  xy: 284, 524
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/tools/iron_pickaxe
+  rotate: false
+  xy: 284, 604
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/tools/iron_shovel
+  rotate: false
+  xy: 348, 684
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/tools/iron_sword
+  rotate: false
+  xy: 348, 764
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/tools/ruby_axe
+  rotate: false
+  xy: 348, 844
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/tools/ruby_pickaxe
+  rotate: false
+  xy: 348, 924
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/tools/ruby_shovel
+  rotate: false
+  xy: 364, 332
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/tools/ruby_sword
+  rotate: false
+  xy: 396, 252
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/tools/stone_axe
+  rotate: false
+  xy: 444, 12
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/tools/stone_pickaxe
+  rotate: false
+  xy: 444, 92
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/tools/stone_shovel
+  rotate: false
+  xy: 444, 172
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/tools/stone_sword
+  rotate: false
+  xy: 364, 412
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/tools/tungsten_axe
+  rotate: false
+  xy: 364, 492
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/tools/tungsten_pickaxe
+  rotate: false
+  xy: 364, 572
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/tools/tungsten_shovel
+  rotate: false
+  xy: 428, 652
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+items/tools/tungsten_sword
+  rotate: false
+  xy: 428, 732
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+light
+  rotate: false
+  xy: 12, 12
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+tile-frame
+  rotate: false
+  xy: 12, 284
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+white
+  rotate: false
+  xy: 12, 984
+  size: 4, 4
+  orig: 4, 4
+  offset: 0, 0
+  index: -1
