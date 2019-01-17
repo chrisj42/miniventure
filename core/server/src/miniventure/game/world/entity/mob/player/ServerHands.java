@@ -236,7 +236,6 @@ public class ServerHands {
 		}
 		
 		@Override public ServerItem getUsedItem() { return this; }
-		@Override public ServerItem copy() { return this; }
 		
 		@Override public Result interact(WorldObject obj, Player player) {
 			return obj.interactWith(player, null);

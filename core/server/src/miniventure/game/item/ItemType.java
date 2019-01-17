@@ -86,7 +86,5 @@ public enum ItemType {
 			return new String[] {getType().name(), getName()};
 		}
 		
-		@Override
-		public ServerItem copy() { return this; }
 	}
 }

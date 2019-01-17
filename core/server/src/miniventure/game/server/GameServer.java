@@ -262,7 +262,7 @@ public class GameServer implements GameProtocol {
 					Vector2 targetPos = client.getCenter();
 					targetPos.add(client.getDirection().getVector().scl(2)); // adds 2 in the direction of the player.
 					for(int i = 0; i < drops.count; i++)
-						level.dropItem(drops.item.copy(), true, client.getCenter(), targetPos);
+						level.dropItem(drops.item, true, client.getCenter(), targetPos);
 				});
 				
 				forPacket(object, InventoryRequest.class, req -> {

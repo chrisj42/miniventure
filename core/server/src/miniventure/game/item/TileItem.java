@@ -58,7 +58,7 @@ public class TileItem extends ServerItem {
 		
 		addItem(TileTypeEnum.DIRT, TileTypeEnum.HOLE);
 		addItem(TileTypeEnum.SAND, TileTypeEnum.DIRT);
-		addItem(TileTypeEnum.GRASS, TileTypeEnum.DIRT);
+		addItem(TileTypeEnum.GRASS, TileTypeEnum.DIRT); // won't have a grass item
 		addItem(TileTypeEnum.STONE, TileTypeEnum.DIRT);
 		
 		items.put(TileTypeEnum.CLOSED_DOOR, new TileItem("Door", GameCore.descaledTileAtlas.findRegion("closed_door/c00"), TileTypeEnum.CLOSED_DOOR, PlacementCheck.on(groundTypes)));
@@ -75,7 +75,7 @@ public class TileItem extends ServerItem {
 	public static TileItem get(@NotNull TileTypeEnum tile) {
 		if(!items.containsKey(tile))
 			items.put(tile, new TileItem(tile, PlacementCheck.on(groundTypes)));
-		return items.get(tile).copy();
+		return items.get(tile);
 	}
 	
 	@NotNull private final TileTypeEnum result;
@@ -112,11 +112,6 @@ public class TileItem extends ServerItem {
 	@Override
 	public int hashCode() {
 		return super.hashCode() - 17 * result.hashCode();
-	}
-	
-	@Override
-	public TileItem copy() {
-		return new TileItem(getName(), getTexture(), result, placementCheck);
 	}
 	
 	@Override

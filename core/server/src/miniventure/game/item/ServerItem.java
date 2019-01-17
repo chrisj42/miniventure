@@ -55,8 +55,6 @@ public abstract class ServerItem extends Item {
 	// this is used solely for saving to file, not to-client serialization.
 	public abstract String[] save();
 	
-	public abstract ServerItem copy();
-	
 	
 	public static String[] save(@Nullable ServerItem item) {
 		if(item == null) return null;
@@ -69,6 +67,5 @@ public abstract class ServerItem extends Item {
 		ItemType type = ItemType.valueOf(data[0]);
 		return type.load(Arrays.copyOfRange(data, 1, data.length));
 	}
-	
 	
 }

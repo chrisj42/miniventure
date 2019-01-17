@@ -67,9 +67,6 @@ public class ToolItem extends ServerItem {
 	public int hashCode() { return super.hashCode() + durability; }
 	
 	@Override
-	public ToolItem copy() { return new ToolItem(toolType, material, durability); }
-	
-	@Override
 	public String[] save() {
 		return new String[] {getType().name(), toolType.name(), material.name(), String.valueOf(durability)};
 	}

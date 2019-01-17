@@ -98,7 +98,7 @@ public class ServerTile extends Tile {
 		 */
 		
 		ServerTileType type = getType();
-		ServerTileType underType = getTypeStack().getLayerFromTop(1, true);
+		// ServerTileType underType = getTypeStack().getLayerFromTop(1, true);
 		
 		if(newType.equals(type)) {
 			// just reset the data
@@ -107,11 +107,12 @@ public class ServerTile extends Tile {
 			return true;
 		}
 		
+		// DISABLED because I don't check it in addTile, so checking it here seems inconsistent.
 		// check that the new type can be placed on the type that was under the previous type
-		if(newType.getTypeEnum().compareTo(underType.getTypeEnum()) <= 0) {
+		/*if(newType.getTypeEnum().compareTo(underType.getTypeEnum()) <= 0) {
 			System.err.println("cannot replace; new type "+newType.getTypeEnum()+" does not come after under type "+underType.getTypeEnum());
 			return false; // cannot replace tile
-		}
+		}*/
 		
 		if(type.transitionManager.tryStartAnimation(this, newType, true)) {
 			// there is an exit animation; it needs to be played. So let that happen, the tile will be replaced later
