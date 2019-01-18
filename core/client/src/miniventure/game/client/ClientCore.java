@@ -150,7 +150,7 @@ public class ClientCore extends ApplicationAdapter {
 	public void render() {
 		input.update();
 		
-		getBatch().setColor(new Color(1, 1, 1, 1));
+		getBatch().setColor(Color.WHITE);
 		
 		if (clientWorld != null && clientWorld.worldLoaded())
 			clientWorld.update(GameCore.getDeltaTime()); // renders as well
