@@ -64,9 +64,12 @@ TILE RENDERING
 - keep in mind that 3D types obviously shouldn't overlap flat types on adjacent 3D types; but if you put dirt on stone, the stone will technically overlap the dirt. Neither the stone nor the dirt have overlap sprites I believe, but it still ought to be fixed.
 
 - process to compile sprites for a Tile:
-	- start with highest opaque layer below the lowest empty layer; this will be the first stack layer to render
+	- there are two sets of rendering that can occur in a tile:
+		- rendering tiles below air at the player's level
+		- rendering tiles visible from the surface...
+	- start with highest opaque layer, that's below the lowest empty layer, that's ; this will be the first stack layer to render
 		- compile the layer as described below
-	- 
+	- compile each layer above it
 
 - process to compile sprites for a TileStackLayer:
 	- sprite types to worry about:
@@ -74,8 +77,11 @@ TILE RENDERING
 		- overlap sprites from adjacent tiles' flat types on the current layer, and then solid types one layer up.
 			- adjacent flat type overlaps are intermingled appropriately with types in the current tile and layer, just like with the current rendering system.
 		-? should overlap and connection sources be limited to visible types in the adjacent tiles? 
-		
+	
 	- get highest opaque tiletype in the layer
+		- 
+	
+	- note that the rendering filter on layers can be applied universally for white/black height indication; as for transparency...
 		- 
 
 
@@ -85,6 +91,11 @@ TILE RENDERING
 
 - sprite compiling happens one tile at a time, though that's further split into each layer group at a time.
 - sprite rendering, on the otherhand, happens across the screen on a per-layer-group basis, from the bottom up. Each new layer group will bring with it entities on that same layer.
+
+
+Can we enumerate this with examples? lol that's what you do in SWEng.
+ugh, so many possibilities tho... anything I have to say is something I'll have to code, though, so I suppose it isn't all that bad.
+- 
 
 
 

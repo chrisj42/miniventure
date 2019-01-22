@@ -142,7 +142,10 @@ public class GameServer implements GameProtocol {
 						
 						broadcast(new Message(player.getName()+" joined the server.", STATUS_MSG_COLOR), false, player);
 					}
-					else connection.sendTCP(new LoginFailure("Server world is not initialized."));
+					else {
+						System.err.println("Server could not connect player "+name+", no levels exist.");
+						connection.sendTCP(new LoginFailure("Server world is not initialized."));
+					}
 					
 					return;
 				}

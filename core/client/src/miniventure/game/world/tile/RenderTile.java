@@ -93,6 +93,8 @@ public class RenderTile extends Tile {
 			int y = rp.getY();
 			RenderTile oTile = (RenderTile) getLevel().getTile(this.x + x, this.y + y);
 			List<ClientTileType> aroundTypes = oTile != null ? oTile.getTypeStack().getTypes() : Collections.emptyList();
+			if(aroundTypes.size() > 0 && aroundTypes.get(aroundTypes.size()-1).getTypeEnum() == TileTypeEnum.STONE && getType().getTypeEnum() != TileTypeEnum.STONE)
+				aroundTypes.add(ClientTileType.get(TileTypeEnum.AIR));
 			
 			EnumSet<TileTypeEnum> typeSet = EnumSet.noneOf(TileTypeEnum.class);
 			for(ClientTileType type: aroundTypes) {
