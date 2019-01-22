@@ -26,7 +26,7 @@ import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.levelgen.LevelGenerator;
-import miniventure.game.world.mapgen.WorldGenerator;
+import miniventure.game.world.levelgen.WorldGenerator;
 import miniventure.game.world.tile.ServerTileType;
 import miniventure.game.world.tile.TileType;
 import miniventure.game.world.tile.TileTypeEnum;
@@ -117,7 +117,7 @@ public class ServerWorld extends WorldManager {
 		
 		logger.pushMessage("");
 		clearLevels();
-		int numLevels = 1;
+		int numLevels = 3;
 		// int minId = 1;
 		for(int i = 0; i < numLevels; i++) {
 			logger.editMessage("Loading level "+(i+1)+'/'+numLevels+"...");
@@ -295,8 +295,18 @@ public class ServerWorld extends WorldManager {
 	
 	public GameServer getServer() { return server; }
 	
+	public WorldGenerator getWorldGenerator() { return worldGenerator; }
+	
 	@Override
-	public ServerLevel getLevel(int levelId) { return (ServerLevel) super.getLevel(levelId); }
+	public ServerLevel getLevel(int levelId) { return getLevel(levelId, false); }
+	public ServerLevel getLevel(int levelId, boolean load) {
+		ServerLevel level = (ServerLevel) super.getLevel(levelId);
+		if(level == null && load) {
+			loadLevel(levelId);
+			level = getLevel(levelId);
+		}
+		return level;
+	}
 	
 	@Override
 	public ServerLevel getEntityLevel(Entity e) { return (ServerLevel) super.getEntityLevel(e); }

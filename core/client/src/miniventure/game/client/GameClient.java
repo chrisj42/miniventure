@@ -12,6 +12,7 @@ import miniventure.game.screen.ChatScreen;
 import miniventure.game.screen.ErrorScreen;
 import miniventure.game.screen.InputScreen;
 import miniventure.game.screen.LoadingScreen;
+import miniventure.game.screen.MapScreen;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.ValueFunction;
@@ -62,6 +63,12 @@ public class GameClient implements GameProtocol {
 					if(GameCore.debug) System.out.println("client received level");
 					world.addLevel((LevelData)object);
 				}
+				
+				forPacket(object, MapRequest.class, req -> {
+					MenuScreen screen = ClientCore.getScreen();
+					if(screen instanceof MapScreen)
+						((MapScreen)screen).mapUpdate(req);
+				});
 				
 				if(object instanceof SpawnData) {
 					if(GameCore.debug) System.out.println("client received player");

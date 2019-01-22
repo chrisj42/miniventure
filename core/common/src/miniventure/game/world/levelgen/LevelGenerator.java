@@ -118,6 +118,15 @@ public class LevelGenerator {
 				values[x][y] = type;
 			}
 		}
+		
+		for(int y = 0; y < height; y++) {
+			for(int x = 0; x < width; x++) {
+				if(values[x][y] != WATER) {
+					values[x][y] = OPEN_DOOR;
+					return;
+				}
+			}
+		}
 	}
 	
 	public TileTypeEnum[][][] generateTiles() {
@@ -175,5 +184,6 @@ public class LevelGenerator {
 		put(FLINT, GRASS);
 		put(SNOW, GRASS);
 		// put(TORCH, DIRT);
+		put(OPEN_DOOR, SAND);
 	}};
 }

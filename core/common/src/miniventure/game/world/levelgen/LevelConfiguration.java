@@ -1,12 +1,12 @@
 package miniventure.game.world.levelgen;
 
-public class IslandType {
+public class LevelConfiguration {
 	
 	// contains a static hashmap of strings to IslandTypes
 	
 	;
 	
-	IslandType() {}
+	LevelConfiguration() {}
 	
 	/*public TileTypeEnum[][][] generateIsland(long seed, int width, int height) {
 		

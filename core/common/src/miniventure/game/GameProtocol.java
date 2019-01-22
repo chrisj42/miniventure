@@ -184,6 +184,30 @@ public interface GameProtocol {
 		}
 	}
 	
+	/*class IslandData {
+		public final Point position;
+	}*/
+	
+	class MapRequest {
+		public final Point[] positions;
+		
+		// for client use only
+		public MapRequest() { this(null); }
+		// for server use only
+		public MapRequest(Point[] positions) {
+			this.positions = positions;
+		}
+	}
+	
+	class LevelChange {
+		public final int levelid;
+		
+		private LevelChange() { this(0); }
+		public LevelChange(int levelid) {
+			this.levelid = levelid;
+		}
+	}
+	
 	class TileUpdate {
 		public final TileData tileData;
 		public final int levelId;

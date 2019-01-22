@@ -161,6 +161,9 @@ public class ClientWorld extends WorldManager {
 	
 	public void addLevel(LevelData data) {
 		addLevel(new ClientLevel(this, data.levelId, data.tiles));
+		// if this isn't the first level added, add the player to the new level
+		if(getLoadedLevelCount() > 1)
+			setEntityLevel(getMainPlayer(), getLevel(data.levelId));
 	}
 	
 	/*public void loadChunk(ChunkData data) {

@@ -1,5 +1,6 @@
 package miniventure.game.world;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 import miniventure.game.util.MyUtils;
@@ -293,6 +294,18 @@ public abstract class Level implements Taggable<Level> {
 		
 		return chunkCoords;
 	}*/
+	
+	public ArrayList<Tile> getMatchingTiles(TileTypeEnum type) {
+		ArrayList<Tile> matches = new ArrayList<>();
+		for(int x = 0; x < width; x++) {
+			for(int y = 0; y < height; y++) {
+				if(tiles[x][y].getType().getTypeEnum() == type)
+					matches.add(tiles[x][y]);
+			}
+		}
+		
+		return matches;
+	}
 	
 	@Nullable
 	public Player getClosestPlayer(final Vector2 pos) {

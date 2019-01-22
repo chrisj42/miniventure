@@ -176,6 +176,23 @@ public class GameServer implements GameProtocol {
 					}
 				});
 				
+				forPacket(object, MapRequest.class, req -> {
+					connection.sendTCP(new MapRequest(world.getWorldGenerator().getLevelPositions()));
+				});
+				
+				forPacket(object, LevelChange.class, change -> {
+					Level level = world.getLevel(change.levelid, true);
+					world.setEntityLevel(client, level);
+					Tile spawnTile = level.getMatchingTiles(TileTypeEnum.OPEN_DOOR).get(0);
+					client.moveTo(spawnTile);
+					connection.sendTCP(new LevelData(level));
+					for(Entity e: level.getEntities())
+						if(e != client)
+							connection.sendTCP(new EntityAddition(e));
+					
+					ServerCore.getServer().broadcast(new EntityUpdate(client.getTag(), new PositionUpdate(client), null));
+				});
+				
 				/*if(object instanceof ChunkRequest) {
 					//System.out.println("server received chunk request");
 					ChunkRequest request = (ChunkRequest) object;
