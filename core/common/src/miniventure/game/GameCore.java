@@ -39,6 +39,8 @@ public class GameCore {
 	
 	public static final Color DEFAULT_CHAT_COLOR = Color.WHITE;
 	
+	public static final int DEFAULT_WORLD_SIZE = 200;
+	
 	public static TextureAtlasHolder entityAtlas, tileAtlas, descaledTileAtlas, scaledIconAtlas;
 	public static TextureAtlas tileConnectionAtlas = new TextureAtlas(); // tile overlap atlas not needed b/c the overlap sprite layout is simple enough to code; it goes in binary. However, the tile connection sprite layout is more complicated, so a map is needed to compare against.
 	

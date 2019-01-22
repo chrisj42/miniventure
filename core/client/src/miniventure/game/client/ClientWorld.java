@@ -1,5 +1,6 @@
 package miniventure.game.client;
 
+import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.DatalessRequest;
 import miniventure.game.GameProtocol.LevelData;
 import miniventure.game.GameProtocol.PositionUpdate;
@@ -100,8 +101,8 @@ public class ClientWorld extends WorldManager {
 	
 	@Override
 	public void createWorld(int width, int height) { createWorld(width, height, true, ""); }
-	public void rejoinWorld() { createWorld(0, 0, false, ipAddress); }
-	public void createWorld(String ipAddress) { createWorld(0, 0, false, ipAddress); }
+	public void rejoinWorld() { createWorld(GameCore.DEFAULT_WORLD_SIZE, GameCore.DEFAULT_WORLD_SIZE, false, ipAddress); }
+	public void createWorld(String ipAddress) { createWorld(GameCore.DEFAULT_WORLD_SIZE, GameCore.DEFAULT_WORLD_SIZE, false, ipAddress); }
 	private void createWorld(int width, int height, boolean startServer, String ipAddress) {
 		ClientCore.stopMusic();
 		LoadingScreen loadingScreen = new LoadingScreen();

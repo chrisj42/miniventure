@@ -55,7 +55,7 @@ public class MainMenu extends BackgroundProvider implements ParentScreen {
 			if(!ClientCore.viewedInstructions)
 				ClientCore.setScreen(new InstructionsScreen(true));
 			else
-				world.createWorld(0, 0);
+				world.createWorld(GameCore.DEFAULT_WORLD_SIZE, GameCore.DEFAULT_WORLD_SIZE);
 		});
 		
 		table.add(playButton).spaceBottom(20);

@@ -47,6 +47,9 @@ public class ServerCore {
 				
 				System.out.println("loading server world...");
 				
+				if(width == 0) width = GameCore.DEFAULT_WORLD_SIZE;
+				if(height == 0) height = GameCore.DEFAULT_WORLD_SIZE;
+				
 				initServer(width, height, true);
 			} catch(NumberFormatException ex) {
 				success = false;
@@ -55,7 +58,7 @@ public class ServerCore {
 		
 		if(!success) {
 			System.out.println("Usage: miniventure.server.ServerCore --server <world width> <world height>");
-			System.out.println("    specify 0 for width and/or height to use the maximum value for that dimension.");
+			System.out.println("    specify 0 for width and/or height to use the default value for that dimension.");
 		}
 		else {
 			System.out.println("server ready");
