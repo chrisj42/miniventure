@@ -204,9 +204,7 @@
 		close-window: {
 			up: button-window-bg, down: button-red, over: button-over, imageUp: icon-close, disabled: button
 		},
-		close-titlebar: {
-			imageUp: icon-close-titlebar, down: button-red, up: button, over: button-over, disabled: button
-		}
+		
 	},
 	com.kotcrab.vis.ui.widget.VisImageTextButton$VisImageTextButtonStyle: {
 		default: {
