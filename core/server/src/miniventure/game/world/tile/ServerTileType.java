@@ -1,5 +1,6 @@
 package miniventure.game.world.tile;
 
+import miniventure.game.GameProtocol.MapRequest;
 import miniventure.game.item.FoodType;
 import miniventure.game.item.ResourceType;
 import miniventure.game.item.Result;
@@ -7,6 +8,7 @@ import miniventure.game.item.ServerItem;
 import miniventure.game.item.TileItem;
 import miniventure.game.item.TileItem.PlacementCheck;
 import miniventure.game.item.ToolType;
+import miniventure.game.server.ServerCore;
 import miniventure.game.util.customenum.SerialMap;
 import miniventure.game.util.function.MapFunction;
 import miniventure.game.util.param.Param;
@@ -16,6 +18,7 @@ import miniventure.game.world.ItemDrop;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.player.Player;
+import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.tile.DestructionManager.PreferredTool;
 import miniventure.game.world.tile.DestructionManager.RequiredTool;
 import miniventure.game.world.tile.SpreadUpdateAction.FloatFetcher;
@@ -157,6 +160,16 @@ public class ServerTileType extends TileType {
 					(newType, tile) -> tile.addTile(newType), TileTypeEnum.HOLE)
 			))
 		)),
+		
+		DOCK(type -> new ServerTileType(type,
+			DestructionManager.INDESTRUCTIBLE(type)
+		) {
+			@Override
+			public Result interact(@NotNull ServerTile tile, Player player, @Nullable ServerItem item) {
+				ServerCore.getServer().sendToPlayer((ServerPlayer) player, new MapRequest());
+				return Result.INTERACT;
+			}
+		}),
 		
 		COAL_ORE(type -> ServerTileFactory.ore(type, ResourceType.Coal, 25)),
 		IRON_ORE(type -> ServerTileFactory.ore(type, ResourceType.Iron, 35)),

@@ -157,16 +157,23 @@ dirt/c00
   orig: 128, 128
   offset: 0, 0
   index: -1
-door_/closed/c00
+dock/c00
   rotate: false
   xy: 3176, 8
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-door_/open/c00
+door_/closed/c00
   rotate: false
   xy: 3320, 8
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+door_/open/c00
+  rotate: false
+  xy: 3176, 8
   size: 128, 128
   orig: 128, 128
   offset: 0, 0

@@ -14,6 +14,7 @@ public enum TileTypeEnum {
 	SNOW(true),
 	FLINT(true),
 	WATER(true, 0.6f),
+	DOCK(true),
 	COAL_ORE(false),
 	IRON_ORE(false),
 	TUNGSTEN_ORE(false),

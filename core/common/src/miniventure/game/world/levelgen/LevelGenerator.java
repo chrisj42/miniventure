@@ -119,12 +119,21 @@ public class LevelGenerator {
 			}
 		}
 		
+		if(values[0][0] != WATER) {
+			values[0][0] = DOCK;
+			return;
+		}
+		
+		int ly = 0;
 		for(int y = 0; y < height; y++) {
+			int lx = width-1;
 			for(int x = 0; x < width; x++) {
 				if(values[x][y] != WATER) {
-					values[x][y] = OPEN_DOOR;
+					values[lx][ly] = DOCK;
 					return;
 				}
+				lx = x;
+				ly = y;
 			}
 		}
 	}
@@ -184,6 +193,6 @@ public class LevelGenerator {
 		put(FLINT, GRASS);
 		put(SNOW, GRASS);
 		// put(TORCH, DIRT);
-		put(OPEN_DOOR, SAND);
+		put(DOCK, WATER);
 	}};
 }

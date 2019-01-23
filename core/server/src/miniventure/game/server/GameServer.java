@@ -183,7 +183,7 @@ public class GameServer implements GameProtocol {
 				forPacket(object, LevelChange.class, change -> {
 					Level level = world.getLevel(change.levelid, true);
 					world.setEntityLevel(client, level);
-					Tile spawnTile = level.getMatchingTiles(TileTypeEnum.OPEN_DOOR).get(0);
+					Tile spawnTile = level.getMatchingTiles(TileTypeEnum.DOCK).get(0);
 					client.moveTo(spawnTile);
 					connection.sendTCP(new LevelData(level));
 					for(Entity e: level.getEntities())

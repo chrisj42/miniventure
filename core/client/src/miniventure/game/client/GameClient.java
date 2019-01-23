@@ -66,7 +66,11 @@ public class GameClient implements GameProtocol {
 				
 				forPacket(object, MapRequest.class, req -> {
 					MenuScreen screen = ClientCore.getScreen();
-					if(screen instanceof MapScreen)
+					if(req.positions == null) {
+						if(screen == null)
+							Gdx.app.postRunnable(() -> ClientCore.setScreen(new MapScreen()));
+					}
+					else if(screen instanceof MapScreen)
 						((MapScreen)screen).mapUpdate(req);
 				});
 				

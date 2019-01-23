@@ -110,6 +110,8 @@ public class ClientTileType extends TileType {
 			P.swimAnimation.as(new SwimAnimation(type))
 		)),
 		
+		DOCK(type -> new ClientTileType(type, true)),
+		
 		COAL_ORE(ClientTileFactory::ore),
 		IRON_ORE(ClientTileFactory::ore),
 		TUNGSTEN_ORE(ClientTileFactory::ore),

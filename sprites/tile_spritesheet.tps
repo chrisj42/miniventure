@@ -220,6 +220,7 @@
             <key type="filename">tile-sprites/air/o18.png</key>
             <key type="filename">tile-sprites/cactus/c00.png</key>
             <key type="filename">tile-sprites/dirt/c00.png</key>
+            <key type="filename">tile-sprites/dock/c00.png</key>
             <key type="filename">tile-sprites/door_/closed/c00.png</key>
             <key type="filename">tile-sprites/door_/open/c00.png</key>
             <key type="filename">tile-sprites/door_/open/tclose_01.png</key>
