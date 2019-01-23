@@ -88,9 +88,9 @@
         <key>maxTextureSize</key>
         <QSize>
             <key>width</key>
-            <int>2048</int>
+            <int>4096</int>
             <key>height</key>
-            <int>2048</int>
+            <int>4096</int>
         </QSize>
         <key>fixedTextureSize</key>
         <QSize>
@@ -183,20 +183,6 @@
         <map type="IndividualSpriteSettingsMap">
             <key type="filename">skin/border-circle-error.png</key>
             <key type="filename">skin/border-circle.png</key>
-            <key type="filename">skin/check-down-on.png</key>
-            <key type="filename">skin/check-down.png</key>
-            <key type="filename">skin/check-off.png</key>
-            <key type="filename">skin/check-on-disabled.png</key>
-            <key type="filename">skin/check-on.png</key>
-            <key type="filename">skin/check-over-off.png</key>
-            <key type="filename">skin/check-over-on.png</key>
-            <key type="filename">skin/radio-down-on.png</key>
-            <key type="filename">skin/radio-down.png</key>
-            <key type="filename">skin/radio-off.png</key>
-            <key type="filename">skin/radio-on-disabled.png</key>
-            <key type="filename">skin/radio-on.png</key>
-            <key type="filename">skin/radio-over-off.png</key>
-            <key type="filename">skin/radio-over-on.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -209,13 +195,9 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">skin/border-dark-blue.9.png</key>
             <key type="filename">skin/border-error.9.png</key>
             <key type="filename">skin/border.9.png</key>
-            <key type="filename">skin/default-select-selection.9.png</key>
             <key type="filename">skin/tooltip-bg.9.png</key>
-            <key type="filename">skin/tree-selection.9.png</key>
-            <key type="filename">skin/window-border-bg.9.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -228,13 +210,8 @@
                 <key>scale9FromFile</key>
                 <true/>
             </struct>
-            <key type="filename">skin/button-blue-down.9.png</key>
-            <key type="filename">skin/button-blue-over.9.png</key>
-            <key type="filename">skin/button-blue.9.png</key>
             <key type="filename">skin/button-down.9.png</key>
             <key type="filename">skin/button-over.9.png</key>
-            <key type="filename">skin/button-red.9.png</key>
-            <key type="filename">skin/button-window-bg.9.png</key>
             <key type="filename">skin/button.9.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
@@ -248,58 +225,6 @@
                 <key>scale9FromFile</key>
                 <true/>
             </struct>
-            <key type="filename">skin/color-picker-bar-selector.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>4,7,7,14</rect>
-                <key>scale9Paddings</key>
-                <rect>4,7,7,14</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">skin/color-picker-cross.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>3,3,5,5</rect>
-                <key>scale9Paddings</key>
-                <rect>3,3,5,5</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">skin/color-picker-selector-horizontal.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>2,0,3,1</rect>
-                <key>scale9Paddings</key>
-                <rect>2,0,3,1</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">skin/color-picker-selector-vertical.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>0,2,1,3</rect>
-                <key>scale9Paddings</key>
-                <rect>0,2,1,3</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
             <key type="filename">skin/cursor.9.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
@@ -312,46 +237,6 @@
                 <rect>0,0,0,0</rect>
                 <key>scale9FromFile</key>
                 <false/>
-            </struct>
-            <key type="filename">skin/default-pane-no-border.9.png</key>
-            <key type="filename">skin/default-pane-noborder.9.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <true/>
-                <key>scale9Borders</key>
-                <rect>0,0,1,1</rect>
-                <key>scale9Paddings</key>
-                <rect>0,0,0,0</rect>
-                <key>scale9FromFile</key>
-                <true/>
-            </struct>
-            <key type="filename">skin/default-pane.9.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <true/>
-                <key>scale9Borders</key>
-                <rect>1,1,3,1</rect>
-                <key>scale9Paddings</key>
-                <rect>0,0,0,0</rect>
-                <key>scale9FromFile</key>
-                <true/>
-            </struct>
-            <key type="filename">skin/default-select.9.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <true/>
-                <key>scale9Borders</key>
-                <rect>4,0,7,0</rect>
-                <key>scale9Paddings</key>
-                <rect>0,0,0,0</rect>
-                <key>scale9FromFile</key>
-                <true/>
             </struct>
             <key type="filename">skin/default.png</key>
             <key type="filename">skin/font-small.png</key>
@@ -367,42 +252,8 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">skin/grey.png</key>
-            <key type="filename">skin/list-selection.png</key>
-            <key type="filename">skin/menu-bg.png</key>
-            <key type="filename">skin/select-box-list-bg.png</key>
-            <key type="filename">skin/selection.png</key>
-            <key type="filename">skin/separator-menu.png</key>
-            <key type="filename">skin/separator.png</key>
-            <key type="filename">skin/tree-over.png</key>
-            <key type="filename">skin/vis-blue.png</key>
-            <key type="filename">skin/vis-red.png</key>
-            <key type="filename">skin/window-bg.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>0,0,1,1</rect>
-                <key>scale9Paddings</key>
-                <rect>0,0,1,1</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
             <key type="filename">skin/icon-arrow-left.png</key>
             <key type="filename">skin/icon-arrow-right.png</key>
-            <key type="filename">skin/icon-close.png</key>
-            <key type="filename">skin/icon-drive.png</key>
-            <key type="filename">skin/icon-file-audio.png</key>
-            <key type="filename">skin/icon-file-image.png</key>
-            <key type="filename">skin/icon-file-pdf.png</key>
-            <key type="filename">skin/icon-file-text.png</key>
-            <key type="filename">skin/icon-folder-new.png</key>
-            <key type="filename">skin/icon-folder-parent.png</key>
-            <key type="filename">skin/icon-folder-star.png</key>
-            <key type="filename">skin/icon-folder.png</key>
-            <key type="filename">skin/icon-trash.png</key>
             <key type="filename">skin/touchpad-knob.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
@@ -415,39 +266,6 @@
                 <rect>11,11,22,22</rect>
                 <key>scale9FromFile</key>
                 <false/>
-            </struct>
-            <key type="filename">skin/icon-close-titlebar.png</key>
-            <key type="filename">skin/icon-list-settings.png</key>
-            <key type="filename">skin/icon-maximize.png</key>
-            <key type="filename">skin/icon-minimize.png</key>
-            <key type="filename">skin/icon-refresh.png</key>
-            <key type="filename">skin/icon-restore.png</key>
-            <key type="filename">skin/icon-star-outline.png</key>
-            <key type="filename">skin/icon-star.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>6,6,11,11</rect>
-                <key>scale9Paddings</key>
-                <rect>6,6,11,11</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">skin/padded-list-selection.9.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <true/>
-                <key>scale9Borders</key>
-                <rect>4,0,2,0</rect>
-                <key>scale9Paddings</key>
-                <rect>0,0,0,0</rect>
-                <key>scale9FromFile</key>
-                <true/>
             </struct>
             <key type="filename">skin/progressbar-filled-vertical.png</key>
             <key type="filename">skin/progressbar-vertical.png</key>
@@ -529,17 +347,18 @@
                 <key>scale9FromFile</key>
                 <true/>
             </struct>
-            <key type="filename">skin/select-down.png</key>
-            <key type="filename">skin/select-up.png</key>
+            <key type="filename">skin/selection.png</key>
+            <key type="filename">skin/separator.png</key>
+            <key type="filename">skin/vis-blue.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>4,2,7,4</rect>
+                <rect>0,0,1,1</rect>
                 <key>scale9Paddings</key>
-                <rect>4,2,7,4</rect>
+                <rect>0,0,1,1</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -560,8 +379,6 @@
                 <false/>
             </struct>
             <key type="filename">skin/slider-vertical.png</key>
-            <key type="filename">skin/splitpane-over.png</key>
-            <key type="filename">skin/splitpane.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -575,8 +392,6 @@
                 <false/>
             </struct>
             <key type="filename">skin/slider.png</key>
-            <key type="filename">skin/splitpane-vertical-over.png</key>
-            <key type="filename">skin/splitpane-vertical.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -586,19 +401,6 @@
                 <rect>0,2,1,4</rect>
                 <key>scale9Paddings</key>
                 <rect>0,2,1,4</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">skin/sub-menu.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>2,4,4,7</rect>
-                <key>scale9Paddings</key>
-                <rect>2,4,4,7</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -615,20 +417,6 @@
                 <rect>0,0,0,0</rect>
                 <key>scale9FromFile</key>
                 <true/>
-            </struct>
-            <key type="filename">skin/tree-minus.png</key>
-            <key type="filename">skin/tree-plus.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>4,4,8,8</rect>
-                <key>scale9Paddings</key>
-                <rect>4,4,8,8</rect>
-                <key>scale9FromFile</key>
-                <false/>
             </struct>
             <key type="filename">skin/vis-check-down.png</key>
             <key type="filename">skin/vis-check-over.png</key>
@@ -665,33 +453,6 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">skin/window-noborder.9.png</key>
-            <key type="filename">skin/window.9.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <true/>
-                <key>scale9Borders</key>
-                <rect>5,26,18,5</rect>
-                <key>scale9Paddings</key>
-                <rect>0,0,0,0</rect>
-                <key>scale9FromFile</key>
-                <true/>
-            </struct>
-            <key type="filename">skin/window-resizable.9.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <true/>
-                <key>scale9Borders</key>
-                <rect>5,3,10,28</rect>
-                <key>scale9Paddings</key>
-                <rect>5,25,17,15</rect>
-                <key>scale9FromFile</key>
-                <true/>
-            </struct>
         </map>
         <key>fileList</key>
         <array>
@@ -702,7 +463,9 @@
         <key>replaceList</key>
         <array/>
         <key>ignoredWarnings</key>
-        <array/>
+        <array>
+            <string>large-max-texture-size</string>
+        </array>
         <key>commonDivisorX</key>
         <uint>1</uint>
         <key>commonDivisorY</key>
