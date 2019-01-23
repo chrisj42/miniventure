@@ -9,6 +9,7 @@ import miniventure.game.world.Level;
 import miniventure.game.world.Point;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.kotcrab.vis.ui.widget.VisTextButton;
@@ -36,6 +37,14 @@ public class MapScreen extends MenuScreen {
 			requested = true;
 			ClientCore.getClient().send(new MapRequest());
 		}
+	}
+	
+	@Override
+	public void act(float delta) {
+		if(Gdx.input.isKeyPressed(Keys.ESCAPE))
+			ClientCore.setScreen(null);
+		else
+			super.act(delta);
 	}
 	
 	public void mapUpdate(MapRequest mapRequest) {
