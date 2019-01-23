@@ -25,11 +25,11 @@ import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
-import miniventure.game.world.levelgen.LevelGenerator;
-import miniventure.game.world.levelgen.WorldGenerator;
 import miniventure.game.world.tile.ServerTileType;
 import miniventure.game.world.tile.TileType;
 import miniventure.game.world.tile.TileTypeEnum;
+import miniventure.game.world.worldgen.LevelGenerator;
+import miniventure.game.world.worldgen.WorldGenerator;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;

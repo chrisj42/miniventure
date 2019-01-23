@@ -1,14 +1,14 @@
-package miniventure.game.world.levelgen;
+package miniventure.game.world.worldgen;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
 
-import miniventure.game.world.levelgen.noise.Coherent2DNoiseFunction;
-import miniventure.game.world.levelgen.noise.Noise;
-import miniventure.game.world.levelgen.noise.NoiseConfiguration;
-import miniventure.game.world.levelgen.noise.NoiseGenerator;
-import miniventure.game.world.levelgen.noise.NoiseModifier;
 import miniventure.game.world.tile.TileTypeEnum;
+import miniventure.game.world.worldgen.noise.Coherent2DNoiseFunction;
+import miniventure.game.world.worldgen.noise.Noise;
+import miniventure.game.world.worldgen.noise.NoiseConfiguration;
+import miniventure.game.world.worldgen.noise.NoiseGenerator;
+import miniventure.game.world.worldgen.noise.NoiseModifier;
 
 import static miniventure.game.world.tile.TileTypeEnum.*;
 

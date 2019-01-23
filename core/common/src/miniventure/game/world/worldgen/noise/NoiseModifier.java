@@ -1,4 +1,4 @@
-package miniventure.game.world.levelgen.noise;
+package miniventure.game.world.worldgen.noise;
 
 import miniventure.game.util.ArrayUtils;
 

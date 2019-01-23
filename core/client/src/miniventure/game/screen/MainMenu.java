@@ -13,7 +13,7 @@ import miniventure.game.screen.util.ParentScreen;
 import miniventure.game.util.VersionInfo;
 import miniventure.game.world.DisplayLevel;
 import miniventure.game.world.TimeOfDay;
-import miniventure.game.world.levelgen.LevelGenerator;
+import miniventure.game.world.worldgen.LevelGenerator;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;

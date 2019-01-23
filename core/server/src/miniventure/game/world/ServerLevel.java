@@ -15,10 +15,10 @@ import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.AiType;
 import miniventure.game.world.entity.mob.ServerMob;
 import miniventure.game.world.entity.particle.ItemEntity;
-import miniventure.game.world.levelgen.LevelGenerator;
 import miniventure.game.world.tile.ServerTile;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileTypeEnum;
+import miniventure.game.world.worldgen.LevelGenerator;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
