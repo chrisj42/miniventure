@@ -98,7 +98,7 @@ public class Testing {
 		return displayMap(width, height, scale, colors);
 	}
 	
-	private static boolean displayMap(int width, int height, int scale, Color[][] colors) {
+	public static boolean displayMap(int width, int height, int scale, Color[][] colors) {
 		BufferedImage image = new BufferedImage(width * scale, height * scale, BufferedImage.TYPE_INT_RGB);
 		Graphics g = image.getGraphics();
 		
