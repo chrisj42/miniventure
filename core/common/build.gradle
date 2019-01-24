@@ -2,3 +2,15 @@ sourceCompatibility = 1.8
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 sourceSets.main.java.srcDirs = [ "src/" ]
+
+task worldgentest(type: Jar) {
+	from files(sourceSets.main.output.classesDir)
+	from files(sourceSets.main.output.resourcesDir)
+	from {configurations.compile.collect {zipTree(it)}}
+	
+	manifest {
+		attributes 'Main-Class': "miniventure.game.world.worldgen.WorldGenTest"
+	}
+}
+
+worldgentest.dependsOn classes
