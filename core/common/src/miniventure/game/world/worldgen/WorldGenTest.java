@@ -3,6 +3,7 @@ package miniventure.game.world.worldgen;
 import java.awt.Color;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
@@ -15,7 +16,7 @@ public class WorldGenTest {
 	
 	// use Testing.displayMap()
 	
-	private static final int MAX_ISLAND_PLACEMENT_ATTEMPTS = 1000; // maximum number of times a new island will attempt to be placed before giving up and starting over with a fresh map.
+	private static final int MAX_ISLAND_PLACEMENT_ATTEMPTS = 10000; // maximum number of times a new island will attempt to be placed before giving up and starting over with a fresh map.
 	
 	/*
 		data used:
@@ -79,7 +80,7 @@ public class WorldGenTest {
 			new int[] {25, 35, 35, 35, 65, 65, 65, 65, 90, 90, 120, 130, 130, 140},
 			new int[] {35, 45, 45, 45, 80, 80, 80, 85, 100, 105, 140, 140, 150, 155}
 			),
-			3, 2);
+			4, 2);
 		while(repeat);
 	}
 	
@@ -140,10 +141,11 @@ public class WorldGenTest {
 			min = Math.min(min, islandRequirements[i].minCenterDist);
 			max = Math.max(max, islandRequirements[i].maxCenterDist);
 		}
-		final int range = max - min;
+		// final int range = max - min;
 		
-		HashMap<Point, Color> islandLocations = new HashMap<>(islandRequirements.length+1);
-		islandLocations.put(new Point(0, 0), Color.BLACK);
+		Point[] islandLocations = new Point[islandRequirements.length+1];
+		islandLocations[0] = new Point(0, 0);
+		HashSet<Point> pointSet = new HashSet<>(islandRequirements.length+1);
 		
 		for(int i = islandRequirements.length-1; i >= 0; i--) {
 		// for(int i = 0; i < islandRequirements.length; i++) {
@@ -151,24 +153,57 @@ public class WorldGenTest {
 			final int minDist = curIsland.minCenterDist;
 			final int maxDist = curIsland.maxCenterDist;
 			System.out.println("placing island "+(i+1)+" of "+islandRequirements.length + " between "+minDist+" and "+maxDist);
-			Point islandPos = placeNewIsland(islandLocations, curIsland);
+			Point islandPos = placeNewIsland(pointSet, curIsland);
 			if(islandPos == null)
 				return null; // islands cannot reasonably fit in in this configuration
-			// get the color based on the distance threshold
-			float thresholdRelativeSize = (maxDist - min) * (280/360f) / range;
-			Color color = Color.getHSBColor(thresholdRelativeSize, 1, 1);
-			islandLocations.put(islandPos, color);
+			// get the color based on the distance to nearest island
+			// float thresholdRelativeSize = (maxDist - min) * (280/360f) / range;
+			// Color color = Color.getHSBColor(thresholdRelativeSize, 1, 1);
+			// islandData.put(islandPos, color);
+			islandLocations[i+1] = islandPos;
+			pointSet.add(islandPos);
 		}
 		
-		return islandLocations;
+		System.out.println(Arrays.toString(islandLocations));
+		
+		// find min dist between each island
+		float[] minDists = new float[islandLocations.length];
+		for(int i = 0; i < islandLocations.length-1; i++) {
+			for(int j = i+1; j < islandLocations.length; j++) {
+				float dist = Vector2.dst(islandLocations[i].x, islandLocations[i].y, islandLocations[j].x, islandLocations[j].y);
+				minDists[i] = minDists[i] == 0 ? dist : Math.min(minDists[i], dist);
+				minDists[j] = minDists[j] == 0 ? dist : Math.min(minDists[j], dist);
+			}
+		}
+		float minDist = 0, maxDist = 0;
+		for(int i = 0; i < minDists.length; i++) {
+			float dist = minDists[i];
+			minDist = minDist == 0 ? dist : Math.min(minDist, dist);
+			maxDist = maxDist == 0 ? dist : Math.max(maxDist, dist);
+		}
+		
+		System.out.println(Arrays.toString(minDists));
+		System.out.println("total min: "+minDist+", total max: "+maxDist);
+		
+		// now that the minDists have been calculated, set the colors
+		HashMap<Point, Color> islandData = new HashMap<>(islandRequirements.length+1);
+		
+		for(int i = 0; i < minDists.length; i++) {
+			float distRelative = (minDists[i] - minDist) / 2 / (maxDist - minDist);
+			Color color = Color.getHSBColor(distRelative, 1, 1);
+			islandData.put(islandLocations[i], color);
+		}
+		
+		// islandData.put(new Point(0, 0), Color.BLACK);
+		
+		return islandData;
 	}
 	
-	private static Point placeNewIsland(HashMap<Point, Color> existing, final IslandReq island) {
-		final Set<Point> existingPositions = existing.keySet();
-		
+	private static Point placeNewIsland(final HashSet<Point> existingPositions, final IslandReq island) {
 		Random rand = new Random();
 		Point islandPos = null;
 		int attempts = 0;
+		Vector2 v = new Vector2(1, 1);
 		do {
 			attempts++;
 			if(attempts > MAX_ISLAND_PLACEMENT_ATTEMPTS) {
@@ -176,17 +211,14 @@ public class WorldGenTest {
 				break;
 			}
 			
-			// float curDist = island.centerDistRange - (float)Math.sqrt(rand.nextFloat() * island.centerDistRange) + island.minCenterDist;
-			float curDist = rand.nextFloat() * island.centerDistRange + island.minCenterDist;
+			float curDist = island.centerDistRange - (float)Math.sqrt(rand.nextFloat() * island.centerDistRange) + island.minCenterDist;
+			// float curDist = rand.nextFloat() * island.centerDistRange + island.minCenterDist;
+			float angle = rand.nextFloat() * 360;
+			v.setLength(curDist).setAngle(angle);
 			
-			double angle = rand.nextDouble() * Math.PI * 2;
+			// System.out.println("attempt "+attempts+" of island placement with center dist "+curDist+" and angle "+angle+"; vector: "+v);
 			
-			// System.out.println("attempt "+attempts+" of island placement with center dist "+curDist+" and angle "+(angle/Math.PI/2));
-			
-			Vector2 vector = new Vector2((float)Math.cos(angle), (float)Math.sin(angle));
-			vector.scl(curDist);
-			
-			islandPos = new Point(Math.round(vector.x), Math.round(vector.y));
+			islandPos = new Point(Math.round(v.x), Math.round(v.y));
 			
 		} while(!validateIsland(existingPositions, islandPos, island));
 		
@@ -198,7 +230,7 @@ public class WorldGenTest {
 	
 	private static boolean validateIsland(Set<Point> existing, Point islandPos, IslandReq island) {
 		if(existing.contains(islandPos)) {
-			System.out.println(islandPos+" already exists");
+			// System.out.println(islandPos+" already exists");
 			return false;
 		}
 		
@@ -219,7 +251,7 @@ public class WorldGenTest {
 		}
 		
 		if(minDist > island.maxIslandDist) {
-			System.out.println("island neighbors are too far away; "+minDist+" is greater than limit "+island.maxIslandDist);
+			// System.out.println("island neighbors are too far away; "+minDist+" is greater than limit "+island.maxIslandDist);
 			return false;
 		}
 		
