@@ -23,6 +23,7 @@ import miniventure.game.item.ServerItemStack;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
+import miniventure.game.world.ServerWorld;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ServerEntity;
@@ -177,11 +178,11 @@ public class GameServer implements GameProtocol {
 				});
 				
 				forPacket(object, MapRequest.class, req -> {
-					connection.sendTCP(new MapRequest(world.getWorldGenerator().getLevelPositions()));
+					connection.sendTCP(new MapRequest(world.getIslandGenerators()));
 				});
 				
 				forPacket(object, LevelChange.class, change -> {
-					Level level = world.getLevel(change.levelid, true);
+					ServerLevel level = world.getLevel(change.levelid, true);
 					world.setEntityLevel(client, level);
 					Tile spawnTile = level.getMatchingTiles(TileTypeEnum.DOCK).get(0);
 					client.moveTo(spawnTile);
@@ -544,5 +545,5 @@ public class GameServer implements GameProtocol {
 			out.println("Debug mode is enabled.");
 	}
 	
-	void stop() { server.stop(); }
+	public void stop() { server.stop(); }
 }

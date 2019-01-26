@@ -23,6 +23,7 @@ import miniventure.game.screen.util.BackgroundInheritor;
 import miniventure.game.screen.util.BackgroundProvider;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.ValueFunction;
+import miniventure.game.world.ClientWorld;
 import miniventure.game.world.tile.ClientTileType;
 
 import com.badlogic.gdx.ApplicationAdapter;
@@ -269,7 +270,7 @@ public class ClientCore extends ApplicationAdapter {
 	
 	@Override
 	public void resize(int width, int height) {
-		if(gameScreen != null)
+		if(gameScreen != null) // null check in case this is called before app is fully initialized
 			gameScreen.resize(width, height);
 		
 		MenuScreen menu = getScreen();

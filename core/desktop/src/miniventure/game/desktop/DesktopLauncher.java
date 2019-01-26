@@ -5,6 +5,7 @@ import miniventure.game.client.ClientCore;
 import miniventure.game.client.ServerManager;
 import miniventure.game.server.ServerCore;
 import miniventure.game.util.function.ValueFunction;
+import miniventure.game.world.worldgen.WorldConfig;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
@@ -35,8 +36,8 @@ public class DesktopLauncher {
 			config.height = ClientCore.DEFAULT_SCREEN_HEIGHT;
 			new LwjglApplication(new ClientCore(new ServerManager() {
 				@Override
-				public void startServer(int worldWidth, int worldHeight, ValueFunction<Boolean> callback) {
-					boolean started = ServerCore.initServer(worldWidth, worldHeight, false);
+				public void startServer(WorldConfig config, ValueFunction<Boolean> callback) {
+					boolean started = ServerCore.initServer(config, false);
 					if(!started)
 						callback.act(false);
 					else {

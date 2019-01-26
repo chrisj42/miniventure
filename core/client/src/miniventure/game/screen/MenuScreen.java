@@ -8,7 +8,6 @@ import java.util.Map;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.FontStyle;
 import miniventure.game.screen.util.DiscreteViewport;
-import miniventure.game.screen.util.ParentScreen;
 import miniventure.game.util.RelPos;
 import miniventure.game.util.function.Action;
 
@@ -80,12 +79,14 @@ public class MenuScreen extends Stage {
 	}
 	
 	public void setParent(MenuScreen parent) {
-		if(parent != null && !(parent instanceof ParentScreen))
+		if(parent != null && !parent.allowChildren())
 			setParent(parent.getParent());
 		else
 			this.parent = parent;
 	}
 	public MenuScreen getParent() { return parent; }
+	
+	public boolean allowChildren() { return false; }
 	
 	public boolean usesWholeScreen() { return clearGdxBackground; }
 	

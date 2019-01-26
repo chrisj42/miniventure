@@ -2,15 +2,14 @@ package miniventure.game.screen;
 
 import miniventure.game.GameCore;
 import miniventure.game.client.ClientCore;
-import miniventure.game.client.ClientWorld;
 import miniventure.game.client.FontStyle;
 import miniventure.game.client.LevelViewport;
 import miniventure.game.screen.InfoScreen.CreditsScreen;
 import miniventure.game.screen.InfoScreen.InstructionsScreen;
 import miniventure.game.screen.util.BackgroundProvider;
 import miniventure.game.screen.util.MyLinkLabel;
-import miniventure.game.screen.util.ParentScreen;
 import miniventure.game.util.VersionInfo;
+import miniventure.game.world.ClientWorld;
 import miniventure.game.world.DisplayLevel;
 import miniventure.game.world.TimeOfDay;
 import miniventure.game.world.worldgen.LevelGenerator;
@@ -27,7 +26,7 @@ import com.kotcrab.vis.ui.widget.VisTextButton;
 
 import org.jetbrains.annotations.NotNull;
 
-public class MainMenu extends BackgroundProvider implements ParentScreen {
+public class MainMenu extends BackgroundProvider {
 	
 	private final Table table;
 	
@@ -55,13 +54,13 @@ public class MainMenu extends BackgroundProvider implements ParentScreen {
 			if(!ClientCore.viewedInstructions)
 				ClientCore.setScreen(new InstructionsScreen(true));
 			else
-				world.createWorld(GameCore.DEFAULT_WORLD_SIZE, GameCore.DEFAULT_WORLD_SIZE);
+				ClientCore.setScreen(world.getNewWorldInput());
 		});
 		
 		table.add(playButton).spaceBottom(20);
 		table.row();
 		
-		VisTextButton joinBtn = makeButton("Join Server", () -> ClientCore.setScreen(new InputScreen("Enter the IP Address you want to connect to:", world::createWorld)));
+		VisTextButton joinBtn = makeButton("Join Server", () -> ClientCore.setScreen(new InputScreen("Enter the IP Address you want to connect to:", world::joinWorld)));
 		
 		table.add(joinBtn).spaceBottom(20).row();
 		
@@ -95,6 +94,11 @@ public class MainMenu extends BackgroundProvider implements ParentScreen {
 			song.setLooping(true);
 			song.play();
 		}
+	}
+	
+	@Override
+	public boolean allowChildren() {
+		return true;
 	}
 	
 	@Override

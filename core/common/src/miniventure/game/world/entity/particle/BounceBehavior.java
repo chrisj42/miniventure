@@ -57,7 +57,7 @@ public class BounceBehavior {
 				- b/c we don't know the current position, we will just have to assume the starting point is (0,0), and move the delta dist for this frame, based on the passed in delta and the total move time.
 		 */
 		
-		Level level = e.getWorld().getEntityLevel(e);
+		Level level = e.getLevel();
 		if(level == null) return;
 		
 		Vector2 pos = e.getPosition();

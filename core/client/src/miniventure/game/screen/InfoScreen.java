@@ -1,6 +1,5 @@
 package miniventure.game.screen;
 
-import miniventure.game.GameCore;
 import miniventure.game.client.ClientCore;
 import miniventure.game.screen.util.BackgroundInheritor;
 
@@ -18,7 +17,7 @@ public class InfoScreen extends BackgroundInheritor {
 		vGroup.addActor(makeLabel(String.join("\n", text)));
 		
 		if(addButton)
-			vGroup.addActor(makeButton("Start Game", () -> ClientCore.getWorld().createWorld(GameCore.DEFAULT_WORLD_SIZE, GameCore.DEFAULT_WORLD_SIZE)));
+			vGroup.addActor(makeButton("Start Game", () -> ClientCore.setScreen(ClientCore.getWorld().getNewWorldInput())));
 		
 		vGroup.addActor(makeButton("Back to Main Menu", ClientCore::backToParentScreen));
 	}

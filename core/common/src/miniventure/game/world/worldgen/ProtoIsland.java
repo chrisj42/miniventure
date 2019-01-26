@@ -4,7 +4,9 @@ import java.util.Random;
 
 import miniventure.game.world.Point;
 
-public class WorldGenerator {
+public class ProtoIsland {
+	
+	// I think "level stub" will become the main class; it will have a method to get a LevelGenerator for it. It will also contain a static method to generate a map of LevelStubs.
 	
 	private class LevelStub {
 		Point position;
@@ -25,7 +27,7 @@ public class WorldGenerator {
 	private final int mapHeight;
 	private final LevelStub[] levelStubs;
 	
-	public WorldGenerator(long seed, int levelWidth, int levelHeight) {
+	public ProtoIsland(long seed, int levelWidth, int levelHeight) {
 		this.seed = seed;
 		random = new Random(seed);
 		this.levelWidth = levelWidth;

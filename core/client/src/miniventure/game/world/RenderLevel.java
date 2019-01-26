@@ -15,13 +15,22 @@ import org.jetbrains.annotations.NotNull;
 
 public abstract class RenderLevel extends Level {
 	
-	protected RenderLevel(@NotNull WorldManager world, int levelId, @NotNull TileTypeEnum[][][] tileTypes, @NotNull TileMaker tileFetcher) {
+	protected RenderLevel(@NotNull LevelManager world, int levelId, @NotNull TileTypeEnum[][][] tileTypes, @NotNull TileMaker tileFetcher) {
 		super(world, levelId, tileTypes, tileFetcher);
 	}
 	
-	protected RenderLevel(@NotNull WorldManager world, int levelId, TileData[][] tileData, TileLoader tileFetcher) {
+	protected RenderLevel(@NotNull LevelManager world, int levelId, TileData[][] tileData, TileLoader tileFetcher) {
 		super(world, levelId, tileData, tileFetcher);
 	}
+	
+	@Override @NotNull
+	public LevelManager getWorld() { return (LevelManager) super.getWorld(); }
+	
+	@Override
+	public int getEntityCount() { return getWorld().getEntityTotal(); }
+	
+	@Override
+	public Entity[] getEntities() { return getWorld().getAllEntities(); }
 	
 	public abstract void render(Rectangle renderSpace, SpriteBatch batch, float delta, Vector2 posOffset);
 	

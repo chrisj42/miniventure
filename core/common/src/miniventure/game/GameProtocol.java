@@ -26,6 +26,7 @@ import miniventure.game.world.entity.particle.ParticleData;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.Tile.TileData;
 import miniventure.game.world.tile.Tile.TileTag;
+import miniventure.game.world.worldgen.ProtoIsland;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
@@ -184,18 +185,14 @@ public interface GameProtocol {
 		}
 	}
 	
-	/*class IslandData {
-		public final Point position;
-	}*/
-	
 	class MapRequest {
-		public final Point[] positions;
+		public final ProtoIsland[] islands;
 		
 		// for client use only
 		public MapRequest() { this(null); }
 		// for server use only
-		public MapRequest(Point[] positions) {
-			this.positions = positions;
+		public MapRequest(ProtoIsland[] islands) {
+			this.islands = islands;
 		}
 	}
 	

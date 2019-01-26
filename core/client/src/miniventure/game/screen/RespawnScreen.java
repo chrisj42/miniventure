@@ -1,27 +1,27 @@
 package miniventure.game.screen;
 
 import miniventure.game.client.ClientCore;
-import miniventure.game.client.LevelViewport;
+import miniventure.game.client.GameScreen;
 import miniventure.game.screen.util.BackgroundProvider;
 import miniventure.game.world.ClientLevel;
+import miniventure.game.world.entity.mob.player.ClientPlayer;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 public class RespawnScreen extends BackgroundProvider {
 	
-	private final Vector2 deathPos;
-	private final Color lighting;
+	private final ClientPlayer deadPlayer;
 	private final ClientLevel level;
-	private final LevelViewport backgroundRenderer;
+	private final Color lighting;
+	private final GameScreen backgroundRenderer;
 	
-	public RespawnScreen(Vector2 deathPos, Color lighting, ClientLevel level, LevelViewport backgroundRenderer) {
+	public RespawnScreen(ClientPlayer deadPlayer, Color lighting, GameScreen backgroundRenderer) {
 		super(false, true, new ScreenViewport()); // level renderer clears it
-		this.deathPos = deathPos;
+		this.deadPlayer = deadPlayer;
+		level = deadPlayer.getWorld().getLevel();
 		this.lighting = lighting;
-		this.level = level;
 		this.backgroundRenderer = backgroundRenderer;
 		
 		VerticalGroup vGroup = useVGroup(20);
@@ -33,11 +33,10 @@ public class RespawnScreen extends BackgroundProvider {
 	@Override
 	public void renderBackground() {
 		if(level != null)
-			backgroundRenderer.render(deathPos, lighting, level);
+			backgroundRenderer.render(deadPlayer, lighting, level, false);
 	}
 	
+	// background is level viewport of gamescreen; ClientCore always calls that directly, so there is no need to do it again here.
 	@Override
-	public void resizeBackground(int width, int height) {
-		backgroundRenderer.resize(width, height);
-	}
+	public void resizeBackground(int width, int height) {}
 }

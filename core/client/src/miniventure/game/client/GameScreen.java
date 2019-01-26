@@ -79,8 +79,6 @@ public class GameScreen {
 		resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 	}
 	
-	@NotNull LevelViewport getLevelView() { return levelView; }
-	
 	void dispose() {
 		levelView.dispose();
 		guiStage.dispose();
@@ -88,7 +86,7 @@ public class GameScreen {
 		chatScreen.dispose();
 	}
 	
-	void handleInput(@NotNull ClientPlayer player) {
+	public void handleInput(@NotNull ClientPlayer player) {
 		player.handleInput(getMouseInput());
 		
 		boolean shift = Gdx.input.isKeyPressed(Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Keys.SHIFT_RIGHT);
@@ -136,16 +134,21 @@ public class GameScreen {
 	}
 	
 	public void render(@NotNull ClientPlayer mainPlayer, Color lightOverlay, @NotNull ClientLevel level) {
+		render(mainPlayer, lightOverlay, level, true);
+	}
+	public void render(@NotNull ClientPlayer mainPlayer, Color lightOverlay, @NotNull ClientLevel level, boolean drawGui) {
 		
 		levelView.render(mainPlayer.getCenter(), lightOverlay, level);
 		
 		batch.setProjectionMatrix(uiCamera.combined);
-		batch.begin();
-		renderGui(mainPlayer, level);
-		batch.end();
-		guiStage.focus();
-		guiStage.act();
-		guiStage.draw();
+		if(drawGui) {
+			batch.begin();
+			renderGui(mainPlayer, level);
+			batch.end();
+			guiStage.focus();
+			guiStage.act();
+			guiStage.draw();
+		}
 		
 		chatOverlay.act();
 		if(!(ClientCore.getScreen() instanceof ChatScreen)) {

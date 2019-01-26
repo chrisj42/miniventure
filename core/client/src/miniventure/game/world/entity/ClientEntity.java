@@ -1,12 +1,11 @@
 package miniventure.game.world.entity;
 
-import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.EntityAddition;
 import miniventure.game.client.ClientCore;
-import miniventure.game.client.ClientWorld;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.blinker.FrameBlinker;
 import miniventure.game.world.ClientLevel;
+import miniventure.game.world.ClientWorld;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.entity.particle.ClientParticle;
@@ -31,7 +30,7 @@ public class ClientEntity extends Entity {
 	private final boolean canFloat;
 	
 	public ClientEntity(EntityAddition data) {
-		super(ClientCore.getWorld(), data.eid);
+		super(ClientCore.getWorld(), data.eid, data.positionUpdate);
 		this.permeable = data.permeable;
 		this.descriptor = data.descriptor;
 		this.cutHeight = data.cutHeight;

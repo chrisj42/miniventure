@@ -1,17 +1,18 @@
 package miniventure.game.server;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import miniventure.game.GameCore;
 import miniventure.game.chat.command.CommandInputParser;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.VersionInfo;
+import miniventure.game.world.ServerWorld;
 import miniventure.game.world.tile.ServerTileType;
+import miniventure.game.world.worldgen.WorldConfig;
+import miniventure.game.world.worldgen.WorldConfig.CreationConfig;
+import miniventure.game.world.worldgen.WorldConfig.LoadConfig;
 
 import com.badlogic.gdx.math.MathUtils;
 
@@ -31,36 +32,88 @@ public class ServerCore {
 		args = ArrayUtils.mapArray(args, String.class, String::toLowerCase);
 		List<String> argList = Arrays.asList(args);
 		
-		int sizeIdx = argList.indexOf("--server") + 1;
-		boolean success = sizeIdx > 0 && args.length > sizeIdx+1;
+		LinkedHashMap<String, ArrayList<String>> optionList = new LinkedHashMap<>(argList.size()); // argList size is an absolute max, many args will probably be parameters to the same option
 		
-		if(argList.contains("--debug"))
-			GameCore.debug = true;
+		ArrayList<String> curOption = new ArrayList<>();
+		optionList.put("", curOption);
+		for(String arg: args) {
+			if(arg.startsWith("--")) {
+				curOption = new ArrayList<>();
+				optionList.put(arg.substring(2), curOption);
+			}
+			else
+				curOption.add(arg);
+		}
 		
-		if(success) {
+		WorldConfig config = null;
+		
+		for(String option: optionList.keySet()) {
+			switch(option) {
+				case "": break;
+				
+				case "debug":
+					GameCore.debug = true;
+					break;
+				
+				case "server":
+					ArrayList<String> params = optionList.get(option);
+					if(params.size() == 0) break;
+					
+					String worldname = params.get(0);
+					if(params.size() >= 3) {
+						try {
+							int width = Integer.parseInt(params.get(1));
+							int height = Integer.parseInt(params.get(2));
+							config = new CreationConfig(worldname, width, height, new Random().nextLong());
+						} catch(NumberFormatException ex) {
+							System.err.println("world size parameters to option '--server' are invalid");
+						}
+					}
+					else if(params.size() == 2)
+						System.err.println("option '--server' expects 1 or 3 parameters.");
+					else
+						config = new LoadConfig(worldname);
+					
+					break;
+				
+				default:
+					System.err.println("unrecognized option: --"+option);
+			}
+		}
+		
+		// int sizeIdx = argList.indexOf("--server") + 1;
+		// boolean success = sizeIdx > 0 && args.length > sizeIdx+2;
+		
+		// if(argList.contains("--debug"))
+		// 	GameCore.debug = true;
+		
+		/*if(success) {
 			try {
 				int width = Integer.parseInt(args[sizeIdx]);
 				int height = Integer.parseInt(args[sizeIdx+1]);
 				
-				GameCore.initNonGdxTextures();
-				ServerTileType.init();
-				
-				System.out.println("loading server world...");
-				
 				if(width == 0) width = GameCore.DEFAULT_WORLD_SIZE;
 				if(height == 0) height = GameCore.DEFAULT_WORLD_SIZE;
 				
-				initServer(width, height, true);
+				
 			} catch(NumberFormatException ex) {
 				success = false;
 			}
-		}
+		}*/
 		
-		if(!success) {
-			System.out.println("Usage: miniventure.server.ServerCore --server <world width> <world height>");
-			System.out.println("    specify 0 for width and/or height to use the default value for that dimension.");
+		if(config == null) {
+			System.out.println("Usage: miniventure.server.ServerCore [--create] worldname");
+			System.out.println("    Specify '--create' to make a new world, omit it to load.");
 		}
 		else {
+			
+			GameCore.initNonGdxTextures();
+			ServerTileType.init();
+			
+			System.out.println("loading server world...");
+			
+			initServer(config, true);
+			
 			System.out.println("server ready");
 			if(!GameCore.determinedLatestVersion())
 				System.out.println("Checking for newer versions...");
@@ -73,7 +126,7 @@ public class ServerCore {
 		}
 	}
 	
-	public static boolean initServer(int width, int height, boolean standalone) {
+	public static boolean initServer(WorldConfig config, boolean standalone) {
 		if(serverWorld != null)
 			serverWorld.exitWorld();
 		
@@ -84,7 +137,7 @@ public class ServerCore {
 			serverWorld = null;
 			return false;
 		}
-		serverWorld.createWorld(width, height);
+		serverWorld.createWorld(config);
 		return true;
 	}
 	
@@ -163,6 +216,6 @@ public class ServerCore {
 	
 	// stop the server.
 	public static void quit() {
-		getWorld().exitWorld(true);
+		getWorld().exitWorld();
 	}
 }

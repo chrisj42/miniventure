@@ -39,12 +39,18 @@ public class ServerLevel extends Level {
 	
 	//private float timeCache = 0; // this is used when you should technically be updating < 1 tile in a frame.
 	
-	private final LevelGenerator levelGenerator;
-	
 	public ServerLevel(WorldManager world, int levelId, LevelGenerator levelGenerator) {
 		super(world, levelId, levelGenerator.generateTiles(), ServerTile::new);
-		this.levelGenerator = levelGenerator;
 	}
+	
+	@Override @NotNull
+	public ServerWorld getWorld() { return (ServerWorld) super.getWorld(); }
+	
+	@Override
+	public int getEntityCount() { return getWorld().getEntityCount(this); }
+	
+	@Override
+	public Entity[] getEntities() { return getWorld().getEntities(this); }
 	
 	/*@Override
 	public void entityMoved(Entity entity) {
@@ -72,7 +78,8 @@ public class ServerLevel extends Level {
 	}
 	
 	//private float updateAllDelta = 0;
-	public void update(Entity[] entities, float delta) {
+	@Override
+	public void update(float delta) {
 		// if(getLoadedChunkCount() == 0) return;
 		
 		// update the tiles in the queue
@@ -141,9 +148,9 @@ public class ServerLevel extends Level {
 		
 		
 		// update entities
-		updateEntities(entities, delta);
+		super.update(delta);
 		
-		if(entities.length < getMobCap() && MathUtils.randomBoolean(0.01f))
+		if(getMobCount() < getMobCap() && MathUtils.randomBoolean(0.01f))
 			spawnMob(AiType.values[MathUtils.random(AiType.values.length-1)].makeMob());
 	}
 	

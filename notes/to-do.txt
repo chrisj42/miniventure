@@ -1,3 +1,5 @@
+- see about optimizing access to a level entity set; synchronized iteration over it and/or repeated cloning into an array is likely inefficient.
+
 - centralize menu screens that load content from the server; they all have a "requested" bool, they all have an update method, and they all display a waiting message while loading, though in different places. Also they all should probably wait a quarter-second or so before showing the waiting message, so that in fast connections it isn't even shown, and you don't get that quick flash of "loading".
 
 - I think a big part of the new Tile System was *supposed* to be the ability to lump DOOR_OPEN and DOOR_CLOSED, amoung other things, into the same TileType. However, I don't seem to be doing that at all. I ought to see that it happens.

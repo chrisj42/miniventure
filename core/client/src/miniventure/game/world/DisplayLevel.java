@@ -1,6 +1,5 @@
 package miniventure.game.world;
 
-import miniventure.game.client.DisplayWorld;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.worldgen.LevelGenerator;
 
@@ -28,6 +27,7 @@ public class DisplayLevel extends RenderLevel {
 			
 			y++;
 		}*/
+		getWorld().addLevel(this);
 	}
 	
 	@Override

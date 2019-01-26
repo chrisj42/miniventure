@@ -17,6 +17,7 @@ import miniventure.game.screen.MenuScreen;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.ClientLevel;
+import miniventure.game.world.ClientWorld;
 import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClientEntity;
@@ -66,7 +67,7 @@ public class GameClient implements GameProtocol {
 				
 				forPacket(object, MapRequest.class, req -> {
 					MenuScreen screen = ClientCore.getScreen();
-					if(req.positions == null) {
+					if(req.islands == null) {
 						if(screen == null)
 							Gdx.app.postRunnable(() -> ClientCore.setScreen(new MapScreen()));
 					}
@@ -132,9 +133,8 @@ public class GameClient implements GameProtocol {
 					ClientLevel level = world.getLevel(addition.positionUpdate.levelId);
 					if(level == null || (player != null && !level.equals(player.getLevel()))) return;
 					
+					// registered automatically
 					ClientEntity e = new ClientEntity(addition);
-					PositionUpdate newPos = addition.positionUpdate;
-					e.moveTo(level, newPos.x, newPos.y, newPos.z);
 				}
 				
 				if(object instanceof EntityRemoval) {

@@ -1,5 +1,6 @@
 package miniventure.game.world.entity;
 
+import miniventure.game.GameProtocol.PositionUpdate;
 import miniventure.game.item.Item;
 import miniventure.game.item.Result;
 import miniventure.game.util.blinker.Blinker;
@@ -39,9 +40,12 @@ public abstract class Entity implements WorldObject {
 	}
 	
 	// for client, on entities updated by the server
-	public Entity(@NotNull WorldManager world, int eid) {
+	public Entity(@NotNull WorldManager world, int eid, PositionUpdate position) {
 		this.world = world;
 		this.eid = eid;
+		x = position.x;
+		y = position.y;
+		z = position.z;
 		world.registerEntity(this);
 	}
 	
@@ -138,7 +142,6 @@ public abstract class Entity implements WorldObject {
 		return entity.checkMove(level, oldRect, newRect, false);
 	}
 	
-	@SuppressWarnings("unchecked")
 	private boolean checkMove(@NotNull Level level, Rectangle oldRect, Rectangle newRect, boolean interact) {
 		
 		// check and see if the entity can go to the new coordinates.
@@ -221,11 +224,6 @@ public abstract class Entity implements WorldObject {
 		
 		this.x = x;
 		this.y = y;
-		
-		if(!level.equals(getLevel()))
-			/*level.entityMoved(this);
-		else
-			*/world.setEntityLevel(this, level);
 	}
 	public void moveTo(@NotNull Level level, float x, float y, float z) {
 		moveTo(level, x, y);

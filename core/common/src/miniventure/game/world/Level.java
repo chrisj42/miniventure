@@ -82,9 +82,9 @@ public abstract class Level implements Taggable<Level> {
 	@NotNull public WorldManager getWorld() { return world; }
 	public int getMobCap() { return mobCap; }
 	public int getMobCount() { return mobCount; }
-	public int getEntityCount() { return world.getEntityCount(this); }
+	public abstract int getEntityCount();
 	
-	public Entity[] getEntities() { return world.getEntities(this); }
+	public abstract Entity[] getEntities();
 	
 	public TileData[][] getTileData() {
 		TileData[][] data = new TileData[width][height];
@@ -152,9 +152,10 @@ public abstract class Level implements Taggable<Level> {
 		}
 	}*/
 	
-	public void updateEntities(Entity[] entities, float delta) {
+	
+	public void update(float delta) {
 		int mobs = 0;
-		for(Entity e: entities) {
+		for(Entity e: getEntities()) {
 			e.update(delta);
 			if(e.isMob())
 				mobs++;
@@ -253,11 +254,9 @@ public abstract class Level implements Taggable<Level> {
 	
 	public Array<Entity> getOverlappingEntities(Rectangle rect, Entity... exclude) {
 		Array<Entity> overlapping = new Array<>(Entity.class);
-		world.actOnEntitySet(this, set -> {
-			for(Entity entity: set)
-				if(entity.getBounds().overlaps(rect))
-					overlapping.add(entity);
-		});
+		for(Entity entity: getEntities())
+			if(entity.getBounds().overlaps(rect))
+				overlapping.add(entity);
 		
 		if(exclude.length > 0)
 			overlapping.removeAll(new Array<>(exclude), true); // use ==, not .equals()
@@ -310,11 +309,9 @@ public abstract class Level implements Taggable<Level> {
 	@Nullable
 	public Player getClosestPlayer(final Vector2 pos) {
 		Array<Player> players = new Array<>();
-		world.actOnEntitySet(this, set -> {
-			for(Entity e: set)
-				if(e instanceof Player)
-					players.add((Player)e);
-		});
+		for(Entity e: getEntities())
+			if(e instanceof Player)
+				players.add((Player)e);
 		
 		if(players.size == 0) return null;
 		

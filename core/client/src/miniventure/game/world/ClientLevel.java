@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import miniventure.game.client.ClientCore;
-import miniventure.game.client.ClientWorld;
 import miniventure.game.screen.RespawnScreen;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.tile.ClientTile;

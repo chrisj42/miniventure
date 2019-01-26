@@ -1,35 +1,32 @@
-package miniventure.game.client;
+package miniventure.game.world;
+
+import java.util.Random;
 
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.DatalessRequest;
 import miniventure.game.GameProtocol.LevelData;
-import miniventure.game.GameProtocol.PositionUpdate;
 import miniventure.game.GameProtocol.SpawnData;
 import miniventure.game.GameProtocol.WorldData;
+import miniventure.game.client.ClientCore;
+import miniventure.game.client.GameClient;
+import miniventure.game.client.GameScreen;
+import miniventure.game.client.ServerManager;
 import miniventure.game.screen.ErrorScreen;
+import miniventure.game.screen.InputScreen;
+import miniventure.game.screen.InputScreen.CircularFunction;
 import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.RespawnScreen;
-import miniventure.game.util.function.ValueFunction;
-import miniventure.game.world.ClientLevel;
-import miniventure.game.world.Level;
-import miniventure.game.world.TimeOfDay;
-import miniventure.game.world.WorldManager;
-import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
-import miniventure.game.world.tile.ClientTileType;
-import miniventure.game.world.tile.TileType;
-import miniventure.game.world.tile.TileTypeEnum;
+import miniventure.game.world.worldgen.WorldConfig;
+import miniventure.game.world.worldgen.WorldConfig.CreationConfig;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.utils.Array;
 
-import org.jetbrains.annotations.NotNull;
-
-public class ClientWorld extends WorldManager {
+public class ClientWorld extends LevelManager {
 	
 	/*
 		This is what contains the world. GameCore will check if the world is loaded here, and if not it won't render the game screen. Though... perhaps this class should hold a reference to the game screen instead...? Because, if you don't have a world, you don't need a game screen...
@@ -55,7 +52,7 @@ public class ClientWorld extends WorldManager {
 	
 	private boolean doDaylightCycle = true;
 	
-	ClientWorld(ServerManager serverManager, GameScreen gameScreen) {
+	public ClientWorld(ServerManager serverManager, GameScreen gameScreen) {
 		this.serverManager = serverManager;
 		this.gameScreen = gameScreen;
 		
@@ -76,7 +73,7 @@ public class ClientWorld extends WorldManager {
 		if(menu == null)
 			gameScreen.handleInput(mainPlayer);
 		
-		level.updateEntities(getEntities(level), delta);
+		level.update(delta);
 		
 		if(menu == null || !menu.usesWholeScreen())
 			gameScreen.render(mainPlayer, getLightingOverlay(), level);
@@ -88,7 +85,7 @@ public class ClientWorld extends WorldManager {
 	/*  --- WORLD MANAGEMENT --- */
 	
 	
-	void init(WorldData data) {
+	public void init(WorldData data) {
 		gameTime = data.gameTime;
 		daylightOffset = data.daylightOffset;
 		this.doDaylightCycle = data.doDaylightCycle;
@@ -96,27 +93,63 @@ public class ClientWorld extends WorldManager {
 	
 	@Override protected boolean doDaylightCycle() { return doDaylightCycle; }
 	
-	@Override
-	public boolean worldLoaded() { return getLoadedLevelCount() > 0; }
 	
-	@Override
-	public void createWorld(int width, int height) { createWorld(width, height, true, ""); }
-	public void rejoinWorld() { createWorld(GameCore.DEFAULT_WORLD_SIZE, GameCore.DEFAULT_WORLD_SIZE, false, ipAddress); }
-	public void createWorld(String ipAddress) { createWorld(GameCore.DEFAULT_WORLD_SIZE, GameCore.DEFAULT_WORLD_SIZE, false, ipAddress); }
-	private void createWorld(int width, int height, boolean startServer, String ipAddress) {
+	public void rejoinWorld() { joinWorld(ipAddress); }
+	public void joinWorld(String ipAddress) {
 		ClientCore.stopMusic();
 		LoadingScreen loadingScreen = new LoadingScreen();
 		ClientCore.setScreen(loadingScreen);
 		
-		gameTime = 0;
-		daylightOffset = 0;
-		clearLevels();
+		clearWorld();
 		
 		this.ipAddress = ipAddress;
 		
 		new Thread(() -> {
-			// with a server running, attempt to connect the client. If successful, it will set the screen to null.
-			ValueFunction<Boolean> connect = serverSuccess -> {
+			// connect to an existing server.
+			client.connectToServer(loadingScreen, ipAddress, success -> {
+				if(!success)
+					client = new GameClient();
+			});
+		}).start();
+	}
+	
+	public InputScreen getNewWorldInput() {
+		return new InputScreen("Name your new world:", worldname -> {
+			ClientCore.setScreen(new InputScreen("Average island diameter (default "+GameCore.DEFAULT_WORLD_SIZE+"):", new CircularFunction<>((size, self) -> {
+				boolean valid;
+				int sizeVal = 0;
+				try {
+					sizeVal = Integer.parseInt(size);
+					valid = sizeVal >= 10;
+				} catch(NumberFormatException e) {
+					valid = false;
+				}
+				
+				if(!valid)
+					ClientCore.setScreen(new InputScreen(new String[] {
+						"Average island diameter (default "+GameCore.DEFAULT_WORLD_SIZE+"):",
+						"Value must be an integer >= 10"
+					}, self));
+				else
+					createWorld(new CreationConfig(worldname, sizeVal, sizeVal, new Random().nextLong()));
+			})));
+		});
+	}
+	
+	@Override
+	public boolean createWorld(WorldConfig config) {
+		ClientCore.stopMusic();
+		LoadingScreen loadingScreen = new LoadingScreen();
+		ClientCore.setScreen(loadingScreen);
+		
+		clearWorld();
+		
+		this.ipAddress = "localhost";
+		
+		new Thread(() -> {
+			// start a server, and attempt to connect the client. If successful, it will set the screen to null; if not, the new server will be closed.
+			
+			serverManager.startServer(config, serverSuccess -> {
 				if(!serverSuccess)
 					Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen("Error starting local server. The port may already be in use.\nPress 'reconnect' to attempt to connect to the existing server.")));
 				else
@@ -126,25 +159,19 @@ public class ClientWorld extends WorldManager {
 							client = new GameClient();
 						}
 					});
-			};
-			
-			if(startServer) // start server, then connect
-				serverManager.startServer(width, height, connect);
-			else // server should already be running; just connect
-				client.connectToServer(loadingScreen, ipAddress, success -> {
-					if(!success)
-						client = new GameClient();
-				});
+			});
 			
 		}).start();
+		
+		return true; // not particularly useful, since we don't actually know the outcome yet; but the return value is for the server implementation.
 	}
 	
 	@Override
-	public void exitWorld(boolean save) { // returns to title screen
+	public void exitWorld() { // returns to title screen
 		// set menu to main menu, and dispose of level/world resources
 		ClientCore.getClient().disconnect();
 		mainPlayer = null;
-		clearLevels();
+		clearWorld();
 		ClientCore.setScreen(new MainMenu());
 		client = new GameClient();
 	}
@@ -161,9 +188,6 @@ public class ClientWorld extends WorldManager {
 	
 	public void addLevel(LevelData data) {
 		addLevel(new ClientLevel(this, data.levelId, data.tiles));
-		// if this isn't the first level added, add the player to the new level
-		if(getLoadedLevelCount() > 1)
-			setEntityLevel(getMainPlayer(), getLevel(data.levelId));
 	}
 	
 	/*public void loadChunk(ChunkData data) {
@@ -176,30 +200,14 @@ public class ClientWorld extends WorldManager {
 		level.loadChunk(new Chunk(level, data, (x, y, types, dataMaps) -> new ClientTile(level, x, y, types, dataMaps)));
 	}*/
 	
-	@Override
-	protected void pruneLoadedLevels() {
-		ClientPlayer p = getMainPlayer();
-		if(p == null) return;
-		Level current = p.getLevel();
-		if(current == null) return;
-		
-		// unload all levels besides the one the player is on.
-		for(int levelId: getLoadedLevelIds())
-			if(levelId != current.getLevelId())
-				unloadLevel(levelId);
-	}
-	
 	
 	/*  --- ENTITY MANAGEMENT --- */
 	
 	
 	@Override
-	public boolean isKeepAlive(@NotNull WorldObject obj) { return obj.equals(mainPlayer); }
-	
-	@Override
 	public void deregisterEntity(final int eid) {
 		if(mainPlayer != null && eid == mainPlayer.getId()) {
-			Gdx.app.postRunnable(() -> ClientCore.setScreen(new RespawnScreen(mainPlayer.getCenter(), getLightingOverlay(), mainPlayer.getLevel(), gameScreen.getLevelView())));
+			Gdx.app.postRunnable(() -> ClientCore.setScreen(new RespawnScreen(mainPlayer, getLightingOverlay(), gameScreen)));
 		}
 		else
 			super.deregisterEntity(eid);
@@ -216,19 +224,9 @@ public class ClientWorld extends WorldManager {
 			// gameScreen.getHudPanel().remove(this.mainPlayer.getHands().getHotbarTable());
 		}
 		
-		ClientPlayer mainPlayer = new ClientPlayer(data);
-		PositionUpdate newPos = data.playerData.positionUpdate;
-		mainPlayer.moveTo(newPos.x, newPos.y, newPos.z);
+		this.mainPlayer = new ClientPlayer(data);
 		
 		// gameScreen.getHudPanel().add(mainPlayer.getHands().getHotbarTable());
-		
-		this.mainPlayer = mainPlayer;
-		
-		Level level = getLevel(newPos.levelId);
-		if(level != null)
-			setEntityLevel(mainPlayer, level);
-		else
-			System.err.println("could not add main player, default level is null");
 	}
 	
 	public void respawnPlayer() {
@@ -243,19 +241,10 @@ public class ClientWorld extends WorldManager {
 	/*  --- GET METHODS --- */
 	
 	
-	@Override
-	public Array<WorldObject> getKeepAlives(@NotNull Level level) {
-		Array<WorldObject> playerHolder = new Array<>(WorldObject.class);
-		if(mainPlayer != null && mainPlayer.getLevel() == level)
-			playerHolder.add(mainPlayer);
-		
-		return playerHolder;
-	}
-	
-	@Override
-	public TileType getTileType(TileTypeEnum type) { return ClientTileType.get(type); }
-	
 	public GameClient getClient() { return client; }
+	
+	@Override
+	public ClientLevel getLevel() { return (ClientLevel) super.getLevel(); }
 	
 	@Override
 	public ClientLevel getLevel(int levelId) { return (ClientLevel) super.getLevel(levelId); }

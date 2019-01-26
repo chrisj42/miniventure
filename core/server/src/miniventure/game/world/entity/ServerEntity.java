@@ -9,12 +9,12 @@ import miniventure.game.GameProtocol.EntityUpdate;
 import miniventure.game.GameProtocol.PositionUpdate;
 import miniventure.game.GameProtocol.SpriteUpdate;
 import miniventure.game.server.ServerCore;
-import miniventure.game.server.ServerWorld;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
+import miniventure.game.world.ServerWorld;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.tile.Tile;
@@ -94,6 +94,10 @@ public abstract class ServerEntity extends Entity {
 	@Override
 	public void moveTo(@NotNull Level level, float x, float y) {
 		super.moveTo(level, x, y);
+		
+		if(!level.equals(getLevel()))
+			getWorld().setEntityLevel(this, level);
+		
 		newPos = new PositionUpdate(this);
 	}
 	

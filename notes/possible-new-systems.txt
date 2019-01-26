@@ -11,16 +11,11 @@ Dither effect around the edges, perhaps.
 
 ****
 
-spells?
+it would be cool if things like trees did a little shake when you attack them... maybe rocks that are not touching any others could also do it.
 
 ****
 
 lasers as a form of energy transport. Wiring could be a thing too, I suppose.
-
-****
-
-level system; note that levels will not solely be identified by depth (though the core ones will), levels can also be tied to a portal of sorts, like a house door or something. I just need a way to identify them more easily...
-Then again, maybe I won't need a level system, if I play my cards right with level gen...
 
 ****
 
