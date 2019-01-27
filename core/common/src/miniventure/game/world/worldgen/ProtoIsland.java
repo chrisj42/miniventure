@@ -4,7 +4,7 @@ import java.util.Random;
 
 import miniventure.game.world.Point;
 
-public class ProtoIsland {
+public class ProtoIsland implements IslandReference {
 	
 	// I think "level stub" will become the main class; it will have a method to get a LevelGenerator for it. It will also contain a static method to generate a map of LevelStubs.
 	

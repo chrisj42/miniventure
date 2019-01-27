@@ -1,5 +1,7 @@
 package miniventure.game;
 
+import java.io.File;
+import java.nio.file.Path;
 import java.util.HashMap;
 
 import miniventure.game.texture.TextureAtlasHolder;
@@ -27,11 +29,21 @@ import org.jetbrains.annotations.NotNull;
 /** @noinspection StaticNonFinalField*/
 public class GameCore {
 	
-	public static final Version VERSION = new Version("1.6.1.dev");
-	
-	public static final float MAX_DELTA = 0.25f; // the maximum time that the game will clamp getDeltaTime to, to prevent huge jumps after a lag spike.
+	public static final Version VERSION = new Version("2.1.1.dev");
 	
 	public static boolean debug = false;
+	
+	public static final String DEFAULT_GAME_DIR;
+	public static Path GAME_DIR = null;
+	static {
+		String home = System.getProperty("user.home");
+		if(System.getProperty("os.name").contains("Windows"))
+			DEFAULT_GAME_DIR = home + "/AppData/Roaming/miniventure/";
+		else
+			DEFAULT_GAME_DIR = home + "/.miniventure/";
+	}
+	
+	public static final float MAX_DELTA = 0.25f; // the maximum time that the game will clamp getDeltaTime to, to prevent huge jumps after a lag spike.
 	
 	private static final long START_TIME = System.nanoTime();
 	

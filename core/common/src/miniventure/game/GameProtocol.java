@@ -9,6 +9,7 @@ import miniventure.game.chat.InfoMessageLine;
 import miniventure.game.item.Item;
 import miniventure.game.item.ItemStack;
 import miniventure.game.util.Version;
+import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.Boundable;
 import miniventure.game.world.Level;
 import miniventure.game.world.Point;
@@ -26,6 +27,7 @@ import miniventure.game.world.entity.particle.ParticleData;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.Tile.TileData;
 import miniventure.game.world.tile.Tile.TileTag;
+import miniventure.game.world.worldgen.IslandReference;
 import miniventure.game.world.worldgen.ProtoIsland;
 
 import com.badlogic.gdx.graphics.Color;
@@ -42,6 +44,11 @@ public interface GameProtocol {
 	
 	boolean lag = false;
 	int lagMin = lag?10:0, lagMax = lag?100:0;
+	
+	default <T> void forPacket(Object packet, Class<T> type, ValueFunction<T> response) {
+		if(type.isAssignableFrom(packet.getClass()))
+			response.act(type.cast(packet));
+	}
 	
 	static void registerClasses(Kryo kryo) {
 		kryo.register(Version.class);
@@ -91,17 +98,6 @@ public interface GameProtocol {
 		
 		private LoginFailure() { this(null); }
 		public LoginFailure(String msg) { this.message = msg; }
-	}
-	
-	@FunctionalInterface
-	// T = Request class
-	interface RequestResponse<T> {
-		void respond(T request);
-	}
-	
-	default <T> void forPacket(Object packet, Class<T> type, RequestResponse<T> response) {
-		if(type.isAssignableFrom(packet.getClass()))
-			response.respond(type.cast(packet));
 	}
 	
 	enum DatalessRequest {
@@ -173,11 +169,14 @@ public interface GameProtocol {
 		}
 	}
 	
+	// for server to send level data to the client, and for client to request the current level if for some reason it ends up with the wrong one.
 	class LevelData {
 		public final int levelId;
 		public final TileData[][] tiles;
 		
-		private LevelData() { this(0, null); }
+		// for client
+		public LevelData() { this(0, null); }
+		// for server
 		public LevelData(Level level) { this(level.getLevelId(), level.getTileData()); }
 		public LevelData(int levelId, TileData[][] tiles) {
 			this.levelId = levelId;
@@ -186,12 +185,12 @@ public interface GameProtocol {
 	}
 	
 	class MapRequest {
-		public final ProtoIsland[] islands;
+		public final IslandReference[] islands;
 		
 		// for client use only
 		public MapRequest() { this(null); }
 		// for server use only
-		public MapRequest(ProtoIsland[] islands) {
+		public MapRequest(IslandReference[] islands) {
 			this.islands = islands;
 		}
 	}

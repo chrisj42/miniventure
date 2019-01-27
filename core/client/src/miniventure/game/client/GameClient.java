@@ -62,7 +62,7 @@ public class GameClient implements GameProtocol {
 				
 				if(object instanceof LevelData) {
 					if(GameCore.debug) System.out.println("client received level");
-					world.addLevel((LevelData)object);
+					world.setLevel((LevelData)object);
 				}
 				
 				forPacket(object, MapRequest.class, req -> {
@@ -114,13 +114,13 @@ public class GameClient implements GameProtocol {
 				}
 				
 				forPacket(object, ParticleAddition.class, addition -> {
-					ClientLevel level = world.getLevel(addition.positionUpdate.levelId);
-					if(level == null || (player != null && !level.equals(player.getLevel()))) return;
+					// ClientLevel level = world.getLevel(addition.positionUpdate.levelId);
+					// if(level == null || (player != null && !level.equals(player.getLevel()))) return;
 					
 					ClientParticle e = ClientParticle.get(addition.particleData);
 					PositionUpdate newPos = addition.positionUpdate;
 					Vector2 size = e.getSize();
-					e.moveTo(level, newPos.x - size.x/2, newPos.y - size.y/2, newPos.z); // center entity
+					e.moveTo(newPos.x - size.x/2, newPos.y - size.y/2, newPos.z); // center entity
 				});
 				
 				if(object instanceof EntityAddition) {
@@ -130,11 +130,11 @@ public class GameClient implements GameProtocol {
 					if(world.getEntity(addition.eid) != null) return; // entity is already loaded.
 					
 					if(player != null && addition.eid == player.getId()) return; // shouldn't pay attention to trying to set the client player like this.
-					ClientLevel level = world.getLevel(addition.positionUpdate.levelId);
-					if(level == null || (player != null && !level.equals(player.getLevel()))) return;
+					// ClientLevel level = world.getLevel(addition.positionUpdate.levelId);
+					// if(level == null || (player != null && !level.equals(player.getLevel()))) return;
 					
 					// registered automatically
-					ClientEntity e = new ClientEntity(addition);
+					new ClientEntity(addition);
 				}
 				
 				if(object instanceof EntityRemoval) {
@@ -151,7 +151,7 @@ public class GameClient implements GameProtocol {
 					ClientEntity e = (ClientEntity) update.tag.getObject(world);
 					//System.out.println("client received entity update for " + e + ": " + update);
 					if(e == null) {
-						if(!isPositionLoaded(newPos)) return;
+						// if(!isPositionLoaded(newPos)) return;
 						
 						// chunk is loaded, but entity doesn't exist; ask for it from the server
 						send(new EntityRequest(update.tag.eid));
@@ -159,11 +159,11 @@ public class GameClient implements GameProtocol {
 					}
 					
 					if(newPos != null) {
-						ClientLevel level = world.getLevel(newPos.levelId);
-						if(level != null) {
-							e.moveTo(level, newPos.x, newPos.y, newPos.z);
+						// ClientLevel level = world.getLevel(newPos.levelId);
+						// if(level != null) {
+							e.moveTo(newPos.x, newPos.y, newPos.z);
 							//System.out.println("moved client entity "+e+", new pos: "+e.getPosition(true));
-						}
+						// }
 					}
 					if(newSprite != null) {
 						e.setRenderer(EntityRenderer.deserialize(newSprite.rendererData));
@@ -182,17 +182,18 @@ public class GameClient implements GameProtocol {
 					// first, make a list of all the entities that the client has loaded. Then, go through those given here, removing them from the list just made as you go. For each one, check the position; if it is not in a loaded chunk, then unload it. Else, if a local version doesn't exist, request it from the server. Don't use this data to actually change the positions of the entities, as there is already a system that will take care of that.
 					
 					if(player == null) {
-						System.err.println("Client received entity validation without loaded world; ignoring packet.");
+						System.err.println("Client received entity validation without loaded player; ignoring packet.");
 						return;
 					}
-					ClientLevel level = player.getLevel();
+					ClientLevel level = world.getLevel();
 					if(level == null) {
-						System.err.println("Client: player level is null upon receiving entity validation; ignoring packet.");
+						System.err.println("Client: level is null upon receiving entity validation; ignoring packet.");
 						return;
 					}
 					
 					if(level.getLevelId() != list.levelId) {
-						System.err.println("Client: player level does not match entity validation level; ignoring packet.");
+						System.err.println("Client: level does not match entity validation level; requesting correct level.");
+						connection.sendTCP(new LevelData());
 						return;
 					}
 					
@@ -255,9 +256,9 @@ public class GameClient implements GameProtocol {
 				});
 				
 				forPacket(object, PositionUpdate.class, newPos -> {
-					if(player == null || newPos.levelId == null) return;
+					if(player == null) return;
 					//player.updatePos(newPos);
-					player.moveTo(world.getLevel(newPos.levelId), newPos.x, newPos.y, newPos.z);
+					player.moveTo(newPos.x, newPos.y, newPos.z);
 				});
 				
 				forPacket(object, StatUpdate.class, update -> {
@@ -341,7 +342,7 @@ public class GameClient implements GameProtocol {
 	
 	public void disconnect() { client.stop(); }
 	
-	private boolean isPositionLoaded(PositionUpdate posUpdate) {
+	/*private boolean isPositionLoaded(PositionUpdate posUpdate) {
 		if(posUpdate == null) return false;
 		Level level = ClientCore.getWorld().getLevel(posUpdate.levelId);
 		if(level == null) return false; // entity is on unloaded level
@@ -351,5 +352,5 @@ public class GameClient implements GameProtocol {
 		// 	return false; // entity is on unloaded chunk
 		
 		return true;
-	}
+	}*/
 }

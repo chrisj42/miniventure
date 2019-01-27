@@ -73,7 +73,7 @@ public class BounceBehavior {
 		time += delta;
 		
 		if(e.getZ() < 0) {
-			e.move(0, 0, -e.getZ());
+			e.setZ(0);
 			velocity.scl(REBOUND_SPEED_FACTOR, REBOUND_SPEED_FACTOR, -REBOUND_SPEED_FACTOR);
 			if(time - lastBounceTime < 0.01f) {
 				moving = false;

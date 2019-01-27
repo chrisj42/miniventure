@@ -1,9 +1,12 @@
 package miniventure.game.world;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import miniventure.game.util.function.Action;
+import miniventure.game.util.function.FetchFunction;
 import miniventure.game.util.function.MapFunction;
 import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.entity.Entity;
@@ -42,18 +45,12 @@ public abstract class WorldManager {
 	/** if there is a world loaded (should be true after calling createWorld) */
 	public abstract boolean worldLoaded();
 	
-	/** creates the world 
-	 * @param config config about the world */
-	public abstract boolean createWorld(WorldConfig config);
-	
 	/** unload and close the world */
 	public abstract void exitWorld();
 	
 	
 	/*  --- LEVEL MANAGEMENT --- */
 	
-	
-	protected abstract void addLevel(@NotNull Level level);
 	
 	protected void clearWorld() { actOnEntityMap(Map::clear); }
 	

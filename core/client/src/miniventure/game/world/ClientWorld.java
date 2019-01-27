@@ -11,6 +11,7 @@ import miniventure.game.client.ClientCore;
 import miniventure.game.client.GameClient;
 import miniventure.game.client.GameScreen;
 import miniventure.game.client.ServerManager;
+import miniventure.game.file.WorldFile;
 import miniventure.game.screen.ErrorScreen;
 import miniventure.game.screen.InputScreen;
 import miniventure.game.screen.InputScreen.CircularFunction;
@@ -20,7 +21,6 @@ import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.RespawnScreen;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
-import miniventure.game.world.worldgen.WorldConfig;
 import miniventure.game.world.worldgen.WorldConfig.CreationConfig;
 
 import com.badlogic.gdx.Gdx;
@@ -113,6 +113,7 @@ public class ClientWorld extends LevelManager {
 		}).start();
 	}
 	
+	// todo replace this with an actual WorldSelectScreen; this screen checks for existing worlds and gets quick details on them, and also will be responsible for providing a WorldFile instance to startWorld().
 	public InputScreen getNewWorldInput() {
 		return new InputScreen("Name your new world:", worldname -> {
 			ClientCore.setScreen(new InputScreen("Average island diameter (default "+GameCore.DEFAULT_WORLD_SIZE+"):", new CircularFunction<>((size, self) -> {
@@ -131,27 +132,26 @@ public class ClientWorld extends LevelManager {
 						"Value must be an integer >= 10"
 					}, self));
 				else
-					createWorld(new CreationConfig(worldname, sizeVal, sizeVal, new Random().nextLong()));
+					startWorld(new CreationConfig(worldname, sizeVal, sizeVal, new Random().nextLong()));
 			})));
 		});
 	}
 	
-	@Override
-	public boolean createWorld(WorldConfig config) {
+	// given a pre-initialized WorldFile (ie the world has already been read from file and/or generated successfully), this method starts up a local server on it, and logs in.
+	// todo due to possibility of different world saves, more consideration towards port variability should be considered. Perhaps instead of giving an error, the server should try another port...? Only because this is local. Though maybe port *should* be considered, and saved even?
+	public void startWorld(WorldFile worldFile) {
 		ClientCore.stopMusic();
 		LoadingScreen loadingScreen = new LoadingScreen();
 		ClientCore.setScreen(loadingScreen);
-		
-		clearWorld();
 		
 		this.ipAddress = "localhost";
 		
 		new Thread(() -> {
 			// start a server, and attempt to connect the client. If successful, it will set the screen to null; if not, the new server will be closed.
 			
-			serverManager.startServer(config, serverSuccess -> {
+			serverManager.startServer(worldFile, serverSuccess -> {
 				if(!serverSuccess)
-					Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen("Error starting local server. The port may already be in use.\nPress 'reconnect' to attempt to connect to the existing server.")));
+					Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen("Error starting local server; the port may already be in use.\nPress 'reconnect' to attempt to connect to the existing server.")));
 				else
 					client.connectToServer(loadingScreen, "localhost", success -> {
 						if(!success) {
@@ -162,12 +162,11 @@ public class ClientWorld extends LevelManager {
 			});
 			
 		}).start();
-		
-		return true; // not particularly useful, since we don't actually know the outcome yet; but the return value is for the server implementation.
 	}
 	
+	// returns to title screen; this ClientWorld instance is still capable of supporting future worlds.
 	@Override
-	public void exitWorld() { // returns to title screen
+	public void exitWorld() {
 		// set menu to main menu, and dispose of level/world resources
 		ClientCore.getClient().disconnect();
 		mainPlayer = null;
@@ -186,8 +185,8 @@ public class ClientWorld extends LevelManager {
 	/*  --- LEVEL MANAGEMENT --- */
 	
 	
-	public void addLevel(LevelData data) {
-		addLevel(new ClientLevel(this, data.levelId, data.tiles));
+	public void setLevel(LevelData data) {
+		setLevel(new ClientLevel(this, data.levelId, data.tiles));
 	}
 	
 	/*public void loadChunk(ChunkData data) {

@@ -24,10 +24,9 @@ public abstract class LevelManager extends WorldManager {
 	/*  --- LEVEL MANAGEMENT --- */
 	
 	
-	@Override
-	protected void addLevel(@NotNull Level level) {
+	protected void setLevel(@NotNull RenderLevel level) {
 		clearWorld();
-		this.level = (RenderLevel) level;
+		this.level = level;
 	}
 	
 	

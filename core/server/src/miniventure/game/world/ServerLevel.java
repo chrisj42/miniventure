@@ -209,7 +209,7 @@ public class ServerLevel extends Level {
 		
 		ie = new ItemEntity(item, dropDir, delayPickup);
 		
-		ie.moveTo(this, dropPos);
+		ie.moveTo(dropPos);
 		getWorld().setEntityLevel(ie, this);
 	}
 	
@@ -232,15 +232,14 @@ public class ServerLevel extends Level {
 		if(!mob.maySpawn()) return;
 		
 		int x, y;
-		TileTypeEnum type;
+		TileTypeEnum type = null;
 		do {
 			x = MathUtils.random(getWidth()-1);
 			y = MathUtils.random(getHeight()-1);
 			Tile tile = getTile(x, y);
-			if(tile == null) {
+			if(tile == null)
 				System.err.println("level contains null tile! "+x+","+y+"@level="+this);
-			}
-			type = tile.getType().getTypeEnum();
+			else type = tile.getType().getTypeEnum();
 		} while(!mob.maySpawn(type));
 		
 		// loadChunk(Chunk.getCoords(x, y));

@@ -27,7 +27,7 @@ public class DisplayLevel extends RenderLevel {
 			
 			y++;
 		}*/
-		getWorld().addLevel(this);
+		getWorld().setLevel(this);
 	}
 	
 	@Override

@@ -46,7 +46,7 @@ public abstract class Entity implements WorldObject {
 		x = position.x;
 		y = position.y;
 		z = position.z;
-		world.registerEntity(this);
+		world.registerEntity(this); // considered to be part of the level as well
 	}
 	
 	public int getId() { return eid; }
@@ -96,7 +96,7 @@ public abstract class Entity implements WorldObject {
 	public Vector3 getLocation(boolean worldOriginCenter) { return new Vector3(getPosition(worldOriginCenter), z); }
 	
 	public float getZ() { return z; }
-	protected void setZ(float z) { this.z = z; }
+	public void setZ(float z) { this.z = z; }
 	
 	@Override @NotNull
 	public Rectangle getBounds() {
@@ -121,7 +121,7 @@ public abstract class Entity implements WorldObject {
 		z += zd;
 		boolean moved = !movement.isZero();
 		if(moved)
-			moveTo(level, x+movement.x, y+movement.y);
+			moveTo(x+movement.x, y+movement.y);
 		return moved;
 	}
 	
@@ -211,34 +211,36 @@ public abstract class Entity implements WorldObject {
 	abstract void touchTile(Tile tile);
 	abstract void touchEntity(Entity entity);
 	
-	public void moveTo(@NotNull Level level, @NotNull Vector2 pos) { moveTo(level, pos.x, pos.y); }
-	public void moveTo(@NotNull Level level, float x, float y) {
-		//if(level == getLevel() && x == this.x && y == this.y) return; // no action or updating required.
+	public void moveTo(@NotNull Vector2 pos) { moveTo(pos.x, pos.y); }
+	public void moveTo(@NotNull Vector3 pos) { moveTo(pos.x, pos.y, pos.z); }
+	public void moveTo(float x, float y) { moveTo(x, y, this.z); }
+	public void moveTo(float x, float y, float z) {
+		// this method doesn't care where you end up; ie doesn't check for collisions.
+		// it also doesn't bother with clamping if there is no level.
 		
-		// this method doesn't care where you end up.
-		x = Math.max(x, 0);
-		y = Math.max(y, 0);
-		Vector2 size = getSize();
-		x = Math.min(x, level.getWidth() - size.x);
-		y = Math.min(y, level.getHeight() - size.y);
+		Level level = getLevel();
+		if(level != null) {
+			x = Math.max(x, 0);
+			y = Math.max(y, 0);
+			Vector2 size = getSize();
+			x = Math.min(x, level.getWidth() - size.x);
+			y = Math.min(y, level.getHeight() - size.y);
+		}
 		
 		this.x = x;
 		this.y = y;
-	}
-	public void moveTo(@NotNull Level level, float x, float y, float z) {
-		moveTo(level, x, y);
 		this.z = z;
 	}
 	public void moveTo(@NotNull Tile tile) {
 		Vector2 pos = tile.getCenter();
 		pos.sub(getSize().scl(0.5f));
-		moveTo(tile.getLevel(), pos);
+		moveTo(pos);
 	}
 	
 	protected void moveIfLevel(float x, float y) {
 		Level level = getLevel();
 		if(level != null)
-			moveTo(level, x, y);
+			moveTo(x, y);
 	}
 	
 	// returns whether anything meaningful happened; if false, then other.touchedBy(this) will be called.

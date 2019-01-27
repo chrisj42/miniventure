@@ -4,8 +4,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.Map;
 
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.EntityAddition;
@@ -19,19 +18,14 @@ import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolItem.Material;
 import miniventure.game.item.ToolType;
 import miniventure.game.server.GameServer;
-import miniventure.game.util.function.MapFunction;
-import miniventure.game.util.function.ValueFunction;
+import miniventure.game.util.SyncObj;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.tile.ServerTileType;
 import miniventure.game.world.tile.TileTypeEnum;
+import miniventure.game.world.worldgen.IslandReference;
 import miniventure.game.world.worldgen.LevelGenerator;
-import miniventure.game.world.worldgen.ProtoIsland;
-import miniventure.game.world.worldgen.WorldConfig;
-import miniventure.game.world.worldgen.WorldConfig.CreationConfig;
-
-import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -44,14 +38,13 @@ public class ServerWorld extends WorldManager {
 		ServerWorld is also the only world that will ever have multiple islands loaded simultaneously.
 	 */
 	
-	private final HashMap<Integer, ServerLevel> loadedLevels = new HashMap<>();
-	private final HashMap<ServerLevel, Set<ServerEntity>> levelEntities = new HashMap<>();
-	private final HashMap<ServerEntity, ServerLevel> entityLevels = new HashMap<>(INITIAL_ENTITY_BUFFER);
+	private final SyncObj<Map<Integer, ServerLevel>> loadedLevels = new SyncObj<>(Collections.synchronizedMap(new HashMap<>()));
 	
-	private final Set<WorldObject> keepAlives = Collections.synchronizedSet(new HashSet<>()); // always keep islands with these objects loaded.
+	private final EntityManager entityManager = new EntityManager();
 	
-	private ProtoIsland[] islandGenerators;
-	private WorldFile worldFile;
+	
+	private IslandReference[] islandStores;
+	private WorldFile worldFile; // should hold island stores?
 	private GameServer server;
 	
 	private boolean worldLoaded = false;
@@ -66,16 +59,8 @@ public class ServerWorld extends WorldManager {
 	@Override
 	public void update(float delta) {
 		
-		HashSet<ServerLevel> loadedLevels = new HashSet<>();
-		synchronized (keepAlives) {
-			for(WorldObject obj : keepAlives) {
-				ServerLevel level = (ServerLevel) obj.getLevel();
-				if(level != null)
-					loadedLevels.add(level);
-			}
-		}
-		
-		for(ServerLevel level: loadedLevels)
+		ServerLevel[] levels = loadedLevels.get(map -> map.values().toArray(new ServerLevel[0]));
+		for(ServerLevel level: levels)
 			level.update(delta);
 		
 		super.update(delta);
@@ -106,38 +91,14 @@ public class ServerWorld extends WorldManager {
 	@Override
 	public boolean worldLoaded() { return worldLoaded; }
 	
-	@Override
-	public boolean createWorld(WorldConfig config) {
+	// this is called "load", but a world file does not necessarily mean it's data in a file; it's simply the intermediary that the world fetches non-live data from.
+	public void loadWorld(WorldFile worldFile) {
 		worldLoaded = false;
-		
-		ProgressPrinter logger = new ProgressPrinter();
-		logger.pushMessage("");
-		
 		clearWorld();
 		
-		if(config instanceof CreationConfig) {
-			CreationConfig genconfig = (CreationConfig) config; 
-			islandGenerators = new ProtoIsland(genconfig.seed, genconfig.width, genconfig.height);
-			// todo instantiate a new world file
-		}
-		else {
-			// todo read world file to get data to make world generator
-		}
 		
-		// fixme honestly I shouldn't have a method that both loads and creates. This was a bad idea. The whole "WorldConfig" thing was a bad idea, in terms of having Creation and Load there; Load should be a different setup entirely.
-		
-		// the below code is going to go
-		
-		int numLevels = 3;
-		// int minId = 1;
-		for(int i = 0; i < numLevels; i++) {
-			logger.editMessage("Loading level "+(i+1)+'/'+numLevels+"...");
-			loadLevel(i);
-		}
-		logger.popMessage();
 		
 		worldLoaded = true;
-		return true;
 	}
 	
 	/** Saves the world to file; specific to ServerWorld. */
@@ -145,13 +106,13 @@ public class ServerWorld extends WorldManager {
 		
 	}
 	
+	// the ServerWorld cannot be reused after a call to exitWorld(); a new instance must be made.
 	@Override
 	public void exitWorld() {
 		if(!worldLoaded) return;
 		// dispose of level/world resources
-		synchronized (keepAlives) { keepAlives.clear(); }
 		clearWorld();
-		islandGenerators = null;
+		islandStores = null;
 		worldFile = null;
 		server.stop();
 		worldLoaded = false;
@@ -162,54 +123,51 @@ public class ServerWorld extends WorldManager {
 	/*  --- LEVEL MANAGEMENT --- */
 	
 	
-	private boolean isLevelLoaded(int levelId) { return loadedLevels.containsKey(levelId); }
+	private boolean isLevelLoaded(int levelId) { return loadedLevels.get(map -> map.containsKey(levelId)); }
 	
-	private void loadLevel(int levelId) {
-		// TODO this will need to get redone when loading from file
+	@Override
+	public ServerLevel getLevel(int levelId) { return loadedLevels.get(map -> map.get(levelId)); }
+	
+	@NotNull
+	public ServerLevel loadLevel(int levelId) {
 		
-		if(loadedLevels.containsKey(levelId)) return;
-		if(levelId < 0 || levelId >= islandGenerators.length) {
-			System.err.println("Server: ERROR: no level with id " + levelId + " exists; cannot load. Ignoring call.");
-			return;
+		ServerLevel level = getLevel(levelId);
+		
+		if(level == null) {
+			// TODO this will need to get redone when loading from file
+			
+			LevelGenerator levelGenerator = islandStores[levelId].getLevelGenerator(levelId);
+			
+			level = new ServerLevel(this, levelId, levelGenerator);
 		}
-		LevelGenerator levelGenerator = islandGenerators[levelId].getLevelGenerator(levelId);
 		
-		addLevel(new ServerLevel(this, levelId, levelGenerator));
+		return level;
 	}
 	
 	protected void unloadLevel(int levelId) {
 		// TODO save to file first
 		
-		ServerLevel level = loadedLevels.get(levelId);
+		ServerLevel level = getLevel(levelId);
 		if(level == null) return; // already unloaded
 		
 		//System.out.println("unloading level "+levelId);
 		
-		for(Entity e: levelEntities.remove(level)) {
-			entityLevels.remove(e);
-			e.remove();
+		for(Entity e: entityManager.removeLevel(level)) {
+			super.deregisterEntity(e.getId());
 		}
 		
-		loadedLevels.remove(levelId);
-	}
-	
-	@Override
-	protected void addLevel(@NotNull Level level) {
-		levelEntities.put((ServerLevel)level, Collections.synchronizedSet(new HashSet<>()));
-		loadedLevels.put(level.getLevelId(), (ServerLevel)level);
+		loadedLevels.act(map -> map.remove(levelId));
 	}
 	
 	protected void pruneLoadedLevels() {
-		Integer[] levelids = loadedLevels.keySet().toArray(new Integer[0]);
+		Integer[] levelids = loadedLevels.get(map -> map.keySet().toArray(new Integer[0]));
 		HashSet<Integer> safeIds = new HashSet<>(levelids.length);
 		
 		// log which levels have a keep-alive
-		synchronized (keepAlives) {
-			for(WorldObject obj : keepAlives) {
-				Level level = obj.getLevel();
-				if(level != null)
-					safeIds.add(level.getLevelId());
-			}
+		for(ServerPlayer player: server.getPlayers()) {
+			Level level = player.getLevel();
+			if(level != null)
+				safeIds.add(level.getLevelId());
 		}
 		
 		// unload any loaded level that didn't have a keep-alive
@@ -222,102 +180,103 @@ public class ServerWorld extends WorldManager {
 	/*  --- ENTITY MANAGEMENT --- */
 	
 	
-	/** @noinspection MismatchedQueryAndUpdateOfCollection*/
-	private static final HashSet<ServerEntity> emptySet = new HashSet<>();
-	
-	private void actOnEntitySet(ServerLevel level, ValueFunction<Set<ServerEntity>> action) {
-		Set<ServerEntity> entitySet = levelEntities.getOrDefault(level, emptySet);
-		//noinspection SynchronizationOnLocalVariableOrMethodParameter
-		synchronized (entitySet) {
-			action.act(entitySet);
-		}
-	}
-	
-	private <T> T getFromEntitySet(ServerLevel level, MapFunction<Set<ServerEntity>, T> getter) {
-		Set<ServerEntity> entitySet = levelEntities.getOrDefault(level, emptySet);
-		//noinspection SynchronizationOnLocalVariableOrMethodParameter
-		synchronized (entitySet) {
-			return getter.get(entitySet);
-		}
-	}
-	
 	public int getEntityCount(ServerLevel level) {
-		return getFromEntitySet(level, Set::size);
+		return entityManager.getEntityCount(level);
 	}
 	
 	public ServerEntity[] getEntities(ServerLevel level) {
-		return getFromEntitySet(level, set -> set.toArray(new ServerEntity[0]));
+		return entityManager.getEntities(level);
 	}
 	
 	@Override
 	public void deregisterEntity(int eid) {
 		ServerEntity e = getEntity(eid);
-		ServerLevel prev = getEntityLevel(e);
-		
-		actOnEntitySet(prev, set -> {
-			entityLevels.remove(e);
-			set.remove(e);
-			super.deregisterEntity(eid);
-		});
-		
-		if(e != null && prev != null)
-			server.broadcast(new EntityRemoval(e), prev, (ServerEntity) e);
-	}
-	
-	public void setEntityLevel(@NotNull ServerEntity e, @NotNull ServerLevel level) {
-		if(!isEntityRegistered(e) || !loadedLevels.containsKey(level.getLevelId())) {
-			System.err.println(this + ": couldn't set entity level, entity " + e + " or level " + level + " is not registered. Ignoring request.");
+		if(e == null) {
+			if(GameCore.debug)
+				System.out.println("Server could not find entity "+eid+", ignoring deregister request.");
 			return;
 		}
 		
-		ServerLevel oldLevel = entityLevels.put(e, level);
-		//if(e instanceof Player) // so it doesn't go too crazy
-		//	System.out.println("for "+this+": setting level of entity " + e + " to " + level + " (removing from level "+oldLevel+") - entity location = " + e.getLocation(true));
-		
-		if(!level.equals(oldLevel)) {
-			actOnEntitySet(level, set -> set.add(e));
-			actOnEntitySet(oldLevel, set -> set.remove(e));
-		}
-		
-		ServerLevel newLevel = getEntityLevel(e);
-		
-		if(!Objects.equals(oldLevel, newLevel)) {
-			if(oldLevel != null)
-				server.broadcast(new EntityRemoval(e), oldLevel, (ServerEntity) e);
-			if(newLevel != null)
-				server.broadcast(new EntityAddition(e), newLevel, (ServerEntity) e);
-		}
+		removeEntityLevel(e);
+		super.deregisterEntity(eid);
 	}
 	
-	// removes entity from levels, without deregistering it. Can only be done for keep alives.
-	protected void removeFromLevels(@NotNull ServerEntity e) {
-		if(!isKeepAlive(e))
-			System.err.println(this+": entity "+e+" is not a keep-alive; will not remove from levels without deregistering.");
-		else {
-			ServerLevel level = e.getLevel();
-			if(level != null)
-				actOnEntitySet(level, set -> {
-					entityLevels.put(e, null);
-					set.remove(e);
-				});
-		}
+	private void removeEntityLevel(@NotNull ServerEntity e) {
+		entityManager.removeEntity(e);
+		
+		server.broadcast(new EntityRemoval(e));
+		
+		if(e instanceof ServerPlayer)
+			pruneLoadedLevels();
 	}
 	
-	public boolean isKeepAlive(WorldObject obj) {
-		synchronized (keepAlives) { return keepAlives.contains(obj); }
+	public void setEntityLevel(@NotNull ServerEntity e, @NotNull ServerLevel level) {
+		boolean registered = isEntityRegistered(e);
+		ServerLevel current = e.getLevel();
+		boolean hasLevel = current != null;
+		
+		boolean act = true;
+		if(!registered) {
+			act = false;
+			if(GameCore.debug) {
+				if(hasLevel)
+					System.err.println("Unregistered server entity found on level "+current+" during request to set level to "+level+". Ignoring request and removing from current level.");
+				else
+					System.err.println("Server entity "+e+" is not registered (request to set level to "+level+"). Ignoring request.");
+			}
+			
+			if(hasLevel) {
+				entityManager.removeEntity(e);
+				hasLevel = false;
+			}
+		}
+		
+		if(hasLevel) {
+			act = false;
+			if(GameCore.debug) System.out.println("Server entity "+e+" is already on level "+current+", will not set level to "+level);
+		}
+		
+		if(!isLevelLoaded(level.getLevelId())) {
+			act = false;
+			if(GameCore.debug) System.err.println("Server level "+level+" should not be loaded; will not add entity "+e);
+		}
+		
+		
+		if(!act) return; // level set is not valid.
+		
+		
+		entityManager.addEntity(e, level);
+		
+		server.broadcast(new EntityAddition(e), level, e);
 	}
 	
 	
 	/*  --- PLAYER MANAGEMENT --- */
 	
 	
+	// called on player death
+	public void despawnPlayer(@NotNull ServerPlayer player) {
+		removeEntityLevel(player);
+	}
+	
+	public void respawnPlayer(ServerPlayer player) {
+		player.reset();
+		
+		// ServerLevel level = loadLevel(0);
+		
+		// if(level == null)
+		// 	throw new NullPointerException("Surface level found to be null while attempting to spawn player.");
+		
+		// find a good spawn location near the middle of the map
+		// Rectangle spawnBounds = levelGenerator.getSpawnArea(new Rectangle());
+		
+		loadLevel(0).spawnMob(player);
+		// later, perhaps spawn player in specific location after first attempt, instead of randomly always.
+	}
+	
 	@NotNull
 	public ServerPlayer addPlayer(String playerName) {
 		ServerPlayer player = new ServerPlayer(playerName);
-		
-		synchronized (keepAlives) {
-			keepAlives.add(player);
-		}
 		
 		respawnPlayer(player);
 		
@@ -341,46 +300,9 @@ public class ServerWorld extends WorldManager {
 		return player;
 	}
 	
-	// called on player death
-	public void despawnPlayer(ServerPlayer player) {
-		server.sendToPlayer(player, new EntityRemoval(player));
-		removeFromLevels(player);
-	}
-	
-	public void respawnPlayer(ServerPlayer player) {
-		player.reset();
-		
-		ServerLevel level = getLevel(0);
-		
-		if(level == null)
-			throw new NullPointerException("Surface level found to be null while attempting to spawn player.");
-		
-		// find a good spawn location near the middle of the map
-		// Rectangle spawnBounds = levelGenerator.getSpawnArea(new Rectangle());
-		
-		level.spawnMob(player);
-	}
-	
-	public void removePlayer(ServerPlayer player) {
-		synchronized (keepAlives) {
-			keepAlives.remove(player);
-		}
-	}
-	
 	
 	/*  --- GET METHODS --- */
 	
-	
-	public Array<WorldObject> getKeepAlives(@NotNull Level level) {
-		Array<WorldObject> keepAlives = new Array<>();
-		synchronized (this.keepAlives) {
-			for(WorldObject obj : this.keepAlives)
-				if(level.equals(obj.getLevel()))
-					keepAlives.add(obj);
-		}
-		
-		return keepAlives;
-	}
 	
 	@Override
 	public ServerEntity getEntity(int eid) { return (ServerEntity) super.getEntity(eid); }
@@ -390,23 +312,12 @@ public class ServerWorld extends WorldManager {
 	
 	public GameServer getServer() { return server; }
 	
-	public ProtoIsland[] getIslandGenerators() { return islandGenerators; }
+	public IslandReference[] getIslandStores() { return islandStores; }
 	
 	public WorldFile getWorldFile() { return worldFile; }
 	
 	@Override
-	public ServerLevel getLevel(int levelId) { return getLevel(levelId, false); }
-	public ServerLevel getLevel(int levelId, boolean load) {
-		ServerLevel level = loadedLevels.get(levelId);
-		if(level == null && load) {
-			loadLevel(levelId);
-			level = getLevel(levelId);
-		}
-		return level;
-	}
-	
-	@Override
-	public ServerLevel getEntityLevel(Entity e) { return entityLevels.get((ServerEntity) e); }
+	public ServerLevel getEntityLevel(Entity e) { return entityManager.getLevel((ServerEntity) e); }
 	
 	@Override
 	public String toString() { return "ServerWorld"; }

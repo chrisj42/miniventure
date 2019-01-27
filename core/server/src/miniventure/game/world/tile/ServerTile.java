@@ -159,7 +159,7 @@ public class ServerTile extends Tile {
 				
 				Rectangle entityBounds = entity.getBounds();
 				MyUtils.moveRectInside(entityBounds, tileBounds, 0.05f);
-				entity.moveTo(closest.getLevel(), entityBounds.x, entityBounds.y);
+				entity.moveTo(entityBounds.x, entityBounds.y);
 			}
 		}
 	}

@@ -102,7 +102,7 @@ public class ClientEntity extends Entity {
 	
 	public boolean move(Vector2 moveDist, boolean validate) { return move(moveDist.x, moveDist.y, validate); }
 	public boolean move(Vector3 moveDist, boolean validate) { return move(moveDist.x, moveDist.y, moveDist.z, validate); }
-	public boolean move(float xd, float yd, boolean validate) { return move(xd, yd, this.z, validate); }
+	public boolean move(float xd, float yd, boolean validate) { return move(xd, yd, 0, validate); }
 	@Override
 	public boolean move(float xd, float yd, float zd) { return move(xd, yd, zd, false); }
 	
@@ -115,20 +115,6 @@ public class ClientEntity extends Entity {
 		
 		moveTo(new Vector3(xd, yd, zd).add(getLocation()));
 		return true;
-	}
-	
-	public void moveTo(Vector2 pos) { moveTo(pos.x, pos.y); }
-	public void moveTo(Vector3 pos) { moveTo(pos.x, pos.y, pos.z); }
-	public void moveTo(float x, float y) { moveTo(x, y, this.z); }
-	public void moveTo(float x, float y, float z) {
-		this.z = z;
-		ClientLevel level = getLevel();
-		if(level == null) {
-			this.x = x;
-			this.y = y;
-		}
-		else
-			moveTo(level, x, y);
 	}
 	
 	@Override

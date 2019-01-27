@@ -12,7 +12,6 @@ import miniventure.game.server.ServerCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueFunction;
-import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.ServerWorld;
 import miniventure.game.world.WorldObject;
@@ -86,17 +85,14 @@ public abstract class ServerEntity extends Entity {
 		
 		// get the entity back on the map if they somehow end up on a null tile
 		if(tile == null)
-			moveTo(level, level.getClosestTile(getBounds()).getCenter());
+			moveTo(level.getClosestTile(getBounds()).getCenter());
 	}
 	
 	protected void updateSprite(SpriteUpdate newSprite) { this.newSprite = newSprite; }
 	
 	@Override
-	public void moveTo(@NotNull Level level, float x, float y) {
-		super.moveTo(level, x, y);
-		
-		if(!level.equals(getLevel()))
-			getWorld().setEntityLevel(this, level);
+	public void moveTo(float x, float y, float z) {
+		super.moveTo(x, y, z);
 		
 		newPos = new PositionUpdate(this);
 	}

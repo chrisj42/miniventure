@@ -178,11 +178,19 @@ public class GameServer implements GameProtocol {
 				});
 				
 				forPacket(object, MapRequest.class, req -> {
-					connection.sendTCP(new MapRequest(world.getIslandGenerators()));
+					connection.sendTCP(new MapRequest(world.getIslandStores()));
 				});
 				
+				if(object instanceof LevelData) {
+					Level level = client.getLevel();
+					if(level == null) return;
+					connection.sendTCP(new LevelData(level));
+					for(Entity e: level.getEntities())
+						connection.sendTCP(new EntityAddition(e));
+				}
+				
 				forPacket(object, LevelChange.class, change -> {
-					ServerLevel level = world.getLevel(change.levelid, true);
+					ServerLevel level = world.loadLevel(change.levelid);
 					world.setEntityLevel(client, level);
 					Tile spawnTile = level.getMatchingTiles(TileTypeEnum.DOCK).get(0);
 					client.moveTo(spawnTile);
@@ -211,7 +219,7 @@ public class GameServer implements GameProtocol {
 				
 				forPacket(object, EntityRequest.class, req -> {
 					Entity e = world.getEntity(req.eid);
-					if(e != null)
+					if(e != null && e.getLevel() == client.getLevel())
 						connection.sendTCP(new EntityAddition(e));
 				});
 				
@@ -386,7 +394,7 @@ public class GameServer implements GameProtocol {
 				data.validationTimer.stop();
 				ServerPlayer player = data.player;
 				player.remove();
-				player.getWorld().removePlayer(player);
+				// player.getWorld().removePlayer(player);
 				connectionToPlayerDataMap.remove(connection);
 				playerToConnectionMap.remove(player);
 				broadcast(new Message(player.getName()+" left the server.", STATUS_MSG_COLOR));
@@ -452,6 +460,10 @@ public class GameServer implements GameProtocol {
 				return player;
 		
 		return null;
+	}
+	
+	public ServerPlayer[] getPlayers() {
+		return playerToConnectionMap.keySet().toArray(new ServerPlayer[0]);
 	}
 	
 	public boolean isInventoryMode(@NotNull ServerPlayer player) {

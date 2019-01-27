@@ -156,7 +156,7 @@ public enum Command {
 			
 			ServerLevel level = dest.getLevel();
 			if(level != null) {
-				toMove.moveTo(level, dest.getPosition());
+				toMove.moveTo(dest.getPosition());
 				ServerCore.getServer().sendToPlayer(toMove, new PositionUpdate(toMove));
 				out.println("teleported "+toMove.getName()+" to "+toMove.getPosition(true)+".");
 			} else
@@ -176,7 +176,7 @@ public enum Command {
 			if(level != null) {
 				x += level.getWidth()/2f;
 				y += level.getHeight()/2f;
-				player.moveTo(level, x, y);
+				player.moveTo(x, y);
 				ServerCore.getServer().sendToPlayer(player, new PositionUpdate(player));
 				out.println("teleported "+player.getName()+" to "+player.getPosition(true)+'.');
 			} else
