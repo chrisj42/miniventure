@@ -3,6 +3,7 @@ package miniventure.game.util;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -34,14 +35,22 @@ public final class MyUtils {
 		return String.join(delimiter, words);
 	}
 	
-	public static String encodeStringArray(String... strings) { return encodeStringArray(strings, '(', ')',','); }
+	// TODO because most strings are going to be safe anyway (I already trust that there are no mismatched delimiters), I should put start/end markers on either side of the entire array, rather than on each element. It uses up FAR less characters, and if I come across a string value that can have a delimiter in it, then I'll just tack them on manually (or call this method on the one string lol, that would also work).
+	// the only weird bit about the simpler design is that every call to parse will probably be a string with start/end characters on the ends. Maybe I could have parse remove start/end delimiters from elements if they're found? the resulting element string, of course, would no longer be safe to encode, but you typically don't go from decode to encode...
+	// better idea though is probably just making a mode bool for encode&parse: "encaseElements" or something.
+	public static String encodeStringArray(String... strings) { return encodeStringArray(Arrays.asList(strings)); }
+	public static String encodeStringArray(Iterable<String> strings) { return encodeStringArray(strings, '(', ')',','); }
 	public static String encodeStringArray(String[] strings, char elementStart, char elementEnd, char delimiter) {
+		return encodeStringArray(Arrays.asList(strings), elementStart, elementEnd, delimiter);
+	}
+	public static String encodeStringArray(Iterable<String> strings, char elementStart, char elementEnd, char delimiter) {
 		StringBuilder str = new StringBuilder();
-		for(int i = 0; i < strings.length; i++) {
+		Iterator<String> iter = strings.iterator();
+		while(iter.hasNext()) {
 			str.append(elementStart);
-			str.append(strings[i]);
+			str.append(iter.next());
 			str.append(elementEnd);
-			if(i < strings.length-1)
+			if(iter.hasNext())
 				str.append(delimiter);
 		}
 		

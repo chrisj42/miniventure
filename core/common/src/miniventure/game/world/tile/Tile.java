@@ -1,8 +1,11 @@
 package miniventure.game.world.tile;
 
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashSet;
 
+import miniventure.game.util.ArrayUtils;
+import miniventure.game.util.MyUtils;
 import miniventure.game.util.customenum.SerialMap;
 import miniventure.game.world.Level;
 import miniventure.game.world.Point;
@@ -128,6 +131,22 @@ public abstract class Tile implements WorldObject {
 				for(int i = 0; i < data.length; i++)
 					data[i] = tile.dataMaps.get(tileTypes[i]).serialize();
 			}
+		}
+		
+		public TileData(String tileData) {
+			String[] all = MyUtils.parseLayeredString(tileData);
+			data = Arrays.copyOfRange(all, 1, all.length);
+			
+			typeOrdinals = int[].class.cast(ArrayUtils.mapArray(all[0].split(","), int.class, Integer::parseInt));
+		}
+		
+		public String serialize() {
+			String[] all = new String[data.length+1];
+			System.arraycopy(data, 0, all, 1, data.length);
+			
+			all[0] = ArrayUtils.arrayToString(typeOrdinals, "", "", ",");
+			
+			return MyUtils.encodeStringArray(all);
 		}
 		
 		public TileTypeEnum[] getTypes() { return getTypes(typeOrdinals); }

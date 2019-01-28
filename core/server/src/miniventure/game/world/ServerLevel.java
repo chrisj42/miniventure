@@ -1,22 +1,19 @@
 package miniventure.game.world;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import miniventure.game.GameProtocol.TileUpdate;
 import miniventure.game.item.ServerItem;
 import miniventure.game.server.ServerCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.entity.Entity;
+import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.AiType;
 import miniventure.game.world.entity.mob.ServerMob;
 import miniventure.game.world.entity.particle.ItemEntity;
 import miniventure.game.world.tile.ServerTile;
 import miniventure.game.world.tile.Tile;
+import miniventure.game.world.tile.Tile.TileData;
 import miniventure.game.world.tile.TileTypeEnum;
 import miniventure.game.world.worldgen.LevelGenerator;
 
@@ -39,8 +36,12 @@ public class ServerLevel extends Level {
 	
 	//private float timeCache = 0; // this is used when you should technically be updating < 1 tile in a frame.
 	
-	public ServerLevel(WorldManager world, int levelId, LevelGenerator levelGenerator) {
-		super(world, levelId, levelGenerator.generateTiles(), ServerTile::new);
+	public ServerLevel(int levelId, LevelGenerator levelGenerator) {
+		super(ServerCore.getWorld(), levelId, levelGenerator.generateTiles(), ServerTile::new);
+	}
+	
+	public ServerLevel(int levelId, TileData[][] tileData) {
+		super(ServerCore.getWorld(), levelId, tileData, ServerTile::new);
 	}
 	
 	@Override @NotNull
@@ -51,6 +52,9 @@ public class ServerLevel extends Level {
 	
 	@Override
 	public Entity[] getEntities() { return getWorld().getEntities(this); }
+	
+	@Override
+	public ServerTile getTile(float x, float y) { return (ServerTile) super.getTile(x, y); }
 	
 	/*@Override
 	public void entityMoved(Entity entity) {
@@ -154,6 +158,10 @@ public class ServerLevel extends Level {
 			spawnMob(AiType.values[MathUtils.random(AiType.values.length-1)].makeMob());
 	}
 	
+	public void addEntity(@NotNull ServerEntity e) {
+		getWorld().setEntityLevel(e, this);
+	}
+	
 	public void dropItems(@NotNull ItemDrop drop, @NotNull WorldObject source, @Nullable WorldObject target) {
 		dropItems(drop, source.getCenter(), target == null ? null : target.getCenter());
 	}
@@ -179,7 +187,7 @@ public class ServerLevel extends Level {
 		itemBounds.setPosition(dropPos);
 		
 		if(closest == null) {
-			System.err.println("ERROR dropping item, closest tile is null");
+			System.err.println("Server ERROR dropping item, closest tile is null");
 			return;
 		}
 		
@@ -210,7 +218,7 @@ public class ServerLevel extends Level {
 		ie = new ItemEntity(item, dropDir, delayPickup);
 		
 		ie.moveTo(dropPos);
-		getWorld().setEntityLevel(ie, this);
+		addEntity(ie);
 	}
 	
 	// only spawns on the given tiles
@@ -228,22 +236,39 @@ public class ServerLevel extends Level {
 		mob.moveTo(spawnTile);
 	}*/
 	
-	public void spawnMob(ServerMob mob) {
-		if(!mob.maySpawn()) return;
+	private final ArrayList<Integer> locations = new ArrayList<>();
+	{
+		for(int i = 0; i < getWidth() * getHeight(); i++) {
+			locations.add(i);
+		}
+	}
+	
+	public ServerTile getSpawnTile(ServerMob mob) {
+		if(!mob.maySpawn()) return null;
 		
-		int x, y;
-		TileTypeEnum type = null;
-		do {
-			x = MathUtils.random(getWidth()-1);
-			y = MathUtils.random(getHeight()-1);
+		ArrayList<Integer> locations = new ArrayList<>(this.locations);
+		
+		while(locations.size() > 0) {
+			final int idx = MathUtils.random(locations.size()-1);
+			final int loc = locations.get(idx);
+			final int x = loc % getWidth();
+			final int y = loc / getWidth();
 			Tile tile = getTile(x, y);
 			if(tile == null)
-				System.err.println("level contains null tile! "+x+","+y+"@level="+this);
-			else type = tile.getType().getTypeEnum();
-		} while(!mob.maySpawn(type));
+				System.err.println("level contains null tile! "+x+','+y+"@level="+this);
+			else if(mob.maySpawn(tile.getType().getTypeEnum()))
+				return getTile(x, y);
+			else
+				locations.remove(idx);
+		}
+		// all tiles in the level were searched through; no options were found.
 		
-		// loadChunk(Chunk.getCoords(x, y));
-		mob.moveTo(getTile(x, y));
+		return null;
+	}
+	
+	public void spawnMob(ServerMob mob) {
+		mob.moveTo(getSpawnTile(mob));
+		addEntity(mob);
 	}
 	
 	// only spawns within the given area

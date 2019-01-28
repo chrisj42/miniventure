@@ -21,7 +21,7 @@ import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.RespawnScreen;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
-import miniventure.game.world.worldgen.WorldConfig.CreationConfig;
+import miniventure.game.world.worldgen.WorldConfig;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -132,7 +132,7 @@ public class ClientWorld extends LevelManager {
 						"Value must be an integer >= 10"
 					}, self));
 				else
-					startWorld(new CreationConfig(worldname, sizeVal, sizeVal, new Random().nextLong()));
+					startWorld(new WorldConfig(worldname, sizeVal, sizeVal, new Random().nextLong()));
 			})));
 		});
 	}
@@ -186,6 +186,7 @@ public class ClientWorld extends LevelManager {
 	
 	
 	public void setLevel(LevelData data) {
+		// todo hold the player in a loading screen until a 
 		setLevel(new ClientLevel(this, data.levelId, data.tiles));
 	}
 	

@@ -18,7 +18,6 @@ import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.ClientLevel;
 import miniventure.game.world.ClientWorld;
-import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClientEntity;
 import miniventure.game.world.entity.Entity;
@@ -192,8 +191,7 @@ public class GameClient implements GameProtocol {
 					}
 					
 					if(level.getLevelId() != list.levelId) {
-						System.err.println("Client: level does not match entity validation level; requesting correct level.");
-						connection.sendTCP(new LevelData());
+						System.err.println("Client: level does not match entity validation level; ignoring packet.");
 						return;
 					}
 					

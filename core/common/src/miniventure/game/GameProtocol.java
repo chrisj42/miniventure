@@ -101,7 +101,10 @@ public interface GameProtocol {
 	}
 	
 	enum DatalessRequest {
-		Respawn, Tile, Clear_Console
+		Respawn,
+		Tile,
+		Clear_Console, // server sends to player to clear console; is a server command only to make it fit in with the others; could be implemented entirely client-side otherwise.
+		Level_Ready // when the server has sent all the entities to the client.
 	}
 	
 	// pings always end up being started from the server.
@@ -169,7 +172,7 @@ public interface GameProtocol {
 		}
 	}
 	
-	// for server to send level data to the client, and for client to request the current level if for some reason it ends up with the wrong one.
+	// for server to send level data to the client. Sets the client to a loading screen, which stays open until a SpawnData is sent. A SpawnData packet will always clear a loading screen.
 	class LevelData {
 		public final int levelId;
 		public final TileData[][] tiles;

@@ -108,6 +108,7 @@ public class ServerCore {
 		
 		// lock acquired, we can now be reasonably sure it's going to work out, so let's initialize everything.
 		
+		GameCore.initNonGdxTextures();
 		ServerTileType.init();
 		
 		System.out.println("loading server world...");

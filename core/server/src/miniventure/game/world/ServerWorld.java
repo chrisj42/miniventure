@@ -19,10 +19,12 @@ import miniventure.game.item.ToolItem.Material;
 import miniventure.game.item.ToolType;
 import miniventure.game.server.GameServer;
 import miniventure.game.util.SyncObj;
+import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.tile.ServerTileType;
+import miniventure.game.world.tile.Tile.TileData;
 import miniventure.game.world.tile.TileTypeEnum;
 import miniventure.game.world.worldgen.IslandReference;
 import miniventure.game.world.worldgen.LevelGenerator;
@@ -37,6 +39,18 @@ public class ServerWorld extends WorldManager {
 		
 		ServerWorld is also the only world that will ever have multiple islands loaded simultaneously.
 	 */
+	
+	private static final LevelFetcher levelFetcher = new LevelFetcher() {
+		@Override
+		public Level makeLevel(int levelId, LevelGenerator generator) {
+			return new ServerLevel(levelId, generator);
+		}
+		
+		@Override
+		public Level loadLevel(int levelId, TileData[][] tileData) {
+			return new ServerLevel(levelId, tileData);
+		}
+	};
 	
 	private final SyncObj<Map<Integer, ServerLevel>> loadedLevels = new SyncObj<>(Collections.synchronizedMap(new HashMap<>()));
 	
@@ -129,17 +143,49 @@ public class ServerWorld extends WorldManager {
 	public ServerLevel getLevel(int levelId) { return loadedLevels.get(map -> map.get(levelId)); }
 	
 	@NotNull
-	public ServerLevel loadLevel(int levelId) {
+	// player activator is required to ensure the level is not immediately pruned due to chance circumstances.
+	// it is assumed that the player is not currently on a level.
+	public synchronized ServerLevel loadLevel(int levelId, @NotNull ServerPlayer activator) {
+		return loadLevel(levelId, activator, level -> {});
+	}
+	@NotNull
+	// the ordering of "get/make level", "position player", "send level data", and finally "register world/add player" is important. Doing so is the most efficient, and prevents split-second frame changes like showing the player in the previous level position, as well as minimizing the time that the player may be in-game on the server, but still loading on the client.
+	public synchronized ServerLevel loadLevel(int levelId, @NotNull ServerPlayer activator, ValueFunction<ServerLevel> playerPositioner) {
 		
 		ServerLevel level = getLevel(levelId);
 		
-		if(level == null) {
-			// TODO this will need to get redone when loading from file
+		boolean put = level == null;
+		if(put)
+			level = (ServerLevel) islandStores[levelId].getLevel(levelFetcher);
+		
+		// position the activator.
+		playerPositioner.act(level);
+		
+		/*
+			there are a couple possible moves here.
+			- the player is moving between islands in a boat
+				- position set by server; level must exist first though
+				- position would be on dock sprite.
+			- the player is joining for the first time, or respawning (either way check player obj)
+				- spawnmob placement, or using given vars
+			- the player is rejoining (or console hax); position is already set
+				- for console hax: would be set in Command class; player would be removed from current level, then position would be set, then this method gets called
+				- for rejoin: position is from save file
 			
-			LevelGenerator levelGenerator = islandStores[levelId].getLevelGenerator(levelId);
-			
-			level = new ServerLevel(this, levelId, levelGenerator);
+		 */
+		
+		// send level data to client
+		server.sendLevel(activator, level);
+		
+		// add player to level and register level if needed
+		if(put) {
+			final ServerLevel sl = level;
+			loadedLevels.act(map -> {
+				map.put(levelId, sl);
+				setEntityLevel(activator, sl);
+			});
 		}
+		else setEntityLevel(activator, level);
 		
 		return level;
 	}
@@ -215,6 +261,9 @@ public class ServerWorld extends WorldManager {
 		ServerLevel current = e.getLevel();
 		boolean hasLevel = current != null;
 		
+		if(hasLevel && current.getLevelId() == level.getLevelId())
+			return; // requests to add an entity to a level they are already on will be quietly ignored.
+		
 		boolean act = true;
 		if(!registered) {
 			act = false;
@@ -254,7 +303,7 @@ public class ServerWorld extends WorldManager {
 	/*  --- PLAYER MANAGEMENT --- */
 	
 	
-	// called on player death
+	// called when switching levels and on player death (client won't show death screen if on map or loading screen
 	public void despawnPlayer(@NotNull ServerPlayer player) {
 		removeEntityLevel(player);
 	}
@@ -270,15 +319,20 @@ public class ServerWorld extends WorldManager {
 		// find a good spawn location near the middle of the map
 		// Rectangle spawnBounds = levelGenerator.getSpawnArea(new Rectangle());
 		
-		loadLevel(0).spawnMob(player);
+		loadLevel(player.getSpawnLevel(), player, player.respawnPositioning());
 		// later, perhaps spawn player in specific location after first attempt, instead of randomly always.
 	}
 	
 	@NotNull
+	// registers a new player in the world with the given username. World data will be checked to see if this player has logged in before; if so, that player file is loaded, otherwise, a new player is created.
 	public ServerPlayer addPlayer(String playerName) {
+		// todo check files for player data
+		
 		ServerPlayer player = new ServerPlayer(playerName);
 		
-		respawnPlayer(player);
+		// at this point, the player object has been initialized and registered, but it isn't on a particular level yet. This method doesn't attempt to position the player or set its level, beyond data stored from previous logins.
+		
+		// respawnPlayer(player);
 		
 		if(GameCore.debug) {
 			player.getInventory().addItem(new ToolItem(ToolType.Shovel, Material.Ruby));

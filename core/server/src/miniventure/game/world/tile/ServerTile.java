@@ -6,6 +6,7 @@ import miniventure.game.item.Item;
 import miniventure.game.item.Result;
 import miniventure.game.item.ServerItem;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.customenum.SerialMap;
 import miniventure.game.world.Level;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
@@ -31,6 +32,16 @@ public class ServerTile extends Tile {
 		
 		for(TileTypeEnum type: types)
 			this.dataMaps.put(type, ServerTileType.get(type).getInitialData());
+	}
+	
+	public ServerTile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, SerialMap[] dataMaps) {
+		this((ServerLevel) level, x, y, types, dataMaps);
+	}
+	public ServerTile(@NotNull ServerLevel level, int x, int y, @NotNull TileTypeEnum[] types, SerialMap[] dataMaps) {
+		super(level, x, y, types);
+		
+		for(int i = 0; i < types.length; i++)
+			this.dataMaps.put(types[i], dataMaps[i]);
 	}
 	
 	@Override

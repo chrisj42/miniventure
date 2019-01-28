@@ -108,14 +108,12 @@ public abstract class ServerEntity extends Entity {
 			this.touchedBy(entity); // to make sure something has a chance to happen, but it doesn't happen twice.
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static String serialize(ServerEntity e) {
 		ClassDataList data = e.save();
-		ArrayList<String>[] doubleDataArray = data.toArray(new ArrayList[0]);
 		
-		String[] partEncodedData = new String[doubleDataArray.length+1];
-		for(int i = 0; i < doubleDataArray.length; i++) {
-			partEncodedData[i+1] = MyUtils.encodeStringArray(doubleDataArray[i].toArray(new String[0]));
+		String[] partEncodedData = new String[data.size()+1];
+		for(int i = 0; i < data.size(); i++) {
+			partEncodedData[i+1] = MyUtils.encodeStringArray(data.get(i));
 		}
 		
 		partEncodedData[0] = e.getClass().getCanonicalName().replace(Entity.class.getPackage().getName()+".", "");

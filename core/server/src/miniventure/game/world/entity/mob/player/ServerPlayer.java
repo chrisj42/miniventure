@@ -1,5 +1,6 @@
 package miniventure.game.world.entity.mob.player;
 
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
@@ -19,6 +20,7 @@ import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.Boundable;
+import miniventure.game.world.Point;
 import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClassDataList;
@@ -28,6 +30,7 @@ import miniventure.game.world.entity.mob.ServerMob;
 import miniventure.game.world.entity.particle.ActionType;
 import miniventure.game.world.entity.particle.ParticleData.ActionParticleData;
 import miniventure.game.world.entity.particle.ParticleData.TextParticleData;
+import miniventure.game.world.tile.ServerTile;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileTypeEnum;
 
@@ -42,6 +45,11 @@ import org.jetbrains.annotations.Nullable;
 public class ServerPlayer extends ServerMob implements Player {
 	
 	private final EnumMap<Stat, Integer> stats = new EnumMap<>(Stat.class);
+	
+	// saved spawn location; you slept in a bed, etc. This is checked when adding the player to a level. If there is no location, then the player is spawned randomly on the default level. If the location (and adjacent tiles) are not spawnable, then the player is spawned randomly on the saved level (assuming it's valid).
+	private Point spawnLoc;
+	private int spawnLevel = 0;
+	
 	
 	@NotNull private final ServerHands hands;
 	@NotNull private final Inventory inventory;
@@ -63,14 +71,22 @@ public class ServerPlayer extends ServerMob implements Player {
 		
 		name = data.get(0);
 		inventory = new Inventory(INV_SIZE);
-		hands = new ServerHands(this, MyUtils.parseLayeredString(data.get(4)));
+		hands = new ServerHands(this, MyUtils.parseLayeredString(data.get(6)));
 		
 		stats.put(Stat.Health, getHealth());
 		stats.put(Stat.Hunger, Integer.parseInt(data.get(1)));
 		stats.put(Stat.Stamina, Integer.parseInt(data.get(2)));
 		//stats.put(Stat.Armor, Integer.parseInt(data.get(3)));
 		
-		inventory.loadItems(MyUtils.parseLayeredString(data.get(3)));
+		if(data.get(3).equals("null"))
+			spawnLoc = null;
+		else {
+			String[] pos = data.get(3).split(";");
+			spawnLoc = new Point(Integer.parseInt(pos[0]), Integer.parseInt(pos[1]));
+		}
+		spawnLevel = Integer.parseInt(data.get(4));
+		
+		inventory.loadItems(MyUtils.parseLayeredString(data.get(5)));
 	}
 	
 	@Override
@@ -80,6 +96,8 @@ public class ServerPlayer extends ServerMob implements Player {
 			name,
 			String.valueOf(getStat(Stat.Hunger)),
 			String.valueOf(getStat(Stat.Stamina)),
+			spawnLoc == null ? "null" : spawnLoc.x+";"+spawnLoc.y,
+			String.valueOf(spawnLevel),
 			MyUtils.encodeStringArray(inventory.save()),
 			MyUtils.encodeStringArray(hands.save())
 		));
@@ -260,6 +278,44 @@ public class ServerPlayer extends ServerMob implements Player {
 	
 	@Override
 	public boolean maySpawn(TileTypeEnum type) {
-		return super.maySpawn(type) && type != TileTypeEnum.SAND;
+		return super.maySpawn(type)/* && type != TileTypeEnum.SAND*/;
+	}
+	
+	public int getSpawnLevel() { return spawnLevel; }
+	
+	public ValueFunction<ServerLevel> respawnPositioning() {
+		return level -> {
+			if(spawnLoc != null) {
+				ServerTile spawnTile = level.getTile(spawnLoc.x, spawnLoc.y);
+				if(maySpawn(spawnTile.getType().getTypeEnum())) {
+					moveTo(spawnTile);
+					return;
+				}
+				for(Tile tile: level.getAreaTiles(spawnLoc, 1, false)) {
+					if(maySpawn(tile.getType().getTypeEnum())) {
+						moveTo(tile);
+						return;
+					}
+				}
+				
+				// spawn location obstructed.
+				spawnLoc = null; // player loses their saved spawn location.
+				getWorld().getServer().sendMessage(null, this, "Spawn location is obstructed");
+			}
+			
+			Tile tile = level.getSpawnTile(this);
+			if(tile != null) {
+				spawnLoc = tile.getLocation();
+				moveTo(tile);
+			}
+			else
+				System.err.println("Server: error spawning player "+this+" on level "+level+", no spawnable tiles found. Spawning player anyway at current position: "+getCenter());
+		};
+	}
+	
+	@Override
+	public String toString() {
+		InetSocketAddress address = getWorld().getServer().getPlayerAddress(this);
+		return "ServerPlayer["+name+(address==null?']':" at "+address+']');
 	}
 }

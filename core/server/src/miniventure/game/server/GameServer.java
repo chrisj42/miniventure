@@ -3,6 +3,7 @@ package miniventure.game.server;
 import javax.swing.Timer;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -125,28 +126,24 @@ public class GameServer implements GameProtocol {
 					connection.sendTCP(world.getWorldUpdate());
 					
 					// prepare level
-					ServerLevel level = world.getLevel(0);
-					if(level != null) {
+					// ServerLevel level = world.getLevel(0);
+					// if(level != null) {
 						ServerPlayer player = world.addPlayer(name);
 						PlayerData playerData = new PlayerData(connection, player);
 						connectionToPlayerDataMap.put(connection, playerData);
 						playerToConnectionMap.put(player, connection);
-						connection.sendTCP(new LevelData(level));
-						connection.sendTCP(new SpawnData(new EntityAddition(player), player.getHotbarUpdate(), player.saveStats()));
-						for(Entity e: level.getEntities())
-							if(e != player)
-								connection.sendTCP(new EntityAddition(e));
+						world.loadLevel(player.getSpawnLevel(), player, player.respawnPositioning());
 						
 						System.out.println("Server: new player successfully connected: "+player.getName());
 						
 						playerData.validationTimer.start();
 						
 						broadcast(new Message(player.getName()+" joined the server.", STATUS_MSG_COLOR), false, player);
-					}
+					/*}
 					else {
 						System.err.println("Server could not connect player "+name+", no levels exist.");
 						connection.sendTCP(new LoginFailure("Server world is not initialized."));
-					}
+					}*/
 					
 					return;
 				}
@@ -181,25 +178,24 @@ public class GameServer implements GameProtocol {
 					connection.sendTCP(new MapRequest(world.getIslandStores()));
 				});
 				
-				if(object instanceof LevelData) {
-					Level level = client.getLevel();
-					if(level == null) return;
-					connection.sendTCP(new LevelData(level));
-					for(Entity e: level.getEntities())
-						connection.sendTCP(new EntityAddition(e));
-				}
-				
 				forPacket(object, LevelChange.class, change -> {
-					ServerLevel level = world.loadLevel(change.levelid);
-					world.setEntityLevel(client, level);
-					Tile spawnTile = level.getMatchingTiles(TileTypeEnum.DOCK).get(0);
-					client.moveTo(spawnTile);
-					connection.sendTCP(new LevelData(level));
-					for(Entity e: level.getEntities())
-						if(e != client)
-							connection.sendTCP(new EntityAddition(e));
+					// check to see if the level exists (client shouldn't be able to crash server), and if the client is allowed to change to the given level
+					// if the move is invalid, then send a simple spawn packet; the client doesn't unload a level unless a new LevelData packet is recieved.
 					
-					ServerCore.getServer().broadcast(new EntityUpdate(client.getTag(), new PositionUpdate(client), null));
+					Level clientLevel = client.getLevel();
+					if(clientLevel != null && change.levelid == clientLevel.getLevelId())
+						return; // quietly ignore level requests for the same level
+					
+					// todo check if move is valid in terms of stats (prob using class/method in common module)
+					// for now we will assume it is.
+					
+					world.despawnPlayer(client);
+					world.loadLevel(change.levelid, client, level -> {
+						Tile spawnTile = level.getMatchingTiles(TileTypeEnum.DOCK).get(0);
+						client.moveTo(spawnTile);
+					});
+					
+					// broadcast(new EntityUpdate(client.getTag(), new PositionUpdate(client), null));
 				});
 				
 				/*if(object instanceof ChunkRequest) {
@@ -462,8 +458,24 @@ public class GameServer implements GameProtocol {
 		return null;
 	}
 	
+	public InetSocketAddress getPlayerAddress(@NotNull ServerPlayer player) {
+		Connection c = playerToConnectionMap.get(player);
+		if(c != null)
+			return c.getRemoteAddressTCP();
+		return null;
+	}
+	
 	public ServerPlayer[] getPlayers() {
 		return playerToConnectionMap.keySet().toArray(new ServerPlayer[0]);
+	}
+	
+	public void sendLevel(@NotNull ServerPlayer player, @NotNull ServerLevel level) {
+		Connection connection = playerToConnectionMap.get(player);
+		
+		connection.sendTCP(new LevelData(level));
+		connection.sendTCP(new SpawnData(new EntityAddition(player), player.getHotbarUpdate(), player.saveStats()));
+		for(Entity e: level.getEntities())
+			connection.sendTCP(new EntityAddition(e));
 	}
 	
 	public boolean isInventoryMode(@NotNull ServerPlayer player) {
