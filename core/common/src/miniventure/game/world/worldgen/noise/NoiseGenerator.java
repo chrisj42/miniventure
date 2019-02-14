@@ -2,10 +2,33 @@ package miniventure.game.world.worldgen.noise;
 
 import java.util.Arrays;
 
+import miniventure.game.util.function.MapFunction;
+
+// this interface creates noise maps out of nothing but size and seed.
+// NoiseGenerator factory methods will consist of patterns that have no prior value.
 @FunctionalInterface
-public interface NoiseGenerator {
+public interface NoiseGenerator extends ValueSetFetcher {
 	
 	float[][] get2DNoise(long seed, int width, int height);
+	
+	default NoiseGenerator modifySeed(MapFunction<Long, Long> seedModifier) {
+		return (seed, width, height) -> get2DNoise(seedModifier.get(seed), width, height);
+	}
+	
+	default NoiseGenerator modify(NoiseModifier... modifiers) {
+		return (seed, width, height) -> {
+			float[][] noise = get2DNoise(seed, width, height);
+			for(NoiseModifier mod: modifiers)
+				mod.modify(seed, noise);
+			return noise;
+		};
+	}
+	
+	@Override
+	default ValueFetcher get(long seed, int width, int height) {
+		float[][] noise = get2DNoise(seed, width, height);
+		return (x, y) -> noise[x][y];
+	}
 	
 	NoiseGenerator BLANK = (seed, width, height) -> {
 		float[][] values = new float[width][height];
@@ -13,8 +36,6 @@ public interface NoiseGenerator {
 			Arrays.fill(values[x], 1f);
 		return values;
 	};
-	
-	// NoiseGenerator RADIAL_DISTANCE = islandMask(1);
 	
 	// value given to modifier is 1 if at max value, 0 at minimum value.
 	static NoiseGenerator islandMask(float dropOffSpeed) {
@@ -28,7 +49,7 @@ public interface NoiseGenerator {
 					float xd = Math.abs(x-width/2f);
 					float yd = Math.abs(y-height/2f);
 					float dist = (float) Math.hypot(xd, yd);
-					values[x][y] = 1 - (float) Math.pow(dist/maxDist, dropOffSpeed);
+					values[x][y] = 1 - (float) Math.pow(Math.min(1, dist/maxDist), dropOffSpeed);
 				}
 			}
 			

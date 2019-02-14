@@ -1,4 +1,4 @@
-package miniventure.game.file;
+package miniventure.game.world;
 
 public enum SaveSection {
 	

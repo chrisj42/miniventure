@@ -1,7 +1,5 @@
 package miniventure.game.world;
 
-import miniventure.game.world.worldgen.WorldConfig;
-
 public class DisplayWorld extends LevelManager {
 	
 	@Override
@@ -13,9 +11,6 @@ public class DisplayWorld extends LevelManager {
 	public boolean worldLoaded() {
 		return true;
 	}
-	
-	@Override
-	public boolean createWorld(WorldConfig config) { return true; }
 	
 	@Override
 	public void exitWorld() {}

@@ -9,10 +9,15 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 
+import static miniventure.game.world.worldgen.noise.NoiseModifier.*;
+import static miniventure.game.world.worldgen.noise.NoiseModifier.NoiseValueMerger.*;
+import static miniventure.game.world.worldgen.noise.NoiseGenerator.islandMask;
+
+/** @noinspection SameParameterValue*/
 public class Testing {
 	
 	/** @noinspection UnnecessaryLocalVariable, unused, RedundantSuppression */
-	public static NoiseConfiguration getTerrain() {
+	public static NoiseGenerator getTerrain() {
 		// NoiseConfiguration mountains = new NoiseConfiguration(new Coherent2DNoiseFunction(2, 2))
 		// 	.modify(NoiseModifier.combine(new Coherent2DNoiseFunction(50, 8), 1))
 		// 	.modify(NoiseModifier.combine(new Coherent2DNoiseFunction(32, 6), 1))
@@ -21,25 +26,25 @@ public class Testing {
 		
 		// Noise features = new Noise(new int[] {1,32,8,2,4,16}, new int[] {4,2,1}); // good for terrain features..?
 		
-		NoiseConfiguration terrain = new NoiseConfiguration(new Coherent2DNoiseFunction(36, 3))
-			.modify(NoiseModifier.combine(new Noise(new int[] {1,32,8,2,4,16}, new int[] {4,2,1}), 1))
-			.modify(NoiseModifier.FILL_VALUE_RANGE)
-			.modify(NoiseModifier.multiply(NoiseGenerator.islandMask(1)))
-			// .modify(NoiseModifier.FILL_VALUE_RANGE)
-			// .modify(NoiseModifier.combine(NoiseGenerator.islandMask(1), .25f))
-		;
+		NoiseGenerator heightMask = islandMask(1).modify(
+			FILL_VALUE_RANGE,
+			forEach((noise, x, y) -> (float) Math.pow(noise, 2)),
+			FILL_VALUE_RANGE
+		);
 		
-		NoiseConfiguration features = new NoiseConfiguration(new Coherent2DNoiseFunction(12, 2))
-		// NoiseConfiguration trees = new NoiseConfiguration(features)
-			.modify(NoiseModifier.FILL_VALUE_RANGE)
-		;
+		NoiseGenerator terrain = new Coherent2DNoiseFunction(36, 3)
+			.modify(
+			combine(new Noise(new int[] {1,32,8,2,4,16}, new int[] {4,2,1}), .5f)
+			,FILL_VALUE_RANGE
+			,combine(islandMask(1), MULTIPLY)
+			,FILL_VALUE_RANGE
+			,combine(islandMask(2), heightMask)
+		);
 		
-		NoiseConfiguration heightMask = new NoiseConfiguration(NoiseGenerator.BLANK)
-			.modify(NoiseModifier.multiply(NoiseGenerator.islandMask(2)))
-			// .modify(NoiseModifier.FILL_VALUE_RANGE)
-		;
+		NoiseGenerator features = new Coherent2DNoiseFunction(12, 2)
+			.modify(FILL_VALUE_RANGE);
 		
-		return features;
+		return terrain;
 	}
 	
 	public static void main(String[] args) {
@@ -50,48 +55,31 @@ public class Testing {
 		final int height = 300;
 		final int scale = 2;
 		
-		// float[] thresholds = getThresholds(32);
-		float[] thresholds = {.05f, .95f};
-		Color[] colors = {Color.GRAY, Color.GREEN, Color.GREEN.darker()};
+		// float[] thresholds = getThresholds(8);
+		float[] thresholds = {.2f/*, .5f, .6f, .7f, .8f, .9f*/};
+		Color[] colors = getColors(thresholds.length+1, false); // add 1 to threshold count to do black-gray instead of black-white
+		// Color[] colors = {Color.BLACK, Color.DARK_GRAY, Color.DARK_GRAY.brighter()};
 		
 		Random rand = new Random();
 		boolean repeat = true;
 		while(repeat)
-			// repeat = displayNoise(width, height, scale, getTerrain().get2DNoise(rand.nextLong(), width, height), thresholds, false);
 			repeat = displayNoise(width, height, scale, getTerrain().get2DNoise(rand.nextLong(), width, height), thresholds, colors);
-	}
-	
-	/** @noinspection SameParameterValue*/
-	private static boolean displayNoise(int width, int height, int scale, float[][] noise, float[] thresholds, boolean color) {
-		int sectionCount = thresholds.length+1;
-		float sectionSize = (color?360f:255f) / sectionCount;
-		
-		Color[] colors = new Color[sectionCount];
-		
-		// int col = color?360:255;
-		for(int i = 0; i < colors.length; i++) {
-			int col = (int) (i*sectionSize);
-			colors[i] = color ? Color.getHSBColor((1-col/360f)+.6f, 1, 1) : new Color(col, col, col);
-		}
-		
-		return displayNoise(width, height, scale, noise, thresholds, colors);
 	}
 	
 	private static boolean displayNoise(int width, int height, int scale, float[][] noise, float[] thresholds, Color[] thresholdColors) {
 		
 		Color[][] colors = new Color[width][height];
-		final Color maxColor = thresholdColors[thresholdColors.length-1];
 		for(int x = 0; x < width; x++) {
 			for(int y = 0; y < height; y++) {
-				float val = noise[x][y];
-				Color color = maxColor;
+				final float val = noise[x][y];
+				int colorIdx = thresholds.length; // color array is 1 larger than threshold array
 				for(int i = 0; i < thresholds.length; i++) {
 					if(val < thresholds[i]) {
-						color = thresholdColors[i];
+						colorIdx = i;
 						break;
 					}
 				}
-				colors[x][y] = color;
+				colors[x][y] = thresholdColors[colorIdx];
 			}
 		}
 		
@@ -119,11 +107,30 @@ public class Testing {
 		return JOptionPane.showConfirmDialog(null, viewPanel, "Noise", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE) == JOptionPane.OK_OPTION;
 	}
 	
-	private static float[] getThresholds(int colorCount) {
-		float[] thresholds = new float[colorCount-1];
+	private static float[] getThresholds(int sectionCount) {
+		float[] thresholds = new float[sectionCount-1];
 		for(int i = 0; i < thresholds.length; i++)
-			thresholds[i] = (i+1)*1f/thresholds.length;
+			thresholds[i] = (i+1)*1f/sectionCount;
 		return thresholds;
+	}
+	
+	// colors are equally spaced in color-space regardless of threshold values.
+	private static Color[] getColors(int thresholdCount, boolean color) {
+		// the thresholds account for the end of each range, but not the beginning. Hence, the number of colors is 1 greater than the number of thresholds.
+		int colorCount = thresholdCount + 1;
+		// now we need to know how much to change the color by so that the last color is at the top of the range. The number of changes is 1 less than the number of colors.
+		float colorDelta = colorCount == 1 ? 0 : (color?1f:255f) / (colorCount - 1);
+		// if there are no thresholds, i.e. only one color, then the delta is invalid and the range will not be covered, hence the color count check.
+		
+		Color[] colors = new Color[colorCount];
+		
+		// int col = color?360:255;
+		for(int i = 0; i < colors.length; i++) {
+			int col = (int) (i*colorDelta);
+			colors[i] = color ? Color.getHSBColor((1-col)+.6f, 1, 1) : new Color(col, col, col);
+		}
+		
+		return colors;
 	}
 	
 	private static int[] parseInts(String str) {

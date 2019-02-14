@@ -1,11 +1,12 @@
 package miniventure.game.client;
 
-import miniventure.game.file.WorldFile;
-import miniventure.game.util.function.ValueFunction;
+import miniventure.game.world.WorldFile;
 
 public interface ServerManager {
 	
-	void startServer(WorldFile worldFile, final ValueFunction<Boolean> callback);
+	boolean createWorld(WorldFile worldFile);
+	
+	boolean startServer(WorldFile worldFile);
 	void closeServer();
 	
 }

@@ -1,12 +1,13 @@
 package miniventure.game.world;
 
+import miniventure.game.util.Version;
 import miniventure.game.world.tile.Tile.TileData;
-import miniventure.game.world.worldgen.LevelGenerator;
+import miniventure.game.world.worldgen.island.IslandType;
 
 public interface LevelFetcher {
 	
-	Level makeLevel(int levelId, LevelGenerator generator);
+	Level makeLevel(int levelId, long seed, IslandType islandType);
 	
-	Level loadLevel(int levelId, TileData[][] tileData);
+	Level loadLevel(final Version version, int levelId, TileData[][] tileData, String[] entityData);
 	
 }

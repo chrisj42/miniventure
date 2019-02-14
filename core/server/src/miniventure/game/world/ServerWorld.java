@@ -9,9 +9,8 @@ import java.util.Map;
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.EntityAddition;
 import miniventure.game.GameProtocol.EntityRemoval;
+import miniventure.game.GameProtocol.MapRequest;
 import miniventure.game.GameProtocol.WorldData;
-import miniventure.game.ProgressPrinter;
-import miniventure.game.file.WorldFile;
 import miniventure.game.item.FoodType;
 import miniventure.game.item.ResourceType;
 import miniventure.game.item.ToolItem;
@@ -19,6 +18,7 @@ import miniventure.game.item.ToolItem.Material;
 import miniventure.game.item.ToolType;
 import miniventure.game.server.GameServer;
 import miniventure.game.util.SyncObj;
+import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ServerEntity;
@@ -26,8 +26,7 @@ import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.tile.ServerTileType;
 import miniventure.game.world.tile.Tile.TileData;
 import miniventure.game.world.tile.TileTypeEnum;
-import miniventure.game.world.worldgen.IslandReference;
-import miniventure.game.world.worldgen.LevelGenerator;
+import miniventure.game.world.worldgen.island.IslandType;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -42,13 +41,16 @@ public class ServerWorld extends WorldManager {
 	
 	private static final LevelFetcher levelFetcher = new LevelFetcher() {
 		@Override
-		public Level makeLevel(int levelId, LevelGenerator generator) {
-			return new ServerLevel(levelId, generator);
+		public Level makeLevel(int levelId, long seed, IslandType islandType) {
+			return null;//new ServerLevel(levelId, generator);
 		}
 		
 		@Override
-		public Level loadLevel(int levelId, TileData[][] tileData) {
-			return new ServerLevel(levelId, tileData);
+		public Level loadLevel(final Version version, int levelId, TileData[][] tileData, String[] entityData) {
+			ServerLevel level = new ServerLevel(levelId, tileData);
+			for(String e: entityData)
+				level.addEntity(ServerEntity.deserialize(e, version));
+			return level;
 		}
 	};
 	
@@ -57,7 +59,7 @@ public class ServerWorld extends WorldManager {
 	private final EntityManager entityManager = new EntityManager();
 	
 	
-	private IslandReference[] islandStores;
+	private LevelCache[] islandStores;
 	private WorldFile worldFile; // should hold island stores?
 	private GameServer server;
 	
@@ -366,9 +368,12 @@ public class ServerWorld extends WorldManager {
 	
 	public GameServer getServer() { return server; }
 	
-	public IslandReference[] getIslandStores() { return islandStores; }
-	
 	public WorldFile getWorldFile() { return worldFile; }
+	
+	public MapRequest getMapData() {
+		
+		return new MapRequest();
+	}
 	
 	@Override
 	public ServerLevel getEntityLevel(Entity e) { return entityManager.getLevel((ServerEntity) e); }

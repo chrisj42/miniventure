@@ -174,9 +174,7 @@ public class GameServer implements GameProtocol {
 					}
 				});
 				
-				forPacket(object, MapRequest.class, req -> {
-					connection.sendTCP(new MapRequest(world.getIslandStores()));
-				});
+				forPacket(object, MapRequest.class, req -> connection.sendTCP(world.getMapData()));
 				
 				forPacket(object, LevelChange.class, change -> {
 					// check to see if the level exists (client shouldn't be able to crash server), and if the client is allowed to change to the given level

@@ -1,0 +1,118 @@
+some terrain feature notes:
+- stones/boulders will be different from large stone collections...
+- the difference needs to be that in some cases, there is stone in smaller amounts, and sometimes larger...
+
+
+characteristics of each island type:
+
++ starter island
+- larger than usual
+- plenty of trees
+- small "mountainous" areas with little height
+- covered mostly in grass, otherwise
+- thin beach around perimeter
+- beach is only source of sand
+
+- can't do much on starter island alone; the good stuff is on other islands
+- starter island only really has basic resources to get you off the island, i.e. wood and stone
+
++ desert island
+- almost entirely sand
+- a couple pockets of grass/water/trees (oases); not too many
+- cactus, of course
+- occasional sandy-wind overlay
+- mesas? large rock formations?
+- maybe cracked ground in places...
+- scattered tumbleweed, dead branches, dried bones
+- mobs
+	- sand lizards
+- resources
+	- cactus
+	- sand
+	- bones?
+
+- Having a hue/shading parameter for each tile, based on its position, would probably help with adding variation.
+
++ swamp
+- almost jungle-like trees, but dispersed
+- mist overlay
+- land consists of good-sized blobs, with some trees, with negative space filled with rivers/water
+- mobs
+	- 
+- resources
+	- certain type of dirt that's better?
+	- 
+
++ snowy island
+- trees covered in snow
+- has open areas, and then more-forested areas
+- has stone sections..?
+- frozen lake; frozen ponds here and there?
+- climate overlay of snow on screen?
+- mobs
+	- polar bears
+- resources
+	- snow
+	- ice
+	- frozen artifacts? of a sort? stuff found frozen (could be natural)
+
++ heavily forested / jungle
+- many trees, paths among the trees (paths can be many tiles across sometimes)
+- ponds every now and then
+- 
+- mobs
+	- wanna say monkeys, but that's unlikely.
+	- 
+- resources
+	- moss-covered stone
+	- 
+
++ rocky island (TBD if sensible)
+- beach is intermittent with rocks
+- light fog overlay?
+- mobs
+	- 
+- resources
+	- 
+
+
+----
+emergent patterns in island layout:
+- "structure" placement, generation is random but has a given area is can occupy; ex oases, clearing, boulders / stone bits
+- paths among a different type (i.e. path consists of one pattern, non-path is another pattern); ex paths through trees, and maybe stone later; single path, or many crossing paths, with variable path width
+	- probably make single path from pattern to make many; just use the map, and follow a "valley". The path could then even be branched off, if desired.
+- 
+
+
+-- possible implementation / relationships --
+- islands generated via sequence of "structures"; base type is deep water (which can't be built over / changed by the player)
+- first structure is the actual island, likely made of dirt; the basic "island" shape will only distinguish "land" from water. What "land" is can be passed in (coords are given and a tiletype is expected in return).
+
+-- can structures have the following interface?
+- have a size
+- have a tile pattern (generator)
+- pattern is made of "names" such that the actual tile makers for each name is passed in on call
+- names can have default makers; i.e. not every maker must be specified
+- something about seeds, idk
+
+
+- sand for beaches ought to be checked after gen to ensure it can reach water directly or through sand tiles. Or maybe another method could be used to generate the ocean ass different from the island... Key is I have to be able to produce a single landmass when I want to.
+	- pretty easy; after generation, iterate through tiles; when land tile is found, check if its already part of a known landmass, and if not make a new one. Depth first additions begin when a land tile is found
+
+
+----
+
+- maybe islands could have different classes of materials...
+- follow a bit from astroneer; maybe materials are a little funky. :P
+
+
+- if I were to allow heights to some extent... I mean, it's all in the rendering.
+- how about blur for depth as well as shadow? Shadow works for caves, but not for well lit areas.
+
+- height will be allowed, but it will be limited. Caves won't exist. First kind of height will only exist for stone.
+	- when stone is on top of stone, the rendering depends on the depth of the surrounding tiles
+	- if a stone layer is "on top of" an edge stone piece, then that layer is considered a "half layer" and no further stone can be located above it. It uses a reduced sprite that doesn't fill the entire space, allowing the edge from the layer below to show.
+	- stone layers on top of an inner corner piece, where the sides are stone but a corner isn't, also must modify their sprite, in order to avoid the corner and connect with the edge half layers.
+	- this essentially means that stone layers have to consider each corner in turn:
+		- if neither side is stone, then do a reduced corner
+		- if 

@@ -1,7 +1,7 @@
 package miniventure.game.world;
 
 import miniventure.game.world.entity.Entity;
-import miniventure.game.world.worldgen.LevelGenerator;
+import miniventure.game.world.worldgen.island.TerrainGenerator;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
@@ -13,7 +13,7 @@ public class DisplayLevel extends RenderLevel {
 	// private final LevelGenerator generator;
 	//private final HashMap<Point, Chunk> chunks = new HashMap<>();
 	
-	public DisplayLevel(LevelGenerator generator) {
+	public DisplayLevel(TerrainGenerator generator) {
 		super(new DisplayWorld(), 0, generator.generateTiles(), DisplayTile::new);
 		
 		// this.generator = generator;

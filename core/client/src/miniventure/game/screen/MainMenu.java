@@ -12,7 +12,7 @@ import miniventure.game.util.VersionInfo;
 import miniventure.game.world.ClientWorld;
 import miniventure.game.world.DisplayLevel;
 import miniventure.game.world.TimeOfDay;
-import miniventure.game.world.worldgen.LevelGenerator;
+import miniventure.game.world.worldgen.island.TerrainGenerator;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
@@ -80,7 +80,7 @@ public class MainMenu extends BackgroundProvider {
 		TimeOfDay time = TimeOfDay.values[MathUtils.random(TimeOfDay.values.length-1)];
 		lightOverlay = TimeOfDay.getSkyColor(time.getStartOffsetSeconds());
 		
-		LevelGenerator generator = new LevelGenerator(MathUtils.random.nextLong(), 200, 100/*, true*/);
+		TerrainGenerator generator = new TerrainGenerator(MathUtils.random.nextLong(), 200, 100/*, true*/);
 		backgroundLevel = new DisplayLevel(generator);
 		
 		Vector2 size = new Vector2(levelView.getViewWidth(), levelView.getViewHeight());//.scl(0.5f);

@@ -1,32 +1,29 @@
-package miniventure.game.world.worldgen;
+package miniventure.game.world.worldgen.island;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
 
 import miniventure.game.world.tile.TileTypeEnum;
-import miniventure.game.world.worldgen.noise.Coherent2DNoiseFunction;
-import miniventure.game.world.worldgen.noise.Noise;
-import miniventure.game.world.worldgen.noise.NoiseConfiguration;
-import miniventure.game.world.worldgen.noise.NoiseGenerator;
-import miniventure.game.world.worldgen.noise.NoiseModifier;
+import miniventure.game.world.worldgen.island.TileMap.TileMapBuilder;
+import miniventure.game.world.worldgen.island.TileSource.TypeSource;
 
 import static miniventure.game.world.tile.TileTypeEnum.*;
 
-public class LevelGenerator {
+public class TerrainGenerator {
 	
 	/*
-		- levels need to be islands.
+		- this generates a tilemap for an island, but not any entities...
 		- major value map is going to be elevation, increases as you go to the center
 	 */
 	
-	private static final TileMap PLAINS = new TileMap()
+	/*private static final TileMap PLAINS = new TileMap()
 		.addRegion(TileTypeEnum.WATER, 2)
 		.addRegion(TileTypeEnum.SAND, 1)
 		.addRegion(TileTypeEnum.GRASS, 2)
 		.addRegion(TileTypeEnum.STONE_PATH, 1)
 		.addRegion(TileTypeEnum.STONE, 2)
 		.addRegion(TileTypeEnum.STONE, 2);
-	
+	*/
 	public final int levelWidth, levelHeight;
 	private final int noiseOffX = 0, noiseOffY = 0; // todo bring back for validation when new algo is made? unless algo doesn't need it...
 	
@@ -61,14 +58,14 @@ public class LevelGenerator {
 	 */
 	
 	// public LevelGenerator(long seed) { this(seed, 0, 0); }
-	public LevelGenerator(long seed, int width, int height) {
+	public TerrainGenerator(long seed, int width, int height) {
 		levelWidth = width;
 		levelHeight = height;
 		
 		// values = Testing.getTerrain().get2DNoise(seed, width, height);
 		
-		float[][] terrain = new NoiseConfiguration(new Coherent2DNoiseFunction(36, 3))
-			.modify(NoiseModifier.combine(new Noise(new int[] {1,32,8,2,4,16}, new int[] {4,2,1}), 1))
+		/*float[][] terrain = new NoiseConfiguration(new Coherent2DNoiseFunction(36, 3))
+			.modify(NoiseModifier.weigh(new Noise(new int[] {1,32,8,2,4,16}, new int[] {4,2,1}), 1))
 			.modify(NoiseModifier.FILL_VALUE_RANGE)
 			.modify(NoiseModifier.multiply(NoiseGenerator.islandMask(1)))
 			// .modify(NoiseModifier.FILL_VALUE_RANGE)
@@ -79,13 +76,40 @@ public class LevelGenerator {
 			// NoiseConfiguration trees = new NoiseConfiguration(features)
 			.modify(NoiseModifier.FILL_VALUE_RANGE)
 			.get2DNoise(seed, width, height);
+		*/
+		TileMap map = new TileMapBuilder()
+			.addRegion(1, new TypeSource(WATER))
+			// .addRegion(9, )
+			.get();
 		
+		
+		/*
+			hmm... to get the tiletype of a tile, the generator goes through a series of checks against a series of values. The value is determined by the first check, which holds a reference to the noise generator it uses....
+			
+			before starting the first check, you must initialize it by passing 
+			
+			
+			highest level goal is going to be an enum of island generators.
+			- These island generators will specify their specific island characteristics by providing the tile map, and later, spawn patterns of mobs.
+				- The spawn patterns may require the enum to be in the server module.
+			
+			- tile map will be made with custom map size per island (ie each type specifies its map size)
+			- island type will be given a seed and expected to return a TileTypeEnum[][][].
+				- In the future, if the level generator needs to alter initial data besides type, then the island type will have to pair up tile types with the data they should be added with.
+			- generation process is as follows:
+				- create tiletype 3d array
+				- get noise values from all noise configs, using the seed gotten from sequential nextLong calls for each config
+				- Tile mappers (which are tile sources) consist of a noise ordinal, a value check, and an if-true TileSource and if-false tile source
+					- tile sources accept a MapFunction to turn a noise ordinal into a float noise value
+					- todo I can't figure out how to link noise configs and tile maps / conditions nicely; should tile maps all have their own noise configs? Should they be applied during use? I think I need to try and establish some more abstract use cases, where I use noise configs and tile maps or whatever in non-code form so I can get a feel of what relationships, interdependencies, and the like exist between the range of island types I'll have. Come up with a decent pattern first, at least desired if not strictly implementable; only after I've decided on what patterns I'll need for all the islands total will I look at ways to implement those patterns nicely.
+			
+		 */
 		
 		values = new TileTypeEnum[width][height];
 		for(int x = 0; x < width; x++) {
 			for(int y = 0; y < height; y++) {
-				float terrainv = terrain[x][y];
-				float featurev = features[x][y];
+				float terrainv = 0;//terrain[x][y];
+				float featurev = 0;//features[x][y];
 				TileTypeEnum type;
 				if(terrainv < .1)
 					type = TileTypeEnum.WATER;

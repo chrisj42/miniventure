@@ -11,10 +11,9 @@ import java.util.List;
 import miniventure.game.GameCore;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.ServerManager;
-import miniventure.game.file.Preferences;
-import miniventure.game.file.WorldFile;
+import miniventure.game.Preferences;
+import miniventure.game.world.WorldFile;
 import miniventure.game.server.ServerCore;
-import miniventure.game.util.function.ValueFunction;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
@@ -85,15 +84,20 @@ public class DesktopLauncher {
 			config.height = ClientCore.DEFAULT_SCREEN_HEIGHT;
 			new LwjglApplication(new ClientCore(new ServerManager() {
 				@Override
-				public void startServer(WorldFile worldFile, ValueFunction<Boolean> callback) {
+				public boolean createWorld(WorldFile worldFile) {
+					
+					return false;
+				}
+				
+				@Override
+				public boolean startServer(WorldFile worldFile) {
 					boolean started = ServerCore.initServer(worldFile, false);
 					if(!started)
-						callback.act(false);
-					else {
-						// server running, and world loaded; now, get the server world updating
-						new Thread(new ThreadGroup("server"), ServerCore::run, "Miniventure Server").start();
-						callback.act(true); // ready to connect
-					}
+						return false;
+					
+					// server running, and world loaded; now, get the server world updating
+					new Thread(new ThreadGroup("server"), ServerCore::run, "Miniventure Server").start();
+					return true; // ready to connect
 				}
 				
 				@Override

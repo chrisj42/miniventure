@@ -1,4 +1,4 @@
-package miniventure.game.file;
+package miniventure.game;
 
 public class Preferences {
 	

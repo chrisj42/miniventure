@@ -1,7 +1,5 @@
 package miniventure.game.world;
 
-import java.util.Random;
-
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.DatalessRequest;
 import miniventure.game.GameProtocol.LevelData;
@@ -11,7 +9,6 @@ import miniventure.game.client.ClientCore;
 import miniventure.game.client.GameClient;
 import miniventure.game.client.GameScreen;
 import miniventure.game.client.ServerManager;
-import miniventure.game.file.WorldFile;
 import miniventure.game.screen.ErrorScreen;
 import miniventure.game.screen.InputScreen;
 import miniventure.game.screen.InputScreen.CircularFunction;
@@ -21,7 +18,6 @@ import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.RespawnScreen;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
-import miniventure.game.world.worldgen.WorldConfig;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -131,8 +127,8 @@ public class ClientWorld extends LevelManager {
 						"Average island diameter (default "+GameCore.DEFAULT_WORLD_SIZE+"):",
 						"Value must be an integer >= 10"
 					}, self));
-				else
-					startWorld(new WorldConfig(worldname, sizeVal, sizeVal, new Random().nextLong()));
+				// else
+				// 	startWorld(/*WorldFile.createWorld(worldname, sizeVal, new Random().nextLong())*/);
 			})));
 		});
 	}
@@ -149,18 +145,15 @@ public class ClientWorld extends LevelManager {
 		new Thread(() -> {
 			// start a server, and attempt to connect the client. If successful, it will set the screen to null; if not, the new server will be closed.
 			
-			serverManager.startServer(worldFile, serverSuccess -> {
-				if(!serverSuccess)
-					Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen("Error starting local server; the port may already be in use.\nPress 'reconnect' to attempt to connect to the existing server.")));
-				else
-					client.connectToServer(loadingScreen, "localhost", success -> {
-						if(!success) {
-							serverManager.closeServer();
-							client = new GameClient();
-						}
-					});
-			});
-			
+			if(!serverManager.startServer(worldFile))
+				Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen("Error starting local server; the port may already be in use.\nPress 'reconnect' to attempt to connect to the existing server.")));
+			else
+				client.connectToServer(loadingScreen, "localhost", success -> {
+					if(!success) {
+						serverManager.closeServer();
+						client = new GameClient();
+					}
+				});
 		}).start();
 	}
 	

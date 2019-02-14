@@ -51,7 +51,7 @@ public class MapScreen extends MenuScreen {
 		Gdx.app.postRunnable(() -> {
 			table.clearChildren();
 			for(int i = 0; i < mapRequest.islands.length; i++) {
-				Point p = mapRequest.islands[i];
+				Point p = null;//mapRequest.islands[i];
 				final int levelid = i;
 				VisTextButton btn = makeButton("Island "+(i+1), () -> {
 					Level playerLevel = ClientCore.getWorld().getMainPlayer().getLevel();

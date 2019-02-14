@@ -27,8 +27,7 @@ import miniventure.game.world.entity.particle.ParticleData;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.Tile.TileData;
 import miniventure.game.world.tile.Tile.TileTag;
-import miniventure.game.world.worldgen.IslandReference;
-import miniventure.game.world.worldgen.ProtoIsland;
+import miniventure.game.world.worldgen.island.IslandType;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
@@ -61,6 +60,8 @@ public interface GameProtocol {
 		kryo.register(TileData[][].class);
 		// kryo.register(ChunkData.class);
 		// kryo.register(ChunkData[].class);
+		kryo.register(IslandType.class);
+		kryo.register(IslandReference[].class);
 		kryo.register(Tag.class);
 		kryo.register(EntityTag.class);
 		kryo.register(TileTag.class);
@@ -187,6 +188,21 @@ public interface GameProtocol {
 		}
 	}
 	
+	// used in MapRequest below; holds general data about a single island.
+	class IslandReference {
+		public final int levelId;
+		public final Point location;
+		public final IslandType type; // gen parameter
+		
+		private IslandReference() { this(0, null, null); }
+		public IslandReference(int levelId, Point location, IslandType type) {
+			this.levelId = levelId;
+			this.location = location;
+			this.type = type;
+		}
+	}
+	
+	// for server to transmit world layout to client, so it can display a world map.
 	class MapRequest {
 		public final IslandReference[] islands;
 		
