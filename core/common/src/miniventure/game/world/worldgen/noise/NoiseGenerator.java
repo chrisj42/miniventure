@@ -11,6 +11,8 @@ public interface NoiseGenerator extends ValueSetFetcher {
 	
 	float[][] get2DNoise(long seed, int width, int height);
 	
+	// seed changes really only matter when you use the same map multiple times. The same seed used on different algorithms cannot be directly said to cause artifacts not seen by any other static association of two seeds. Hence, the need for seed changes is heavily tied to the nature of the generator.
+	// Noise instances, that start with a map of white noise and then smooth it, are an example of a generator for which having the same seed causes a noticeable effect. Let's test that...
 	default NoiseGenerator modifySeed(MapFunction<Long, Long> seedModifier) {
 		return (seed, width, height) -> get2DNoise(seedModifier.get(seed), width, height);
 	}

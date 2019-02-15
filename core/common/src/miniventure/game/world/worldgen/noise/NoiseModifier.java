@@ -3,9 +3,8 @@ package miniventure.game.world.worldgen.noise;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.world.worldgen.noise.ValueSetFetcher.ValueFetcher;
 
-// this interface is for noise patterns that alter existing noise.
-// It cannot create noise, only alter, therefore all implementations *should* take into account the existing data; if it doesn't then it should be a NoiseGenerator.
-// 
+// for noise patterns that alter existing noise.
+// direct instances usually alter the noise according to some predetermined pattern; the seed should not be necessary.
 @FunctionalInterface
 public interface NoiseModifier {
 	

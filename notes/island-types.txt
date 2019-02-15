@@ -17,12 +17,14 @@ characteristics of each island type:
 - starter island only really has basic resources to get you off the island, i.e. wood and stone
 
 + desert island
-- almost entirely sand
-- a couple pockets of grass/water/trees (oases); not too many
+- much sand
+- much red rock formations, to provide some semblance of structure so it isn't just unending sand.
+	- but do it in areas; some areas of the island *are* unending sand, punctuated only by cactus
+	- these "blank" areas could be a good place for oases, though there could be a low chance of having one among the red rocks
+- red rock areas may or may not show cracked ground instead of sand; could be a subarea, or when deep into the rocky paths, away from the open sand.
+- a couple pockets of grass/water/trees (oases)
 - cactus, of course
 - occasional sandy-wind overlay
-- mesas? large rock formations?
-- maybe cracked ground in places...
 - scattered tumbleweed, dead branches, dried bones
 - mobs
 	- sand lizards

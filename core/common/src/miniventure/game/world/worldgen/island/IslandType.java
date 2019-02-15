@@ -1,6 +1,7 @@
 package miniventure.game.world.worldgen.island;
 
 import miniventure.game.world.tile.TileTypeEnum;
+import miniventure.game.world.worldgen.noise.Testing;
 
 public enum IslandType {
 	
@@ -10,12 +11,10 @@ public enum IslandType {
 		@Override
 		void generateIsland(ProtoIsland island) {
 			/*
-			TODO current goal is to try and lessen the number of ocean values that occur in the terrain noise when unwanted. I need a way of increasing the values near the center more, but this increase happens most for lower values. i.e., lower values near the center go up a lot, but higher values change little, and lower values near the edges also change little.
-			TODO One way of going about this could be making a way to use the values of a noise map as a means of specifying the effect magnitude of changes to that tile's value.
-			
 				- refined island shape
 					- fill land as dirt
 						- all land within 2 tiles of sea is sand
+						- using noise for sand really doesn't work out too well because I post-process the island, and noise values will reflect the inconsistencies that the post-processing tried to fix.
 					- map perimeter is deep water 
 					-- else if noise value is just under land threshold, or tile is within certain radius from center, it's water
 					-- else (i.e. low noise value and outside radius) it's deep water
@@ -25,7 +24,11 @@ public enum IslandType {
 				- usage of noise repeatedly requires noise to be created beforehand and passed in, so it remains available
 			 */
 			
-			// 
+			float[][] terrain = Testing.getTerrain().get2DNoise(island.requestSeed(), island.width, island.height);
+			
+			TileGroupMap groupMap = TileGroupMap.process(new NoiseTileCondition(terrain, val -> val > .2f), island);
+			
+			
 		}
 	},
 	
