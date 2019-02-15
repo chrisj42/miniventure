@@ -21,42 +21,14 @@ import static miniventure.game.world.worldgen.noise.NoiseGenerator.islandMask;
 /** @noinspection SameParameterValue*/
 public class Testing {
 	
-	/** @noinspection UnnecessaryLocalVariable, unused, RedundantSuppression */
-	public static NoiseGenerator getTerrain() {
-		// NoiseConfiguration mountains = new NoiseConfiguration(new Coherent2DNoiseFunction(2, 2))
-		// 	.modify(NoiseModifier.combine(new Coherent2DNoiseFunction(50, 8), 1))
-		// 	.modify(NoiseModifier.combine(new Coherent2DNoiseFunction(32, 6), 1))
-		// 	.modify(NoiseModifier.multiply(NoiseGenerator.ISLAND_MASK, 2))
-		// 	.modify(NoiseModifier.FILL_VALUE_RANGE);
-		
-		// Noise features = new Noise(new int[] {1,32,8,2,4,16}, new int[] {4,2,1}); // good for terrain features..?
-		
-		NoiseGenerator heightMask = islandMask(1).modify(
-			FILL_VALUE_RANGE,
-			forEach((noise, x, y) -> (float) Math.pow(noise, 2)),
-			FILL_VALUE_RANGE
-		);
-		
-		NoiseGenerator terrain = new Coherent2DNoiseFunction(36, 3).modify(
-			// combine(new Coherent2DNoiseFunction(36, 3).modifySeed(seed -> seed+1), 0.5f)
-			// ,combine(new Coherent2DNoiseFunction(36, 3).modifySeed(seed -> seed+2), 0.5f)
-			combine(new Noise(new int[] {1,32,8,2,4,16}, new int[] {4,2,1}), .5f)
-			,FILL_VALUE_RANGE
-			,combine(islandMask(1), MULTIPLY)
-			,FILL_VALUE_RANGE
-			// ,combine(islandMask(2), heightMask)
-		);
-		
-		NoiseGenerator features = new Coherent2DNoiseFunction(12, 2)
-			.modify(FILL_VALUE_RANGE);
-		
+	private static NoiseGenerator removeHoles(NoiseGenerator original) {
 		return (seed, width, height) -> {
-			float[][] noise = terrain.get2DNoise(seed, width, height);
+			float[][] noise = original.get2DNoise(seed, width, height);
 			TileGroupMap groupMap = TileGroupMap.process(new NoiseTileCondition(noise, val -> val >= .2f), new ProtoIsland(width, height, seed));
 			
-			System.out.println("match groups: "+groupMap.matches.size()+", fail groups: "+groupMap.fails.size());
+			// System.out.println("match groups: "+groupMap.matches.size()+", fail groups: "+groupMap.fails.size());
 			
-			System.out.println("removing excess matches...");
+			// System.out.println("removing excess matches...");
 			// remove all but the biggest match group, and any fail group not touching the edge.
 			TileGroup biggestMatch = null;
 			// cache the set, because the second for loop will modify during iteration
@@ -69,19 +41,53 @@ public class Testing {
 					match.switchSet(); // switches group to a fail group, modifying related maps and the match/fail sets; group is combined with any adjacent groups.
 			}
 			
-			System.out.println("removing excess fails...");
+			// System.out.println("removing excess fails...");
 			// now for the fail groups not touching the edge
 			for(TileGroup fail: groupMap.fails.toArray(new TileGroup[0])) {
 				if(!fail.touchesEdge())
 					fail.switchSet();
 			}
 			
-			System.out.println("after switching:\nmatch groups: "+groupMap.matches.size()+", fail groups: "+groupMap.fails.size());
+			// System.out.println("after switching:\nmatch groups: "+groupMap.matches.size()+", fail groups: "+groupMap.fails.size());
 			
 			forEach((val, x, y) -> groupMap.checkMatched(x, y) ? 1 : 0).modify(seed, noise);
 			
 			return noise;
 		};
+	}
+	
+	/** @noinspection UnnecessaryLocalVariable, unused, RedundantSuppression */
+	public static NoiseGenerator getTerrain() {
+		// NoiseConfiguration mountains = new NoiseConfiguration(new Coherent2DNoiseFunction(2, 2))
+		// 	.modify(NoiseModifier.combine(new Coherent2DNoiseFunction(50, 8), 1))
+		// 	.modify(NoiseModifier.combine(new Coherent2DNoiseFunction(32, 6), 1))
+		// 	.modify(NoiseModifier.multiply(NoiseGenerator.ISLAND_MASK, 2))
+		// 	.modify(NoiseModifier.FILL_VALUE_RANGE);
+		
+		// Noise features = new Noise(new int[] {1,32,8,2,4,16}, new int[] {4,2,1}); // good for terrain features..?
+		
+		NoiseGenerator heightMask = islandMask(1.3f).modify(
+			// FILL_VALUE_RANGE,
+			// forEach((noise, x, y) -> (float) Math.pow(noise, 2)),
+			FILL_VALUE_RANGE
+		);
+		
+		NoiseGenerator terrain = new Coherent2DNoiseFunction(36, 3).modify(
+			// combine(new Coherent2DNoiseFunction(36, 3).modifySeed(seed -> seed+1), 0.5f)
+			// ,combine(new Coherent2DNoiseFunction(36, 3).modifySeed(seed -> seed+2), 0.5f)
+			combine(new Noise(new int[] {1,32,8,2,4,16}, new int[] {4,2,1}), .5f)
+			,FILL_VALUE_RANGE
+			,combine(islandMask(1), MULTIPLY)
+			// ,FILL_VALUE_RANGE
+			,combine(islandMask(1), heightMask)
+			// ,combine(heightMask, 0.75f)
+			,FILL_VALUE_RANGE
+		);
+		
+		NoiseGenerator features = new Coherent2DNoiseFunction(12, 2)
+			.modify(FILL_VALUE_RANGE);
+		
+		return removeHoles(terrain);
 	}
 	
 	public static void main(String[] args) {
@@ -92,8 +98,8 @@ public class Testing {
 		final int height = 300;
 		final int scale = 2;
 		
-		// float[] thresholds = getThresholds(256);
-		float[] thresholds = {.2f/*, .5f, .6f, .7f, .8f, .9f*/};
+		// float[] thresholds = getThresholds(8);
+		float[] thresholds = {.15f/*, .5f, .6f, .7f, .8f, .9f*/};
 		Color[] colors = getColors(thresholds.length+1, false); // add 1 to threshold count to do black-gray instead of black-white
 		// Color[] colors = {Color.BLACK, Color.DARK_GRAY, Color.DARK_GRAY.brighter()};
 		
