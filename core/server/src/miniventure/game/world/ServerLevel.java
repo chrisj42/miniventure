@@ -14,7 +14,7 @@ import miniventure.game.world.entity.particle.ItemEntity;
 import miniventure.game.world.tile.ServerTile;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.Tile.TileData;
-import miniventure.game.world.worldgen.island.TerrainGenerator;
+import miniventure.game.world.tile.TileTypeEnum;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -35,8 +35,8 @@ public class ServerLevel extends Level {
 	
 	//private float timeCache = 0; // this is used when you should technically be updating < 1 tile in a frame.
 	
-	public ServerLevel(int levelId, TerrainGenerator levelGenerator) {
-		super(ServerCore.getWorld(), levelId, levelGenerator.generateTiles(), ServerTile::new);
+	public ServerLevel(int levelId, TileTypeEnum[][][] tiles) {
+		super(ServerCore.getWorld(), levelId, tiles, ServerTile::new);
 	}
 	
 	public ServerLevel(int levelId, TileData[][] tileData) {

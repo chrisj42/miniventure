@@ -14,3 +14,15 @@ task worldgentest(type: Jar) {
 }
 
 worldgentest.dependsOn classes
+
+task noisegentest(type: Jar) {
+	from files(sourceSets.main.output.classesDir)
+	from files(sourceSets.main.output.resourcesDir)
+	from {configurations.compile.collect {zipTree(it)}}
+	
+	manifest {
+		attributes 'Main-Class': "miniventure.game.world.worldgen.noise.Testing"
+	}
+}
+
+noisegentest.dependsOn classes

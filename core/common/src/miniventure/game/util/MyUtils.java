@@ -145,6 +145,9 @@ public final class MyUtils {
 		batch.setColor(prev);
 	}
 	
+	// useful as a method reference
+	public static <T> boolean notNull(T obj) { return obj != null; }
+	
 	public static boolean noException(Action action) { return noException(action, false); }
 	public static boolean noException(Action action, boolean printError) {
 		try {
@@ -164,8 +167,6 @@ public final class MyUtils {
 		// if(noException(music::play, true))
 		// 	return;// delay(1500, () -> tryPlayMusic(music));
 	}
-	
-	public static <T> boolean notNull(T obj) { return obj != null; }
 	
 	public static void delay(int milliDelay, Action action) { new DelayedAction(milliDelay, action).start(); }
 	

@@ -137,7 +137,7 @@ public abstract class Tile implements WorldObject {
 			String[] all = MyUtils.parseLayeredString(tileData);
 			data = Arrays.copyOfRange(all, 1, all.length);
 			
-			typeOrdinals = int[].class.cast(ArrayUtils.mapArray(all[0].split(","), int.class, Integer::parseInt));
+			typeOrdinals = ArrayUtils.mapArray(all[0].split(","), int.class, int[].class, Integer::parseInt);
 		}
 		
 		public String serialize() {

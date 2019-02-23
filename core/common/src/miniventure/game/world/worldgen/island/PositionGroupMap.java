@@ -6,11 +6,11 @@ import java.util.Set;
 
 import miniventure.game.util.function.ValueFunction;
 
-// returned by TileGroupProcess
 // Contains 2 sets of groups: those that matched the condition, and those that didn't.
-// Each group consists of tiles adjacent to 1 or more tiles already in the group (if the tile is not adjacent to any known group, a new group is created).
+// Each group consists of tiles (positions) adjacent to 1 or more tiles already in the group (if the tile is not adjacent to any known group, a new group is created).
 // Groups hold reference to adjacent groups in the opposite set.
-public class TileGroupMap {
+// originally held ProtoTiles, hence the comments talk of tiles; but I have since made this more flexible.
+public class PositionGroupMap {
 	
 	/*
 		Overview of usage and interface:
@@ -25,38 +25,43 @@ public class TileGroupMap {
 		- provide these two sets of groups as output.
 	 */
 	
-	public final HashSet<TileGroup> matches;
-	public final HashSet<TileGroup> fails;
-	private final GroupedTile[][] tileData;
+	@FunctionalInterface
+	public interface PositionalFetcher<T> {
+		T get(int x, int y);
+	}
 	
-	private TileGroupMap(HashSet<TileGroup> matches, HashSet<TileGroup> fails, GroupedTile[][] tileData) {
+	public final HashSet<PositionGroup> matches;
+	public final HashSet<PositionGroup> fails;
+	private final GroupedPosition[][] positionData;
+	
+	private PositionGroupMap(HashSet<PositionGroup> matches, HashSet<PositionGroup> fails, GroupedPosition[][] positionData) {
 		this.matches = matches;
 		this.fails = fails;
-		this.tileData = tileData;
+		this.positionData = positionData;
 	}
 	
 	public boolean checkMatched(int x, int y) {
-		return tileData[x][y].matches;
+		return positionData[x][y].matches;
 	}
 	
-	public static class GroupedTile {
-		public final ProtoTile tile;
+	public static class GroupedPosition {
+		public final int x;
+		public final int y;
 		private boolean matches;
 		private boolean edge;
-		private TileGroup group;
+		private PositionGroup group;
 		
-		private GroupedTile(ProtoTile tile, boolean matches, TileGroup group, ProtoIsland island) {
-			this.tile = tile;
+		private GroupedPosition(int x, int y, boolean matches, PositionGroup group, boolean edge) {
 			this.matches = matches;
 			this.group = group;
 			
-			int x = tile.pos.x;
-			int y = tile.pos.y;
-			this.edge = x == 0 || y == 0 || x == island.width - 1 || y == island.height - 1;
+			this.x = x;
+			this.y = y;
+			this.edge = edge;
 		}
 	}
 	
-	public static TileGroupMap process(TileCondition condition, ProtoIsland island) {
+	public static PositionGroupMap process(final int width, final int height, final PositionalFetcher<Boolean> matchFetcher) {
 		/*
 			- create list buffer for processing tiles, add first
 			
@@ -85,15 +90,15 @@ public class TileGroupMap {
 					- skip neighbors added to queue (but not yet processed) that are of the opposite 
 		 */
 		
-		// final int tileCount = island.width * island.height;
-		
 		// method of accessing GroupedTiles via coordinate.
-		GroupedTile[][] tileData = new GroupedTile[island.width][island.height];
+		GroupedPosition[][] positionData = new GroupedPosition[width][height];
 		// the two sets to which the groups may belong
-		final HashSet<TileGroup> matches = new HashSet<>();
-		final HashSet<TileGroup> fails = new HashSet<>();
+		final HashSet<PositionGroup> matches = new HashSet<>();
+		final HashSet<PositionGroup> fails = new HashSet<>();
 		
-		island.forEach(tile -> new TileGroup(tile, condition.isMatch(tile), island, tileData, matches, fails));
+		for(int x = 0; x < width; x++)
+			for(int y = 0; y < height; y++)
+				new PositionGroup(x, y, matchFetcher.get(x, y), width, height, positionData, matches, fails);
 		
 		// go through the tiles again, and this time create groups by looking at the top and right neighbors of each tile.
 		// if match, add them to the current tile's group (or add cur to their group if cur doesn't have a group), if both have a group then merge the smaller one into the larger.
@@ -102,58 +107,61 @@ public class TileGroupMap {
 		// the map of tiles to their group
 		// final HashMap<ProtoTile, TileGroup> groupMap = new HashMap<>(tileCount);
 		
-		island.forEach(pt -> {
-			final GroupedTile tile = tileData[pt.pos.x][pt.pos.y];
-			final boolean curMatch = tile.matches;
-			
-			ValueFunction<GroupedTile> neighborCheck = other -> {
-				TileGroup curGroup = tile.group;
-				TileGroup oGroup = other.group;
+		for(int x = 0; x < width; x++) {
+			for(int y = 0; y < height; y++) {
+				final GroupedPosition pos = positionData[x][y];
+				final boolean curMatch = pos.matches;
 				
-				if(curMatch == other.matches) {
-					// merge groups
-					TileGroup bigger = curGroup.size() >= oGroup.size() ? curGroup : oGroup;
-					TileGroup smaller = curGroup == bigger ? oGroup : curGroup;
-					for(GroupedTile switched: bigger.mergeGroup(smaller))
-						switched.group = bigger;
-				}
-				else {
-					// add each other as adjacent opposites
-					curGroup.adjacentOpposites.add(oGroup);
-					oGroup.adjacentOpposites.add(curGroup);
-				}
-			};
-			
-			// check tile to the right
-			if(pt.pos.x < island.width-1)
-				neighborCheck.act(tileData[pt.pos.x+1][pt.pos.y]);
-			// check tile above(?)
-			if(pt.pos.y < island.height-1)
-				neighborCheck.act(tileData[pt.pos.x][pt.pos.y+1]);
-		});
+				ValueFunction<GroupedPosition> neighborCheck = other -> {
+					PositionGroup curGroup = pos.group;
+					PositionGroup oGroup = other.group;
+					
+					if(curMatch == other.matches) {
+						// merge groups
+						PositionGroup bigger = curGroup.size() >= oGroup.size() ? curGroup : oGroup;
+						PositionGroup smaller = curGroup == bigger ? oGroup : curGroup;
+						for(GroupedPosition switched: bigger.mergeGroup(smaller))
+							switched.group = bigger;
+					}
+					else {
+						// add each other as adjacent opposites
+						curGroup.adjacentOpposites.add(oGroup);
+						oGroup.adjacentOpposites.add(curGroup);
+					}
+				};
+				
+				// check tile to the right
+				if(x < width-1)
+					neighborCheck.act(positionData[x+1][y]);
+				// check tile above(?)
+				if(y < height-1)
+					neighborCheck.act(positionData[x][y+1]);
+			}
+		}
 		
-		return new TileGroupMap(matches, fails, tileData);
+		return new PositionGroupMap(matches, fails, positionData);
 	}
 	
-	public static class TileGroup {
+	public static class PositionGroup {
 		// a group of adjacent tiles that all satisfied, or all didn't satisfy, the sorting condition.
 		// a given instance of this class does not know whether it satisfied the sorting condition.
 		
-		private HashSet<GroupedTile> tiles;
-		private HashSet<TileGroup> adjacentOpposites; // if this group has no "holes" in it, then there can only be 1 adjacent opposite. However, each "hole" in the group space would also count as an adjacent opposite.
+		private HashSet<GroupedPosition> positions;
+		private HashSet<PositionGroup> adjacentOpposites; // if this group has no "holes" in it, then there can only be 1 adjacent opposite. However, each "hole" in the group space would also count as an adjacent opposite.
 		
-		private HashSet<TileGroup> ownSet;
-		private HashSet<TileGroup> oppositeSet;
+		private HashSet<PositionGroup> ownSet;
+		private HashSet<PositionGroup> oppositeSet;
 		
 		private boolean edge; // true if at least one member tile touches the edge
 		
-		public TileGroup(ProtoTile starter, boolean starterMatches, ProtoIsland island, GroupedTile[][] tileData, HashSet<TileGroup> matchSet, HashSet<TileGroup> failSet) {
-			tiles = new HashSet<>();
-			GroupedTile tile = new GroupedTile(starter, starterMatches, this, island);
-			tiles.add(tile);
-			edge = tile.edge;
+		public PositionGroup(int startX, int startY, boolean starterMatches, int width, int height, GroupedPosition[][] positionData, HashSet<PositionGroup> matchSet, HashSet<PositionGroup> failSet) {
+			positions = new HashSet<>();
 			
-			tileData[starter.pos.x][starter.pos.y] = tile;
+			edge = startX == 0 || startY == 0 || startX == width - 1 || startY == height - 1;
+			GroupedPosition pos = new GroupedPosition(startX, startY, starterMatches, this, edge);
+			positions.add(pos);
+			
+			positionData[startX][startY] = pos;
 			
 			this.ownSet = starterMatches ? matchSet : failSet;
 			this.oppositeSet = starterMatches ? failSet : matchSet;
@@ -163,7 +171,7 @@ public class TileGroupMap {
 			ownSet.add(this);
 		}
 		
-		public int size() { return tiles.size(); }
+		public int size() { return positions.size(); }
 		
 		public boolean touchesEdge() { return edge; }
 		
@@ -173,13 +181,13 @@ public class TileGroupMap {
 		public void switchSet() {
 			// first, check that we are where we expect...
 			if(!ownSet.contains(this)) {
-				System.err.println("TileGroup not contained in own set, assuming no longer tracked; ignoring switch request.");
+				System.err.println("PositionGroup not contained in own set, assuming no longer tracked; ignoring switch request.");
 				return;
 			}
-			// System.out.println("switching tile group (set count: "+ownSet.size()+"; opp set count: "+oppositeSet.size()+"; adjacents to merge: "+adjacentOpposites.size()+')');
+			// System.out.println("switching position group (set count: "+ownSet.size()+"; opp set count: "+oppositeSet.size()+"; adjacents to merge: "+adjacentOpposites.size()+')');
 			
 			// cache adjacent
-			TileGroup[] toMerge = adjacentOpposites.toArray(new TileGroup[0]);
+			PositionGroup[] toMerge = adjacentOpposites.toArray(new PositionGroup[0]);
 			// clear adjacent
 			adjacentOpposites.clear();
 			
@@ -187,37 +195,37 @@ public class TileGroupMap {
 			ownSet.remove(this);
 			oppositeSet.add(this);
 			// switch group refs
-			HashSet<TileGroup> temp = ownSet;
+			HashSet<PositionGroup> temp = ownSet;
 			ownSet = oppositeSet;
 			oppositeSet = temp;
 			
 			// run through all tiles and switch "matched" bool
-			for(GroupedTile tile: tiles)
-				tile.matches = !tile.matches;
+			for(GroupedPosition pos: positions)
+				pos.matches = !pos.matches;
 			
 			// merge adjacents
-			TileGroup biggest = this;
-			for(TileGroup opp: toMerge) {
+			PositionGroup biggest = this;
+			for(PositionGroup opp: toMerge) {
 				opp.adjacentOpposites.remove(this);
 				
-				TileGroup smaller = opp;
+				PositionGroup smaller = opp;
 				if(opp.size() > biggest.size()) {
 					smaller = biggest;
 					biggest = opp;
 				}
 				
-				for(GroupedTile tile: biggest.mergeGroup(smaller))
-					tile.group = biggest;
+				for(GroupedPosition pos: biggest.mergeGroup(smaller))
+					pos.group = biggest;
 			}
 		}
 		
 		// merges contents of other into this group, and removes it from set.
-		public Set<GroupedTile> mergeGroup(TileGroup other) {
+		public Set<GroupedPosition> mergeGroup(PositionGroup other) {
 			if(other == this) return Collections.emptySet();
-			tiles.addAll(other.tiles); // add tiles
+			positions.addAll(other.positions); // add tiles
 			
 			// the adjacent opposites also track the other group; loop through them and update their lists, by removing refs to other, and adding refs to this where not already present.
-			for(TileGroup otherOp: other.adjacentOpposites) {
+			for(PositionGroup otherOp: other.adjacentOpposites) {
 				otherOp.adjacentOpposites.remove(other);
 				// I *could* do a conditional to see if this group is already in this group's list... but we're dealing with sets here so there's no reason to bother.
 				otherOp.adjacentOpposites.add(this);
@@ -226,8 +234,7 @@ public class TileGroupMap {
 			adjacentOpposites.addAll(other.adjacentOpposites); // add group's adjacent
 			ownSet.remove(other); // remove ref
 			edge = edge || other.edge; // merge edge flag
-			return new HashSet<>(other.tiles);
+			return new HashSet<>(other.positions);
 		}
 	}
-	
 }

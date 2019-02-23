@@ -16,10 +16,12 @@ public class Noise implements NoiseGenerator {
 	} 
 	
 	@Override
-	public float[][] get2DNoise(long seed, int width, int height) {
-		float[] noise = getWhiteNoise(seed, width*height);
+	public float[][] get2DNoise(GenInfo info) {
+		final int width = info.width;
+		final int height = info.height;
+		float[] noise = getWhiteNoise(info.seed, width*height);
 		float[][] noises = smoothNoise2D(noise, width, height, samplePeriods);
-		float[] smoothNoise = addNoiseWeighted(noises, true);
+		float[] smoothNoise = addNoiseWeighted(noises, false);
 		smoothNoise = smoothNoise2DProgressive(smoothNoise, width, height, postSmoothing);
 		
 		float[][] smoothNoise2D = new float[width][height];

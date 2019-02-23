@@ -4,6 +4,7 @@ import java.util.Random;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+
 import net.openhft.hashing.LongHashFunction;
 
 public class Coherent2DNoiseFunction implements NoiseGenerator {
@@ -29,12 +30,12 @@ public class Coherent2DNoiseFunction implements NoiseGenerator {
 	}
 	
 	@Override
-	public float[][] get2DNoise(long seed, int width, int height) {
-		hashFunction = LongHashFunction.xx(seed);
+	public float[][] get2DNoise(GenInfo info) {
+		hashFunction = LongHashFunction.xx(info.seed);
 		
-		float[][] smoothNoise = new float[width][height];
-		for(int x = 0; x < width; x++)
-			for(int y = 0; y < height; y++)
+		float[][] smoothNoise = new float[info.width][info.height];
+		for(int x = 0; x < info.width; x++)
+			for(int y = 0; y < info.height; y++)
 				smoothNoise[x][y] = getValue(x, y);
 		
 		return smoothNoise;

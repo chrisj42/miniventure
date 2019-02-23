@@ -1,15 +1,31 @@
 package miniventure.game.util;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
 
 import miniventure.game.util.function.MapFunction;
+
+import com.badlogic.gdx.math.MathUtils;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+/** @noinspection WeakerAccess*/
+@SuppressWarnings("unchecked")
 public final class ArrayUtils {
 	private ArrayUtils() {}
+	
+	public static <T> T pickRandom(T[] array) { return pickRandom(array, MathUtils.random); }
+	public static <T> T pickRandom(T[] array, Random random) {
+		return array[random.nextInt(array.length)];
+	}
+	public static <T> T pickRandom(Object array) { return pickRandom(array, MathUtils.random); }
+	public static <T> T pickRandom(Object array, Random random) {
+		return (T) Array.get(array, random.nextInt(Array.getLength(array)));
+	}
 	
 	public static void revArray(Object array) {
 		final int len = Array.getLength(array);
@@ -22,37 +38,37 @@ public final class ArrayUtils {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
-	public static <PT, RT> RT[] mapArray(PT[] startValues, Class<RT> returnType, MapFunction<PT, RT> mapper) {
-		RT[] endValues = (RT[]) java.lang.reflect.Array.newInstance(returnType, startValues.length);
+	public static Object flattenArray(Object multiDimArray) {
+		Class<?> compType = multiDimArray.getClass();
+		while(compType.isArray())
+			compType = compType.getComponentType();
 		
-		for(int i = 0; i < startValues.length; i++)
-			endValues[i] = mapper.get(startValues[i]);
+		// compile into 1D list
+		List<Object> list = new LinkedList<>();
+		flattenHelper(list, multiDimArray);
+		// make new array and copy contents to it
+		Object flatArray = Array.newInstance(compType, list.size());
+		int i = 0;
+		for(Object o: list)
+			Array.set(flatArray, i++, o);
 		
-		return endValues;
+		return flatArray;
 	}
 	
-	@NotNull
-	public static String arrayToString(@NotNull Object array, String start, String end, String delimiter) {
-		StringBuilder str = new StringBuilder(start);
-		
-		final int len = Array.getLength(array);
-		for(int i = 0; i < len; i++) {
-			str.append(Array.get(array, i));
-			if(i < len-1)
-				str.append(delimiter);
-		}
-		str.append(end);
-		return str.toString();
+	private static void flattenHelper(List<Object> stack, Object array) {
+		if(!array.getClass().isArray())
+			stack.add(array);
+		else for(int i = 0; i < Array.getLength(array); i++)
+			flattenHelper(stack, Array.get(array, i));
 	}
 	
-	@SuppressWarnings("unchecked")
-	public static <T> T[] arrayJoin(Class<T> clazz, Object... arrays) {
+	/** @noinspection SuspiciousSystemArraycopy*/
+	public static <T> T joinArrays(Class<T> arrayClass, Object... arrays) {
 		int length = 0;
 		for(Object ar: arrays)
 			length += Array.getLength(ar);
 		
-		T[] joined = (T[]) Array.newInstance(clazz, length);
+		T joined = (T) Array.newInstance(arrayClass.getComponentType(), length);
 		int offset = 0;
 		for(Object ar: arrays) {
 			System.arraycopy(ar, 0, joined, offset, Array.getLength(ar));
@@ -62,7 +78,104 @@ public final class ArrayUtils {
 		return joined;
 	}
 	
-	@SuppressWarnings("unchecked")
+	// this method is not really safe since it assumes the the array type is the generic type; ie it assumes there has been no casting.
+	/*public static <T> T[] mapArray(T[] startArray, MapFunction<T, T> mapper) {
+		return mapArray(startArray, (Class<T>) startArray.getClass().getComponentType(), mapper);
+	}*/
+	// useful to convert between object arrays
+	public static <PT, RT> RT[] mapArray(PT[] startArray, Class<RT> resultComponentType, MapFunction<PT, RT> mapper) {
+		return (RT[]) mapArray((Object)startArray, resultComponentType, mapper);
+	}
+	// useful to convert from an object array to a primitive array
+	public static <PT, RT, RAT> RAT mapArray(PT[] startArray, Class<RT> resultComponentType, Class<RAT> resultArrayType, MapFunction<PT, RT> mapper) {
+		return (RAT) mapArray((Object)startArray, resultComponentType, mapper);
+	}
+	// useful to convert from a primitive array to an object array
+	public static <PT, RT> RT[] mapArray(Class<PT> startComponentType, Object startArray, Class<RT> resultComponentType, MapFunction<PT, RT> mapper) {
+		return (RT[]) mapArray(startArray, resultComponentType, mapper);
+	}
+	// useful to convert between primitive arrays.
+	public static <PT, RT, RAT> RAT mapArray(Class<PT> startComponentType, Object startArray, Class<RT> resultComponentType, Class<RAT> resultArrayType, MapFunction<PT, RT> mapper) {
+		return (RAT) mapArray(startArray, resultComponentType, mapper);
+	}
+	// base method that does the real mapping work
+	private static <PT, RT> Object mapArray(Object startArray, Class<RT> resultComponentType, MapFunction<PT, RT> mapper) {
+		Object endValues = Array.newInstance(resultComponentType, Array.getLength(startArray));
+		
+		for(int i = 0; i < Array.getLength(startArray); i++)
+			Array.set(endValues, i, mapper.get((PT)Array.get(startArray, i)));
+		
+		return endValues;
+	}
+	
+	public static void deepFill(Object array, Object value) {
+		for(int i = 0; i < Array.getLength(array); i++) {
+			Object stored = Array.get(array, i);
+			if(stored != null && stored.getClass().isArray())
+				deepFill(stored, value);
+			else
+				Array.set(array, i, value);
+		}
+	}
+	
+	public static void deepFill(Object multiDimArray, MapFunction<List<Integer>, ?> valueFetcher) {
+		int dimensions = 0;
+		Class<?> clazz = multiDimArray.getClass();
+		while(clazz.isArray()) {
+			++dimensions;
+			clazz = clazz.getComponentType();
+		}
+		
+		if(dimensions > 0) // 0 dims means the given object is not an array at all
+			deepFillHelper(multiDimArray, valueFetcher, new ArrayList<>(dimensions));
+	}
+	
+	private static void deepFillHelper(Object array, MapFunction<List<Integer>, ?> valueFetcher, List<Integer> indexStack) {
+		final Class<?> componentType = array.getClass().getComponentType();
+		final boolean multidim = componentType.isArray();
+		for(int i = 0; i < Array.getLength(array); i++) {
+			indexStack.add(i);
+			if(multidim) {
+				// contains arrays
+				Object obj = Array.get(array, i);
+				if(obj != null)
+					deepFillHelper(obj, valueFetcher, indexStack);
+			}
+			else // contains values
+				Array.set(array, i, valueFetcher.get(indexStack));
+			
+			indexStack.remove(indexStack.size()-1);
+		}
+	}
+	
+	@NotNull
+	public static String arrayToString(@NotNull Object array, String start, String end, String delimiter) {
+		return arrayToString(array, Object::toString, start, end, delimiter);
+	}
+	@NotNull
+	public static String arrayToString(@NotNull Object array, @NotNull MapFunction<Object, String> stringifier, String start, String end, String delimiter) {
+		StringBuilder str = new StringBuilder(start);
+		
+		final int len = Array.getLength(array);
+		for(int i = 0; i < len; i++) {
+			str.append(stringifier.get(Array.get(array, i)));
+			if(i < len-1)
+				str.append(delimiter);
+		}
+		str.append(end);
+		return str.toString();
+	}
+	
+	public static String deepToString(Object arrayValue, MapFunction<String[], String> stringArrayJoiner, MapFunction<Object, String> stringifier) {
+		if(arrayValue == null)
+			return "null";
+		
+		if(!arrayValue.getClass().isArray())
+			return stringifier.get(arrayValue);
+		
+		return stringArrayJoiner.get(fetchArray(String.class, Array.getLength(arrayValue), i -> deepToString(Array.get(arrayValue, i), stringArrayJoiner, stringifier)));
+	}
+	
 	public static <T> T[] fetchArray(Class<T> clazz, int length, MapFunction<Integer, T> valueFetcher) {
 		T[] ar = (T[]) Array.newInstance(clazz, length);
 		for(int i = 0; i < ar.length; i++)
@@ -98,6 +211,7 @@ public final class ArrayUtils {
 	}
 	
 	public static Object unbox(Object[] ar) {
+		if(ar == null) return null;
 		try {
 			Class<?> clazz = (Class<?>) ar.getClass().getComponentType().getDeclaredField("TYPE").get(null);
 			Object primAr = Array.newInstance(clazz, ar.length);
@@ -109,28 +223,7 @@ public final class ArrayUtils {
 		}
 	}
 	
-	public static String deepToString(Object obj, MapFunction<String[], String> stringArrayJoiner, MapFunction<Object, String> stringifier) {
-		if(obj == null)
-			return "null";
-		
-		if(!obj.getClass().isArray())
-			return stringifier.get(obj);
-		
-		return stringArrayJoiner.get(mapArray(boxArray(obj), String.class, elem -> deepToString(elem, stringArrayJoiner, stringifier)));
-	}
-	
-	public static void deepFill(Object array, Object value) {
-		for(int i = 0; i < Array.getLength(array); i++) {
-			Object stored = Array.get(array, i);
-			if(stored != null && stored.getClass().isArray())
-				deepFill(stored, value);
-			else
-				Array.set(array, i, value);
-		}
-	}
-	
-	// i realize that I don't need to track every array if I'm assuming the component type is a number; but I already did it.
-	public static void deepMapArray(Object array, float newmin, float newmax) {
+	public static void deepMapFloatArray(Object array, final float newmin, final float newmax) {
 		if(Array.getLength(array) == 0) return;
 		
 		float[] extrema = getDeepMinMax(array);

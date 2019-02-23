@@ -9,48 +9,54 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 
-import miniventure.game.world.worldgen.island.NoiseTileCondition;
-import miniventure.game.world.worldgen.island.ProtoIsland;
-import miniventure.game.world.worldgen.island.TileGroupMap;
-import miniventure.game.world.worldgen.island.TileGroupMap.TileGroup;
+import miniventure.game.world.worldgen.island.PositionGroupMap;
+import miniventure.game.world.worldgen.island.PositionGroupMap.PositionGroup;
 
-import static miniventure.game.world.worldgen.noise.NoiseModifier.*;
-import static miniventure.game.world.worldgen.noise.NoiseModifier.NoiseValueMerger.*;
+import static miniventure.game.world.worldgen.noise.NoiseGenerator.MIN_RADIUS;
 import static miniventure.game.world.worldgen.noise.NoiseGenerator.islandMask;
+import static miniventure.game.world.worldgen.noise.NoiseGenerator.islandShape;
+import static miniventure.game.world.worldgen.noise.NoiseModifier.FILL_VALUE_RANGE;
+import static miniventure.game.world.worldgen.noise.NoiseModifier.NoiseValueMerger.MULTIPLY;
+import static miniventure.game.world.worldgen.noise.NoiseModifier.combine;
 
 /** @noinspection SameParameterValue*/
 public class Testing {
 	
-	private static NoiseGenerator removeHoles(NoiseGenerator original) {
-		return (seed, width, height) -> {
-			float[][] noise = original.get2DNoise(seed, width, height);
-			TileGroupMap groupMap = TileGroupMap.process(new NoiseTileCondition(noise, val -> val >= .2f), new ProtoIsland(width, height, seed));
+	private static NoiseGenerator removeHoles(NoiseGenerator original, float landThresh) {
+		return info -> {
+			float[][] noise = original.get2DNoise(info);
+			
+			PositionGroupMap groupMap = PositionGroupMap.process(info.width, info.height,
+				(x, y) -> noise[x][y] >= landThresh
+			);
 			
 			// System.out.println("match groups: "+groupMap.matches.size()+", fail groups: "+groupMap.fails.size());
 			
 			// System.out.println("removing excess matches...");
 			// remove all but the biggest match group, and any fail group not touching the edge.
-			TileGroup biggestMatch = null;
+			PositionGroup biggestMatch = null;
 			// cache the set, because the second for loop will modify during iteration
-			TileGroup[] matches = groupMap.matches.toArray(new TileGroup[0]);
-			for(TileGroup match: matches)
+			PositionGroup[] matches = groupMap.matches.toArray(new PositionGroup[0]);
+			for(PositionGroup match: matches)
 				biggestMatch = biggestMatch == null || biggestMatch.size() < match.size() ? match : biggestMatch;
 			
-			for(TileGroup match: matches) {
+			for(PositionGroup match: matches) {
 				if(match != biggestMatch)
 					match.switchSet(); // switches group to a fail group, modifying related maps and the match/fail sets; group is combined with any adjacent groups.
 			}
 			
 			// System.out.println("removing excess fails...");
 			// now for the fail groups not touching the edge
-			for(TileGroup fail: groupMap.fails.toArray(new TileGroup[0])) {
+			for(PositionGroup fail: groupMap.fails.toArray(new PositionGroup[0])) {
 				if(!fail.touchesEdge())
 					fail.switchSet();
 			}
 			
 			// System.out.println("after switching:\nmatch groups: "+groupMap.matches.size()+", fail groups: "+groupMap.fails.size());
 			
-			forEach((val, x, y) -> groupMap.checkMatched(x, y) ? 1 : 0).modify(seed, noise);
+			NoiseModifier.forEach(noise, (val, x, y) ->
+				groupMap.checkMatched(x, y) ? Math.max(landThresh+.01f, val) : Math.min(landThresh-.01f, val)
+			);
 			
 			return noise;
 		};
@@ -75,7 +81,7 @@ public class Testing {
 		NoiseGenerator terrain = new Coherent2DNoiseFunction(36, 3).modify(
 			// combine(new Coherent2DNoiseFunction(36, 3).modifySeed(seed -> seed+1), 0.5f)
 			// ,combine(new Coherent2DNoiseFunction(36, 3).modifySeed(seed -> seed+2), 0.5f)
-			combine(new Noise(new int[] {1,32,8,2,4,16}, new int[] {4,2,1}), .5f)
+			combine(new Noise(new int[] {1,32,8,2,4,16}, new int[] {4,2,1}))
 			,FILL_VALUE_RANGE
 			,combine(islandMask(1), MULTIPLY)
 			// ,FILL_VALUE_RANGE
@@ -84,10 +90,38 @@ public class Testing {
 			,FILL_VALUE_RANGE
 		);
 		
-		NoiseGenerator features = new Coherent2DNoiseFunction(12, 2)
-			.modify(FILL_VALUE_RANGE);
+		NoiseGenerator terrain2 = new Coherent2DNoiseFunction(84, 3).modify(
+			combine(new Coherent2DNoiseFunction(36, 3), MULTIPLY, islandMask(1))
+			,combine(islandMask(2), MULTIPLY)
+			// ,combine(new Coherent2DNoiseFunction(36, 3).modifySeed(seed -> seed+2), 0.5f)
+			// combine(new Noise(new int[] {1,32,8,2,4,16}, new int[] {4,2,1}), .5f)
+			,FILL_VALUE_RANGE
+			// ,FILL_VALUE_RANGE
+			,combine(islandMask(1), islandMask(1f).modify(combine(new Coherent2DNoiseFunction(12, 5), MULTIPLY)))
+			// ,combine(heightMask, 0.75f)
+			// ,FILL_VALUE_RANGE
+		);
 		
-		return removeHoles(terrain);
+		NoiseGenerator features = new Coherent2DNoiseFunction(428, 0)
+		// NoiseGenerator features = new Noise(new int[] {32, 64}, getDescending(64))
+			.modify(
+				// combine(new Coherent2DNoiseFunction(36, 6), MULTIPLY)
+				FILL_VALUE_RANGE
+			);
+		
+		// NoiseGenerator source = islandMask(1).modify(FILL_VALUE_RANGE);//new Coherent2DNoiseFunction(92, 6);
+		// NoiseGenerator angle = new Coherent2DNoiseFunction(100, 0).modify(FILL_VALUE_RANGE);
+		// NoiseGenerator distance = new Coherent2DNoiseFunction(80, 0).modify(FILL_VALUE_RANGE);
+		
+		// return source.modify(NoiseModifier.perturb(angle, distance, 40));
+		// return islandMask(10, info -> MIN_RADIUS.get(info)/2);//.modify(getForEach((noise, x, y) -> (float)Math.pow(noise, 16)));
+		// return new Coherent2DNoiseFunction(12);
+		
+		// return new Noise(new int[] {128}, getDescending(0)).modify(FILL_VALUE_RANGE);
+		// return removeHoles(terrain, .2f);
+		// return terrain;
+		
+		return islandShape(info -> MIN_RADIUS.get(info)*.7f, .15f, 2, false, new Coherent2DNoiseFunction(36, 3));
 	}
 	
 	public static void main(String[] args) {
@@ -98,15 +132,17 @@ public class Testing {
 		final int height = 300;
 		final int scale = 2;
 		
-		// float[] thresholds = getThresholds(8);
-		float[] thresholds = {.15f/*, .5f, .6f, .7f, .8f, .9f*/};
+		float[] thresholds = getThresholds(255);
+		// float[] thresholds = {.2f, .3f, .4f, .5f, .6f, .7f, .8f, .9f};
+		// float[] thresholds = {.2f};
 		Color[] colors = getColors(thresholds.length+1, false); // add 1 to threshold count to do black-gray instead of black-white
-		// Color[] colors = {Color.BLACK, Color.DARK_GRAY, Color.DARK_GRAY.brighter()};
+		// Color[] colors = {Color.BLUE.darker(), Color.YELLOW, Color.GREEN.darker()};
 		
 		Random rand = new Random();
 		boolean repeat = true;
 		while(repeat)
-			repeat = displayNoise(width, height, scale, getTerrain().get2DNoise(rand.nextLong(), width, height), thresholds, colors);
+			repeat = displayNoise(width, height, scale, getTerrain().get2DNoise(new GenInfo(rand.nextLong(), width, height)), thresholds, colors);
+			// repeat = displayMap(width, height, scale, IslandType.STARTER.generateColorMap(rand.nextLong(), width, height));
 	}
 	
 	private static boolean displayNoise(int width, int height, int scale, float[][] noise, float[] thresholds, Color[] thresholdColors) {
@@ -147,7 +183,7 @@ public class Testing {
 			protected void paintComponent(Graphics g) { g.drawImage(image, 0, 0, null); }
 		};
 		
-		return JOptionPane.showConfirmDialog(null, viewPanel, "Noise", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE) == JOptionPane.OK_OPTION;
+		return JOptionPane.showOptionDialog(null, viewPanel, "Noise Map", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, new Object[] {"Regen", "Exit"}, null) == 0;
 	}
 	
 	private static float[] getThresholds(int sectionCount) {
@@ -189,5 +225,13 @@ public class Testing {
 		for(int i = 0; i < nums.length; i++)
 			nums[i] = new Float(strs[i]);
 		return nums;
+	}
+	
+	private static int[] getDescending(int max) {
+		int[] n = new int[max+1];
+		for(int i = 0; i < n.length; i++) {
+			n[max-i] = i+1;
+		}
+		return n;
 	}
 }
