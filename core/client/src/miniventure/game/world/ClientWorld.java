@@ -1,6 +1,5 @@
 package miniventure.game.world;
 
-import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.DatalessRequest;
 import miniventure.game.GameProtocol.LevelData;
 import miniventure.game.GameProtocol.SpawnData;
@@ -10,12 +9,11 @@ import miniventure.game.client.GameClient;
 import miniventure.game.client.GameScreen;
 import miniventure.game.client.ServerManager;
 import miniventure.game.screen.ErrorScreen;
-import miniventure.game.screen.InputScreen;
-import miniventure.game.screen.InputScreen.CircularFunction;
 import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.RespawnScreen;
+import miniventure.game.world.SaveLoadInterface.WorldDataSet;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
 
@@ -109,8 +107,7 @@ public class ClientWorld extends LevelManager {
 		}).start();
 	}
 	
-	// todo replace this with an actual WorldSelectScreen; this screen checks for existing worlds and gets quick details on them, and also will be responsible for providing a WorldFile instance to startWorld().
-	public InputScreen getNewWorldInput() {
+	/*public InputScreen getNewWorldInput() {
 		return new InputScreen("Name your new world:", worldname -> {
 			ClientCore.setScreen(new InputScreen("Average island diameter (default "+GameCore.DEFAULT_WORLD_SIZE+"):", new CircularFunction<>((size, self) -> {
 				boolean valid;
@@ -127,15 +124,13 @@ public class ClientWorld extends LevelManager {
 						"Average island diameter (default "+GameCore.DEFAULT_WORLD_SIZE+"):",
 						"Value must be an integer >= 10"
 					}, self));
-				// else
-				// 	startWorld(/*WorldFile.createWorld(worldname, sizeVal, new Random().nextLong())*/);
 			})));
 		});
-	}
+	}*/
 	
 	// given a pre-initialized WorldFile (ie the world has already been read from file and/or generated successfully), this method starts up a local server on it, and logs in.
 	// todo due to possibility of different world saves, more consideration towards port variability should be considered. Perhaps instead of giving an error, the server should try another port...? Only because this is local. Though maybe port *should* be considered, and saved even?
-	public void startWorld(WorldFile worldFile) {
+	public void startLocalWorld(WorldDataSet worldInfo) {
 		ClientCore.stopMusic();
 		LoadingScreen loadingScreen = new LoadingScreen();
 		ClientCore.setScreen(loadingScreen);
@@ -145,7 +140,7 @@ public class ClientWorld extends LevelManager {
 		new Thread(() -> {
 			// start a server, and attempt to connect the client. If successful, it will set the screen to null; if not, the new server will be closed.
 			
-			if(!serverManager.startServer(worldFile))
+			if(!serverManager.startServer(worldInfo))
 				Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen("Error starting local server; the port may already be in use.\nPress 'reconnect' to attempt to connect to the existing server.")));
 			else
 				client.connectToServer(loadingScreen, "localhost", success -> {

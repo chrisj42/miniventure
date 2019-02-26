@@ -17,7 +17,7 @@ public class InfoScreen extends BackgroundInheritor {
 		vGroup.addActor(makeLabel(String.join("\n", text)));
 		
 		if(addButton)
-			vGroup.addActor(makeButton("Start Game", () -> ClientCore.setScreen(ClientCore.getWorld().getNewWorldInput())));
+			vGroup.addActor(makeButton("Continue to World Config", () -> ClientCore.setScreen(new WorldGenScreen())));
 		
 		vGroup.addActor(makeButton("Back to Main Menu", ClientCore::backToParentScreen));
 	}

@@ -51,7 +51,7 @@ public enum IslandType {
 	 */
 	
 	// a background for the main menu
-	MENU(200, 100) {
+	MENU(100, 100) {
 		@Override
 		void generateIsland(ProtoIsland island) {
 			float[][] terrain = island.getFromGen(
@@ -200,9 +200,10 @@ public enum IslandType {
 		return island.getMap();
 	}
 	
-	public Color[][] generateColorMap(long seed) {
+	public boolean displayColorMap(long seed, int scale) {
 		ProtoIsland island = new ProtoIsland(seed, width, height);
 		generateIsland(island);
-		return island.getColors();
+		
+		return Testing.displayMap(width, height, scale, island.getColors());
 	}
 }

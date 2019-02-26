@@ -2,6 +2,7 @@ package miniventure.game.util;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -148,13 +149,11 @@ public final class ArrayUtils {
 		}
 	}
 	
-	@NotNull
-	public static String arrayToString(@NotNull Object array, String start, String end, String delimiter) {
-		return arrayToString(array, Object::toString, start, end, delimiter);
+	public static String arrayToString(@NotNull Object array, String delimiter) {
+		return arrayToString(array, delimiter, Object::toString);
 	}
-	@NotNull
-	public static String arrayToString(@NotNull Object array, @NotNull MapFunction<Object, String> stringifier, String start, String end, String delimiter) {
-		StringBuilder str = new StringBuilder(start);
+	public static String arrayToString(@NotNull Object array, String delimiter, @NotNull MapFunction<Object, String> stringifier) {
+		StringBuilder str = new StringBuilder();
 		
 		final int len = Array.getLength(array);
 		for(int i = 0; i < len; i++) {
@@ -162,7 +161,23 @@ public final class ArrayUtils {
 			if(i < len-1)
 				str.append(delimiter);
 		}
-		str.append(end);
+		return str.toString();
+	}
+	
+	public static <T> String iterableToString(@NotNull Iterable<T> iterable, String delimiter) {
+		return iterableToString(iterable, delimiter, Object::toString);
+	}
+	public static <T> String iterableToString(@NotNull Iterable<T> iterable, String delimiter, MapFunction<T, String> stringifier) {
+		StringBuilder str = new StringBuilder();
+		
+		Iterator<T> iter = iterable.iterator();
+		boolean hasnext = iter.hasNext();
+		while(hasnext) {
+			str.append(stringifier.get(iter.next()));
+			hasnext = iter.hasNext();
+			if(hasnext)
+				str.append(delimiter);
+		}
 		return str.toString();
 	}
 	

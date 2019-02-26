@@ -126,7 +126,7 @@ public enum Command {
 			out.println(TimeOfDay.getTimeString(daylightOffset));
 		}, Argument.get(ArgValidator.exactString(false, "get"))),
 		
-		new CommandUsageForm(true, "set <clocktime | "+ ArrayUtils.arrayToString(TimeOfDay.names, "", ">", " | "), "Set time given clocktime, or to start of specified range.", (executor, args, out, err) -> {
+		new CommandUsageForm(true, "set <clocktime | "+ ArrayUtils.arrayToString(TimeOfDay.names, " | "), "Set time given clocktime, or to start of specified range.", (executor, args, out, err) -> {
 			float dayTime = ArgValidator.TIME.get(args[1]);
 			ServerCore.getWorld().setTimeOfDay(dayTime);
 			dayTime = ServerCore.getWorld().getDaylightOffset();

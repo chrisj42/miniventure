@@ -12,8 +12,8 @@ import miniventure.game.GameCore;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.ServerManager;
 import miniventure.game.Preferences;
-import miniventure.game.world.WorldFile;
 import miniventure.game.server.ServerCore;
+import miniventure.game.world.SaveLoadInterface.WorldDataSet;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
@@ -84,14 +84,8 @@ public class DesktopLauncher {
 			config.height = ClientCore.DEFAULT_SCREEN_HEIGHT;
 			new LwjglApplication(new ClientCore(new ServerManager() {
 				@Override
-				public boolean createWorld(WorldFile worldFile) {
-					
-					return false;
-				}
-				
-				@Override
-				public boolean startServer(WorldFile worldFile) {
-					boolean started = ServerCore.initServer(worldFile, false);
+				public boolean startServer(WorldDataSet worldInfo) {
+					boolean started = ServerCore.initServer(worldInfo, false);
 					if(!started)
 						return false;
 					

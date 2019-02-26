@@ -39,6 +39,18 @@ public class Version implements Comparable<Version> {
 		}
 	}
 	
+	// returns a string representation in the same form as what is expected in the constructor.
+	public String serialize() {
+		StringBuilder str = new StringBuilder(12);
+		str.append(make).append('.').append(major);
+		if(minor >= 0) {
+			str.append('.').append(minor);
+			if(dev)
+				str.append(".dev");
+		}
+		return str.toString();
+	}
+	
 	@Override
 	public int compareTo(@NotNull Version other) {
 		if(make != other.make) return Integer.compare(make, other.make);

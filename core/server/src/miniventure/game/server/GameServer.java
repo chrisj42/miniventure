@@ -362,7 +362,7 @@ public class GameServer implements GameProtocol {
 						matches.sort(String::compareToIgnoreCase);
 						
 						if(request.tabIndex < 0)
-							connection.sendTCP(new Message(ArrayUtils.arrayToString(matches.shrink(), "", "", ", "), GameCore.DEFAULT_CHAT_COLOR));
+							connection.sendTCP(new Message(ArrayUtils.arrayToString(matches.shrink(), ", "), GameCore.DEFAULT_CHAT_COLOR));
 						else {
 							// actually autocomplete
 							connection.sendTCP(new TabResponse(request.manualText, matches.get(request.tabIndex % matches.size)));

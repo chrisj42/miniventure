@@ -123,4 +123,9 @@ public class MobAi extends ServerMob {
 			return super.maySpawn(type);
 		return aiType.spawnBehavior.maySpawn(type);
 	}
+	
+	@Override
+	public String toString() {
+		return super.toString()+'('+aiType+')';
+	}
 }

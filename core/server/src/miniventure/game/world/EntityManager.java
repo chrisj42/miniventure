@@ -17,6 +17,11 @@ class EntityManager {
 		entityLevels = new HashMap<>();
 	}
 	
+	void clear() {
+		levelEntities.clear();
+		entityLevels.clear();
+	}
+	
 	private Set<ServerEntity> entitySet(ServerLevel level) {
 		return levelEntities.getOrDefault(level, Collections.emptySet());
 	}

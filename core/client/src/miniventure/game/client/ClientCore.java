@@ -93,8 +93,8 @@ public class ClientCore extends ApplicationAdapter {
 	
 	public static final UncaughtExceptionHandler exceptionHandler = (thread, throwable) -> {
 		exceptionNotifier.act(throwable);
-		
 		throwable.printStackTrace();
+		System.exit(1);
 	};
 	
 	public ClientCore(ServerManager serverStarter) {

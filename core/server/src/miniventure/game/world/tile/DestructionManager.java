@@ -104,7 +104,7 @@ public class DestructionManager {
 			if(replace || this.preferredTools.length == 0)
 				this.preferredTools = preferredTools;
 			else if(preferredTools.length > 0)
-				this.preferredTools = ArrayUtils.joinArrays(PreferredTool.class, this.preferredTools, preferredTools);
+				this.preferredTools = ArrayUtils.joinArrays(PreferredTool[].class, this.preferredTools, preferredTools);
 			return this;
 		}
 		
@@ -113,7 +113,7 @@ public class DestructionManager {
 			if(replace || this.damageConditions.length == 0)
 				this.damageConditions = damageConditions;
 			else if(damageConditions.length > 0)
-				this.damageConditions = ArrayUtils.joinArrays(DamageConditionCheck.class, this.damageConditions, damageConditions);
+				this.damageConditions = ArrayUtils.joinArrays(DamageConditionCheck[].class, this.damageConditions, damageConditions);
 			return this;
 		}
 		
@@ -129,7 +129,7 @@ public class DestructionManager {
 			if(replace || this.drops.length == 0)
 				this.drops = drops;
 			else if(drops.length > 0)
-				this.drops = ArrayUtils.joinArrays(ItemDrop.class, this.drops, drops);
+				this.drops = ArrayUtils.joinArrays(ItemDrop[].class, this.drops, drops);
 			return this;
 		}
 		

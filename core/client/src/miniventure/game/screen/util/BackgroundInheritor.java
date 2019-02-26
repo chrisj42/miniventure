@@ -1,5 +1,7 @@
 package miniventure.game.screen.util;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 public class BackgroundInheritor extends BackgroundProvider {
@@ -23,7 +25,7 @@ public class BackgroundInheritor extends BackgroundProvider {
 	public void setBackground(final BackgroundProvider gdxBackground) {
 		if(gdxBackground instanceof BackgroundInheritor)
 			setBackground(((BackgroundInheritor)gdxBackground).gdxBackground);
-		else if(gdxBackground != this) // don't want an infinite loop going
+		else if(gdxBackground != this) // don't want an infinite loop going... but that's impossible!
 			this.gdxBackground = gdxBackground;
 	}
 	
@@ -31,6 +33,8 @@ public class BackgroundInheritor extends BackgroundProvider {
 	public void renderBackground() {
 		if(gdxBackground != null)
 			gdxBackground.renderBackground();
+		else // there is no background when we expect one to have been given to us; clear the background to make sure it actually happens.
+			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 	}
 	
 	@Override

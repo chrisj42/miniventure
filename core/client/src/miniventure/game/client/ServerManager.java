@@ -1,12 +1,10 @@
 package miniventure.game.client;
 
-import miniventure.game.world.WorldFile;
+import miniventure.game.world.SaveLoadInterface.WorldDataSet;
 
 public interface ServerManager {
 	
-	boolean createWorld(WorldFile worldFile);
-	
-	boolean startServer(WorldFile worldFile);
+	boolean startServer(WorldDataSet worldInfo);
 	void closeServer();
 	
 }

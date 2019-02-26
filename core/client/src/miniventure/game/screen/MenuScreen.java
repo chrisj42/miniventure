@@ -28,6 +28,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Layout;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 
@@ -133,6 +134,12 @@ public class MenuScreen extends Stage {
 	protected void deregisterLabels(Label... labels) {
 		for(Label label: labels)
 			this.labels.remove(label);
+	}
+	
+	protected TextField makeField(String text) {
+		TextField field = new TextField(text, VisUI.getSkin());
+		registerField(field);
+		return field;
 	}
 	
 	protected void registerField(TextField field) { textFields.add(field); }

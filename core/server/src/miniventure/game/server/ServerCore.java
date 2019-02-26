@@ -7,10 +7,12 @@ import java.util.*;
 
 import miniventure.game.GameCore;
 import miniventure.game.chat.command.CommandInputParser;
-import miniventure.game.world.WorldFile;
+import miniventure.game.util.ErrorWrapper;
+import miniventure.game.world.SaveLoadInterface;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.VersionInfo;
+import miniventure.game.world.SaveLoadInterface.WorldDataSet;
 import miniventure.game.world.ServerWorld;
 import miniventure.game.world.tile.ServerTileType;
 
@@ -66,7 +68,7 @@ public class ServerCore {
 		}
 		
 		// check for an existing save with the given name
-		File world = WorldFile.getLocation(worldname);
+		File world = SaveLoadInterface.getLocation(worldname);
 		System.out.println("looking for worlds in: "+GameCore.GAME_DIR.resolve("saves").toFile().getAbsolutePath());
 		boolean exists = world.exists();
 		
@@ -100,9 +102,15 @@ public class ServerCore {
 			world.mkdirs();
 		}
 		
-		RandomAccessFile lockHolder = WorldFile.tryLockWorld(world);
+		RandomAccessFile lockHolder;
+		try {
+			lockHolder = SaveLoadInterface.tryLockWorld(world);
+		} catch(IOException e) {
+			e.printStackTrace();
+			return;
+		}
 		if(lockHolder == null) {
-			System.out.println("failed to acquire world lock; is it currently loaded by another instance?");
+			System.err.println("Failed to acquire world lock; is it currently loaded by another instance?");
 			return;
 		}
 		
@@ -113,14 +121,14 @@ public class ServerCore {
 		
 		System.out.println("loading server world...");
 		
-		WorldFile worldFile;
+		WorldDataSet worldInfo;
 		
 		if(load) // LOAD
-			worldFile = WorldFile.loadWorld(world, lockHolder);
+			worldInfo = SaveLoadInterface.loadWorld(world, lockHolder);
 		else // CREATE
-			worldFile = WorldFile.createWorld(world, lockHolder, seedString);
+			worldInfo = SaveLoadInterface.createWorld(world, lockHolder, seedString);
 		
-		initServer(worldFile, true);
+		initServer(worldInfo, true);
 		
 		System.out.println("server ready");
 		if(!GameCore.determinedLatestVersion())
@@ -153,7 +161,7 @@ public class ServerCore {
 		return ""; // impossible to reach.
 	}
 	
-	public static boolean initServer(WorldFile worldFile, boolean standalone) {
+	public static boolean initServer(WorldDataSet worldInfo, boolean standalone) {
 		if(serverWorld != null)
 			serverWorld.exitWorld();
 		
@@ -165,7 +173,7 @@ public class ServerCore {
 			return false;
 		}
 		
-		serverWorld.loadWorld(worldFile);
+		serverWorld.loadWorld(worldInfo);
 		
 		return true;
 	}
@@ -209,7 +217,6 @@ public class ServerCore {
 		long lastNow = System.nanoTime();
 		long lastInterval = lastNow;
 		
-		//noinspection InfiniteLoopStatement
 		while(serverWorld.worldLoaded()) {
 			long now = System.nanoTime();
 			

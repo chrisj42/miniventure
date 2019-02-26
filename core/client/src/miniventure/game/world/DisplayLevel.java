@@ -17,7 +17,7 @@ public class DisplayLevel extends RenderLevel {
 	
 	public DisplayLevel() {
 		super(new DisplayWorld(), 0,
-			ArrayUtils.pickRandom(IslandType.values()).generateIsland(MathUtils.random.nextLong()),
+			IslandType.MENU.generateIsland(MathUtils.random.nextLong()),
 			DisplayTile::new
 		);
 		

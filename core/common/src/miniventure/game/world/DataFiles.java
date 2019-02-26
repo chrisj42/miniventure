@@ -1,6 +1,9 @@
 package miniventure.game.world;
 
-public enum SaveSection {
+public enum DataFiles {
+	
+	// GAME,
+	
 	
 	/*
 		- version
@@ -8,7 +11,7 @@ public enum SaveSection {
 		- world info
 			- seed
 			- time of day
-			- players (user+passhash; not used for loading unless player logs in, ofc)
+			- players (user+passhash; not used for loading, unless player logs in ofc; first player is host)
 			- up time (later)
 			- creation time (later)
 		

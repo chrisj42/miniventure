@@ -6,6 +6,7 @@ import java.util.HashSet;
 
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.Version;
 import miniventure.game.util.customenum.SerialMap;
 import miniventure.game.world.Level;
 import miniventure.game.world.Point;
@@ -113,7 +114,7 @@ public abstract class Tile implements WorldObject {
 		public final int[] typeOrdinals;
 		public final String[] data;
 		
-		private TileData() { this(null, null); }
+		private TileData() { this((int[])null, null); }
 		private TileData(int[] typeOrdinals, String[] data) {
 			this.typeOrdinals = typeOrdinals;
 			this.data = data;
@@ -133,7 +134,7 @@ public abstract class Tile implements WorldObject {
 			}
 		}
 		
-		public TileData(String tileData) {
+		public TileData(Version dataVersion, String tileData) {
 			String[] all = MyUtils.parseLayeredString(tileData);
 			data = Arrays.copyOfRange(all, 1, all.length);
 			
@@ -144,7 +145,7 @@ public abstract class Tile implements WorldObject {
 			String[] all = new String[data.length+1];
 			System.arraycopy(data, 0, all, 1, data.length);
 			
-			all[0] = ArrayUtils.arrayToString(typeOrdinals, "", "", ",");
+			all[0] = ArrayUtils.arrayToString(typeOrdinals, ",");
 			
 			return MyUtils.encodeStringArray(all);
 		}

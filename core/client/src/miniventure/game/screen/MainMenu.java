@@ -49,17 +49,19 @@ public class MainMenu extends BackgroundProvider {
 		VisLabel updateLabel = addLabel("Checking for higher versions...", 45);
 		setVersionUpdateLabel(updateLabel);
 		
-		VisTextButton playButton = makeButton("Play", () -> {
+		VisTextButton playButton = makeButton("New World", () -> {
 			if(!ClientCore.viewedInstructions)
 				ClientCore.setScreen(new InstructionsScreen(true));
 			else
-				ClientCore.setScreen(world.getNewWorldInput());
+				ClientCore.setScreen(new WorldGenScreen());
 		});
+		
+		// VisTextButton loadButton = makeButton("Load World", () -> ClientCore.setScreen(new WorldSelectScreen()));
 		
 		table.add(playButton).spaceBottom(20);
 		table.row();
 		
-		VisTextButton joinBtn = makeButton("Join Server", () -> ClientCore.setScreen(new InputScreen("Enter the IP Address you want to connect to:", world::joinWorld)));
+		VisTextButton joinBtn = makeButton("Join Local Game", () -> ClientCore.setScreen(new InputScreen("Enter the IP Address you want to connect to:", world::joinWorld)));
 		
 		table.add(joinBtn).spaceBottom(20).row();
 		

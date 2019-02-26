@@ -9,6 +9,7 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 
+import miniventure.game.world.worldgen.island.IslandType;
 import miniventure.game.world.worldgen.island.PositionGroupMap;
 import miniventure.game.world.worldgen.island.PositionGroupMap.PositionGroup;
 
@@ -141,8 +142,8 @@ public class Testing {
 		Random rand = new Random();
 		boolean repeat = true;
 		while(repeat)
-			repeat = displayNoise(width, height, scale, getTerrain().get2DNoise(new GenInfo(rand.nextLong(), width, height)), thresholds, colors);
-			// repeat = displayMap(width, height, scale, IslandType.STARTER.generateColorMap(rand.nextLong(), width, height));
+			// repeat = displayNoise(width, height, scale, getTerrain().get2DNoise(new GenInfo(rand.nextLong(), width, height)), thresholds, colors);
+			repeat = IslandType.MENU.displayColorMap(rand.nextLong(), scale);
 	}
 	
 	private static boolean displayNoise(int width, int height, int scale, float[][] noise, float[] thresholds, Color[] thresholdColors) {

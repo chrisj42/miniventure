@@ -1,9 +1,12 @@
 package miniventure.game.world;
 
 import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 import miniventure.game.GameCore;
@@ -20,6 +23,9 @@ import miniventure.game.server.GameServer;
 import miniventure.game.util.SyncObj;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueFunction;
+import miniventure.game.world.SaveLoadInterface.LevelCache;
+import miniventure.game.world.SaveLoadInterface.PlayerInfo;
+import miniventure.game.world.SaveLoadInterface.WorldDataSet;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
@@ -42,7 +48,7 @@ public class ServerWorld extends WorldManager {
 	private static final LevelFetcher levelFetcher = new LevelFetcher() {
 		@Override
 		public Level makeLevel(int levelId, long seed, IslandType islandType) {
-			return null;//new ServerLevel(levelId, generator);
+			return new ServerLevel(levelId, islandType.generateIsland(seed));
 		}
 		
 		@Override
@@ -58,9 +64,11 @@ public class ServerWorld extends WorldManager {
 	
 	private final EntityManager entityManager = new EntityManager();
 	
-	
+	private Path worldPath;
+	private RandomAccessFile lockRef;
 	private LevelCache[] islandStores;
-	private WorldFile worldFile; // should hold island stores?
+	private HashMap<String, PlayerInfo> knownPlayers;
+	private long worldSeed;
 	private GameServer server;
 	
 	private boolean worldLoaded = false;
@@ -108,11 +116,20 @@ public class ServerWorld extends WorldManager {
 	public boolean worldLoaded() { return worldLoaded; }
 	
 	// this is called "load", but a world file does not necessarily mean it's data in a file; it's simply the intermediary that the world fetches non-live data from.
-	public void loadWorld(WorldFile worldFile) {
+	public void loadWorld(WorldDataSet worldInfo) {
 		worldLoaded = false;
 		clearWorld();
 		
+		gameTime = worldInfo.gameTime;
+		daylightOffset = worldInfo.timeOfDay;
+		worldSeed = worldInfo.seed;
+		knownPlayers = new HashMap<>(worldInfo.playerInfo.length*2);
+		for(PlayerInfo info: worldInfo.playerInfo)
+			knownPlayers.put(info.name, info);
 		
+		islandStores = worldInfo.levelCaches;
+		worldPath = worldInfo.worldFile;
+		lockRef = worldInfo.lockRef;
 		
 		worldLoaded = true;
 	}
@@ -122,6 +139,16 @@ public class ServerWorld extends WorldManager {
 		
 	}
 	
+	@Override
+	protected void clearWorld() {
+		super.clearWorld();
+		Integer[] loadedIds = loadedLevels.get(map -> map.keySet().toArray(new Integer[0]));
+		for(int id: loadedIds)
+			unloadLevel(id);
+		
+		entityManager.clear();
+	}
+	
 	// the ServerWorld cannot be reused after a call to exitWorld(); a new instance must be made.
 	@Override
 	public void exitWorld() {
@@ -129,9 +156,18 @@ public class ServerWorld extends WorldManager {
 		// dispose of level/world resources
 		clearWorld();
 		islandStores = null;
-		worldFile = null;
 		server.stop();
 		worldLoaded = false;
+		if(lockRef != null) {
+			try {
+				lockRef.close();
+			} catch(IOException e) {
+				System.err.println("while closing world lock ref");
+				e.printStackTrace();
+			}
+			lockRef = null;
+			worldPath = null;
+		}
 		//spawnTile = null;
 	}
 	
@@ -367,8 +403,6 @@ public class ServerWorld extends WorldManager {
 	public ServerTileType getTileType(TileTypeEnum type) { return ServerTileType.get(type); }
 	
 	public GameServer getServer() { return server; }
-	
-	public WorldFile getWorldFile() { return worldFile; }
 	
 	public MapRequest getMapData() {
 		
