@@ -31,19 +31,21 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.esotericsoftware.kryonet.Client;
+
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
+import com.esotericsoftware.kryonet.MiniventureClient;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class GameClient implements GameProtocol {
 	
-	private Client client;
+	private MiniventureClient client;
 	private String username;
 	
 	public GameClient() {
-		client = new Client(writeBufferSize, objectBufferSize);
+		client = new MiniventureClient(writeBufferSize, objectBufferSize);
 		
 		GameProtocol.registerClasses(client.getKryo());
 		
@@ -305,8 +307,8 @@ public class GameClient implements GameProtocol {
 	public void send(Object obj) { client.sendTCP(obj); }
 	public void addListener(Listener listener) { client.addListener(listener); }
 	
-	public boolean connectToServer(@NotNull LoadingScreen logger, String host, ValueFunction<Boolean> callback) { return connectToServer(logger, host, GameProtocol.PORT, callback); }
-	public boolean connectToServer(@NotNull LoadingScreen logger, String host, int port, ValueFunction<Boolean> callback) {
+	// public boolean connectToServer(@NotNull LoadingScreen logger, String host, ValueFunction<Boolean> callback) { return connectToServer(logger, host, GameProtocol.PORT, callback); }
+	public boolean connectToServer(@NotNull LoadingScreen logger, @Nullable ServerManager personalServer, String host, int port, ValueFunction<Boolean> callback) {
 		logger.pushMessage("connecting to server at "+host+':'+port+"...");
 		
 		try {
@@ -322,18 +324,27 @@ public class GameClient implements GameProtocol {
 			return false;
 		}
 		
-		Gdx.app.postRunnable(() -> ClientCore.setScreen(new InputScreen("Specify username:", username -> {
-			this.username = username;
+		if(personalServer != null) {
+			personalServer.setHost(client.getLocalAddressTCP());
+			this.username = HOST;
 			send(new Login(username, GameCore.VERSION));
-			
 			logger.editMessage("Loading world from server...");
-			ClientCore.setScreen(logger);
 			callback.act(true);
-		}, () -> {
-			disconnect();
-			ClientCore.backToParentScreen();
-			callback.act(false);
-		})));
+		}
+		else {
+			Gdx.app.postRunnable(() -> ClientCore.setScreen(new InputScreen("Specify username:", username -> {
+				this.username = username;
+				send(new Login(username, GameCore.VERSION));
+				
+				logger.editMessage("Loading world from server...");
+				ClientCore.setScreen(logger);
+				callback.act(true);
+			}, () -> {
+				disconnect();
+				ClientCore.backToParentScreen();
+				callback.act(false);
+			})));
+		}
 		
 		return true;
 	}

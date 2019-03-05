@@ -39,10 +39,11 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.FrameworkMessage.KeepAlive;
 import com.esotericsoftware.kryonet.Listener;
-import com.esotericsoftware.kryonet.Server;
+import com.esotericsoftware.kryonet.MiniventureServer;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -80,22 +81,12 @@ public class GameServer implements GameProtocol {
 	private final HashMap<Connection, PlayerData> connectionToPlayerDataMap = new HashMap<>();
 	private final HashMap<ServerPlayer, Connection> playerToConnectionMap = new HashMap<>();
 	
-	private Server server;
+	private MiniventureServer server;
 	private boolean multiplayer;
 	
 	public GameServer(int port, boolean multiplayer) throws IOException {
 		this.multiplayer = multiplayer;
-		server = new Server(writeBufferSize*5, objectBufferSize) {
-			@Override
-			public void start() {
-				Thread thread = new Thread(this, "Server");
-				thread.setUncaughtExceptionHandler((t, ex) -> {
-					t.getThreadGroup().uncaughtException(t, ex);
-					close();
-				});
-				thread.start();
-			}
-		};
+		server = new MiniventureServer(writeBufferSize*5, objectBufferSize);
 		GameProtocol.registerClasses(server.getKryo());
 		
 		server.addListener(actor);
@@ -111,8 +102,12 @@ public class GameServer implements GameProtocol {
 		@Override
 		public void connected(Connection connection) {
 			// prevent further connections unless desired.
-			if(playerToConnectionMap.size() > 0 && !multiplayer)
+			// System.out.println("attempted connection from address "+connection.getRemoteAddressTCP());
+			if(!multiplayer && playerToConnectionMap.size() > 0 && !connection.getRemoteAddressTCP().equals(ServerCore.host)) {
+				// System.err.println("Ur not allowed.");
+				connection.sendTCP(new LoginFailure("Ur not allowed."));
 				connection.close();
+			}
 		}
 		
 		@Override
@@ -140,6 +135,10 @@ public class GameServer implements GameProtocol {
 					}
 				}
 				
+				if(name.equals(HOST) && !connection.getRemoteAddressTCP().equals(ServerCore.host)) {
+					connection.sendTCP(new LoginFailure("Username '"+HOST+"' reserved for server host."));
+					return;
+				}
 				
 				connection.sendTCP(world.getWorldUpdate());
 				
@@ -517,7 +516,7 @@ public class GameServer implements GameProtocol {
 	
 	public Message getMessage(@Nullable ServerPlayer sender, String msg) {
 		if(sender == null) return new Message("Server: "+msg, SERVER_CHAT_COLOR);
-		return new Message(sender.getName()+": "+msg, GameCore.DEFAULT_CHAT_COLOR);
+		return new Message((multiplayer?sender.getName()+": ":"")+msg, GameCore.DEFAULT_CHAT_COLOR);
 	}
 	
 	public void broadcastParticle(ParticleData data, WorldObject posMarker) {

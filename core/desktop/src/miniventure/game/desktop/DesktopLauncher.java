@@ -2,6 +2,7 @@ package miniventure.game.desktop;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,9 +11,9 @@ import java.util.List;
 
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol;
+import miniventure.game.Preferences;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.ServerManager;
-import miniventure.game.Preferences;
 import miniventure.game.server.ServerCore;
 import miniventure.game.world.SaveLoadInterface.WorldDataSet;
 
@@ -97,9 +98,13 @@ public class DesktopLauncher {
 				}
 				
 				@Override
-				public void open() {
-					ServerCore.getServer().setMultiplayer(true);
+				public void setHost(InetSocketAddress host) {
+					// System.out.println("setting host to "+host);
+					ServerCore.host = host;
 				}
+				
+				@Override
+				public void open() { ServerCore.getServer().setMultiplayer(true); }
 				
 				@Override
 				public void closeServer() { ServerCore.quit(); }

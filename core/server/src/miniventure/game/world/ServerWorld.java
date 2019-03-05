@@ -19,6 +19,7 @@ import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolItem.Material;
 import miniventure.game.item.ToolType;
 import miniventure.game.server.GameServer;
+import miniventure.game.server.ServerCore;
 import miniventure.game.util.SyncObj;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueFunction;
@@ -195,6 +196,7 @@ public class ServerWorld extends WorldManager {
 		entityManager.clear();
 		islandStores = null;
 		server.stop();
+		ServerCore.host = null;
 		// worldLoaded = false;
 		if(lockRef != null) {
 			try {

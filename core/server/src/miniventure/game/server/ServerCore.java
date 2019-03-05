@@ -2,6 +2,7 @@ package miniventure.game.server;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -28,8 +29,8 @@ import org.jetbrains.annotations.NotNull;
 
 public class ServerCore {
 	
-	// private static final GameServer server = new GameServer();
 	private static final ServerWorld serverWorld = new ServerWorld();
+	public static InetSocketAddress host = null;
 	
 	private static CommandInputParser commandParser = null;
 	
@@ -276,7 +277,6 @@ public class ServerCore {
 		}
 		
 		commandParser.end();
-		
 	}
 	
 	// stop the server.

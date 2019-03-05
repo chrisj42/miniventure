@@ -39,6 +39,7 @@ public class ClientWorld extends LevelManager {
 	
 	private final ServerManager serverManager;
 	private String ipAddress;
+	private int port;
 	
 	private final GameScreen gameScreen;
 	
@@ -90,8 +91,8 @@ public class ClientWorld extends LevelManager {
 	@Override protected boolean doDaylightCycle() { return doDaylightCycle; }
 	
 	
-	public void rejoinWorld() { joinWorld(ipAddress); }
-	public void joinWorld(String ipAddress) {
+	public void rejoinWorld() { joinWorld(ipAddress, port); }
+	public void joinWorld(String ipAddress, int port) {
 		ClientCore.stopMusic();
 		LoadingScreen loadingScreen = new LoadingScreen();
 		ClientCore.setScreen(loadingScreen);
@@ -99,10 +100,11 @@ public class ClientWorld extends LevelManager {
 		clearEntityIdMap();
 		
 		this.ipAddress = ipAddress;
+		this.port = port;
 		
 		new Thread(() -> {
 			// connect to an existing server.
-			client.connectToServer(loadingScreen, ipAddress, success -> {
+			client.connectToServer(loadingScreen, null, ipAddress, port, success -> {
 				if(!success)
 					client = new GameClient();
 			});
@@ -150,7 +152,7 @@ public class ClientWorld extends LevelManager {
 			}
 			
 			// successful server start
-			client.connectToServer(loadingScreen, "localhost", port, success -> {
+			client.connectToServer(loadingScreen, serverManager, "localhost", port, success -> {
 				if(!success) {
 					serverManager.closeServer();
 					client = new GameClient();

@@ -1,6 +1,5 @@
 package miniventure.game.screen;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.file.Path;
@@ -35,7 +34,7 @@ public class WorldGenScreen extends BackgroundInheritor {
 		seedLabel.setAlignment(Align.center, Align.right);
 		table.add(seedLabel);
 		TextField seedField = makeField("");
-		seedField.setMessageText("leave blank for random");
+		seedField.setMessageText("blank for random");
 		table.add(seedField);
 		table.row();
 		

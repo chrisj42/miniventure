@@ -1,6 +1,7 @@
 package miniventure.game.screen;
 
 import miniventure.game.GameCore;
+import miniventure.game.GameProtocol;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.FontStyle;
 import miniventure.game.client.LevelViewport;
@@ -61,7 +62,21 @@ public class MainMenu extends BackgroundProvider {
 		table.add(playButton).spaceBottom(20);
 		table.row();
 		
-		VisTextButton joinBtn = makeButton("Join Local Game", () -> ClientCore.setScreen(new InputScreen("Enter the IP Address you want to connect to:", world::joinWorld)));
+		VisTextButton joinBtn = makeButton("Join Local Game", () -> ClientCore.setScreen(new InputScreen("Enter the IP Address you want to connect to (optionally including port):", input -> {
+			if(input.contains(":")) {
+				String ip = input.substring(0, input.indexOf(":"));
+				String portstr = input.substring(input.indexOf(":")+1);
+				int port;
+				try {
+					port = Integer.parseInt(portstr);
+				} catch(NumberFormatException e) {
+					ClientCore.setScreen(new ErrorScreen("Given ip address is invalid; appeared to have port number '"+portstr+"', but port was not a valid integer."));
+					return;
+				}
+				world.joinWorld(ip, port);
+			} else
+				world.joinWorld(input, GameProtocol.PORT);
+		})));
 		
 		table.add(joinBtn).spaceBottom(20).row();
 		

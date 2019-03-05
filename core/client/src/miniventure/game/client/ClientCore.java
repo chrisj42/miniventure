@@ -179,7 +179,7 @@ public class ClientCore extends ApplicationAdapter {
 				return;
 			}
 			
-			if(menuScreen instanceof MainMenu && screen instanceof ErrorScreen)
+			if((menuScreen instanceof MainMenu || menuScreen instanceof ErrorScreen) && screen instanceof ErrorScreen)
 				return; // ignore it.
 			
 			if(menuScreen instanceof BackgroundProvider && screen instanceof BackgroundInheritor)
