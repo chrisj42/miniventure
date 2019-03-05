@@ -1,5 +1,7 @@
 package miniventure.game.world;
 
+import java.io.IOException;
+
 import miniventure.game.GameProtocol.DatalessRequest;
 import miniventure.game.GameProtocol.LevelData;
 import miniventure.game.GameProtocol.SpawnData;
@@ -94,7 +96,7 @@ public class ClientWorld extends LevelManager {
 		LoadingScreen loadingScreen = new LoadingScreen();
 		ClientCore.setScreen(loadingScreen);
 		
-		clearWorld();
+		clearEntityIdMap();
 		
 		this.ipAddress = ipAddress;
 		
@@ -129,7 +131,6 @@ public class ClientWorld extends LevelManager {
 	}*/
 	
 	// given a pre-initialized WorldFile (ie the world has already been read from file and/or generated successfully), this method starts up a local server on it, and logs in.
-	// todo due to possibility of different world saves, more consideration towards port variability should be considered. Perhaps instead of giving an error, the server should try another port...? Only because this is local. Though maybe port *should* be considered, and saved even?
 	public void startLocalWorld(WorldDataSet worldInfo) {
 		ClientCore.stopMusic();
 		LoadingScreen loadingScreen = new LoadingScreen();
@@ -140,15 +141,21 @@ public class ClientWorld extends LevelManager {
 		new Thread(() -> {
 			// start a server, and attempt to connect the client. If successful, it will set the screen to null; if not, the new server will be closed.
 			
-			if(!serverManager.startServer(worldInfo))
-				Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen("Error starting local server; the port may already be in use.\nPress 'reconnect' to attempt to connect to the existing server.")));
-			else
-				client.connectToServer(loadingScreen, "localhost", success -> {
-					if(!success) {
-						serverManager.closeServer();
-						client = new GameClient();
-					}
-				});
+			int port;
+			try {
+				port = serverManager.startServer(worldInfo);
+			} catch(IOException e) {
+				Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen("Error starting world; internal server requires open port to host world, but none found.")));
+				return;
+			}
+			
+			// successful server start
+			client.connectToServer(loadingScreen, "localhost", port, success -> {
+				if(!success) {
+					serverManager.closeServer();
+					client = new GameClient();
+				}
+			});
 		}).start();
 	}
 	
@@ -158,7 +165,7 @@ public class ClientWorld extends LevelManager {
 		// set menu to main menu, and dispose of level/world resources
 		ClientCore.getClient().disconnect();
 		mainPlayer = null;
-		clearWorld();
+		clearEntityIdMap();
 		ClientCore.setScreen(new MainMenu());
 		client = new GameClient();
 	}

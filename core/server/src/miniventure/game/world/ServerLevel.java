@@ -7,10 +7,12 @@ import miniventure.game.GameProtocol.TileUpdate;
 import miniventure.game.item.ServerItem;
 import miniventure.game.server.ServerCore;
 import miniventure.game.util.MyUtils;
+import miniventure.game.world.SaveLoadInterface.LevelCache;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.AiType;
 import miniventure.game.world.entity.mob.ServerMob;
+import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.entity.particle.ItemEntity;
 import miniventure.game.world.tile.ServerTile;
 import miniventure.game.world.tile.Tile;
@@ -55,6 +57,18 @@ public class ServerLevel extends Level {
 	
 	@Override
 	public ServerTile getTile(float x, float y) { return (ServerTile) super.getTile(x, y); }
+	
+	public void save(@NotNull LevelCache cache) {
+		Entity[] entities = getEntities();
+		TileData[][] tileData = getTileData();
+		LinkedList<String> entityData = new LinkedList<>();
+		for(Entity e: entities) {
+			if(e instanceof ServerPlayer)
+				continue;
+			entityData.add(ServerEntity.serialize((ServerEntity)e));
+		}
+		cache.save(entityData.toArray(new String[0]), tileData);
+	}
 	
 	/*@Override
 	public void entityMoved(Entity entity) {

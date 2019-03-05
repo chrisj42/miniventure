@@ -25,7 +25,7 @@ public abstract class LevelManager extends WorldManager {
 	
 	
 	protected void setLevel(@NotNull RenderLevel level) {
-		clearWorld();
+		clearEntityIdMap();
 		this.level = level;
 	}
 	

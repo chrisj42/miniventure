@@ -49,7 +49,7 @@ public class ServerHands {
 		this(player);
 		
 		for(int i = 0; i < hotbarItems.length; i++)
-			hotbarItems[i] = ServerItem.load(MyUtils.parseLayeredString(itemData[i]));
+			hotbarItems[i] = itemData[i].equals("null") ? null : ServerItem.load(MyUtils.parseLayeredString(itemData[i]));
 	}
 	
 	void reset() { Arrays.fill(hotbarItems, null); }
@@ -197,7 +197,7 @@ public class ServerHands {
 		
 		String[] data = new String[hotbarItems.length];
 		for(int i = 0; i < hotbarItems.length; i++)
-			data[i] = MyUtils.encodeStringArray(hotbarItems[i].save());
+			data[i] = hotbarItems[i] == null ? "null" : MyUtils.encodeStringArray(hotbarItems[i].save());
 		return data;
 	}
 	

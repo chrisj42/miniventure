@@ -108,6 +108,8 @@ public abstract class ServerEntity extends Entity {
 			this.touchedBy(entity); // to make sure something has a chance to happen, but it doesn't happen twice.
 	}
 	
+	public String serialize() { return serialize(this); }
+	
 	public static String serialize(ServerEntity e) {
 		ClassDataList data = e.save();
 		

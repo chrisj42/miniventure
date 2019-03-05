@@ -38,6 +38,7 @@ import com.esotericsoftware.kryo.Kryo;
 public interface GameProtocol {
 	
 	int PORT = 8405;
+	String HOST = "Host"; // name of host player; used only when joining a game in the same JVM. Other players are not allowed to specify this name.
 	int writeBufferSize = 1638400;
 	int objectBufferSize = 1638400;
 	

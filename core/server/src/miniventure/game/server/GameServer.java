@@ -81,8 +81,10 @@ public class GameServer implements GameProtocol {
 	private final HashMap<ServerPlayer, Connection> playerToConnectionMap = new HashMap<>();
 	
 	private Server server;
+	private boolean multiplayer;
 	
-	public GameServer(boolean standalone) {
+	public GameServer(int port, boolean multiplayer) throws IOException {
+		this.multiplayer = multiplayer;
 		server = new Server(writeBufferSize*5, objectBufferSize) {
 			@Override
 			public void start() {
@@ -96,105 +98,126 @@ public class GameServer implements GameProtocol {
 		};
 		GameProtocol.registerClasses(server.getKryo());
 		
-		addListener(/*new LagListener(lagMin, lagMax, */new Listener() {
-			@Override
-			public void received (Connection connection, Object object) {
-				if(object instanceof KeepAlive)
-					return; // we don't care about these, they are internal packets
+		server.addListener(actor);
+		server.start();
+		server.bind(port);
+	}
+	
+	public void setMultiplayer(boolean multiplayer) {
+		this.multiplayer = multiplayer;
+	}
+	
+	private final Listener actor = new Listener() {
+		@Override
+		public void connected(Connection connection) {
+			// prevent further connections unless desired.
+			if(playerToConnectionMap.size() > 0 && !multiplayer)
+				connection.close();
+		}
+		
+		@Override
+		public void received (Connection connection, Object object) {
+			if(object instanceof KeepAlive)
+				return; // we don't care about these, they are internal packets
+			
+			ServerWorld world = ServerCore.getWorld();
+			
+			if(object instanceof Login) {
+				if(GameCore.debug) System.out.println("server received login");
+				Login login = (Login) object;
 				
-				ServerWorld world = ServerCore.getWorld();
+				if(login.version.compareTo(GameCore.VERSION) != 0) {
+					connection.sendTCP(new LoginFailure("Required version: "+GameCore.VERSION));
+					return;
+				}
 				
-				if(object instanceof Login) {
-					if(GameCore.debug) System.out.println("server received login");
-					Login login = (Login) object;
-					
-					if(login.version.compareTo(GameCore.VERSION) != 0) {
-						connection.sendTCP(new LoginFailure("Required version: "+GameCore.VERSION));
+				String name = login.username;
+				
+				for(ServerPlayer player: playerToConnectionMap.keySet()) {
+					if(player.getName().equals(name)) {
+						connection.sendTCP(new LoginFailure("Username already exists."));
 						return;
 					}
-					
-					String name = login.username;
-					
-					for(ServerPlayer player: playerToConnectionMap.keySet()) {
-						if(player.getName().equals(name)) {
-							connection.sendTCP(new LoginFailure("Username already exists."));
-							return;
-						}
-					}
-					
-					
-					connection.sendTCP(world.getWorldUpdate());
-					
-					// prepare level
-					// ServerLevel level = world.getLevel(0);
-					// if(level != null) {
-						ServerPlayer player = world.addPlayer(name);
-						PlayerData playerData = new PlayerData(connection, player);
-						connectionToPlayerDataMap.put(connection, playerData);
-						playerToConnectionMap.put(player, connection);
-						world.loadLevel(player.getSpawnLevel(), player, player.respawnPositioning());
-						
-						System.out.println("Server: new player successfully connected: "+player.getName());
-						
-						playerData.validationTimer.start();
-						
-						broadcast(new Message(player.getName()+" joined the server.", STATUS_MSG_COLOR), false, player);
+				}
+				
+				
+				connection.sendTCP(world.getWorldUpdate());
+				
+				// prepare level
+				// ServerLevel level = world.getLevel(0);
+				// if(level != null) {
+				// TODO implement passwords
+				ServerPlayer player = world.addPlayer(name, "");
+				if(player == null) {
+					connection.sendTCP(new LoginFailure("Password is incorrect."));
+					return;
+				}
+				PlayerData playerData = new PlayerData(connection, player);
+				connectionToPlayerDataMap.put(connection, playerData);
+				playerToConnectionMap.put(player, connection);
+				world.loadPlayer(player, "");
+				
+				System.out.println("Server: new player successfully connected: "+player.getName());
+				
+				playerData.validationTimer.start();
+				
+				broadcast(new Message(player.getName()+" joined the server.", STATUS_MSG_COLOR), false, player);
 					/*}
 					else {
 						System.err.println("Server could not connect player "+name+", no levels exist.");
 						connection.sendTCP(new LoginFailure("Server world is not initialized."));
 					}*/
+				
+				return;
+			}
+			
+			PlayerData clientData = connectionToPlayerDataMap.get(connection);
+			if(clientData == null) {
+				System.err.println("server received packet from unknown client "+connection.getRemoteAddressTCP().getHostString()+"; ignoring packet "+object);
+				return;
+			}
+			
+			ServerPlayer client = clientData.player;
+			
+			forPacket(object, Ping.class, ping -> {
+				long nano = System.nanoTime() - ping.start;
+				double time = nano / 1E9D;
+				String disp = time < 1 ? time*1E3+" ms." : time+" seconds.";
+				if(ping.source == null) // server origin
+					System.out.println("ping from "+client.getName()+": "+disp);
+				else {
+					Connection c;
+					if(ping.source.equals(client.getName()))
+						c = connection;
+					else
+						c = playerToConnectionMap.get(getPlayerByName(ping.source));
 					
-					return;
+					if(c != null)
+						c.sendTCP(new Message("Ping for '"+client.getName()+"': "+disp, Color.SKY));
 				}
+			});
+			
+			forPacket(object, MapRequest.class, req -> connection.sendTCP(world.getMapData()));
+			
+			forPacket(object, LevelChange.class, change -> {
+				// check to see if the level exists (client shouldn't be able to crash server), and if the client is allowed to change to the given level
+				// if the move is invalid, then send a simple spawn packet; the client doesn't unload a level unless a new LevelData packet is recieved.
 				
-				PlayerData clientData = connectionToPlayerDataMap.get(connection);
-				if(clientData == null) {
-					System.err.println("server received packet from unknown client "+connection.getRemoteAddressTCP().getHostString()+"; ignoring packet "+object);
-					return;
-				}
+				Level clientLevel = client.getLevel();
+				if(clientLevel != null && change.levelid == clientLevel.getLevelId())
+					return; // quietly ignore level requests for the same level
 				
-				ServerPlayer client = clientData.player;
+				// todo check if move is valid in terms of stats (prob using class/method in common module)
+				// for now we will assume it is.
 				
-				forPacket(object, Ping.class, ping -> {
-					long nano = System.nanoTime() - ping.start;
-					double time = nano / 1E9D;
-					String disp = time < 1 ? time*1E3+" ms." : time+" seconds.";
-					if(ping.source == null) // server origin
-						System.out.println("ping from "+client.getName()+": "+disp);
-					else {
-						Connection c;
-						if(ping.source.equals(client.getName()))
-							c = connection;
-						else
-							c = playerToConnectionMap.get(getPlayerByName(ping.source));
-						
-						if(c != null)
-							c.sendTCP(new Message("Ping for '"+client.getName()+"': "+disp, Color.SKY));
-					}
+				world.despawnPlayer(client);
+				world.loadLevel(change.levelid, client, level -> {
+					Tile spawnTile = level.getMatchingTiles(TileTypeEnum.DOCK).get(0);
+					client.moveTo(spawnTile);
 				});
 				
-				forPacket(object, MapRequest.class, req -> connection.sendTCP(world.getMapData()));
-				
-				forPacket(object, LevelChange.class, change -> {
-					// check to see if the level exists (client shouldn't be able to crash server), and if the client is allowed to change to the given level
-					// if the move is invalid, then send a simple spawn packet; the client doesn't unload a level unless a new LevelData packet is recieved.
-					
-					Level clientLevel = client.getLevel();
-					if(clientLevel != null && change.levelid == clientLevel.getLevelId())
-						return; // quietly ignore level requests for the same level
-					
-					// todo check if move is valid in terms of stats (prob using class/method in common module)
-					// for now we will assume it is.
-					
-					world.despawnPlayer(client);
-					world.loadLevel(change.levelid, client, level -> {
-						Tile spawnTile = level.getMatchingTiles(TileTypeEnum.DOCK).get(0);
-						client.moveTo(spawnTile);
-					});
-					
-					// broadcast(new EntityUpdate(client.getTag(), new PositionUpdate(client), null));
-				});
+				// broadcast(new EntityUpdate(client.getTag(), new PositionUpdate(client), null));
+			});
 				
 				/*if(object instanceof ChunkRequest) {
 					//System.out.println("server received chunk request");
@@ -210,204 +233,194 @@ public class GameServer implements GameProtocol {
 					} else
 						System.err.println("Server could not satisfy chunk request, player level is null");
 				}*/
+			
+			forPacket(object, EntityRequest.class, req -> {
+				Entity e = world.getEntity(req.eid);
+				if(e != null && e.getLevel() == client.getLevel())
+					connection.sendTCP(new EntityAddition(e));
+			});
+			
+			// TODO don't allow client to update server stats
+			forPacket(object, StatUpdate.class, client::loadStat);
+			
+			forPacket(object, MovementRequest.class, move -> {
+				Vector3 loc = client.getLocation();
+				if(move.getMoveDist().len() < 1 && !move.startPos.variesFrom(client)) {
+					// move to start pos
+					Vector3 start = move.startPos.getPos();
+					Vector3 diff = loc.cpy().sub(start);
+					client.move(diff);
+				}
+				// move given dist
+				Vector3 moveDist = move.getMoveDist();
+				if(!GameCore.debug) // TODO replace this static speed check with something that determines the player's speed with respect to their situation.
+					moveDist.clamp(0, Math.min(.5f, 3.5f*Player.MOVE_SPEED/Math.min(ServerCore.getFPS(), 60))); // the server will not allow the client to move fast (unless in debug mode)
+				client.move(moveDist);
+				// compare against given end pos
+				if(move.endPos.variesFrom(client)) {
+					connection.sendTCP(new PositionUpdate(client));
+				}
+				// note that the server will always have the say when it comes to which level the player should be on.
+			});
+			
+			if(object instanceof InteractRequest) {
+				InteractRequest r = (InteractRequest) object;
+				if(r.playerPosition.variesFrom(client))
+					connection.sendTCP(new PositionUpdate(client)); // fix the player's position
 				
-				forPacket(object, EntityRequest.class, req -> {
-					Entity e = world.getEntity(req.eid);
-					if(e != null && e.getLevel() == client.getLevel())
-						connection.sendTCP(new EntityAddition(e));
-				});
+				client.doInteract(r.dir, r.hotbarIndex, r.attack);
+			}
+			
+			forPacket(object, ItemDropRequest.class, drop -> {
+				ServerHands hands = client.getHands();
+				Inventory inv = client.getInventory();
+				ServerItem item;
 				
-				// TODO don't allow client to update server stats
-				forPacket(object, StatUpdate.class, client::loadStat);
+				if(clientData.inventoryMode)
+					// dropped from the inventory screen
+					item = inv.getItem(drop.index);
+				else
+					// dropped from the hotbar
+					item = hands.getItem(drop.index);
 				
-				forPacket(object, MovementRequest.class, move -> {
-					Vector3 loc = client.getLocation();
-					if(move.getMoveDist().len() < 1 && !move.startPos.variesFrom(client)) {
-						// move to start pos
-						Vector3 start = move.startPos.getPos();
-						Vector3 diff = loc.cpy().sub(start);
-						client.move(diff);
-					}
-					// move given dist
-					Vector3 moveDist = move.getMoveDist();
-					if(!GameCore.debug) // TODO replace this static speed check with something that determines the player's speed with respect to their situation.
-						moveDist.clamp(0, Math.min(.5f, 3.5f*Player.MOVE_SPEED/Math.min(ServerCore.getFPS(), 60))); // the server will not allow the client to move fast (unless in debug mode)
-					client.move(moveDist);
-					// compare against given end pos
-					if(move.endPos.variesFrom(client)) {
-						connection.sendTCP(new PositionUpdate(client));
-					}
-					// note that the server will always have the say when it comes to which level the player should be on.
-				});
-				
-				if(object instanceof InteractRequest) {
-					InteractRequest r = (InteractRequest) object;
-					if(r.playerPosition.variesFrom(client))
-						connection.sendTCP(new PositionUpdate(client)); // fix the player's position
-					
-					client.doInteract(r.dir, r.hotbarIndex, r.attack);
+				if(item == null) {
+					// no item; client must have made a mistake (it shouldn't be sending a request if there isn't an item); if it came from their hotbar, update it, but in inventory mode it would get too messy so just ignore it; we'll update the inv once they close the menu in that case.
+					if(!clientData.inventoryMode)
+						connection.sendTCP(client.getHotbarUpdate());
+					return;
 				}
 				
-				forPacket(object, ItemDropRequest.class, drop -> {
-					ServerHands hands = client.getHands();
-					Inventory inv = client.getInventory();
-					ServerItem item;
+				ServerItemStack drops;
+				if(drop.all)
+					drops = new ServerItemStack(item, client.getInventory().removeItemStack(item));
+				else
+					drops = new ServerItemStack(item, client.getInventory().removeItem(item) ? 1 : 0);
+				
+				if(!clientData.inventoryMode) {
+					hands.validate();
+					connection.sendTCP(client.getHotbarUpdate());
+				}
+				// inventory screen mode: don't send back item removals, the client should manage by itself. Only send back additions.
+				
+				ServerLevel level = client.getLevel();
+				if(level == null) return;
+				// get target pos, which is one tile in front of player.
+				Vector2 targetPos = client.getCenter();
+				targetPos.add(client.getDirection().getVector().scl(2)); // adds 2 in the direction of the player.
+				for(int i = 0; i < drops.count; i++)
+					level.dropItem(drops.item, true, client.getCenter(), targetPos);
+			});
+			
+			forPacket(object, InventoryRequest.class, req -> {
+				clientData.inventoryMode = req.hotbar == null;
+				if(req.hotbar != null) {
+					client.getHands().fromInventoryIndex(req.hotbar);
+					connection.sendTCP(client.getHotbarUpdate());
+				}
+				else
+					connection.sendTCP(client.getInventoryUpdate());
+			});
+			
+			forPacket(object, RecipeRequest.class, req ->
+				connection.sendTCP(new RecipeRequest(
+					Recipes.serializeRecipes(),
+					new RecipeStockUpdate(client.getInventory().getItemStacks())
+				))
+			);
+			
+			forPacket(object, CraftRequest.class, req -> {
+				Recipe recipe = Recipes.recipes[req.recipeIndex];
+				ServerItem[] left = recipe.tryCraft(client.getInventory());
+				if(left != null) {
+					ServerLevel level = client.getLevel();
+					if(level != null)
+						for(ServerItem item : left)
+							level.dropItem(item, client.getPosition(), null);
+				}
+				client.getHands().validate();
+				connection.sendTCP(client.getHotbarUpdate());
+				connection.sendTCP(new RecipeStockUpdate(client.getInventory().getItemStacks()));
+			});
+			
+			if(object.equals(DatalessRequest.Respawn)) {
+				//ServerPlayer client = connectionToPlayerDataMap.get(connection).player;
+				world.respawnPlayer(client);
+				connection.sendTCP(new SpawnData(new EntityAddition(client), client.getHotbarUpdate(), client.saveStats()));
+			}
+			
+			if(object.equals(DatalessRequest.Tile)) {
+				Level level = client.getLevel();
+				if(level != null) {
+					Tile t = level.getTile(client.getInteractionRect());
+					connection.sendTCP(new Message(client+" looking at "+(t==null?null:t.toLocString()), GameCore.DEFAULT_CHAT_COLOR));
+				}
+			}
+			
+			forPacket(object, Message.class, msg -> {
+				//System.out.println("server: executing command "+msg.msg);
+				CommandInputParser.executeCommand(msg.msg, client, clientData.toClientOut, clientData.toClientErr);
+				InfoMessage output = clientData.toClientOut.flushMessage();
+				if(output != null)
+					connection.sendTCP(output);
+			});
+			
+			forPacket(object, TabRequest.class, request -> {
+				String text = request.manualText;
+				if(text.split(" ").length == 1) {
+					// hasn't finished entering command name, autocomplete that
+					Array<String> matches = new Array<>(String.class);
+					for(Command c: Command.values()) {
+						String name = c.name();
+						if(text.length() == 0 || name.toLowerCase().contains(text.toLowerCase()))
+							matches.add(name);
+					}
 					
-					if(clientData.inventoryMode)
-						// dropped from the inventory screen
-						item = inv.getItem(drop.index);
-					else
-						// dropped from the hotbar
-						item = hands.getItem(drop.index);
+					if(matches.size == 0) return;
 					
-					if(item == null) {
-						// no item; client must have made a mistake (it shouldn't be sending a request if there isn't an item); if it came from their hotbar, update it, but in inventory mode it would get too messy so just ignore it; we'll update the inv once they close the menu in that case.
-						if(!clientData.inventoryMode)
-							connection.sendTCP(client.getHotbarUpdate());
+					if(matches.size == 1) {
+						connection.sendTCP(new TabResponse(request.manualText, matches.get(0)));
 						return;
 					}
 					
-					ServerItemStack drops;
-					if(drop.all)
-						drops = new ServerItemStack(item, client.getInventory().removeItemStack(item));
-					else
-						drops = new ServerItemStack(item, client.getInventory().removeItem(item) ? 1 : 0);
+					matches.sort(String::compareToIgnoreCase);
 					
-					if(!clientData.inventoryMode) {
-						hands.validate();
-						connection.sendTCP(client.getHotbarUpdate());
-					}
-					// inventory screen mode: don't send back item removals, the client should manage by itself. Only send back additions.
-					
-					ServerLevel level = client.getLevel();
-					if(level == null) return;
-					// get target pos, which is one tile in front of player.
-					Vector2 targetPos = client.getCenter();
-					targetPos.add(client.getDirection().getVector().scl(2)); // adds 2 in the direction of the player.
-					for(int i = 0; i < drops.count; i++)
-						level.dropItem(drops.item, true, client.getCenter(), targetPos);
-				});
-				
-				forPacket(object, InventoryRequest.class, req -> {
-					clientData.inventoryMode = req.hotbar == null;
-					if(req.hotbar != null) {
-						client.getHands().fromInventoryIndex(req.hotbar);
-						connection.sendTCP(client.getHotbarUpdate());
-					}
-					else
-						connection.sendTCP(client.getInventoryUpdate());
-				});
-				
-				forPacket(object, RecipeRequest.class, req ->
-					connection.sendTCP(new RecipeRequest(
-						Recipes.serializeRecipes(),
-						new RecipeStockUpdate(client.getInventory().getItemStacks())
-					))
-				);
-				
-				forPacket(object, CraftRequest.class, req -> {
-					Recipe recipe = Recipes.recipes[req.recipeIndex];
-					ServerItem[] left = recipe.tryCraft(client.getInventory());
-					if(left != null) {
-						ServerLevel level = client.getLevel();
-						if(level != null)
-							for(ServerItem item : left)
-								level.dropItem(item, client.getPosition(), null);
-					}
-					client.getHands().validate();
-					connection.sendTCP(client.getHotbarUpdate());
-					connection.sendTCP(new RecipeStockUpdate(client.getInventory().getItemStacks()));
-				});
-				
-				if(object.equals(DatalessRequest.Respawn)) {
-					//ServerPlayer client = connectionToPlayerDataMap.get(connection).player;
-					world.respawnPlayer(client);
-					connection.sendTCP(new SpawnData(new EntityAddition(client), client.getHotbarUpdate(), client.saveStats()));
-				}
-				
-				if(object.equals(DatalessRequest.Tile)) {
-					Level level = client.getLevel();
-					if(level != null) {
-						Tile t = level.getTile(client.getInteractionRect());
-						connection.sendTCP(new Message(client+" looking at "+(t==null?null:t.toLocString()), GameCore.DEFAULT_CHAT_COLOR));
+					if(request.tabIndex < 0)
+						connection.sendTCP(new Message(ArrayUtils.arrayToString(matches.shrink(), ", "), GameCore.DEFAULT_CHAT_COLOR));
+					else {
+						// actually autocomplete
+						connection.sendTCP(new TabResponse(request.manualText, matches.get(request.tabIndex % matches.size)));
 					}
 				}
-				
-				forPacket(object, Message.class, msg -> {
-					//System.out.println("server: executing command "+msg.msg);
-					CommandInputParser.executeCommand(msg.msg, client, clientData.toClientOut, clientData.toClientErr);
-					InfoMessage output = clientData.toClientOut.flushMessage();
-					if(output != null)
-						connection.sendTCP(output);
-				});
-				
-				forPacket(object, TabRequest.class, request -> {
-					String text = request.manualText;
-					if(text.split(" ").length == 1) {
-						// hasn't finished entering command name, autocomplete that
-						Array<String> matches = new Array<>(String.class);
-						for(Command c: Command.values()) {
-							String name = c.name();
-							if(text.length() == 0 || name.toLowerCase().contains(text.toLowerCase()))
-								matches.add(name);
-						}
-						
-						if(matches.size == 0) return;
-						
-						if(matches.size == 1) {
-							connection.sendTCP(new TabResponse(request.manualText, matches.get(0)));
-							return;
-						}
-						
-						matches.sort(String::compareToIgnoreCase);
-						
-						if(request.tabIndex < 0)
-							connection.sendTCP(new Message(ArrayUtils.arrayToString(matches.shrink(), ", "), GameCore.DEFAULT_CHAT_COLOR));
-						else {
-							// actually autocomplete
-							connection.sendTCP(new TabResponse(request.manualText, matches.get(request.tabIndex % matches.size)));
-						}
-					}
-				});
-				
-				forPacket(object, SelfHurt.class, hurt -> {
-					// assumed that the client has hurt itself in some way
-					client.attackedBy(client, null, hurt.dmg);
-				});
-			}
+			});
+			
+			forPacket(object, SelfHurt.class, hurt -> {
+				// assumed that the client has hurt itself in some way
+				client.attackedBy(client, null, hurt.dmg);
+			});
+		}
 			
 			/*@Override
 			public void connected(Connection connection) {
 				System.out.println("new connection: " + connection.getRemoteAddressTCP().getHostString());
 			}*/
-			
-			@Override
-			public void disconnected(Connection connection) {
-				PlayerData data = connectionToPlayerDataMap.get(connection);
-				if(data == null) return;
-				data.validationTimer.stop();
-				ServerPlayer player = data.player;
-				player.remove();
-				// player.getWorld().removePlayer(player);
-				connectionToPlayerDataMap.remove(connection);
-				playerToConnectionMap.remove(player);
-				broadcast(new Message(player.getName()+" left the server.", STATUS_MSG_COLOR));
-				//System.out.println("server disconnected from client: " + connection.getRemoteAddressTCP().getHostString());
-				
-				if(connectionToPlayerDataMap.size() == 0 && !standalone)
-					ServerCore.quit();
-			}
-		});//);
 		
-		server.start();
-	}
-	
-	public void addListener(Listener listener) { server.addListener(listener); }
-	
-	public void startServer() throws IOException { startServer(GameProtocol.PORT); }
-	public void startServer(int port) throws IOException {
-		server.bind(port);
-	}
+		@Override
+		public void disconnected(Connection connection) {
+			PlayerData data = connectionToPlayerDataMap.get(connection);
+			if(data == null) return;
+			data.validationTimer.stop();
+			ServerPlayer player = data.player;
+			player.remove();
+			// player.getWorld().removePlayer(player);
+			connectionToPlayerDataMap.remove(connection);
+			playerToConnectionMap.remove(player);
+			broadcast(new Message(player.getName()+" left the server.", STATUS_MSG_COLOR));
+			//System.out.println("server disconnected from client: " + connection.getRemoteAddressTCP().getHostString());
+			
+			if(player.getName().equals(HOST)) // quit server when host exits
+				ServerCore.quit();
+		}
+	};
 	
 	public void sendToPlayer(@NotNull ServerPlayer player, Object obj) {
 		Connection c = playerToConnectionMap.get(player);

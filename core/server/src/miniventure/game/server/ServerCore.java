@@ -1,8 +1,9 @@
 package miniventure.game.server;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -11,6 +12,7 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 import miniventure.game.GameCore;
+import miniventure.game.GameProtocol;
 import miniventure.game.chat.command.CommandInputParser;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
@@ -26,15 +28,17 @@ import org.jetbrains.annotations.NotNull;
 
 public class ServerCore {
 	
-	private static ServerWorld serverWorld;
+	// private static final GameServer server = new GameServer();
+	private static final ServerWorld serverWorld = new ServerWorld();
 	
 	private static CommandInputParser commandParser = null;
 	
+	@NotNull
 	public static ServerWorld getWorld() { return serverWorld; }
 	public static GameServer getServer() { return serverWorld.getServer(); }
 	public static CommandInputParser getCommandInput() { return commandParser; }
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		args = ArrayUtils.mapArray(args, String.class, String::toLowerCase);
 		List<String> arglist = Arrays.asList(args);
 		
@@ -42,6 +46,7 @@ public class ServerCore {
 		boolean create = false;
 		boolean overwrite = false;
 		String seedString = null;
+		int port = GameProtocol.PORT;
 		
 		while(arglist.size() > 0) {
 			String arg = arglist.remove(0);
@@ -49,6 +54,19 @@ public class ServerCore {
 				case "--create": create = true; break;
 				
 				case "--overwrite": overwrite = true; break;
+				
+				case "--port":
+					if(arglist.size() == 0) {
+						System.out.println("error: --port option requires an argument.");
+						return;
+					}
+					try {
+						port = Integer.parseInt(arglist.remove(0));
+					} catch(NumberFormatException e) {
+						System.out.println("error: --port argument is invalid; must be an integer.");
+						return;
+					}
+					break;
 				
 				case "--seed":
 					if(arglist.size() == 0) {
@@ -72,9 +90,9 @@ public class ServerCore {
 		}
 		
 		// check for an existing save with the given name
-		File world = SaveLoadInterface.getLocation(worldname);
-		System.out.println("looking for worlds in: "+GameCore.GAME_DIR.resolve("saves").toFile().getAbsolutePath());
-		boolean exists = world.exists();
+		Path world = SaveLoadInterface.getLocation(worldname);
+		System.out.println("looking for worlds in: "+SaveLoadInterface.getLocation("").toAbsolutePath());
+		boolean exists = Files.exists(world);
 		
 		if(!exists && !create) {
 			// doesn't exist but didn't say create; prompt for creation
@@ -103,16 +121,10 @@ public class ServerCore {
 		
 		if(make) {
 			// create folders to acquire lock
-			world.mkdirs();
+			Files.createDirectories(world);
 		}
 		
-		RandomAccessFile lockHolder;
-		try {
-			lockHolder = SaveLoadInterface.tryLockWorld(world);
-		} catch(IOException e) {
-			e.printStackTrace();
-			return;
-		}
+		RandomAccessFile lockHolder = SaveLoadInterface.tryLockWorld(world);
 		if(lockHolder == null) {
 			System.err.println("Failed to acquire world lock; is it currently loaded by another instance?");
 			return;
@@ -132,7 +144,12 @@ public class ServerCore {
 		else // CREATE
 			worldInfo = SaveLoadInterface.createWorld(world, lockHolder, seedString);
 		
-		initServer(worldInfo, true);
+		if(worldInfo == null) {
+			System.err.println("Error occurred during world load, world init failed.");
+			return;
+		}
+		
+		serverWorld.loadWorld(port, true, worldInfo);
 		
 		System.out.println("server ready");
 		if(!GameCore.determinedLatestVersion())
@@ -165,21 +182,24 @@ public class ServerCore {
 		return ""; // impossible to reach.
 	}
 	
-	public static boolean initServer(WorldDataSet worldInfo, boolean standalone) {
-		if(serverWorld != null)
-			serverWorld.exitWorld();
-		
-		try {
-			serverWorld = new ServerWorld(standalone);
-		} catch(IOException e) {
-			e.printStackTrace();
-			serverWorld = null;
-			return false;
+	// returns port server is running on.
+	public static int initSinglePlayer(WorldDataSet worldInfo) throws IOException {
+		int tries = 0;
+		int port = GameProtocol.PORT;
+		while(true) {
+			try {
+				serverWorld.loadWorld(port, false, worldInfo);
+				return port;
+			} catch(IOException e) {
+				if(tries == 0)
+					e.printStackTrace();
+				tries++;
+				if(tries > 10)
+					throw new IOException("Failed to find valid port for internal server.", e);
+				else
+					port += MathUtils.random(1, 10);
+			}
 		}
-		
-		serverWorld.loadWorld(worldInfo);
-		
-		return true;
 	}
 	
 	private static final float[] frameTimes = new float[20];
@@ -256,11 +276,11 @@ public class ServerCore {
 		}
 		
 		commandParser.end();
-		serverWorld = null;
+		
 	}
 	
 	// stop the server.
 	public static void quit() {
-		getWorld().exitWorld();
+		serverWorld.exitWorld();
 	}
 }

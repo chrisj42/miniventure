@@ -48,7 +48,7 @@ public abstract class WorldManager {
 	/*  --- LEVEL MANAGEMENT --- */
 	
 	
-	protected void clearWorld() { actOnEntityMap(Map::clear); }
+	protected void clearEntityIdMap() { actOnEntityMap(Map::clear); }
 	
 	
 	/*  --- ENTITY MANAGEMENT --- */

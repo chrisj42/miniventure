@@ -3,6 +3,7 @@ package miniventure.game.screen;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.file.Path;
 
 import miniventure.game.client.ClientCore;
 import miniventure.game.screen.util.BackgroundInheritor;
@@ -43,7 +44,7 @@ public class WorldGenScreen extends BackgroundInheritor {
 			if(name.length() == 0)
 				return;
 			
-			File path = SaveLoadInterface.getLocation(name);
+			Path path = SaveLoadInterface.getLocation(name);
 			RandomAccessFile lockRef;
 			try {
 				lockRef = SaveLoadInterface.tryLockWorld(path);

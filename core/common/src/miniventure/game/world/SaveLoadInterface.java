@@ -2,16 +2,15 @@ package miniventure.game.world;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Random;
 
 import miniventure.game.GameCore;
@@ -23,7 +22,6 @@ import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.tile.Tile.TileData;
 import miniventure.game.world.worldgen.island.IslandType;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class SaveLoadInterface {
@@ -45,18 +43,18 @@ public class SaveLoadInterface {
 	
 	public static final String LOCK_FILE = "session.lock";
 	
-	public static File getLocation(String worldname) {
-		return GameCore.GAME_DIR.resolve("saves").resolve(worldname).toFile();
+	public static Path getLocation(String worldname) {
+		return GameCore.GAME_DIR.resolve("saves").resolve(worldname);
 	}
 	
 	@Nullable
-	public static RandomAccessFile tryLockWorld(File worldFolder) throws IOException {
-		File lockFile = worldFolder.toPath().resolve(LOCK_FILE).toFile();
-		if(!worldFolder.exists())
-			worldFolder.mkdirs();
-		if(!lockFile.exists()) {
+	public static RandomAccessFile tryLockWorld(Path worldFolder) throws IOException {
+		Path lockFile = worldFolder.resolve(LOCK_FILE);
+		if(!Files.exists(worldFolder))
+			Files.createDirectories(worldFolder);
+		if(!Files.exists(lockFile)) {
 			try {
-				lockFile.createNewFile();
+				Files.createFile(lockFile);
 			} catch(IOException e) {
 				throw new IOException("Error creating world lock file.", e);
 			}
@@ -64,7 +62,7 @@ public class SaveLoadInterface {
 		
 		RandomAccessFile rf;
 		try {
-			rf = new RandomAccessFile(lockFile, "rws");
+			rf = new RandomAccessFile(lockFile.toFile(), "rws");
 		} catch(FileNotFoundException e) {
 			throw new IOException("Error opening world lock file.", e);
 		}
@@ -79,7 +77,7 @@ public class SaveLoadInterface {
 		}
 	}
 	
-	public static WorldDataSet createWorld(File file, RandomAccessFile lockRef, String seedString) {
+	public static WorldDataSet createWorld(Path file, RandomAccessFile lockRef, String seedString) {
 		if(seedString == null || seedString.length() == 0)
 			return createWorld(file, lockRef, new Random().nextLong());
 		
@@ -99,35 +97,65 @@ public class SaveLoadInterface {
 		long seed = Long.parseLong(b1+b2, 2);
 		return createWorld(file, lockRef, seed);
 	}
-	public static WorldDataSet createWorld(File file, RandomAccessFile lockRef, long seed) {
+	public static WorldDataSet createWorld(Path file, RandomAccessFile lockRef, long seed) {
 		
 		LevelCache[] levelCaches = new LevelCache[] {
-			new LevelCache(0, new Point(0, 0), seed, IslandType.STARTER)
+			new LevelCache(0, new Point(0, 0), seed, IslandType.STARTER)/*,
+			new LevelCache(1, new Point(2, 2), seed, IslandType.DESERT),
+			new LevelCache(2, new Point(3, -5), seed, IslandType.ARCTIC),
+			new LevelCache(3, new Point(-3, 5), seed, IslandType.JUNGLE),
+			new LevelCache(4, new Point(10, 0), seed, IslandType.SWAMP)*/
 		};
 		
-		WorldDataSet worldData = new WorldDataSet(file.toPath(), lockRef, seed, 0, TimeOfDay.Morning.getStartOffsetSeconds(), GameCore.VERSION, new PlayerInfo[0], levelCaches);
-		// saveWorld(worldData);
+		WorldDataSet worldData = new WorldDataSet(file, lockRef, seed, 0, TimeOfDay.Morning.getStartOffsetSeconds(), GameCore.VERSION, new PlayerInfo[0], levelCaches);
+		saveWorld(worldData);
 		return worldData;
 	}
 	
-	public static WorldDataSet loadWorld(File folder, RandomAccessFile lockRef) {
-		LinkedList<String> lines = new LinkedList<>();
-		
-		try (BufferedReader reader = Files.newBufferedReader(folder.toPath())) {
-			String line;
-			while((line = reader.readLine()) != null)
-				lines.add(line);
+	public static WorldDataSet loadWorld(Path folder, RandomAccessFile lockRef) {
+		try {
+			LinkedList<String> lines = new LinkedList<>();
 			
-		} catch(IOException e) {
+			// read global data
+			if(!readFile(folder.resolve("game.txt"), lines))
+				return null;
+			
+			Version version = new Version(lines.pop());
+			//noinspection MismatchedQueryAndUpdateOfCollection
+			SerialDataMap map = new SerialDataMap(lines.pop());
+			final long seed = Long.parseLong(map.get("seed"));
+			final float gameTime = Float.parseFloat(map.get("gt"));
+			final float daytime = Float.parseFloat(map.get("time"));
+			
+			// read terrain / entity / level data
+			final String[] islandNames = MyUtils.parseLayeredString(map.get("islands"));
+			LevelCache[] levels = new LevelCache[islandNames.length];
+			for(int i = 0; i < levels.length; i++) {
+				lines.clear();
+				if(!readFile(folder.resolve(islandNames[i] + ".txt"), lines))
+					return null;
+				levels[i] = new LevelCache(version, lines);
+			}
+			
+			// read player data
+			lines.clear();
+			if(!readFile(folder.resolve("players.txt"), lines))
+				return null;
+			PlayerInfo[] players = new PlayerInfo[lines.size() / 4];
+			for(int i = 0; i < players.length; i++) {
+				String name = lines.pop();
+				String passhash = lines.pop();
+				int level = Integer.parseInt(lines.pop());
+				String data = lines.pop();
+				players[i] = new PlayerInfo(name, passhash, data, level);
+			}
+			
+			return new WorldDataSet(folder, lockRef, seed, gameTime, daytime, version, players, levels);
+		} catch(NoSuchElementException e) {
+			System.err.println("Save format of world '"+folder+"' is invalid.");
 			e.printStackTrace();
 			return null;
 		}
-		
-		LevelCache[] levels = new LevelCache[lines.size()-1];
-		
-		// TODO need to write loader
-		
-		return null;//new WorldDataSet(folder.toPath(), lockRef, );
 	}
 	
 	static boolean saveWorld(WorldDataSet worldData) {
@@ -167,6 +195,20 @@ public class SaveLoadInterface {
 		return good;
 	}
 	
+	/** @noinspection BooleanMethodIsAlwaysInverted*/
+	private static boolean readFile(Path path, LinkedList<String> list) {
+		try (BufferedReader reader = Files.newBufferedReader(path)) {
+			String s;
+			while((s = reader.readLine()) != null)
+				list.add(s);
+			// actor.act(lines);
+		} catch(IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+	
 	private static boolean writeFile(Path path, ValueFunction<LinkedList<String>> populator) {
 		try (BufferedWriter writer = Files.newBufferedWriter(path)) {
 			
@@ -195,7 +237,7 @@ public class SaveLoadInterface {
 		final PlayerInfo[] playerInfo;
 		final LevelCache[] levelCaches;
 		
-		private WorldDataSet(Path worldFile, RandomAccessFile lockRef, long seed, float gameTime, float timeOfDay, Version dataVersion, PlayerInfo[] playerInfo, LevelCache[] levelCaches) {
+		public WorldDataSet(Path worldFile, RandomAccessFile lockRef, long seed, float gameTime, float timeOfDay, Version dataVersion, PlayerInfo[] playerInfo, LevelCache[] levelCaches) {
 			this.worldFile = worldFile;
 			this.lockRef = lockRef;
 			this.seed = seed;
@@ -232,8 +274,6 @@ public class SaveLoadInterface {
 			Client needs levelid, location, and levelConfig (which is the island type)
 		 */
 		
-		// TODO remove data version from level caches, because I ought to ensure they are always up to date with the current version. For a previous version that is still compatible, if entity/tile data exists, then the island is loaded and saved again to update any format changes. This should not really be necessary for not-yet-loaded caches, but there still technically is data there so I suppose I should load it then too.
-		
 		final IslandReference island;
 		
 		// gen parameter
@@ -250,8 +290,7 @@ public class SaveLoadInterface {
 			dataVersion = GameCore.VERSION;
 		}
 		
-		private LevelCache(LinkedList<String> fileData) {
-			this.dataVersion = new Version(fileData.pop());
+		private LevelCache(Version dataVersion, LinkedList<String> fileData) {
 			//noinspection MismatchedQueryAndUpdateOfCollection
 			SerialDataMap map = new SerialDataMap(fileData.pop());
 			int id = Integer.parseInt(map.get("id"));
@@ -283,8 +322,6 @@ public class SaveLoadInterface {
 		
 		private List<String> serialize() { return serialize(new LinkedList<>()); }
 		private List<String> serialize(LinkedList<String> data) {
-			data.add(dataVersion.serialize());
-			
 			SerialDataMap map = new SerialDataMap();
 			map.add("id", island.levelId);
 			map.add("x", island.location.x);
@@ -313,8 +350,10 @@ public class SaveLoadInterface {
 			dataVersion = GameCore.VERSION;
 		}
 		
+		public boolean generated() { return tileData != null; }
+		
 		public Level getLevel(LevelFetcher fetcher) {
-			if(tileData != null)
+			if(generated())
 				return fetcher.loadLevel(dataVersion, island.levelId, tileData, entityData);
 			
 			return fetcher.makeLevel(island.levelId, seed, island.type);

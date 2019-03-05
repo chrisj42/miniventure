@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import miniventure.game.GameCore;
+import miniventure.game.GameProtocol;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.ServerManager;
 import miniventure.game.Preferences;
@@ -34,9 +35,10 @@ public class DesktopLauncher {
 			System.out.println("\t--savedir   change where game data is stored and searched for. The default location on your computer is \""+GameCore.DEFAULT_GAME_DIR +"\". Without this option, the default location is checked for \""+Preferences.PREF_REDIRECT+"\", which tells the game where to look for the actual preferences and world saves. Using this option replaces the function of \""+Preferences.PREF_REDIRECT+"\", but it will not modify the file, so the option must be specified every time. To modify the file, use the options menu in the GUI client.");
 			System.out.println("\t--server    run as a headless server (no graphical windows). See below..");
 			System.out.println("Headless server usage format:");
-			System.out.println("  --server \"world name\" [--create [--seed \"seed\"] [--overwrite]]");
+			System.out.println("  --server \"world name\" [--port PORT] [--create [--seed \"seed\"] [--overwrite]]");
 			System.out.println("Explanation:");
 			System.out.println("\tWorld name is required. Square brackets \"[]\" denote optional arguments. As is implied by the nesting, the other options are ignored if --create is not specified.");
+			System.out.println("\t--port: server is started on the given TCP port instead of the default port ("+GameProtocol.PORT+").");
 			System.out.println("\tIt is first determined if the game dir contains a world save matching the given name.");
 			System.out.println("\tWith no server options (only world name): if a match is found, it will be loaded, otherwise you will be prompted to create the world.");
 			System.out.println("\tWith --create option: if no match is found, it will create the world without prompt, otherwise it will confirm you wish to overwrite the match with a new save.");
@@ -76,7 +78,8 @@ public class DesktopLauncher {
 		if(server) {
 			ServerCore.main(leftover.toArray(new String[0]));
 		} else {
-			System.out.println("Starting GUI client...");
+			if(GameCore.debug)
+				System.out.println("Starting GUI client...");
 			Thread.setDefaultUncaughtExceptionHandler(ClientCore.exceptionHandler);
 			LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 			config.title = "Miniventure - " + GameCore.VERSION;
@@ -84,14 +87,18 @@ public class DesktopLauncher {
 			config.height = ClientCore.DEFAULT_SCREEN_HEIGHT;
 			new LwjglApplication(new ClientCore(new ServerManager() {
 				@Override
-				public boolean startServer(WorldDataSet worldInfo) {
-					boolean started = ServerCore.initServer(worldInfo, false);
-					if(!started)
-						return false;
+				public int startServer(WorldDataSet worldInfo) throws IOException {
+					int port = ServerCore.initSinglePlayer(worldInfo);
 					
 					// server running, and world loaded; now, get the server world updating
 					new Thread(new ThreadGroup("server"), ServerCore::run, "Miniventure Server").start();
-					return true; // ready to connect
+					// ready to connect
+					return port;
+				}
+				
+				@Override
+				public void open() {
+					ServerCore.getServer().setMultiplayer(true);
 				}
 				
 				@Override
