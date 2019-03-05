@@ -30,10 +30,11 @@ public class WorldGenScreen extends BackgroundInheritor {
 		table.add(nameField);
 		table.row();
 		
-		VisLabel seedLabel = makeLabel("World Seed\n(leave blank for random):", false);
+		VisLabel seedLabel = makeLabel("World Seed:", false);
 		seedLabel.setAlignment(Align.center, Align.right);
 		table.add(seedLabel);
 		TextField seedField = makeField("");
+		seedField.setMessageText("leave blank for random");
 		table.add(seedField);
 		table.row();
 		
