@@ -4,7 +4,7 @@ import miniventure.game.item.Result;
 import miniventure.game.item.ServerItem;
 import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolItem.Material;
-import miniventure.game.item.ToolType;
+import miniventure.game.item.ToolItem.ToolType;
 import miniventure.game.server.ServerCore;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.customenum.SerialMap;

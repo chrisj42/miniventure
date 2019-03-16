@@ -12,7 +12,7 @@ public enum ItemType {
 	
 	// TODO add EntityItem, an item that becomes an entity when placed (like TileItems become tiles when placed). This will mainly be used for various types of furniture.
 	
-	Tool(data -> new ToolItem(ToolType.valueOf(data[0]), Material.valueOf(data[1]), Integer.parseInt(data[2]))),
+	Tool(data -> new ToolItem(ToolItem.ToolType.valueOf(data[0]), Material.valueOf(data[1]), Integer.parseInt(data[2]))),
 	
 	Enum(data -> EnumItemType.valueOf(data[0]).itemFetcher.get(data[1])),
 	

@@ -17,7 +17,7 @@ import miniventure.game.item.FoodType;
 import miniventure.game.item.ResourceType;
 import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolItem.Material;
-import miniventure.game.item.ToolType;
+import miniventure.game.item.ToolItem.ToolType;
 import miniventure.game.server.GameServer;
 import miniventure.game.server.ServerCore;
 import miniventure.game.util.SyncObj;

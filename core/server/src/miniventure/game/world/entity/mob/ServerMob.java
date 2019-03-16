@@ -9,7 +9,7 @@ import miniventure.game.GameProtocol.SpriteUpdate;
 import miniventure.game.item.Item;
 import miniventure.game.item.Result;
 import miniventure.game.item.ToolItem;
-import miniventure.game.item.ToolType;
+import miniventure.game.item.ToolItem.ToolType;
 import miniventure.game.server.ServerCore;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueFunction;

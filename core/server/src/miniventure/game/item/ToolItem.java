@@ -4,6 +4,10 @@ import miniventure.game.GameCore;
 
 public class ToolItem extends ServerItem {
 	
+	public enum ToolType {
+		Pickaxe, Shovel, Axe, Sword;
+	}
+	
 	public enum Material {
 		Flint(50, 1, 1),
 		
@@ -25,8 +29,6 @@ public class ToolItem extends ServerItem {
 			this.staminaUsage = staminaUsage;
 		}
 	}
-	
-	
 	
 	private final ToolType toolType;
 	private final Material material;

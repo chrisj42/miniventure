@@ -11,102 +11,102 @@ public class Recipes {
 	private Recipes() {}
 	
 	public static final Recipe[] recipes = new Recipe[] {
-		new Recipe(new ToolItem(ToolType.Pickaxe, Material.Flint),
+		new Recipe(new ToolItem(ToolItem.ToolType.Pickaxe, Material.Flint),
 			new ServerItemStack(ResourceType.Flint.get(), 2),
 			new ServerItemStack(ResourceType.Log.get(), 1)
 		),
 		
-		new Recipe(new ToolItem(ToolType.Sword, Material.Flint),
+		new Recipe(new ToolItem(ToolItem.ToolType.Sword, Material.Flint),
 			new ServerItemStack(ResourceType.Flint.get(), 2),
 			new ServerItemStack(ResourceType.Log.get(), 1)
 		),
 		
-		new Recipe(new ToolItem(ToolType.Axe, Material.Flint),
+		new Recipe(new ToolItem(ToolItem.ToolType.Axe, Material.Flint),
 			new ServerItemStack(ResourceType.Flint.get(), 2),
 			new ServerItemStack(ResourceType.Log.get(), 1)
 		),
 		
-		new Recipe(new ToolItem(ToolType.Shovel, Material.Flint),
+		new Recipe(new ToolItem(ToolItem.ToolType.Shovel, Material.Flint),
 			new ServerItemStack(ResourceType.Flint.get(), 1),
 			new ServerItemStack(ResourceType.Log.get(), 1)
 		),
 		
-		new Recipe(new ToolItem(ToolType.Pickaxe, Material.Stone),
+		new Recipe(new ToolItem(ToolItem.ToolType.Pickaxe, Material.Stone),
 			new ServerItemStack(ResourceType.Stone.get(), 2),
 			new ServerItemStack(ResourceType.Log.get(), 1)
 		),
 		
-		new Recipe(new ToolItem(ToolType.Sword, Material.Stone),
+		new Recipe(new ToolItem(ToolItem.ToolType.Sword, Material.Stone),
 			new ServerItemStack(ResourceType.Stone.get(), 2),
 			new ServerItemStack(ResourceType.Log.get(), 1)
 		),
 		
-		new Recipe(new ToolItem(ToolType.Axe, Material.Stone),
+		new Recipe(new ToolItem(ToolItem.ToolType.Axe, Material.Stone),
 			new ServerItemStack(ResourceType.Stone.get(), 2),
 			new ServerItemStack(ResourceType.Log.get(), 1)
 		),
 		
-		new Recipe(new ToolItem(ToolType.Shovel, Material.Stone),
+		new Recipe(new ToolItem(ToolItem.ToolType.Shovel, Material.Stone),
 			new ServerItemStack(ResourceType.Stone.get(), 1),
 			new ServerItemStack(ResourceType.Log.get(), 1)
 		),
 		
-		new Recipe(new ToolItem(ToolType.Pickaxe, Material.Iron),
+		new Recipe(new ToolItem(ToolItem.ToolType.Pickaxe, Material.Iron),
 			new ServerItemStack(ResourceType.Iron.get(), 2),
 			new ServerItemStack(ResourceType.Log.get(), 1)
 		),
 		
-		new Recipe(new ToolItem(ToolType.Sword, Material.Iron),
+		new Recipe(new ToolItem(ToolItem.ToolType.Sword, Material.Iron),
 			new ServerItemStack(ResourceType.Iron.get(), 2),
 			new ServerItemStack(ResourceType.Log.get(), 1)
 		),
 		
-		new Recipe(new ToolItem(ToolType.Axe, Material.Iron),
+		new Recipe(new ToolItem(ToolItem.ToolType.Axe, Material.Iron),
 			new ServerItemStack(ResourceType.Iron.get(), 2),
 			new ServerItemStack(ResourceType.Log.get(), 1)
 		),
 		
-		new Recipe(new ToolItem(ToolType.Shovel, Material.Iron),
+		new Recipe(new ToolItem(ToolItem.ToolType.Shovel, Material.Iron),
 			new ServerItemStack(ResourceType.Iron.get(), 1),
 			new ServerItemStack(ResourceType.Log.get(), 1)
 		),
 		
-		new Recipe(new ToolItem(ToolType.Pickaxe, Material.Tungsten),
+		new Recipe(new ToolItem(ToolItem.ToolType.Pickaxe, Material.Tungsten),
 			new ServerItemStack(ResourceType.Tungsten.get(), 2),
 			new ServerItemStack(ResourceType.Log.get(), 1)
 		),
 		
-		new Recipe(new ToolItem(ToolType.Sword, Material.Tungsten),
+		new Recipe(new ToolItem(ToolItem.ToolType.Sword, Material.Tungsten),
 			new ServerItemStack(ResourceType.Tungsten.get(), 2),
 			new ServerItemStack(ResourceType.Log.get(), 1)
 		),
 		
-		new Recipe(new ToolItem(ToolType.Axe, Material.Tungsten),
+		new Recipe(new ToolItem(ToolItem.ToolType.Axe, Material.Tungsten),
 			new ServerItemStack(ResourceType.Tungsten.get(), 2),
 			new ServerItemStack(ResourceType.Log.get(), 1)
 		),
 		
-		new Recipe(new ToolItem(ToolType.Shovel, Material.Tungsten),
+		new Recipe(new ToolItem(ToolItem.ToolType.Shovel, Material.Tungsten),
 			new ServerItemStack(ResourceType.Tungsten.get(), 1),
 			new ServerItemStack(ResourceType.Log.get(), 1)
 		),
 		
-		new Recipe(new ToolItem(ToolType.Pickaxe, Material.Ruby),
+		new Recipe(new ToolItem(ToolItem.ToolType.Pickaxe, Material.Ruby),
 			new ServerItemStack(ResourceType.Ruby.get(), 2),
 			new ServerItemStack(ResourceType.Log.get(), 1)
 		),
 		
-		new Recipe(new ToolItem(ToolType.Sword, Material.Ruby),
+		new Recipe(new ToolItem(ToolItem.ToolType.Sword, Material.Ruby),
 			new ServerItemStack(ResourceType.Ruby.get(), 2),
 			new ServerItemStack(ResourceType.Log.get(), 1)
 		),
 		
-		new Recipe(new ToolItem(ToolType.Axe, Material.Ruby),
+		new Recipe(new ToolItem(ToolItem.ToolType.Axe, Material.Ruby),
 			new ServerItemStack(ResourceType.Ruby.get(), 2),
 			new ServerItemStack(ResourceType.Log.get(), 1)
 		),
 		
-		new Recipe(new ToolItem(ToolType.Shovel, Material.Ruby),
+		new Recipe(new ToolItem(ToolItem.ToolType.Shovel, Material.Ruby),
 			new ServerItemStack(ResourceType.Ruby.get(), 1),
 			new ServerItemStack(ResourceType.Log.get(), 1)
 		),

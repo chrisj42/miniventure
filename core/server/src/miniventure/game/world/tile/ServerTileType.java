@@ -7,7 +7,7 @@ import miniventure.game.item.Result;
 import miniventure.game.item.ServerItem;
 import miniventure.game.item.TileItem;
 import miniventure.game.item.TileItem.PlacementCheck;
-import miniventure.game.item.ToolType;
+import miniventure.game.item.ToolItem.ToolType;
 import miniventure.game.server.ServerCore;
 import miniventure.game.util.customenum.SerialMap;
 import miniventure.game.util.function.MapFunction;
