@@ -1,7 +1,5 @@
 package miniventure.game.world.worldgen.island;
 
-import java.awt.Color;
-
 import miniventure.game.world.tile.TileTypeEnum;
 import miniventure.game.world.worldgen.island.TileNoiseMap.TileMapBuilder;
 import miniventure.game.world.worldgen.island.TileProcessor.TileMultiProcess;
@@ -174,6 +172,20 @@ public enum IslandType {
 		@Override
 		void generateIsland(ProtoIsland island) {
 			// describe process
+			
+			float[][] shape = island.getFromGen(Testing.getTerrain());
+			
+			float[][] trees = island.getFromGen(new Coherent2DNoiseFunction(24));
+			
+			island.forEach(new TileDelegator(
+				new NoiseTileCondition(shape, val -> val < .18f),
+				GRASS,
+				new TileMapBuilder(
+					1, POOF_TREE)
+				.addRegion(2, PINE_TREE)
+				.addRegion(2, CARTOON_TREE)
+				.addRegion(1, POOF_TREE).get(trees)
+			));
 		}
 	};
 	

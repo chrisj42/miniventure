@@ -100,7 +100,7 @@ public class SaveLoadInterface {
 	public static WorldDataSet createWorld(Path file, RandomAccessFile lockRef, long seed) {
 		
 		LevelCache[] levelCaches = new LevelCache[] {
-			new LevelCache(0, new Point(0, 0), seed, IslandType.STARTER)/*,
+			new LevelCache(0, new Point(0, 0), seed, IslandType.JUNGLE)/*,
 			new LevelCache(1, new Point(2, 2), seed, IslandType.DESERT),
 			new LevelCache(2, new Point(3, -5), seed, IslandType.ARCTIC),
 			new LevelCache(3, new Point(-3, 5), seed, IslandType.JUNGLE),
