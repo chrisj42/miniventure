@@ -34,7 +34,7 @@ public class WorldGenScreen extends BackgroundInheritor {
 		seedLabel.setAlignment(Align.center, Align.right);
 		table.add(seedLabel);
 		TextField seedField = makeField("");
-		seedField.setMessageText("blank for random");
+		seedField.setMessageText("(blank for random)");
 		table.add(seedField);
 		table.row();
 		
