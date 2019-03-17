@@ -189,6 +189,10 @@ public enum Command {
 		}), Argument.get(ArgValidator.DECIMAL, ArgValidator.DECIMAL))
 	),
 	
+	SAVE("Save the world to file.",
+		new CommandUsageForm(true, "", "Save the current state of the game to file, so it can be loaded later.", (executor, args, out, err) -> ServerCore.getWorld().saveWorld())
+	),
+	
 	STATUS("Print the server's status on various things.",
 		new CommandUsageForm(true, "", "Print various pieces of info about the server.", (executor, args, out, err) -> ServerCore.getServer().printStatus(out))
 	),
