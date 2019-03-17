@@ -1,6 +1,5 @@
 package miniventure.game;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.util.HashMap;
 
@@ -19,6 +18,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.TextureAtlasData;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.TextureAtlasData.Region;
 import com.badlogic.gdx.math.MathUtils;
+
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
@@ -87,11 +87,13 @@ public class GameCore {
 		FileHandle spriteFolder = Gdx.files.internal("sprites");
 		TextureAtlasData entityData = new TextureAtlasData(spriteFolder.child("entities.txt"), spriteFolder, false);
 		TextureAtlasData iconData = new TextureAtlasData(spriteFolder.child("icons.txt"), spriteFolder, false);
+		TextureAtlasData iconScaledData = new TextureAtlasData(spriteFolder.child("icons4x.txt"), spriteFolder, false);
 		TextureAtlasData tileData = new TextureAtlasData(spriteFolder.child("tiles4x.txt"), spriteFolder, false);
 		
 		entityAtlas = new TextureAtlasHolder(entityData);
 		tileAtlas = new TextureAtlasHolder(tileData);
 		descaledTileAtlas = new TextureAtlasHolder(new TextureAtlasData(spriteFolder.child("tiles.txt"), spriteFolder, false));
+		scaledIconAtlas = new TextureAtlasHolder(iconScaledData);
 		for(Region region: iconData.getRegions()) {
 			TextureHolder tex = new TextureHolder(region);
 			icons.put(tex.name, tex);

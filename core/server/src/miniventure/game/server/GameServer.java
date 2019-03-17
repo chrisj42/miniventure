@@ -409,6 +409,7 @@ public class GameServer implements GameProtocol {
 			if(data == null) return;
 			data.validationTimer.stop();
 			ServerPlayer player = data.player;
+			ServerCore.getWorld().savePlayer(player);
 			player.remove();
 			// player.getWorld().removePlayer(player);
 			connectionToPlayerDataMap.remove(connection);

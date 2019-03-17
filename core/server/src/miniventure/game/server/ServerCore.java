@@ -41,7 +41,7 @@ public class ServerCore {
 	
 	public static void main(String[] args) throws IOException {
 		args = ArrayUtils.mapArray(args, String.class, String::toLowerCase);
-		List<String> arglist = Arrays.asList(args);
+		LinkedList<String> arglist = new LinkedList<>(Arrays.asList(args));
 		
 		String worldname = null;
 		boolean create = false;
@@ -50,7 +50,7 @@ public class ServerCore {
 		int port = GameProtocol.PORT;
 		
 		while(arglist.size() > 0) {
-			String arg = arglist.remove(0);
+			String arg = arglist.pop();
 			switch(arg) {
 				case "--create": create = true; break;
 				
@@ -62,7 +62,7 @@ public class ServerCore {
 						return;
 					}
 					try {
-						port = Integer.parseInt(arglist.remove(0));
+						port = Integer.parseInt(arglist.pop());
 					} catch(NumberFormatException e) {
 						System.out.println("error: --port argument is invalid; must be an integer.");
 						return;
@@ -74,7 +74,7 @@ public class ServerCore {
 						System.out.println("error: --seed option requires an argument.");
 						return;
 					}
-					seedString = arglist.remove(0);
+					seedString = arglist.pop();
 					break;
 				
 				default:
@@ -106,7 +106,7 @@ public class ServerCore {
 		if(create && exists) {
 			// prompt for overwrite
 			if(!overwrite)
-				overwrite = prompt("world \""+worldname+"\" already exists. Are you sure you want to overwrite it? type \"yes\" to overwrite. (yes/no)").equals("yes");
+				overwrite = prompt("world \""+worldname+"\" already exists. Are you sure you want to overwrite it? type \"yes\" to overwrite. (yes/no) ").equals("yes");
 			
 			if(!overwrite)
 				System.out.println("Not overwriting; world not created.");

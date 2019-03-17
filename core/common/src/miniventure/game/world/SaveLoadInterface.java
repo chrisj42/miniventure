@@ -5,9 +5,14 @@ import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.file.FileVisitOption;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -99,8 +104,39 @@ public class SaveLoadInterface {
 	}
 	public static WorldDataSet createWorld(Path file, RandomAccessFile lockRef, long seed) {
 		
+		try {
+			Files.walkFileTree(file, EnumSet.noneOf(FileVisitOption.class), 1, new FileVisitor<Path>() {
+				@Override
+				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+					if(!dir.equals(file))
+						return FileVisitResult.SKIP_SUBTREE;
+					return FileVisitResult.CONTINUE;
+				}
+				
+				@Override
+				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+					if(!file.getFileName().toString().equals(LOCK_FILE)) 
+						Files.delete(file);
+					return FileVisitResult.CONTINUE;
+				}
+				
+				@Override
+				public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+					return FileVisitResult.CONTINUE;
+				}
+				
+				@Override
+				public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+					return FileVisitResult.CONTINUE;
+				}
+			});
+		} catch(IOException e) {
+			System.err.println("Error deleting existing files");
+			e.printStackTrace();
+		}
+		
 		LevelCache[] levelCaches = new LevelCache[] {
-			new LevelCache(0, new Point(0, 0), seed, IslandType.JUNGLE)/*,
+			new LevelCache(0, new Point(0, 0), seed, IslandType.STARTER)/*,
 			new LevelCache(1, new Point(2, 2), seed, IslandType.DESERT),
 			new LevelCache(2, new Point(3, -5), seed, IslandType.ARCTIC),
 			new LevelCache(3, new Point(-3, 5), seed, IslandType.JUNGLE),

@@ -2,11 +2,13 @@ package miniventure.game.world.entity.particle;
 
 import miniventure.game.world.entity.EntityRenderer.AnimationRenderer;
 
+import org.jetbrains.annotations.NotNull;
+
 public class ActionParticle extends ClientParticle {
 	
 	// may be animated; lasts as long as the animation, or lasts a given time, with a single frame.
 	
-	private final LifetimeTracker lifetime;
+	@NotNull private final LifetimeTracker lifetime;
 	
 	ActionParticle(ActionParticleData data) {
 		super();

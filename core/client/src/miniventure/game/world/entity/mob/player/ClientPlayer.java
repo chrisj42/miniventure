@@ -67,7 +67,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 		addStatEvo(new HungerSystem());
 	}
 	
-	private final EnumMap<Stat, Integer> stats = new EnumMap<>(Stat.class);
+	@NotNull private final EnumMap<Stat, Integer> stats = new EnumMap<>(Stat.class);
 	
 	private ClientHands hands;
 	
@@ -240,8 +240,8 @@ public class ClientPlayer extends ClientEntity implements Player {
 		Vector2 hold = new Vector2(0, canvas.y + padding);
 		
 		drawStat(Stat.Health, canvas.x, hold.y, batch, hold);
-		if(getStat(Stat.Armor) > 0)
-			drawStat(Stat.Armor, canvas.x, hold.y, batch, hold);
+		// if(getStat(Stat.Armor) > 0)
+		// 	drawStat(Stat.Armor, canvas.x, hold.y, batch, hold);
 		drawStat(Stat.Stamina, canvas.x, hold.y, batch, hold);
 		drawStat(Stat.Hunger, canvas.x, hold.y, batch, hold);
 	}

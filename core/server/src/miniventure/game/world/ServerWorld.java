@@ -163,16 +163,20 @@ public class ServerWorld extends WorldManager {
 		
 		// update player data
 		for(ServerPlayer player: getServer().getPlayers()) {
-			final String name = player.getName();
-			final String data = player.serialize();
-			Level level = player.getLevel();
-			final int levelid = level == null ? player.getSpawnLevel() : level.getLevelId();
-			PlayerInfo old = knownPlayers.get(name);
-			PlayerInfo info = new PlayerInfo(name, old.passhash, data, levelid);
-			knownPlayers.put(name, info);
+			savePlayer(player);
 		}
 		
 		SaveLoadInterface.saveWorld(new WorldDataSet(worldPath, lockRef, worldSeed, gameTime, daylightOffset, GameCore.VERSION, knownPlayers.values().toArray(new PlayerInfo[0]), islandStores));
+	}
+	
+	public synchronized void savePlayer(@NotNull ServerPlayer player) {
+		final String name = player.getName();
+		final String data = player.serialize();
+		Level level = player.getLevel();
+		final int levelid = level == null ? player.getSpawnLevel() : level.getLevelId();
+		PlayerInfo old = knownPlayers.get(name);
+		PlayerInfo info = new PlayerInfo(name, old.passhash, data, levelid);
+		knownPlayers.put(name, info);
 	}
 	
 	/*@Override
@@ -406,8 +410,8 @@ public class ServerWorld extends WorldManager {
 			loadLevel(info.levelId, player);
 		}
 		else {
-			knownPlayers.put(player.getName(), new PlayerInfo(player.getName(), passhash, player.serialize(), player.getSpawnLevel()));
 			respawnPlayer(player);
+			knownPlayers.put(player.getName(), new PlayerInfo(player.getName(), passhash, player.serialize(), player.getSpawnLevel()));
 		}
 	}
 	
@@ -417,6 +421,8 @@ public class ServerWorld extends WorldManager {
 		ServerPlayer player;
 		// check for player data
 		if(knownPlayers.containsKey(playerName)) {
+			if(GameCore.debug)
+				System.out.println("Player '"+playerName+"' is known.");
 			PlayerInfo info = knownPlayers.get(playerName);
 			if(!info.passhash.equals(passhash))
 				return null; // incorrect password

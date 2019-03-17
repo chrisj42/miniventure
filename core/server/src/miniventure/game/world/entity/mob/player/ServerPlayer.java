@@ -76,7 +76,7 @@ public class ServerPlayer extends ServerMob implements Player {
 		stats.put(Stat.Health, getHealth());
 		stats.put(Stat.Hunger, Integer.parseInt(data.get(1)));
 		stats.put(Stat.Stamina, Integer.parseInt(data.get(2)));
-		//stats.put(Stat.Armor, Integer.parseInt(data.get(3)));
+		// stats.put(Stat.Armor, Integer.parseInt(data.get(3)));
 		
 		if(data.get(3).equals("null"))
 			spawnLoc = null;
