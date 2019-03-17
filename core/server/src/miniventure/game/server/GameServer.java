@@ -243,13 +243,13 @@ public class GameServer implements GameProtocol {
 			forPacket(object, StatUpdate.class, client::loadStat);
 			
 			forPacket(object, MovementRequest.class, move -> {
-				Vector3 loc = client.getLocation();
+				/*Vector3 loc = client.getLocation();
 				if(move.getMoveDist().len() < 1 && !move.startPos.variesFrom(client)) {
 					// move to start pos
 					Vector3 start = move.startPos.getPos();
 					Vector3 diff = loc.cpy().sub(start);
 					client.move(diff);
-				}
+				}*/
 				// move given dist
 				Vector3 moveDist = move.getMoveDist();
 				if(!GameCore.debug) // TODO replace this static speed check with something that determines the player's speed with respect to their situation.
