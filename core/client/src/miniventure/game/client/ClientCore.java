@@ -22,6 +22,7 @@ import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.util.BackgroundInheritor;
 import miniventure.game.screen.util.BackgroundProvider;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.customenum.GenericEnum;
 import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.ClientWorld;
 import miniventure.game.world.tile.ClientTileType;
@@ -118,6 +119,7 @@ public class ClientCore extends ApplicationAdapter {
 			if(batch == null)
 				batch = new SpriteBatch();
 			
+			GenericEnum.init();
 			ClientTileType.init();
 			
 			gameScreen = new GameScreen();

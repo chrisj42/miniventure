@@ -10,6 +10,8 @@ public class TileCacheTag<T> extends SerialEnum<T> {
 		GenericEnum.registerEnum(TileCacheTag.class, 8);
 	}
 	
+	public static void init() {}
+	
 	/* --- ENUMERATION VALUES --- */
 	
 	

@@ -18,6 +18,7 @@ import miniventure.game.chat.command.CommandInputParser;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.VersionInfo;
+import miniventure.game.util.customenum.GenericEnum;
 import miniventure.game.world.SaveLoadInterface;
 import miniventure.game.world.SaveLoadInterface.WorldDataSet;
 import miniventure.game.world.ServerWorld;
@@ -134,6 +135,7 @@ public class ServerCore {
 		// lock acquired, we can now be reasonably sure it's going to work out, so let's initialize everything.
 		
 		GameCore.initNonGdxTextures();
+		GenericEnum.init();
 		ServerTileType.init();
 		
 		System.out.println("loading server world...");

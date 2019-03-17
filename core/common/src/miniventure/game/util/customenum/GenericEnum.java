@@ -6,6 +6,8 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import miniventure.game.world.tile.TileCacheTag;
+
 import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("unchecked")
@@ -15,6 +17,10 @@ public abstract class GenericEnum<EC extends GenericEnum<EC>> implements Compara
 	
 	protected static final <EC extends GenericEnum> void registerEnum(Class<EC> clazz, int constants) {
 		enumClasses.put(clazz, new EnumData<>(clazz, constants));
+	}
+	
+	public static void init() {
+		TileCacheTag.init();
 	}
 	
 	private static final class EnumData<EC extends GenericEnum> {
