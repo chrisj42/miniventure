@@ -55,7 +55,6 @@ public class CommandInputParser implements Runnable {
 	
 	// a null player indicates that it is from the server console.
 	public static void executeCommand(String input, @Nullable ServerPlayer executor, MessageBuilder out, MessageBuilder err) {
-		System.out.println("command: \""+input+"\"");
 		if(input.length() == 0) return;
 		
 		List<String> args = new ArrayList<>(input.split(" ").length);

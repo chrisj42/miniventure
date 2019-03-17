@@ -225,10 +225,10 @@ public class ServerCore {
 	}
 	
 	public static void run() {
-		if(ask != null) {
+		/*if(ask != null) {
 			ask.close();
 			ask = null;
-		}
+		}*/
 		
 		// start scanner thread
 		if(commandParser != null)
