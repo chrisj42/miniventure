@@ -55,6 +55,92 @@ public class SaveLoadInterface {
 		return GameCore.GAME_DIR.resolve("saves").resolve(worldname);
 	}
 	
+	public static class WorldReference {
+		
+		public final Path folder;
+		public final Version version;
+		public final String worldName;
+		
+		private WorldReference(Path folder) {
+			// validate the folder
+			this.folder = folder;
+			
+			try {
+				version = getWorldVersion(folder);
+				if(version == null)
+					throw new FileNotFoundException("version.txt");
+				
+				worldName = folder.getFileName().toString();
+				
+				testFor(folder, "game.txt");
+				testFor(folder, "players.txt");
+				testFor(folder, "island-0.txt");
+			} catch(FileNotFoundException e) {
+				throw new IllegalArgumentException("Path " + folder + " is not a valid world save.", e);
+			}
+		}
+		
+		@Override
+		public String toString() {
+			return worldName;
+		}
+		
+		private static void testFor(Path worldFolder, String file) throws FileNotFoundException {
+			if(!Files.exists(worldFolder.resolve(file)))
+				throw new FileNotFoundException(file);
+		}
+	}
+	
+	public static WorldReference[] getLocalWorlds() {
+		
+		Path saveDir = getLocation("");
+		LinkedList<WorldReference> worlds = new LinkedList<>();
+		try {
+			Files.walkFileTree(saveDir, new FileVisitor<Path>() {
+				@Override
+				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+					if(dir.equals(saveDir)) return FileVisitResult.CONTINUE;
+					if(GameCore.debug)
+						System.out.println("trying "+dir);
+					try {
+						worlds.add(new WorldReference(dir));
+						if(GameCore.debug)
+							System.out.println("world found: "+dir);
+					} catch(IllegalArgumentException ignored) {}
+					return FileVisitResult.SKIP_SUBTREE;
+				}
+				
+				@Override
+				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+					return FileVisitResult.CONTINUE;
+				}
+				
+				@Override
+				public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+					return FileVisitResult.CONTINUE;
+				}
+				
+				@Override
+				public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+					return FileVisitResult.CONTINUE;
+				}
+			});
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+		
+		return worlds.toArray(new WorldReference[0]);
+	}
+	
+	public static Version getWorldVersion(Path worldFolder) {
+		LinkedList<String> lines = new LinkedList<>();
+		
+		if(!readFile(worldFolder.resolve("version.txt"), lines))
+			return null;
+		
+		return new Version(lines.pop());
+	}
+	
 	@Nullable
 	public static RandomAccessFile tryLockWorld(Path worldFolder) throws IOException {
 		Path lockFile = worldFolder.resolve(LOCK_FILE);
@@ -155,24 +241,27 @@ public class SaveLoadInterface {
 		try {
 			LinkedList<String> lines = new LinkedList<>();
 			
+			final Version version = getWorldVersion(folder);
+			
 			// read global data
 			if(!readFile(folder.resolve("game.txt"), lines))
 				return null;
 			
-			Version version = new Version(lines.pop());
 			//noinspection MismatchedQueryAndUpdateOfCollection
 			SerialDataMap map = new SerialDataMap(lines.pop());
 			final long seed = Long.parseLong(map.get("seed"));
 			final float gameTime = Float.parseFloat(map.get("gt"));
 			final float daytime = Float.parseFloat(map.get("time"));
+			final int islandCount = Integer.parseInt(map.get("islands"));
 			
 			// read terrain / entity / level data
-			final String[] islandNames = MyUtils.parseLayeredString(map.get("islands"));
-			LevelCache[] levels = new LevelCache[islandNames.length];
+			// final String[] islandNames = MyUtils.parseLayeredString(map.get("islands"));
+			LevelCache[] levels = new LevelCache[islandCount];
 			for(int i = 0; i < levels.length; i++) {
 				lines.clear();
-				if(!readFile(folder.resolve(islandNames[i] + ".txt"), lines))
+				if(!readFile(folder.resolve("island-"+i+".txt"), lines))
 					return null;
+				
 				levels[i] = new LevelCache(version, lines);
 			}
 			
@@ -190,7 +279,7 @@ public class SaveLoadInterface {
 			}
 			
 			return new WorldDataSet(folder, lockRef, seed, gameTime, daytime, version, players, levels);
-		} catch(NoSuchElementException e) {
+		} catch(Exception e) {
 			System.err.println("Save format of world '"+folder+"' is invalid.");
 			e.printStackTrace();
 			return null;
@@ -199,27 +288,23 @@ public class SaveLoadInterface {
 	
 	static boolean saveWorld(WorldDataSet worldData) {
 		Path main = worldData.worldFile;
-		boolean good = true;
-		String[] islandNames = new String[worldData.levelCaches.length];
+		boolean good;
 		
-		int i = 0;
-		for(LevelCache level: worldData.levelCaches) {
-			String name = "island-" + level.island.type.name().toLowerCase() + level.island.levelId;
-			islandNames[i++] = name;
-			good = writeFile(main.resolve(name+".txt"), level::serialize) && good;
-		}
+		good = writeFile(main.resolve("version.txt"), list -> list.add(GameCore.VERSION.serialize()));
 		
 		good = writeFile(main.resolve("game.txt"), list -> {
-			list.add(worldData.dataVersion.serialize());
-			
 			SerialDataMap map = new SerialDataMap();
 			map.add("seed", worldData.seed);
 			map.add("gt", (int)worldData.gameTime); // accuracy isn't worth the extra space
 			map.add("time", (int)worldData.timeOfDay); // same here
-			map.add("islands", MyUtils.encodeStringArray(islandNames));
+			map.add("islands", worldData.levelCaches.length); // same here
 			list.add(map.serialize());
-			
 		}) && good;
+		
+		int i = 0;
+		for(LevelCache level: worldData.levelCaches) {
+			good = writeFile(main.resolve("island-"+(i++)+".txt"), level::serialize) && good;
+		}
 		
 		good = writeFile(main.resolve("players.txt"), list -> {
 			for(PlayerInfo p: worldData.playerInfo) {
@@ -242,7 +327,7 @@ public class SaveLoadInterface {
 				list.add(s);
 			// actor.act(lines);
 		} catch(IOException e) {
-			e.printStackTrace();
+			// e.printStackTrace();
 			return false;
 		}
 		return true;

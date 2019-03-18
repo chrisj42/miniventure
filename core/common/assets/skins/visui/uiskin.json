@@ -15,7 +15,8 @@
 		link-label: { a: 1, b: 0.886, g: 0.631, r: 0.105 }
 	},
 	com.badlogic.gdx.scenes.scene2d.ui.Skin$TintedDrawable: {
-		link-label: { name: white, color: link-label }
+		link-label: { name: white, color: link-label },
+		list: { name: white, color: grey }
 	},
 	
 	com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
@@ -78,6 +79,11 @@
 		},
 		label: {
 			selection: selection, errorBorder: border-error, font: default, fontColor: white, disabledFontColor: grey
+		}
+	},
+	com.badlogic.gdx.scenes.scene2d.ui.List$ListStyle: {
+		default: {
+			fontColorUnselected: white, selection: padded-list-selection, fontColorSelected: white, font: default, background: list
 		}
 	},
 	com.badlogic.gdx.scenes.scene2d.ui.ScrollPane$ScrollPaneStyle: {

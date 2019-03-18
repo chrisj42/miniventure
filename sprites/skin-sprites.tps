@@ -267,6 +267,35 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">skin/list-selection.png</key>
+            <key type="filename">skin/selection.png</key>
+            <key type="filename">skin/separator.png</key>
+            <key type="filename">skin/vis-blue.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>0,0,1,1</rect>
+                <key>scale9Paddings</key>
+                <rect>0,0,1,1</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">skin/padded-list-selection.9.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <true/>
+                <key>scale9Borders</key>
+                <rect>4,0,2,0</rect>
+                <key>scale9Paddings</key>
+                <rect>0,0,0,0</rect>
+                <key>scale9FromFile</key>
+                <true/>
+            </struct>
             <key type="filename">skin/progressbar-filled-vertical.png</key>
             <key type="filename">skin/progressbar-vertical.png</key>
             <struct type="IndividualSpriteSettings">
@@ -346,21 +375,6 @@
                 <rect>0,0,0,0</rect>
                 <key>scale9FromFile</key>
                 <true/>
-            </struct>
-            <key type="filename">skin/selection.png</key>
-            <key type="filename">skin/separator.png</key>
-            <key type="filename">skin/vis-blue.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>0,0,1,1</rect>
-                <key>scale9Paddings</key>
-                <rect>0,0,1,1</rect>
-                <key>scale9FromFile</key>
-                <false/>
             </struct>
             <key type="filename">skin/slider-knob-disabled.png</key>
             <key type="filename">skin/slider-knob-down.png</key>

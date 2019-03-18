@@ -14,6 +14,7 @@ import miniventure.game.util.VersionInfo;
 import miniventure.game.world.level.RenderLevel;
 import miniventure.game.world.management.ClientWorld;
 import miniventure.game.world.management.DisplayWorld;
+import miniventure.game.world.management.SaveLoadInterface;
 import miniventure.game.world.management.TimeOfDay;
 
 import com.badlogic.gdx.Gdx;
@@ -59,10 +60,13 @@ public class MainMenu extends BackgroundProvider {
 				ClientCore.setScreen(new WorldGenScreen());
 		});
 		
-		// VisTextButton loadButton = makeButton("Load World", () -> ClientCore.setScreen(new WorldSelectScreen()));
-		
 		table.add(playButton).spaceBottom(20);
 		table.row();
+		
+		if(SaveLoadInterface.getLocalWorlds().length > 0) {
+			VisTextButton loadBtn = makeButton("Load World", () -> ClientCore.setScreen(new WorldSelectScreen()));
+			table.add(loadBtn).spaceBottom(20).row();
+		}
 		
 		VisTextButton joinBtn = makeButton("Join Local Game", () -> ClientCore.setScreen(new InputScreen("Enter the IP Address you want to connect to (optionally including port):", input -> {
 			if(input.contains(":")) {
