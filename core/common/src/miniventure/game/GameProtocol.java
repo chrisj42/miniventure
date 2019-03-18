@@ -33,6 +33,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+
 import com.esotericsoftware.kryo.Kryo;
 
 public interface GameProtocol {
@@ -613,17 +614,20 @@ public interface GameProtocol {
 	}
 	
 	class SerialRecipe {
+		public final int id;
 		public final String[] result;
 		public final String[][] costs;
 		
-		private SerialRecipe() { this((String[])null, null); }
-		public SerialRecipe(ItemStack result, ItemStack[] costs) {
+		private SerialRecipe() { this(0, (String[])null, null); }
+		public SerialRecipe(int id, ItemStack result, ItemStack[] costs) {
+			this.id = id;
 			this.result = result.serialize();
 			this.costs = new String[costs.length][];
 			for(int i = 0; i < costs.length; i++)
 				this.costs[i] = costs[i].serialize();
 		}
-		public SerialRecipe(String[] result, String[][] costs) {
+		public SerialRecipe(int id, String[] result, String[][] costs) {
+			this.id = id;
 			this.result = result;
 			this.costs = costs;
 		}

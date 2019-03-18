@@ -3,8 +3,11 @@ package miniventure.game.item;
 import javax.swing.Timer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 
+import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.CraftRequest;
 import miniventure.game.GameProtocol.RecipeRequest;
 import miniventure.game.GameProtocol.RecipeStockUpdate;
@@ -13,6 +16,7 @@ import miniventure.game.client.ClientCore;
 import miniventure.game.client.FontStyle;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.util.ColorBackground;
+import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.RelPos;
 
 import com.badlogic.gdx.Gdx;
@@ -185,7 +189,7 @@ public class CraftingScreen extends MenuScreen {
 				for(int i = 0; i < costs.length; i++)
 					costs[i] = ItemStack.deserialize(serialRecipe.costs[i]);
 				
-				RecipeSlot slot = new RecipeSlot(new ClientRecipe(result, costs));
+				RecipeSlot slot = new RecipeSlot(new ClientRecipe(serialRecipe.id, result, costs));
 				slot.addListener(new InputListener() {
 					@Override
 					public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
@@ -202,15 +206,30 @@ public class CraftingScreen extends MenuScreen {
 					}
 				});
 				slot.updateCanCraft(inventoryCounts);
+				// if(GameCore.debug && slot.recipe.canCraft)
+				// 	System.out.println("recipe "+slot.recipe.id+" is craftable");
 				recipes.add(slot);
-				recipeListTable.add(slot).row();
 			}
 			
-			recipeListTable.pack();
-			recipeListTable.invalidateHierarchy();
 			selection = 0;
 			itemChanged();
 			refreshCraftability(recipeRequest.stockUpdate);
+			
+			// sort recipes by craftability, craftable first
+			recipes.sort(Comparator.comparing(slot -> slot.recipe.canCraft,
+				Comparator.comparingInt(canCraft -> canCraft ? 0 : 1)
+			));
+			
+			if(GameCore.debug)
+				System.out.println("recipe display order: " + Arrays.toString(ArrayUtils.mapArray(recipes.toArray(), Integer.class, recipe -> ((RecipeSlot)recipe).recipe.id)));
+			
+			// add sorted recipes to ui
+			for(RecipeSlot slot: recipes)
+				recipeListTable.add(slot).row();
+			
+			recipeListTable.pack();
+			recipeListTable.invalidateHierarchy();
+			
 			Gdx.app.postRunnable(() -> mainGroup.setVisible(true)); // if the timer hasn't yet expired by now
 		}
 	}
@@ -222,19 +241,22 @@ public class CraftingScreen extends MenuScreen {
 	private void itemChanged() {
 		Gdx.app.postRunnable(() -> {
 			// I probably have to synchronize this manually since it's in a postRunnable.
-			ClientRecipe recipe = recipes.get(selection).recipe;
-			
-			craftableTable.clearChildren();
-			craftableTable.add(new ItemIcon(recipe.result.item, recipe.result.count)).row();
-			craftableTable.add(makeLabel(recipe.result.item.getName(), FontStyle.KeepSize, false)).row();
-			craftableTable.add(resultStockLabel = makeLabel("Stock: "+getCount(recipe.result.item), FontStyle.KeepSize, false)).row();
+			ClientRecipe recipe;
+			synchronized (CraftingScreen.this) {
+				recipe = recipes.get(selection).recipe;
+				
+				craftableTable.clearChildren();
+				craftableTable.add(new ItemIcon(recipe.result.item, recipe.result.count)).row();
+				craftableTable.add(makeLabel(recipe.result.item.getName(), FontStyle.KeepSize, false)).row();
+				craftableTable.add(resultStockLabel = makeLabel("Stock: " + getCount(recipe.result.item), FontStyle.KeepSize, false)).row();
+			}
 			
 			costTable.clearChildren();
 			costTable.add(makeLabel("Stock", FontStyle.StockHeader, false));
 			costTable.add(makeLabel("Required", FontStyle.CostHeader, false));
 			costTable.row();
 			costSlots.clear();
-			for(ItemStack cost: recipe.costs) {
+			for(ItemStack cost : recipe.costs) {
 				Label costLabel = makeLabel(String.valueOf(getCount(cost.item)), FontStyle.KeepSize, false);
 				costStockLabels.put(cost.item.getName(), costLabel);
 				costTable.add(costLabel);
@@ -277,7 +299,7 @@ public class CraftingScreen extends MenuScreen {
 	}
 	
 	private synchronized void craftSelected() {
-		ClientCore.getClient().send(new CraftRequest(selection));
+		ClientCore.getClient().send(new CraftRequest(recipes.get(selection).recipe.id));
 	}
 	
 	@Override
@@ -310,12 +332,14 @@ public class CraftingScreen extends MenuScreen {
 	
 	private static class ClientRecipe extends Item {
 		
+		private final int id;
 		private final ItemStack result;
 		private final ItemStack[] costs;
 		private boolean canCraft;
 		
-		ClientRecipe(@NotNull ItemStack result, ItemStack... costs) {
+		ClientRecipe(int id, @NotNull ItemStack result, ItemStack... costs) {
 			super(result.item.getName(), result.item.getTexture());
+			this.id = id;
 			this.result = result;
 			this.costs = costs;
 		}

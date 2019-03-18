@@ -141,7 +141,7 @@ public class Recipes {
 		SerialRecipe[] serialRecipes = new SerialRecipe[Recipes.recipes.length];
 		for(int i = 0; i < recipes.length; i++) {
 			Recipe r = recipes[i];
-			serialRecipes[i] = new SerialRecipe(r.getResult(), r.getCosts());
+			serialRecipes[i] = new SerialRecipe(i, r.getResult(), r.getCosts());
 		}
 		
 		return serialRecipes;
