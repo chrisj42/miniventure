@@ -334,7 +334,7 @@ public class GameClient implements GameProtocol {
 			callback.act(true);
 		}
 		else {
-			Gdx.app.postRunnable(() -> ClientCore.setScreen(new InputScreen("Specify username:", username -> {
+			Gdx.app.postRunnable(() -> ClientCore.setScreen(new InputScreen("Player name:", username -> {
 				this.username = username;
 				send(new Login(username, GameCore.VERSION));
 				

@@ -13,6 +13,7 @@ import miniventure.game.GameCore;
 import miniventure.game.GameProtocol;
 import miniventure.game.chat.command.CommandInputParser;
 import miniventure.game.util.ArrayUtils;
+import miniventure.game.util.MyUtils;
 import miniventure.game.util.VersionInfo;
 import miniventure.game.util.customenum.GenericEnum;
 import miniventure.game.world.management.SaveLoadInterface;
@@ -47,34 +48,37 @@ public class ServerCore implements Runnable {
 		
 		Arrays.fill(frameTimes, 0);
 		
-		long lastNow = System.nanoTime();
-		long lastInterval = lastNow;
+		long prevStartTime = System.nanoTime();
+		long lastInterval = prevStartTime;
 		
 		while(serverWorld.worldLoaded()) {
-			long now = System.nanoTime();
+			long frameStartTime = System.nanoTime();
 			
 			synchronized (fpsLock) {
 				frameIdx = (frameIdx + 1) % FRAME_INTERVAL;
 				if(frameIdx == 0) {
-					frameTimes[timeIdx] = (float) ((now - lastInterval) / 1E9D);
-					lastInterval = now;
+					frameTimes[timeIdx] = (float) ((frameStartTime - lastInterval) / 1E9D);
+					lastInterval = frameStartTime;
 					timeIdx = (timeIdx + 1) % frameTimes.length;
 					if(timeIdx == 0)
 						loopedFrames = true;
 				}
 			}
 			
+			final float delta = (frameStartTime - prevStartTime) / 1E9f;
+			
+			if(delta * 1000 < 10)
+				MyUtils.sleep(10 - (int)(delta*1000));
+			
 			try {
-				serverWorld.update(MathUtils.clamp((now - lastNow) / 1E9f, 0, GameCore.MAX_DELTA));
+				serverWorld.update(MathUtils.clamp(delta, 0, GameCore.MAX_DELTA));
 			} catch(Throwable t) {
 				getServer().stop(false);
 				commandParser.end();
 				throw t;
 			}
 			
-			lastNow = now;
-			
-			// MyUtils.sleep(10);
+			prevStartTime = frameStartTime;
 		}
 		
 		commandParser.end();

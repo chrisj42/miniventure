@@ -14,6 +14,7 @@ import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.AiType;
 import miniventure.game.world.entity.mob.ServerMob;
+import miniventure.game.world.entity.mob.player.Player;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.entity.particle.ItemEntity;
 import miniventure.game.world.management.SaveLoadInterface.LevelCache;
@@ -40,6 +41,8 @@ public class ServerLevel extends Level {
 	private final Set<Tile> newTileUpdates = Collections.synchronizedSet(new HashSet<>());
 	private final HashMap<Tile, Float> tileUpdateQueue = new HashMap<>();
 	
+	// prevents level from being pruned before any keep-alives are added to it.
+	private boolean preload = true;
 	//private float timeCache = 0; // this is used when you should technically be updating < 1 tile in a frame.
 	
 	public ServerLevel(@NotNull ServerWorld world, int levelId, TileTypeEnum[][][] tiles) {
@@ -64,6 +67,8 @@ public class ServerLevel extends Level {
 	
 	@Override
 	public ServerTile getTile(float x, float y) { return (ServerTile) super.getTile(x, y); }
+	
+	public boolean isPreload() { return preload; }
 	
 	public void save(@NotNull LevelCache cache) {
 		TileData[][] tileData = getTileData();
@@ -176,6 +181,11 @@ public class ServerLevel extends Level {
 		
 		if(getMobCount() < getMobCap() && MathUtils.randomBoolean(0.01f))
 			spawnMob(AiType.values[MathUtils.random(AiType.values.length-1)].makeMob(getWorld()));
+	}
+	
+	public void entityAdded(@NotNull ServerEntity e) {
+		if(e instanceof Player)
+			preload = false;
 	}
 	
 	public void addEntity(@NotNull ServerEntity e) {

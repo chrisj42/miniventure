@@ -60,6 +60,7 @@ public class ServerWorld extends WorldManager {
 		@Override
 		public ServerLevel loadLevel(final Version version, int levelId, TileData[][] tileData, String[] entityData) {
 			ServerLevel level = new ServerLevel(ServerWorld.this, levelId, tileData);
+			
 			for(String e: entityData)
 				level.addEntity(ServerEntity.deserialize(ServerWorld.this, e, version));
 			return level;
@@ -312,8 +313,8 @@ public class ServerWorld extends WorldManager {
 	}
 	
 	protected synchronized void pruneLoadedLevels() {
-		Integer[] levelids = loadedLevels.get(map -> map.keySet().toArray(new Integer[0]));
-		HashSet<Integer> safeIds = new HashSet<>(levelids.length);
+		ServerLevel[] levels = loadedLevels.get(map -> map.values().toArray(new ServerLevel[0]));
+		HashSet<Integer> safeIds = new HashSet<>(levels.length);
 		
 		// log which levels have a keep-alive
 		for(ServerPlayer player: server.getPlayers()) {
@@ -323,9 +324,9 @@ public class ServerWorld extends WorldManager {
 		}
 		
 		// unload any loaded level that didn't have a keep-alive
-		for(int id: levelids)
-			if(!safeIds.contains(id))
-				unloadLevel(id);
+		for(ServerLevel level: levels)
+			if(!safeIds.contains(level.getLevelId()) && !level.isPreload())
+				unloadLevel(level.getLevelId());
 	}
 	
 	
@@ -385,7 +386,7 @@ public class ServerWorld extends WorldManager {
 		
 		if(!isLevelLoaded(level.getLevelId())) {
 			act = false;
-			GameCore.debug("Server level "+level+" should not be loaded; will not add entity "+e);
+			GameCore.debug("Server level "+level+" exists but is not loaded; will not add entity "+e);
 		}
 		
 		if(!act) return; // level set is not valid.
@@ -395,6 +396,7 @@ public class ServerWorld extends WorldManager {
 			registerEntity(e);
 		
 		entityManager.addEntity(e, level);
+		level.entityAdded(e);
 		
 		server.broadcast(new EntityAddition(e), level, e);
 	}
@@ -425,8 +427,10 @@ public class ServerWorld extends WorldManager {
 	
 	// called after the player has been registered to the GameServer.
 	public void loadPlayer(ServerPlayer player, String passhash) {
-		if(knownPlayers.containsKey(player.getName())) {
-			PlayerInfo info = knownPlayers.get(player.getName());
+		PlayerInfo info = knownPlayers.get(player.getName());
+		if(info != null) {
+			// if(GameCore.debug)
+			// 	System.out.println("Player '"+player.getName()+"' is known.");
 			loadLevel(info.levelId, player);
 		}
 		else {
