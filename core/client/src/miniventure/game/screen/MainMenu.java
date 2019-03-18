@@ -2,6 +2,7 @@ package miniventure.game.screen;
 
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol;
+import miniventure.game.client.AudioException;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.FontStyle;
 import miniventure.game.client.LevelViewport;
@@ -105,9 +106,14 @@ public class MainMenu extends BackgroundProvider {
 		
 		if(ClientCore.PLAY_MUSIC) {
 			// setup background music
-			Music song = ClientCore.setMusicTrack(Gdx.files.internal("audio/music/title.mp3"));
-			song.setLooping(true);
-			song.play();
+			try {
+				Music song = ClientCore.setMusicTrack(Gdx.files.internal("audio/music/title.mp3"));
+				song.setLooping(true);
+				song.play();
+			} catch(AudioException e) {
+				System.err.println("Failed to fetch main menu music.");
+				// e.printStackTrace();
+			}
 		}
 	}
 	

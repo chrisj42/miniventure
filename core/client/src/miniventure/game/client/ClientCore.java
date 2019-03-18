@@ -40,6 +40,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.kotcrab.vis.ui.VisUI;
 
 import org.jetbrains.annotations.NotNull;
@@ -235,8 +236,14 @@ public class ClientCore extends ApplicationAdapter {
 	}
 	
 	public static void playSound(String soundName) {
-		if(!soundEffects.containsKey(soundName))
-			soundEffects.put(soundName, Gdx.audio.newSound(Gdx.files.internal("audio/effects/"+soundName+".wav")));
+		if(!soundEffects.containsKey(soundName)) {
+			try {
+				soundEffects.put(soundName, Gdx.audio.newSound(Gdx.files.internal("audio/effects/" + soundName + ".wav")));
+			} catch(GdxRuntimeException e) {
+				System.err.println("error loading sound '"+soundName+"'; not playing.");
+				return;
+			}
+		}
 		
 		Sound s = soundEffects.get(soundName);
 		//System.out.println("playing sound "+soundName+": "+s);
@@ -244,10 +251,14 @@ public class ClientCore extends ApplicationAdapter {
 			s.play();
 	}
 	
-	public static Music setMusicTrack(@NotNull FileHandle file) {
-		stopMusic();
-		song = Gdx.audio.newMusic(file);
-		return song;
+	public static Music setMusicTrack(@NotNull FileHandle file) throws AudioException {
+		try {
+			stopMusic();
+			song = Gdx.audio.newMusic(file);
+			return song;
+		} catch(GdxRuntimeException e) {
+			throw new AudioException(e);
+		}
 	}
 	public static void stopMusic() {
 		if(song != null) {

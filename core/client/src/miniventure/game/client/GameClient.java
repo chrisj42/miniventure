@@ -82,12 +82,17 @@ public class GameClient implements GameProtocol {
 					world.spawnPlayer(data);
 					ClientCore.setScreen(null);
 					if(ClientCore.PLAY_MUSIC) {
-						Music song = ClientCore.setMusicTrack(Gdx.files.internal("audio/music/game.mp3"));
-						song.setOnCompletionListener(music -> {
-							music.stop();
-							MyUtils.delay(MathUtils.random(30_000, 90_000), () -> MyUtils.tryPlayMusic(music));
-						});
-						MyUtils.delay(10_000, () -> MyUtils.tryPlayMusic(song));
+						try {
+							Music song = ClientCore.setMusicTrack(Gdx.files.internal("audio/music/game.mp3"));
+							song.setOnCompletionListener(music -> {
+								music.stop();
+								MyUtils.delay(MathUtils.random(30_000, 90_000), () -> MyUtils.tryPlayMusic(music));
+							});
+							MyUtils.delay(10_000, () -> MyUtils.tryPlayMusic(song));
+						} catch(AudioException e) {
+							System.err.println("failed to fetch game music.");
+							// e.printStackTrace();
+						}
 					}
 				}
 				
