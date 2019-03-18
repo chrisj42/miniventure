@@ -2,13 +2,10 @@ package miniventure.game.server;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
@@ -16,29 +13,109 @@ import miniventure.game.GameCore;
 import miniventure.game.GameProtocol;
 import miniventure.game.chat.command.CommandInputParser;
 import miniventure.game.util.ArrayUtils;
-import miniventure.game.util.MyUtils;
 import miniventure.game.util.VersionInfo;
 import miniventure.game.util.customenum.GenericEnum;
-import miniventure.game.world.SaveLoadInterface;
-import miniventure.game.world.SaveLoadInterface.WorldDataSet;
-import miniventure.game.world.ServerWorld;
+import miniventure.game.world.management.SaveLoadInterface;
+import miniventure.game.world.management.SaveLoadInterface.WorldDataSet;
+import miniventure.game.world.management.ServerWorld;
 import miniventure.game.world.tile.ServerTileType;
 
 import com.badlogic.gdx.math.MathUtils;
 
 import org.jetbrains.annotations.NotNull;
 
-public class ServerCore {
+public class ServerCore implements Runnable {
 	
-	private static final ServerWorld serverWorld = new ServerWorld();
-	public static InetSocketAddress host = null;
+	@NotNull private final ServerWorld serverWorld;
+	@NotNull private final CommandInputParser commandParser;
 	
-	private static CommandInputParser commandParser = null;
+	private final float[] frameTimes = new float[20];
+	private final int FRAME_INTERVAL = 30; // how many frames are in each time (above)
+	private int timeIdx = 0, frameIdx = 0;
+	private boolean loopedFrames = false;
+	private final Object fpsLock = new Object();
+	
+	private ServerCore(int port, boolean multiplayer, WorldDataSet worldInfo) throws IOException {
+		serverWorld = new ServerWorld(this, port, multiplayer, worldInfo);
+		commandParser = new CommandInputParser(serverWorld);
+	}
+	
+	@Override
+	public void run() {
+		// start command parser thread
+		new Thread(commandParser, "CommandInputParser").start();
+		
+		Arrays.fill(frameTimes, 0);
+		
+		long lastNow = System.nanoTime();
+		long lastInterval = lastNow;
+		
+		while(serverWorld.worldLoaded()) {
+			long now = System.nanoTime();
+			
+			synchronized (fpsLock) {
+				frameIdx = (frameIdx + 1) % FRAME_INTERVAL;
+				if(frameIdx == 0) {
+					frameTimes[timeIdx] = (float) ((now - lastInterval) / 1E9D);
+					lastInterval = now;
+					timeIdx = (timeIdx + 1) % frameTimes.length;
+					if(timeIdx == 0)
+						loopedFrames = true;
+				}
+			}
+			
+			try {
+				serverWorld.update(MathUtils.clamp((now - lastNow) / 1E9f, 0, GameCore.MAX_DELTA));
+			} catch(Throwable t) {
+				getServer().stop(false);
+				commandParser.end();
+				throw t;
+			}
+			
+			lastNow = now;
+			
+			// MyUtils.sleep(10);
+		}
+		
+		commandParser.end();
+	}
 	
 	@NotNull
-	public static ServerWorld getWorld() { return serverWorld; }
-	public static GameServer getServer() { return serverWorld.getServer(); }
-	public static CommandInputParser getCommandInput() { return commandParser; }
+	public ServerWorld getWorld() { return serverWorld; }
+	@NotNull
+	public GameServer getServer() { return getWorld().getServer(); }
+	
+	public float getFPS() {
+		synchronized (fpsLock) {
+			float totalTime = 0;
+			for(float duration : frameTimes)
+				totalTime += duration;
+			
+			if(totalTime == 0) return 0;
+			
+			return ((loopedFrames ? frameTimes.length : timeIdx) * FRAME_INTERVAL) / totalTime;
+		}
+	}
+	
+	
+	// single player server
+	public static ServerCore initSinglePlayer(WorldDataSet worldInfo) throws IOException {
+		int tries = 0;
+		int port = GameProtocol.PORT;
+		while(true) {
+			try {
+				return new ServerCore(port, false, worldInfo);
+			} catch(IOException e) {
+				if(tries == 0)
+					e.printStackTrace();
+				tries++;
+				if(tries > 10)
+					throw new IOException("Failed to find valid port for internal server.", e);
+				else
+					port += MathUtils.random(1, 10);
+			}
+		}
+	}
 	
 	public static void main(String[] args) throws IOException {
 		args = ArrayUtils.mapArray(args, String.class, String::toLowerCase);
@@ -152,7 +229,7 @@ public class ServerCore {
 			return;
 		}
 		
-		serverWorld.loadWorld(port, true, worldInfo);
+		ServerCore core = new ServerCore(port, true, worldInfo);
 		
 		System.out.println("server ready");
 		if(!GameCore.determinedLatestVersion())
@@ -162,7 +239,7 @@ public class ServerCore {
 			// there's a newer version
 			System.out.println("Newer game version found: "+info.version+". Download the jar file here: "+info.assetUrl);
 		}
-		run();
+		core.run();
 	}
 	
 	private static Scanner ask;
@@ -185,104 +262,4 @@ public class ServerCore {
 		return ""; // impossible to reach.
 	}
 	
-	// returns port server is running on.
-	public static int initSinglePlayer(WorldDataSet worldInfo) throws IOException {
-		int tries = 0;
-		int port = GameProtocol.PORT;
-		while(true) {
-			try {
-				serverWorld.loadWorld(port, false, worldInfo);
-				return port;
-			} catch(IOException e) {
-				if(tries == 0)
-					e.printStackTrace();
-				tries++;
-				if(tries > 10)
-					throw new IOException("Failed to find valid port for internal server.", e);
-				else
-					port += MathUtils.random(1, 10);
-			}
-		}
-	}
-	
-	private static final float[] frameTimes = new float[20];
-	private static final int FRAME_INTERVAL = 30; // how many frames are in each time (above)
-	private static int timeIdx = 0, frameIdx = 0;
-	private static boolean loopedFrames = false;
-	
-	public static float getFPS() {
-		float totalTime = 0;
-		for(float duration: frameTimes)
-			totalTime += duration;
-		
-		return ((loopedFrames ? frameTimes.length : timeIdx) * FRAME_INTERVAL) / totalTime;
-	}
-	
-	private static final List<Runnable> runnables = Collections.synchronizedList(new LinkedList<>());
-	
-	public static void postRunnable(@NotNull Runnable r) {
-		synchronized (runnables) {
-			runnables.add(r);
-		}
-	}
-	
-	public static void run() {
-		/*if(ask != null) {
-			ask.close();
-			ask = null;
-		}*/
-		
-		// start scanner thread
-		if(commandParser != null)
-			commandParser.end();
-		
-		commandParser = new CommandInputParser();
-		new Thread(commandParser, "CommandInputParser").start();
-		
-		Arrays.fill(frameTimes, 0);
-		
-		long lastNow = System.nanoTime();
-		long lastInterval = lastNow;
-		
-		while(serverWorld.worldLoaded()) {
-			long now = System.nanoTime();
-			
-			frameIdx = (frameIdx + 1) % FRAME_INTERVAL;
-			if(frameIdx == 0) {
-				frameTimes[timeIdx] = (float) ((now - lastInterval) / 1E9D);
-				lastInterval = now;
-				timeIdx = (timeIdx + 1) % frameTimes.length;
-				if(timeIdx == 0)
-					loopedFrames = true;
-			}
-			
-			try {
-				serverWorld.update(MathUtils.clamp((now - lastNow) / 1E9f, 0, GameCore.MAX_DELTA));
-				
-				// run any runnables that were posted during the above update
-				Runnable[] lastRunnables;
-				synchronized (runnables) {
-					lastRunnables = runnables.toArray(new Runnable[0]);
-					runnables.clear();
-				}
-				for(Runnable r: lastRunnables)
-					r.run(); // any runnables added here will be run next update
-				
-			} catch(Throwable t) {
-				getServer().stop();
-				throw t;
-			}
-			
-			lastNow = now;
-			
-			MyUtils.sleep(10);
-		}
-		
-		commandParser.end();
-	}
-	
-	// stop the server.
-	public static void quit() {
-		serverWorld.exitWorld();
-	}
 }

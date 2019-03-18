@@ -1,4 +1,4 @@
-package miniventure.game.world;
+package miniventure.game.world.management;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -24,6 +24,9 @@ import miniventure.game.util.MyUtils;
 import miniventure.game.util.SerialDataMap;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueFunction;
+import miniventure.game.world.Point;
+import miniventure.game.world.level.Level;
+import miniventure.game.world.level.LevelFetcher;
 import miniventure.game.world.tile.Tile.TileData;
 import miniventure.game.world.worldgen.island.IslandType;
 

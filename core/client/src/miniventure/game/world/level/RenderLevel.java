@@ -1,6 +1,10 @@
-package miniventure.game.world;
+package miniventure.game.world.level;
 
+import java.util.Set;
+
+import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
+import miniventure.game.world.management.LevelManager;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.Tile.TileData;
 import miniventure.game.world.tile.TileTypeEnum;
@@ -30,7 +34,7 @@ public abstract class RenderLevel extends Level {
 	public int getEntityCount() { return getWorld().getEntityTotal(); }
 	
 	@Override
-	public Entity[] getEntities() { return getWorld().getAllEntities(); }
+	public Set<? extends Entity> getEntities() { return getWorld().getRegisteredEntities(); }
 	
 	public abstract void render(Rectangle renderSpace, SpriteBatch batch, float delta, Vector2 posOffset);
 	

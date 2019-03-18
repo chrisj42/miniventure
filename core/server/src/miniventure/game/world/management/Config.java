@@ -1,9 +1,11 @@
-package miniventure.game.world;
+package miniventure.game.world.management;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
 
 import miniventure.game.chat.command.Argument.ArgValidator;
+
+import org.jetbrains.annotations.NotNull;
 
 public class Config<T> {
 	
@@ -36,8 +38,7 @@ public class Config<T> {
 			nameToValue.put(valueToName.get(value).toLowerCase(), value);
 	}
 	
-	@SuppressWarnings("unchecked")
-	public static Config<?>[] values() { return valueToName.keySet().toArray(new Config[valueToName.size()]); }
+	public static Config<?>[] values() { return valueToName.keySet().toArray(new Config[0]); }
 	public static Config valueOf(String str) { return nameToValue.get(str.toLowerCase()); }
 	
 	public static final Config<?>[] values = values();
@@ -66,11 +67,11 @@ public class Config<T> {
 		value = defaultValue;
 	}
 	
-	public T get() { return value; }
-	public void set(T value) { this.value = value; }
-	public boolean set(String stringValue) {
-		if(!stringParser.isValid(stringValue)) return false;
-		set(stringParser.get(stringValue));
+	public synchronized T get() { return value; }
+	public synchronized void set(T value) { this.value = value; }
+	public synchronized boolean set(@NotNull ServerWorld world, String stringValue) {
+		if(!stringParser.isValid(world, stringValue)) return false;
+		set(stringParser.get(world, stringValue));
 		return true;
 	}
 	

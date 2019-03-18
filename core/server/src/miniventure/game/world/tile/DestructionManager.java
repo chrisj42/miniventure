@@ -5,7 +5,6 @@ import miniventure.game.item.ServerItem;
 import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolItem.Material;
 import miniventure.game.item.ToolItem.ToolType;
-import miniventure.game.server.ServerCore;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.customenum.SerialMap;
 import miniventure.game.world.ItemDrop;
@@ -146,22 +145,22 @@ public class DestructionManager {
 			//	tile.getLevel().getWorld().getSender().sendData(new Hurt(attacker.getTag(), tile.getTag(), damage, ServerItem.save(item)));
 			
 			// add damage particle
-			ServerCore.getServer().broadcastParticle(new ActionParticleData(ActionType.IMPACT), tile);
+			tile.getServer().broadcastParticle(new ActionParticleData(ActionType.IMPACT), tile);
 			
 			SerialMap dataMap = tile.getDataMap(tileType);
 			
 			int health = totalHealth > 1 ? dataMap.getOrDefaultAndPut(TileCacheTag.Health, totalHealth) : 1;
 			health -= damage;
 			if(totalHealth > 1)
-				ServerCore.getServer().broadcastParticle(new TextParticleData(String.valueOf(damage)), tile);
+				tile.getServer().broadcastParticle(new TextParticleData(String.valueOf(damage)), tile);
 			if(health <= 0) {
-				ServerCore.getServer().playTileSound("break", tile, tileType);
+				tile.getServer().playTileSound("break", tile, tileType);
 				tile.breakTile();
 				for(ItemDrop drop: drops)
 					tile.getLevel().dropItems(drop, tile, attacker);
 			} else {
 				dataMap.put(TileCacheTag.Health, health);
-				ServerCore.getServer().playTileSound("hit", tile, tileType);
+				tile.getServer().playTileSound("hit", tile, tileType);
 			}
 			
 			return damage > 1 || damageConditions.length > 0 ? Result.USED : Result.INTERACT;

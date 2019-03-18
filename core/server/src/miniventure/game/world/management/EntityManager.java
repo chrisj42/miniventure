@@ -1,4 +1,4 @@
-package miniventure.game.world;
+package miniventure.game.world.management;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import miniventure.game.world.entity.ServerEntity;
+import miniventure.game.world.level.ServerLevel;
 
 class EntityManager {
 	
@@ -36,14 +37,14 @@ class EntityManager {
 	}
 	
 	// returns the entities that were in the level
-	synchronized ServerEntity[] removeLevel(ServerLevel level) {
+	synchronized Set<ServerEntity> removeLevel(ServerLevel level) {
 		Set<ServerEntity> entities = levelEntities.remove(level);
-		if(entities == null) return new ServerEntity[0];
+		if(entities == null) return Collections.emptySet();
 		
 		for(ServerEntity e: entities)
 			entityLevels.remove(e);
 		
-		return entities.toArray(new ServerEntity[0]);
+		return entities;
 	}
 	
 	synchronized ServerLevel getLevel(ServerEntity entity) {
@@ -58,7 +59,7 @@ class EntityManager {
 		return entitySet(level).size();
 	}
 	
-	synchronized ServerEntity[] getEntities(ServerLevel level) {
-		return entitySet(level).toArray(new ServerEntity[0]);
+	synchronized HashSet<ServerEntity> getEntities(ServerLevel level) {
+		return new HashSet<>(entitySet(level));
 	}
 }

@@ -3,11 +3,9 @@ package miniventure.game.item;
 import javax.swing.Timer;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 
-import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.CraftRequest;
 import miniventure.game.GameProtocol.RecipeRequest;
 import miniventure.game.GameProtocol.RecipeStockUpdate;
@@ -16,7 +14,6 @@ import miniventure.game.client.ClientCore;
 import miniventure.game.client.FontStyle;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.util.ColorBackground;
-import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.RelPos;
 
 import com.badlogic.gdx.Gdx;
@@ -220,8 +217,8 @@ public class CraftingScreen extends MenuScreen {
 				Comparator.comparingInt(canCraft -> canCraft ? 0 : 1)
 			));
 			
-			if(GameCore.debug)
-				System.out.println("recipe display order: " + Arrays.toString(ArrayUtils.mapArray(recipes.toArray(), Integer.class, recipe -> ((RecipeSlot)recipe).recipe.id)));
+			// if(GameCore.debug)
+			// 	System.out.println("recipe display order: " + Arrays.toString(ArrayUtils.mapArray(recipes.toArray(), Integer.class, recipe -> ((RecipeSlot)recipe).recipe.id)));
 			
 			// add sorted recipes to ui
 			for(RecipeSlot slot: recipes)

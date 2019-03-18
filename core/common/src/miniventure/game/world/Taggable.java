@@ -1,5 +1,7 @@
 package miniventure.game.world;
 
+import miniventure.game.world.management.WorldManager;
+
 public interface Taggable<T> {
 	
 	interface Tag<T> {

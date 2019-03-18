@@ -11,9 +11,10 @@ import miniventure.game.screen.InfoScreen.InstructionsScreen;
 import miniventure.game.screen.util.BackgroundProvider;
 import miniventure.game.screen.util.MyLinkLabel;
 import miniventure.game.util.VersionInfo;
-import miniventure.game.world.ClientWorld;
-import miniventure.game.world.DisplayLevel;
-import miniventure.game.world.TimeOfDay;
+import miniventure.game.world.level.RenderLevel;
+import miniventure.game.world.management.ClientWorld;
+import miniventure.game.world.management.DisplayWorld;
+import miniventure.game.world.management.TimeOfDay;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
@@ -31,7 +32,7 @@ public class MainMenu extends BackgroundProvider {
 	
 	private final Table table;
 	
-	private final DisplayLevel backgroundLevel;
+	private final RenderLevel backgroundLevel;
 	private final LevelViewport levelView;
 	private final Color lightOverlay;
 	private final Vector2 cameraPos, cameraDir;
@@ -97,7 +98,7 @@ public class MainMenu extends BackgroundProvider {
 		TimeOfDay time = TimeOfDay.values[MathUtils.random(TimeOfDay.values.length-1)];
 		lightOverlay = TimeOfDay.getSkyColor(time.getStartOffsetSeconds());
 		
-		backgroundLevel = new DisplayLevel();
+		backgroundLevel = new DisplayWorld().getLevel();
 		
 		Vector2 size = new Vector2(levelView.getViewWidth(), levelView.getViewHeight());//.scl(0.5f);
 		cameraPos = new Vector2(MathUtils.random(size.x, backgroundLevel.getWidth()-size.x), MathUtils.random(size.y, backgroundLevel.getHeight()-size.y));

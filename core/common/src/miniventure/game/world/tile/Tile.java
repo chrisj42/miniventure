@@ -8,10 +8,10 @@ import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
 import miniventure.game.util.customenum.SerialMap;
-import miniventure.game.world.Level;
 import miniventure.game.world.Point;
-import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
+import miniventure.game.world.level.Level;
+import miniventure.game.world.management.WorldManager;
 
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;

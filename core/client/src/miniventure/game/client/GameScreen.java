@@ -9,10 +9,10 @@ import miniventure.game.screen.MapScreen;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.util.DiscreteViewport;
 import miniventure.game.util.RelPos;
-import miniventure.game.world.ClientLevel;
-import miniventure.game.world.Level;
-import miniventure.game.world.TimeOfDay;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
+import miniventure.game.world.level.ClientLevel;
+import miniventure.game.world.level.Level;
+import miniventure.game.world.management.TimeOfDay;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.Gdx;

@@ -8,14 +8,14 @@ import java.util.Arrays;
 import miniventure.game.GameProtocol.EntityUpdate;
 import miniventure.game.GameProtocol.PositionUpdate;
 import miniventure.game.GameProtocol.SpriteUpdate;
-import miniventure.game.server.ServerCore;
+import miniventure.game.server.GameServer;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueFunction;
-import miniventure.game.world.ServerLevel;
-import miniventure.game.world.ServerWorld;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Mob;
+import miniventure.game.world.level.ServerLevel;
+import miniventure.game.world.management.ServerWorld;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.utils.Array;
@@ -28,12 +28,12 @@ public abstract class ServerEntity extends Entity {
 	private SpriteUpdate newSprite = null;
 	private PositionUpdate newPos = null;
 	
-	public ServerEntity() {
-		super(ServerCore.getWorld());
+	public ServerEntity(@NotNull ServerWorld world) {
+		super(world, false);
 	}
 	
-	protected ServerEntity(ClassDataList allData, final Version version, ValueFunction<ClassDataList> modifier) {
-		super(ServerCore.getWorld());
+	protected ServerEntity(@NotNull ServerWorld world, ClassDataList allData, final Version version, ValueFunction<ClassDataList> modifier) {
+		this(world);
 		modifier.act(allData);
 		// the index here is based on the class count away from ServerEntity in inheritance.
 		ArrayList<String> data = allData.get(0);
@@ -56,6 +56,9 @@ public abstract class ServerEntity extends Entity {
 	@Override @NotNull
 	public ServerWorld getWorld() { return (ServerWorld) super.getWorld(); }
 	
+	@NotNull
+	public GameServer getServer() { return getWorld().getServer(); }
+	
 	@Override @Nullable
 	public ServerLevel getLevel() { return getWorld().getEntityLevel(this); }
 	
@@ -65,7 +68,7 @@ public abstract class ServerEntity extends Entity {
 	@Override
 	public void update(float delta) {
 		if(newSprite != null || newPos != null) {
-			ServerCore.getServer().broadcast(new EntityUpdate(getTag(), newPos, newSprite), this);
+			getServer().broadcast(new EntityUpdate(getTag(), newPos, newSprite), this);
 			newPos = null;
 			newSprite = null;
 		}
@@ -123,7 +126,7 @@ public abstract class ServerEntity extends Entity {
 		return MyUtils.encodeStringArray(partEncodedData);
 	}
 	
-	public static ServerEntity deserialize(String data, Version version) {
+	public static ServerEntity deserialize(@NotNull ServerWorld world, String data, Version version) {
 		String[] partData = MyUtils.parseLayeredString(data);
 		
 		ClassDataList map = new ClassDataList();
@@ -140,7 +143,7 @@ public abstract class ServerEntity extends Entity {
 			
 			Class<? extends ServerEntity> entityClass = clazz.asSubclass(ServerEntity.class);
 			
-			entity = deserialize(entityClass, map, version);
+			entity = deserialize(world, entityClass, map, version);
 			
 		} catch(ClassNotFoundException e) {
 			e.printStackTrace();
@@ -148,12 +151,12 @@ public abstract class ServerEntity extends Entity {
 		
 		return entity;
 	}
-	public static <T extends ServerEntity> T deserialize(Class<T> clazz, ClassDataList data, Version version) {
+	public static <T extends ServerEntity> T deserialize(@NotNull ServerWorld world, Class<T> clazz, ClassDataList data, Version version) {
 		T newEntity = null;
 		try {
-			Constructor<T> constructor = clazz.getDeclaredConstructor(ClassDataList.class, Version.class, ValueFunction.class);
+			Constructor<T> constructor = clazz.getDeclaredConstructor(ServerWorld.class, ClassDataList.class, Version.class, ValueFunction.class);
 			constructor.setAccessible(true);
-			newEntity = constructor.newInstance(data, version, (ValueFunction)(allData -> {}));
+			newEntity = constructor.newInstance(world, data, version, (ValueFunction)(allData -> {}));
 		} catch(NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
 			e.printStackTrace();
 		}

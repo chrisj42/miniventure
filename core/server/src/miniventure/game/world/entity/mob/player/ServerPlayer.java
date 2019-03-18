@@ -15,13 +15,11 @@ import miniventure.game.item.Item;
 import miniventure.game.item.Result;
 import miniventure.game.item.ServerItem;
 import miniventure.game.server.GameServer;
-import miniventure.game.server.ServerCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.Boundable;
 import miniventure.game.world.Point;
-import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClassDataList;
 import miniventure.game.world.entity.Direction;
@@ -30,6 +28,8 @@ import miniventure.game.world.entity.mob.ServerMob;
 import miniventure.game.world.entity.particle.ActionType;
 import miniventure.game.world.entity.particle.ParticleData.ActionParticleData;
 import miniventure.game.world.entity.particle.ParticleData.TextParticleData;
+import miniventure.game.world.level.ServerLevel;
+import miniventure.game.world.management.ServerWorld;
 import miniventure.game.world.tile.ServerTile;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileTypeEnum;
@@ -56,8 +56,8 @@ public class ServerPlayer extends ServerMob implements Player {
 	
 	private final String name;
 	
-	public ServerPlayer(String name) {
-		super("player", Stat.Health.initial);
+	public ServerPlayer(@NotNull ServerWorld world, String name) {
+		super(world, "player", Stat.Health.initial);
 		
 		this.name = name;
 		inventory = new Inventory(INV_SIZE);
@@ -65,8 +65,8 @@ public class ServerPlayer extends ServerMob implements Player {
 		reset();
 	}
 	
-	protected ServerPlayer(ClassDataList allData, final Version version, ValueFunction<ClassDataList> modifier) {
-		super(allData, version, modifier);
+	protected ServerPlayer(@NotNull ServerWorld world, ClassDataList allData, final Version version, ValueFunction<ClassDataList> modifier) {
+		super(world, allData, version, modifier);
 		ArrayList<String> data = allData.get(2);
 		
 		name = data.get(0);
@@ -137,12 +137,12 @@ public class ServerPlayer extends ServerMob implements Player {
 		int change = stats.get(stat) - prevVal;
 		
 		if(amt != 0) {
-			ServerCore.getServer().sendToPlayer(this, new StatUpdate(stat, amt));
+			getServer().sendToPlayer(this, new StatUpdate(stat, amt));
 			
 			if(stat == Stat.Hunger && change > 0) {
 				ServerLevel level = getLevel();
 				if(level != null)
-					ServerCore.getServer().broadcastParticle(new TextParticleData(String.valueOf(amt), Color.CORAL), this);
+					getServer().broadcastParticle(new TextParticleData(String.valueOf(amt), Color.CORAL), this);
 			}
 		}
 		
@@ -175,7 +175,7 @@ public class ServerPlayer extends ServerMob implements Player {
 		if(inventory.addItem(item)) {
 			if(inventory.getCount(item) == 1) // don't add to hotbar if it already existed in inventory
 				hands.addItem(item); // add to open hotbar slot if it exists
-			GameServer server = ServerCore.getServer();
+			GameServer server = getServer();
 			server.playEntitySound("pickup", this, false);
 			
 			if(server.isInventoryMode(this))
@@ -210,7 +210,7 @@ public class ServerPlayer extends ServerMob implements Player {
 	
 	// this method gets called by GameServer, so in order to ensure it doesn't mix badly with server world updates, we'll post it as a runnable to the server world update thread.
 	public void doInteract(Direction dir, int index, boolean attack) {
-		ServerCore.postRunnable(() -> {
+		getWorld().postRunnable(() -> {
 			setDirection(dir);
 			ServerItem heldItem = hands.getHeldItem(index);
 			if(getStat(Stat.Stamina) < heldItem.getStaminaUsage())
@@ -235,13 +235,13 @@ public class ServerPlayer extends ServerMob implements Player {
 			
 			if (attack && level != null) {
 				if(result.success)
-					ServerCore.getServer().broadcastParticle(
+					getServer().broadcastParticle(
 						new ActionParticleData(ActionType.SLASH, getDirection()),
 						level,
 						getCenter().add(getDirection().getVector().scl(getSize().scl(0.5f, Mob.unshortenSprite(0.5f))))
 					);
 				else
-					ServerCore.getServer().broadcastParticle(
+					getServer().broadcastParticle(
 						new ActionParticleData(ActionType.PUNCH, getDirection()),
 						level,
 						getInteractionRect().getCenter(new Vector2())
@@ -255,7 +255,7 @@ public class ServerPlayer extends ServerMob implements Player {
 			
 			if(!result.success)
 				// this sound is of an empty swing; successful interaction sounds are taken care of elsewhere.
-				ServerCore.getServer().playEntitySound("swing", this);
+				getServer().playEntitySound("swing", this);
 			
 			if(result == Result.USED && !GameCore.debug)
 				hands.resetItemUsage(heldItem, index);
@@ -300,7 +300,7 @@ public class ServerPlayer extends ServerMob implements Player {
 				
 				// spawn location obstructed.
 				spawnLoc = null; // player loses their saved spawn location.
-				getWorld().getServer().sendMessage(null, this, "Spawn location is obstructed");
+				getServer().sendMessage(null, this, "Spawn location is obstructed");
 			}
 			
 			Tile tile = level.getSpawnTile(this);
@@ -315,7 +315,7 @@ public class ServerPlayer extends ServerMob implements Player {
 	
 	@Override
 	public String toString() {
-		InetSocketAddress address = getWorld().getServer().getPlayerAddress(this);
+		InetSocketAddress address = getServer().getPlayerAddress(this);
 		return "ServerPlayer["+name+(address==null?']':" at "+address+']');
 	}
 }

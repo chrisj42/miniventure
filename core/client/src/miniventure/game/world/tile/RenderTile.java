@@ -7,10 +7,10 @@ import miniventure.game.item.Result;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.RelPos;
 import miniventure.game.util.customenum.SerialMap;
-import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.player.Player;
+import miniventure.game.world.level.Level;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;

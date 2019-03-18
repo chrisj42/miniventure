@@ -5,13 +5,15 @@ import java.util.HashSet;
 import miniventure.game.item.Item;
 import miniventure.game.item.Result;
 import miniventure.game.item.ServerItem;
+import miniventure.game.server.GameServer;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.customenum.SerialMap;
-import miniventure.game.world.Level;
-import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.player.Player;
+import miniventure.game.world.level.Level;
+import miniventure.game.world.level.ServerLevel;
+import miniventure.game.world.management.ServerWorld;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
@@ -46,8 +48,14 @@ public class ServerTile extends Tile {
 	
 	@Override
 	TileStack<ServerTileType> makeStack(@NotNull TileTypeEnum[] types) {
-		return new ServerTileStack(types);
+		return new ServerTileStack(getWorld(), types);
 	}
+	
+	@Override @NotNull
+	public ServerWorld getWorld() { return (ServerWorld) super.getWorld(); }
+	
+	@NotNull
+	public GameServer getServer() { return getWorld().getServer(); }
 	
 	@Override @NotNull
 	public ServerLevel getLevel() { return (ServerLevel) super.getLevel(); }

@@ -1,4 +1,4 @@
-package miniventure.game.world;
+package miniventure.game.world.level;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import miniventure.game.client.ClientCore;
 import miniventure.game.screen.RespawnScreen;
 import miniventure.game.world.entity.Entity;
+import miniventure.game.world.management.ClientWorld;
 import miniventure.game.world.tile.ClientTile;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.Tile.TileData;

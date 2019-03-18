@@ -9,10 +9,11 @@ import miniventure.game.item.ServerItem;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.ItemDrop;
-import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClassDataList;
 import miniventure.game.world.entity.Entity;
+import miniventure.game.world.level.ServerLevel;
+import miniventure.game.world.management.ServerWorld;
 import miniventure.game.world.tile.TileTypeEnum;
 
 import org.jetbrains.annotations.NotNull;
@@ -42,16 +43,16 @@ public class MobAi extends ServerMob {
 	@Nullable private MovementPattern tempMovePattern = null;
 	private float tempTimeLeft = 0;
 	
-	protected MobAi(@NotNull AiType aiType) {
-		super(aiType.name().toLowerCase(), aiType.health);
+	protected MobAi(@NotNull ServerWorld world, @NotNull AiType aiType) {
+		super(world, aiType.name().toLowerCase(), aiType.health);
 		this.aiType = aiType;
 		this.itemDrops = aiType.deathDrops;
 		this.movePattern = aiType.defaultPattern.copy();
 	}
 	
 	// if a subclass was made of this, then it may not save the ai type.
-	protected MobAi(ClassDataList allData, final Version version, ValueFunction<ClassDataList> modifier) {
-		super(allData, version, modifier);
+	protected MobAi(@NotNull ServerWorld world, ClassDataList allData, final Version version, ValueFunction<ClassDataList> modifier) {
+		super(world, allData, version, modifier);
 		ArrayList<String> data = allData.get(2);
 		aiType = AiType.valueOf(data.get(0));
 		this.itemDrops = aiType.deathDrops;

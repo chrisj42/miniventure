@@ -1,4 +1,4 @@
-package miniventure.game.world;
+package miniventure.game.world.management;
 
 import java.io.IOException;
 
@@ -15,9 +15,10 @@ import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.RespawnScreen;
-import miniventure.game.world.SaveLoadInterface.WorldDataSet;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
+import miniventure.game.world.level.ClientLevel;
+import miniventure.game.world.management.SaveLoadInterface.WorldDataSet;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -222,6 +223,7 @@ public class ClientWorld extends LevelManager {
 		}
 		
 		this.mainPlayer = new ClientPlayer(data);
+		registerEntity(mainPlayer);
 		
 		// gameScreen.getHudPanel().add(mainPlayer.getHands().getHotbarTable());
 	}

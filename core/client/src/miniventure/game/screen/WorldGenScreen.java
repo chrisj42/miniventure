@@ -6,8 +6,8 @@ import java.nio.file.Path;
 
 import miniventure.game.client.ClientCore;
 import miniventure.game.screen.util.BackgroundInheritor;
-import miniventure.game.world.SaveLoadInterface;
-import miniventure.game.world.SaveLoadInterface.WorldDataSet;
+import miniventure.game.world.management.SaveLoadInterface;
+import miniventure.game.world.management.SaveLoadInterface.WorldDataSet;
 
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
@@ -68,7 +68,12 @@ public class WorldGenScreen extends BackgroundInheritor {
 		});
 		table.add(genButton);
 		
-		table.add(makeButton("Cancel", ClientCore::backToParentScreen));
+		VisTextButton cancelBtn = makeButton("Cancel", ClientCore::backToParentScreen);
+		table.add(cancelBtn);
+		
+		mapFieldButtons(nameField, genButton, cancelBtn);
+		mapFieldButtons(seedField, genButton, cancelBtn);
+		setKeyboardFocus(nameField);
 	}
 	
 	

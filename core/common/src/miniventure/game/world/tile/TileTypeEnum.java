@@ -2,7 +2,7 @@ package miniventure.game.world.tile;
 
 import java.awt.Color;
 
-import miniventure.game.world.WorldManager;
+import miniventure.game.world.management.WorldManager;
 import miniventure.game.world.worldgen.island.ProtoTile;
 import miniventure.game.world.worldgen.island.TileProcessor;
 

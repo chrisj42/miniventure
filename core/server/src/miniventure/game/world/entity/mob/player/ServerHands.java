@@ -8,11 +8,10 @@ import miniventure.game.item.ItemStack;
 import miniventure.game.item.ItemType;
 import miniventure.game.item.Result;
 import miniventure.game.item.ServerItem;
-import miniventure.game.server.ServerCore;
 import miniventure.game.util.MyUtils;
-import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.player.Player.Stat;
+import miniventure.game.world.level.ServerLevel;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -165,7 +164,7 @@ public class ServerHands {
 			removeItem(item);
 		
 		// we are never going to be in inventory mode here, because the client has just used an item; items can't be used with a menu open.
-		ServerCore.getServer().sendToPlayer(player, player.getHotbarUpdate());
+		player.getServer().sendToPlayer(player, player.getHotbarUpdate());
 	}
 	
 	@Nullable

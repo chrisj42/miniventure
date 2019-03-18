@@ -1,12 +1,17 @@
-package miniventure.game.world;
+package miniventure.game.world.level;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Set;
 
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.customenum.SerialMap;
+import miniventure.game.world.Point;
+import miniventure.game.world.Taggable;
+import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.player.Player;
+import miniventure.game.world.management.WorldManager;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.Tile.TileData;
 import miniventure.game.world.tile.TileTypeEnum;
@@ -84,7 +89,7 @@ public abstract class Level implements Taggable<Level> {
 	public int getMobCount() { return mobCount; }
 	public abstract int getEntityCount();
 	
-	public abstract Entity[] getEntities();
+	public abstract Set<? extends Entity> getEntities();
 	
 	public TileData[][] getTileData() {
 		TileData[][] data = new TileData[width][height];

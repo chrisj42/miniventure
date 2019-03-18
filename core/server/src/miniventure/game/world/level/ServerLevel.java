@@ -1,19 +1,23 @@
-package miniventure.game.world;
+package miniventure.game.world.level;
 
 import java.util.*;
 
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.TileUpdate;
 import miniventure.game.item.ServerItem;
-import miniventure.game.server.ServerCore;
+import miniventure.game.server.GameServer;
 import miniventure.game.util.MyUtils;
-import miniventure.game.world.SaveLoadInterface.LevelCache;
+import miniventure.game.world.Boundable;
+import miniventure.game.world.ItemDrop;
+import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.AiType;
 import miniventure.game.world.entity.mob.ServerMob;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.entity.particle.ItemEntity;
+import miniventure.game.world.management.SaveLoadInterface.LevelCache;
+import miniventure.game.world.management.ServerWorld;
 import miniventure.game.world.tile.ServerTile;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.Tile.TileData;
@@ -38,31 +42,33 @@ public class ServerLevel extends Level {
 	
 	//private float timeCache = 0; // this is used when you should technically be updating < 1 tile in a frame.
 	
-	public ServerLevel(int levelId, TileTypeEnum[][][] tiles) {
-		super(ServerCore.getWorld(), levelId, tiles, ServerTile::new);
+	public ServerLevel(@NotNull ServerWorld world, int levelId, TileTypeEnum[][][] tiles) {
+		super(world, levelId, tiles, ServerTile::new);
 	}
 	
-	public ServerLevel(int levelId, TileData[][] tileData) {
-		super(ServerCore.getWorld(), levelId, tileData, ServerTile::new);
+	public ServerLevel(@NotNull ServerWorld world, int levelId, TileData[][] tileData) {
+		super(world, levelId, tileData, ServerTile::new);
 	}
 	
 	@Override @NotNull
 	public ServerWorld getWorld() { return (ServerWorld) super.getWorld(); }
 	
+	@NotNull
+	public GameServer getServer() { return getWorld().getServer(); }
+	
 	@Override
 	public int getEntityCount() { return getWorld().getEntityCount(this); }
 	
 	@Override
-	public Entity[] getEntities() { return getWorld().getEntities(this); }
+	public HashSet<ServerEntity> getEntities() { return getWorld().getEntities(this); }
 	
 	@Override
 	public ServerTile getTile(float x, float y) { return (ServerTile) super.getTile(x, y); }
 	
 	public void save(@NotNull LevelCache cache) {
-		Entity[] entities = getEntities();
 		TileData[][] tileData = getTileData();
 		LinkedList<String> entityData = new LinkedList<>();
-		for(Entity e: entities) {
+		for(Entity e: getEntities()) {
 			if(e instanceof ServerPlayer)
 				continue;
 			entityData.add(ServerEntity.serialize((ServerEntity)e));
@@ -79,14 +85,14 @@ public class ServerLevel extends Level {
 		if(!Objects.equals(prevChunk, newChunk)) {
 			//	System.out.println("Server broadcasting entity "+(newChunk==null?"removal":"addition")+": "+entity);
 			if(newChunk != null)
-				ServerCore.getServer().broadcast(new EntityAddition(entity), this);
+				getServer().broadcast(new EntityAddition(entity), this);
 			else
-				ServerCore.getServer().broadcast(new EntityRemoval(entity), this);
+				getServer().broadcast(new EntityRemoval(entity), this);
 		}
 	}*/
 	
 	public void onTileUpdate(ServerTile tile) {
-		ServerCore.getServer().broadcast(new TileUpdate(tile), this);
+		getServer().broadcast(new TileUpdate(tile), this);
 		
 		HashSet<Tile> tiles = getAreaTiles(tile.getLocation(), 1, true);
 		
@@ -169,7 +175,7 @@ public class ServerLevel extends Level {
 		super.update(delta);
 		
 		if(getMobCount() < getMobCap() && MathUtils.randomBoolean(0.01f))
-			spawnMob(AiType.values[MathUtils.random(AiType.values.length-1)].makeMob());
+			spawnMob(AiType.values[MathUtils.random(AiType.values.length-1)].makeMob(getWorld()));
 	}
 	
 	public void addEntity(@NotNull ServerEntity e) {
@@ -185,7 +191,7 @@ public class ServerLevel extends Level {
 	}
 	
 	public void dropItem(@NotNull ServerItem item, @NotNull Vector2 dropPos, @Nullable Vector2 targetPos) { dropItem(item, false, dropPos, targetPos); }
-	public void dropItem(@NotNull ServerItem item, boolean delayPickup, @NotNull Vector2 dropPos, @Nullable Vector2 targetPos) {
+	public void dropItem(@NotNull final ServerItem item, boolean delayPickup, @NotNull Vector2 dropPos, @Nullable Vector2 targetPos) {
 		
 		/* this drops the itemEntity at the given coordinates, with the given direction (random if null).
 		 	However, if the given coordinates reside within a solid tile, the adjacent tiles are checked.
@@ -193,7 +199,7 @@ public class ServerLevel extends Level {
 		 		But if it finds a non-solid tile, it drops it towards the non-solid tile.
 		  */
 		
-		ItemEntity ie = new ItemEntity(item, Vector2.Zero.cpy()); // this is a dummy variable.
+		final ItemEntity ie = new ItemEntity(getWorld(), item, Vector2.Zero.cpy()); // this is a dummy variable.
 		
 		Tile closest = getClosestTile(dropPos.x, dropPos.y);
 		
@@ -229,10 +235,11 @@ public class ServerLevel extends Level {
 		else
 			dropDir = targetPos.cpy().sub(dropPos);
 		
-		ie = new ItemEntity(item, dropDir, delayPickup);
+		getWorld().cancelIdReservation(ie);
+		ItemEntity nie = new ItemEntity(getWorld(), item, dropDir, delayPickup);
 		
-		ie.moveTo(dropPos);
-		addEntity(ie);
+		nie.moveTo(dropPos);
+		addEntity(nie);
 	}
 	
 	// only spawns on the given tiles
@@ -281,13 +288,13 @@ public class ServerLevel extends Level {
 	}
 	
 	public void spawnMob(ServerMob mob) {
+		if(!mob.maySpawn()) return;
 		ServerTile tile = getSpawnTile(mob);
 		if(tile != null) {
 			mob.moveTo(tile);
 			addEntity(mob);
 		}
-		else if(GameCore.debug)
-			System.err.println("Failed to spawn mob "+mob+", no suitable spawn location.");
+		else GameCore.debug("Failed to spawn mob "+mob+", no suitable spawn location.");
 	}
 	
 	// only spawns within the given area

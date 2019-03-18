@@ -1,7 +1,7 @@
 package miniventure.game.world.entity.particle;
 
-import miniventure.game.world.Level;
 import miniventure.game.world.entity.Entity;
+import miniventure.game.world.level.Level;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;

@@ -4,7 +4,7 @@ import java.util.EnumMap;
 
 import miniventure.game.GameCore;
 import miniventure.game.texture.TextureHolder;
-import miniventure.game.world.WorldManager;
+import miniventure.game.world.management.WorldManager;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Vector2;

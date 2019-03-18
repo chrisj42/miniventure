@@ -1,8 +1,8 @@
 package miniventure.game.world.tile;
 
 import miniventure.game.util.customenum.SerialMap;
-import miniventure.game.world.ClientLevel;
-import miniventure.game.world.Level;
+import miniventure.game.world.level.ClientLevel;
+import miniventure.game.world.level.Level;
 
 import org.jetbrains.annotations.NotNull;
 

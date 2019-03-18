@@ -1,6 +1,8 @@
-package miniventure.game.world;
+package miniventure.game.world.management;
 
 import miniventure.game.world.entity.Entity;
+import miniventure.game.world.entity.particle.ClientParticle;
+import miniventure.game.world.level.RenderLevel;
 import miniventure.game.world.tile.ClientTileType;
 import miniventure.game.world.tile.TileTypeEnum;
 
@@ -33,7 +35,10 @@ public abstract class LevelManager extends WorldManager {
 	/*  --- ENTITY MANAGEMENT --- */
 	
 	
-	// insert entity stuff here
+	@Override
+	public void registerEntity(Entity e) {
+		registerEntity(e, e instanceof ClientParticle);
+	}
 	
 	
 	/*  --- GET METHODS --- */

@@ -5,8 +5,8 @@ import java.util.HashMap;
 import miniventure.game.GameProtocol.LevelChange;
 import miniventure.game.GameProtocol.MapRequest;
 import miniventure.game.client.ClientCore;
-import miniventure.game.world.Level;
 import miniventure.game.world.Point;
+import miniventure.game.world.level.Level;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;

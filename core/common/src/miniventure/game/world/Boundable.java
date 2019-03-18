@@ -1,5 +1,6 @@
 package miniventure.game.world;
 
+import miniventure.game.world.level.Level;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.math.Rectangle;

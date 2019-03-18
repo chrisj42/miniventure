@@ -3,8 +3,8 @@ package miniventure.game.screen;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.GameScreen;
 import miniventure.game.screen.util.BackgroundProvider;
-import miniventure.game.world.ClientLevel;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
+import miniventure.game.world.level.ClientLevel;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;

@@ -3,8 +3,8 @@ package miniventure.game.world.entity.mob;
 import java.util.Arrays;
 import java.util.EnumSet;
 
-import miniventure.game.world.TimeOfDay;
 import miniventure.game.world.entity.Entity;
+import miniventure.game.world.management.TimeOfDay;
 import miniventure.game.world.tile.TileTypeEnum;
 
 import org.jetbrains.annotations.Nullable;

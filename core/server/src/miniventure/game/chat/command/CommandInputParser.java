@@ -12,17 +12,23 @@ import miniventure.game.chat.ConsoleMessageBuilder;
 import miniventure.game.chat.MessageBuilder;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
+import miniventure.game.world.management.ServerWorld;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class CommandInputParser implements Runnable {
 	
+	private final ServerWorld world;
+	
+	// this isn't a scanner because it needs to not block for input.
 	private BufferedReader in;
 	private boolean shouldRun;
 	
 	private ConsoleMessageBuilder out, err;
 	
-	public CommandInputParser() {
+	public CommandInputParser(@NotNull ServerWorld world) {
+		this.world = world;
 		this.in = new BufferedReader(new InputStreamReader(System.in));
 		
 		out = new ConsoleMessageBuilder(new PrintWriter(new OutputStreamWriter(System.out), true));
@@ -48,13 +54,13 @@ public class CommandInputParser implements Runnable {
 			}
 			if(!shouldRun) break;
 			
-			executeCommand(input, null, out, err);
+			executeCommand(world, input, null, out, err);
 			out.println();
 		}
 	}
 	
 	// a null player indicates that it is from the server console.
-	public static void executeCommand(String input, @Nullable ServerPlayer executor, MessageBuilder out, MessageBuilder err) {
+	public static void executeCommand(@NotNull ServerWorld world, String input, @Nullable ServerPlayer executor, MessageBuilder out, MessageBuilder err) {
 		if(input.length() == 0) return;
 		
 		List<String> args = new ArrayList<>(input.split(" ").length);
@@ -102,7 +108,7 @@ public class CommandInputParser implements Runnable {
 		if(command == null)
 			err.println("Command not recognized: \""+commandName+"\". Type \"/help\" for a list of commands.");
 		else
-			command.execute(args.toArray(new String[0]), executor, out, err);
+			command.execute(world, args.toArray(new String[0]), executor, out, err);
 	}
 	
 	public void end() { shouldRun = false; }

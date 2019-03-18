@@ -3,7 +3,7 @@ package miniventure.game.client;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
-import miniventure.game.world.SaveLoadInterface.WorldDataSet;
+import miniventure.game.world.management.SaveLoadInterface.WorldDataSet;
 
 public interface ServerManager {
 	

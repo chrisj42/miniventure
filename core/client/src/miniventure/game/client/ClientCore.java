@@ -24,7 +24,7 @@ import miniventure.game.screen.util.BackgroundProvider;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.customenum.GenericEnum;
 import miniventure.game.util.function.ValueFunction;
-import miniventure.game.world.ClientWorld;
+import miniventure.game.world.management.ClientWorld;
 import miniventure.game.world.tile.ClientTileType;
 
 import com.badlogic.gdx.ApplicationAdapter;

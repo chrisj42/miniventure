@@ -1,7 +1,7 @@
 package miniventure.game.world.entity.mob;
 
-import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
+import miniventure.game.world.level.Level;
 
 import com.badlogic.gdx.math.Vector2;
 

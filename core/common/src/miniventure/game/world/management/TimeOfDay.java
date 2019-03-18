@@ -1,4 +1,4 @@
-package miniventure.game.world;
+package miniventure.game.world.management;
 
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;

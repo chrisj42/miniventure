@@ -2,8 +2,8 @@ package miniventure.game.client;
 
 import miniventure.game.GameCore;
 import miniventure.game.util.MyUtils;
-import miniventure.game.world.RenderLevel;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
+import miniventure.game.world.level.RenderLevel;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.Gdx;

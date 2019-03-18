@@ -1,6 +1,7 @@
 package miniventure.game.world.entity.particle;
 
 import miniventure.game.world.entity.EntityRenderer.AnimationRenderer;
+import miniventure.game.world.entity.particle.ParticleData.ActionParticleData;
 
 import org.jetbrains.annotations.NotNull;
 

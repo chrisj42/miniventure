@@ -8,7 +8,6 @@ import miniventure.game.item.ServerItem;
 import miniventure.game.item.TileItem;
 import miniventure.game.item.TileItem.PlacementCheck;
 import miniventure.game.item.ToolItem.ToolType;
-import miniventure.game.server.ServerCore;
 import miniventure.game.util.customenum.SerialMap;
 import miniventure.game.util.function.MapFunction;
 import miniventure.game.util.param.Param;
@@ -166,7 +165,7 @@ public class ServerTileType extends TileType {
 		) {
 			@Override
 			public Result interact(@NotNull ServerTile tile, Player player, @Nullable ServerItem item) {
-				ServerCore.getServer().sendToPlayer((ServerPlayer) player, new MapRequest());
+				tile.getServer().sendToPlayer((ServerPlayer) player, new MapRequest());
 				return Result.INTERACT;
 			}
 		}),

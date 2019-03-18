@@ -4,11 +4,11 @@ import miniventure.game.GameProtocol.EntityAddition;
 import miniventure.game.client.ClientCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.blinker.FrameBlinker;
-import miniventure.game.world.ClientLevel;
-import miniventure.game.world.ClientWorld;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.entity.particle.ClientParticle;
+import miniventure.game.world.level.ClientLevel;
+import miniventure.game.world.management.ClientWorld;
 import miniventure.game.world.tile.ClientTile;
 import miniventure.game.world.tile.SwimAnimation;
 import miniventure.game.world.tile.Tile;
@@ -40,7 +40,7 @@ public class ClientEntity extends Entity {
 	
 	// for locally updated entities. Assumes traits of a particle.
 	protected ClientEntity() {
-		super(ClientCore.getWorld());
+		super(ClientCore.getWorld(), true);
 		permeable = true;
 		canFloat = true;
 		cutHeight = false;

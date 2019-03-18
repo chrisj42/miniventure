@@ -4,12 +4,11 @@ import miniventure.game.GameProtocol.PositionUpdate;
 import miniventure.game.item.Item;
 import miniventure.game.item.Result;
 import miniventure.game.util.blinker.Blinker;
-import miniventure.game.world.Level;
-import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.EntityRenderer.BlinkRenderer;
 import miniventure.game.world.entity.mob.player.Player;
-import miniventure.game.world.entity.particle.ParticleData;
+import miniventure.game.world.level.Level;
+import miniventure.game.world.management.WorldManager;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.graphics.Color;
@@ -33,20 +32,20 @@ public abstract class Entity implements WorldObject {
 	private BlinkRenderer blinker = null;
 	
 	// for entities updated locally (called by both server and client for different entities)
-	public Entity(@NotNull WorldManager world) {
+	// "local" refers to if the entity exists only locally, as opposed to being synced across clients.
+	protected Entity(@NotNull WorldManager world, boolean negative) {
 		this.world = world;
-		
-		eid = world.registerEntityWithNewId(this, this instanceof ParticleData);
+		eid = world.reserveNewEntityId(negative);
 	}
 	
 	// for client, on entities updated by the server
-	public Entity(@NotNull WorldManager world, int eid, PositionUpdate position) {
+	protected Entity(@NotNull WorldManager world, int eid, PositionUpdate position) {
 		this.world = world;
 		this.eid = eid;
 		x = position.x;
-		y = position.y;
 		z = position.z;
-		world.registerEntity(this); // considered to be part of the level as well
+		y = position.y;
+		// world.registerEntity(this); // considered to be part of the level as well
 	}
 	
 	public int getId() { return eid; }

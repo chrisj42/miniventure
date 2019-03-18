@@ -12,12 +12,15 @@ import miniventure.game.util.RelPos;
 import miniventure.game.util.function.Action;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputEvent.Type;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
@@ -31,6 +34,9 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisTextButton;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class MenuScreen extends Stage {
 	
@@ -144,6 +150,46 @@ public class MenuScreen extends Stage {
 	
 	protected void registerField(TextField field) { textFields.add(field); }
 	protected void deregisterField(TextField field) { textFields.remove(field); }
+	
+	protected void mapFieldButtons(@NotNull TextField field, @Nullable VisTextButton confirmBtn, @Nullable VisTextButton cancelBtn) {
+		field.addListener(new InputListener() {
+			@Override
+			public boolean keyDown(InputEvent event, int keycode) {
+				if(keycode == Keys.ENTER && confirmBtn != null) {
+					InputEvent event1 = new InputEvent();
+					event1.setType(Type.touchDown);
+					confirmBtn.fire(event1);
+					setKeyboardFocus(field);
+					return true;
+				}
+				if(keycode == Keys.ESCAPE && cancelBtn != null) {
+					InputEvent event1 = new InputEvent();
+					event1.setType(Type.touchDown);
+					cancelBtn.fire(event1);
+					setKeyboardFocus(field);
+					return true;
+				}
+				return false;
+			}
+			
+			@Override
+			public boolean keyUp(InputEvent event, int keycode) {
+				if(keycode == Keys.ENTER && confirmBtn != null) {
+					InputEvent event1 = new InputEvent();
+					event1.setType(Type.touchUp);
+					confirmBtn.fire(event1);
+					return true;
+				}
+				if(keycode == Keys.ESCAPE && cancelBtn != null) {
+					InputEvent event1 = new InputEvent();
+					event1.setType(Type.touchUp);
+					cancelBtn.fire(event1);
+					return true;
+				}
+				return false;
+			}
+		});
+	}
 	
 	protected VerticalGroup useVGroup(float space) { return useVGroup(space, true); }
 	protected VerticalGroup useVGroup(float space, int alignment) { return useVGroup(space, alignment, true); }

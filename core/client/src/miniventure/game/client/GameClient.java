@@ -16,8 +16,6 @@ import miniventure.game.screen.MapScreen;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.ValueFunction;
-import miniventure.game.world.ClientLevel;
-import miniventure.game.world.ClientWorld;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClientEntity;
 import miniventure.game.world.entity.Entity;
@@ -25,12 +23,13 @@ import miniventure.game.world.entity.EntityRenderer;
 import miniventure.game.world.entity.EntityRenderer.DirectionalAnimationRenderer;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
 import miniventure.game.world.entity.particle.ClientParticle;
+import miniventure.game.world.level.ClientLevel;
+import miniventure.game.world.management.ClientWorld;
 import miniventure.game.world.tile.ClientTile;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
 
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
@@ -123,10 +122,8 @@ public class GameClient implements GameProtocol {
 					// ClientLevel level = world.getLevel(addition.positionUpdate.levelId);
 					// if(level == null || (player != null && !level.equals(player.getLevel()))) return;
 					
-					ClientParticle e = ClientParticle.get(addition.particleData);
-					PositionUpdate newPos = addition.positionUpdate;
-					Vector2 size = e.getSize();
-					e.moveTo(newPos.x - size.x/2, newPos.y - size.y/2, newPos.z); // center entity
+					ClientParticle e = ClientParticle.get(addition);
+					world.registerEntity(e);
 				});
 				
 				if(object instanceof EntityAddition) {
@@ -139,8 +136,8 @@ public class GameClient implements GameProtocol {
 					// ClientLevel level = world.getLevel(addition.positionUpdate.levelId);
 					// if(level == null || (player != null && !level.equals(player.getLevel()))) return;
 					
-					// registered automatically
-					new ClientEntity(addition);
+					ClientEntity e = new ClientEntity(addition);
+					world.registerEntity(e);
 				}
 				
 				if(object instanceof EntityRemoval) {

@@ -2,19 +2,19 @@ package miniventure.game;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.Objects;
 
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.chat.InfoMessageLine;
 import miniventure.game.item.Item;
 import miniventure.game.item.ItemStack;
+import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.Boundable;
-import miniventure.game.world.Level;
 import miniventure.game.world.Point;
 import miniventure.game.world.Taggable.Tag;
-import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.Entity;
@@ -24,6 +24,8 @@ import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.entity.mob.player.Player.Stat;
 import miniventure.game.world.entity.particle.ActionType;
 import miniventure.game.world.entity.particle.ParticleData;
+import miniventure.game.world.level.Level;
+import miniventure.game.world.management.WorldManager;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.Tile.TileData;
 import miniventure.game.world.tile.Tile.TileTag;
@@ -32,7 +34,6 @@ import miniventure.game.world.worldgen.island.IslandType;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Array;
 
 import com.esotericsoftware.kryo.Kryo;
 
@@ -358,14 +359,12 @@ public interface GameProtocol {
 		private EntityValidation() { this(0, null); }
 		public EntityValidation(Level level, Entity... excluded) {
 			this.levelId = level.getLevelId();
-			
-			Array<Entity> entities = new Array<>(level.getEntities());
-			entities.removeAll(new Array<>(excluded), false);
-			
-			ids = new int[entities.size];
-			
-			for(int i = 0; i < entities.size; i++)
-				ids[i] = entities.get(i).getId();
+			// get all entities in level
+			LinkedList<Entity> entities = new LinkedList<>(level.getEntities());
+			// remove excluded entities
+			entities.removeAll(Arrays.asList(excluded));
+			// map to ids
+			ids = ArrayUtils.mapArray(entities.toArray(), int.class, int[].class, e -> ((Entity)e).getId());
 		}
 		public EntityValidation(int levelId, int[] ids) {
 			this.levelId = levelId;

@@ -10,10 +10,8 @@ import miniventure.game.item.Item;
 import miniventure.game.item.Result;
 import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolItem.ToolType;
-import miniventure.game.server.ServerCore;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueFunction;
-import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClassDataList;
 import miniventure.game.world.entity.Direction;
@@ -23,6 +21,8 @@ import miniventure.game.world.entity.mob.MobAnimationController.AnimationState;
 import miniventure.game.world.entity.mob.player.Player;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.entity.particle.ParticleData.TextParticleData;
+import miniventure.game.world.level.ServerLevel;
+import miniventure.game.world.management.ServerWorld;
 import miniventure.game.world.tile.TileTypeEnum;
 
 import com.badlogic.gdx.graphics.Color;
@@ -48,8 +48,8 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 	
 	private final String spriteName;
 	
-	protected ServerMob(@NotNull String spriteName, int health) {
-		super();
+	protected ServerMob(@NotNull ServerWorld world, @NotNull String spriteName, int health) {
+		super(world);
 		dir = Direction.DOWN;
 		this.maxHealth = health;
 		this.health = health;
@@ -64,8 +64,8 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 	// some stuff is given in the child constructor; this shouldn't need to be saved to file.
 	// these include the sprite name and the max health, in this case.
 	// these things
-	protected ServerMob(ClassDataList allData, final Version version, ValueFunction<ClassDataList> modifier) {
-		super(allData, version, modifier);
+	protected ServerMob(@NotNull ServerWorld world, ClassDataList allData, final Version version, ValueFunction<ClassDataList> modifier) {
+		super(world, allData, version, modifier);
 		ArrayList<String> data = allData.get(1);
 		
 		this.spriteName = data.get(0);
@@ -109,7 +109,7 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 	protected void setDirection(@NotNull Direction dir) {
 		if(animator.setDirection(dir)) {
 			this.dir = dir;
-			ServerCore.getServer().broadcast(new MobUpdate(getTag(), dir), this);
+			getServer().broadcast(new MobUpdate(getTag(), dir), this);
 		}
 	}
 	
@@ -172,7 +172,7 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 		health -= Math.min(damage, health);
 		invulnerableTime = HURT_COOLDOWN;
 		
-		ServerCore.getServer().playEntitySound("hurt", this);
+		getServer().playEntitySound("hurt", this);
 		
 		if(health > 0) {
 			// do knockback
@@ -182,8 +182,8 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 		
 		ServerLevel level = getLevel();
 		if(level != null) {
-			ServerCore.getServer().broadcast(new Hurt(obj.getTag(), getTag(), damage*1f/maxHealth));
-			ServerCore.getServer().broadcastParticle(new TextParticleData(String.valueOf(damage), this instanceof ServerPlayer ? Color.PINK : Color.RED), this);
+			getServer().broadcast(new Hurt(obj.getTag(), getTag(), damage*1f/maxHealth));
+			getServer().broadcastParticle(new TextParticleData(String.valueOf(damage), this instanceof ServerPlayer ? Color.PINK : Color.RED), this);
 		}
 		
 		if (health == 0)

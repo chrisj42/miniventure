@@ -33,6 +33,18 @@ public class GameCore {
 	
 	public static boolean debug = false;
 	
+	public static void debugFull(String error) { debug(error, false, true); }
+	public static void debug(String error) { debug(error, true); }
+	public static void debug(String error, boolean debugModeOnly) { debug(error, debugModeOnly, false); }
+	public static void debug(String error, boolean debugModeOnly, boolean dumpStack) {
+		if(debugModeOnly && !debug) return;
+		if(dumpStack) {
+			System.err.println(error + " Printing stack trace:");
+			Thread.dumpStack();
+		} else
+			System.err.println(error);
+	}
+	
 	public static final String DEFAULT_GAME_DIR;
 	public static Path GAME_DIR = null;
 	static {

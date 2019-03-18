@@ -15,7 +15,7 @@ import miniventure.game.Preferences;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.ServerManager;
 import miniventure.game.server.ServerCore;
-import miniventure.game.world.SaveLoadInterface.WorldDataSet;
+import miniventure.game.world.management.SaveLoadInterface.WorldDataSet;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
@@ -86,30 +86,42 @@ public class DesktopLauncher {
 			config.title = "Miniventure - " + GameCore.VERSION;
 			config.width = ClientCore.DEFAULT_SCREEN_WIDTH;
 			config.height = ClientCore.DEFAULT_SCREEN_HEIGHT;
-			new LwjglApplication(new ClientCore(new ServerManager() {
-				@Override
-				public int startServer(WorldDataSet worldInfo) throws IOException {
-					int port = ServerCore.initSinglePlayer(worldInfo);
-					
-					// server running, and world loaded; now, get the server world updating
-					new Thread(new ThreadGroup("server"), ServerCore::run, "Miniventure Server").start();
-					// ready to connect
-					return port;
-				}
-				
-				@Override
-				public void setHost(InetSocketAddress host) {
-					// System.out.println("setting host to "+host);
-					ServerCore.host = host;
-				}
-				
-				@Override
-				public void open() { ServerCore.getServer().setMultiplayer(true); }
-				
-				@Override
-				public void closeServer() { ServerCore.quit(); }
-				
-			}), config);
+			// config.fullscreen = true;
+			new LwjglApplication(new ClientCore(new ServerHolder()), config);
 		}
+	}
+	
+	private static class ServerHolder implements ServerManager {
+		
+		private ServerCore core;
+		
+		ServerHolder() {}
+		
+		@Override
+		public int startServer(WorldDataSet worldInfo) throws IOException {
+			this.core = ServerCore.initSinglePlayer(worldInfo);
+			int port = core.getServer().getPort();
+			
+			// server running, and world loaded; now, get the server world updating
+			new Thread(new ThreadGroup("server"), core, "Miniventure Server").start();
+			// ready to connect
+			return port;
+		}
+		
+		@Override
+		public void setHost(InetSocketAddress host) {
+			// System.out.println("setting host to "+host);
+			core.getServer().setHost(host);
+		}
+		
+		@Override
+		public void open() { core.getServer().setMultiplayer(true); }
+		
+		@Override
+		public void closeServer() {
+			core.getWorld().exitWorld();
+			core = null;
+		}
+		
 	}
 }

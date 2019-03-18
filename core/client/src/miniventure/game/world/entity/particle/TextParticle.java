@@ -1,6 +1,7 @@
 package miniventure.game.world.entity.particle;
 
 import miniventure.game.world.entity.ClientEntityRenderer.TextRenderer;
+import miniventure.game.world.entity.particle.ParticleData.TextParticleData;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
