@@ -15,12 +15,10 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Random;
 
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.IslandReference;
-import miniventure.game.util.MyUtils;
 import miniventure.game.util.SerialDataMap;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueFunction;
@@ -100,12 +98,10 @@ public class SaveLoadInterface {
 				@Override
 				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
 					if(dir.equals(saveDir)) return FileVisitResult.CONTINUE;
-					if(GameCore.debug)
-						System.out.println("trying "+dir);
+					GameCore.debug("trying "+dir);
 					try {
 						worlds.add(new WorldReference(dir));
-						if(GameCore.debug)
-							System.out.println("world found: "+dir);
+						GameCore.debug("world found: "+dir);
 					} catch(IllegalArgumentException ignored) {}
 					return FileVisitResult.SKIP_SUBTREE;
 				}

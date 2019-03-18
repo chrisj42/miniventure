@@ -168,7 +168,7 @@ public class GameServer implements GameProtocol {
 		final ServerWorld world = GameServer.this.world;
 		
 		if(object instanceof Login) {
-			if(GameCore.debug) System.out.println("server received login");
+			GameCore.debug("server received login");
 			Login login = (Login) object;
 			
 			if(login.version.compareTo(GameCore.VERSION) != 0) {
@@ -564,7 +564,7 @@ public class GameServer implements GameProtocol {
 		
 		ServerLevel level = player.getLevel();
 		if(level == null) {
-			if(GameCore.debug) System.out.println("Server: Level of player "+player.getName()+" is null during entity validation attempt, skipping validation.");
+			GameCore.debug("Server: Level of player "+player.getName()+" is null during entity validation attempt, skipping validation.");
 			return;
 		}
 		

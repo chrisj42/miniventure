@@ -20,7 +20,7 @@ public class TileTypeRenderer {
 	static void init() {}
 	
 	static {
-		if(GameCore.debug) System.out.println("reading tile sprites...");
+		GameCore.debug("reading tile sprites...");
 		
 		Array<TextureHolder> regions = GameCore.tileAtlas.getRegions();
 		for(TextureHolder region: regions) {
@@ -48,7 +48,7 @@ public class TileTypeRenderer {
 				.add(region);
 		}
 		
-		if(GameCore.debug) System.out.println("tile sprites read successfully.");
+		GameCore.debug("tile sprites read successfully.");
 	}
 	
 	

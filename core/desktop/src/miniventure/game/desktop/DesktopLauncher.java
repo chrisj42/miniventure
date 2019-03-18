@@ -79,8 +79,7 @@ public class DesktopLauncher {
 		if(server) {
 			ServerCore.main(leftover.toArray(new String[0]));
 		} else {
-			if(GameCore.debug)
-				System.out.println("Starting GUI client...");
+			GameCore.debug("Starting GUI client...");
 			Thread.setDefaultUncaughtExceptionHandler(ClientCore.exceptionHandler);
 			LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 			config.title = "Miniventure - " + GameCore.VERSION;

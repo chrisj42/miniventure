@@ -78,12 +78,12 @@ public abstract class WorldManager {
 	void registerEntity(Entity e, boolean shouldBeReserved) {
 		synchronized (idLock) {
 			if(!reservedIDs.remove(e.getId()) && shouldBeReserved)
-				GameCore.debug(this+" has not reserved entity ID "+e.getId()+"; continuing registration of given entity "+e);
+				GameCore.error(this+" has not reserved entity ID "+e.getId()+"; continuing registration of given entity "+e);
 			
 			// check for existing registration
 			Entity cur;
 			if((cur = entityIDMap.put(e.getId(), e)) != null)
-				GameCore.debug(this+" recieved redundant registration request for entity "+e+"; existing mapping (should match): "+cur);
+				GameCore.error(this+" recieved redundant registration request for entity "+e+"; existing mapping (should match): "+cur);
 		}
 	}
 	
@@ -109,14 +109,14 @@ public abstract class WorldManager {
 	public void cancelIdReservation(Entity e) {
 		synchronized (idLock) {
 			if(!reservedIDs.remove(e.getId()))
-				GameCore.debug("(in WorldManager.cancelIdReservation): id for entity " + e + " not reserved.");
+				GameCore.error("(in WorldManager.cancelIdReservation): id for entity " + e + " not reserved.");
 		}
 	}
 	
 	public void deregisterEntity(int eid) {
 		synchronized (idLock) {
 			if(entityIDMap.remove(eid) == null)
-				GameCore.debug("(in WorldManager.deregisterEntity): id "+eid+" not registered.");
+				GameCore.error("(in WorldManager.deregisterEntity): id "+eid+" not registered.");
 		}
 	}
 	

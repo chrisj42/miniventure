@@ -195,7 +195,7 @@ public class ClientCore extends ApplicationAdapter {
 			} else if(menuScreen != null && (gameScreen == null || menuScreen != gameScreen.chatScreen))
 				menuScreen.dispose();
 			
-			if(GameCore.debug) System.out.println("setting screen to " + screen);
+			GameCore.debug("setting screen to " + screen);
 			
 			if(gameScreen != null) {
 				if(screen instanceof MainMenu) {
@@ -218,7 +218,7 @@ public class ClientCore extends ApplicationAdapter {
 		synchronized (screenLock) {
 			if(menuScreen != null && menuScreen.getParent() != null) {
 				MenuScreen screen = menuScreen.getParent();
-				if(GameCore.debug) System.out.println("setting screen back to " + screen);
+				GameCore.debug("setting screen back to " + screen);
 				if(gameScreen == null || menuScreen != gameScreen.chatScreen)
 					menuScreen.dispose(false);
 				screen.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());

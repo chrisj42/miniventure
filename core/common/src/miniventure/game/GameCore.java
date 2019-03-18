@@ -33,10 +33,15 @@ public class GameCore {
 	
 	public static boolean debug = false;
 	
-	public static void debugFull(String error) { debug(error, false, true); }
-	public static void debug(String error) { debug(error, true); }
-	public static void debug(String error, boolean debugModeOnly) { debug(error, debugModeOnly, false); }
-	public static void debug(String error, boolean debugModeOnly, boolean dumpStack) {
+	public static void debug(String msg) {
+		if(debug)
+			System.out.println(msg);
+	}
+	
+	public static void errorFull(String error) { error(error, false, true); }
+	public static void error(String error) { error(error, true); }
+	public static void error(String error, boolean debugModeOnly) { error(error, debugModeOnly, false); }
+	public static void error(String error, boolean debugModeOnly, boolean dumpStack) {
 		if(debugModeOnly && !debug) return;
 		if(dumpStack) {
 			System.err.println(error + " Printing stack trace:");

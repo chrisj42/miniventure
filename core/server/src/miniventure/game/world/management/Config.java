@@ -67,9 +67,9 @@ public class Config<T> {
 		value = defaultValue;
 	}
 	
-	public synchronized T get() { return value; }
-	public synchronized void set(T value) { this.value = value; }
-	public synchronized boolean set(@NotNull ServerWorld world, String stringValue) {
+	public T get() { return value; }
+	public void set(T value) { this.value = value; }
+	public boolean set(@NotNull ServerWorld world, String stringValue) {
 		if(!stringParser.isValid(world, stringValue)) return false;
 		set(stringParser.get(world, stringValue));
 		return true;

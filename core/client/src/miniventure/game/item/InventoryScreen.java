@@ -174,7 +174,7 @@ public class InventoryScreen extends MenuScreen {
 	
 	// should only be called by the LibGDX Application thread
 	public synchronized void close() {
-		if(GameCore.debug) System.out.println("closing inventory screen");
+		GameCore.debug("closing inventory screen");
 		if(requested) {
 			if(hotbar == null)
 				hotbar = new int[0];

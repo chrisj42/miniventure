@@ -61,7 +61,7 @@ public class GameClient implements GameProtocol {
 					world.init((WorldData)object);
 				
 				if(object instanceof LevelData) {
-					if(GameCore.debug) System.out.println("client received level");
+					GameCore.debug("client received level");
 					world.setLevel((LevelData)object);
 				}
 				
@@ -76,7 +76,7 @@ public class GameClient implements GameProtocol {
 				});
 				
 				if(object instanceof SpawnData) {
-					if(GameCore.debug) System.out.println("client received player");
+					GameCore.debug("client received player");
 					SpawnData data = (SpawnData) object;
 					world.spawnPlayer(data);
 					ClientCore.setScreen(null);

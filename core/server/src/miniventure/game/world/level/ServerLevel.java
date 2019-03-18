@@ -184,8 +184,10 @@ public class ServerLevel extends Level {
 	}
 	
 	public void entityAdded(@NotNull ServerEntity e) {
-		if(e instanceof Player)
+		if(preload && e instanceof Player) {
+			GameCore.debug("preload disabled.");
 			preload = false;
+		}
 	}
 	
 	public void addEntity(@NotNull ServerEntity e) {
@@ -304,7 +306,7 @@ public class ServerLevel extends Level {
 			mob.moveTo(tile);
 			addEntity(mob);
 		}
-		else GameCore.debug("Failed to spawn mob "+mob+", no suitable spawn location.");
+		else GameCore.error("Failed to spawn mob "+mob+", no suitable spawn location.");
 	}
 	
 	// only spawns within the given area

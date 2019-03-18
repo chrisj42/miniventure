@@ -57,7 +57,7 @@ public class ConnectionManager {
 		else {
 			if(connectingTypes.length == 0) {// there are multiple connection sprites, but no connecting types; add the self as a connecting type, so the extra sprites are used.
 				connectingTypes = new TileTypeEnum[] {type};
-				if(GameCore.debug) System.out.println("connect sprites found for "+type+" with no types, adding self");
+				GameCore.debug("connect sprites found for "+type+" with no types, adding self");
 			}
 			
 			this.connectingTypes = MyUtils.enumSet(connectingTypes);

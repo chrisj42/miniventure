@@ -259,13 +259,16 @@ public class ServerWorld extends WorldManager {
 	}
 	@NotNull
 	// the ordering of "get/make level", "position player", "send level data", and finally "register world/add player" is important. Doing so is the most efficient, and prevents split-second frame changes like showing the player in the previous level position, as well as minimizing the time that the player may be in-game on the server, but still loading on the client.
-	public synchronized ServerLevel loadLevel(int levelId, @NotNull ServerPlayer activator, ValueFunction<ServerLevel> playerPositioner) {
+	public ServerLevel loadLevel(int levelId, @NotNull ServerPlayer activator, ValueFunction<ServerLevel> playerPositioner) {
 		
 		ServerLevel level = getLevel(levelId);
 		
 		boolean put = level == null;
-		if(put)
+		if(put) {
+			GameCore.debug("Generating level "+levelId);
 			level = (ServerLevel) islandStores[levelId].getLevel(levelFetcher);
+			System.out.println("level "+levelId+" created.");
+		}
 		
 		// position the activator.
 		playerPositioner.act(level);
@@ -296,10 +299,12 @@ public class ServerWorld extends WorldManager {
 		}
 		else setEntityLevel(activator, level);
 		
+		GameCore.debug("loaded level "+level.getLevelId());
+		
 		return level;
 	}
 	
-	protected synchronized void unloadLevel(int levelId) {
+	protected void unloadLevel(int levelId) {
 		ServerLevel level = getLevel(levelId);
 		if(level == null) return; // already unloaded
 		
@@ -310,9 +315,10 @@ public class ServerWorld extends WorldManager {
 			super.deregisterEntity(e.getId());
 		
 		loadedLevels.act(map -> map.remove(levelId));
+		GameCore.debug("unloaded level "+levelId);
 	}
 	
-	protected synchronized void pruneLoadedLevels() {
+	protected void pruneLoadedLevels() {
 		ServerLevel[] levels = loadedLevels.get(map -> map.values().toArray(new ServerLevel[0]));
 		HashSet<Integer> safeIds = new HashSet<>(levels.length);
 		
@@ -345,8 +351,7 @@ public class ServerWorld extends WorldManager {
 	public void deregisterEntity(int eid) {
 		ServerEntity e = getEntity(eid);
 		if(e == null) {
-			if(GameCore.debug)
-				System.out.println("Server could not find entity "+eid+", ignoring deregister request.");
+			GameCore.debug("Server could not find entity "+eid+", ignoring deregister request.");
 			return;
 		}
 		
@@ -372,21 +377,21 @@ public class ServerWorld extends WorldManager {
 		
 		if(hasLevel) {
 			if(!registered) {
-				GameCore.debug("Unregistered server entity found on level " + current + " during request to set level to " + level + ". Removing from current level.");
+				GameCore.error("Unregistered server entity found on level " + current + " during request to set level to " + level + ". Removing from current level.");
 				entityManager.removeEntity(e);
 				hasLevel = false;
 				act = false;
 			}
 			else if(current.getLevelId() != level.getLevelId())
 				// levels are different
-				GameCore.debug("Server entity "+e+" is already on level "+current+", will not set level to "+level);
+				GameCore.error("Server entity "+e+" is already on level "+current+", will not set level to "+level);
 			else
 				return; // requests to add an entity to a level they are already on will be quietly ignored.
 		}
 		
-		if(!isLevelLoaded(level.getLevelId())) {
+		if(!level.isPreload() && !isLevelLoaded(level.getLevelId())) {
 			act = false;
-			GameCore.debug("Server level "+level+" exists but is not loaded; will not add entity "+e);
+			GameCore.error("Server level "+level+" exists but is not loaded; will not add entity "+e);
 		}
 		
 		if(!act) return; // level set is not valid.
@@ -445,8 +450,7 @@ public class ServerWorld extends WorldManager {
 		ServerPlayer player;
 		// check for player data
 		if(knownPlayers.containsKey(playerName)) {
-			if(GameCore.debug)
-				System.out.println("Player '"+playerName+"' is known.");
+			GameCore.debug("Player '"+playerName+"' is known.");
 			PlayerInfo info = knownPlayers.get(playerName);
 			if(!info.passhash.equals(passhash))
 				return null; // incorrect password
