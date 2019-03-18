@@ -251,6 +251,8 @@ public class ClientWorld extends LevelManager {
 	
 	public ClientPlayer getMainPlayer() { return mainPlayer; }
 	
+	public boolean hasRenderableLevel() { return worldLoaded() && mainPlayer != null && mainPlayer.getLevel() != null; }
+	
 	@Override
 	public String toString() { return "ClientWorld"; }
 }
