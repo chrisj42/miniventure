@@ -34,18 +34,18 @@ public class RenderStyle {
 		this.isFrameTime = isFrameTime;
 	}
 	
-	TileAnimation<TextureHolder> getAnimation(@NotNull TileTypeEnum tileType, String name, EnumMap<TileTypeEnum, HashMap<String, Array<TextureHolder>>> map, String mapName) {
+	TileAnimation getAnimation(@NotNull TileTypeEnum tileType, String name, EnumMap<TileTypeEnum, HashMap<String, Array<TextureHolder>>> map, String mapName) {
 		if(!map.containsKey(tileType))
 			throw new SpriteNotFoundException("tile type "+tileType+" does not have any registered sprites in map "+mapName+". (discovered when attempting to fetch sprite \""+name+"\")");
 		if(!map.get(tileType).containsKey(name))
 			throw new SpriteNotFoundException("tile type "+tileType+" does not have sprite with name \""+name+"\" in map "+mapName+'.');
 		return getAnimation(map.get(tileType).get(name));
 	}
-	private TileAnimation<TextureHolder> getAnimation(Array<TextureHolder> frames) {
+	private TileAnimation getAnimation(Array<TextureHolder> frames) {
 		if(time == 0)
-			return new TileAnimation<>(sync, 1, frames.get(0));
+			return new TileAnimation(sync, 1, frames.get(0));
 		else
-			return new TileAnimation<>(sync, isFrameTime ? time : time / frames.size, frames, playMode);
+			return new TileAnimation(sync, isFrameTime ? time : time / frames.size, frames, playMode);
 	}
 	
 	// TODO this ought to be a checked exception

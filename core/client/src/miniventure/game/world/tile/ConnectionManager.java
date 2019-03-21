@@ -84,7 +84,7 @@ public class ConnectionManager {
 		return this;
 	}
 	
-	private void addAnimations(LinkedList<TileAnimation<TextureHolder>> sprites, RenderTile tile, int spriteIdx) {
+	private void addAnimations(LinkedList<TileAnimation> sprites, RenderTile tile, int spriteIdx) {
 		if(mainAnimations.containsKey(type)) {
 			int idx = new Random(tile.x * 17 + tile.y * 131).nextInt(mainAnimations.get(type).size());
 			sprites.add(RenderStyle.SINGLE_FRAME.getAnimation(type, (idx<10?"0":"")+idx, mainAnimations, "connection main"));
@@ -93,7 +93,7 @@ public class ConnectionManager {
 	}
 	
 	/// Checks the given aroundTypes for all types
-	public void addConnectionSprites(LinkedList<TileAnimation<TextureHolder>> sprites, RenderTile tile, EnumMap<RelPos, EnumSet<TileTypeEnum>> aroundTypes) {
+	public void addConnectionSprites(LinkedList<TileAnimation> sprites, RenderTile tile, EnumMap<RelPos, EnumSet<TileTypeEnum>> aroundTypes) {
 		if(connectingTypes != null && connectingTypes.size() == 0) {
 			addAnimations(sprites, tile, 0);
 			return;

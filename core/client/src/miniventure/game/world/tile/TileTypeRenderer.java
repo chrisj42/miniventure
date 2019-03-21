@@ -77,8 +77,8 @@ public class TileTypeRenderer {
 	// whenever a tile changes its TileTypeEnum stack in any way, all 9 tiles around it re-fetch their overlap and main animations. Then they keep that stack of animations until the next fetch.
 	
 	// gets the sprite for when this tiletype is surrounded by the given types.
-	public LinkedList<TileAnimation<TextureHolder>> getConnectionSprites(@NotNull Tile tile, EnumMap<RelPos, EnumSet<TileTypeEnum>> aroundTypes) {
-		LinkedList<TileAnimation<TextureHolder>> sprites = new LinkedList<>();
+	public LinkedList<TileAnimation> getConnectionSprites(@NotNull Tile tile, EnumMap<RelPos, EnumSet<TileTypeEnum>> aroundTypes) {
+		LinkedList<TileAnimation> sprites = new LinkedList<>();
 		String name = tile.getDataMap(tileType).get(TileCacheTag.TransitionName);
 		if(name != null)
 			sprites.add(ClientTileType.get(tileType).getTransition(name).getAnimation());
@@ -89,7 +89,7 @@ public class TileTypeRenderer {
 	}
 	
 	// gets the overlap sprite (sides + any isolated corners) for this tiletype overlapping a tile at the given positions.
-	public ArrayList<TileAnimation<TextureHolder>> getOverlapSprites(EnumSet<RelPos> overlapPositions) {
+	public ArrayList<TileAnimation> getOverlapSprites(EnumSet<RelPos> overlapPositions) {
 		return overlapManager.getOverlapSprites(overlapPositions);
 	}
 	

@@ -48,8 +48,8 @@ public class OverlapManager {
 	}
 	
 	/// returns sprites for the stored type assuming it is being overlapped at the given positions.
-	public ArrayList<TileAnimation<TextureHolder>> getOverlapSprites(EnumSet<RelPos> ovLayout) {
-		ArrayList<TileAnimation<TextureHolder>> animations = new ArrayList<>();
+	public ArrayList<TileAnimation> getOverlapSprites(EnumSet<RelPos> ovLayout) {
+		ArrayList<TileAnimation> animations = new ArrayList<>();
 		
 		if(renderStyle == null && overrides.size() == 0)
 			return animations;

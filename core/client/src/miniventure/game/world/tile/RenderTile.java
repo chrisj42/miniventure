@@ -4,7 +4,6 @@ import java.util.*;
 
 import miniventure.game.item.Item;
 import miniventure.game.item.Result;
-import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.RelPos;
 import miniventure.game.util.customenum.SerialMap;
 import miniventure.game.world.WorldObject;
@@ -20,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class RenderTile extends Tile {
 	
-	private ArrayList<TileAnimation<TextureHolder>> spriteStack;
+	private ArrayList<TileAnimation> spriteStack;
 	private boolean updateSprites;
 	
 	private final Object spriteLock = new Object();
@@ -52,7 +51,7 @@ public class RenderTile extends Tile {
 		}
 		
 		synchronized (spriteLock) {
-			for(TileAnimation<TextureHolder> animation: spriteStack) {
+			for(TileAnimation animation: spriteStack) {
 				batch.draw(animation.getKeyFrame(this).texture, (x - posOffset.x) * SIZE, (y - posOffset.y) * SIZE);
 			}
 		}
@@ -106,7 +105,7 @@ public class RenderTile extends Tile {
 		}
 		
 		// all tile types have been fetched. Now accumulate the sprites.
-		ArrayList<TileAnimation<TextureHolder>> spriteStack = new ArrayList<>(16);
+		ArrayList<TileAnimation> spriteStack = new ArrayList<>(16);
 		
 		// iterate through main stack from bottom to top, adding connection and overlap sprites each level.
 		List<ClientTileType> types = getTypeStack().getTypes();
@@ -127,7 +126,7 @@ public class RenderTile extends Tile {
 			if(overlapSet.size() > 0) { // add found overlaps
 				overlapSet.forEach(enumType -> {
 					ClientTileType tileType = ClientTileType.get(enumType);
-					ArrayList<TileAnimation<TextureHolder>> sprites = tileType.getRenderer().getOverlapSprites(typePositions.get(enumType));
+					ArrayList<TileAnimation> sprites = tileType.getRenderer().getOverlapSprites(typePositions.get(enumType));
 					spriteStack.addAll(sprites);
 				});
 			}
