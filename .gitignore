@@ -13,6 +13,9 @@ notes/ignored/
 scripts/
 /*.jar
 
+## Windows Explorer configuration
+desktop.ini
+
 ## Robovm
 /ios/robovm-build/
 
