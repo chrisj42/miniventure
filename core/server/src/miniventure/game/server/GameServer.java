@@ -145,9 +145,8 @@ public class GameServer implements GameProtocol {
 		public void connected(Connection connection) {
 			// prevent further connections unless desired.
 			// System.out.println("attempted connection from address "+connection.getRemoteAddressTCP());
-			if(!multiplayer && playerToConnectionMap.size() > 0 && !isHost(connection.getRemoteAddressTCP())) {
-				// System.err.println("Ur not allowed.");
-				connection.sendTCP(new LoginFailure("Ur not allowed."));
+			if(!multiplayer && connectionThreadMap.size() > 0 && !isHost(connection.getRemoteAddressTCP())) {
+				connection.sendTCP(new LoginFailure("World is private."));
 				connection.close();
 			}
 			else {
@@ -163,7 +162,10 @@ public class GameServer implements GameProtocol {
 				return; // we don't care about these, they are internal packets
 			
 			ServerThread st = connectionThreadMap.get(connection);
-			st.addPacket(object);
+			if(st != null)
+				st.addPacket(object);
+			else
+				GameCore.error("recieved packet from unregistered connection: "+connection.getRemoteAddressTCP());
 		}
 		
 		@Override
@@ -261,9 +263,20 @@ public class GameServer implements GameProtocol {
 		forPacket(object, Ping.class, ping -> {
 			long nano = System.nanoTime() - ping.start;
 			double time = nano / 1E9D;
-			String disp = time < 1 ? time*1E3+" ms." : time+" seconds.";
+			
+			String unit;
+			if(time < 1) {
+				time *= 1E3;
+				unit = "ms";
+			} else
+				unit = "seconds";
+			
+			int whole = (int) time;
+			int decimal = (int) (time * 1E3) - whole; // three decimals
+			
+			String disp = "Ping for '"+client.getName()+"': "+whole+'.'+decimal+' '+unit+'.';
 			if(ping.source == null) // server origin
-				System.out.println("ping from "+client.getName()+": "+disp);
+				System.out.println(disp);
 			else {
 				Connection c;
 				if(ping.source.equals(client.getName()))
@@ -275,7 +288,7 @@ public class GameServer implements GameProtocol {
 				}
 				
 				if(c != null)
-					c.sendTCP(new Message("Ping for '"+client.getName()+"': "+disp, Color.SKY));
+					c.sendTCP(new Message(disp, Color.SKY));
 			}
 		});
 		
@@ -347,8 +360,8 @@ public class GameServer implements GameProtocol {
 		});
 		
 		forPacket(object, InteractRequest.class, true, r -> {
-			if(r.playerPosition.variesFrom(client))
-				connection.sendTCP(new PositionUpdate(client)); // fix the player's position
+			// if(r.playerPosition.variesFrom(client))
+			// 	connection.sendTCP(new PositionUpdate(client)); // fix the player's position
 			
 			client.doInteract(r.dir, r.hotbarIndex, r.attack);
 		});
