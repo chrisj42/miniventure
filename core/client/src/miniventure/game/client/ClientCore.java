@@ -122,6 +122,7 @@ public class ClientCore extends ApplicationAdapter {
 			
 			GenericEnum.init();
 			ClientTileType.init();
+			serverStarter.init();
 			
 			gameScreen = new GameScreen();
 			clientWorld = new ClientWorld(serverStarter, gameScreen);

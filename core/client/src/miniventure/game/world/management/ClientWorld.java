@@ -156,7 +156,7 @@ public class ClientWorld extends LevelManager {
 			client.connectToServer(loadingScreen, serverManager, "localhost", port, success -> {
 				if(!success) {
 					serverManager.closeServer();
-					client = new GameClient();
+					exitWorld();
 				}
 			});
 		}).start();
@@ -254,6 +254,8 @@ public class ClientWorld extends LevelManager {
 	public ClientPlayer getMainPlayer() { return mainPlayer; }
 	
 	public boolean hasRenderableLevel() { return worldLoaded() && mainPlayer != null && mainPlayer.getLevel() != null; }
+	
+	public boolean isLocalWorld() { return serverManager.isHosting(); }
 	
 	@Override
 	public String toString() { return "ClientWorld"; }

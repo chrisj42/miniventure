@@ -126,7 +126,7 @@ public class GameScreen {
 				chatScreen.focus("/");
 			
 			else if(ClientCore.input.pressingKey(Keys.ESCAPE))
-				ClientCore.setScreen(new ConfirmScreen("Leave Server?", () -> ClientCore.getWorld().exitWorld()));
+				ClientCore.setScreen(new ConfirmScreen(ClientCore.getWorld().isLocalWorld() ? "Exit World?" : "Leave Server?", () -> ClientCore.getWorld().exitWorld()));
 			
 			else if(GameCore.debug && ClientCore.input.pressingKey(Keys.M))
 				ClientCore.setScreen(new MapScreen());

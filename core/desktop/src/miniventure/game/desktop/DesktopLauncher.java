@@ -16,6 +16,7 @@ import miniventure.game.client.ClientCore;
 import miniventure.game.client.ServerManager;
 import miniventure.game.server.ServerCore;
 import miniventure.game.world.management.SaveLoadInterface.WorldDataSet;
+import miniventure.game.world.tile.ServerTileType;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
@@ -95,6 +96,16 @@ public class DesktopLauncher {
 		private ServerCore core;
 		
 		ServerHolder() {}
+		
+		@Override
+		public void init() {
+			ServerTileType.init();
+		}
+		
+		@Override
+		public boolean isHosting() {
+			return core != null && core.isRunning();
+		}
 		
 		@Override
 		public int startServer(WorldDataSet worldInfo) throws IOException {

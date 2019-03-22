@@ -7,6 +7,12 @@ import miniventure.game.world.management.SaveLoadInterface.WorldDataSet;
 
 public interface ServerManager {
 	
+	// initialize static stuff and things.
+	void init();
+	
+	// returns if a server is being run locally on the same JVM. Can be used to determine if the current world is a local single player one or not.
+	boolean isHosting();
+	
 	// returns port server was started on
 	int startServer(WorldDataSet worldInfo) throws IOException;
 	void setHost(InetSocketAddress host); // tell the server who the host is

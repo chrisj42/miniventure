@@ -29,6 +29,7 @@ public class ServerCore implements Runnable {
 	
 	@NotNull private final ServerWorld serverWorld;
 	@NotNull private final CommandInputParser commandParser;
+	private Thread thread;
 	
 	private final float[] frameTimes = new float[20];
 	private final int FRAME_INTERVAL = 30; // how many frames are in each time (above)
@@ -43,6 +44,7 @@ public class ServerCore implements Runnable {
 	
 	@Override
 	public void run() {
+		thread = Thread.currentThread();
 		// start command parser thread
 		new Thread(commandParser, "CommandInputParser").start();
 		
@@ -73,8 +75,13 @@ public class ServerCore implements Runnable {
 			try {
 				serverWorld.update(MathUtils.clamp(delta, 0, GameCore.MAX_DELTA));
 			} catch(Throwable t) {
-				getServer().stop(false);
-				commandParser.end();
+				try {
+					getServer().stop(false);
+					commandParser.end();
+				} catch(Throwable t2) {
+					System.err.println("exception while attempting to clean up after a previous exception during server world update:");
+					t2.printStackTrace();
+				}
 				throw t;
 			}
 			
@@ -88,6 +95,10 @@ public class ServerCore implements Runnable {
 	public ServerWorld getWorld() { return serverWorld; }
 	@NotNull
 	public GameServer getServer() { return getWorld().getServer(); }
+	
+	public boolean isUpdateThread() { return Thread.currentThread() == thread; }
+	
+	public boolean isRunning() { return thread != null && thread.isAlive(); }
 	
 	public float getFPS() {
 		synchronized (fpsLock) {
