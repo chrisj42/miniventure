@@ -277,6 +277,8 @@
             <key type="filename">tile-sprites/floor_/stone/c45.png</key>
             <key type="filename">tile-sprites/floor_/stone/c46.png</key>
             <key type="filename">tile-sprites/grass/c00.png</key>
+            <key type="filename">tile-sprites/grass/m00.png</key>
+            <key type="filename">tile-sprites/grass/m01.png</key>
             <key type="filename">tile-sprites/grass/o00.png</key>
             <key type="filename">tile-sprites/grass/o01.png</key>
             <key type="filename">tile-sprites/grass/o02.png</key>
@@ -537,10 +539,10 @@
             <key type="filename">tile-sprites/torch/c00_01.png</key>
             <key type="filename">tile-sprites/torch/c00_02.png</key>
             <key type="filename">tile-sprites/torch/c00_03.png</key>
-            <key type="filename">tile-sprites/torch/tenter_00.png</key>
             <key type="filename">tile-sprites/torch/tenter_01.png</key>
             <key type="filename">tile-sprites/torch/tenter_02.png</key>
             <key type="filename">tile-sprites/torch/tenter_03.png</key>
+            <key type="filename">tile-sprites/torch/tenter_04.png</key>
             <key type="filename">tile-sprites/tree_/cartoon/c00.png</key>
             <key type="filename">tile-sprites/tree_/cartoon/c01.png</key>
             <key type="filename">tile-sprites/tree_/cartoon/c02.png</key>
