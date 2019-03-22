@@ -1,19 +1,22 @@
-- echo commands on the server console; preferably, write output to the line above the typing line, and read arrow presses to navigate command history and the current line.
+- move known player handling from ServerWorld to GameServer; world will pass player info from WorldDataSet to server constructor.
+- work on synchronization of packet handling; many packets can probably be processed when the player is updated
+	- players will be updated at the normal time with the rest of the entities
+	- movement requests will accumulate with the waiting for the player to be updated, and when the update occurs it will act like one movement request moving from the first request's start to the last request's end.
+	- further sync notes in related txt file.
 
-- see about optimizing access to a level entity set; synchronized iteration over it and/or repeated cloning into an array is likely inefficient.
+- damage bar for tiles
 
-- centralize menu screens that load content from the server; they all have a "requested" bool, they all have an update method, and they all display a waiting message while loading, though in different places. Also they all should probably wait a quarter-second or so before showing the waiting message, so that in fast connections it isn't even shown, and you don't get that quick flash of "loading".
+- add more biomes to the starter island, like a desert section (just for while we only have one island)
 
-- I think a big part of the new Tile System was *supposed* to be the ability to lump DOOR_OPEN and DOOR_CLOSED, amoung other things, into the same TileType. However, I don't seem to be doing that at all. I ought to see that it happens.
+- add a container so people can store their items
+
+- edit tools a bit so the early ones don't break so fast
+	- I don't really want breakage to be a concern where you have to make a new tool every couple blocks destroyed.
+
+- mob sprites, tool sprites, furnace, loom, fishing, floor tiles including carpets, chests, ores in the middle of rock formations.
+- Note that item sprites should be 16x16.
  
-- when menu system is done, add a volume option
-
-
-- I ought to spend a bit of time, now and in the future, to redo some of the code in terms of error handling. What I currently do is make sure it breaks when something unexpected happens, but what I should do (where possible) is log that there was something unexpected, and then try to recover. Making sure the game doesn't crash during play should be a priority, but the problem should still bring attention to itself; just without crashing the game.
-
-
-- give item entities shadows like the water thing
-- speaking of items, maybe, for the sake of visibility, all item sprites should have a 1-pixel black outline?
+- add a volume option for sounds
 
 - cut some decimals off of the ping time display
 
@@ -22,3 +25,4 @@
 - log to server console when commands are used (this includes chat, since server console doesn't display chat otherwise)
 
 - reconsider rendering rules when player is in a hole; currently clips adjacent tiles. Check if the same happens with water.
+

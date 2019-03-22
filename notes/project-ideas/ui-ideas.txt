@@ -1,0 +1,29 @@
+ui/controls improvements:
+
+- grid layouts
+- options are searchable with text input
+	- hides all but matches
+	- traversable with keyboard
+	- keyboard analogues for mouse presses
+		- left-mouse = enter
+		- 
+
+- crafting screen
+	- tabbed pane of grids
+	- each tab is a category; tools, exploration, house-building, food
+	- tab is icon
+	- mouse-over highlight, in addition to (non)craftable highlight
+	- on click, grid cell is selected
+		- right side of grid shows preview
+		- crafting costs
+		- inventory count
+		- buttons to craft 1, 5, 10
+
+- inventory screen
+	- grid
+	- it kinda is a grid already
+
+- storage container
+	- grids
+
+items can show with labels or alone

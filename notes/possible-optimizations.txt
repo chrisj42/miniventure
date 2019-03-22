@@ -1,0 +1,10 @@
+****
+
+I ought to spend a bit of time, now and in the future, to redo some of the code in terms of error handling. What I currently do is make sure it breaks when something unexpected happens, but what I should do (where possible) is log that there was something unexpected, and then try to recover. Making sure the game doesn't crash during play should be a priority, but the problem should still bring attention to itself; just without crashing the game.
+
+****
+
+I think a big part of the new Tile System was *supposed* to be the ability to lump DOOR_OPEN and DOOR_CLOSED, amoung other things, into the same TileType. However, I don't seem to be doing that at all. I ought to see that it happens.
+
+****
+
