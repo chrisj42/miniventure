@@ -131,6 +131,7 @@ public enum IslandType {
 			
 			TileProcessorChain features = new ProcessChainBuilder()
 				.add(new NoiseTileCondition(stone, val -> val > .65), TileTypeEnum.STONE)
+				.add(new NoiseTileCondition(stone, val -> val > .6), TileTypeEnum.FLINT)
 				.add(new NoiseTileCondition(trees, val -> val > .76), TileTypeEnum.POOF_TREE)
 				.getChain();
 			
@@ -207,6 +208,7 @@ public enum IslandType {
 	abstract void generateIsland(ProtoIsland island);
 	
 	public TileTypeEnum[][][] generateIsland(long seed) {
+		System.out.println("generating "+this+" tilemap...");
 		ProtoIsland island = new ProtoIsland(seed, width, height);
 		generateIsland(island);
 		return island.getMap();
