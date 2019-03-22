@@ -9,17 +9,17 @@ public class TileAnimation extends Animation<TextureHolder> {
 	
 	private float startTime = -1;
 	
-	public TileAnimation(boolean sync, float frameDuration, Array<TextureHolder> keyFrames) {
-		this(sync, frameDuration, keyFrames, PlayMode.LOOP);
+	public TileAnimation(boolean sync, float fps, Array<TextureHolder> keyFrames) {
+		this(sync, fps, keyFrames, PlayMode.LOOP);
 	}
 	
-	public TileAnimation(boolean sync, float frameDuration, Array<TextureHolder> keyFrames, PlayMode playMode) {
-		super(frameDuration, keyFrames, playMode);
+	public TileAnimation(boolean sync, float fps, Array<TextureHolder> keyFrames, PlayMode playMode) {
+		super(1f / fps, keyFrames, playMode);
 		if(sync) startTime = 0;
 	}
 	
-	public TileAnimation(boolean sync, float frameDuration, TextureHolder... keyFrames) {
-		super(frameDuration, keyFrames);
+	public TileAnimation(boolean sync, float fps, TextureHolder... keyFrames) {
+		super(1f / fps, keyFrames);
 		if(sync) startTime = 0;
 	}
 	

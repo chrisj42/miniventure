@@ -25,7 +25,7 @@ public class SwimAnimation {
 		this.drawableHeight = drawableHeight;
 		
 		swim = swimAnimations.computeIfAbsent(enumType, k ->
-			new TileAnimation(false, 1/16f, 
+			new TileAnimation(false, 16, 
 				GameCore.tileAtlas.getRegions(enumType.name().toLowerCase()+"/swim")
 			)
 		);

@@ -105,8 +105,8 @@ public class ClientTileType extends TileType {
 		FLINT(type -> new ClientTileType(type, false)),
 		
 		WATER(type -> new ClientTileType(type, true,
-			new ConnectionManager(type, new RenderStyle(PlayMode.LOOP_RANDOM, 0.2f)),
-			new OverlapManager(type, new RenderStyle(true, 1/24f)),
+			new ConnectionManager(type, new RenderStyle(PlayMode.LOOP_RANDOM, 5)),
+			new OverlapManager(type, new RenderStyle(true, 24)),
 			P.swimAnimation.as(new SwimAnimation(type))
 		)),
 		
@@ -130,10 +130,10 @@ public class ClientTileType extends TileType {
 		CLOSED_DOOR(type -> ClientTileFactory.door(type, false)),
 		
 		TORCH(type -> new ClientTileType(type, false,
-			new ConnectionManager(type, new RenderStyle(1/12f)),
+			new ConnectionManager(type, new RenderStyle(12)),
 			P.lightRadius.as(2f),
 			P.transitions.as(Collections.singletonList(
-				new TransitionAnimation(type, "enter", new RenderStyle(3 / 12f, false))
+				new TransitionAnimation(type, "enter", new RenderStyle(12))
 			))
 		)),
 		
@@ -182,8 +182,8 @@ public class ClientTileType extends TileType {
 		static ClientTileType door(TileTypeEnum type, boolean open) {
 			return new ClientTileType(type, false,
 				P.transitions.as(open?Arrays.asList(
-					new TransitionAnimation(type, "open", new RenderStyle(PlayMode.NORMAL, 3/24f, false)),
-					new TransitionAnimation(type, "close", new RenderStyle(PlayMode.NORMAL, 3/24f, false))
+					new TransitionAnimation(type, "open", new RenderStyle(PlayMode.NORMAL, 24)),
+					new TransitionAnimation(type, "close", new RenderStyle(PlayMode.NORMAL, 24))
 					):new ArrayList<>(0)
 				)
 			);

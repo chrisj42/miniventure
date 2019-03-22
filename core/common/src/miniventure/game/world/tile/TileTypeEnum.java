@@ -1,6 +1,8 @@
 package miniventure.game.world.tile;
 
 import java.awt.Color;
+import java.util.Arrays;
+import java.util.EnumSet;
 
 import miniventure.game.world.management.WorldManager;
 import miniventure.game.world.worldgen.island.ProtoTile;
@@ -59,5 +61,19 @@ public enum TileTypeEnum implements TileProcessor {
 	// adds this tile type to the tile stack.
 	public void processTile(ProtoTile tile) {
 		tile.addLayer(this);
+	}
+	
+	public enum TypeGroup {
+		GROUND(DIRT, GRASS, SAND, STONE_PATH, STONE_FLOOR, SNOW, DOCK);
+		
+		private final EnumSet<TileTypeEnum> types;
+		
+		TypeGroup(TileTypeEnum... types) {
+			this.types = EnumSet.copyOf(Arrays.asList(types));
+		}
+		
+		public boolean contains(TileTypeEnum type) {
+			return types.contains(type);
+		}
 	}
 }

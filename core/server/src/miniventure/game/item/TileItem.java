@@ -9,6 +9,7 @@ import miniventure.game.world.entity.mob.player.Player;
 import miniventure.game.world.tile.ServerTile;
 import miniventure.game.world.tile.ServerTileType;
 import miniventure.game.world.tile.TileTypeEnum;
+import miniventure.game.world.tile.TileTypeEnum.TypeGroup;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -33,6 +34,8 @@ public class TileItem extends ServerItem {
 		
 		boolean canPlace(ServerTile tile, Player player);
 		
+		PlacementCheck NEVER = (tile, player) -> false;
+		
 		static PlacementCheck on(@Nullable TileTypeEnum... canPlaceOn) {
 			return (tile, player) -> {
 				boolean canPlace = canPlaceOn == null;
@@ -49,7 +52,7 @@ public class TileItem extends ServerItem {
 			};
 		}
 		
-		PlacementCheck GROUND = (tile, player) -> tile.getType().isWalkable();
+		PlacementCheck GROUND = (tile, player) -> TypeGroup.GROUND.contains(tile.getType().getTypeEnum());
 		
 		static PlacementCheck groundExcluding(TileTypeEnum exclude) {
 			return (tile, player) -> tile.getType().getTypeEnum() != exclude && GROUND.canPlace(tile, player);

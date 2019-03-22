@@ -1,5 +1,6 @@
 package miniventure.game.world.tile;
 
+import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.MapRequest;
 import miniventure.game.item.FoodType;
 import miniventure.game.item.ResourceType;
@@ -168,7 +169,7 @@ public class ServerTileType extends TileType {
 				tile.getServer().sendToPlayer((ServerPlayer) player, new MapRequest());
 				return Result.INTERACT;
 			}
-		}),
+		}, type -> new TileItem(type, false, PlacementCheck.groundExcluding(type))),
 		
 		COAL_ORE(type -> ServerTileFactory.ore(type, ResourceType.Coal, 25)),
 		IRON_ORE(type -> ServerTileFactory.ore(type, ResourceType.Iron, 35)),
@@ -201,8 +202,8 @@ public class ServerTileType extends TileType {
 			),
 			
 			P.TRANS.as(enumType -> new TransitionManager(enumType)
-				.addEntranceAnimations(new ServerTileTransition("open", 3/24f, TileTypeEnum.CLOSED_DOOR))
-				.addExitAnimations(new ServerTileTransition("close", 3/24f, TileTypeEnum.CLOSED_DOOR))
+				.addEntrance("open", 24, TileTypeEnum.CLOSED_DOOR)
+				.addExit("close", 24, TileTypeEnum.CLOSED_DOOR)
 			)
 		) {
 			@Override
@@ -210,7 +211,7 @@ public class ServerTileType extends TileType {
 				tile.replaceTile(CLOSED_DOOR.getType());
 				return Result.INTERACT;
 			}
-		}),
+		}, type -> new TileItem("Door", type, false, PlacementCheck.GROUND)),
 		
 		CLOSED_DOOR(type -> new ServerTileType(type,
 			new DestructionManager(type, new RequiredTool(ToolType.Axe))
@@ -226,8 +227,9 @@ public class ServerTileType extends TileType {
 		TORCH(type -> new ServerTileType(type,
 			new DestructionManager(type),
 			P.TRANS.as(type1 -> new TransitionManager(type1)
-				.addEntranceAnimations(new ServerTileTransition("enter", 3/12f)))
-		), type -> new TileItem(type, false, PlacementCheck.GROUND)),
+				.addEntrance("enter", 12)
+			)
+		), type -> new TileItem("torch", GameCore.tileAtlas.getRegion("torch/c00"), type, PlacementCheck.GROUND)),
 		
 		CACTUS(type -> new ServerTileType(type,
 			new DestructionManager(type, 12, null,

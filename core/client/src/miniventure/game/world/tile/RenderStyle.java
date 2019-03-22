@@ -14,24 +14,18 @@ public class RenderStyle {
 	
 	static final RenderStyle SINGLE_FRAME = new RenderStyle(PlayMode.NORMAL, 0);
 	
-	final PlayMode playMode;
-	final float time;
-	private final boolean isFrameTime;
+	private final PlayMode playMode;
+	private final float fps;
 	
-	final boolean sync;
+	private final boolean sync;
 	
-	RenderStyle(float frameTime) { this(false, frameTime, true); }
-	RenderStyle(boolean sync, float frameTime) { this(sync, frameTime, true); }
-	RenderStyle(float time, boolean isFrameTime) { this(PlayMode.LOOP, time, isFrameTime); }
-	RenderStyle(boolean sync, float time, boolean isFrameTime) { this(PlayMode.LOOP, sync, time, isFrameTime); }
-	RenderStyle(PlayMode playMode, float frameTime) { this(playMode, false, frameTime, true); }
-	RenderStyle(PlayMode playMode, boolean sync, float frameTime) { this(playMode, sync, frameTime, true); }
-	RenderStyle(PlayMode playMode, float time, boolean isFrameTime) { this(playMode, false, time, isFrameTime); }
-	RenderStyle(PlayMode playMode, boolean sync, float time, boolean isFrameTime) {
+	RenderStyle(float fps) { this(false, fps); }
+	RenderStyle(boolean sync, float fps) { this(PlayMode.LOOP, sync, fps); }
+	RenderStyle(PlayMode playMode, float fps) { this(playMode, false, fps); }
+	RenderStyle(PlayMode playMode, boolean sync, float fps) {
 		this.playMode = playMode;
 		this.sync = sync;
-		this.time = time;
-		this.isFrameTime = isFrameTime;
+		this.fps = fps;
 	}
 	
 	TileAnimation getAnimation(@NotNull TileTypeEnum tileType, String name, EnumMap<TileTypeEnum, HashMap<String, Array<TextureHolder>>> map, String mapName) {
@@ -42,10 +36,10 @@ public class RenderStyle {
 		return getAnimation(map.get(tileType).get(name));
 	}
 	private TileAnimation getAnimation(Array<TextureHolder> frames) {
-		if(time == 0)
+		if(fps == 0)
 			return new TileAnimation(sync, 1, frames.get(0));
 		else
-			return new TileAnimation(sync, isFrameTime ? time : time / frames.size, frames, playMode);
+			return new TileAnimation(sync, fps, frames, playMode);
 	}
 	
 	// TODO this ought to be a checked exception

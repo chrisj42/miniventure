@@ -43,6 +43,11 @@ public class TextureAtlasHolder {
 		}
 	}
 	
+	public int countRegions(String name) {
+		Array<TextureHolder> ar = holderMap.get(name);
+		return ar == null ? 0 : ar.size;
+	}
+	
 	public TextureHolder getRegion(String name) {
 		Array<TextureHolder> ar = holderMap.get(name);
 		return ar == null ? null : ar.get(0);
