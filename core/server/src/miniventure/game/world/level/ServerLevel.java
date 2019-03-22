@@ -101,9 +101,7 @@ public class ServerLevel extends Level {
 		
 		HashSet<Tile> tiles = getAreaTiles(tile.getLocation(), 1, true);
 		
-		synchronized (newTileUpdates) {
-			newTileUpdates.addAll(tiles);
-		}
+		newTileUpdates.addAll(tiles);
 	}
 	
 	//private float updateAllDelta = 0;
@@ -185,7 +183,7 @@ public class ServerLevel extends Level {
 	
 	public void entityAdded(@NotNull ServerEntity e) {
 		if(preload && e instanceof Player) {
-			GameCore.debug("preload disabled.");
+			// GameCore.debug("preload disabled.");
 			preload = false;
 		}
 	}

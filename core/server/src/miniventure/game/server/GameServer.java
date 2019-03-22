@@ -4,11 +4,7 @@ import javax.swing.Timer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol;
@@ -25,6 +21,7 @@ import miniventure.game.item.ServerItem;
 import miniventure.game.item.ServerItemStack;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ServerEntity;
@@ -83,8 +80,8 @@ public class GameServer implements GameProtocol {
 	
 	private final HashMap<Connection, ServerThread> connectionThreadMap = new HashMap<>();
 	
-	private final Map<Connection, PlayerData> connectionToPlayerDataMap = Collections.synchronizedMap(new HashMap<>());
-	private final Map<ServerPlayer, Connection> playerToConnectionMap = Collections.synchronizedMap(new HashMap<>());
+	private final Map<Connection, PlayerData> connectionToPlayerDataMap = new HashMap<>();
+	private final Map<ServerPlayer, Connection> playerToConnectionMap = new HashMap<>();
 	private final Object playerLock = new Object();
 	
 	@NotNull private final ServerWorld world;
@@ -112,6 +109,34 @@ public class GameServer implements GameProtocol {
 	
 	public void setMultiplayer(boolean multiplayer) {
 		this.multiplayer = multiplayer;
+	}
+	
+	private PlayerData getPlayerData(@Nullable ServerPlayer player) {
+		if(player == null)
+			return null;
+		synchronized (playerLock) {
+			return connectionToPlayerDataMap.get(playerToConnectionMap.get(player));
+		}
+	}
+	
+	private PlayerData getPlayerData(@NotNull Connection connection) {
+		synchronized (playerLock) {
+			return connectionToPlayerDataMap.get(connection);
+		}
+	}
+	
+	private Connection getConnection(@Nullable ServerPlayer player) {
+		synchronized (playerLock) {
+			return playerToConnectionMap.get(player);
+		}
+	}
+	
+	
+	<T> void forPacket(Object packet, Class<T> type, boolean sync, ValueFunction<T> response) {
+		if(sync)
+			world.postRunnable(() -> GameProtocol.super.forPacket(packet, type, response));
+		else
+			GameProtocol.super.forPacket(packet, type, response);
 	}
 	
 	// this will only ever be called in one thread: the server thread. So synchronizing the connectionThreadMap isn't necessary.
@@ -147,20 +172,24 @@ public class GameServer implements GameProtocol {
 			if(st == null) return;
 			st.end();
 			
-			PlayerData data = connectionToPlayerDataMap.get(connection);
+			PlayerData data = getPlayerData(connection);
 			if(data == null) return;
 			data.validationTimer.stop();
 			ServerPlayer player = data.player;
-			world.savePlayer(player);
-			player.remove();
-			// player.getWorld().removePlayer(player);
-			connectionToPlayerDataMap.remove(connection);
-			playerToConnectionMap.remove(player);
-			broadcast(new Message(player.getName()+" left the server.", STATUS_MSG_COLOR));
-			//System.out.println("server disconnected from client: " + connection.getRemoteAddressTCP().getHostString());
-			
-			if(player.getName().equals(HOST)) // quit server when host exits
-				world.exitWorld();
+			world.postRunnable(() -> {
+				world.savePlayer(player);
+				player.remove();
+				// player.getWorld().removePlayer(player);
+				synchronized (playerLock) {
+					connectionToPlayerDataMap.remove(connection);
+					playerToConnectionMap.remove(player);
+				}
+				broadcast(new Message(player.getName()+" left the server.", STATUS_MSG_COLOR));
+				//System.out.println("server disconnected from client: " + connection.getRemoteAddressTCP().getHostString());
+				
+				if(player.getName().equals(HOST)) // quit server when host exits
+					world.exitWorld();
+			});
 		}
 	};
 	
@@ -183,42 +212,45 @@ public class GameServer implements GameProtocol {
 				return;
 			}
 			
+			// TODO implement passwords
+			/*if(!world.checkPassword(name, "")) {
+				GameCore.debug("Server rejecting a login request with username '"+name+"' due to incorrect password.");
+				connection.sendTCP(new LoginFailure("Password is incorrect."));
+				return;
+			}*/
+			
+			ServerPlayer player;
+			PlayerData playerData;
 			synchronized (playerLock) {
 				for(ServerPlayer p: playerToConnectionMap.keySet()) {
 					if(p.getName().equals(name)) {
-						connection.sendTCP(new LoginFailure("Username already exists."));
+						connection.sendTCP(new LoginFailure("A player named '"+name+"' is already logged in."));
 						return;
 					}
 				}
 				
-				// TODO implement passwords
-				ServerPlayer player = world.addPlayer(name, "");
-				if(player == null) {
-					connection.sendTCP(new LoginFailure("Password is incorrect."));
-					return;
-				}
+				player = world.addPlayer(name);
 				
-				PlayerData playerData = new PlayerData(connection, player);
+				playerData = new PlayerData(connection, player);
 				connectionToPlayerDataMap.put(connection, playerData);
 				playerToConnectionMap.put(player, connection);
 			}
 			
 			connection.sendTCP(world.getWorldUpdate());
-			PlayerData playerData = connectionToPlayerDataMap.get(connection);
-			ServerPlayer player = playerData.player;
-			
-			world.loadPlayer(player, "");
-			
-			System.out.println("Server: new player successfully connected: "+player.getName());
-			
-			playerData.validationTimer.start();
-			
-			broadcast(new Message(player.getName()+" joined the server.", STATUS_MSG_COLOR), false, player);
+			world.postRunnable(() -> {
+				world.loadPlayer(player);
+				
+				System.out.println("Server: new player successfully connected: "+player.getName());
+				
+				playerData.validationTimer.start();
+				
+				broadcast(new Message(player.getName()+" joined the server.", STATUS_MSG_COLOR), false, player);
+			});
 			
 			return;
 		}
 		
-		PlayerData clientData = connectionToPlayerDataMap.get(connection);
+		PlayerData clientData = getPlayerData(connection);
 		if(clientData == null) {
 			System.err.println("server received packet from unknown client "+connection.getRemoteAddressTCP().getHostString()+"; ignoring packet "+object);
 			return;
@@ -236,17 +268,20 @@ public class GameServer implements GameProtocol {
 				Connection c;
 				if(ping.source.equals(client.getName()))
 					c = connection;
-				else
-					c = playerToConnectionMap.get(getPlayerByName(ping.source));
+				else {
+					synchronized (playerLock) {
+						c = playerToConnectionMap.get(getPlayerByName(ping.source));
+					}
+				}
 				
 				if(c != null)
 					c.sendTCP(new Message("Ping for '"+client.getName()+"': "+disp, Color.SKY));
 			}
 		});
 		
-		forPacket(object, MapRequest.class, req -> connection.sendTCP(world.getMapData()));
+		forPacket(object, MapRequest.class, true, req -> connection.sendTCP(world.getMapData()));
 		
-		forPacket(object, LevelChange.class, change -> {
+		forPacket(object, LevelChange.class, true, change -> {
 			// check to see if the level exists (client shouldn't be able to crash server), and if the client is allowed to change to the given level
 			// if the move is invalid, then send a simple spawn packet; the client doesn't unload a level unless a new LevelData packet is recieved.
 			
@@ -281,16 +316,16 @@ public class GameServer implements GameProtocol {
 						System.err.println("Server could not satisfy chunk request, player level is null");
 				}*/
 		
-		forPacket(object, EntityRequest.class, req -> {
+		forPacket(object, EntityRequest.class, true, req -> {
 			Entity e = world.getEntity(req.eid);
 			if(e != null && e.getLevel() == client.getLevel())
 				connection.sendTCP(new EntityAddition(e));
 		});
 		
 		// TODO don't allow client to update server stats
-		forPacket(object, StatUpdate.class, client::loadStat);
+		forPacket(object, StatUpdate.class, true, client::loadStat);
 		
-		forPacket(object, MovementRequest.class, move -> {
+		forPacket(object, MovementRequest.class, true, move -> {
 				/*Vector3 loc = client.getLocation();
 				if(move.getMoveDist().len() < 1 && !move.startPos.variesFrom(client)) {
 					// move to start pos
@@ -311,15 +346,14 @@ public class GameServer implements GameProtocol {
 			// note that the server will always have the say when it comes to which level the player should be on.
 		});
 		
-		if(object instanceof InteractRequest) {
-			InteractRequest r = (InteractRequest) object;
+		forPacket(object, InteractRequest.class, true, r -> {
 			if(r.playerPosition.variesFrom(client))
 				connection.sendTCP(new PositionUpdate(client)); // fix the player's position
 			
 			client.doInteract(r.dir, r.hotbarIndex, r.attack);
-		}
+		});
 		
-		forPacket(object, ItemDropRequest.class, drop -> {
+		forPacket(object, ItemDropRequest.class, true, drop -> {
 			ServerHands hands = client.getHands();
 			Inventory inv = client.getInventory();
 			ServerItem item;
@@ -359,7 +393,7 @@ public class GameServer implements GameProtocol {
 				level.dropItem(drops.item, true, client.getCenter(), targetPos);
 		});
 		
-		forPacket(object, InventoryRequest.class, req -> {
+		forPacket(object, InventoryRequest.class, true, req -> {
 			clientData.inventoryMode = req.hotbar == null;
 			if(req.hotbar != null) {
 				client.getHands().fromInventoryIndex(req.hotbar);
@@ -369,14 +403,14 @@ public class GameServer implements GameProtocol {
 				connection.sendTCP(client.getInventoryUpdate());
 		});
 		
-		forPacket(object, RecipeRequest.class, req ->
+		forPacket(object, RecipeRequest.class, true, req ->
 			connection.sendTCP(new RecipeRequest(
 				Recipes.serializeRecipes(),
 				new RecipeStockUpdate(client.getInventory().getItemStacks())
 			))
 		);
 		
-		forPacket(object, CraftRequest.class, req -> {
+		forPacket(object, CraftRequest.class, true, req -> {
 			Recipe recipe = Recipes.recipes[req.recipeIndex];
 			ServerItem[] left = recipe.tryCraft(client.getInventory());
 			if(left != null) {
@@ -391,9 +425,10 @@ public class GameServer implements GameProtocol {
 		});
 		
 		if(object.equals(DatalessRequest.Respawn)) {
-			//ServerPlayer client = connectionToPlayerDataMap.get(connection).player;
-			world.respawnPlayer(client);
-			connection.sendTCP(new SpawnData(new EntityAddition(client), client.getHotbarUpdate(), client.saveStats()));
+			world.postRunnable(() -> {
+				world.respawnPlayer(client);
+				connection.sendTCP(new SpawnData(new EntityAddition(client), client.getHotbarUpdate(), client.saveStats()));
+			});
 		}
 		
 		if(object.equals(DatalessRequest.Tile)) {
@@ -404,7 +439,7 @@ public class GameServer implements GameProtocol {
 			}
 		}
 		
-		forPacket(object, Message.class, msg -> {
+		forPacket(object, Message.class, true, msg -> {
 			//System.out.println("server: executing command "+msg.msg);
 			CommandInputParser.executeCommand(world, msg.msg, client, clientData.toClientOut, clientData.toClientErr);
 			InfoMessage output = clientData.toClientOut.flushMessage();
@@ -417,7 +452,7 @@ public class GameServer implements GameProtocol {
 			if(text.split(" ").length == 1) {
 				// hasn't finished entering command name, autocomplete that
 				Array<String> matches = new Array<>(String.class);
-				for(Command c: Command.values()) {
+				for(Command c: Command.valuesFor(client)) {
 					String name = c.name();
 					if(text.length() == 0 || name.toLowerCase().contains(text.toLowerCase()))
 						matches.add(name);
@@ -441,30 +476,29 @@ public class GameServer implements GameProtocol {
 			}
 		});
 		
-		forPacket(object, SelfHurt.class, hurt -> {
+		forPacket(object, SelfHurt.class, true, hurt -> {
 			// assumed that the client has hurt itself in some way
 			client.attackedBy(client, null, hurt.dmg);
 		});
 	};
 	
-	public ServerPlayer[] getPlayers() {
+	public Set<ServerPlayer> getPlayers() {
 		synchronized (playerToConnectionMap) {
-			return playerToConnectionMap.keySet().toArray(new ServerPlayer[0]);
+			return new HashSet<>(playerToConnectionMap.keySet());
 		}
 	}
 	
 	public void sendToPlayer(@NotNull ServerPlayer player, Object obj) {
-		Connection c = playerToConnectionMap.get(player);
-		if(c != null) {
+		Connection c = getConnection(player);
+		if(c != null)
 			c.sendTCP(obj);
-		}
 	}
 	
 	// levelMask is the level a player must be on to receive this data.
 	public void broadcast(Object obj, Level levelMask, @NotNull ServerEntity... exclude) {
 		if(levelMask == null) return; // no level, no packet.
 		
-		HashSet<ServerPlayer> players = new HashSet<>(playerToConnectionMap.keySet());
+		Set<ServerPlayer> players = getPlayers();
 		HashSet<ServerEntity> excluded = new HashSet<>(Arrays.asList(exclude));
 		//noinspection SuspiciousMethodCalls
 		players.removeAll(excluded);
@@ -480,20 +514,20 @@ public class GameServer implements GameProtocol {
 	}
 	public void broadcast(Object obj, @NotNull ServerPlayer... excludedPlayers) { broadcast(obj, false, excludedPlayers); }
 	public void broadcast(Object obj, boolean includeGiven, @NotNull ServerPlayer... players) { broadcast(obj, includeGiven, new HashSet<>(Arrays.asList(players))); }
-	private void broadcast(Object obj, boolean includeGiven, @NotNull HashSet<ServerPlayer> players) {
+	private void broadcast(Object obj, boolean includeGiven, @NotNull Set<ServerPlayer> players) {
 		if(!includeGiven) {
-			HashSet<ServerPlayer> playerSet = new HashSet<>(playerToConnectionMap.keySet());
+			Set<ServerPlayer> playerSet = getPlayers();
 			playerSet.removeAll(players);
 			players = playerSet;
 		}
 		
 		for(ServerPlayer p: players)
-			playerToConnectionMap.get(p).sendTCP(obj);
+			sendToPlayer(p, obj);
 	}
 	
 	@Nullable
 	public ServerPlayer getPlayerByName(String name) {
-		for(ServerPlayer player: playerToConnectionMap.keySet())
+		for(ServerPlayer player: getPlayers())
 			if(player.getName().equalsIgnoreCase(name))
 				return player;
 		
@@ -501,35 +535,41 @@ public class GameServer implements GameProtocol {
 	}
 	
 	public InetSocketAddress getPlayerAddress(@NotNull ServerPlayer player) {
-		Connection c = playerToConnectionMap.get(player);
+		Connection c = getConnection(player);
 		if(c != null)
 			return c.getRemoteAddressTCP();
 		return null;
 	}
 	
 	public void sendLevel(@NotNull ServerPlayer player, @NotNull ServerLevel level) {
-		Connection connection = playerToConnectionMap.get(player);
+		Connection connection = getConnection(player);
+		if(connection == null) {
+			System.err.println("Could not send level to player "+player+", Connection obj could not be found.");
+			return;
+		}
 		
-		connection.sendTCP(new LevelData(level));
-		connection.sendTCP(new SpawnData(new EntityAddition(player), player.getHotbarUpdate(), player.saveStats()));
-		for(Entity e: level.getEntities())
-			connection.sendTCP(new EntityAddition(e));
+		world.postRunnable(() -> {
+			connection.sendTCP(new LevelData(level));
+			connection.sendTCP(new SpawnData(new EntityAddition(player), player.getHotbarUpdate(), player.saveStats()));
+			for(Entity e: level.getEntities())
+				connection.sendTCP(new EntityAddition(e));
+		});
 	}
 	
 	public boolean isInventoryMode(@NotNull ServerPlayer player) {
-		PlayerData data = connectionToPlayerDataMap.get(playerToConnectionMap.get(player));
+		PlayerData data = getPlayerData(player);
 		return data != null && data.inventoryMode;
 	}
 	
 	public boolean isAdmin(@Nullable ServerPlayer player) {
 		if(player == null) return true; // from server command prompt
-		PlayerData data = connectionToPlayerDataMap.get(playerToConnectionMap.get(player));
+		PlayerData data = getPlayerData(player);
 		if(data == null) return false; // unrecognized player (should never happen)
 		return data.op;
 	}
 	
 	public boolean setAdmin(@NotNull ServerPlayer player, boolean op) {
-		PlayerData data = connectionToPlayerDataMap.get(playerToConnectionMap.get(player));
+		PlayerData data = getPlayerData(player);
 		if(data == null) return false; // unrecognized player (should never happen)
 		data.op = op;
 		return true;
@@ -568,8 +608,10 @@ public class GameServer implements GameProtocol {
 			return;
 		}
 		
-		EntityValidation validation = new EntityValidation(level, player);
-		pData.connection.sendTCP(validation);
+		world.postRunnable(() -> {
+			EntityValidation validation = new EntityValidation(level, player);
+			pData.connection.sendTCP(validation);
+		});
 	}
 	
 	public void playEntitySound(String soundName, Entity source) { playEntitySound(soundName, source, true); }
@@ -586,9 +628,12 @@ public class GameServer implements GameProtocol {
 		playGenericSound("tile/"+soundName, tile.getCenter());
 	}
 	public void playGenericSound(String soundName, Vector2 source) {
-		for(ServerPlayer player: playerToConnectionMap.keySet()) {
-			if(player.getPosition().dst(source) <= GameCore.SOUND_RADIUS)
-				playerToConnectionMap.get(player).sendTCP(new SoundRequest(soundName));
+		for(ServerPlayer player: getPlayers()) {
+			if(player.getPosition().dst(source) <= GameCore.SOUND_RADIUS) {
+				Connection c = getConnection(player);
+				if(c != null)
+					c.sendTCP(new SoundRequest(soundName));
+			}
 		}
 	}
 	
@@ -597,7 +642,11 @@ public class GameServer implements GameProtocol {
 		out.println("Server Running: "+(server.getUpdateThread() != null && server.getUpdateThread().isAlive()));
 		out.println("FPS: " + world.getFPS());
 		out.println("Players connected: "+playerToConnectionMap.size());
-		for(PlayerData pd: connectionToPlayerDataMap.values()) {
+		Collection<PlayerData> data;
+		synchronized (playerLock) {
+			data = new ArrayList<>(connectionToPlayerDataMap.values());
+		}
+		for(PlayerData pd: data) {
 			out.print("     Player '"+pd.player.getName()+"' ");
 			if(pd.op) out.print("(admin) ");
 			out.print(pd.player.getLocation(true));
@@ -611,9 +660,7 @@ public class GameServer implements GameProtocol {
 		server.stop();
 		while(wait) {
 			MyUtils.sleep(25);
-			synchronized (playerLock) {
-				wait = playerToConnectionMap.size() > 0;
-			}
+			wait = playerToConnectionMap.size() > 0;
 		}
 	}
 }

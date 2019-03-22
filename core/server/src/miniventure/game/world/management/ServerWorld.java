@@ -54,11 +54,13 @@ public class ServerWorld extends WorldManager {
 	private final LevelFetcher levelFetcher = new LevelFetcher() {
 		@Override
 		public ServerLevel makeLevel(int levelId, long seed, IslandType islandType) {
+			GameCore.debug("Server generating "+islandType+" map for level "+levelId);
 			return new ServerLevel(ServerWorld.this, levelId, islandType.generateIsland(seed));
 		}
 		
 		@Override
 		public ServerLevel loadLevel(final Version version, int levelId, TileData[][] tileData, String[] entityData) {
+			GameCore.debug("Server loading level "+levelId+" from data");
 			ServerLevel level = new ServerLevel(ServerWorld.this, levelId, tileData);
 			
 			for(String e: entityData)
@@ -85,7 +87,7 @@ public class ServerWorld extends WorldManager {
 	private final List<Runnable> runnables = Collections.synchronizedList(new LinkedList<>());
 	
 	// locks world update frames so world loading, saving, and exiting occurs before or after a full step.
-	private final Object updateLock = new Object();
+	// private final Object updateLock = new Object();
 	
 	public ServerWorld(@NotNull ServerCore core, int port, boolean multiplayer, @NotNull WorldDataSet worldInfo) throws IOException {
 		this.core = core;
@@ -107,13 +109,11 @@ public class ServerWorld extends WorldManager {
 		}
 		
 		islandStores = worldInfo.levelCaches;
-		if(old) {
-			// refresh loaded levels
-			for(int i = 0; i < islandStores.length; i++) {
-				if(islandStores[i].generated()) {
-					ServerLevel level = (ServerLevel) islandStores[i].getLevel(levelFetcher);
-					level.save(islandStores[i]);
-				}
+		// generate levels with a new world, refresh loaded levels for an old one
+		for(int i = 0; i < islandStores.length; i++) {
+			if(!islandStores[i].generated() || old) {
+				ServerLevel level = (ServerLevel) islandStores[i].getLevel(levelFetcher);
+				level.save(islandStores[i]);
 			}
 		}
 		
@@ -127,7 +127,12 @@ public class ServerWorld extends WorldManager {
 	/*  --- UPDATE MANAGEMENT --- */
 	
 	
-	public void postRunnable(Runnable r) { runnables.add(r); }
+	public void postRunnable(Runnable r) {
+		if(!core.isRunning() || core.isUpdateThread())
+			r.run();
+		else
+			runnables.add(r);
+	}
 	
 	@Override
 	public void update(float delta) {
@@ -174,37 +179,39 @@ public class ServerWorld extends WorldManager {
 	@Override protected boolean doDaylightCycle() { return Config.DaylightCycle.get(); }
 	
 	@Override
-	public boolean worldLoaded() { synchronized (updateLock) { return worldLoaded; } }
+	public boolean worldLoaded() { return worldLoaded; }
 	
 	/** Saves the world to file; specific to ServerWorld. */
 	public void saveWorld() {
 		// update island store caches
-		
-		
-		loadedLevels.act(map -> {
-			for(ServerLevel level: map.values())
-				level.save(islandStores[level.getLevelId()]);
+		postRunnable(() -> {
+			loadedLevels.act(map -> {
+				for(ServerLevel level: map.values())
+					level.save(islandStores[level.getLevelId()]);
+			});
+			
+			// update player data
+			for(ServerPlayer player: getServer().getPlayers()) {
+				savePlayer(player);
+			}
+			
+			synchronized (knownPlayers) {
+				SaveLoadInterface.saveWorld(new WorldDataSet(worldPath, lockRef, worldSeed, gameTime, daylightOffset, GameCore.VERSION, knownPlayers.values().toArray(new PlayerInfo[0]), islandStores));
+			}
 		});
-		
-		// update player data
-		for(ServerPlayer player: getServer().getPlayers()) {
-			savePlayer(player);
-		}
-		
-		synchronized (knownPlayers) {
-			SaveLoadInterface.saveWorld(new WorldDataSet(worldPath, lockRef, worldSeed, gameTime, daylightOffset, GameCore.VERSION, knownPlayers.values().toArray(new PlayerInfo[0]), islandStores));
-		}
 	}
 	
 	public void savePlayer(@NotNull ServerPlayer player) {
-		final String name = player.getName();
-		final String data = player.serialize();
-		Level level = player.getLevel();
-		final int levelid = level == null ? player.getSpawnLevel() : level.getLevelId();
-		
-		PlayerInfo old = knownPlayers.get(name);
-		PlayerInfo info = new PlayerInfo(name, old.passhash, data, levelid);
-		knownPlayers.put(name, info);
+		postRunnable(() -> {
+			final String name = player.getName();
+			final String data = player.serialize();
+			Level level = player.getLevel();
+			final int levelid = level == null ? player.getSpawnLevel() : level.getLevelId();
+			
+			PlayerInfo old = knownPlayers.get(name);
+			PlayerInfo info = new PlayerInfo(name, old.passhash, data, levelid);
+			knownPlayers.put(name, info);
+		});
 	}
 	
 	/*@Override
@@ -265,13 +272,17 @@ public class ServerWorld extends WorldManager {
 		
 		boolean put = level == null;
 		if(put) {
-			GameCore.debug("Generating level "+levelId);
+			GameCore.debug("Fetching level "+levelId);
 			level = (ServerLevel) islandStores[levelId].getLevel(levelFetcher);
-			System.out.println("level "+levelId+" created.");
 		}
+		
+		// synchronize on the level
 		
 		// position the activator.
 		playerPositioner.act(level);
+		
+		// send level data to client
+		server.sendLevel(activator, level);
 		
 		/*
 			there are a couple possible moves here.
@@ -286,9 +297,6 @@ public class ServerWorld extends WorldManager {
 			
 		 */
 		
-		// send level data to client
-		server.sendLevel(activator, level);
-		
 		// add player to level and register level if needed
 		if(put) {
 			final ServerLevel sl = level;
@@ -296,10 +304,11 @@ public class ServerWorld extends WorldManager {
 				map.put(levelId, sl);
 				setEntityLevel(activator, sl);
 			});
+			GameCore.debug("level "+level.getLevelId()+" is now loaded.");
 		}
 		else setEntityLevel(activator, level);
 		
-		GameCore.debug("loaded level "+level.getLevelId());
+		GameCore.debug("Player "+activator+" has been loaded to level "+level.getLevelId());
 		
 		return level;
 	}
@@ -418,67 +427,63 @@ public class ServerWorld extends WorldManager {
 	public void respawnPlayer(ServerPlayer player) {
 		player.reset();
 		
-		// ServerLevel level = loadLevel(0);
-		
-		// if(level == null)
-		// 	throw new NullPointerException("Surface level found to be null while attempting to spawn player.");
-		
-		// find a good spawn location near the middle of the map
-		// Rectangle spawnBounds = levelGenerator.getSpawnArea(new Rectangle());
+		if(GameCore.debug/* && !knownPlayers.containsKey(player.getName())*/) {
+			System.out.println("adding debug items to player inventory");
+			player.getInventory().addItem(new ToolItem(ToolType.Shovel, Material.Ruby));
+			player.getInventory().addItem(new ToolItem(ToolType.Shovel, Material.Ruby));
+			player.getInventory().addItem(new ToolItem(ToolType.Shovel, Material.Ruby));
+			player.getInventory().addItem(new ToolItem(ToolType.Pickaxe, Material.Iron));
+			player.getInventory().addItem(new ToolItem(ToolType.Pickaxe, Material.Ruby));
+			player.getInventory().addItem(ServerTileType.getItem(TileTypeEnum.CLOSED_DOOR));
+			player.getInventory().addItem(ServerTileType.getItem(TileTypeEnum.TORCH));
+			for(int i = 0; i < 7; i++)
+				player.getInventory().addItem(ResourceType.Log.get());
+			player.getInventory().addItem(ResourceType.Tungsten.get());
+			player.getInventory().addItem(ResourceType.Flint.get());
+			player.getInventory().addItem(ResourceType.Fabric.get());
+			player.getInventory().addItem(ResourceType.Cotton.get());
+			for(FoodType food : FoodType.values())
+				player.getInventory().addItem(food.get());
+		}
 		
 		loadLevel(player.getSpawnLevel(), player, player.respawnPositioning());
-		// later, perhaps spawn player in specific location after first attempt, instead of randomly always.
 	}
 	
 	// called after the player has been registered to the GameServer.
-	public void loadPlayer(ServerPlayer player, String passhash) {
+	public void loadPlayer(ServerPlayer player/*, String passhash*/) {
 		PlayerInfo info = knownPlayers.get(player.getName());
 		if(info != null) {
-			// if(GameCore.debug)
-			// 	System.out.println("Player '"+player.getName()+"' is known.");
+			GameCore.debug("existing player "+player+" loading into level "+info.levelId);
 			loadLevel(info.levelId, player);
 		}
 		else {
 			respawnPlayer(player);
-			knownPlayers.put(player.getName(), new PlayerInfo(player.getName(), passhash, player.serialize(), player.getSpawnLevel()));
+			knownPlayers.put(player.getName(), new PlayerInfo(player.getName(), "", player.serialize(), player.getSpawnLevel()));
+			saveWorld();
 		}
 	}
 	
+	/*public boolean checkPassword(String playerName, String passhash) {
+		
+	}*/
+	
 	// registers a new player in the world with the given username. World data will be checked to see if this player has logged in before; if so, that player file is loaded, otherwise, a new player is created.
-	@Nullable
-	public ServerPlayer addPlayer(String playerName, String passhash) {
+	public ServerPlayer addPlayer(String playerName/*, String passhash*/) {
 		ServerPlayer player;
-		// check for player data
+		// check for player data; I don't expect players to get removed from this so synchronization shouldn't be necessary.
 		if(knownPlayers.containsKey(playerName)) {
-			GameCore.debug("Player '"+playerName+"' is known.");
+			GameCore.debug("Player '"+playerName+"' is known, loading stored data.");
 			PlayerInfo info = knownPlayers.get(playerName);
-			if(!info.passhash.equals(passhash))
-				return null; // incorrect password
-			player = (ServerPlayer) ServerEntity.deserialize(this, knownPlayers.get(playerName).data, GameCore.VERSION);
+			// TODO passwords
+			// if(!info.passhash.equals(passhash))
+			// 	return null; // incorrect password
+			player = (ServerPlayer) ServerEntity.deserialize(this, info.data, GameCore.VERSION);
 		} else {
+			GameCore.debug("Player '"+playerName+"' is not known, creating new player.");
 			player = new ServerPlayer(this, playerName);
-			// knownPlayers.put(playerName, new PlayerInfo(playerName, passhash, player.serialize(), 0));
-			
-			if(GameCore.debug) {
-				player.getInventory().addItem(new ToolItem(ToolType.Shovel, Material.Ruby));
-				player.getInventory().addItem(new ToolItem(ToolType.Shovel, Material.Ruby));
-				player.getInventory().addItem(new ToolItem(ToolType.Shovel, Material.Ruby));
-				player.getInventory().addItem(new ToolItem(ToolType.Pickaxe, Material.Iron));
-				player.getInventory().addItem(new ToolItem(ToolType.Pickaxe, Material.Ruby));
-				player.getInventory().addItem(ServerTileType.getItem(TileTypeEnum.CLOSED_DOOR));
-				player.getInventory().addItem(ServerTileType.getItem(TileTypeEnum.TORCH));
-				for(int i = 0; i < 7; i++)
-					player.getInventory().addItem(ResourceType.Log.get());
-				player.getInventory().addItem(ResourceType.Tungsten.get());
-				player.getInventory().addItem(ResourceType.Flint.get());
-				player.getInventory().addItem(ResourceType.Fabric.get());
-				player.getInventory().addItem(ResourceType.Cotton.get());
-				for(FoodType food : FoodType.values())
-					player.getInventory().addItem(food.get());
-			}
 		}
 		
-		// at this point, the player object has been initialized and registered, but it isn't on a particular level yet. This method doesn't attempt to position the player or set its level, beyond data stored from previous logins.
+		// at this point, the player object has been initialized, but not necessarily registered or on a particular level yet. This method doesn't attempt to position the player or set its level, beyond data stored from previous logins.
 		
 		return player;
 	}
