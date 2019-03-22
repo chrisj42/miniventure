@@ -1,71 +1,60 @@
 package miniventure.game.texture;
 
+import java.util.HashMap;
+import java.util.LinkedList;
+
+import miniventure.game.util.function.ValueFunction;
+
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.TextureAtlasData;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.TextureAtlasData.Region;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 
 public class TextureAtlasHolder {
 	
-	public final TextureAtlas atlas;
-	private final Array<Region> regions;
+	private final TextureAtlas atlas;
+	
+	private final TextureHolder[] holders;
+	private final HashMap<String, Array<TextureHolder>> holderMap = new HashMap<>();
 	
 	public TextureAtlasHolder(TextureAtlas atlas) {
 		this.atlas = atlas;
-		for(AtlasRegion r: atlas.getRegions())
-			r.name = TextureHolder.fixPath(r.name);
-		regions = null;
+		
+		LinkedList<TextureHolder> list = new LinkedList<>();
+		for(AtlasRegion r: atlas.getRegions()) {
+			TextureHolder t = new TextureHolder(r);
+			list.add(t);
+			holderMap.computeIfAbsent(t.name, name -> new Array<>(TextureHolder.class)).add(t);
+		}
+		
+		holders = list.toArray(new TextureHolder[0]);
 	}
 	public TextureAtlasHolder(TextureAtlasData data) {
 		atlas = null;
-		regions = data.getRegions();
-		for(Region r: regions)
-			r.name = TextureHolder.fixPath(r.name);
+		Array<Region> regions = data.getRegions();
+		holders = new TextureHolder[regions.size];
+		int i = 0;
+		for(Region r: regions) {
+			TextureHolder t = new TextureHolder(r);
+			holders[i++] = t;
+			holderMap.computeIfAbsent(t.name, name -> new Array<>(TextureHolder.class)).add(t);
+		}
 	}
 	
-	public TextureHolder findRegion(String name) {
-		if(atlas != null) {
-			AtlasRegion region = atlas.findRegion(name);
-			return region == null ? null : new TextureHolder(region);
-		}
-		
-		for(Region region: regions)
-			if(region.name.equals(name))
-				return new TextureHolder(region);
-		
-		return null;
+	public TextureHolder getRegion(String name) {
+		Array<TextureHolder> ar = holderMap.get(name);
+		return ar == null ? null : ar.get(0);
 	}
 	
-	public Array<TextureHolder> findRegions(String name) {
-		Array<TextureHolder> textures = new Array<>(TextureHolder.class);
-		if(atlas != null) {
-			for(AtlasRegion region: atlas.findRegions(name))
-				textures.add(new TextureHolder(region));
-		}
-		else {
-			for(Region region : regions) {
-				if(region.name.equals(name))
-					textures.add(new TextureHolder(region));
-			}
-		}
-		
-		return textures;
+	public Array<TextureHolder> getRegions(String name) {
+		return holderMap.getOrDefault(name, new Array<>(TextureHolder.class));
 	}
 	
-	public Array<TextureHolder> getRegions() {
-		Array<TextureHolder> textures = new Array<>();
-		if(atlas != null) {
-			for(AtlasRegion r: atlas.getRegions()) {
-				textures.add(new TextureHolder(r));
-			}
-		}
-		else {
-			for(Region r: regions)
-				textures.add(new TextureHolder(r));
-		}
-		
-		return textures;
+	public void iterRegions(ValueFunction<TextureHolder> action) {
+		for(TextureHolder t: holders)
+			action.act(t);
 	}
 	
 	public void dispose() {

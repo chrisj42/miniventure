@@ -22,8 +22,7 @@ public class TileTypeRenderer {
 	static {
 		GameCore.debug("reading tile sprites...");
 		
-		Array<TextureHolder> regions = GameCore.tileAtlas.getRegions();
-		for(TextureHolder region: regions) {
+		GameCore.tileAtlas.iterRegions(region -> {
 			TileTypeEnum tileType = TileTypeEnum.valueOf(region.name.substring(0, region.name.indexOf('/')).toUpperCase());
 			String spriteID = region.name.substring(region.name.indexOf('/')+1);
 			
@@ -39,14 +38,14 @@ public class TileTypeRenderer {
 				default:
 					if(!(prefix + spriteID).equals("swim"))
 						System.err.println("Unknown Tile Sprite Frame for " + tileType + ": " + prefix + spriteID);
-					continue;
+					return;
 			}
 			
 			animationMap
 				.computeIfAbsent(tileType, k -> new HashMap<>())
 				.computeIfAbsent(spriteID, k -> new Array<>(TextureHolder.class))
 				.add(region);
-		}
+		});
 		
 		GameCore.debug("tile sprites read successfully.");
 	}

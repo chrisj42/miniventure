@@ -49,7 +49,7 @@ public abstract class EntityRenderer {
 			this.spriteName = spriteName;
 			
 			if(!textures.containsKey(spriteName))
-				textures.put(spriteName, GameCore.entityAtlas.findRegion(spriteName));
+				textures.put(spriteName, GameCore.entityAtlas.getRegion(spriteName));
 			
 			sprite = textures.get(spriteName);
 		}
@@ -81,9 +81,9 @@ public abstract class EntityRenderer {
 		
 		private static TextureHolder mapTexture(TextureHolder given) {
 			if(given.name.startsWith("items"))
-				return GameCore.scaledIconAtlas.findRegion(given.name);
+				return GameCore.scaledIconAtlas.getRegion(given.name);
 			else
-				return GameCore.descaledTileAtlas.findRegion(given.name);
+				return GameCore.descaledTileAtlas.getRegion(given.name);
 		}
 		
 		protected ItemSpriteRenderer(String[] data) {
@@ -113,10 +113,7 @@ public abstract class EntityRenderer {
 			this.isFrameDuration = isFrameDuration;
 			this.loopAnimation = loopAnimation;
 			
-			if(!animationFrames.containsKey(animationName))
-				animationFrames.put(animationName, GameCore.entityAtlas.findRegions(animationName));
-			
-			Array<TextureHolder> frames = animationFrames.get(animationName);
+			Array<TextureHolder> frames = animationFrames.computeIfAbsent(animationName, name -> GameCore.entityAtlas.getRegions(name));
 			
 			animation = new Animation<>(isFrameDuration ? duration : duration/frames.size, frames);
 		}

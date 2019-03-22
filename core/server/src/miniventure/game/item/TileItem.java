@@ -69,7 +69,7 @@ public class TileItem extends ServerItem {
 	public TileItem(String name, @NotNull TileTypeEnum result, boolean useIconAtlas, @NotNull PlacementCheck placementCheck) {
 		this(name,
 			useIconAtlas ? GameCore.icons.get("items/tile/"+name.toLowerCase()) : 
-				GameCore.descaledTileAtlas.findRegion(result.name().toLowerCase()+"/c00"),
+				GameCore.descaledTileAtlas.getRegion(result.name().toLowerCase()+"/c00"),
 			result, placementCheck);
 	}
 	public TileItem(String name, @NotNull TextureHolder texture, @NotNull TileTypeEnum result, @NotNull PlacementCheck placementCheck) {

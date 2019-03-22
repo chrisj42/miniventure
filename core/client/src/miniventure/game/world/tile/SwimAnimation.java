@@ -26,7 +26,7 @@ public class SwimAnimation {
 		
 		swim = swimAnimations.computeIfAbsent(enumType, k ->
 			new TileAnimation(false, 1/16f, 
-				GameCore.tileAtlas.findRegions(enumType.name().toLowerCase()+"/swim")
+				GameCore.tileAtlas.getRegions(enumType.name().toLowerCase()+"/swim")
 			)
 		);
 	}
