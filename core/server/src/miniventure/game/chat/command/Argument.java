@@ -55,7 +55,10 @@ public interface Argument {
 		return new Argument() {
 			@Override
 			public boolean satisfiedBy(@NotNull ServerWorld world, String[] args, int offset) {
-				return validator.isValid(world, String.join(" ", Arrays.copyOfRange(args, offset, args.length)));
+				for(int i = offset; i < args.length; i++)
+					if(!validator.isValid(world, args[i]))
+						return false;
+				return true;
 			}
 			
 			@Override
