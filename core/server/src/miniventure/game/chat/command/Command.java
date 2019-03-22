@@ -191,7 +191,11 @@ public enum Command {
 	),
 	
 	SAVE("Save the world to file.",
-		new CommandUsageForm(true, "", "Save the current state of the game to file, so it can be loaded later.", (world, executor, args, out, err) -> world.saveWorld())
+		new CommandUsageForm(true, "", "Save the current state of the game to file, so it can be loaded later.", (world, executor, args, out, err) -> {
+			world.saveWorld();
+			// TODO allow ~###### hex color codes in messages
+			out.println("World saved.");
+		})
 	),
 	
 	STATUS("Print the server's status on various things.",
@@ -271,17 +275,25 @@ public enum Command {
 	}
 	
 	private boolean canExecute(@Nullable ServerPlayer executor) {
-		for(CommandUsageForm form: forms)
-			if(form.executorCheck.get(executor))
+		if(restricted) {
+			if(executor == null) return true; // server console
+			if(executor.getWorld().getServer().isAdmin(executor))
 				return true;
+			return false;
+		} else
+			return true;
 		
-		return false;
+		// for(CommandUsageForm form: forms)
+		// 	if(form.executorCheck.get(executor))
+		// 		return true;
+		
+		// return false;
 	}
 	
-	private static Command[] valuesFor(@Nullable ServerPlayer player) {
+	public static Command[] valuesFor(@Nullable ServerPlayer player) {
 		Array<Command> commands = new Array<>(true, Command.values().length, Command.class);
 		for(Command c: Command.values())
-			if(c.canExecute(player) && !(c == DEBUG && player != null)) // only list debug command on server console; but all admins are still capable of *using* the debug command.
+			if(c.canExecute(player) && (c != DEBUG || player == null)) // only list debug command on server console; but all admins are still capable of *using* the debug command.
 				commands.add(c);
 		
 		return commands.shrink();
