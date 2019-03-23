@@ -4,11 +4,13 @@ import java.util.Arrays;
 
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.DatalessRequest;
+import miniventure.game.GameProtocol.Message;
 import miniventure.game.GameProtocol.Ping;
 import miniventure.game.GameProtocol.PositionUpdate;
 import miniventure.game.chat.MessageBuilder;
 import miniventure.game.chat.command.Argument.ArgValidator;
 import miniventure.game.chat.command.CommandUsageForm.ExecutionBehavior;
+import miniventure.game.server.GameServer;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.MapFunction;
@@ -154,6 +156,24 @@ public enum Command {
 		}), ArgValidator.PLAYER, Argument.varArg(ArgValidator.ANY))
 	),
 	
+	SAVE("Save the world to file.",
+		new CommandUsageForm(true, "", "Save the current state of the game to file, so it can be loaded later.", (world, executor, args, out, err) -> {
+			world.postRunnable(() -> {
+				world.saveWorld();
+				System.out.println("World Saved."); // for server console, and debug in general
+				world.getServer().broadcast(new Message("World Saved.", GameServer.STATUS_MSG_COLOR));
+			});
+		})
+	),
+	
+	STATUS("Print the server's status on various things.",
+		new CommandUsageForm(true, "", "Print various pieces of info about the server.", (world, executor, args, out, err) -> world.getServer().printStatus(out))
+	),
+	
+	STOP("Stops the server.",
+		new CommandUsageForm(true, "", "Stops the server.", (world, executor, args, out, err) -> world.exitWorld())
+	),
+	
 	TIME("Get or set the time of day.", "Note, the \"clocktime\" parameter used below refers to the time format \"HH:MM\", with the hour(HH) in the range 0-23, and the minute(MM) in the range 0-59, as one expects from a normal 24-hour clock.",
 		new CommandUsageForm(false, "get", "Print the time of day, in 24 hour clock format, along with the current time \"range\" (day, night, etc).", (world, executor, args, out, err) -> {
 			float daylightOffset = world.getDaylightOffset();
@@ -222,23 +242,8 @@ public enum Command {
 			String source = executor.getName();
 			Command.valueOf("TP").execute(world, executor, new String[] {source, args[0], args[1]}, out, err);
 		}, ArgValidator.DECIMAL, ArgValidator.DECIMAL)
-	),
-	
-	SAVE("Save the world to file.",
-		new CommandUsageForm(true, "", "Save the current state of the game to file, so it can be loaded later.", (world, executor, args, out, err) -> {
-			world.saveWorld();
-			// TODO allow ~###### hex color codes in messages
-			out.println("World saved.");
-		})
-	),
-	
-	STATUS("Print the server's status on various things.",
-		new CommandUsageForm(true, "", "Print various pieces of info about the server.", (world, executor, args, out, err) -> world.getServer().printStatus(out))
-	),
-	
-	STOP("Stops the server.",
-		new CommandUsageForm(true, "", "Stops the server.", (world, executor, args, out, err) -> world.exitWorld())
 	);
+	
 	
 	static Command getCommand(String commandName, @Nullable ServerPlayer executor) {
 		Command c = null;
@@ -276,6 +281,7 @@ public enum Command {
 	}
 	
 	public void execute(@NotNull ServerWorld world, @Nullable ServerPlayer executor, String[] args, MessageBuilder out, MessageBuilder err) {
+		// this method is called after previous canExecute checks, at least by proxy; so this technically should never print unless it's a race condition or something.
 		if(!canExecute(executor)) {
 			err.println("You do not have access to that command.");
 			return;
