@@ -3,6 +3,7 @@ package miniventure.game.world.management;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 
+import miniventure.game.chat.MessageBuilder;
 import miniventure.game.chat.command.Argument.ArgValidator;
 
 import org.jetbrains.annotations.NotNull;
@@ -69,9 +70,14 @@ public class Config<T> {
 	
 	public T get() { return value; }
 	public void set(T value) { this.value = value; }
-	public boolean set(@NotNull ServerWorld world, String stringValue) {
-		if(!stringParser.isValid(world, stringValue)) return false;
-		set(stringParser.get(world, stringValue));
+	public boolean set(@NotNull ServerWorld world, String stringValue, MessageBuilder err) {
+		// if(!stringParser.isValid(world, stringValue)) return false;
+		try {
+			set(stringParser.get(world, stringValue));
+		} catch(IllegalArgumentException e) {
+			err.println(e.getMessage());
+			return false;
+		}
 		return true;
 	}
 	

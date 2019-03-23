@@ -8,8 +8,10 @@ import miniventure.game.GameProtocol.Ping;
 import miniventure.game.GameProtocol.PositionUpdate;
 import miniventure.game.chat.MessageBuilder;
 import miniventure.game.chat.command.Argument.ArgValidator;
+import miniventure.game.chat.command.CommandUsageForm.ExecutionBehavior;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.function.MapFunction;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.level.ServerLevel;
 import miniventure.game.world.management.Config;
@@ -32,28 +34,28 @@ public enum Command {
 			out.println("Config values:");
 			for(Config value: Config.values)
 				out.println("    "+value+" = "+value.get());
-		}, Argument.get(ArgValidator.exactString(false, "list"))),
+		}, ArgValidator.exactString(false, "list")),
 		
 		new CommandUsageForm(true, "get <configvalue>", "Display the current value of a config entry.", (world, executor, args, out, err) -> {
 			Config value = ArgValidator.CONFIG_VALUE.get(args[1]);
 			out.println(value+": "+value.get());
-		}, Argument.get(ArgValidator.exactString(false, "get"), ArgValidator.CONFIG_VALUE)),
+		}, ArgValidator.exactString(false, "get"), ArgValidator.CONFIG_VALUE),
 		
 		new CommandUsageForm(true, "set <configname> <value>", "Set the value of a config entry.", (world, executor, args, out, err) -> {
 			Config value = ArgValidator.CONFIG_VALUE.get(args[1]);
-			if(value.set(world, args[2])) {
+			if(value.set(world, args[2], err)) {
 				out.println("Successfully set " + value + " to " + value.get());
 				world.broadcastWorldUpdate();
 			} else
 				err.println("Could not set config value.");
-		}, Argument.get(ArgValidator.exactString(false, "set"), ArgValidator.CONFIG_VALUE, ArgValidator.ANY))
+	}, ArgValidator.exactString(false, "set"), ArgValidator.CONFIG_VALUE, ArgValidator.ANY)
 	),
 	
 	DEBUG("Toggles debug mode.", "This will show some extra things, and also allow certain cheats executed from a client to affect the server.",
 		new CommandUsageForm(true, "on", "Enable debug mode.",
-			((world, executor, args, out, err) -> GameCore.debug = true), Argument.get(ArgValidator.exactString(false, "on", "true", "1", "yes"))),
+			((world, executor, args, out, err) -> GameCore.debug = true), ArgValidator.exactString(false, "on", "true", "1", "yes")),
 		new CommandUsageForm(true, "off", "Disable debug mode.",
-			((world, executor, args, out, err) -> GameCore.debug = false), Argument.get(ArgValidator.exactString(false, "off", "false", "0", "no")))
+			((world, executor, args, out, err) -> GameCore.debug = false), ArgValidator.exactString(false, "off", "false", "0", "no"))
 	),
 	
 	HELP("List and show usage of various commands.",
@@ -68,14 +70,14 @@ public enum Command {
 				c.printHelpAdvanced(executor, out);
 			else
 				err.println("You do not have access to that command.");
-		}, Argument.get(ArgValidator.COMMAND)),
+		}, ArgValidator.COMMAND),
 		
 		new CommandUsageForm(false, "--all", "list all commands in detail", (world, executor, args, out, err) -> {
 			for(Command c: Command.valuesFor(executor)) {
 				c.printHelpAdvanced(executor, out);
 				out.println();
 			}
-		}, Argument.get(ArgValidator.exactString(false, "--all")))
+		}, ArgValidator.exactString(false, "--all"))
 	),
 	
 	MSG("Broadcast a message for all players to see.",
@@ -86,7 +88,7 @@ public enum Command {
 	),
 	
 	OP("Give another player access to all commands, or take it away.",
-		new CommandUsageForm(true, "<playername> <isAdmin>", "Give or take admin permissions for the specified player. (isAdmin = true OR false)", ((world, executor, args, out, err) -> {
+		new CommandUsageForm(true, "<player> <isAdmin>", "Give or take admin permissions for the specified player. (isAdmin = true OR false)", ((world, executor, args, out, err) -> {
 			ServerPlayer player = ArgValidator.PLAYER.get(world, args[0]);
 			boolean give = ArgValidator.BOOLEAN.get(args[1]);
 			boolean success = world.getServer().setAdmin(player, give);
@@ -94,64 +96,74 @@ public enum Command {
 				out.println("Admin permissions "+(give?"granted":"removed")+" for player "+player.getName()+'.');
 			else
 				err.println("failed to change admin permissions of player "+player.getName()+'.');
-		}), Argument.get(ArgValidator.PLAYER, ArgValidator.BOOLEAN))
+		}), ArgValidator.PLAYER, ArgValidator.BOOLEAN)
 	),
 	
-	PING("Check client-server connection speed.",
-		new CommandUsageForm(false, "", "Sends a ping to the server, unless sent from the server console in which case all the clients are pinged.", (world, executor, args, out, err) -> {
+	PING("Test client-server connection speed.",
+		new CommandUsageForm(false, "", "From the server console, tests connection speed of all clients; from the chat console, tests only the player who requested the ping.", (world, executor, args, out, err) -> {
 			// pings always come from the server.
+			Ping ping = new Ping(executor == null ? null : executor.getName());
 			if(executor == null)
-				world.getServer().broadcast(new Ping(null));
+				world.getServer().broadcast(ping);
 			else
 				world.getServer().sendToPlayer(executor, new Ping(executor.getName()));
 		}),
-		new CommandUsageForm(true, "all", "Ping all clients", MyUtils::notNull,
-			(world, executor, args, out, err) -> world.getServer().broadcast(new Ping(executor.getName())), 
-			Argument.get(ArgValidator.exactString(false, "all"))
+		new CommandUsageForm(true, "all", "Tests connection speed of all clients.",
+			(world, executor, args, out, err) ->
+				world.getServer().broadcast(new Ping(executor == null ? null : executor.getName())),
+			ArgValidator.exactString(false, "all")
+		),
+		new CommandUsageForm(true, "<players...>", "Tests connection speed of all specified players in the given order.",
+			(world, executor, args, out, err) -> {
+				for(String arg: args)
+					world.getServer().sendToPlayer(ArgValidator.PLAYER.get(world, arg), new Ping(executor.getName()));
+			},
+			Argument.varArg(ArgValidator.PLAYER)
 		)
 	),
 	
 	PMSG("Send a private message to another player.",
-		new CommandUsageForm(false, "<playername> <message...>", "Send a message to the specified player, that only they can see.", ((world, executor, args, out, err) -> {
+		new CommandUsageForm(false, "<player> <message...>", "Send a message to the specified player, that only they can see.", ((world, executor, args, out, err) -> {
 			ServerPlayer player = ArgValidator.PLAYER.get(world, args[0]);
 			String msg = String.join("", Arrays.copyOfRange(args, 1, args.length));
 			
 			world.getServer().sendMessage(executor, player, msg);
 			
-		}), Argument.get(ArgValidator.PLAYER), Argument.varArg(ArgValidator.ANY))
+		}), ArgValidator.PLAYER, Argument.varArg(ArgValidator.ANY))
 	),
 	
 	TIME("Get or set the time of day.", "Note, the \"clocktime\" parameter used below refers to the time format \"HH:MM\", with the hour(HH) in the range 0-23, and the minute(MM) in the range 0-59, as one expects from a normal 24-hour clock.",
 		new CommandUsageForm(false, "get", "Print the time of day, in 24 hour clock format, along with the current time \"range\" (day, night, etc).", (world, executor, args, out, err) -> {
 			float daylightOffset = world.getDaylightOffset();
 			out.println(TimeOfDay.getTimeString(daylightOffset));
-		}, Argument.get(ArgValidator.exactString(false, "get"))),
+		}, ArgValidator.exactString(false, "get")),
 		
 		new CommandUsageForm(true, "set <clocktime | "+ ArrayUtils.arrayToString(TimeOfDay.names, " | "), "Set time given clocktime, or to start of specified range.", (world, executor, args, out, err) -> {
 			float dayTime = ArgValidator.TIME.get(args[1]);
 			world.setTimeOfDay(dayTime);
 			dayTime = world.getDaylightOffset();
 			out.println("Set time of day to "+TimeOfDay.getClockString(dayTime)+" ("+TimeOfDay.getTimeOfDay(dayTime)+")");
-		}, Argument.get(ArgValidator.exactString(false, "set"), ArgValidator.TIME)
-		),
+		}, ArgValidator.exactString(false, "set"), ArgValidator.TIME),
 		
 		new CommandUsageForm(true, "add <HH:MM>", "Add the specified number of hours and minutes to the current time.", (world, executor, args, out, err) -> {
 			float diffTime = ArgValidator.CLOCK_DURATION.get(args[1]);
 			float dayTime = world.changeTimeOfDay(diffTime);
 			out.println("Added "+TimeOfDay.getClockString(diffTime-TimeOfDay.SECONDS_START_TIME_OFFSET)+" to the current time; new time: "+TimeOfDay.getClockString(dayTime)+" ("+TimeOfDay.getTimeOfDay(dayTime)+")");
 			
-		}, Argument.get(ArgValidator.exactString(false, "add"), ArgValidator.CLOCK_DURATION)),
+		}, ArgValidator.exactString(false, "add"), ArgValidator.CLOCK_DURATION),
 		
 		new CommandUsageForm(true, "sub <HH:MM>", "Subtract the specified number of hours and minutes from the current time.", (world, executor, args, out, err) -> {
 			float diffTime = ArgValidator.CLOCK_DURATION.get(args[1]);
 			float dayTime = world.changeTimeOfDay(-diffTime);
 			out.println("Subtracted "+TimeOfDay.getClockString(diffTime-TimeOfDay.SECONDS_START_TIME_OFFSET)+" from the current time; new time: "+TimeOfDay.getClockString(dayTime)+" ("+TimeOfDay.getTimeOfDay(dayTime)+")");
 			
-		}, Argument.get(ArgValidator.exactString(false, "sub"), ArgValidator.CLOCK_DURATION))
+		}, ArgValidator.exactString(false, "sub"), ArgValidator.CLOCK_DURATION)
 	),
 	
+	// all TP forms in one: [player] <player | <x> <y> [level]>
+	// args are fairly variable; maybe usage forms split at '|'?
 	TP("Teleport a player to a location in the world.",
-		new CommandUsageForm(true, "<playername> <playername>", "Teleport the first player to the second player.", (world, executor, args, out, err) -> {
+		new CommandUsageForm(true, "<player> <player>", "Teleport the first player to the second player.", (world, executor, args, out, err) -> {
 			ServerPlayer toMove = ArgValidator.PLAYER.get(world, args[0]);
 			ServerPlayer dest = ArgValidator.PLAYER.get(world, args[1]);
 			
@@ -162,14 +174,14 @@ public enum Command {
 				out.println("teleported "+toMove.getName()+" to "+toMove.getPosition(true)+".");
 			} else
 				err.println("player "+dest.getName()+" is not on a valid level; cannot tp to their location.");
-		}, Argument.get(ArgValidator.PLAYER, ArgValidator.PLAYER)),
+		}, ArgValidator.PLAYER, ArgValidator.PLAYER),
 		
-		new CommandUsageForm(true, "<playername>", "Teleports user to the specified player.", executor -> executor != null, ((world, executor, args, out, err) -> {
+		new CommandUsageForm(true, "<player>", "Teleports user to the specified player.", MyUtils::notNull, ((world, executor, args, out, err) -> {
 			String source = executor.getName();
-			Command.valueOf("TP").execute(world, new String[] {source, args[0]}, executor, out, err);
-		}), Argument.get(ArgValidator.PLAYER)),
+			Command.valueOf("TP").execute(world, executor, new String[] {source, args[0]}, out, err);
+		}), ArgValidator.PLAYER),
 		
-		new CommandUsageForm(true, "<playername> <x> <y>", "Teleports the specified player to the specified location.", ((world, executor, args, out, err) -> {
+		new CommandUsageForm(true, "<player> <x> <y>", "Teleports the specified player to the specified location.", ((world, executor, args, out, err) -> {
 			ServerPlayer player = ArgValidator.PLAYER.get(world, args[0]);
 			float x = ArgValidator.DECIMAL.get(args[1]);
 			float y = ArgValidator.DECIMAL.get(args[2]);
@@ -182,12 +194,12 @@ public enum Command {
 				out.println("teleported "+player.getName()+" to "+player.getPosition(true)+'.');
 			} else
 				err.println("player "+player.getName()+" is not on a valid level; cannot be teleported.");
-		}), Argument.get(ArgValidator.PLAYER, ArgValidator.DECIMAL, ArgValidator.DECIMAL)),
+		}), ArgValidator.PLAYER, ArgValidator.DECIMAL, ArgValidator.DECIMAL),
 		
-		new CommandUsageForm(true, "<x> <y>", "Teleports user to the specified location.", executor -> executor != null, ((world, executor, args, out, err) -> {
+		new CommandUsageForm(true, "<x> <y>", "Teleports user to the specified location.", MyUtils::notNull, (world, executor, args, out, err) -> {
 			String source = executor.getName();
-			Command.valueOf("TP").execute(world, new String[] {source, args[0], args[1]}, executor, out, err);
-		}), Argument.get(ArgValidator.DECIMAL, ArgValidator.DECIMAL))
+			Command.valueOf("TP").execute(world, executor, new String[] {source, args[0], args[1]}, out, err);
+		}, ArgValidator.DECIMAL, ArgValidator.DECIMAL)
 	),
 	
 	SAVE("Save the world to file.",
@@ -206,7 +218,7 @@ public enum Command {
 		new CommandUsageForm(true, "", "Stops the server.", (world, executor, args, out, err) -> world.exitWorld())
 	);
 	
-	static Command getCommand(String commandName, ServerPlayer executor) {
+	static Command getCommand(String commandName, @Nullable ServerPlayer executor) {
 		Command c = null;
 		try {
 			c = Enum.valueOf(Command.class, commandName.toUpperCase());
@@ -216,6 +228,11 @@ public enum Command {
 			c = null; // not allowed to access.
 		
 		return c;
+	}
+	
+	private static ExecutionBehavior replaceArgs(String command, MapFunction<String[], String[]> argMapper) {
+		return (world, executor, args, out, err) ->
+			getCommand(command, executor).execute(world, executor, argMapper.get(args), out, err);
 	}
 	
 	private final String name;
@@ -236,7 +253,7 @@ public enum Command {
 		this.details = details;
 	}
 	
-	public void execute(@NotNull ServerWorld world, String[] args, @Nullable ServerPlayer executor, MessageBuilder out, MessageBuilder err) {
+	public void execute(@NotNull ServerWorld world, @Nullable ServerPlayer executor, String[] args, MessageBuilder out, MessageBuilder err) {
 		if(!canExecute(executor)) {
 			err.println("You do not have access to that command.");
 			return;

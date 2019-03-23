@@ -1,7 +1,6 @@
 package miniventure.game.chat.command;
 
-import java.util.Arrays;
-
+import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.FetchFunction;
 import miniventure.game.util.function.MapFunction;
@@ -66,41 +65,66 @@ public interface Argument {
 		};
 	}
 	
-	interface ArgValidator<T> {
-		static <T> T notNull(FetchFunction<T> function) throws IllegalArgumentException {
+	interface ArgValidator<T> extends Argument {
+		
+		@Override
+		default boolean satisfiedBy(@NotNull ServerWorld world, String[] args, int offset) {
+			return isValid(world, args[offset]);
+		}
+		
+		@Override
+		default int length() { return 1; }
+		
+		static <T> T notNull(FetchFunction<T> function, String error) throws IllegalArgumentException {
 			T obj = function.get();
 			if(obj == null)
-				throw new IllegalArgumentException();
+				throw new IllegalArgumentException("value is null", new NullPointerException(error));
 			return obj;
 		}
 		static <T> T noException(FetchFunction<T> function) throws IllegalArgumentException {
+			return noException(function, "");
+		}
+		static <T> T noException(FetchFunction<T> function, String error) throws IllegalArgumentException {
 			T obj;
 			try {
 				obj = function.get();
 			} catch(Throwable t) {
-				throw new IllegalArgumentException();
+				throw new IllegalArgumentException(error, t);
 			}
 			
 			return obj;
 		}
 		
 		SimpleArgValidator<String> ANY = arg -> arg;
-		SimpleArgValidator<Integer> INTEGER = arg -> noException(() -> Integer.parseInt(arg));
-		SimpleArgValidator<Float> DECIMAL = arg -> noException(() -> Float.parseFloat(arg));
-		SimpleArgValidator<Boolean> BOOLEAN = arg -> noException(() -> Boolean.parseBoolean(arg));
-		ArgValidator<ServerPlayer> PLAYER = (world, arg) -> notNull(() -> world.getServer().getPlayerByName(arg));
-		SimpleArgValidator<Command> COMMAND = arg -> noException(() -> Enum.valueOf(Command.class, arg.toUpperCase()));
+		SimpleArgValidator<Integer> INTEGER = arg -> noException(() -> Integer.parseInt(arg),
+			"arg '"+arg+"' is not an integer");
+		SimpleArgValidator<Float> DECIMAL = arg -> noException(() -> Float.parseFloat(arg),
+			"arg '"+arg+"' is not a decimal");
+		SimpleArgValidator<Boolean> BOOLEAN = arg -> {
+			if(arg == null || !arg.equalsIgnoreCase("true") && !arg.equalsIgnoreCase("false"))
+				throw new IllegalArgumentException("arg '"+arg+"' is not a boolean");
+			return Boolean.parseBoolean(arg);
+		};
+		ArgValidator<ServerPlayer> PLAYER = (world, arg) -> notNull(() -> world.getServer().getPlayerByName(arg),
+			"player '"+arg+"' does not exist");
+		SimpleArgValidator<Command> COMMAND = arg -> noException(() -> Enum.valueOf(Command.class, arg.toUpperCase()), 
+			"command '"+arg+"' does not exist");
+		SimpleArgValidator<Config> CONFIG_VALUE = arg -> notNull(() -> Config.valueOf(arg),
+			"arg '"+arg+"' is not a valid config value");
+		
 		SimpleArgValidator<Float> CLOCK_DURATION = arg -> noException(() -> {
 			String[] parts = arg.split(":");
 			int hour = Integer.parseInt(parts[0]);
 			int min = Integer.parseInt(parts[1]);
 			
-			if(hour < 0 || hour >= 24 || min < 0 || min >= 60) throw new IllegalArgumentException();
+			if(hour < 0 || hour >= 24 || min < 0 || min >= 60)
+				throw new IllegalArgumentException("hour and/or min is outside valid range");
 			
 			float time = hour + (min / 60f);
 			
 			return MyUtils.mapFloat(time, 0, 24, 0, TimeOfDay.SECONDS_IN_DAY);
-		});
+		}, "arg is not a valid duration");
+		
 		SimpleArgValidator<Float> CLOCK_TIME = arg -> {
 			float duration = CLOCK_DURATION.get(arg);
 			float total = TimeOfDay.SECONDS_IN_DAY;
@@ -108,9 +132,10 @@ public interface Argument {
 			//time = (time + 24 - ) % 24;
 			//return MyUtils.mapFloat(time, 0, 24, 0, TimeOfDay.SECONDS_IN_DAY);
 		};
+		
 		SimpleArgValidator<TimeOfDay> TIME_RANGE = arg -> noException(() -> TimeOfDay.valueOf(MyUtils.toTitleCase(arg)));
+		
 		SimpleArgValidator<Float> TIME = anyOf(CLOCK_TIME, map(TIME_RANGE, TimeOfDay::getStartOffsetSeconds));
-		SimpleArgValidator<Config> CONFIG_VALUE = arg -> notNull(() -> Config.valueOf(arg));
 		
 		@SafeVarargs
 		static <T> SimpleArgValidator<T> anyOf(SimpleArgValidator<T>... validators) {
@@ -121,7 +146,7 @@ public interface Argument {
 					}
 				}
 				
-				throw new IllegalArgumentException();
+				throw new IllegalArgumentException("no validators match");
 			};
 		}
 		
@@ -134,7 +159,8 @@ public interface Argument {
 					if(matchCase ? arg.equals(match) : arg.equalsIgnoreCase(match))
 						return resultMapper.get(arg);
 				
-				throw new IllegalArgumentException();
+				throw new IllegalArgumentException("arg '"+arg+"' must be one of "+
+					ArrayUtils.arrayToString(matches, ", ", val -> "'"+val+'\''));
 			};
 		}
 		

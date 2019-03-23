@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class CommandUsageForm {
 	
+	@FunctionalInterface
 	interface ExecutionBehavior {
 		void execute(@NotNull ServerWorld world, ServerPlayer executor, String[] args, MessageBuilder out, MessageBuilder err);
 	}
@@ -50,7 +51,19 @@ public class CommandUsageForm {
 		
 		if(off < args.length) return false;
 		
-		this.executionBehavior.execute(world, executor, args, out, err);
+		try {
+			this.executionBehavior.execute(world, executor, args, out, err);
+		} catch(IllegalArgumentException ex) {
+			StringBuilder str = new StringBuilder("error");
+			Throwable t = ex;
+			while(t != null) {
+				System.out.println("throwable "+t);
+				str.append(": ").append(t.getMessage());
+				t = t.getCause();
+			}
+			err.println(str);
+		}
+		
 		return true;
 	}
 	
