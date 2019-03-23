@@ -23,6 +23,8 @@ import com.badlogic.gdx.utils.Array;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import static miniventure.game.chat.command.Argument.SERVER_ONLY;
+
 public enum Command {
 	
 	CLEAR("Clear the chat console.",
@@ -88,19 +90,38 @@ public enum Command {
 	),
 	
 	OP("Give another player access to all commands, or take it away.",
-		new CommandUsageForm(true, "<player> <isAdmin>", "Give or take admin permissions for the specified player. (isAdmin = true OR false)", ((world, executor, args, out, err) -> {
-			ServerPlayer player = ArgValidator.PLAYER.get(world, args[0]);
-			boolean give = ArgValidator.BOOLEAN.get(args[1]);
-			boolean success = world.getServer().setAdmin(player, give);
-			if(success)
-				out.println("Admin permissions "+(give?"granted":"removed")+" for player "+player.getName()+'.');
-			else
-				err.println("failed to change admin permissions of player "+player.getName()+'.');
+		new CommandUsageForm(true, "<player> <isAdmin>", "Give or take admin permissions for the specified player. (isAdmin = true OR false)", SERVER_ONLY,
+			((world, executor, args, out, err) -> {
+				ServerPlayer player = ArgValidator.PLAYER.get(world, args[0]);
+				boolean give = ArgValidator.BOOLEAN.get(args[1]);
+					
+				if(world.getServer().isAdmin(player) == give) {
+					out.println("player '"+player.getName()+"' is already "+(give?"":"not ")+" an admin.");
+					return;
+				}
+				
+				if(player == executor) {
+					// this command can only be used by admins, so this implies that this only runs if an admin attempts to remove their own permissions.
+					err.println("You are not allowed to remove permissions from yourself.");
+					return;
+				}
+				
+				if(world.getServer().isHost(player)) {
+					err.println("Host permissions cannot be modified.");
+					return;
+				}
+				
+				boolean success = world.getServer().setAdmin(player, give);
+				if(success)
+					out.println("Admin permissions "+(give?"granted":"removed")+" for player "+player.getName()+'.');
+				else
+					err.println("failed to change admin permissions of player "+player.getName()+'.');
 		}), ArgValidator.PLAYER, ArgValidator.BOOLEAN)
 	),
 	
 	PING("Test client-server connection speed.",
-		new CommandUsageForm(false, "", "From the server console, tests connection speed of all clients; from the chat console, tests only the player who requested the ping.", (world, executor, args, out, err) -> {
+		new CommandUsageForm(false, "", "From the server console, tests connection speed of all clients; from the chat console, tests only the player who requested the ping.", SERVER_ONLY,
+			(world, executor, args, out, err) -> {
 			// pings always come from the server.
 			Ping ping = new Ping(executor == null ? null : executor.getName());
 			if(executor == null)
@@ -123,7 +144,8 @@ public enum Command {
 	),
 	
 	PMSG("Send a private message to another player.",
-		new CommandUsageForm(false, "<player> <message...>", "Send a message to the specified player, that only they can see.", ((world, executor, args, out, err) -> {
+		new CommandUsageForm(false, "<player> <message...>", "Send a message to the specified player, that only they can see.", SERVER_ONLY,
+			((world, executor, args, out, err) -> {
 			ServerPlayer player = ArgValidator.PLAYER.get(world, args[0]);
 			String msg = String.join("", Arrays.copyOfRange(args, 1, args.length));
 			

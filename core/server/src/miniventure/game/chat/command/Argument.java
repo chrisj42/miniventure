@@ -16,7 +16,10 @@ public interface Argument {
 	boolean satisfiedBy(@NotNull ServerWorld world, String[] args, int offset);
 	int length();
 	
-	static Argument get(@NotNull ArgValidator... validators) {
+	MapFunction<ServerPlayer, Boolean> SERVER_ONLY = player ->
+		player == null || player.getWorld().getServer().isMultiplayer();
+	
+	/*static Argument get(@NotNull ArgValidator... validators) {
 		return new Argument() {
 			@Override
 			public boolean satisfiedBy(@NotNull ServerWorld world, String[] args, int offset) {
@@ -30,24 +33,6 @@ public interface Argument {
 			@Override
 			public int length() { return validators.length; }
 		};
-	}
-	
-	/*static Argument[] get(@NotNull ArgumentValidator... validators) {
-		Argument[] args = new Argument[validators.length];
-		
-		for(int i = 0; i < args.length; i++) {
-			final int index = i;
-			args[i] = new Argument() {
-				@Override
-				public boolean satisfiedBy(String[] args, int offset) {
-					return validators[index].isValid(args[offset]);
-				}
-				
-				@Override public int length() { return 1; }
-			};
-		}
-		
-		return args;
 	}*/
 	
 	static Argument varArg(ArgValidator validator) {

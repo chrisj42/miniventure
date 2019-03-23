@@ -104,12 +104,19 @@ public class GameServer implements GameProtocol {
 	
 	public int getPort() { return port; }
 	
-	public void setHost(InetSocketAddress host) { this.host = host; }
-	public boolean isHost(@NotNull InetSocketAddress host) { return host.equals(this.host); }
-	
+	public boolean isMultiplayer() { return multiplayer; }
 	public void setMultiplayer(boolean multiplayer) {
 		this.multiplayer = multiplayer;
 	}
+	
+	public void setHost(InetSocketAddress host) { this.host = host; }
+	private boolean isHost(@NotNull InetSocketAddress host) { return host.equals(this.host); }
+	
+	public boolean isHost(@NotNull ServerPlayer player) {
+		InetSocketAddress addr = getPlayerAddress(player);
+		return addr != null && isHost(addr);
+	}
+	
 	
 	private PlayerData getPlayerData(@Nullable ServerPlayer player) {
 		if(player == null)
