@@ -39,6 +39,7 @@ public interface Argument {
 		return new Argument() {
 			@Override
 			public boolean satisfiedBy(@NotNull ServerWorld world, String[] args, int offset) {
+				if(args.length - offset <= 0) return false; // must have at least one arg
 				for(int i = offset; i < args.length; i++)
 					if(!validator.isValid(world, args[i]))
 						return false;

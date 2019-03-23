@@ -131,12 +131,12 @@ public enum Command {
 			else
 				world.getServer().sendToPlayer(executor, new Ping(executor.getName()));
 		}),
-		new CommandUsageForm(true, "all", "Tests connection speed of all clients.",
+		new CommandUsageForm(true, "all", "Tests connection speed of all clients.", SERVER_ONLY,
 			(world, executor, args, out, err) ->
 				world.getServer().broadcast(new Ping(executor == null ? null : executor.getName())),
 			ArgValidator.exactString(false, "all")
 		),
-		new CommandUsageForm(true, "<players...>", "Tests connection speed of all specified players in the given order.",
+		new CommandUsageForm(true, "<players...>", "Tests connection speed of all specified players in the given order.", SERVER_ONLY,
 			(world, executor, args, out, err) -> {
 				for(String arg: args)
 					world.getServer().sendToPlayer(ArgValidator.PLAYER.get(world, arg), new Ping(executor.getName()));
@@ -320,19 +320,15 @@ public enum Command {
 	}
 	
 	private boolean canExecute(@Nullable ServerPlayer executor) {
-		if(restricted) {
-			if(executor == null) return true; // server console
-			if(executor.getWorld().getServer().isAdmin(executor))
-				return true;
+		if(restricted && executor != null && !executor.getWorld().getServer().isAdmin(executor))
 			return false;
-		} else
-			return true;
 		
-		// for(CommandUsageForm form: forms)
-		// 	if(form.executorCheck.get(executor))
-		// 		return true;
-		
-		// return false;
+		// run through each form's checks and see if any of them are viable options
+		for(CommandUsageForm form: forms)
+			if(form.executorCheck.get(executor))
+				return true;
+
+		return false;
 	}
 	
 	public static Command[] valuesFor(@Nullable ServerPlayer player) {
