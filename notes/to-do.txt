@@ -1,8 +1,28 @@
+- add stuff to serverplayer
+- level loading sync queue
+
+- preload disabled on level load
+
+- have a play with colorizing server console output
+- echo player commands to server terminal (this includes the msg command)
+	- "player": <command>
+
+- consider converting command execution behavior param "args" to a list for easier manipulation
+- consider checking if a world is sp, and circumventing the kryo server if so. Simply pass the packets without serialization.
+	- do this next!
+
+- when a client attempts to use a command they cannot use, tell them they don't have permission, don't act like it doesn't exist.
+
+- create a dropItems method 
+
 - move known player handling from ServerWorld to GameServer; world will pass player info from WorldDataSet to server constructor.
 - work on synchronization of packet handling; many packets can probably be processed when the player is updated
 	- players will be updated at the normal time with the rest of the entities
 	- movement requests will accumulate with the waiting for the player to be updated, and when the update occurs it will act like one movement request moving from the first request's start to the last request's end.
 	- further sync notes in related txt file.
+
+- have mob AI's pursue their attacker instead of just the "nearest player." zombies, which are naturally aggressive, actually will seek out the nearest player, but will focus on one for a time if they attack it.
+	- impl note, move getNearestPlayer method from Level to ServerLevel, so it can fetch the players on a level without having to go through all the entities on the level.
 
 - damage bar for tiles
 
