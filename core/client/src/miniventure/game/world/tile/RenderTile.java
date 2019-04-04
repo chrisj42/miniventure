@@ -22,7 +22,8 @@ public class RenderTile extends Tile {
 	private ArrayList<TileAnimation> spriteStack;
 	private boolean updateSprites;
 	
-	private final Object spriteLock = new Object();
+	// spriteLock is unnecessary because all access occurs in the same thread: the libGDX render thread.
+	// private final Object spriteLock = new Object();
 	
 	public RenderTile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, @Nullable SerialMap[] data) {
 		super(level, x, y, types);
@@ -44,17 +45,12 @@ public class RenderTile extends Tile {
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
 		if(getLevel().getTile(x, y) == null) return; // cannot render if there are no tiles.
 		
-		synchronized (spriteLock) {
-			// cannot render if there are no sprites.
-			if(spriteStack == null || updateSprites)
-				compileSprites(); // since the lock can be reacquired by the same thread, this is fine to put in a synchronized statement.
-		}
+		// cannot render if there are no sprites.
+		if(spriteStack == null || updateSprites)
+			compileSprites();
 		
-		synchronized (spriteLock) {
-			for(TileAnimation animation: spriteStack) {
-				batch.draw(animation.getKeyFrame(this).texture, (x - posOffset.x) * SIZE, (y - posOffset.y) * SIZE);
-			}
-		}
+		for(TileAnimation animation: spriteStack)
+			batch.draw(animation.getKeyFrame(this).texture, (x - posOffset.x) * SIZE, (y - posOffset.y) * SIZE);
 	}
 	
 	@Override
@@ -73,12 +69,10 @@ public class RenderTile extends Tile {
 	@Override public void touching(Entity entity) {}
 	
 	public void updateSprites() {
-		synchronized (spriteLock) {
-			updateSprites = true;
-		}
+		updateSprites = true;
 	}
 	
-	// TODO compile sprites in each layer group separately; additionally, for each layer, end it with an air tile. Transparency will be implemented afterwards, once I've implemented this and also changed tile stacks; see todo in TileStack.java. Following initial implementation of transparency, and the rest, test it out with the level gen.
+	// compile sprites in each layer group separately; additionally, for each layer, end it with an air tile. Transparency will be implemented afterwards, once I've implemented this and also changed tile stacks; see in TileStack.java. Following initial implementation of transparency, and the rest, test it out with the level gen.
 	
 	/** @noinspection ObjectAllocationInLoop*/
 	@SuppressWarnings("unchecked")
@@ -132,10 +126,8 @@ public class RenderTile extends Tile {
 			}
 		}
 		
-		synchronized (spriteLock) {
-			this.spriteStack = spriteStack;
-			updateSprites = false;
-		}
+		this.spriteStack = spriteStack;
+		updateSprites = false;
 	}
 	
 	private static <E extends Enum<E>> NavigableSet<E> safeSubSet(TreeSet<E> set,

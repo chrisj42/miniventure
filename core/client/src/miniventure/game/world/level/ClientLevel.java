@@ -69,6 +69,7 @@ public class ClientLevel extends RenderLevel {
 			((ClientTile)t).updateSprites();
 	}
 	
+	// called in GameClient thread.
 	public void serverUpdate(ClientTile tile, TileData data) {
 		synchronized (tileUpdates) {
 			tileUpdates.put(tile, data);
@@ -77,33 +78,4 @@ public class ClientLevel extends RenderLevel {
 	
 	@Override
 	public ClientTile getTile(float x, float y) { return (ClientTile) super.getTile(x, y); }
-	/*public ClientTile getTile(float x, float y, boolean loadIfNull) {
-		ClientTile tile = (ClientTile) super.getTile(x, y);
-		if(tile == null && loadIfNull)
-			loadChunk(Chunk.getCoords(x, y));
-		
-		return tile;
-	}*/
-	
-	/*@Override
-	protected void loadChunk(Point chunkCoord) {
-		//System.out.println("Client requesting chunk "+chunkCoord);
-		ClientCore.getClient().send(new ChunkRequest(chunkCoord));
-	}
-	
-	@Override
-	protected void unloadChunk(Point chunkCoord) {
-		Chunk chunk = getLoadedChunk(chunkCoord);
-		if(chunk == null) return; // already unloaded
-		
-		//System.out.println("Client unloading chunk "+chunkCoord);
-		
-		for(Entity e: entityChunks.keySet().toArray(new Entity[entityChunks.size()]))
-			if(entityChunks.get(e).equals(chunkCoord))
-				e.remove();
-		
-		loadedChunks.access(chunks -> chunks.remove(chunkCoord));
-	}*/
-	
-	
 }
