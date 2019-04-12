@@ -4,14 +4,21 @@ Miniventure started as a remake of [Minicraft Plus](https://github.com/chrisj42/
 
 ## Features
 
-#### Miniventure is still in relatively early development despite it being in alpha for a year and a half now. It should be ready for Beta soon though. Here's a list of the major features it *does* have in the meanwhile:
+#### Miniventure is still in relatively early development despite it being in Alpha for a year and a half now.
+
+It should be ready for Beta soon though. Here's a list of the major features that *have* been implemented:
 
   - Multiplayer functionality, allowing many people to play in the same world. The server can be run without a GUI.
   - Procedurally generated terrain maps using noise manipulation
+    - Current world system is a continguous "effectively infinite" map; however, Beta will have a different world layout.
+  - World save/load (not yet released)
   - Sprite animations and smooth tile transitions
-  - basic tool crafting and interactions
-  - an update-checker that tells you when there's a new update available, and gives you the link.
-  - sound effects and a little bit of music
+  - Fully malleable terrain; tiles can be broken and replaced to create your own environments
+  - Basic inventory management and crafting
+  - Mob AI behaviors
+  - In-game chat/command overlay
+  - An update-checker that tells you when there's a new update available, and gives you the link.
+  - Some neat retro sound effects
 
 ### Notes
 
