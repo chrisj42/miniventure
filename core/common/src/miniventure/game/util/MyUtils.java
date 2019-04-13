@@ -22,6 +22,9 @@ public final class MyUtils {
 	private MyUtils() {} // can't instantiate
 	
 	
+	/// STRING UTILS
+	
+	
 	public static String toTitleCase(String string) {
 		return toTitleCase(toTitleCase(string, " "), "_");
 	}
@@ -87,6 +90,39 @@ public final class MyUtils {
 		return result.toArray(String.class);
 	}
 	
+	public static String plural(int count) { return count == 1 ? "" : "s"; }
+	public static String plural(int count, String word) { return plural(count, word, ""); }
+	public static String plural(int count, String word, String suffix) {
+		return String.valueOf(count) + ' ' +
+			(count != 1 && word.endsWith("y") ? word.substring(0, word.length() - 1) : word) +
+			(count == 1 ? "" : word.endsWith("s") ? "es" : word.endsWith("y") ? "ies" : "s") +
+			suffix;
+	}
+	
+	
+	// MATH UTILS
+	
+	
+	public static float mapFloat(float num, float prevMin, float prevMax, float newMin, float newMax) {
+		return (num-prevMin)/(prevMax-prevMin) * (newMax-newMin) + newMin;
+	}
+	
+	public static <N extends Comparable<N>> N clamp(N val, N min, N max) {
+		if(val.compareTo(min) < 0) return min;
+		if(val.compareTo(max) > 0) return max;
+		return val;
+	}
+	public static int clamp(int val, int min, int max) { return clamp((Integer)val, (Integer)min, (Integer)max); }
+	public static float clamp(float val, float min, float max) { return clamp((Float)val, (Float)min, (Float)max); }
+	
+	public static int mod(int num, int mod) { return (num % mod + mod) % mod; }
+	public static float mod(float num, float mod) { return (num % mod + mod) % mod; }
+	//public static long mod(long num, long mod) { return (num % mod + mod) % mod; }
+	//public static double mod(double num, double mod) { return (num % mod + mod) % mod; }
+	
+	
+	// GAME UTILS
+	
 	
 	// this method moves a rectangle *just* enough so that it fits inside another rectangle. In the event that the "outer" rect is smaller than the rect being moved, the rect being moved will be centered onto the outer rect. The padding is only used if the moving rect isn't already inside the outer one.
 	public static Rectangle moveRectInside(Rectangle toMove, Rectangle outer, float padding) {
@@ -111,18 +147,6 @@ public final class MyUtils {
 		return toMove;
 	}
 	
-	public static float mapFloat(float num, float prevMin, float prevMax, float newMin, float newMax) {
-		return (num-prevMin)/(prevMax-prevMin) * (newMax-newMin) + newMin;
-	}
-	
-	public static <N extends Comparable<N>> N clamp(N val, N min, N max) {
-		if(val.compareTo(min) < 0) return min;
-		if(val.compareTo(max) > 0) return max;
-		return val;
-	}
-	public static int clamp(int val, int min, int max) { return clamp((Integer)val, (Integer)min, (Integer)max); }
-	public static float clamp(float val, float min, float max) { return clamp((Float)val, (Float)min, (Float)max); }
-	
 	public static void drawRect(Rectangle rect, int thickness, Color c, Batch batch) {
 		drawRect(rect.x, rect.y, rect.width, rect.height, thickness, c, batch);
 	}
@@ -145,6 +169,18 @@ public final class MyUtils {
 		batch.setColor(prev);
 	}
 	
+	
+	public static void tryPlayMusic(Music music) {
+		// music.play();
+		noException(music::play, true);
+		// if(noException(music::play, true))
+		// 	return;// delay(1500, () -> tryPlayMusic(music));
+	}
+	
+	
+	// ERROR UTILS
+	
+	
 	// useful as a method reference
 	public static <T> boolean notNull(T obj) { return obj != null; }
 	
@@ -161,34 +197,14 @@ public final class MyUtils {
 		return true;
 	}
 	
-	public static void tryPlayMusic(Music music) {
-		// music.play();
-		noException(music::play, true);
-		// if(noException(music::play, true))
-		// 	return;// delay(1500, () -> tryPlayMusic(music));
-	}
-	
-	public static void delay(int milliDelay, Action action) { new DelayedAction(milliDelay, action).start(); }
-	
-	public static int mod(int num, int mod) { return (num % mod + mod) % mod; }
-	public static float mod(float num, float mod) { return (num % mod + mod) % mod; }
-	//public static long mod(long num, long mod) { return (num % mod + mod) % mod; }
-	//public static double mod(double num, double mod) { return (num % mod + mod) % mod; }
-	
-	public static String plural(int count) { return count == 1 ? "" : "s"; }
-	public static String plural(int count, String word) { return plural(count, word, ""); }
-	public static String plural(int count, String word, String suffix) {
-		return String.valueOf(count) + ' ' +
-			(count != 1 && word.endsWith("y") ? word.substring(0, word.length() - 1) : word) +
-			(count == 1 ? "" : word.endsWith("s") ? "es" : word.endsWith("y") ? "ies" : "s") +
-			suffix;
-	}
-	
-	public static void sleep(int millis) {
-		try {
-			Thread.sleep(millis);
-		} catch (InterruptedException ignored) {
+	public static String combineThrowableCauses(Throwable t, String prefix) {
+		StringBuilder str = new StringBuilder(prefix);
+		while(t != null) {
+			// System.out.println("throwable "+t);
+			str.append(": ").append(t.getMessage());
+			t = t.getCause();
 		}
+		return str.toString();
 	}
 	
 	public static void dumpAllStackTraces() {
@@ -208,6 +224,19 @@ public final class MyUtils {
 			for(StackTraceElement element: elements)
 				System.out.println("\t" + element);
 		});
+	}
+	
+	
+	// MISC UTILS
+	
+	
+	public static void delay(int milliDelay, Action action) { new DelayedAction(milliDelay, action).start(); }
+	
+	public static void sleep(int millis) {
+		try {
+			Thread.sleep(millis);
+		} catch (InterruptedException ignored) {
+		}
 	}
 	
 	public static <E extends Enum<E>> EnumSet<E> enumSet(Class<E> clazz, Collection<E> collection) {

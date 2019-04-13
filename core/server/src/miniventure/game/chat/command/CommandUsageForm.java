@@ -1,6 +1,7 @@
 package miniventure.game.chat.command;
 
 import miniventure.game.chat.MessageBuilder;
+import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.MapFunction;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.management.ServerWorld;
@@ -54,14 +55,7 @@ public class CommandUsageForm {
 		try {
 			this.executionBehavior.execute(world, executor, args, out, err);
 		} catch(IllegalArgumentException ex) {
-			StringBuilder str = new StringBuilder("error");
-			Throwable t = ex;
-			while(t != null) {
-				System.out.println("throwable "+t);
-				str.append(": ").append(t.getMessage());
-				t = t.getCause();
-			}
-			err.println(str);
+			err.println(MyUtils.combineThrowableCauses(ex, "error"));
 		}
 		
 		return true;
