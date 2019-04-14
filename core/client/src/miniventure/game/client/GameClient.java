@@ -311,26 +311,25 @@ public class GameClient implements GameProtocol {
 	
 	// public boolean connectToServer(@NotNull LoadingScreen logger, String host, ValueFunction<Boolean> callback) { return connectToServer(logger, host, GameProtocol.PORT, callback); }
 	public boolean connectToServer(@NotNull LoadingScreen logger, @Nullable ServerManager personalServer, String host, int port, ValueFunction<Boolean> callback) {
-		logger.pushMessage("connecting to server at "+host+':'+port+"...");
+		logger.pushMessage("Connecting to "+(personalServer!=null?"private ":"")+"server at "+host+':'+port+"...");
 		
 		try {
 			client.connect(5000, host, port);
 		} catch(IOException e) {
-			System.err.println("(caught IOException:)");
-			e.printStackTrace();
+			// e.printStackTrace();
 			// error screen
 			Gdx.app.postRunnable(() -> {
-				ClientCore.setScreen(new ErrorScreen("failed to connect to server."));
+				ClientCore.setScreen(new ErrorScreen("Failed to connect: "+e.getMessage()));
 				callback.act(false);
 			});
 			return false;
 		}
 		
+		logger.editMessage("Logging in");
 		if(personalServer != null) {
 			personalServer.setHost(client.getLocalAddressTCP());
 			this.username = HOST;
 			send(new Login(username, GameCore.VERSION));
-			logger.editMessage("Loading world from server...");
 			callback.act(true);
 		}
 		else {
@@ -338,7 +337,7 @@ public class GameClient implements GameProtocol {
 				this.username = username;
 				send(new Login(username, GameCore.VERSION));
 				
-				logger.editMessage("Loading world from server...");
+				logger.editMessage("Logging in as '"+username+"'");
 				ClientCore.setScreen(logger);
 				callback.act(true);
 			}, () -> {

@@ -18,7 +18,7 @@ public class FrameBlinker implements Blinker {
 	}
 	
 	@Override
-	public String[] save() {
+	public String[] serialize() {
 		return new String[] {
 			"frame",
 			framesOn+"",

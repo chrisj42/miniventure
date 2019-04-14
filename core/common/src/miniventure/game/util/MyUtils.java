@@ -198,11 +198,16 @@ public final class MyUtils {
 	}
 	
 	public static String combineThrowableCauses(Throwable t, String prefix) {
+		return combineThrowableCauses(t, prefix, -1);
+	}
+	public static String combineThrowableCauses(Throwable t, String prefix, int maxDepth) {
 		StringBuilder str = new StringBuilder(prefix);
-		while(t != null) {
+		int depth = 0;
+		while(t != null && (maxDepth < 0 || depth < maxDepth)) {
 			// System.out.println("throwable "+t);
 			str.append(": ").append(t.getMessage());
 			t = t.getCause();
+			depth++;
 		}
 		return str.toString();
 	}

@@ -15,7 +15,8 @@ import miniventure.game.Preferences;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.ServerManager;
 import miniventure.game.server.ServerCore;
-import miniventure.game.world.management.SaveLoadInterface.WorldDataSet;
+import miniventure.game.util.ProgressLogger;
+import miniventure.game.world.management.WorldDataSet;
 import miniventure.game.world.tile.ServerTileType;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
@@ -108,8 +109,8 @@ public class DesktopLauncher {
 		}
 		
 		@Override
-		public int startServer(WorldDataSet worldInfo) throws IOException {
-			this.core = ServerCore.initSinglePlayer(worldInfo);
+		public int startServer(WorldDataSet worldInfo, ProgressLogger logger) throws IOException {
+			this.core = ServerCore.initSinglePlayer(worldInfo, logger);
 			int port = core.getServer().getPort();
 			
 			// server running, and world loaded; now, get the server world updating

@@ -11,6 +11,13 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 
+/*
+	TODO in order to make this class more useful, it should allow for a variable number of inputs, and buttons
+		- for each input, have a prefix and initial text
+		- for each button, have text and onclick action
+		- also allow for a title/header
+		- menu should also be contained in a ui frame, i.e. have some solid background
+ */
 public class InputScreen extends BackgroundInheritor {
 	
 	public InputScreen(String prompt, ValueFunction<String> onConfirm) { this(prompt, onConfirm, ClientCore::backToParentScreen); }

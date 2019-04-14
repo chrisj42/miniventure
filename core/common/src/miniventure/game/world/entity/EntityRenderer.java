@@ -218,7 +218,7 @@ public abstract class EntityRenderer {
 		}
 		
 		private BlinkRenderer(String[] data) {
-			this(EntityRenderer.deserialize(MyUtils.parseLayeredString(data[0])), data[1].equals("null")?null:Color.valueOf(data[1]), Float.parseFloat(data[2]), Boolean.parseBoolean(data[3]), Blinker.load(MyUtils.parseLayeredString(data[4])));
+			this(EntityRenderer.deserialize(MyUtils.parseLayeredString(data[0])), data[1].equals("null")?null:Color.valueOf(data[1]), Float.parseFloat(data[2]), Boolean.parseBoolean(data[3]), Blinker.deserialize(MyUtils.parseLayeredString(data[4])));
 		}
 		
 		public void setRenderer(EntityRenderer renderer) {
@@ -232,7 +232,7 @@ public abstract class EntityRenderer {
 				blinkColor==null?"null":blinkColor.toString(),
 				String.valueOf(initialDuration),
 				String.valueOf(blinkFirst),
-				MyUtils.encodeStringArray(blinker.save())
+				MyUtils.encodeStringArray(blinker.serialize())
 			};
 		}
 		

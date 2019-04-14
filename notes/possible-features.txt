@@ -9,6 +9,33 @@ If you try to craft something, and you have multiple, different items which sati
 
 ---
 
+Do more intense analysis of world folders and their contents. Display all folders in the "saves" folder as if they were worlds, but display different messages depending on the validity of the world; these are cumulative:
+- validates:
+	- white text
+	- show version
+- validates with unknown/unused files:
+	- light yellow text
+	- show version
+	- show number of unused files
+- validates partially:
+	- red text
+	- show version if version present
+	- disallow load
+	- display missing files
+- does not validate
+	- gray text
+	- disallow load
+	- state that folder does not contain a world
+
+have radio button filter ("Show:")
+	- all folders
+	- world folders
+	- valid worlds
+
+set to "world folders" by default
+
+---
+
 failed interaction animation - player should show indication of failed interaction.
 
 ---

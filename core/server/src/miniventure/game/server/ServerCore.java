@@ -11,14 +11,18 @@ import java.util.Scanner;
 
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol;
+import miniventure.game.ProgressPrinter;
 import miniventure.game.chat.command.CommandInputParser;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.ProgressLogger;
 import miniventure.game.util.VersionInfo;
 import miniventure.game.util.customenum.GenericEnum;
-import miniventure.game.world.management.SaveLoadInterface;
-import miniventure.game.world.management.SaveLoadInterface.WorldDataSet;
+import miniventure.game.world.management.WorldFileInterface;
+import miniventure.game.world.management.WorldDataSet;
 import miniventure.game.world.management.ServerWorld;
+import miniventure.game.world.management.WorldFormatException;
+import miniventure.game.world.management.WorldReference;
 import miniventure.game.world.tile.ServerTileType;
 
 import com.badlogic.gdx.math.MathUtils;
@@ -37,8 +41,8 @@ public class ServerCore implements Runnable {
 	private boolean loopedFrames = false;
 	private final Object fpsLock = new Object();
 	
-	private ServerCore(int port, boolean multiplayer, WorldDataSet worldInfo) throws IOException {
-		serverWorld = new ServerWorld(this, port, multiplayer, worldInfo);
+	private ServerCore(int port, boolean multiplayer, WorldDataSet worldInfo, ProgressLogger logger) throws IOException {
+		serverWorld = new ServerWorld(this, port, multiplayer, worldInfo, logger);
 		commandParser = new CommandInputParser(serverWorld);
 	}
 	
@@ -114,20 +118,20 @@ public class ServerCore implements Runnable {
 	
 	
 	// single player server
-	public static ServerCore initSinglePlayer(WorldDataSet worldInfo) throws IOException {
+	public static ServerCore initSinglePlayer(WorldDataSet worldInfo, ProgressLogger logger) throws IOException {
 		int tries = 0;
 		int port = GameProtocol.PORT;
 		while(true) {
 			try {
-				return new ServerCore(port, false, worldInfo);
+				return new ServerCore(port, false, worldInfo, logger);
 			} catch(IOException e) {
 				if(tries == 0)
 					e.printStackTrace();
 				tries++;
 				if(tries > 10)
-					throw new IOException("Failed to find valid port for internal server.", e);
+					throw new IOException("Failed to find valid port for internal server after "+tries+" tries. Ensure you have port "+GameProtocol.PORT+" or subsequent ports available.", e);
 				else
-					port += MathUtils.random(1, 10);
+					port++;// += MathUtils.random(1, 10);
 			}
 		}
 	}
@@ -184,8 +188,8 @@ public class ServerCore implements Runnable {
 		}
 		
 		// check for an existing save with the given name
-		Path world = SaveLoadInterface.getLocation(worldname);
-		System.out.println("looking for worlds in: "+SaveLoadInterface.getLocation("").toAbsolutePath());
+		Path world = WorldFileInterface.getLocation(worldname);
+		System.out.println("looking for worlds in: "+ WorldFileInterface.getLocation("").toAbsolutePath());
 		boolean exists = Files.exists(world);
 		
 		if(!exists && !create) {
@@ -218,7 +222,7 @@ public class ServerCore implements Runnable {
 			Files.createDirectories(world);
 		}
 		
-		RandomAccessFile lockHolder = SaveLoadInterface.tryLockWorld(world);
+		RandomAccessFile lockHolder = WorldFileInterface.tryLockWorld(world);
 		if(lockHolder == null) {
 			System.err.println("Failed to acquire world lock; is it currently loaded by another instance?");
 			return;
@@ -234,17 +238,19 @@ public class ServerCore implements Runnable {
 		
 		WorldDataSet worldInfo;
 		
-		if(load) // LOAD
-			worldInfo = SaveLoadInterface.loadWorld(world, lockHolder);
-		else // CREATE
-			worldInfo = SaveLoadInterface.createWorld(world, lockHolder, seedString);
-		
-		if(worldInfo == null) {
-			System.err.println("Error occurred during world load, world init failed.");
-			return;
+		if(load) { // LOAD
+			WorldReference worldRef = new WorldReference(world);
+			try {
+				worldInfo = WorldFileInterface.loadWorld(worldRef, lockHolder);
+			} catch(WorldFormatException e) {
+				System.err.println(MyUtils.combineThrowableCauses(e, "Error occurred during world load"));
+				return;
+			}
 		}
+		else // CREATE
+			worldInfo = WorldFileInterface.createWorld(world, lockHolder, seedString);
 		
-		ServerCore core = new ServerCore(port, true, worldInfo);
+		ServerCore core = new ServerCore(port, true, worldInfo, new ProgressPrinter());
 		
 		System.out.println("server ready");
 		if(!GameCore.determinedLatestVersion())

@@ -36,15 +36,19 @@ public class LoadingScreen extends BackgroundInheritor implements ProgressLogger
 	@Override
 	public void pushMessage(String message) { pushMessage(message, false); }
 	public void pushMessage(String message, boolean simple) {
+		message += "...";
 		final VisLabel label = simple ? new VisLabel(message) : makeLabel(message);
 		messageLabels.push(label);
 		Gdx.app.postRunnable(() -> vGroup.addActor(label));
 	}
 	
 	@Override
-	public void editMessage(final String message) {
-		final VisLabel label = messageLabels.peek();
-		Gdx.app.postRunnable(() -> label.setText(message));
+	public void editMessage(String message) {
+		VisLabel label = messageLabels.empty() ? null : messageLabels.peek();
+		if(label == null)
+			pushMessage(message);
+		else
+			Gdx.app.postRunnable(() -> label.setText(message+"..."));
 	}
 	
 	@Override

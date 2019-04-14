@@ -6,8 +6,8 @@ import java.nio.file.Path;
 
 import miniventure.game.client.ClientCore;
 import miniventure.game.screen.util.BackgroundInheritor;
-import miniventure.game.world.management.SaveLoadInterface;
-import miniventure.game.world.management.SaveLoadInterface.WorldDataSet;
+import miniventure.game.world.management.WorldFileInterface;
+import miniventure.game.world.management.WorldDataSet;
 
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
@@ -43,26 +43,22 @@ public class WorldGenScreen extends BackgroundInheritor {
 			if(name.length() == 0)
 				return;
 			
-			Path path = SaveLoadInterface.getLocation(name);
+			Path path = WorldFileInterface.getLocation(name);
 			RandomAccessFile lockRef;
 			try {
-				lockRef = SaveLoadInterface.tryLockWorld(path);
+				lockRef = WorldFileInterface.tryLockWorld(path);
 			} catch(IOException e) {
-				e.printStackTrace();
+				// e.printStackTrace();
 				ClientCore.setScreen(new ErrorScreen(e.getMessage()));
 				return;
 			}
 			if(lockRef == null) {
-				ClientCore.setScreen(new ErrorScreen("World exists and is currently being managed by another process. Only one instance of the game can load a world at a given time."));
+				ClientCore.setScreen(new ErrorScreen("World exists and is currently being managed by another process. Please ensure no other programs (or miniventure processes) are modifying the world files, then try again."));
 				return;
 			}
 			
-			LoadingScreen loader = new LoadingScreen();
-			loader.pushMessage("Generating world...");
-			ClientCore.setScreen(loader);
-			
 			String seed = seedField.getText();
-			WorldDataSet worldInfo = SaveLoadInterface.createWorld(path, lockRef, seed);
+			WorldDataSet worldInfo = WorldFileInterface.createWorld(path, lockRef, seed);
 			
 			ClientCore.getWorld().startLocalWorld(worldInfo);
 		});

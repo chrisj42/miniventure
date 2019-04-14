@@ -14,8 +14,8 @@ import miniventure.game.util.VersionInfo;
 import miniventure.game.world.level.RenderLevel;
 import miniventure.game.world.management.ClientWorld;
 import miniventure.game.world.management.DisplayWorld;
-import miniventure.game.world.management.SaveLoadInterface;
 import miniventure.game.world.management.TimeOfDay;
+import miniventure.game.world.management.WorldReference;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
@@ -63,12 +63,26 @@ public class MainMenu extends BackgroundProvider {
 		table.add(playButton).spaceBottom(20);
 		table.row();
 		
-		if(SaveLoadInterface.getLocalWorlds().length > 0) {
+		if(WorldReference.getLocalWorlds().size() > 0) {
 			VisTextButton loadBtn = makeButton("Load World", () -> ClientCore.setScreen(new WorldSelectScreen()));
 			table.add(loadBtn).spaceBottom(20).row();
 		}
 		
 		VisTextButton joinBtn = makeButton("Join Local Game", () -> ClientCore.setScreen(new InputScreen("Enter the IP Address you want to connect to (optionally including port):", input -> {
+			/*
+				TODO condense player name input into server ip input
+				- if the username is taken, display the same page again, with the same data in them but also an error message saying the username is taken.
+				TODO also save a default player name for new servers, and login data for all servers that have previously been connected to.
+				- This suggests a renovation for the "join server" screen: a text field at the top where you enter a server ip, a text field below it filled with the default username, and at the bottom there's a list of all servers previously connected to.
+				-   --- password later
+				- the list has the ip, and username you connected with
+				- when you type into the IP field, the displayed servers change live
+					- only those matching the input are shown
+					- if the ip matches exactly (or the server is clicked, which modifies the ip field), then the server is highlighted and the username is changed to the stored value for that server
+					- changing the ip removes the highlight
+					- changing the username is allowed, but a confirmation will be shown, confirming that you realize you will not have the same stuff as your last account, and still wish to connect.
+			*/
+			
 			if(input.contains(":")) {
 				String ip = input.substring(0, input.indexOf(":"));
 				String portstr = input.substring(input.indexOf(":")+1);

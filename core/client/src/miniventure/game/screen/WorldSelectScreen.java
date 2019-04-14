@@ -6,9 +6,10 @@ import java.io.RandomAccessFile;
 import miniventure.game.GameCore;
 import miniventure.game.client.ClientCore;
 import miniventure.game.screen.util.BackgroundInheritor;
-import miniventure.game.world.management.SaveLoadInterface;
-import miniventure.game.world.management.SaveLoadInterface.WorldDataSet;
-import miniventure.game.world.management.SaveLoadInterface.WorldReference;
+import miniventure.game.util.MyUtils;
+import miniventure.game.world.management.WorldFileInterface;
+import miniventure.game.world.management.WorldFormatException;
+import miniventure.game.world.management.WorldReference;
 
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.List;
@@ -24,6 +25,9 @@ public class WorldSelectScreen extends BackgroundInheritor {
 	
 	private List<WorldReference> worldList;
 	
+	// TODO use the info strings in WorldReference to highlight the world a certain color,
+	//  and display info about it.
+	// TODO add a checkbox to have invalid worlds displayed (missing files will be shown).
 	public WorldSelectScreen() {
 		
 		Table table = useTable();
@@ -31,7 +35,7 @@ public class WorldSelectScreen extends BackgroundInheritor {
 		// add delete function later
 		
 		worldList = new List<>(VisUI.getSkin());
-		worldList.setItems(SaveLoadInterface.getLocalWorlds());
+		worldList.setItems(WorldReference.getLocalWorlds(false).toArray(new WorldReference[0]));
 		
 		table.defaults().padBottom(10);
 		
@@ -49,23 +53,27 @@ public class WorldSelectScreen extends BackgroundInheritor {
 			if(ref == null) return;
 			
 			try {
-				RandomAccessFile lockRef = SaveLoadInterface.tryLockWorld(ref.folder);
-				LoadingScreen loader = new LoadingScreen();
-				loader.pushMessage("Loading world '"+ref.worldName+"'...");
-				ClientCore.setScreen(loader);
-				WorldDataSet world = SaveLoadInterface.loadWorld(ref.folder, lockRef);
-				if(world == null) {
-					error.setText("Failed to load world. Possible format error in game files.");
-					error.invalidateHierarchy();
-					ClientCore.backToParentScreen();
-				} else
-					ClientCore.getWorld().startLocalWorld(world);
+				RandomAccessFile lockRef = WorldFileInterface.tryLockWorld(ref.folder);
+				if(lockRef == null) {
+					error.setText("Failed to load world. Ensure no other programs are using the files.");
+				}
+				else {
+					// LoadingScreen loader = new LoadingScreen();
+					// loader.pushMessage("Loading world '"+ref.worldName+"'...");
+					// ClientCore.setScreen(loader);
+					try {
+						ClientCore.getWorld().startLocalWorld(WorldFileInterface.loadWorld(ref, lockRef));
+						return;
+					} catch(WorldFormatException e) {
+						error.setText(MyUtils.combineThrowableCauses(e, "Failed to load world"));
+					}
+				}
 			} catch(IOException e) {
-				error.setText("Failed to load world. Ensure no other programs are using the files.");
-				error.invalidateHierarchy();
-				if(ClientCore.getScreen() instanceof LoadingScreen)
-					ClientCore.backToParentScreen();
+				error.setText(e.getMessage());
 			}
+			// code reaches here if an error occurred
+			error.invalidateHierarchy();
+			ClientCore.setScreen(this);
 		});
 		table.add(load).row();
 		

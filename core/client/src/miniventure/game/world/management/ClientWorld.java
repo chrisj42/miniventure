@@ -18,7 +18,6 @@ import miniventure.game.screen.RespawnScreen;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
 import miniventure.game.world.level.ClientLevel;
-import miniventure.game.world.management.SaveLoadInterface.WorldDataSet;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -135,8 +134,9 @@ public class ClientWorld extends LevelManager {
 	
 	// given a pre-initialized WorldFile (ie the world has already been read from file and/or generated successfully), this method starts up a local server on it, and logs in.
 	public void startLocalWorld(WorldDataSet worldInfo) {
-		ClientCore.stopMusic();
+		// ClientCore.stopMusic();
 		LoadingScreen loadingScreen = new LoadingScreen();
+		loadingScreen.pushMessage("Initializing private server");
 		ClientCore.setScreen(loadingScreen);
 		
 		this.ipAddress = "localhost";
@@ -146,11 +146,13 @@ public class ClientWorld extends LevelManager {
 			
 			int port;
 			try {
-				port = serverManager.startServer(worldInfo);
+				port = serverManager.startServer(worldInfo, loadingScreen);
 			} catch(IOException e) {
-				Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen("Error starting world; internal server requires open port to host world, but none found.")));
+				Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen("Error starting world: "+e.getMessage())));
 				return;
 			}
+			
+			loadingScreen.popMessage();
 			
 			// successful server start
 			client.connectToServer(loadingScreen, serverManager, "localhost", port, success -> {
@@ -231,7 +233,7 @@ public class ClientWorld extends LevelManager {
 	public void respawnPlayer() {
 		LoadingScreen loader = new LoadingScreen();
 		ClientCore.setScreen(loader);
-		loader.pushMessage("Respawning...");
+		loader.pushMessage("Respawning");
 		client.send(DatalessRequest.Respawn);
 	}
 	

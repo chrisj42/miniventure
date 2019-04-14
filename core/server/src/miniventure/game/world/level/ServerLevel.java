@@ -17,7 +17,7 @@ import miniventure.game.world.entity.mob.ServerMob;
 import miniventure.game.world.entity.mob.player.Player;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.entity.particle.ItemEntity;
-import miniventure.game.world.management.SaveLoadInterface.LevelCache;
+import miniventure.game.world.management.LevelCache;
 import miniventure.game.world.management.ServerWorld;
 import miniventure.game.world.tile.ServerTile;
 import miniventure.game.world.tile.Tile;
@@ -78,7 +78,7 @@ public class ServerLevel extends Level {
 				continue;
 			entityData.add(ServerEntity.serialize((ServerEntity)e));
 		}
-		cache.save(entityData.toArray(new String[0]), tileData);
+		cache.updateData(entityData.toArray(new String[0]), tileData);
 	}
 	
 	/*@Override

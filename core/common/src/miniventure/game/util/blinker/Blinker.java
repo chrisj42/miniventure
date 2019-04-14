@@ -8,9 +8,9 @@ public interface Blinker {
 	boolean shouldRender();
 	void reset();
 	
-	String[] save();
+	String[] serialize();
 	
-	static Blinker load(String[] allData) {
+	static Blinker deserialize(String[] allData) {
 		String type = allData[0];
 		String[] data = Arrays.copyOfRange(allData, 1, allData.length);
 		if(type.equals("frame"))

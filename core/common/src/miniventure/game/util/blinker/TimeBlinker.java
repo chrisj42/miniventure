@@ -18,12 +18,12 @@ public class TimeBlinker implements Blinker {
 	}
 	
 	@Override
-	public String[] save() {
+	public String[] serialize() {
 		return new String[] {
 			"time",
-			timeOn+"",
-			timeOff+"",
-			startOn+""
+			String.valueOf(timeOn),
+			String.valueOf(timeOff),
+			String.valueOf(startOn)
 		};
 	}
 	

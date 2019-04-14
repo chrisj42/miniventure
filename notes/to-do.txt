@@ -1,7 +1,7 @@
+- validate world name; can only contain alphanum, spaces, dashes, and underscores
+
 - add stuff to serverplayer
 - level loading sync queue
-
-- preload disabled on level load
 
 - have a play with colorizing server console output
 - echo player commands to server terminal (this includes the msg command)

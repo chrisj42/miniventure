@@ -22,6 +22,7 @@ import miniventure.game.item.ToolItem.Material;
 import miniventure.game.item.ToolItem.ToolType;
 import miniventure.game.server.GameServer;
 import miniventure.game.server.ServerCore;
+import miniventure.game.util.ProgressLogger;
 import miniventure.game.util.SyncObj;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueFunction;
@@ -31,16 +32,12 @@ import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.level.Level;
 import miniventure.game.world.level.LevelFetcher;
 import miniventure.game.world.level.ServerLevel;
-import miniventure.game.world.management.SaveLoadInterface.LevelCache;
-import miniventure.game.world.management.SaveLoadInterface.PlayerInfo;
-import miniventure.game.world.management.SaveLoadInterface.WorldDataSet;
 import miniventure.game.world.tile.ServerTileType;
 import miniventure.game.world.tile.Tile.TileData;
 import miniventure.game.world.tile.TileTypeEnum;
 import miniventure.game.world.worldgen.island.IslandType;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class ServerWorld extends WorldManager {
 	
@@ -51,10 +48,11 @@ public class ServerWorld extends WorldManager {
 		ServerWorld is also the only world that will ever have multiple islands loaded simultaneously.
 	 */
 	
-	private final LevelFetcher levelFetcher = new LevelFetcher() {
+	private final LevelFetcher<ServerLevel> levelFetcher = new LevelFetcher<ServerLevel>() {
 		@Override
-		public ServerLevel makeLevel(int levelId, long seed, IslandType islandType) {
-			GameCore.debug("Server generating "+islandType+" map for level "+levelId);
+		public ServerLevel makeLevel(int levelId, IslandType islandType) {
+			// GameCore.debug("Server generating "+islandType+" map for level "+levelId);
+			long seed = ServerWorld.this.worldSeed * (2 + levelId);
 			return new ServerLevel(ServerWorld.this, levelId, islandType.generateIsland(seed));
 		}
 		
@@ -89,15 +87,20 @@ public class ServerWorld extends WorldManager {
 	// locks world update frames so world loading, saving, and exiting occurs before or after a full step.
 	// private final Object updateLock = new Object();
 	
-	public ServerWorld(@NotNull ServerCore core, int port, boolean multiplayer, @NotNull WorldDataSet worldInfo) throws IOException {
+	public ServerWorld(@NotNull ServerCore core, int port, boolean multiplayer, @NotNull WorldDataSet worldInfo, ProgressLogger logger) throws IOException {
 		this.core = core;
 		this.server = new GameServer(this, port, multiplayer); // start new server on given port
 		
+		logger.pushMessage("Parsing world parameters");
 		final boolean old = worldInfo.dataVersion.compareTo(GameCore.VERSION) < 0;
 		gameTime = worldInfo.gameTime;
 		daylightOffset = worldInfo.timeOfDay;
 		worldSeed = worldInfo.seed;
 		knownPlayers = Collections.synchronizedMap(new HashMap<>(Math.max(4, worldInfo.playerInfo.length * 2)));
+		
+		final boolean refreshPlayers = old && worldInfo.playerInfo.length > 0;
+		if(refreshPlayers)
+			logger.pushMessage("Refreshing player data");
 		for(int i = 0; i < worldInfo.playerInfo.length; i++) {
 			PlayerInfo info = worldInfo.playerInfo[i];
 			if(old) {
@@ -107,19 +110,29 @@ public class ServerWorld extends WorldManager {
 			}
 			knownPlayers.put(info.name, info);
 		}
+		if(refreshPlayers)
+			logger.popMessage();
 		
 		islandStores = worldInfo.levelCaches;
 		// generate levels with a new world, refresh loaded levels for an old one
-		for(int i = 0; i < islandStores.length; i++) {
-			if(!islandStores[i].generated() || old) {
-				ServerLevel level = (ServerLevel) islandStores[i].getLevel(levelFetcher);
-				level.save(islandStores[i]);
+		if(worldInfo.create)
+			logger.pushMessage("Generating world");
+		else if(old)
+			logger.pushMessage("Refreshing terrain data");
+		
+		if(worldInfo.create || old) {
+			for(LevelCache cache: islandStores) {
+				int id = cache.island.levelId;
+				IslandType type = cache.island.type;
+				levelFetcher.makeLevel(id, type).save(cache);
 			}
+			logger.popMessage();
 		}
 		
 		worldPath = worldInfo.worldFile;
 		lockRef = worldInfo.lockRef;
 		
+		logger.popMessage();
 		worldLoaded = true;
 	}
 	
@@ -196,7 +209,7 @@ public class ServerWorld extends WorldManager {
 			}
 			
 			synchronized (knownPlayers) {
-				SaveLoadInterface.saveWorld(new WorldDataSet(worldPath, lockRef, worldSeed, gameTime, daylightOffset, GameCore.VERSION, knownPlayers.values().toArray(new PlayerInfo[0]), islandStores));
+				WorldFileInterface.saveWorld(new WorldDataSet(worldPath, lockRef, worldSeed, gameTime, daylightOffset, GameCore.VERSION, knownPlayers.values().toArray(new PlayerInfo[0]), islandStores));
 			}
 		});
 	}
@@ -230,7 +243,7 @@ public class ServerWorld extends WorldManager {
 			if(!worldLoaded) return;
 			server.stop(true);
 			worldLoaded = false;
-			SaveLoadInterface.saveWorld(new WorldDataSet(worldPath, lockRef, worldSeed, gameTime, daylightOffset, GameCore.VERSION, knownPlayers.values().toArray(new PlayerInfo[0]), islandStores));
+			WorldFileInterface.saveWorld(new WorldDataSet(worldPath, lockRef, worldSeed, gameTime, daylightOffset, GameCore.VERSION, knownPlayers.values().toArray(new PlayerInfo[0]), islandStores));
 			// dispose of level/world resources
 			saveWorld();
 			clearEntityIdMap();

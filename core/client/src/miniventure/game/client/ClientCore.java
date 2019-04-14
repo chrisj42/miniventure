@@ -111,7 +111,7 @@ public class ClientCore extends ApplicationAdapter {
 		VisUI.load(skin);
 		
 		LoadingScreen loader = new LoadingScreen();
-		loader.pushMessage("Initializing...", true);
+		loader.pushMessage("Initializing", true);
 		setScreen(loader);
 		//System.out.println("start delay");
 		MyUtils.delay(0, () -> Gdx.app.postRunnable(() -> {
@@ -185,6 +185,21 @@ public class ClientCore extends ApplicationAdapter {
 			
 			if((menuScreen instanceof MainMenu || menuScreen instanceof ErrorScreen) && screen instanceof ErrorScreen)
 				return; // ignore it.
+			
+			if(screen != null) {
+				// determine if the given screen instance is already somewhere on the "screen" hierarchy, and if so go back to that one.
+				MenuScreen check = menuScreen;
+				while(check != null && check != screen)
+					check = check.getParent();
+				
+				if(check != null) {
+					// screen found
+					while(menuScreen != null && menuScreen != screen)
+						backToParentScreen();
+					
+					return;
+				}
+			}
 			
 			if(menuScreen instanceof BackgroundProvider && screen instanceof BackgroundInheritor)
 				((BackgroundInheritor) screen).setBackground((BackgroundProvider) menuScreen);

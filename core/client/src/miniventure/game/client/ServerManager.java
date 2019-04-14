@@ -3,7 +3,8 @@ package miniventure.game.client;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
-import miniventure.game.world.management.SaveLoadInterface.WorldDataSet;
+import miniventure.game.util.ProgressLogger;
+import miniventure.game.world.management.WorldDataSet;
 
 public interface ServerManager {
 	
@@ -14,7 +15,7 @@ public interface ServerManager {
 	boolean isHosting();
 	
 	// returns port server was started on
-	int startServer(WorldDataSet worldInfo) throws IOException;
+	int startServer(WorldDataSet worldInfo, ProgressLogger logger) throws IOException;
 	void setHost(InetSocketAddress host); // tell the server who the host is
 	void open(); // allow other players to join; TODO implement this option in a pause menu on client GUI
 	void closeServer();
