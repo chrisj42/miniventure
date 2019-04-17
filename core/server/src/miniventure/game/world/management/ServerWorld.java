@@ -53,7 +53,7 @@ public class ServerWorld extends WorldManager {
 	private final LevelFetcher<ServerLevel> levelFetcher = new LevelFetcher<ServerLevel>() {
 		@Override
 		public ServerLevel makeLevel(int levelId, IslandType islandType) {
-			// GameCore.debug("Server generating "+islandType+" map for level "+levelId);
+			GameCore.debug("Server generating "+islandType+" map for level "+levelId);
 			long seed = ServerWorld.this.worldSeed * (2 + levelId);
 			return new ServerLevel(ServerWorld.this, levelId, islandType.generateIsland(seed));
 		}
@@ -137,10 +137,10 @@ public class ServerWorld extends WorldManager {
 		worldPath = worldInfo.worldFile;
 		lockRef = worldInfo.lockRef;
 		
-		/*if(genIsland) {
-			logger.editMessage("Saving refreshed world data");
+		if(worldInfo.create/*genIsland*/) {
+			logger.editMessage("Saving initial generated world to file"/*"Saving refreshed world data"*/);
 			saveWorld();
-		}*/
+		}
 		
 		logger.popMessage();
 		worldLoaded = true;
@@ -458,21 +458,23 @@ public class ServerWorld extends WorldManager {
 		
 		if(GameCore.debug/* && !knownPlayers.containsKey(player.getName())*/) {
 			System.out.println("adding debug items to player inventory");
+			// player.getInventory().addItem(new ToolItem(ToolType.Shovel, Material.Ruby));
+			// player.getInventory().addItem(new ToolItem(ToolType.Shovel, Material.Ruby));
 			player.getInventory().addItem(new ToolItem(ToolType.Shovel, Material.Ruby));
-			player.getInventory().addItem(new ToolItem(ToolType.Shovel, Material.Ruby));
-			player.getInventory().addItem(new ToolItem(ToolType.Shovel, Material.Ruby));
-			player.getInventory().addItem(new ToolItem(ToolType.Pickaxe, Material.Iron));
+			// player.getInventory().addItem(new ToolItem(ToolType.Pickaxe, Material.Iron));
 			player.getInventory().addItem(new ToolItem(ToolType.Pickaxe, Material.Ruby));
 			player.getInventory().addItem(ServerTileType.getItem(TileTypeEnum.CLOSED_DOOR));
-			player.getInventory().addItem(ServerTileType.getItem(TileTypeEnum.TORCH));
+			for(int i = 0; i < 7; i++)
+				player.getInventory().addItem(ServerTileType.getItem(TileTypeEnum.TORCH));
 			for(int i = 0; i < 7; i++)
 				player.getInventory().addItem(ResourceType.Log.get());
-			player.getInventory().addItem(ResourceType.Tungsten.get());
-			player.getInventory().addItem(ResourceType.Flint.get());
-			player.getInventory().addItem(ResourceType.Fabric.get());
-			player.getInventory().addItem(ResourceType.Cotton.get());
-			for(FoodType food : FoodType.values())
-				player.getInventory().addItem(food.get());
+			// player.getInventory().addItem(ResourceType.Tungsten.get());
+			// player.getInventory().addItem(ResourceType.Flint.get());
+			// player.getInventory().addItem(ResourceType.Fabric.get());
+			// player.getInventory().addItem(ResourceType.Cotton.get());
+			// for(FoodType food : FoodType.values())
+			for(int i = 0; i < 7; i++)
+				player.getInventory().addItem(FoodType.Cooked_Meat.get());
 		}
 		
 		loadLevel(player.getSpawnLevel(), player, player.respawnPositioning());

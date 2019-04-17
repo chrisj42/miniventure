@@ -208,7 +208,6 @@ public enum IslandType {
 	abstract void generateIsland(ProtoIsland island);
 	
 	public TileTypeEnum[][][] generateIsland(long seed) {
-		System.out.println("generating "+this+" tilemap...");
 		ProtoIsland island = new ProtoIsland(seed, width, height);
 		generateIsland(island);
 		return island.getMap();

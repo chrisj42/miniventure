@@ -16,9 +16,6 @@ public interface Argument {
 	boolean satisfiedBy(@NotNull ServerWorld world, String[] args, int offset);
 	int length();
 	
-	MapFunction<ServerPlayer, Boolean> SERVER_ONLY = player ->
-		player == null || player.getWorld().getServer().isMultiplayer();
-	
 	/*static Argument get(@NotNull ArgValidator... validators) {
 		return new Argument() {
 			@Override

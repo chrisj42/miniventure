@@ -9,11 +9,9 @@ import miniventure.game.GameProtocol.Ping;
 import miniventure.game.GameProtocol.PositionUpdate;
 import miniventure.game.chat.MessageBuilder;
 import miniventure.game.chat.command.Argument.ArgValidator;
-import miniventure.game.chat.command.CommandUsageForm.ExecutionBehavior;
 import miniventure.game.server.GameServer;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
-import miniventure.game.util.function.MapFunction;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.level.ServerLevel;
 import miniventure.game.world.management.Config;
@@ -25,7 +23,7 @@ import com.badlogic.gdx.utils.Array;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static miniventure.game.chat.command.Argument.SERVER_ONLY;
+import static miniventure.game.chat.command.CommandInputParser.SERVER_ONLY;
 
 public enum Command {
 	
@@ -245,22 +243,18 @@ public enum Command {
 	);
 	
 	
-	static Command getCommand(String commandName, @Nullable ServerPlayer executor) {
-		Command c = null;
+	static Command getCommand(String commandName) {
 		try {
-			c = Enum.valueOf(Command.class, commandName.toUpperCase());
-		} catch(IllegalArgumentException ignored) {}
-		
-		if(c != null && !c.canExecute(executor))
-			c = null; // not allowed to access.
-		
-		return c;
+			return Enum.valueOf(Command.class, commandName.toUpperCase());
+		} catch(IllegalArgumentException e) {
+			return null;
+		}
 	}
 	
-	private static ExecutionBehavior replaceArgs(String command, MapFunction<String[], String[]> argMapper) {
+	/*private static ExecutionBehavior replaceArgs(String command, MapFunction<String[], String[]> argMapper) {
 		return (world, executor, args, out, err) ->
-			getCommand(command, executor).execute(world, executor, argMapper.get(args), out, err);
-	}
+			getCommand(command).execute(world, executor, argMapper.get(args), out, err);
+	}*/
 	
 	private final String name;
 	private final String description, details;
@@ -283,7 +277,10 @@ public enum Command {
 	public void execute(@NotNull ServerWorld world, @Nullable ServerPlayer executor, String[] args, MessageBuilder out, MessageBuilder err) {
 		// this method is called after previous canExecute checks, at least by proxy; so this technically should never print unless it's a race condition or something.
 		if(!canExecute(executor)) {
-			err.println("You do not have access to that command.");
+			if(executor == null || world.getServer().isHost(executor))
+				err.println("This command is only available on multiplayer servers.");
+			else
+				err.println("You do not have access to this command.");
 			return;
 		}
 		

@@ -11,6 +11,7 @@ import java.util.List;
 import miniventure.game.chat.ConsoleMessageBuilder;
 import miniventure.game.chat.MessageBuilder;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.function.MapFunction;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.management.ServerWorld;
 
@@ -18,6 +19,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class CommandInputParser implements Runnable {
+	
+	static final MapFunction<ServerPlayer, Boolean> SERVER_ONLY = player ->
+		player == null || player.getWorld().getServer().isMultiplayer();
 	
 	private final ServerWorld world;
 	
@@ -100,10 +104,10 @@ public class CommandInputParser implements Runnable {
 		
 		
 		String commandName = args.remove(0);
-		Command command = Command.getCommand(commandName, executor);
+		Command command = Command.getCommand(commandName);
 		if(command == null && commandName.startsWith("/")) {
 			commandName = commandName.substring(1);
-			command = Command.getCommand(commandName, executor);
+			command = Command.getCommand(commandName);
 		}
 		if(command == null)
 			err.println("Command not recognized: \""+commandName+"\". Type \"/help\" for a list of commands.");
