@@ -17,7 +17,7 @@ import miniventure.game.world.entity.mob.ServerMob;
 import miniventure.game.world.entity.mob.player.Player;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.entity.particle.ItemEntity;
-import miniventure.game.world.management.LevelCache;
+import miniventure.game.world.file.LevelCache;
 import miniventure.game.world.management.ServerWorld;
 import miniventure.game.world.tile.ServerTile;
 import miniventure.game.world.tile.Tile;

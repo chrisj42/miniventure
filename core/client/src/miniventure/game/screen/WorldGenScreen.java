@@ -6,8 +6,8 @@ import java.nio.file.Path;
 
 import miniventure.game.client.ClientCore;
 import miniventure.game.screen.util.BackgroundInheritor;
-import miniventure.game.world.management.WorldFileInterface;
-import miniventure.game.world.management.WorldDataSet;
+import miniventure.game.world.file.WorldFileInterface;
+import miniventure.game.world.file.WorldDataSet;
 
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;

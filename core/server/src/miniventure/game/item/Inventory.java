@@ -19,7 +19,7 @@ public class Inventory {
 		reset();
 	}
 	
-	public void reset() {
+	public synchronized void reset() {
 		itemCounter.clear();
 		uniqueItems.clear();
 		spaceTaken = 0;
@@ -30,25 +30,25 @@ public class Inventory {
 	public int getSlotsTaken() { return uniqueItems.size(); }
 	public float getPercentFilled() { return spaceTaken / (float) getSpace(); }
 	
-	public int getCount(ServerItem item) { return itemCounter.get(item); }
+	public synchronized int getCount(ServerItem item) { return itemCounter.get(item); }
 	public boolean hasItem(ServerItem item) { return hasItem(item, 1); }
 	public boolean hasItem(ServerItem item, int count) { return getCount(item) >= count; }
 	
-	public ServerItem[] getUniqueItems() { return uniqueItems.toArray(new ServerItem[0]); }
+	public synchronized ServerItem[] getUniqueItems() { return uniqueItems.toArray(new ServerItem[0]); }
 	
-	public ServerItem getItem(int idx) { return uniqueItems.get(idx); }
-	public ServerItemStack getItemStack(int idx) { return new ServerItemStack(getItem(idx), getCount(getItem(idx))); }
+	public synchronized ServerItem getItem(int idx) { return uniqueItems.get(idx); }
+	public synchronized ServerItemStack getItemStack(int idx) { return new ServerItemStack(getItem(idx), getCount(getItem(idx))); }
 	
-	public ServerItemStack[] getItemStacks() {
+	public synchronized ServerItemStack[] getItemStacks() {
 		ServerItemStack[] stacks = new ServerItemStack[uniqueItems.size()];
 		for(int i = 0; i < stacks.length; i++)
 			stacks[i] = getItemStack(i);
 		return stacks;
 	}
 	
-	public int getIndex(ServerItem item) { return uniqueItems.indexOf(item); }
+	public synchronized int getIndex(ServerItem item) { return uniqueItems.indexOf(item); }
 	
-	public boolean addItem(ServerItem item) {
+	public synchronized boolean addItem(ServerItem item) {
 		if(getSpaceLeft() < item.getSpaceUsage())
 			return false; // not enough space left in inventory.
 		
@@ -60,7 +60,7 @@ public class Inventory {
 		return true;
 	}
 	
-	public boolean removeItem(ServerItem item) {
+	public synchronized boolean removeItem(ServerItem item) {
 		if(!hasItem(item)) return false;
 		
 		// remove from uniqueItems if none are left
@@ -71,7 +71,7 @@ public class Inventory {
 		return true;
 	}
 	
-	public int removeItemStack(ServerItem item) {
+	public synchronized int removeItemStack(ServerItem item) {
 		if(item == null) return 0;
 		int count = getCount(item);
 		if(count == 0) return 0;
@@ -81,7 +81,7 @@ public class Inventory {
 		return count;
 	}
 	
-	public String[][] serialize() {
+	public synchronized String[][] serialize() {
 		String[][] data = new String[uniqueItems.size()][];
 		for(int i = 0; i < data.length; i++) {
 			ServerItem item = uniqueItems.get(i);
@@ -91,7 +91,7 @@ public class Inventory {
 		return data;
 	}
 	
-	public String[] save() {
+	public synchronized String[] save() {
 		String[] data = new String[uniqueItems.size()];
 		for(int i = 0; i < data.length; i++) {
 			ServerItem item = uniqueItems.get(i);
@@ -102,7 +102,7 @@ public class Inventory {
 	}
 	
 	// this expects exactly the output of the save function above.
-	public void loadItems(String[] allData) {
+	public synchronized void loadItems(String[] allData) {
 		reset();
 		for(String stackData: allData) {
 			String[] data = MyUtils.parseLayeredString(stackData);

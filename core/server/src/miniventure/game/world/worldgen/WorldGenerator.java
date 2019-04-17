@@ -2,7 +2,7 @@ package miniventure.game.world.worldgen;
 
 import java.util.Random;
 
-import miniventure.game.world.management.WorldFileInterface;
+import miniventure.game.world.file.WorldFileInterface;
 
 public class WorldGenerator {
 	

@@ -1,6 +1,4 @@
-package miniventure.game.world.management;
-
-import java.nio.file.Path;
+package miniventure.game.world.file;
 
 public class WorldFormatException extends Exception {
 	

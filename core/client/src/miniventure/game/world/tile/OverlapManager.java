@@ -38,8 +38,8 @@ public class OverlapManager {
 		else
 			renderStyle = null;
 		
-		if(GameCore.debug && renderStyle != null)
-			System.out.println("overlap sprites found for "+type);
+		// if(GameCore.debug && renderStyle != null)
+			// System.out.println("overlap sprites found for "+type);
 	}
 	
 	public OverlapManager customStyle(int spriteIndex, RenderStyle newStyle) {

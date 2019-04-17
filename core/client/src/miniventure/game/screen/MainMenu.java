@@ -15,7 +15,7 @@ import miniventure.game.world.level.RenderLevel;
 import miniventure.game.world.management.ClientWorld;
 import miniventure.game.world.management.DisplayWorld;
 import miniventure.game.world.management.TimeOfDay;
-import miniventure.game.world.management.WorldReference;
+import miniventure.game.world.file.WorldReference;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
@@ -63,7 +63,7 @@ public class MainMenu extends BackgroundProvider {
 		table.add(playButton).spaceBottom(20);
 		table.row();
 		
-		if(WorldReference.getLocalWorlds().size() > 0) {
+		if(WorldReference.getLocalWorlds(false).size() > 0) {
 			VisTextButton loadBtn = makeButton("Load World", () -> ClientCore.setScreen(new WorldSelectScreen()));
 			table.add(loadBtn).spaceBottom(20).row();
 		}

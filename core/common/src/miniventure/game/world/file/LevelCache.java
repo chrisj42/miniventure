@@ -1,4 +1,4 @@
-package miniventure.game.world.management;
+package miniventure.game.world.file;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -25,7 +25,7 @@ public class LevelCache {
 		Client needs levelid, location, and levelConfig (which is the island type)
 	 */
 	
-	final IslandReference island;
+	public final IslandReference island;
 	
 	// gen parameter
 	private final long seed;

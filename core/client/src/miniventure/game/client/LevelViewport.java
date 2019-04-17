@@ -188,7 +188,7 @@ public class LevelViewport {
 		float viewportHeight = window.height * Tile.SIZE / zoomFactor;
 		
 		camera.setToOrtho(false, viewportWidth, viewportHeight);
-		GameCore.debug("set level camera: "+width+'x'+height+" screen with "+viewportWidth+'x'+viewportHeight+" viewport ("+getZoomRatio(width/viewportWidth)+" actual px, "+getZoomRatio(width/viewportWidth*Tile.SCALE)+" apparent px)");
+		// GameCore.debug("set level camera: "+width+'x'+height+" screen with "+viewportWidth+'x'+viewportHeight+" viewport ("+getZoomRatio(width/viewportWidth)+" actual px, "+getZoomRatio(width/viewportWidth*Tile.SCALE)+" apparent px)");
 	}
 	
 	private static String getZoomRatio(float ratio) {

@@ -1,4 +1,4 @@
-package miniventure.game.world.management;
+package miniventure.game.world.file;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -17,6 +17,7 @@ import miniventure.game.util.SerialDataMap;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.Point;
+import miniventure.game.world.management.TimeOfDay;
 import miniventure.game.world.worldgen.island.IslandType;
 
 import org.jetbrains.annotations.NotNull;
@@ -166,12 +167,12 @@ public class WorldFileInterface {
 			new LevelCache(4, new Point(10, 0), seed, IslandType.SWAMP)*/
 		};
 		
-		WorldDataSet worldData = new WorldDataSet(file, lockRef, seed, 0, TimeOfDay.Morning.getStartOffsetSeconds(), GameCore.VERSION, new PlayerInfo[0], levelCaches, true);
+		WorldDataSet worldData = new WorldDataSet(file, lockRef, seed, 0, TimeOfDay.Morning.getStartOffsetSeconds(), GameCore.VERSION, new PlayerData[0], levelCaches, true);
 		saveWorld(worldData);
 		return worldData;
 	}
 	
-	static boolean saveWorld(WorldDataSet worldData) {
+	public static boolean saveWorld(WorldDataSet worldData) {
 		Path main = worldData.worldFile;
 		boolean good;
 		
@@ -192,12 +193,8 @@ public class WorldFileInterface {
 		}
 		
 		good = writeFile(main.resolve(PLAYER_FILE), list -> {
-			for(PlayerInfo p: worldData.playerInfo) {
-				// every 4 is a new player; also the first one is generally regarded as the host
-				list.add(p.name);
-				list.add(p.passhash);
-				list.add(String.valueOf(p.levelId));
-				list.add(p.data);
+			for(PlayerData p: worldData.playerInfo) {
+				p.serialize(list);
 			}
 		}) && good;
 		
@@ -238,14 +235,15 @@ public class WorldFileInterface {
 			
 			// read player data
 			readFile(folder.resolve(PLAYER_FILE), lines);
-			PlayerInfo[] players = new PlayerInfo[lines.size() / 4];
+			PlayerData[] players = new PlayerData[lines.size() / 5];
 			
 			for(int i = 0; i < players.length; i++) {
 				String name = lines.pop();
 				String passhash = lines.pop();
 				int level = Integer.parseInt(lines.pop());
 				String data = lines.pop();
-				players[i] = new PlayerInfo(name, passhash, data, level);
+				boolean op = Boolean.parseBoolean(lines.pop());
+				players[i] = new PlayerData(name, passhash, data, level, op);
 			}
 			
 			return new WorldDataSet(folder, lockRef, seed, gameTime, daytime, version, players, levels);
@@ -256,6 +254,12 @@ public class WorldFileInterface {
 			throw new WorldFormatException("Bad file", e);
 		} catch(Exception e) {
 			throw new WorldFormatException("Error loading world", e);
+		} finally {
+			if(lockRef != null) {
+				try {
+					lockRef.close();
+				} catch(IOException ignored) {}
+			}
 		}
 	}
 	
@@ -309,76 +313,4 @@ public class WorldFileInterface {
 		}
 		return true;
 	}
-	
-	/*enum SaveFile {
-		VERSION("version"),
-		
-		
-		GAME("game"),
-		
-		
-		PLAYERS("players"),
-		
-		
-		ISLANDS("island-\\d\\") {
-			@Override
-			public boolean validate(Set<Path> files, LinkedList<String> missingFiles) {
-				
-			}
-		};
-		
-		private final String filename;
-		private final WorldDataHandler writer;
-		private final WorldDataHandler loader;
-		
-		SaveFile(String filename, WorldDataHandler writer, WorldDataHandler loader) {
-			this.filename = filename+".txt";
-			this.writer = writer;
-			this.loader = loader;
-		}
-		
-		public void load(WorldDataSet worldData) {
-			loader.process(worldData);
-		}
-		
-		// check given files for needed ones, and remove it from the set if present; else, add it to the missing files list.
-		public boolean validate(Set<Path> files, LinkedList<String> missingFiles) {
-			boolean found = files.removeIf(path -> path.getFileName().toString().equals(filename));
-			if(!found)
-				missingFiles.add(filename);
-			return found;
-		}
-	}
-	
-	@FunctionalInterface
-	interface WorldDataHandler {
-		boolean process(WorldDataSet worldData);
-	}
-	
-	@FunctionalInterface
-	interface SimpleHandler {
-		void process(WorldDataSet worldData, LinkedList<String> data);
-	}
-	
-	@FunctionalInterface
-	interface Manager {
-		
-	}
-	
-	// simple handler deals with one file
-	// reads a file to a list, or writes to a list
-	
-	class SimpleWrapper implements WorldDataHandler {
-		
-		private final SimpleHandler handler;
-		
-		SimpleWrapper(ManagerSimpleHandler handler) {
-			this.handler = handler;
-		}
-		
-		@Override
-		public boolean process(WorldDataSet worldData) {
-			
-		}
-	}*/
 }

@@ -72,7 +72,7 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 		dir = Direction.valueOf(data.get(1));
 		maxHealth = Integer.parseInt(data.get(2));
 		health = Integer.parseInt(data.get(3));
-		invulnerableTime = Float.parseFloat(data.get(4));
+		// invulnerableTime = Float.parseFloat(data.get(4));
 		
 		knockbackController = new KnockbackController(this);
 		animator = new MobAnimationController<>(this, spriteName);
@@ -85,8 +85,8 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 			spriteName,
 			dir.name(),
 			String.valueOf(maxHealth),
-			String.valueOf(health),
-			String.valueOf(invulnerableTime)
+			String.valueOf(health)
+			// String.valueOf(invulnerableTime)
 		));
 		
 		allData.add(data);

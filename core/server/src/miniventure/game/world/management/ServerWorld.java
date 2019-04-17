@@ -2,13 +2,9 @@ package miniventure.game.world.management;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.net.InetSocketAddress;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.EntityAddition;
@@ -22,13 +18,19 @@ import miniventure.game.item.ToolItem.Material;
 import miniventure.game.item.ToolItem.ToolType;
 import miniventure.game.server.GameServer;
 import miniventure.game.server.ServerCore;
+import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.ProgressLogger;
 import miniventure.game.util.SyncObj;
 import miniventure.game.util.Version;
+import miniventure.game.util.function.MapFunction;
 import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
+import miniventure.game.world.file.LevelCache;
+import miniventure.game.world.file.PlayerData;
+import miniventure.game.world.file.WorldDataSet;
+import miniventure.game.world.file.WorldFileInterface;
 import miniventure.game.world.level.Level;
 import miniventure.game.world.level.LevelFetcher;
 import miniventure.game.world.level.ServerLevel;
@@ -77,60 +79,68 @@ public class ServerWorld extends WorldManager {
 	private final Path worldPath;
 	private final RandomAccessFile lockRef;
 	private final LevelCache[] islandStores;
-	private final Map<String, PlayerInfo> knownPlayers;
 	private final long worldSeed;
 	
 	private boolean worldLoaded;
 	
 	private final List<Runnable> runnables = Collections.synchronizedList(new LinkedList<>());
+	private final Object updateLock = new Object();
 	
 	// locks world update frames so world loading, saving, and exiting occurs before or after a full step.
 	// private final Object updateLock = new Object();
 	
-	public ServerWorld(@NotNull ServerCore core, int port, boolean multiplayer, @NotNull WorldDataSet worldInfo, ProgressLogger logger) throws IOException {
+	public ServerWorld(@NotNull ServerCore core, int port, boolean multiplayer, MapFunction<InetSocketAddress, Boolean> connectionValidator, @NotNull WorldDataSet worldInfo, ProgressLogger logger) throws IOException {
 		this.core = core;
-		this.server = new GameServer(this, port, multiplayer); // start new server on given port
-		
 		logger.pushMessage("Parsing world parameters");
 		final boolean old = worldInfo.dataVersion.compareTo(GameCore.VERSION) < 0;
+		
+		PlayerData[] pinfo = worldInfo.playerInfo;
+		if(old) {
+			// "refresh" the data
+			pinfo = ArrayUtils.mapArray(pinfo, PlayerData.class, info -> {
+				String newData = ServerEntity.serialize(ServerEntity.deserialize(this, info.data, worldInfo.dataVersion));
+				return new PlayerData(info, newData);
+			});
+		}
+		
+		this.server = new GameServer(this, port, multiplayer, connectionValidator, pinfo); // start new server on given port
+		
 		gameTime = worldInfo.gameTime;
 		daylightOffset = worldInfo.timeOfDay;
 		worldSeed = worldInfo.seed;
-		knownPlayers = Collections.synchronizedMap(new HashMap<>(Math.max(4, worldInfo.playerInfo.length * 2)));
-		
-		final boolean refreshPlayers = old && worldInfo.playerInfo.length > 0;
-		if(refreshPlayers)
-			logger.pushMessage("Refreshing player data");
-		for(int i = 0; i < worldInfo.playerInfo.length; i++) {
-			PlayerInfo info = worldInfo.playerInfo[i];
-			if(old) {
-				// "refresh" the data
-				String newData = ServerEntity.serialize(ServerEntity.deserialize(this, info.data, worldInfo.dataVersion));
-				worldInfo.playerInfo[i] = info = new PlayerInfo(info.name, info.passhash, newData, info.levelId);
-			}
-			knownPlayers.put(info.name, info);
-		}
-		if(refreshPlayers)
-			logger.popMessage();
 		
 		islandStores = worldInfo.levelCaches;
 		// generate levels with a new world, refresh loaded levels for an old one
+		
+		boolean genIsland = true;
 		if(worldInfo.create)
 			logger.pushMessage("Generating world");
 		else if(old)
 			logger.pushMessage("Refreshing terrain data");
-		
-		if(worldInfo.create || old) {
-			for(LevelCache cache: islandStores) {
-				int id = cache.island.levelId;
-				IslandType type = cache.island.type;
-				levelFetcher.makeLevel(id, type).save(cache);
-			}
-			logger.popMessage();
+		else {
+			genIsland = false;
+			logger.pushMessage("Checking for ungenerated terrain");
 		}
+		
+		for(LevelCache cache: islandStores) {
+			int id = cache.island.levelId;
+			IslandType type = cache.island.type;
+			if(!cache.generated() || worldInfo.create || old) {
+				if(!genIsland)
+					logger.editMessage("Generating missing terrain");
+				levelFetcher.makeLevel(id, type).save(cache);
+				genIsland = true;
+			}
+		}
+		logger.popMessage();
 		
 		worldPath = worldInfo.worldFile;
 		lockRef = worldInfo.lockRef;
+		
+		/*if(genIsland) {
+			logger.editMessage("Saving refreshed world data");
+			saveWorld();
+		}*/
 		
 		logger.popMessage();
 		worldLoaded = true;
@@ -140,20 +150,29 @@ public class ServerWorld extends WorldManager {
 	/*  --- UPDATE MANAGEMENT --- */
 	
 	
-	public void postRunnable(Runnable r) {
+	public void postRunnable(Runnable r) { postRunnable(true, r); }
+	public void postRunnable(boolean allowAsync, Runnable r) {
 		if(!core.isRunning() || core.isUpdateThread())
 			r.run();
-		else
+		else if(allowAsync)
 			runnables.add(r);
+		else {
+			synchronized (updateLock) {
+				r.run();
+			}
+		}
+			
 	}
 	
 	@Override
 	public void update(float delta) {
 		if(!worldLoaded) return;
 		
-		ServerLevel[] levels = loadedLevels.get(map -> map.values().toArray(new ServerLevel[0]));
-		for(ServerLevel level : levels)
-			level.update(delta);
+		synchronized (updateLock) {
+			ServerLevel[] levels = loadedLevels.get(map -> map.values().toArray(new ServerLevel[0]));
+			for(ServerLevel level : levels)
+				level.update(delta);
+		}
 		
 		// run any runnables that were posted during the above update
 		Runnable[] lastRunnables;
@@ -163,10 +182,12 @@ public class ServerWorld extends WorldManager {
 			runnables.clear();
 		}
 		
-		for(Runnable r: lastRunnables)
-			r.run(); // any runnables added here will be run next update
-		
-		super.update(delta);
+		synchronized (updateLock) {
+			for(Runnable r : lastRunnables)
+				r.run(); // any runnables added here will be run next update
+			
+			super.update(delta);
+		}
 	}
 	
 	
@@ -203,29 +224,23 @@ public class ServerWorld extends WorldManager {
 					level.save(islandStores[level.getLevelId()]);
 			});
 			
+			PlayerData[] pdata = server.updatePlayerData();
 			// update player data
-			for(ServerPlayer player: getServer().getPlayers()) {
-				savePlayer(player);
-			}
+			// for(ServerPlayer player: getServer().getPlayers()) {
+			// 	savePlayer(player);
+			// }
 			
-			synchronized (knownPlayers) {
-				WorldFileInterface.saveWorld(new WorldDataSet(worldPath, lockRef, worldSeed, gameTime, daylightOffset, GameCore.VERSION, knownPlayers.values().toArray(new PlayerInfo[0]), islandStores));
-			}
+			WorldFileInterface.saveWorld(new WorldDataSet(worldPath, lockRef, worldSeed, gameTime, daylightOffset, GameCore.VERSION, pdata, islandStores));
 		});
 	}
 	
-	public void savePlayer(@NotNull ServerPlayer player) {
+	/*public void savePlayer(@NotNull ServerPlayer player) {
 		postRunnable(() -> {
-			final String name = player.getName();
-			final String data = player.serialize();
-			Level level = player.getLevel();
-			final int levelid = level == null ? player.getSpawnLevel() : level.getLevelId();
 			
-			PlayerInfo old = knownPlayers.get(name);
-			PlayerInfo info = new PlayerInfo(name, old.passhash, data, levelid);
-			knownPlayers.put(name, info);
+			
+			server.updatePlayerData(player);
 		});
-	}
+	}*/
 	
 	/*@Override
 	protected void clearWorld() {
@@ -243,7 +258,7 @@ public class ServerWorld extends WorldManager {
 			if(!worldLoaded) return;
 			server.stop(true);
 			worldLoaded = false;
-			WorldFileInterface.saveWorld(new WorldDataSet(worldPath, lockRef, worldSeed, gameTime, daylightOffset, GameCore.VERSION, knownPlayers.values().toArray(new PlayerInfo[0]), islandStores));
+			// WorldFileInterface.saveWorld(new WorldDataSet(worldPath, lockRef, worldSeed, gameTime, daylightOffset, GameCore.VERSION, knownPlayers.values().toArray(new PlayerInfo[0]), islandStores));
 			// dispose of level/world resources
 			saveWorld();
 			clearEntityIdMap();
@@ -253,7 +268,7 @@ public class ServerWorld extends WorldManager {
 				try {
 					lockRef.close();
 				} catch(IOException e) {
-					System.err.println("while closing world lock ref");
+					System.err.println("exception while closing world lock ref");
 					e.printStackTrace();
 				}
 				// lockRef = null;
@@ -434,6 +449,7 @@ public class ServerWorld extends WorldManager {
 	
 	// called when switching levels and on player death (client won't show death screen if on map or loading screen
 	public void despawnPlayer(@NotNull ServerPlayer player) {
+		server.updatePlayerData(player);
 		removeEntityLevel(player);
 	}
 	
@@ -463,43 +479,34 @@ public class ServerWorld extends WorldManager {
 	}
 	
 	// called after the player has been registered to the GameServer.
-	public void loadPlayer(ServerPlayer player/*, String passhash*/) {
-		PlayerInfo info = knownPlayers.get(player.getName());
+	/*public void addPlayer(ServerPlayer player*//*, String passhash*//*) {
 		if(info != null) {
 			GameCore.debug("existing player "+player+" loading into level "+info.levelId);
 			loadLevel(info.levelId, player);
 		}
 		else {
 			respawnPlayer(player);
-			knownPlayers.put(player.getName(), new PlayerInfo(player.getName(), "", player.serialize(), player.getSpawnLevel()));
-			saveWorld();
+			knownPlayers.put(player.getName(), new PlayerData(player.getName(), "", player.serialize(), player.getSpawnLevel()));
+			// saveWorld();
 		}
-	}
+	}*/
 	
 	/*public boolean checkPassword(String playerName, String passhash) {
 		
 	}*/
 	
+	
+	
 	// registers a new player in the world with the given username. World data will be checked to see if this player has logged in before; if so, that player file is loaded, otherwise, a new player is created.
-	public ServerPlayer addPlayer(String playerName/*, String passhash*/) {
+	/*public ServerPlayer addPlayer(String playerName*//*, String passhash*//*) {
 		ServerPlayer player;
 		// check for player data; I don't expect players to get removed from this so synchronization shouldn't be necessary.
-		if(knownPlayers.containsKey(playerName)) {
-			GameCore.debug("Player '"+playerName+"' is known, loading stored data.");
-			PlayerInfo info = knownPlayers.get(playerName);
-			// TODO passwords
-			// if(!info.passhash.equals(passhash))
-			// 	return null; // incorrect password
-			player = (ServerPlayer) ServerEntity.deserialize(this, info.data, GameCore.VERSION);
-		} else {
-			GameCore.debug("Player '"+playerName+"' is not known, creating new player.");
-			player = new ServerPlayer(this, playerName);
-		}
+		
 		
 		// at this point, the player object has been initialized, but not necessarily registered or on a particular level yet. This method doesn't attempt to position the player or set its level, beyond data stored from previous logins.
 		
 		return player;
-	}
+	}*/
 	
 	
 	/*  --- GET METHODS --- */

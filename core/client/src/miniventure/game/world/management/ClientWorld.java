@@ -10,6 +10,7 @@ import miniventure.game.client.ClientCore;
 import miniventure.game.client.GameClient;
 import miniventure.game.client.GameScreen;
 import miniventure.game.client.ServerManager;
+import miniventure.game.world.file.WorldDataSet;
 import miniventure.game.screen.ErrorScreen;
 import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MainMenu;
@@ -146,7 +147,7 @@ public class ClientWorld extends LevelManager {
 			
 			int port;
 			try {
-				port = serverManager.startServer(worldInfo, loadingScreen);
+				port = serverManager.startServer(worldInfo, addr -> addr.equals(client.getClientAddress()), loadingScreen);
 			} catch(IOException e) {
 				Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen("Error starting world: "+e.getMessage())));
 				return;

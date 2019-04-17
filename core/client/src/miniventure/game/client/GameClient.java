@@ -1,6 +1,7 @@
 package miniventure.game.client;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.HashMap;
 
 import miniventure.game.GameCore;
@@ -306,6 +307,10 @@ public class GameClient implements GameProtocol {
 		}.start();
 	}
 	
+	public InetSocketAddress getClientAddress() {
+		return client != null ? client.getLocalAddressTCP() : null;
+	}
+	
 	public void send(Object obj) { client.sendTCP(obj); }
 	public void addListener(Listener listener) { client.addListener(listener); }
 	
@@ -327,7 +332,7 @@ public class GameClient implements GameProtocol {
 		
 		logger.editMessage("Logging in");
 		if(personalServer != null) {
-			personalServer.setHost(client.getLocalAddressTCP());
+			// personalServer.setHost(client.getLocalAddressTCP());
 			this.username = HOST;
 			send(new Login(username, GameCore.VERSION));
 			callback.act(true);

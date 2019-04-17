@@ -7,9 +7,9 @@ import miniventure.game.GameCore;
 import miniventure.game.client.ClientCore;
 import miniventure.game.screen.util.BackgroundInheritor;
 import miniventure.game.util.MyUtils;
-import miniventure.game.world.management.WorldFileInterface;
-import miniventure.game.world.management.WorldFormatException;
-import miniventure.game.world.management.WorldReference;
+import miniventure.game.world.file.WorldFileInterface;
+import miniventure.game.world.file.WorldFormatException;
+import miniventure.game.world.file.WorldReference;
 
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.List;

@@ -16,7 +16,8 @@ import miniventure.game.client.ClientCore;
 import miniventure.game.client.ServerManager;
 import miniventure.game.server.ServerCore;
 import miniventure.game.util.ProgressLogger;
-import miniventure.game.world.management.WorldDataSet;
+import miniventure.game.util.function.MapFunction;
+import miniventure.game.world.file.WorldDataSet;
 import miniventure.game.world.tile.ServerTileType;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
@@ -109,8 +110,8 @@ public class DesktopLauncher {
 		}
 		
 		@Override
-		public int startServer(WorldDataSet worldInfo, ProgressLogger logger) throws IOException {
-			this.core = ServerCore.initSinglePlayer(worldInfo, logger);
+		public int startServer(WorldDataSet worldInfo, MapFunction<InetSocketAddress, Boolean> hostFinder, ProgressLogger logger) throws IOException {
+			this.core = ServerCore.initSinglePlayer(worldInfo, hostFinder, logger);
 			int port = core.getServer().getPort();
 			
 			// server running, and world loaded; now, get the server world updating
@@ -119,11 +120,11 @@ public class DesktopLauncher {
 			return port;
 		}
 		
-		@Override
+		/*@Override
 		public void setHost(InetSocketAddress host) {
 			// System.out.println("setting host to "+host);
 			core.getServer().setHost(host);
-		}
+		}*/
 		
 		@Override
 		public void open() { core.getServer().setMultiplayer(true); }

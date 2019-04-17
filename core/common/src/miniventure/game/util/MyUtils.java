@@ -38,21 +38,23 @@ public final class MyUtils {
 		return String.join(delimiter, words);
 	}
 	
-	// TODO because most strings are going to be safe anyway (I already trust that there are no mismatched delimiters), I should put start/end markers on either side of the entire array, rather than on each element. It uses up FAR less characters, and if I come across a string value that can have a delimiter in it, then I'll just tack them on manually (or call this method on the one string lol, that would also work).
-	// the only weird bit about the simpler design is that every call to parse will probably be a string with start/end characters on the ends. Maybe I could have parse remove start/end delimiters from elements if they're found? the resulting element string, of course, would no longer be safe to encode, but you typically don't go from decode to encode...
-	// better idea though is probably just making a mode bool for encode&parse: "encaseElements" or something.
 	public static String encodeStringArray(String... strings) { return encodeStringArray(Arrays.asList(strings)); }
 	public static String encodeStringArray(Iterable<String> strings) { return encodeStringArray(strings, '(', ')',','); }
-	public static String encodeStringArray(String[] strings, char elementStart, char elementEnd, char delimiter) {
-		return encodeStringArray(Arrays.asList(strings), elementStart, elementEnd, delimiter);
-	}
-	public static String encodeStringArray(Iterable<String> strings, char elementStart, char elementEnd, char delimiter) {
+	/** @noinspection SameParameterValue*/
+	private static String encodeStringArray(Iterable<String> strings, char begin, char end, char delimiter) {
 		StringBuilder str = new StringBuilder();
 		Iterator<String> iter = strings.iterator();
 		while(iter.hasNext()) {
-			str.append(elementStart);
-			str.append(iter.next());
-			str.append(elementEnd);
+			String elem = iter.next();
+			
+			final boolean wrap = elem.indexOf(delimiter) >= 0;
+			
+			if(wrap)
+				str.append(begin);
+			str.append(elem);
+			if(wrap)
+				str.append(end);
+			
 			if(iter.hasNext())
 				str.append(delimiter);
 		}
@@ -61,7 +63,8 @@ public final class MyUtils {
 	}
 	
 	public static String[] parseLayeredString(String str) { return parseLayeredString(str, '(', ')', ','); }
-	public static String[] parseLayeredString(String str, char layerStart, char layerEnd, char delimiter) {
+	/** @noinspection SameParameterValue*/
+	private static String[] parseLayeredString(String str, char layerStart, char layerEnd, char delimiter) {
 		if(str.length() == 0) return new String[0];
 		
 		Array<String> result = new Array<>();
@@ -73,21 +76,31 @@ public final class MyUtils {
 				result.add(curStr.toString());
 				curStr = new StringBuilder();
 			}
-			else if(chars[i] == layerStart) {
-				if(curLayers > 0) curStr.append(chars[i]);
-				curLayers++;
-			}
-			else if(chars[i] == layerEnd) {
-				if(curLayers != 1) curStr.append(chars[i]);
-				if(curLayers > 0)
+			else {
+				if(chars[i] == layerStart)
+					curLayers++;
+				
+				if((chars[i] != layerStart && chars[i] != layerEnd) || curLayers != 1)
+					curStr.append(chars[i]);
+				
+				if(chars[i] == layerEnd)
 					curLayers--;
 			}
-			else curStr.append(chars[i]);
 		}
 		
 		result.add(curStr.toString());
 		
 		return result.toArray(String.class);
+	}
+	
+	public static int charCount(char c, String s) {
+		int count = 0;
+		for(int i = 0; i < s.length(); i++)
+			if(s.charAt(i) == c)
+				count++;
+		
+		return count;
+		// return s.length() - s.replaceAll("\\"+c, "").length();
 	}
 	
 	public static String plural(int count) { return count == 1 ? "" : "s"; }

@@ -2,6 +2,7 @@ package miniventure.game.server;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -18,11 +19,12 @@ import miniventure.game.util.MyUtils;
 import miniventure.game.util.ProgressLogger;
 import miniventure.game.util.VersionInfo;
 import miniventure.game.util.customenum.GenericEnum;
-import miniventure.game.world.management.WorldFileInterface;
-import miniventure.game.world.management.WorldDataSet;
+import miniventure.game.util.function.MapFunction;
+import miniventure.game.world.file.WorldDataSet;
+import miniventure.game.world.file.WorldFileInterface;
+import miniventure.game.world.file.WorldFormatException;
+import miniventure.game.world.file.WorldReference;
 import miniventure.game.world.management.ServerWorld;
-import miniventure.game.world.management.WorldFormatException;
-import miniventure.game.world.management.WorldReference;
 import miniventure.game.world.tile.ServerTileType;
 
 import com.badlogic.gdx.math.MathUtils;
@@ -41,8 +43,8 @@ public class ServerCore implements Runnable {
 	private boolean loopedFrames = false;
 	private final Object fpsLock = new Object();
 	
-	private ServerCore(int port, boolean multiplayer, WorldDataSet worldInfo, ProgressLogger logger) throws IOException {
-		serverWorld = new ServerWorld(this, port, multiplayer, worldInfo, logger);
+	private ServerCore(int port, boolean multiplayer, MapFunction<InetSocketAddress, Boolean> hostFinder, WorldDataSet worldInfo, ProgressLogger logger) throws IOException {
+		serverWorld = new ServerWorld(this, port, multiplayer, hostFinder, worldInfo, logger);
 		commandParser = new CommandInputParser(serverWorld);
 	}
 	
@@ -118,12 +120,12 @@ public class ServerCore implements Runnable {
 	
 	
 	// single player server
-	public static ServerCore initSinglePlayer(WorldDataSet worldInfo, ProgressLogger logger) throws IOException {
+	public static ServerCore initSinglePlayer(WorldDataSet worldInfo, MapFunction<InetSocketAddress, Boolean> hostFinder, ProgressLogger logger) throws IOException {
 		int tries = 0;
 		int port = GameProtocol.PORT;
 		while(true) {
 			try {
-				return new ServerCore(port, false, worldInfo, logger);
+				return new ServerCore(port, false, hostFinder, worldInfo, logger);
 			} catch(IOException e) {
 				if(tries == 0)
 					e.printStackTrace();
@@ -250,7 +252,7 @@ public class ServerCore implements Runnable {
 		else // CREATE
 			worldInfo = WorldFileInterface.createWorld(world, lockHolder, seedString);
 		
-		ServerCore core = new ServerCore(port, true, worldInfo, new ProgressPrinter());
+		ServerCore core = new ServerCore(port, true, addr -> false, worldInfo, new ProgressPrinter());
 		
 		System.out.println("server ready");
 		if(!GameCore.determinedLatestVersion())

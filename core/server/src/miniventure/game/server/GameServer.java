@@ -21,6 +21,7 @@ import miniventure.game.item.ServerItem;
 import miniventure.game.item.ServerItemStack;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.function.MapFunction;
 import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
@@ -31,6 +32,7 @@ import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.entity.particle.ParticleData;
 import miniventure.game.world.level.Level;
 import miniventure.game.world.level.ServerLevel;
+import miniventure.game.world.file.PlayerData;
 import miniventure.game.world.management.ServerWorld;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileTypeEnum;
@@ -54,48 +56,57 @@ public class GameServer implements GameProtocol {
 	public static final Color STATUS_MSG_COLOR = Color.ORANGE;
 	public static final Color ERROR_CHAT_COLOR = new Color(1f, .5f, .5f, 1);
 	
-	private class PlayerData {
+	public static final String PLAYER_NAME_REGEX = "( *[a-zA-Z0-9_.-] *)+";
+	
+	private class PlayerLink {
 		final Connection connection;
 		@NotNull final ServerPlayer player;
 		final InfoMessageBuilder toClientOut, toClientErr;
-		boolean op;
 		final Timer validationTimer;
+		
+		boolean op;
 		
 		/** @see GameProtocol.InventoryRequest */
 		private boolean inventoryMode = false; // send hotbar updates at first
 		
-		PlayerData(Connection connection, @NotNull ServerPlayer player) {
+		PlayerLink(Connection connection, @NotNull ServerPlayer player, boolean op) {
 			this.connection = connection;
 			this.player = player;
+			this.op = op;
 			
 			toClientOut = new InfoMessageBuilder(text -> new InfoMessageLine(GameCore.DEFAULT_CHAT_COLOR, text));
 			toClientErr = new InfoMessageBuilder(toClientOut, text -> new InfoMessageLine(ERROR_CHAT_COLOR, text));
-			
-			op = connection.getRemoteAddressTCP().getAddress().isLoopbackAddress();
 			
 			validationTimer = new Timer(5000, e -> sendEntityValidation(this));
 			validationTimer.setRepeats(true);
 		}
 	}
 	
-	private final HashMap<Connection, ServerThread> connectionThreadMap = new HashMap<>();
+	// private final HashMap<Connection, ServerThread> connectionThreadMap = new HashMap<>();
+	private final Map<String, PlayerData> knownPlayers = Collections.synchronizedMap(new HashMap<>());
+	private final Object dataLock = new Object();
 	
-	private final Map<Connection, PlayerData> connectionToPlayerDataMap = new HashMap<>();
+	private final Map<Connection, PlayerLink> connectionToPlayerInfoMap = new HashMap<>();
 	private final Map<ServerPlayer, Connection> playerToConnectionMap = new HashMap<>();
 	private final Object playerLock = new Object();
 	
 	@NotNull private final ServerWorld world;
-	private InetSocketAddress host;
+	// private InetSocketAddress host;
 	private final int port;
 	private MiniventureServer server;
 	private boolean multiplayer;
+	private final MapFunction<InetSocketAddress, Boolean> connectionValidator;
 	
-	public GameServer(@NotNull ServerWorld world, int port, boolean multiplayer) throws IOException {
+	public GameServer(@NotNull ServerWorld world, int port, boolean multiplayer, MapFunction<InetSocketAddress, Boolean> connectionValidator, PlayerData[] playerData) throws IOException {
 		this.world = world;
 		this.port = port;
 		this.multiplayer = multiplayer;
+		this.connectionValidator = connectionValidator;
 		server = new MiniventureServer(writeBufferSize*5, objectBufferSize);
 		GameProtocol.registerClasses(server.getKryo());
+		
+		for(PlayerData info: playerData)
+			knownPlayers.put(info.name, info);
 		
 		server.addListener(actor);
 		server.start();
@@ -109,8 +120,8 @@ public class GameServer implements GameProtocol {
 		this.multiplayer = multiplayer;
 	}
 	
-	public void setHost(InetSocketAddress host) { this.host = host; }
-	private boolean isHost(@NotNull InetSocketAddress host) { return host.equals(this.host); }
+	// public void setHost(InetSocketAddress host) { this.host = host; }
+	private boolean isHost(@NotNull InetSocketAddress host) { return connectionValidator.get(host); }
 	
 	public boolean isHost(@NotNull ServerPlayer player) {
 		InetSocketAddress addr = getPlayerAddress(player);
@@ -118,17 +129,56 @@ public class GameServer implements GameProtocol {
 	}
 	
 	
-	private PlayerData getPlayerData(@Nullable ServerPlayer player) {
+	public PlayerData[] updatePlayerData() {
+		ServerPlayer[] players;
+		synchronized (playerLock) {
+			players = playerToConnectionMap.keySet().toArray(new ServerPlayer[0]);
+		}
+		for(ServerPlayer p: players)
+			updatePlayerData(p);
+		
+		synchronized (dataLock) {
+			return knownPlayers.values().toArray(new PlayerData[0]);
+		}
+	}
+	public void updatePlayerData(ServerPlayer player) {
+		PlayerLink info = getPlayerInfo(player);
+		if(info == null) {
+			System.err.println("Player "+player+" does not have PlayerLink, cannot update data.");
+			return;
+		}
+		PlayerData pdata;
+		synchronized (dataLock) {
+			pdata = knownPlayers.get(player.getName());
+		}
+		if(pdata == null) {
+			System.err.println("Player "+player+" does not have PlayerData, cannot update.");
+			return;
+		}
+		
+		world.postRunnable(false, () -> {
+			final String name = player.getName();
+			final String data = player.serialize();
+			final Level level = player.getLevel();
+			// using the pdata level id is better than using the spawn level because it doesn't lose the info if an extra update request is sent after the player is removed from their level.
+			final int levelid = level == null ? pdata.levelId : level.getLevelId();
+			synchronized (dataLock) {
+				knownPlayers.put(name, new PlayerData(name, pdata.passhash, data, levelid, info.op));
+			}
+		});
+	}
+	
+	private PlayerLink getPlayerInfo(@Nullable ServerPlayer player) {
 		if(player == null)
 			return null;
 		synchronized (playerLock) {
-			return connectionToPlayerDataMap.get(playerToConnectionMap.get(player));
+			return connectionToPlayerInfoMap.get(playerToConnectionMap.get(player));
 		}
 	}
 	
-	private PlayerData getPlayerData(@NotNull Connection connection) {
+	private PlayerLink getPlayerInfo(@NotNull Connection connection) {
 		synchronized (playerLock) {
-			return connectionToPlayerDataMap.get(connection);
+			return connectionToPlayerInfoMap.get(connection);
 		}
 	}
 	
@@ -139,7 +189,7 @@ public class GameServer implements GameProtocol {
 	}
 	
 	
-	<T> void forPacket(Object packet, Class<T> type, boolean sync, ValueFunction<T> response) {
+	private <T> void forPacket(Object packet, Class<T> type, boolean sync, ValueFunction<T> response) {
 		if(sync)
 			world.postRunnable(() -> GameProtocol.super.forPacket(packet, type, response));
 		else
@@ -152,15 +202,16 @@ public class GameServer implements GameProtocol {
 		public void connected(Connection connection) {
 			// prevent further connections unless desired.
 			// System.out.println("attempted connection from address "+connection.getRemoteAddressTCP());
-			if(!multiplayer && connectionThreadMap.size() > 0 && !isHost(connection.getRemoteAddressTCP())) {
+			// System.out.println("server: comparing given "+connection.getRemoteAddressTCP()+" to host "+host);
+			if(!multiplayer && /*connectionThreadMap.size() > 0 &&*/ !isHost(connection.getRemoteAddressTCP())) {
 				connection.sendTCP(new LoginFailure("World is private."));
 				connection.close();
 			}
-			else {
+			/*else {
 				ServerThread st = new ServerThread(connection, packetHandler);
 				connectionThreadMap.put(connection, st);
 				st.start();
-			}
+			}*/
 		}
 		
 		@Override
@@ -168,29 +219,30 @@ public class GameServer implements GameProtocol {
 			if(object instanceof KeepAlive)
 				return; // we don't care about these, they are internal packets
 			
-			ServerThread st = connectionThreadMap.get(connection);
-			if(st != null)
-				st.addPacket(object);
-			else
-				GameCore.error("recieved packet from unregistered connection: "+connection.getRemoteAddressTCP());
+			// ServerThread st = connectionThreadMap.get(connection);
+			// if(st != null)
+			// 	st.addPacket(object);
+			// else
+			// 	GameCore.error("recieved packet from unregistered connection: "+connection.getRemoteAddressTCP());
+			packetHandler.handle(connection, object);
 		}
 		
 		@Override
 		public void disconnected(Connection connection) {
-			ServerThread st = connectionThreadMap.remove(connection);
-			if(st == null) return;
-			st.end();
+			// ServerThread st = connectionThreadMap.remove(connection);
+			// if(st == null) return;
+			// st.end();
 			
-			PlayerData data = getPlayerData(connection);
-			if(data == null) return;
-			data.validationTimer.stop();
-			ServerPlayer player = data.player;
+			PlayerLink info = getPlayerInfo(connection);
+			if(info == null) return;
+			info.validationTimer.stop();
+			ServerPlayer player = info.player;
 			world.postRunnable(() -> {
-				world.savePlayer(player);
+				updatePlayerData(player);
 				player.remove();
 				// player.getWorld().removePlayer(player);
 				synchronized (playerLock) {
-					connectionToPlayerDataMap.remove(connection);
+					connectionToPlayerInfoMap.remove(connection);
 					playerToConnectionMap.remove(player);
 				}
 				broadcast(new Message(player.getName()+" left the server.", STATUS_MSG_COLOR));
@@ -215,8 +267,9 @@ public class GameServer implements GameProtocol {
 			}
 			
 			String name = login.username;
+			final boolean isHost = isHost(connection.getRemoteAddressTCP());
 			
-			if(name.equals(HOST) && !isHost(connection.getRemoteAddressTCP())) {
+			if(name.equals(HOST) && !isHost) {
 				connection.sendTCP(new LoginFailure("Username '"+HOST+"' reserved for server host."));
 				return;
 			}
@@ -229,29 +282,53 @@ public class GameServer implements GameProtocol {
 			}*/
 			
 			ServerPlayer player;
-			PlayerData playerData;
-			synchronized (playerLock) {
-				for(ServerPlayer p: playerToConnectionMap.keySet()) {
-					if(p.getName().equals(name)) {
-						connection.sendTCP(new LoginFailure("A player named '"+name+"' is already logged in."));
-						return;
-					}
+			PlayerLink pinfo;
+			// synchronized (playerLock) {
+			for(ServerPlayer p: playerToConnectionMap.keySet()) {
+				if(p.getName().equals(name)) {
+					connection.sendTCP(new LoginFailure("A player named '"+name+"' is already logged in."));
+					return;
 				}
-				
-				player = world.addPlayer(name);
-				
-				playerData = new PlayerData(connection, player);
-				connectionToPlayerDataMap.put(connection, playerData);
-				playerToConnectionMap.put(player, connection);
 			}
+			
+			PlayerData info = knownPlayers.get(name);
+			boolean op;
+			if(info != null) {
+				GameCore.debug("Player '"+name+"' is known, loading stored data.");
+				// TODO passwords
+				// if(!info.passhash.equals(passhash))
+				// 	return null; // incorrect password
+				player = (ServerPlayer) ServerEntity.deserialize(world, info.data, GameCore.VERSION);
+				op = info.op;
+			} else {
+				GameCore.debug("Player '"+name+"' is not known, creating new player.");
+				player = new ServerPlayer(world, name);
+				// if(GameCore.debug)
+				// 	op = connection.getRemoteAddressTCP().getAddress().isLoopbackAddress();
+				// else
+					op = isHost;
+			}
+			
+			pinfo = new PlayerLink(connection, player, op);
+			connectionToPlayerInfoMap.put(connection, pinfo);
+			playerToConnectionMap.put(player, connection);
+			// }
 			
 			connection.sendTCP(world.getWorldUpdate());
 			world.postRunnable(() -> {
-				world.loadPlayer(player);
+				if(info != null)
+					world.loadLevel(info.levelId, player);
+				else
+					world.respawnPlayer(player);
 				
 				System.out.println("Server: new player successfully connected: "+player.getName());
+				if(info == null) {
+					synchronized (dataLock) {
+						knownPlayers.put(name, new PlayerData(name, "", player.serialize(), player.getSpawnLevel(), op));
+					}
+				}
 				
-				playerData.validationTimer.start();
+				pinfo.validationTimer.start();
 				
 				broadcast(new Message(player.getName()+" joined the server.", STATUS_MSG_COLOR), false, player);
 			});
@@ -259,7 +336,7 @@ public class GameServer implements GameProtocol {
 			return;
 		}
 		
-		PlayerData clientData = getPlayerData(connection);
+		PlayerLink clientData = getPlayerInfo(connection);
 		if(clientData == null) {
 			System.err.println("server received packet from unknown client "+connection.getRemoteAddressTCP().getHostString()+"; ignoring packet "+object);
 			return;
@@ -577,21 +654,22 @@ public class GameServer implements GameProtocol {
 	}
 	
 	public boolean isInventoryMode(@NotNull ServerPlayer player) {
-		PlayerData data = getPlayerData(player);
-		return data != null && data.inventoryMode;
+		PlayerLink info = getPlayerInfo(player);
+		return info != null && info.inventoryMode;
 	}
 	
 	public boolean isAdmin(@Nullable ServerPlayer player) {
 		if(player == null) return true; // from server command prompt
-		PlayerData data = getPlayerData(player);
-		if(data == null) return false; // unrecognized player (should never happen)
-		return data.op;
+		PlayerLink info = getPlayerInfo(player);
+		if(info == null) return false; // unrecognized player (should never happen)
+		return info.op;
 	}
 	
 	public boolean setAdmin(@NotNull ServerPlayer player, boolean op) {
-		PlayerData data = getPlayerData(player);
-		if(data == null) return false; // unrecognized player (should never happen)
-		data.op = op;
+		PlayerLink info = getPlayerInfo(player);
+		if(info == null) return false; // unrecognized player (should never happen)
+		info.op = op;
+		world.postRunnable(() -> updatePlayerData(player));
 		return true;
 	}
 	
@@ -614,7 +692,7 @@ public class GameServer implements GameProtocol {
 		broadcast(new ParticleAddition(data, new PositionUpdate(level, pos)));
 	}
 	
-	private void sendEntityValidation(@NotNull PlayerData pData) {
+	private void sendEntityValidation(@NotNull PlayerLink pData) {
 		ServerPlayer player = pData.player;
 		if(!pData.connection.isConnected()) {
 			System.err.println("Server not sending entity validation to player "+player.getName()+" because player has disconnected; stopping validation timer.");
@@ -662,11 +740,11 @@ public class GameServer implements GameProtocol {
 		out.println("Server Running: "+(server.getUpdateThread() != null && server.getUpdateThread().isAlive()));
 		out.println("FPS: " + world.getFPS());
 		out.println("Players connected: "+playerToConnectionMap.size());
-		Collection<PlayerData> data;
+		Collection<PlayerLink> data;
 		synchronized (playerLock) {
-			data = new ArrayList<>(connectionToPlayerDataMap.values());
+			data = new ArrayList<>(connectionToPlayerInfoMap.values());
 		}
-		for(PlayerData pd: data) {
+		for(PlayerLink pd: data) {
 			out.print("     Player '"+pd.player.getName()+"' ");
 			if(pd.op) out.print("(admin) ");
 			out.print(pd.player.getLocation(true));
