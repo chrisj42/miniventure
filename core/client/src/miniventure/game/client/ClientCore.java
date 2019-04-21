@@ -19,6 +19,7 @@ import miniventure.game.screen.ErrorScreen;
 import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
+import miniventure.game.screen.NotifyScreen;
 import miniventure.game.screen.util.BackgroundInheritor;
 import miniventure.game.screen.util.BackgroundProvider;
 import miniventure.game.util.MyUtils;
@@ -127,7 +128,23 @@ public class ClientCore extends ApplicationAdapter {
 			gameScreen = new GameScreen();
 			clientWorld = new ClientWorld(serverStarter, gameScreen);
 			
-			setScreen(new MainMenu());
+			setScreen(new NotifyScreen(true, () -> setScreen(new MainMenu()),
+				"Confirm",
+				"Welcome to Miniventure Beta!",
+				"",
+				"This game is not finished!!! Not even close.",
+				"",
+				"The utmost effort is made to prevent bugs from getting into releases, but since",
+				"the sole developer has a life and very few testers, this effort doesn't amount to much.",
+				"",
+				"Also, please keep in mind that, while the gameplay systems are (fairly) stable,",
+				"the majority of content is yet to come.",
+				
+				"You may have to create new worlds to take advantage of some of the bigger updates,",
+				"as the world is still being fleshed out.",
+				"",
+				"Enjoy the game!"
+			));
 		}));
 	}
 	
