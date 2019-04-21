@@ -160,11 +160,11 @@ public class WorldFileInterface {
 		}*/
 		
 		LevelCache[] levelCaches = new LevelCache[] {
-			new LevelCache(0, new Point(0, 0), seed, IslandType.STARTER)/*,
-			new LevelCache(1, new Point(2, 2), seed, IslandType.DESERT),
-			new LevelCache(2, new Point(3, -5), seed, IslandType.ARCTIC),
-			new LevelCache(3, new Point(-3, 5), seed, IslandType.JUNGLE),
-			new LevelCache(4, new Point(10, 0), seed, IslandType.SWAMP)*/
+			new LevelCache(0, new Point(0, 0), seed, IslandType.STARTER),
+			// new LevelCache(1, new Point(2, 2), seed, IslandType.DESERT),
+			// new LevelCache(2, new Point(3, -5), seed, IslandType.ARCTIC),
+			// new LevelCache(3, new Point(-3, 5), seed, IslandType.JUNGLE),
+			new LevelCache(4, new Point(10, 0), seed, IslandType.SWAMP)
 		};
 		
 		WorldDataSet worldData = new WorldDataSet(file, lockRef, seed, 0, TimeOfDay.Morning.getStartOffsetSeconds(), GameCore.VERSION, new PlayerData[0], levelCaches, true);

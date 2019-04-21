@@ -210,6 +210,27 @@ public enum IslandType {
 	public TileTypeEnum[][][] generateIsland(long seed) {
 		ProtoIsland island = new ProtoIsland(seed, width, height);
 		generateIsland(island);
+		
+		if(island.getTile(0, 0).getTopLayer() != WATER) {
+			island.getTile(0, 0).addLayer(DOCK);
+		}
+		else {
+			boolean dock = false;
+			for(int y = 0; y < height; y++) {
+				for(int x = 0; x < width; x++) {
+					if(island.getTile(x, y).getTopLayer() != WATER) {
+						island.getTile(x, y).addLayer(DOCK);
+						dock = true;
+						break;
+					}
+				}
+				if(dock)
+					break;
+			}
+			if(!dock)
+				island.getTile(width/2, height/2).addLayer(DOCK);
+		}
+		
 		return island.getMap();
 	}
 	

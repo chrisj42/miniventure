@@ -56,7 +56,7 @@ public class GameServer implements GameProtocol {
 	public static final Color STATUS_MSG_COLOR = Color.ORANGE;
 	public static final Color ERROR_CHAT_COLOR = new Color(1f, .5f, .5f, 1);
 	
-	public static final String PLAYER_NAME_REGEX = "( *[a-zA-Z0-9_.-] *)+";
+	// public static final String PLAYER_NAME_REGEX = "( *[a-zA-Z0-9_.-] *)+";
 	
 	private class PlayerLink {
 		final Connection connection;
