@@ -9,6 +9,7 @@ import java.util.*;
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.EntityAddition;
 import miniventure.game.GameProtocol.EntityRemoval;
+import miniventure.game.GameProtocol.IslandReference;
 import miniventure.game.GameProtocol.MapRequest;
 import miniventure.game.GameProtocol.WorldData;
 import miniventure.game.item.FoodType;
@@ -523,8 +524,10 @@ public class ServerWorld extends WorldManager {
 	public GameServer getServer() { return server; }
 	
 	public MapRequest getMapData() {
-		
-		return new MapRequest();
+		IslandReference[] refs = new IslandReference[islandStores.length];
+		for(int i = 0; i < refs.length; i++)
+			refs[i] = islandStores[i].island;
+		return new MapRequest(refs);
 	}
 	
 	public float getFPS() { return core.getFPS(); }

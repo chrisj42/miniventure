@@ -166,7 +166,7 @@ public class ServerTileType extends TileType {
 		) {
 			@Override
 			public Result interact(@NotNull ServerTile tile, Player player, @Nullable ServerItem item) {
-				tile.getServer().sendToPlayer((ServerPlayer) player, new MapRequest());
+				tile.getServer().sendToPlayer((ServerPlayer) player, tile.getWorld().getMapData());
 				return Result.INTERACT;
 			}
 		}, type -> new TileItem(type, false, PlacementCheck.groundExcluding(type))),

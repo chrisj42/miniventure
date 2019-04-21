@@ -5,6 +5,7 @@ import java.util.HashMap;
 import miniventure.game.GameProtocol.LevelChange;
 import miniventure.game.GameProtocol.MapRequest;
 import miniventure.game.client.ClientCore;
+import miniventure.game.util.MyUtils;
 import miniventure.game.world.Point;
 import miniventure.game.world.level.Level;
 
@@ -50,10 +51,11 @@ public class MapScreen extends MenuScreen {
 	public void mapUpdate(MapRequest mapRequest) {
 		Gdx.app.postRunnable(() -> {
 			table.clearChildren();
+			table.add(makeLabel("Island travel coming soon!")).row();
 			for(int i = 0; i < mapRequest.islands.length; i++) {
-				Point p = null;//mapRequest.islands[i];
+				// Point p = null;//mapRequest.islands[i];
 				final int levelid = i;
-				VisTextButton btn = makeButton("Island "+(i+1), () -> {
+				VisTextButton btn = makeButton("Island "+(i+1)+": "+MyUtils.toTitleCase(mapRequest.islands[i].type.name()), () -> {
 					Level playerLevel = ClientCore.getWorld().getMainPlayer().getLevel();
 					if(!(playerLevel != null && playerLevel.getLevelId() == levelid))
 						ClientCore.getClient().send(new LevelChange(levelid));
