@@ -17,6 +17,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputEvent.Type;
@@ -151,22 +152,23 @@ public class MenuScreen extends Stage {
 	protected void registerField(TextField field) { textFields.add(field); }
 	protected void deregisterField(TextField field) { textFields.remove(field); }
 	
-	protected void mapFieldButtons(@NotNull TextField field, @Nullable VisTextButton confirmBtn, @Nullable VisTextButton cancelBtn) {
-		field.addListener(new InputListener() {
+	protected void mapFieldButtons(@NotNull TextField field, @Nullable VisTextButton confirmBtn, @Nullable VisTextButton cancelBtn) { mapButtons(field, confirmBtn, cancelBtn); }
+	protected void mapButtons(@NotNull Actor focus, @Nullable VisTextButton confirmBtn, @Nullable VisTextButton cancelBtn) {
+		focus.addListener(new InputListener() {
 			@Override
 			public boolean keyDown(InputEvent event, int keycode) {
 				if(keycode == Keys.ENTER && confirmBtn != null) {
 					InputEvent event1 = new InputEvent();
 					event1.setType(Type.touchDown);
 					confirmBtn.fire(event1);
-					setKeyboardFocus(field);
+					setKeyboardFocus(focus);
 					return true;
 				}
 				if(keycode == Keys.ESCAPE && cancelBtn != null) {
 					InputEvent event1 = new InputEvent();
 					event1.setType(Type.touchDown);
 					cancelBtn.fire(event1);
-					setKeyboardFocus(field);
+					setKeyboardFocus(focus);
 					return true;
 				}
 				return false;

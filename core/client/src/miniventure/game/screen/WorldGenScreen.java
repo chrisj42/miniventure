@@ -6,12 +6,13 @@ import java.nio.file.Path;
 
 import miniventure.game.client.ClientCore;
 import miniventure.game.screen.util.BackgroundInheritor;
-import miniventure.game.world.file.WorldFileInterface;
 import miniventure.game.world.file.WorldDataSet;
+import miniventure.game.world.file.WorldFileInterface;
 
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 
@@ -22,6 +23,8 @@ public class WorldGenScreen extends BackgroundInheritor {
 	 */
 	
 	public WorldGenScreen() {
+		super(new ScreenViewport());
+		
 		Table table = useTable(true);
 		table.defaults().pad(10, 5, 10, 5);
 		

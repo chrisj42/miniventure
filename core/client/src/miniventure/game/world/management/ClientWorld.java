@@ -10,7 +10,6 @@ import miniventure.game.client.ClientCore;
 import miniventure.game.client.GameClient;
 import miniventure.game.client.GameScreen;
 import miniventure.game.client.ServerManager;
-import miniventure.game.world.file.WorldDataSet;
 import miniventure.game.screen.ErrorScreen;
 import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MainMenu;
@@ -18,6 +17,7 @@ import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.RespawnScreen;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
+import miniventure.game.world.file.WorldDataSet;
 import miniventure.game.world.level.ClientLevel;
 
 import com.badlogic.gdx.Gdx;
@@ -211,7 +211,7 @@ public class ClientWorld extends LevelManager {
 			if(worldLoaded()) {
 				Gdx.app.postRunnable(() -> {
 					LoadingScreen loader = new LoadingScreen();
-					loader.pushMessage("Loading level...");
+					loader.pushMessage("Loading level");
 					ClientCore.setScreen(loader);
 				});
 			}

@@ -129,7 +129,7 @@ public class ClientCore extends ApplicationAdapter {
 			clientWorld = new ClientWorld(serverStarter, gameScreen);
 			
 			setScreen(new NotifyScreen(true, () -> setScreen(new MainMenu()),
-				"Confirm",
+				"Continue",
 				"Welcome to Miniventure Beta!",
 				"",
 				"This game is not finished!!! Not even close.",
