@@ -5,11 +5,15 @@ import java.util.HashSet;
 import miniventure.game.item.Item;
 import miniventure.game.item.Result;
 import miniventure.game.item.ServerItem;
+import miniventure.game.server.GameServer;
 import miniventure.game.util.MyUtils;
-import miniventure.game.world.ServerLevel;
+import miniventure.game.util.customenum.SerialMap;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.player.Player;
+import miniventure.game.world.level.Level;
+import miniventure.game.world.level.ServerLevel;
+import miniventure.game.world.management.ServerWorld;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
@@ -22,6 +26,9 @@ import org.jetbrains.annotations.Nullable;
 /** @noinspection EqualsAndHashcode*/
 public class ServerTile extends Tile {
 	
+	public ServerTile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types) {
+		this((ServerLevel)level, x, y, types);
+	}
 	public ServerTile(@NotNull ServerLevel level, int x, int y, @NotNull TileTypeEnum[] types) {
 		super(level, x, y, types);
 		
@@ -29,10 +36,26 @@ public class ServerTile extends Tile {
 			this.dataMaps.put(type, ServerTileType.get(type).getInitialData());
 	}
 	
+	public ServerTile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, SerialMap[] dataMaps) {
+		this((ServerLevel) level, x, y, types, dataMaps);
+	}
+	public ServerTile(@NotNull ServerLevel level, int x, int y, @NotNull TileTypeEnum[] types, SerialMap[] dataMaps) {
+		super(level, x, y, types);
+		
+		for(int i = 0; i < types.length; i++)
+			this.dataMaps.put(types[i], dataMaps[i]);
+	}
+	
 	@Override
 	TileStack<ServerTileType> makeStack(@NotNull TileTypeEnum[] types) {
-		return new ServerTileStack(types);
+		return new ServerTileStack(getWorld(), types);
 	}
+	
+	@Override @NotNull
+	public ServerWorld getWorld() { return (ServerWorld) super.getWorld(); }
+	
+	@NotNull
+	public GameServer getServer() { return getWorld().getServer(); }
 	
 	@Override @NotNull
 	public ServerLevel getLevel() { return (ServerLevel) super.getLevel(); }
@@ -94,7 +117,7 @@ public class ServerTile extends Tile {
 		 */
 		
 		ServerTileType type = getType();
-		ServerTileType underType = getTypeStack().size() == 1 ? type : getTypeStack().getLayerFromBottom(1);
+		// ServerTileType underType = getTypeStack().getLayerFromTop(1, true);
 		
 		if(newType.equals(type)) {
 			// just reset the data
@@ -103,9 +126,12 @@ public class ServerTile extends Tile {
 			return true;
 		}
 		
+		// DISABLED because I don't check it in addTile, so checking it here seems inconsistent.
 		// check that the new type can be placed on the type that was under the previous type
-		if(newType.getTypeEnum().compareTo(underType.getTypeEnum()) <= 0)
+		/*if(newType.getTypeEnum().compareTo(underType.getTypeEnum()) <= 0) {
+			System.err.println("cannot replace; new type "+newType.getTypeEnum()+" does not come after under type "+underType.getTypeEnum());
 			return false; // cannot replace tile
+		}*/
 		
 		if(type.transitionManager.tryStartAnimation(this, newType, true)) {
 			// there is an exit animation; it needs to be played. So let that happen, the tile will be replaced later
@@ -152,7 +178,7 @@ public class ServerTile extends Tile {
 				
 				Rectangle entityBounds = entity.getBounds();
 				MyUtils.moveRectInside(entityBounds, tileBounds, 0.05f);
-				entity.moveTo(closest.getLevel(), entityBounds.x, entityBounds.y);
+				entity.moveTo(entityBounds.x, entityBounds.y);
 			}
 		}
 	}

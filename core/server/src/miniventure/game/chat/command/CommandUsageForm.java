@@ -1,14 +1,18 @@
 package miniventure.game.chat.command;
 
 import miniventure.game.chat.MessageBuilder;
-import miniventure.game.server.ServerCore;
+import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.MapFunction;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
+import miniventure.game.world.management.ServerWorld;
+
+import org.jetbrains.annotations.NotNull;
 
 public class CommandUsageForm {
 	
+	@FunctionalInterface
 	interface ExecutionBehavior {
-		void execute(ServerPlayer executor, String[] args, MessageBuilder out, MessageBuilder err);
+		void execute(@NotNull ServerWorld world, ServerPlayer executor, String[] args, MessageBuilder out, MessageBuilder err);
 	}
 	
 	final boolean restricted;
@@ -28,15 +32,11 @@ public class CommandUsageForm {
 		this.details = details;
 		this.args = args;
 		this.executionBehavior = executionBehavior;
-		
-		if(restricted)
-			this.executorCheck = executor -> executorCheck.get(executor) && ServerCore.getServer().isAdmin(executor);
-		else
-			this.executorCheck = executorCheck;
+		this.executorCheck = executorCheck;
 	}
 	
-	public boolean execute(ServerPlayer executor, String[] args, MessageBuilder out, MessageBuilder err) {
-		if(restricted && !ServerCore.getServer().isAdmin(executor))
+	public boolean execute(@NotNull ServerWorld world, ServerPlayer executor, String[] args, MessageBuilder out, MessageBuilder err) {
+		if(restricted && !world.getServer().isAdmin(executor))
 			return false;
 		if(!executorCheck.get(executor))
 			return false;
@@ -45,14 +45,19 @@ public class CommandUsageForm {
 		for(Argument arg: this.args) {
 			int len = arg.length();
 			if(len < 0) len = args.length-off; // takes remaining args
-			if(off+len > args.length || !arg.satisfiedBy(args, off))
+			if(off+len > args.length || !arg.satisfiedBy(world, args, off))
 				return false;
 			off += len;
 		}
 		
 		if(off < args.length) return false;
 		
-		this.executionBehavior.execute(executor, args, out, err);
+		try {
+			this.executionBehavior.execute(world, executor, args, out, err);
+		} catch(IllegalArgumentException ex) {
+			err.println(MyUtils.combineThrowableCauses(ex, "error"));
+		}
+		
 		return true;
 	}
 	

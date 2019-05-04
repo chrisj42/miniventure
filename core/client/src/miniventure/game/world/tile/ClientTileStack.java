@@ -13,6 +13,7 @@ public class ClientTileStack extends TileStack<ClientTileType> {
 	private LinkedList<ClientTileType> opaqueStack; // opaque tiles only
 	
 	{
+		//noinspection ConstantConditions
 		if(opaqueStack == null)
 			opaqueStack = new LinkedList<>();
 	}

@@ -19,10 +19,13 @@ import miniventure.game.screen.ErrorScreen;
 import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
+import miniventure.game.screen.NotifyScreen;
 import miniventure.game.screen.util.BackgroundInheritor;
 import miniventure.game.screen.util.BackgroundProvider;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.customenum.GenericEnum;
 import miniventure.game.util.function.ValueFunction;
+import miniventure.game.world.management.ClientWorld;
 import miniventure.game.world.tile.ClientTileType;
 
 import com.badlogic.gdx.ApplicationAdapter;
@@ -38,6 +41,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.kotcrab.vis.ui.VisUI;
 
 import org.jetbrains.annotations.NotNull;
@@ -55,7 +59,7 @@ public class ClientCore extends ApplicationAdapter {
 	
 	// debug flags
 	static boolean debugInfo = false;
-	static boolean debugChunk = false;
+	// static boolean debugChunk = false;
 	static boolean debugTile = false;
 	static boolean debugInteract = false;
 	public static boolean debugBounds = false;
@@ -92,8 +96,8 @@ public class ClientCore extends ApplicationAdapter {
 	
 	public static final UncaughtExceptionHandler exceptionHandler = (thread, throwable) -> {
 		exceptionNotifier.act(throwable);
-		
 		throwable.printStackTrace();
+		System.exit(1);
 	};
 	
 	public ClientCore(ServerManager serverStarter) {
@@ -108,7 +112,7 @@ public class ClientCore extends ApplicationAdapter {
 		VisUI.load(skin);
 		
 		LoadingScreen loader = new LoadingScreen();
-		loader.pushMessage("Initializing...", true);
+		loader.pushMessage("Initializing", true);
 		setScreen(loader);
 		//System.out.println("start delay");
 		MyUtils.delay(0, () -> Gdx.app.postRunnable(() -> {
@@ -117,12 +121,31 @@ public class ClientCore extends ApplicationAdapter {
 			if(batch == null)
 				batch = new SpriteBatch();
 			
+			GenericEnum.init();
 			ClientTileType.init();
+			serverStarter.init();
 			
 			gameScreen = new GameScreen();
 			clientWorld = new ClientWorld(serverStarter, gameScreen);
 			
-			setScreen(new MainMenu());
+			setScreen(new NotifyScreen(true, () -> setScreen(new MainMenu()),
+				"Continue",
+				"Welcome to Miniventure Beta!",
+				"",
+				"This game is not finished!!! Not even close.",
+				"Though the back-end may change from time to time, who knows.",
+				"",
+				"The utmost effort is made to prevent bugs from getting into releases, but since",
+				"the sole developer has a life and very few testers, this effort doesn't amount to much.",
+				"",
+				"Also, please keep in mind that, while the gameplay systems are (fairly) stable,",
+				"the majority of content is yet to come.",
+				
+				"You may have to create new worlds to take advantage of some of the bigger updates,",
+				"as the world is still being fleshed out.",
+				"",
+				"Enjoy the game!"
+			));
 		}));
 	}
 	
@@ -150,7 +173,7 @@ public class ClientCore extends ApplicationAdapter {
 	public void render() {
 		input.update();
 		
-		getBatch().setColor(new Color(1, 1, 1, 1));
+		getBatch().setColor(Color.WHITE);
 		
 		if (clientWorld != null && clientWorld.worldLoaded())
 			clientWorld.update(GameCore.getDeltaTime()); // renders as well
@@ -178,8 +201,23 @@ public class ClientCore extends ApplicationAdapter {
 				return;
 			}
 			
-			if(menuScreen instanceof MainMenu && screen instanceof ErrorScreen)
+			if((menuScreen instanceof MainMenu || menuScreen instanceof ErrorScreen) && screen instanceof ErrorScreen)
 				return; // ignore it.
+			
+			if(screen != null) {
+				// determine if the given screen instance is already somewhere on the "screen" hierarchy, and if so go back to that one.
+				MenuScreen check = menuScreen;
+				while(check != null && check != screen)
+					check = check.getParent();
+				
+				if(check != null) {
+					// screen found
+					while(menuScreen != null && menuScreen != screen)
+						backToParentScreen();
+					
+					return;
+				}
+			}
 			
 			if(menuScreen instanceof BackgroundProvider && screen instanceof BackgroundInheritor)
 				((BackgroundInheritor) screen).setBackground((BackgroundProvider) menuScreen);
@@ -191,7 +229,7 @@ public class ClientCore extends ApplicationAdapter {
 			} else if(menuScreen != null && (gameScreen == null || menuScreen != gameScreen.chatScreen))
 				menuScreen.dispose();
 			
-			System.out.println("setting screen to " + screen);
+			GameCore.debug("setting screen to " + screen);
 			
 			if(gameScreen != null) {
 				if(screen instanceof MainMenu) {
@@ -214,7 +252,7 @@ public class ClientCore extends ApplicationAdapter {
 		synchronized (screenLock) {
 			if(menuScreen != null && menuScreen.getParent() != null) {
 				MenuScreen screen = menuScreen.getParent();
-				System.out.println("setting screen back to " + screen);
+				GameCore.debug("setting screen back to " + screen);
 				if(gameScreen == null || menuScreen != gameScreen.chatScreen)
 					menuScreen.dispose(false);
 				screen.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -232,8 +270,14 @@ public class ClientCore extends ApplicationAdapter {
 	}
 	
 	public static void playSound(String soundName) {
-		if(!soundEffects.containsKey(soundName))
-			soundEffects.put(soundName, Gdx.audio.newSound(Gdx.files.internal("audio/effects/"+soundName+".wav")));
+		if(!soundEffects.containsKey(soundName)) {
+			try {
+				soundEffects.put(soundName, Gdx.audio.newSound(Gdx.files.internal("audio/effects/" + soundName + ".wav")));
+			} catch(GdxRuntimeException e) {
+				System.err.println("error loading sound '"+soundName+"'; not playing.");
+				return;
+			}
+		}
 		
 		Sound s = soundEffects.get(soundName);
 		//System.out.println("playing sound "+soundName+": "+s);
@@ -241,10 +285,14 @@ public class ClientCore extends ApplicationAdapter {
 			s.play();
 	}
 	
-	public static Music setMusicTrack(@NotNull FileHandle file) {
-		stopMusic();
-		song = Gdx.audio.newMusic(file);
-		return song;
+	public static Music setMusicTrack(@NotNull FileHandle file) throws AudioException {
+		try {
+			stopMusic();
+			song = Gdx.audio.newMusic(file);
+			return song;
+		} catch(GdxRuntimeException e) {
+			throw new AudioException(e);
+		}
 	}
 	public static void stopMusic() {
 		if(song != null) {
@@ -269,7 +317,7 @@ public class ClientCore extends ApplicationAdapter {
 	
 	@Override
 	public void resize(int width, int height) {
-		if(gameScreen != null)
+		if(gameScreen != null) // null check in case this is called before app is fully initialized
 			gameScreen.resize(width, height);
 		
 		MenuScreen menu = getScreen();

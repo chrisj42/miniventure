@@ -1,0 +1,39 @@
+you know what, what *can* you make in the game? I'm going to lay out a few things:
+- tools (ax, pick, shovel, sword) (hoe, fish rod)
+- cooked food
+- dock
+- boats?
+- clothes?
+- torch
+- floors, walls, doors
+- machinery....later (like pipes)
+- campfire?
+
+
+material variations
+
+
+
+when selecting a tile...
+- if the tile was crafted, there's an option to deconstruct it
+	- if the tile has a blueprint on it, the option reads "cancel" instead, and will cancel the blueprint
+- regardless, there's an option to build a tile there
+- you get a menu of categories, with craftables in each
+- craftable names are color-coded
+	- red names cannot be crafted on the given tile
+	- blue names can be crafted on the given tile but there but there are other unmet requirements to craft
+	- green names can be crafted on the given tile now; there are no unmet crafting requirements
+- a blue/green craftable may be selected, which causes the tile to appear (gray?)-shaded over, and a blue-shaded icon of the craftable is shown in the middle of the tile.
+	- once a blueprint is laid down, materials may be deposited onto the site, which fills a bar above the blue icon
+		- this may be done through a hotkey or a "chest"-like interface (materials may be added or removed using this interface, but the materials shown are only those that match the types required by the blueprint. And you cannot put more materials than is specified by the blueprint).
+	- once all materials are present, the bar disappears and the icon turns green, indicating that all materials are present.
+		- If no further requirements exist, then the tile is created (blueprint is realized).
+		- many craftables require a hammer to be used a couple times at the end to complete the process
+	- you can choose to deposit all materials on hand when laying a blueprint, which will automatically deposit as much of the needed materials as exists in your inventory.
+
+- a shortcut key exists to place the previous blueprint (does not deposit any materials).
+- a shortcut key exists to deposit all materials on hand (provided there is already a blueprint laid).
+
+- if a tile is changed in such a way that it becomes unsuitable for the blueprint on it, the blueprint goes away and any stored resources are converted into item entities.
+- this usually happens when a blueprint is finished; however for blueprints that don't alter the tile (cooking food, making clothes, tools, etc), the blueprint remains after completion (with the original materials used up of course), allowing it to be used again.
+	- when done, the blueprint may be cancelled

@@ -4,14 +4,12 @@ import java.util.*;
 
 import miniventure.game.item.Item;
 import miniventure.game.item.Result;
-import miniventure.game.texture.TextureHolder;
-import miniventure.game.util.MyUtils;
 import miniventure.game.util.RelPos;
 import miniventure.game.util.customenum.SerialMap;
-import miniventure.game.world.Level;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.player.Player;
+import miniventure.game.world.level.Level;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
@@ -21,11 +19,11 @@ import org.jetbrains.annotations.Nullable;
 
 public class RenderTile extends Tile {
 	
-	private ArrayList<TileAnimation<TextureHolder>> spriteStack;
-	private ArrayList<ClientTileType> typeStack;
+	private ArrayList<TileAnimation> spriteStack;
 	private boolean updateSprites;
 	
-	private final Object spriteLock = new Object();
+	// spriteLock is unnecessary because all access occurs in the same thread: the libGDX render thread.
+	// private final Object spriteLock = new Object();
 	
 	public RenderTile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, @Nullable SerialMap[] data) {
 		super(level, x, y, types);
@@ -47,19 +45,12 @@ public class RenderTile extends Tile {
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
 		if(getLevel().getTile(x, y) == null) return; // cannot render if there are no tiles.
 		
-		synchronized (spriteLock) {
-			// cannot render if there are no sprites.
-			if(spriteStack == null || updateSprites)
-				compileSprites(); // since the lock can be reacquired by the same thread, this is fine to put in a synchronized statement.
-		}
+		// cannot render if there are no sprites.
+		if(spriteStack == null || updateSprites)
+			compileSprites();
 		
-		synchronized (spriteLock) {
-			for(int i = 0; i < spriteStack.size(); i++) {
-				TileAnimation<TextureHolder> animation = spriteStack.get(i);
-				//typeStack.get(i).getRenderer().transitionManager.tryFinishAnimation(this);
-				batch.draw(animation.getKeyFrame(this).texture, (x - posOffset.x) * SIZE, (y - posOffset.y + typeStack.get(i).getZOffset()) * SIZE);
-			}
-		}
+		for(TileAnimation animation: spriteStack)
+			batch.draw(animation.getKeyFrame(this).texture, (x - posOffset.x) * SIZE, (y - posOffset.y) * SIZE);
 	}
 	
 	@Override
@@ -78,15 +69,15 @@ public class RenderTile extends Tile {
 	@Override public void touching(Entity entity) {}
 	
 	public void updateSprites() {
-		synchronized (spriteLock) {
-			updateSprites = true;
-		}
+		updateSprites = true;
 	}
+	
+	// compile sprites in each layer group separately; additionally, for each layer, end it with an air tile. Transparency will be implemented afterwards, once I've implemented this and also changed tile stacks; see in TileStack.java. Following initial implementation of transparency, and the rest, test it out with the level gen.
 	
 	/** @noinspection ObjectAllocationInLoop*/
 	@SuppressWarnings("unchecked")
 	private void compileSprites() {
-		TreeMap<TileTypeEnum, ClientTileType> allTypes = new TreeMap<>(); // overlap
+		TreeSet<TileTypeEnum> allTypes = new TreeSet<>(); // overlap
 		EnumMap<RelPos, EnumSet<TileTypeEnum>> typesAtPositions = new EnumMap<>(RelPos.class); // connection
 		EnumMap<TileTypeEnum, EnumSet<RelPos>> typePositions = new EnumMap<>(TileTypeEnum.class); // overlap
 		
@@ -95,24 +86,20 @@ public class RenderTile extends Tile {
 			int y = rp.getY();
 			RenderTile oTile = (RenderTile) getLevel().getTile(this.x + x, this.y + y);
 			List<ClientTileType> aroundTypes = oTile != null ? oTile.getTypeStack().getTypes() : Collections.emptyList();
+			if(aroundTypes.size() > 0 && aroundTypes.get(aroundTypes.size()-1).getTypeEnum() == TileTypeEnum.STONE && getType().getTypeEnum() != TileTypeEnum.STONE)
+				aroundTypes.add(ClientTileType.get(TileTypeEnum.AIR));
 			
-			EnumMap<TileTypeEnum, ClientTileType> typeMap = new EnumMap<>(TileTypeEnum.class);
+			EnumSet<TileTypeEnum> typeSet = EnumSet.noneOf(TileTypeEnum.class);
 			for(ClientTileType type: aroundTypes) {
-				typeMap.put(type.getTypeEnum(), type);
-				typePositions.computeIfAbsent(type.getTypeEnum(), k -> EnumSet.noneOf(RelPos.class));
-				typePositions.get(type.getTypeEnum()).add(rp);
+				typeSet.add(type.getTypeEnum());
+				typePositions.computeIfAbsent(type.getTypeEnum(), k -> EnumSet.noneOf(RelPos.class)).add(rp);
 			}
-			allTypes.putAll(typeMap);
-			typesAtPositions.put(rp, MyUtils.enumSet(typeMap.keySet()));
+			allTypes.addAll(typeSet);
+			typesAtPositions.put(rp, typeSet);
 		}
 		
 		// all tile types have been fetched. Now accumulate the sprites.
-		ArrayList<TileAnimation<TextureHolder>> spriteStack = new ArrayList<>(16);
-		ArrayList<ClientTileType> typeStack = new ArrayList<>(16);
-		//ArrayList<String> spriteNames = new ArrayList<>(16);
-		
-		// get overlap data, in case it's needed
-		//EnumMap<TileTypeEnum, EnumSet<RelPos>> typePositions = OverlapManager.mapTileTypesAround(this);
+		ArrayList<TileAnimation> spriteStack = new ArrayList<>(16);
 		
 		// iterate through main stack from bottom to top, adding connection and overlap sprites each level.
 		List<ClientTileType> types = getTypeStack().getTypes();
@@ -121,45 +108,34 @@ public class RenderTile extends Tile {
 			ClientTileType prev = types.get(i-1);
 			
 			// add connection sprite (or transition) for prev
-			TileAnimation<TextureHolder> animation = prev.getRenderer().getConnectionSprite(this, typesAtPositions);
-			spriteStack.add(animation);
-			typeStack.add(prev);
-			//spriteNames.add(animation.getKeyFrames()[0].name);
+			spriteStack.addAll(prev.getRenderer().getConnectionSprites(this, typesAtPositions));
 			
 			// check for overlaps that are above prev AND below cur
-			NavigableMap<TileTypeEnum, ClientTileType> overlapMap;
+			NavigableSet<TileTypeEnum> overlapSet;
 			if(cur == null)
-				overlapMap = allTypes.subMap(prev.getTypeEnum(), false, allTypes.lastKey(), !allTypes.lastKey().equals(prev.getTypeEnum()));
+				overlapSet = safeSubSet(allTypes, prev.getTypeEnum(), false, allTypes.last(), !allTypes.last().equals(prev.getTypeEnum()));
 			else
-				overlapMap = allTypes.subMap(prev.getTypeEnum(), false, cur.getTypeEnum(), false);
+				overlapSet = safeSubSet(allTypes, prev.getTypeEnum(), false, cur.getTypeEnum(), false);
 			
-			if(overlapMap.size() > 0) { // add found overlaps
-				overlapMap.forEach((enumType, tileType) -> {
-					ArrayList<TileAnimation<TextureHolder>> sprites = tileType.getRenderer().getOverlapSprites(typePositions.get(enumType));
-					for(TileAnimation<TextureHolder> sprite: sprites) {
-						spriteStack.add(sprite);
-						typeStack.add(tileType);
-						//spriteNames.add(sprite.getKeyFrames()[0].name);
-					}
+			if(overlapSet.size() > 0) { // add found overlaps
+				overlapSet.forEach(enumType -> {
+					ClientTileType tileType = ClientTileType.get(enumType);
+					ArrayList<TileAnimation> sprites = tileType.getRenderer().getOverlapSprites(typePositions.get(enumType));
+					spriteStack.addAll(sprites);
 				});
 			}
 		}
 		
-		
-		// now that we have the new sprites, we need to make sure that the animations remain continuous.
-		// to do that, we need to store the run duration of each one, and keep it if the animation is still here.
-		// to do *that*, we need a way to identify animations: the ClientTileType name combined with the sprite name.
-		// So I'll have to store them together.
-		
-		// The code below: set the sprites, then check each name in the deltaMap against those in the sprite stack.
-		// if in both, don't touch. If in stack only, add to deltaMap with delta 0. If in map only, remove it.
-		
-		// remember: minimize amount of code in synchronized statements (aka split up synchronized statements where possible), but obviously make sure any breaks in synchronization don't break things.
-		
-		synchronized (spriteLock) {
-			this.spriteStack = spriteStack;
-			this.typeStack = typeStack;
-			updateSprites = false;
-		}
+		this.spriteStack = spriteStack;
+		updateSprites = false;
+	}
+	
+	private static <E extends Enum<E>> NavigableSet<E> safeSubSet(TreeSet<E> set,
+											 E fromElement, boolean fromInclusive,
+											 E toElement,   boolean toInclusive) {
+		if(fromElement.compareTo(toElement) > 0)
+			return new TreeSet<>();
+		else
+			return set.subSet(fromElement, fromInclusive, toElement, toInclusive);
 	}
 }

@@ -66,9 +66,9 @@ public class Item {
 	public static Item deserialize(@NotNull String[] info) {
 		TextureHolder t = GameCore.icons.get(info[1]);
 		if(t == null)
-			t = GameCore.tileAtlas.findRegion(info[1]);
+			t = GameCore.descaledTileAtlas.getRegion(info[1]);
 		if(t == null)
-			t = GameCore.entityAtlas.findRegion(info[1]);
+			t = GameCore.entityAtlas.getRegion(info[1]);
 		if(t == null)
 			throw new SpriteNotFoundException("item texture "+info[1]+" not found in icon, tile, or entity atlas.");
 		return new Item(

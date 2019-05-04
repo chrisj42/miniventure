@@ -12,10 +12,12 @@ import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.EntityRenderer.ItemSpriteRenderer;
 import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
+import miniventure.game.world.management.ServerWorld;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ItemEntity extends ServerEntity {
@@ -28,8 +30,9 @@ public class ItemEntity extends ServerEntity {
 	private final ServerItem item;
 	private final boolean delayPickup;
 	
-	public ItemEntity(ServerItem item, @Nullable Vector2 goalDir) { this(item, goalDir, false); }
-	public ItemEntity(ServerItem item, @Nullable Vector2 goalDir, boolean delayPickup) {
+	public ItemEntity(@NotNull ServerWorld world, ServerItem item, @Nullable Vector2 goalDir) { this(world, item, goalDir, false); }
+	public ItemEntity(@NotNull ServerWorld world, ServerItem item, @Nullable Vector2 goalDir, boolean delayPickup) {
+		super(world);
 		this.lifetime = new LifetimeTracker(this, 180f);
 		this.bounceBehavior = new BounceBehavior(goalDir);
 		bounceBehavior.scaleVelocity(MathUtils.random(1f, 2f));
@@ -39,8 +42,8 @@ public class ItemEntity extends ServerEntity {
 		setRenderer(new ItemSpriteRenderer(item));
 	}
 	
-	protected ItemEntity(ClassDataList allData, final Version version, ValueFunction<ClassDataList> modifier) {
-		super(allData, version, modifier);
+	protected ItemEntity(@NotNull ServerWorld world, ClassDataList allData, final Version version, ValueFunction<ClassDataList> modifier) {
+		super(world, allData, version, modifier);
 		ArrayList<String> data = allData.get(1);
 		delayPickup = false;
 		item = ServerItem.load(MyUtils.parseLayeredString(data.get(0)));

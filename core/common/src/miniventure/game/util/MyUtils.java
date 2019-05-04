@@ -3,6 +3,7 @@ package miniventure.game.util;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -21,8 +22,11 @@ public final class MyUtils {
 	private MyUtils() {} // can't instantiate
 	
 	
+	/// STRING UTILS
+	
+	
 	public static String toTitleCase(String string) {
-		return toTitleCase(toTitleCase(string, ""), "_");
+		return toTitleCase(toTitleCase(string, " "), "_");
 	}
 	public static String toTitleCase(String string, String delimiter) {
 		String[] words = string.split(delimiter);
@@ -34,14 +38,24 @@ public final class MyUtils {
 		return String.join(delimiter, words);
 	}
 	
-	public static String encodeStringArray(String... strings) { return encodeStringArray(strings, '(', ')',','); }
-	public static String encodeStringArray(String[] strings, char elementStart, char elementEnd, char delimiter) {
+	public static String encodeStringArray(String... strings) { return encodeStringArray(Arrays.asList(strings)); }
+	public static String encodeStringArray(Iterable<String> strings) { return encodeStringArray(strings, '(', ')',','); }
+	/** @noinspection SameParameterValue*/
+	private static String encodeStringArray(Iterable<String> strings, char begin, char end, char delimiter) {
 		StringBuilder str = new StringBuilder();
-		for(int i = 0; i < strings.length; i++) {
-			str.append(elementStart);
-			str.append(strings[i]);
-			str.append(elementEnd);
-			if(i < strings.length-1)
+		Iterator<String> iter = strings.iterator();
+		while(iter.hasNext()) {
+			String elem = iter.next();
+			
+			final boolean wrap = elem.indexOf(delimiter) >= 0;
+			
+			if(wrap)
+				str.append(begin);
+			str.append(elem);
+			if(wrap)
+				str.append(end);
+			
+			if(iter.hasNext())
 				str.append(delimiter);
 		}
 		
@@ -49,7 +63,8 @@ public final class MyUtils {
 	}
 	
 	public static String[] parseLayeredString(String str) { return parseLayeredString(str, '(', ')', ','); }
-	public static String[] parseLayeredString(String str, char layerStart, char layerEnd, char delimiter) {
+	/** @noinspection SameParameterValue*/
+	private static String[] parseLayeredString(String str, char layerStart, char layerEnd, char delimiter) {
 		if(str.length() == 0) return new String[0];
 		
 		Array<String> result = new Array<>();
@@ -61,22 +76,65 @@ public final class MyUtils {
 				result.add(curStr.toString());
 				curStr = new StringBuilder();
 			}
-			else if(chars[i] == layerStart) {
-				if(curLayers > 0) curStr.append(chars[i]);
-				curLayers++;
-			}
-			else if(chars[i] == layerEnd) {
-				if(curLayers != 1) curStr.append(chars[i]);
-				if(curLayers > 0)
+			else {
+				if(chars[i] == layerStart)
+					curLayers++;
+				
+				if((chars[i] != layerStart && chars[i] != layerEnd) || curLayers != 1)
+					curStr.append(chars[i]);
+				
+				if(chars[i] == layerEnd)
 					curLayers--;
 			}
-			else curStr.append(chars[i]);
 		}
 		
 		result.add(curStr.toString());
 		
 		return result.toArray(String.class);
 	}
+	
+	public static int charCount(char c, String s) {
+		int count = 0;
+		for(int i = 0; i < s.length(); i++)
+			if(s.charAt(i) == c)
+				count++;
+		
+		return count;
+		// return s.length() - s.replaceAll("\\"+c, "").length();
+	}
+	
+	public static String plural(int count) { return count == 1 ? "" : "s"; }
+	public static String plural(int count, String word) { return plural(count, word, ""); }
+	public static String plural(int count, String word, String suffix) {
+		return String.valueOf(count) + ' ' +
+			(count != 1 && word.endsWith("y") ? word.substring(0, word.length() - 1) : word) +
+			(count == 1 ? "" : word.endsWith("s") ? "es" : word.endsWith("y") ? "ies" : "s") +
+			suffix;
+	}
+	
+	
+	// MATH UTILS
+	
+	
+	public static float mapFloat(float num, float prevMin, float prevMax, float newMin, float newMax) {
+		return (num-prevMin)/(prevMax-prevMin) * (newMax-newMin) + newMin;
+	}
+	
+	public static <N extends Comparable<N>> N clamp(N val, N min, N max) {
+		if(val.compareTo(min) < 0) return min;
+		if(val.compareTo(max) > 0) return max;
+		return val;
+	}
+	public static int clamp(int val, int min, int max) { return clamp((Integer)val, (Integer)min, (Integer)max); }
+	public static float clamp(float val, float min, float max) { return clamp((Float)val, (Float)min, (Float)max); }
+	
+	public static int mod(int num, int mod) { return (num % mod + mod) % mod; }
+	public static float mod(float num, float mod) { return (num % mod + mod) % mod; }
+	//public static long mod(long num, long mod) { return (num % mod + mod) % mod; }
+	//public static double mod(double num, double mod) { return (num % mod + mod) % mod; }
+	
+	
+	// GAME UTILS
 	
 	
 	// this method moves a rectangle *just* enough so that it fits inside another rectangle. In the event that the "outer" rect is smaller than the rect being moved, the rect being moved will be centered onto the outer rect. The padding is only used if the moving rect isn't already inside the outer one.
@@ -102,16 +160,6 @@ public final class MyUtils {
 		return toMove;
 	}
 	
-	public static float mapFloat(float num, float prevMin, float prevMax, float newMin, float newMax) {
-		return (num-prevMin)/(prevMax-prevMin) * (newMax-newMin) + newMin;
-	}
-	
-	public static <N extends Comparable<N>> N clamp(N val, N min, N max) {
-		if(val.compareTo(min) < 0) return min;
-		if(val.compareTo(max) > 0) return max;
-		return val;
-	}
-	
 	public static void drawRect(Rectangle rect, int thickness, Color c, Batch batch) {
 		drawRect(rect.x, rect.y, rect.width, rect.height, thickness, c, batch);
 	}
@@ -134,6 +182,21 @@ public final class MyUtils {
 		batch.setColor(prev);
 	}
 	
+	
+	public static void tryPlayMusic(Music music) {
+		// music.play();
+		noException(music::play, true);
+		// if(noException(music::play, true))
+		// 	return;// delay(1500, () -> tryPlayMusic(music));
+	}
+	
+	
+	// ERROR UTILS
+	
+	
+	// useful as a method reference
+	public static <T> boolean notNull(T obj) { return obj != null; }
+	
 	public static boolean noException(Action action) { return noException(action, false); }
 	public static boolean noException(Action action, boolean printError) {
 		try {
@@ -147,36 +210,19 @@ public final class MyUtils {
 		return true;
 	}
 	
-	public static void tryPlayMusic(Music music) {
-		// music.play();
-		noException(music::play, true);
-		// if(noException(music::play, true))
-		// 	return;// delay(1500, () -> tryPlayMusic(music));
+	public static String combineThrowableCauses(Throwable t, String prefix) {
+		return combineThrowableCauses(t, prefix, -1);
 	}
-	
-	public static <T> boolean notNull(T obj) { return obj != null; }
-	
-	public static void delay(int milliDelay, Action action) { new DelayedAction(milliDelay, action).start(); }
-	
-	public static int mod(int num, int mod) { return (num % mod + mod) % mod; }
-	public static float mod(float num, float mod) { return (num % mod + mod) % mod; }
-	//public static long mod(long num, long mod) { return (num % mod + mod) % mod; }
-	//public static double mod(double num, double mod) { return (num % mod + mod) % mod; }
-	
-	public static String plural(int count) { return count == 1 ? "" : "s"; }
-	public static String plural(int count, String word) { return plural(count, word, ""); }
-	public static String plural(int count, String word, String suffix) {
-		return String.valueOf(count) + ' ' +
-			(count != 1 && word.endsWith("y") ? word.substring(0, word.length() - 1) : word) +
-			(count == 1 ? "" : word.endsWith("s") ? "es" : word.endsWith("y") ? "ies" : "s") +
-			suffix;
-	}
-	
-	public static void sleep(int millis) {
-		try {
-			Thread.sleep(millis);
-		} catch (InterruptedException ignored) {
+	public static String combineThrowableCauses(Throwable t, String prefix, int maxDepth) {
+		StringBuilder str = new StringBuilder(prefix);
+		int depth = 0;
+		while(t != null && (maxDepth < 0 || depth < maxDepth)) {
+			// System.out.println("throwable "+t);
+			str.append(": ").append(t.getMessage());
+			t = t.getCause();
+			depth++;
 		}
+		return str.toString();
 	}
 	
 	public static void dumpAllStackTraces() {
@@ -196,6 +242,19 @@ public final class MyUtils {
 			for(StackTraceElement element: elements)
 				System.out.println("\t" + element);
 		});
+	}
+	
+	
+	// MISC UTILS
+	
+	
+	public static void delay(int milliDelay, Action action) { new DelayedAction(milliDelay, action).start(); }
+	
+	public static void sleep(int millis) {
+		try {
+			Thread.sleep(millis);
+		} catch (InterruptedException ignored) {
+		}
 	}
 	
 	public static <E extends Enum<E>> EnumSet<E> enumSet(Class<E> clazz, Collection<E> collection) {

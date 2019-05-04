@@ -42,12 +42,12 @@ public class ProgressPrinter implements ProgressLogger {
 		System.out.println(str);
 	}
 	
-	private void appendNextMessage(StringBuilder str, Iterator<String> iter) {
+	/*private void appendNextMessage(StringBuilder str, Iterator<String> iter) {
 		if(iter.hasNext()) {
 			String msg = iter.next();
 			str.append(" (").append(msg);
 			appendNextMessage(str, iter);
 			str.append(")");
 		}
-	}
+	}*/
 }

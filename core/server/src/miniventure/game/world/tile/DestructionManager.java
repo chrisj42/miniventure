@@ -2,11 +2,9 @@ package miniventure.game.world.tile;
 
 import miniventure.game.item.Result;
 import miniventure.game.item.ServerItem;
-import miniventure.game.item.TileItem;
 import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolItem.Material;
-import miniventure.game.item.ToolType;
-import miniventure.game.server.ServerCore;
+import miniventure.game.item.ToolItem.ToolType;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.customenum.SerialMap;
 import miniventure.game.world.ItemDrop;
@@ -24,12 +22,12 @@ public class DestructionManager {
 		return new DestructibleBuilder(tileType, -1).require(item -> false).make();
 	}
 	
-	final TileTypeEnum tileType;
-	final int totalHealth;
+	private final TileTypeEnum tileType;
+	private final int totalHealth;
 	
 	@NotNull private final PreferredTool[] preferredTools;
 	@NotNull private final DamageConditionCheck[] damageConditions;
-	@NotNull final ItemDrop[] drops;
+	@NotNull private final ItemDrop[] drops;
 	
 	// main constructor
 	DestructionManager(@NotNull TileTypeEnum tileType, int totalHealth, @NotNull PreferredTool[] preferredTools, @NotNull DamageConditionCheck[] damageConditions, @NotNull ItemDrop[] drops) {
@@ -42,7 +40,7 @@ public class DestructionManager {
 	
 	// for those with health, preferred tools, and drops a tile item.
 	DestructionManager(@NotNull TileTypeEnum tileType, int totalHealth, PreferredTool preferredTool) {
-		this(tileType, totalHealth, preferredTool, new ItemDrop(TileItem.get(tileType)));
+		this(tileType, totalHealth, preferredTool, new ItemDrop(ServerTileType.getItem(tileType)));
 	}
 	// above, but custom drop
 	DestructionManager(@NotNull TileTypeEnum tileType, int totalHealth, PreferredTool preferredTool, ItemDrop... drops) {
@@ -51,7 +49,7 @@ public class DestructionManager {
 	
 	// for those that are one-shot, and have certain damage conditions, and drop a tile item
 	DestructionManager(@NotNull TileTypeEnum tileType, DamageConditionCheck... damageConditions) {
-		this(tileType, new ItemDrop(TileItem.get(tileType)), damageConditions);
+		this(tileType, new ItemDrop(ServerTileType.getItem(tileType)), damageConditions);
 	}
 	// above, but custom single item drop
 	DestructionManager(@NotNull TileTypeEnum tileType, @NotNull ItemDrop drop, DamageConditionCheck... damageConditions) {
@@ -83,7 +81,7 @@ public class DestructionManager {
 			preferredTools = new PreferredTool[0];
 			damageConditions = new DamageConditionCheck[0];
 			if(dropTileItem)
-				drops = new ItemDrop[] { new ItemDrop(TileItem.get(type)) };
+				drops = new ItemDrop[] { new ItemDrop(ServerTileType.getItem(type)) };
 			else
 				drops = new ItemDrop[0];
 		}
@@ -105,7 +103,7 @@ public class DestructionManager {
 			if(replace || this.preferredTools.length == 0)
 				this.preferredTools = preferredTools;
 			else if(preferredTools.length > 0)
-				this.preferredTools = ArrayUtils.arrayJoin(PreferredTool.class, this.preferredTools, preferredTools);
+				this.preferredTools = ArrayUtils.joinArrays(PreferredTool[].class, this.preferredTools, preferredTools);
 			return this;
 		}
 		
@@ -114,14 +112,14 @@ public class DestructionManager {
 			if(replace || this.damageConditions.length == 0)
 				this.damageConditions = damageConditions;
 			else if(damageConditions.length > 0)
-				this.damageConditions = ArrayUtils.arrayJoin(DamageConditionCheck.class, this.damageConditions, damageConditions);
+				this.damageConditions = ArrayUtils.joinArrays(DamageConditionCheck[].class, this.damageConditions, damageConditions);
 			return this;
 		}
 		
 		public DestructibleBuilder drops(boolean dropTileItem) { return drops(true, dropTileItem); }
 		public DestructibleBuilder drops(boolean replace, boolean dropTileItem) {
 			if(dropTileItem)
-				return drops(replace, new ItemDrop(TileItem.get(type)));
+				return drops(replace, new ItemDrop(ServerTileType.getItem(type)));
 			else
 				return drops(replace, new ItemDrop[0]);
 		}
@@ -130,7 +128,7 @@ public class DestructionManager {
 			if(replace || this.drops.length == 0)
 				this.drops = drops;
 			else if(drops.length > 0)
-				this.drops = ArrayUtils.arrayJoin(ItemDrop.class, this.drops, drops);
+				this.drops = ArrayUtils.joinArrays(ItemDrop[].class, this.drops, drops);
 			return this;
 		}
 		
@@ -147,22 +145,22 @@ public class DestructionManager {
 			//	tile.getLevel().getWorld().getSender().sendData(new Hurt(attacker.getTag(), tile.getTag(), damage, ServerItem.save(item)));
 			
 			// add damage particle
-			ServerCore.getServer().broadcastParticle(new ActionParticleData(ActionType.IMPACT), tile);
+			tile.getServer().broadcastParticle(new ActionParticleData(ActionType.IMPACT), tile);
 			
 			SerialMap dataMap = tile.getDataMap(tileType);
 			
 			int health = totalHealth > 1 ? dataMap.getOrDefaultAndPut(TileCacheTag.Health, totalHealth) : 1;
 			health -= damage;
 			if(totalHealth > 1)
-				ServerCore.getServer().broadcastParticle(new TextParticleData(String.valueOf(damage)), tile);
+				tile.getServer().broadcastParticle(new TextParticleData(String.valueOf(damage)), tile);
 			if(health <= 0) {
-				ServerCore.getServer().playTileSound("break", tile, tileType);
+				tile.getServer().playTileSound("break", tile, tileType);
 				tile.breakTile();
 				for(ItemDrop drop: drops)
 					tile.getLevel().dropItems(drop, tile, attacker);
 			} else {
 				dataMap.put(TileCacheTag.Health, health);
-				ServerCore.getServer().playTileSound("hit", tile, tileType);
+				tile.getServer().playTileSound("hit", tile, tileType);
 			}
 			
 			return damage > 1 || damageConditions.length > 0 ? Result.USED : Result.INTERACT;

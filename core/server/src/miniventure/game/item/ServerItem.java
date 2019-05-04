@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import miniventure.game.GameCore;
 import miniventure.game.texture.TextureHolder;
+import miniventure.game.util.MyUtils;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.player.Player;
 
@@ -25,7 +26,13 @@ public abstract class ServerItem extends Item {
 	@NotNull private final ItemType type;
 	
 	protected ServerItem(@NotNull ItemType type, @NotNull String name) {
-		this(type, name.replace("_", " "), GameCore.icons.get("items/"+name.toLowerCase()));
+		this(type, name, true);
+	}
+	protected ServerItem(@NotNull ItemType type, @NotNull String name, boolean formatName) {
+		this(type, name, formatName, GameCore.icons.get("items/"+name.toLowerCase()));
+	}
+	protected ServerItem(@NotNull ItemType type, @NotNull String name, boolean formatName, @NotNull TextureHolder texture) {
+		this(type, formatName ? MyUtils.toTitleCase(name).replaceAll("_", " ") : name, texture);
 	}
 	protected ServerItem(@NotNull ItemType type, @NotNull String name, @NotNull TextureHolder texture) {
 		super(name, texture);
@@ -55,8 +62,6 @@ public abstract class ServerItem extends Item {
 	// this is used solely for saving to file, not to-client serialization.
 	public abstract String[] save();
 	
-	public abstract ServerItem copy();
-	
 	
 	public static String[] save(@Nullable ServerItem item) {
 		if(item == null) return null;
@@ -69,6 +74,5 @@ public abstract class ServerItem extends Item {
 		ItemType type = ItemType.valueOf(data[0]);
 		return type.load(Arrays.copyOfRange(data, 1, data.length));
 	}
-	
 	
 }

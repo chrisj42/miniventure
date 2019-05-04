@@ -49,7 +49,7 @@ public abstract class EntityRenderer {
 			this.spriteName = spriteName;
 			
 			if(!textures.containsKey(spriteName))
-				textures.put(spriteName, GameCore.entityAtlas.findRegion(spriteName));
+				textures.put(spriteName, GameCore.entityAtlas.getRegion(spriteName));
 			
 			sprite = textures.get(spriteName);
 		}
@@ -75,8 +75,15 @@ public abstract class EntityRenderer {
 		private final Item item;
 		
 		public ItemSpriteRenderer(Item item) {
-			super(item.getName(), item.getTexture());
+			super(item.getName(), mapTexture(item.getTexture()));
 			this.item = item;
+		}
+		
+		private static TextureHolder mapTexture(TextureHolder given) {
+			if(given.name.startsWith("items"))
+				return GameCore.scaledIconAtlas.getRegion(given.name);
+			else
+				return GameCore.descaledTileAtlas.getRegion(given.name);
 		}
 		
 		protected ItemSpriteRenderer(String[] data) {
@@ -106,10 +113,7 @@ public abstract class EntityRenderer {
 			this.isFrameDuration = isFrameDuration;
 			this.loopAnimation = loopAnimation;
 			
-			if(!animationFrames.containsKey(animationName))
-				animationFrames.put(animationName, GameCore.entityAtlas.findRegions(animationName));
-			
-			Array<TextureHolder> frames = animationFrames.get(animationName);
+			Array<TextureHolder> frames = animationFrames.computeIfAbsent(animationName, name -> GameCore.entityAtlas.getRegions(name));
 			
 			animation = new Animation<>(isFrameDuration ? duration : duration/frames.size, frames);
 		}
@@ -214,7 +218,7 @@ public abstract class EntityRenderer {
 		}
 		
 		private BlinkRenderer(String[] data) {
-			this(EntityRenderer.deserialize(MyUtils.parseLayeredString(data[0])), data[1].equals("null")?null:Color.valueOf(data[1]), Float.parseFloat(data[2]), Boolean.parseBoolean(data[3]), Blinker.load(MyUtils.parseLayeredString(data[4])));
+			this(EntityRenderer.deserialize(MyUtils.parseLayeredString(data[0])), data[1].equals("null")?null:Color.valueOf(data[1]), Float.parseFloat(data[2]), Boolean.parseBoolean(data[3]), Blinker.deserialize(MyUtils.parseLayeredString(data[4])));
 		}
 		
 		public void setRenderer(EntityRenderer renderer) {
@@ -228,7 +232,7 @@ public abstract class EntityRenderer {
 				blinkColor==null?"null":blinkColor.toString(),
 				String.valueOf(initialDuration),
 				String.valueOf(blinkFirst),
-				MyUtils.encodeStringArray(blinker.save())
+				MyUtils.encodeStringArray(blinker.serialize())
 			};
 		}
 		

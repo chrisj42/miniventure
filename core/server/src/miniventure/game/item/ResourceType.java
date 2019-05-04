@@ -1,21 +1,16 @@
 package miniventure.game.item;
 
-import miniventure.game.item.ItemType.SimpleEnumItem;
+import miniventure.game.item.EnumItemType.EnumItem;
 
 import org.jetbrains.annotations.NotNull;
 
 public enum ResourceType {
 	
-	Log, Flint, Coal, Cotton, Fabric, Stone, Iron, Tungsten, Ruby, Snow;
+	Log, Flint, Coal, Cotton, Fabric, Stone, Iron, Tungsten, Ruby;
 	
 	@NotNull
 	public ServerItem get() {
-		return new ResourceItem();
+		return new EnumItem(EnumItemType.Resource, this);
 	}
 	
-	class ResourceItem extends SimpleEnumItem {
-		ResourceItem() {
-			super(ItemType.Resource, name());
-		}
-	}
 }

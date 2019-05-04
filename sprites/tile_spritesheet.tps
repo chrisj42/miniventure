@@ -24,6 +24,23 @@
                     <int>-1</int>
                 </QSize>
             </struct>
+            <struct type="AutoSDSettings">
+                <key>scale</key>
+                <double>4</double>
+                <key>extension</key>
+                <string>4x</string>
+                <key>spriteFilter</key>
+                <string></string>
+                <key>acceptFractionalValues</key>
+                <false/>
+                <key>maxTextureSize</key>
+                <QSize>
+                    <key>width</key>
+                    <int>-1</int>
+                    <key>height</key>
+                    <int>-1</int>
+                </QSize>
+            </struct>
         </array>
         <key>allowRotation</key>
         <false/>
@@ -74,7 +91,7 @@
         <key>jpgQuality</key>
         <uint>80</uint>
         <key>pngOptimizationLevel</key>
-        <uint>0</uint>
+        <uint>1</uint>
         <key>webpQualityLevel</key>
         <uint>101</uint>
         <key>textureSubPath</key>
@@ -88,9 +105,9 @@
         <key>maxTextureSize</key>
         <QSize>
             <key>width</key>
-            <int>2048</int>
+            <int>8192</int>
             <key>height</key>
-            <int>2048</int>
+            <int>8192</int>
         </QSize>
         <key>fixedTextureSize</key>
         <QSize>
@@ -108,7 +125,7 @@
             <key>sizeConstraints</key>
             <enum type="AlgorithmSettings::SizeConstraints">POT</enum>
             <key>forceSquared</key>
-            <false/>
+            <true/>
             <key>maxRects</key>
             <struct type="AlgorithmMaxRectsSettings">
                 <key>heuristic</key>
@@ -132,13 +149,13 @@
             <key>data</key>
             <struct type="DataFile">
                 <key>name</key>
-                <filename>../core/common/assets/sprites/tiles.txt</filename>
+                <filename>../core/common/assets/sprites/tiles{v}.txt</filename>
             </struct>
         </map>
         <key>multiPack</key>
         <false/>
         <key>forceIdenticalLayout</key>
-        <false/>
+        <true/>
         <key>outputFormat</key>
         <enum type="SettingsBase::OutputFormat">RGBA8888</enum>
         <key>alphaHandling</key>
@@ -161,7 +178,7 @@
             <key>scale</key>
             <double>1</double>
             <key>scaleMode</key>
-            <enum type="ScaleMode">Smooth</enum>
+            <enum type="ScaleMode">Fast</enum>
             <key>extrude</key>
             <uint>2</uint>
             <key>trimThreshold</key>
@@ -181,8 +198,29 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
+            <key type="filename">tile-sprites/air/c00.png</key>
+            <key type="filename">tile-sprites/air/o00.png</key>
+            <key type="filename">tile-sprites/air/o01.png</key>
+            <key type="filename">tile-sprites/air/o02.png</key>
+            <key type="filename">tile-sprites/air/o03.png</key>
+            <key type="filename">tile-sprites/air/o04.png</key>
+            <key type="filename">tile-sprites/air/o05.png</key>
+            <key type="filename">tile-sprites/air/o06.png</key>
+            <key type="filename">tile-sprites/air/o07.png</key>
+            <key type="filename">tile-sprites/air/o08.png</key>
+            <key type="filename">tile-sprites/air/o09.png</key>
+            <key type="filename">tile-sprites/air/o10.png</key>
+            <key type="filename">tile-sprites/air/o11.png</key>
+            <key type="filename">tile-sprites/air/o12.png</key>
+            <key type="filename">tile-sprites/air/o13.png</key>
+            <key type="filename">tile-sprites/air/o14.png</key>
+            <key type="filename">tile-sprites/air/o15.png</key>
+            <key type="filename">tile-sprites/air/o16.png</key>
+            <key type="filename">tile-sprites/air/o17.png</key>
+            <key type="filename">tile-sprites/air/o18.png</key>
             <key type="filename">tile-sprites/cactus/c00.png</key>
             <key type="filename">tile-sprites/dirt/c00.png</key>
+            <key type="filename">tile-sprites/dock/c00.png</key>
             <key type="filename">tile-sprites/door_/closed/c00.png</key>
             <key type="filename">tile-sprites/door_/open/c00.png</key>
             <key type="filename">tile-sprites/door_/open/tclose_01.png</key>
@@ -239,6 +277,8 @@
             <key type="filename">tile-sprites/floor_/stone/c45.png</key>
             <key type="filename">tile-sprites/floor_/stone/c46.png</key>
             <key type="filename">tile-sprites/grass/c00.png</key>
+            <key type="filename">tile-sprites/grass/m00.png</key>
+            <key type="filename">tile-sprites/grass/m01.png</key>
             <key type="filename">tile-sprites/grass/o00.png</key>
             <key type="filename">tile-sprites/grass/o01.png</key>
             <key type="filename">tile-sprites/grass/o02.png</key>
@@ -427,25 +467,55 @@
             <key type="filename">tile-sprites/snow/o17.png</key>
             <key type="filename">tile-sprites/snow/o18.png</key>
             <key type="filename">tile-sprites/stone/c00.png</key>
-            <key type="filename">tile-sprites/stone/o00.png</key>
-            <key type="filename">tile-sprites/stone/o01.png</key>
-            <key type="filename">tile-sprites/stone/o02.png</key>
-            <key type="filename">tile-sprites/stone/o03.png</key>
-            <key type="filename">tile-sprites/stone/o04.png</key>
-            <key type="filename">tile-sprites/stone/o05.png</key>
-            <key type="filename">tile-sprites/stone/o06.png</key>
-            <key type="filename">tile-sprites/stone/o07.png</key>
-            <key type="filename">tile-sprites/stone/o08.png</key>
-            <key type="filename">tile-sprites/stone/o09.png</key>
-            <key type="filename">tile-sprites/stone/o10.png</key>
-            <key type="filename">tile-sprites/stone/o11.png</key>
-            <key type="filename">tile-sprites/stone/o12.png</key>
-            <key type="filename">tile-sprites/stone/o13.png</key>
-            <key type="filename">tile-sprites/stone/o14.png</key>
-            <key type="filename">tile-sprites/stone/o15.png</key>
-            <key type="filename">tile-sprites/stone/o16.png</key>
-            <key type="filename">tile-sprites/stone/o17.png</key>
-            <key type="filename">tile-sprites/stone/o18.png</key>
+            <key type="filename">tile-sprites/stone/c01.png</key>
+            <key type="filename">tile-sprites/stone/c02.png</key>
+            <key type="filename">tile-sprites/stone/c03.png</key>
+            <key type="filename">tile-sprites/stone/c04.png</key>
+            <key type="filename">tile-sprites/stone/c05.png</key>
+            <key type="filename">tile-sprites/stone/c06.png</key>
+            <key type="filename">tile-sprites/stone/c07.png</key>
+            <key type="filename">tile-sprites/stone/c08.png</key>
+            <key type="filename">tile-sprites/stone/c09.png</key>
+            <key type="filename">tile-sprites/stone/c10.png</key>
+            <key type="filename">tile-sprites/stone/c11.png</key>
+            <key type="filename">tile-sprites/stone/c12.png</key>
+            <key type="filename">tile-sprites/stone/c13.png</key>
+            <key type="filename">tile-sprites/stone/c14.png</key>
+            <key type="filename">tile-sprites/stone/c15.png</key>
+            <key type="filename">tile-sprites/stone/c16.png</key>
+            <key type="filename">tile-sprites/stone/c17.png</key>
+            <key type="filename">tile-sprites/stone/c18.png</key>
+            <key type="filename">tile-sprites/stone/c19.png</key>
+            <key type="filename">tile-sprites/stone/c20.png</key>
+            <key type="filename">tile-sprites/stone/c21.png</key>
+            <key type="filename">tile-sprites/stone/c22.png</key>
+            <key type="filename">tile-sprites/stone/c23.png</key>
+            <key type="filename">tile-sprites/stone/c24.png</key>
+            <key type="filename">tile-sprites/stone/c25.png</key>
+            <key type="filename">tile-sprites/stone/c26.png</key>
+            <key type="filename">tile-sprites/stone/c27.png</key>
+            <key type="filename">tile-sprites/stone/c28.png</key>
+            <key type="filename">tile-sprites/stone/c29.png</key>
+            <key type="filename">tile-sprites/stone/c30.png</key>
+            <key type="filename">tile-sprites/stone/c31.png</key>
+            <key type="filename">tile-sprites/stone/c32.png</key>
+            <key type="filename">tile-sprites/stone/c33.png</key>
+            <key type="filename">tile-sprites/stone/c34.png</key>
+            <key type="filename">tile-sprites/stone/c35.png</key>
+            <key type="filename">tile-sprites/stone/c36.png</key>
+            <key type="filename">tile-sprites/stone/c37.png</key>
+            <key type="filename">tile-sprites/stone/c38.png</key>
+            <key type="filename">tile-sprites/stone/c39.png</key>
+            <key type="filename">tile-sprites/stone/c40.png</key>
+            <key type="filename">tile-sprites/stone/c41.png</key>
+            <key type="filename">tile-sprites/stone/c42.png</key>
+            <key type="filename">tile-sprites/stone/c43.png</key>
+            <key type="filename">tile-sprites/stone/c44.png</key>
+            <key type="filename">tile-sprites/stone/c45.png</key>
+            <key type="filename">tile-sprites/stone/c46.png</key>
+            <key type="filename">tile-sprites/stone/m00.png</key>
+            <key type="filename">tile-sprites/stone/m01.png</key>
+            <key type="filename">tile-sprites/stone/m02.png</key>
             <key type="filename">tile-sprites/stone_path/c00.png</key>
             <key type="filename">tile-sprites/stone_path/o00.png</key>
             <key type="filename">tile-sprites/stone_path/o01.png</key>
@@ -469,10 +539,10 @@
             <key type="filename">tile-sprites/torch/c00_01.png</key>
             <key type="filename">tile-sprites/torch/c00_02.png</key>
             <key type="filename">tile-sprites/torch/c00_03.png</key>
-            <key type="filename">tile-sprites/torch/tenter_00.png</key>
             <key type="filename">tile-sprites/torch/tenter_01.png</key>
             <key type="filename">tile-sprites/torch/tenter_02.png</key>
             <key type="filename">tile-sprites/torch/tenter_03.png</key>
+            <key type="filename">tile-sprites/torch/tenter_04.png</key>
             <key type="filename">tile-sprites/tree_/cartoon/c00.png</key>
             <key type="filename">tile-sprites/tree_/cartoon/c01.png</key>
             <key type="filename">tile-sprites/tree_/cartoon/c02.png</key>
@@ -1371,11 +1441,13 @@
         <key>replaceList</key>
         <array/>
         <key>ignoredWarnings</key>
-        <array/>
+        <array>
+            <string>large-max-texture-size</string>
+        </array>
         <key>commonDivisorX</key>
-        <uint>36</uint>
+        <uint>1</uint>
         <key>commonDivisorY</key>
-        <uint>36</uint>
+        <uint>1</uint>
         <key>packNormalMaps</key>
         <false/>
         <key>autodetectNormalMaps</key>

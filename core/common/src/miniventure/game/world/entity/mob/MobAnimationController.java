@@ -3,10 +3,10 @@ package miniventure.game.world.entity.mob;
 import java.util.concurrent.PriorityBlockingQueue;
 
 import miniventure.game.GameProtocol.SpriteUpdate;
-import miniventure.game.world.Level;
 import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.EntityRenderer.DirectionalAnimationRenderer;
+import miniventure.game.world.level.Level;
 
 import com.badlogic.gdx.math.Rectangle;
 

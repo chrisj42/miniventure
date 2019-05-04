@@ -1,14 +1,14 @@
 package miniventure.game.world.entity;
 
+import miniventure.game.GameProtocol.PositionUpdate;
 import miniventure.game.item.Item;
 import miniventure.game.item.Result;
 import miniventure.game.util.blinker.Blinker;
-import miniventure.game.world.Level;
-import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.EntityRenderer.BlinkRenderer;
 import miniventure.game.world.entity.mob.player.Player;
-import miniventure.game.world.entity.particle.ParticleData;
+import miniventure.game.world.level.Level;
+import miniventure.game.world.management.WorldManager;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.graphics.Color;
@@ -32,17 +32,20 @@ public abstract class Entity implements WorldObject {
 	private BlinkRenderer blinker = null;
 	
 	// for entities updated locally (called by both server and client for different entities)
-	public Entity(@NotNull WorldManager world) {
+	// "local" refers to if the entity exists only locally, as opposed to being synced across clients.
+	protected Entity(@NotNull WorldManager world, boolean negative) {
 		this.world = world;
-		
-		eid = world.registerEntityWithNewId(this, this instanceof ParticleData);
+		eid = world.reserveNewEntityId(negative);
 	}
 	
 	// for client, on entities updated by the server
-	public Entity(@NotNull WorldManager world, int eid) {
+	protected Entity(@NotNull WorldManager world, int eid, PositionUpdate position) {
 		this.world = world;
 		this.eid = eid;
-		world.registerEntity(this);
+		x = position.x;
+		z = position.z;
+		y = position.y;
+		// world.registerEntity(this); // considered to be part of the level as well
 	}
 	
 	public int getId() { return eid; }
@@ -92,7 +95,7 @@ public abstract class Entity implements WorldObject {
 	public Vector3 getLocation(boolean worldOriginCenter) { return new Vector3(getPosition(worldOriginCenter), z); }
 	
 	public float getZ() { return z; }
-	protected void setZ(float z) { this.z = z; }
+	public void setZ(float z) { this.z = z; }
 	
 	@Override @NotNull
 	public Rectangle getBounds() {
@@ -117,7 +120,7 @@ public abstract class Entity implements WorldObject {
 		z += zd;
 		boolean moved = !movement.isZero();
 		if(moved)
-			moveTo(level, x+movement.x, y+movement.y);
+			moveTo(x+movement.x, y+movement.y);
 		return moved;
 	}
 	
@@ -138,7 +141,6 @@ public abstract class Entity implements WorldObject {
 		return entity.checkMove(level, oldRect, newRect, false);
 	}
 	
-	@SuppressWarnings("unchecked")
 	private boolean checkMove(@NotNull Level level, Rectangle oldRect, Rectangle newRect, boolean interact) {
 		
 		// check and see if the entity can go to the new coordinates.
@@ -208,39 +210,36 @@ public abstract class Entity implements WorldObject {
 	abstract void touchTile(Tile tile);
 	abstract void touchEntity(Entity entity);
 	
-	public void moveTo(@NotNull Level level, @NotNull Vector2 pos) { moveTo(level, pos.x, pos.y); }
-	public void moveTo(@NotNull Level level, float x, float y) {
-		//if(level == getLevel() && x == this.x && y == this.y) return; // no action or updating required.
+	public void moveTo(@NotNull Vector2 pos) { moveTo(pos.x, pos.y); }
+	public void moveTo(@NotNull Vector3 pos) { moveTo(pos.x, pos.y, pos.z); }
+	public void moveTo(float x, float y) { moveTo(x, y, this.z); }
+	public void moveTo(float x, float y, float z) {
+		// this method doesn't care where you end up; ie doesn't check for collisions.
+		// it also doesn't bother with clamping if there is no level.
 		
-		// this method doesn't care where you end up.
-		x = Math.max(x, 0);
-		y = Math.max(y, 0);
-		Vector2 size = getSize();
-		x = Math.min(x, level.getWidth() - size.x);
-		y = Math.min(y, level.getHeight() - size.y);
+		Level level = getLevel();
+		if(level != null) {
+			x = Math.max(x, 0);
+			y = Math.max(y, 0);
+			Vector2 size = getSize();
+			x = Math.min(x, level.getWidth() - size.x);
+			y = Math.min(y, level.getHeight() - size.y);
+		}
 		
 		this.x = x;
 		this.y = y;
-		
-		if(level.equals(getLevel()))
-			level.entityMoved(this);
-		else
-			world.setEntityLevel(this, level);
-	}
-	public void moveTo(@NotNull Level level, float x, float y, float z) {
-		moveTo(level, x, y);
 		this.z = z;
 	}
 	public void moveTo(@NotNull Tile tile) {
 		Vector2 pos = tile.getCenter();
 		pos.sub(getSize().scl(0.5f));
-		moveTo(tile.getLevel(), pos);
+		moveTo(pos);
 	}
 	
 	protected void moveIfLevel(float x, float y) {
 		Level level = getLevel();
 		if(level != null)
-			moveTo(level, x, y);
+			moveTo(x, y);
 	}
 	
 	// returns whether anything meaningful happened; if false, then other.touchedBy(this) will be called.

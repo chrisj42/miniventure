@@ -24,6 +24,23 @@
                     <int>-1</int>
                 </QSize>
             </struct>
+            <struct type="AutoSDSettings">
+                <key>scale</key>
+                <double>4</double>
+                <key>extension</key>
+                <string>4x</string>
+                <key>spriteFilter</key>
+                <string></string>
+                <key>acceptFractionalValues</key>
+                <false/>
+                <key>maxTextureSize</key>
+                <QSize>
+                    <key>width</key>
+                    <int>-1</int>
+                    <key>height</key>
+                    <int>-1</int>
+                </QSize>
+            </struct>
         </array>
         <key>allowRotation</key>
         <false/>
@@ -74,7 +91,7 @@
         <key>jpgQuality</key>
         <uint>80</uint>
         <key>pngOptimizationLevel</key>
-        <uint>0</uint>
+        <uint>1</uint>
         <key>webpQualityLevel</key>
         <uint>101</uint>
         <key>textureSubPath</key>
@@ -88,9 +105,9 @@
         <key>maxTextureSize</key>
         <QSize>
             <key>width</key>
-            <int>2048</int>
+            <int>4096</int>
             <key>height</key>
-            <int>2048</int>
+            <int>4096</int>
         </QSize>
         <key>fixedTextureSize</key>
         <QSize>
@@ -108,7 +125,7 @@
             <key>sizeConstraints</key>
             <enum type="AlgorithmSettings::SizeConstraints">POT</enum>
             <key>forceSquared</key>
-            <false/>
+            <true/>
             <key>maxRects</key>
             <struct type="AlgorithmMaxRectsSettings">
                 <key>heuristic</key>
@@ -132,13 +149,13 @@
             <key>data</key>
             <struct type="DataFile">
                 <key>name</key>
-                <filename>../core/common/assets/sprites/icons.txt</filename>
+                <filename>../core/common/assets/sprites/icons{v}.txt</filename>
             </struct>
         </map>
         <key>multiPack</key>
         <false/>
         <key>forceIdenticalLayout</key>
-        <false/>
+        <true/>
         <key>outputFormat</key>
         <enum type="SettingsBase::OutputFormat">RGBA8888</enum>
         <key>alphaHandling</key>
@@ -161,7 +178,7 @@
             <key>scale</key>
             <double>1</double>
             <key>scaleMode</key>
-            <enum type="ScaleMode">Smooth</enum>
+            <enum type="ScaleMode">Fast</enum>
             <key>extrude</key>
             <uint>2</uint>
             <key>trimThreshold</key>
@@ -238,11 +255,6 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">icon-sprites/items/coal.png</key>
-            <key type="filename">icon-sprites/items/cotton.png</key>
-            <key type="filename">icon-sprites/items/dirt.png</key>
-            <key type="filename">icon-sprites/items/fabric.png</key>
-            <key type="filename">icon-sprites/items/flint.png</key>
             <key type="filename">icon-sprites/items/food/apple.png</key>
             <key type="filename">icon-sprites/items/food/cactus_fruit.png</key>
             <key type="filename">icon-sprites/items/food/cherry.png</key>
@@ -254,12 +266,18 @@
             <key type="filename">icon-sprites/items/food/raw_meat.png</key>
             <key type="filename">icon-sprites/items/food/snow_berries.png</key>
             <key type="filename">icon-sprites/items/food/strawberry.png</key>
-            <key type="filename">icon-sprites/items/iron.png</key>
-            <key type="filename">icon-sprites/items/log.png</key>
-            <key type="filename">icon-sprites/items/ruby.png</key>
-            <key type="filename">icon-sprites/items/sand.png</key>
-            <key type="filename">icon-sprites/items/snow.png</key>
-            <key type="filename">icon-sprites/items/stone.png</key>
+            <key type="filename">icon-sprites/items/resource/coal.png</key>
+            <key type="filename">icon-sprites/items/resource/cotton.png</key>
+            <key type="filename">icon-sprites/items/resource/fabric.png</key>
+            <key type="filename">icon-sprites/items/resource/flint.png</key>
+            <key type="filename">icon-sprites/items/resource/iron.png</key>
+            <key type="filename">icon-sprites/items/resource/log.png</key>
+            <key type="filename">icon-sprites/items/resource/ruby.png</key>
+            <key type="filename">icon-sprites/items/resource/stone.png</key>
+            <key type="filename">icon-sprites/items/resource/tungsten.png</key>
+            <key type="filename">icon-sprites/items/tile/dirt.png</key>
+            <key type="filename">icon-sprites/items/tile/sand.png</key>
+            <key type="filename">icon-sprites/items/tile/snow.png</key>
             <key type="filename">icon-sprites/items/tools/flint_axe.png</key>
             <key type="filename">icon-sprites/items/tools/flint_pickaxe.png</key>
             <key type="filename">icon-sprites/items/tools/flint_shovel.png</key>
@@ -280,7 +298,6 @@
             <key type="filename">icon-sprites/items/tools/tungsten_pickaxe.png</key>
             <key type="filename">icon-sprites/items/tools/tungsten_shovel.png</key>
             <key type="filename">icon-sprites/items/tools/tungsten_sword.png</key>
-            <key type="filename">icon-sprites/items/tungsten.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -316,7 +333,9 @@
         <key>replaceList</key>
         <array/>
         <key>ignoredWarnings</key>
-        <array/>
+        <array>
+            <string>large-max-texture-size</string>
+        </array>
         <key>commonDivisorX</key>
         <uint>1</uint>
         <key>commonDivisorY</key>

@@ -25,7 +25,7 @@ public class TransitionAnimation {
 	
 	public String getName() { return name; }
 	
-	public TileAnimation<TextureHolder> getAnimation() {
-		return renderStyle.getAnimation(tileType, name, tileAnimations);
+	public TileAnimation getAnimation() {
+		return renderStyle.getAnimation(tileType, name, tileAnimations, "transition");
 	}
 }

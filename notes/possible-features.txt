@@ -1,0 +1,87 @@
+﻿---
+
+limited visibility; you have to explore for an area to be shown, otherwise it's black. Or, stones and stuff block the player's view.
+Dither effect around the edges, perhaps.
+
+---
+
+If you try to craft something, and you have multiple, different items which satisfy the requirements, a window will pop up asking you which of the items you want to use.
+
+---
+
+Do more intense analysis of world folders and their contents. Display all folders in the "saves" folder as if they were worlds, but display different messages depending on the validity of the world; these are cumulative:
+- validates:
+	- white text
+	- show version
+- validates with unknown/unused files:
+	- light yellow text
+	- show version
+	- show number of unused files
+- validates partially:
+	- red text
+	- show version if version present
+	- disallow load
+	- display missing files
+- does not validate
+	- gray text
+	- disallow load
+	- state that folder does not contain a world
+
+have radio button filter ("Show:")
+	- all folders
+	- world folders
+	- valid worlds
+
+set to "world folders" by default
+
+---
+
+failed interaction animation - player should show indication of failed interaction.
+
+---
+
+Add a highlight to whatever the player *will* interact with if the attack or interact keys are pressed. Maybe overlay the sprite with a translucent white color.
+
+---
+
+backpacks, to allow for extra storage on your person. They function as extra inventory from the exact slot that they are put in. They can also be categorized, so only certain items can be placed inside. It might make sense for this to be represented as a piece if furniture, just so putting it down doesn't have the possibility of it disappearing with all your items, relatively quickly. And btw, having backpacks means chests cannot be stored in your inventory if they have anything in them.
+
+---
+
+give item entities shadows like the water thing.
+speaking of items, maybe, for the sake of visibility, all item sprites should have a 1-pixel black outline?
+
+---
+
+ice tile
+
+---
+
+farming, and more foods like apples, ‎different meats, bread, rice, ‎soups and pastries. maybe other crops too.
+
+---
+
+NPCs that sell you stuff
+
+---
+
+why not give the player an animation holding items? Or better, use the item's sprite, and just draw it in the player's hand, in each of the player's positions. It's a possible idea, but I'm skeptical.
+
+---
+
+lasers as a form of energy transport. Wiring could be a thing too, I suppose.
+
+---
+
+it would be cool if things like trees did a little shake when you attack them... maybe rocks that are not touching any others could also do it.
+
+---
+
+Character customization
+
+---
+
+Underwater world / biome: requires scuba suit to access. Can dive under in ocean biomes, and explore. Coral, new enemies, etc.
+
+---
+

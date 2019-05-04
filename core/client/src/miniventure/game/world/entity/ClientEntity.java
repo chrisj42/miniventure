@@ -1,15 +1,14 @@
 package miniventure.game.world.entity;
 
-import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.EntityAddition;
 import miniventure.game.client.ClientCore;
-import miniventure.game.client.ClientWorld;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.blinker.FrameBlinker;
-import miniventure.game.world.ClientLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.entity.particle.ClientParticle;
+import miniventure.game.world.level.ClientLevel;
+import miniventure.game.world.management.ClientWorld;
 import miniventure.game.world.tile.ClientTile;
 import miniventure.game.world.tile.SwimAnimation;
 import miniventure.game.world.tile.Tile;
@@ -31,7 +30,7 @@ public class ClientEntity extends Entity {
 	private final boolean canFloat;
 	
 	public ClientEntity(EntityAddition data) {
-		super(ClientCore.getWorld(), data.eid);
+		super(ClientCore.getWorld(), data.eid, data.positionUpdate);
 		this.permeable = data.permeable;
 		this.descriptor = data.descriptor;
 		this.cutHeight = data.cutHeight;
@@ -41,7 +40,7 @@ public class ClientEntity extends Entity {
 	
 	// for locally updated entities. Assumes traits of a particle.
 	protected ClientEntity() {
-		super(ClientCore.getWorld());
+		super(ClientCore.getWorld(), true);
 		permeable = true;
 		canFloat = true;
 		cutHeight = false;
@@ -103,7 +102,7 @@ public class ClientEntity extends Entity {
 	
 	public boolean move(Vector2 moveDist, boolean validate) { return move(moveDist.x, moveDist.y, validate); }
 	public boolean move(Vector3 moveDist, boolean validate) { return move(moveDist.x, moveDist.y, moveDist.z, validate); }
-	public boolean move(float xd, float yd, boolean validate) { return move(xd, yd, this.z, validate); }
+	public boolean move(float xd, float yd, boolean validate) { return move(xd, yd, 0, validate); }
 	@Override
 	public boolean move(float xd, float yd, float zd) { return move(xd, yd, zd, false); }
 	
@@ -116,20 +115,6 @@ public class ClientEntity extends Entity {
 		
 		moveTo(new Vector3(xd, yd, zd).add(getLocation()));
 		return true;
-	}
-	
-	public void moveTo(Vector2 pos) { moveTo(pos.x, pos.y); }
-	public void moveTo(Vector3 pos) { moveTo(pos.x, pos.y, pos.z); }
-	public void moveTo(float x, float y) { moveTo(x, y, this.z); }
-	public void moveTo(float x, float y, float z) {
-		this.z = z;
-		ClientLevel level = getLevel();
-		if(level == null) {
-			this.x = x;
-			this.y = y;
-		}
-		else
-			moveTo(level, x, y);
 	}
 	
 	@Override

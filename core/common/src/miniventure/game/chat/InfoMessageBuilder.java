@@ -11,7 +11,8 @@ public class InfoMessageBuilder implements MessageBuilder {
 		InfoMessageLine getLine(String text);
 	}
 	
-	private final Object lock;
+	private final Object lineLock = new Object();
+	private final Object bufferLock;
 	
 	private Array<InfoMessageLine> lines;
 	private StringBuilder str = new StringBuilder();
@@ -21,31 +22,39 @@ public class InfoMessageBuilder implements MessageBuilder {
 	
 	public InfoMessageBuilder(InfoMessageBuilder sync, LineColorizer colorizer) {
 		this.colorizer = colorizer;
-		this.lock = sync.lock;
+		this.bufferLock = sync.bufferLock;
 		this.lines = sync.lines;
 	}
 	public InfoMessageBuilder(LineColorizer colorizer) {
 		this.colorizer = colorizer;
-		lock = new Object();
+		bufferLock = new Object();
 		lines = new Array<>(InfoMessageLine.class);
 	}
 	
-	public void print(String text) { str.append(text); }
+	@Override
+	public void print(String text) { synchronized (lineLock) { str.append(text); } }
+	@Override
 	public void println(String line) {
 		print(line);
 		println();
 	}
+	@Override
 	public void println() {
-		synchronized (lock) {
-			lines.add(colorizer.getLine(str.toString()));
+		String line;
+		synchronized (lineLock) {
+			line = str.toString();
+			str = new StringBuilder();
 		}
-		str = new StringBuilder();
+		
+		synchronized (bufferLock) {
+			lines.add(colorizer.getLine(line));
+		}
 	}
 	
 	@Nullable
 	public InfoMessage flushMessage() {
 		InfoMessageLine[] lines;
-		synchronized (lock) {
+		synchronized (bufferLock) {
 			lines = this.lines.toArray();
 			this.lines.clear();
 		}

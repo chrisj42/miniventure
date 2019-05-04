@@ -1,7 +1,7 @@
 package miniventure.game.world.entity.particle;
 
-import miniventure.game.world.Level;
 import miniventure.game.world.entity.Entity;
+import miniventure.game.world.level.Level;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -57,7 +57,7 @@ public class BounceBehavior {
 				- b/c we don't know the current position, we will just have to assume the starting point is (0,0), and move the delta dist for this frame, based on the passed in delta and the total move time.
 		 */
 		
-		Level level = e.getWorld().getEntityLevel(e);
+		Level level = e.getLevel();
 		if(level == null) return;
 		
 		Vector2 pos = e.getPosition();
@@ -73,7 +73,7 @@ public class BounceBehavior {
 		time += delta;
 		
 		if(e.getZ() < 0) {
-			e.move(0, 0, -e.getZ());
+			e.setZ(0);
 			velocity.scl(REBOUND_SPEED_FACTOR, REBOUND_SPEED_FACTOR, -REBOUND_SPEED_FACTOR);
 			if(time - lastBounceTime < 0.01f) {
 				moving = false;

@@ -1,6 +1,7 @@
 package miniventure.game.client;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.HashMap;
 
 import miniventure.game.GameCore;
@@ -12,14 +13,10 @@ import miniventure.game.screen.ChatScreen;
 import miniventure.game.screen.ErrorScreen;
 import miniventure.game.screen.InputScreen;
 import miniventure.game.screen.LoadingScreen;
+import miniventure.game.screen.MapScreen;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.ValueFunction;
-import miniventure.game.world.Chunk;
-import miniventure.game.world.Chunk.ChunkData;
-import miniventure.game.world.ClientLevel;
-import miniventure.game.world.Level;
-import miniventure.game.world.Point;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClientEntity;
 import miniventure.game.world.entity.Entity;
@@ -27,25 +24,28 @@ import miniventure.game.world.entity.EntityRenderer;
 import miniventure.game.world.entity.EntityRenderer.DirectionalAnimationRenderer;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
 import miniventure.game.world.entity.particle.ClientParticle;
+import miniventure.game.world.level.ClientLevel;
+import miniventure.game.world.management.ClientWorld;
 import miniventure.game.world.tile.ClientTile;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
-import com.esotericsoftware.kryonet.Client;
+
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
+import com.esotericsoftware.kryonet.MiniventureClient;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class GameClient implements GameProtocol {
 	
-	private Client client;
+	private MiniventureClient client;
 	private String username;
 	
 	public GameClient() {
-		client = new Client(writeBufferSize, objectBufferSize);
+		client = new MiniventureClient(writeBufferSize, objectBufferSize);
 		
 		GameProtocol.registerClasses(client.getKryo());
 		
@@ -62,34 +62,47 @@ public class GameClient implements GameProtocol {
 					world.init((WorldData)object);
 				
 				if(object instanceof LevelData) {
-					System.out.println("client received level");
-					world.addLevel((LevelData)object);
+					GameCore.debug("client received level");
+					world.setLevel((LevelData)object);
 				}
 				
-				if(object instanceof ChunkData) {
-					//System.out.println("client received chunk");
-					world.loadChunk((ChunkData)object);
+				if(object == DatalessRequest.Death) {
+					Gdx.app.postRunnable(() -> ClientCore.setScreen(world.getRespawnScreen()));
+					return;
 				}
+				
+				forPacket(object, MapRequest.class, req -> {
+					MenuScreen screen = ClientCore.getScreen();
+					if(screen instanceof MapScreen)
+						((MapScreen)screen).mapUpdate(req);
+					else if(screen == null)
+						Gdx.app.postRunnable(() -> ClientCore.setScreen(new MapScreen()));
+				});
 				
 				if(object instanceof SpawnData) {
-					System.out.println("client received player");
+					GameCore.debug("client received player");
 					SpawnData data = (SpawnData) object;
 					world.spawnPlayer(data);
 					ClientCore.setScreen(null);
 					if(ClientCore.PLAY_MUSIC) {
-						Music song = ClientCore.setMusicTrack(Gdx.files.internal("audio/music/game.mp3"));
-						song.setOnCompletionListener(music -> {
-							music.stop();
-							MyUtils.delay(MathUtils.random(30_000, 90_000), () -> MyUtils.tryPlayMusic(music));
-						});
-						MyUtils.delay(10_000, () -> MyUtils.tryPlayMusic(song));
+						try {
+							Music song = ClientCore.setMusicTrack(Gdx.files.internal("audio/music/game.mp3"));
+							song.setOnCompletionListener(music -> {
+								music.stop();
+								MyUtils.delay(MathUtils.random(30_000, 90_000), () -> MyUtils.tryPlayMusic(music));
+							});
+							MyUtils.delay(10_000, () -> MyUtils.tryPlayMusic(song));
+						} catch(AudioException e) {
+							System.err.println("failed to fetch game music.");
+							// e.printStackTrace();
+						}
 					}
 				}
 				
 				if(object instanceof TileUpdate) {
 					// individual tile update
 					TileUpdate update = (TileUpdate) object;
-					ClientLevel level = world.getLevel(update.levelDepth);
+					ClientLevel level = world.getLevel(update.levelId);
 					if(level == null) return;
 					ClientTile tile = level.getTile(update.x, update.y);
 					if(tile != null)
@@ -110,13 +123,11 @@ public class GameClient implements GameProtocol {
 				}
 				
 				forPacket(object, ParticleAddition.class, addition -> {
-					ClientLevel level = world.getLevel(addition.positionUpdate.levelDepth);
-					if(level == null || (player != null && !level.equals(player.getLevel()))) return;
+					// ClientLevel level = world.getLevel(addition.positionUpdate.levelId);
+					// if(level == null || (player != null && !level.equals(player.getLevel()))) return;
 					
-					ClientParticle e = ClientParticle.get(addition.particleData);
-					PositionUpdate newPos = addition.positionUpdate;
-					Vector2 size = e.getSize();
-					e.moveTo(level, newPos.x - size.x/2, newPos.y - size.y/2, newPos.z); // center entity
+					ClientParticle e = ClientParticle.get(addition);
+					world.registerEntity(e);
 				});
 				
 				if(object instanceof EntityAddition) {
@@ -126,12 +137,11 @@ public class GameClient implements GameProtocol {
 					if(world.getEntity(addition.eid) != null) return; // entity is already loaded.
 					
 					if(player != null && addition.eid == player.getId()) return; // shouldn't pay attention to trying to set the client player like this.
-					ClientLevel level = world.getLevel(addition.positionUpdate.levelDepth);
-					if(level == null || (player != null && !level.equals(player.getLevel()))) return;
+					// ClientLevel level = world.getLevel(addition.positionUpdate.levelId);
+					// if(level == null || (player != null && !level.equals(player.getLevel()))) return;
 					
 					ClientEntity e = new ClientEntity(addition);
-					PositionUpdate newPos = addition.positionUpdate;
-					e.moveTo(level, newPos.x, newPos.y, newPos.z);
+					world.registerEntity(e);
 				}
 				
 				if(object instanceof EntityRemoval) {
@@ -148,7 +158,7 @@ public class GameClient implements GameProtocol {
 					ClientEntity e = (ClientEntity) update.tag.getObject(world);
 					//System.out.println("client received entity update for " + e + ": " + update);
 					if(e == null) {
-						if(!isPositionLoaded(newPos)) return;
+						// if(!isPositionLoaded(newPos)) return;
 						
 						// chunk is loaded, but entity doesn't exist; ask for it from the server
 						send(new EntityRequest(update.tag.eid));
@@ -156,11 +166,11 @@ public class GameClient implements GameProtocol {
 					}
 					
 					if(newPos != null) {
-						ClientLevel level = world.getLevel(newPos.levelDepth);
-						if(level != null) {
-							e.moveTo(level, newPos.x, newPos.y, newPos.z);
+						// ClientLevel level = world.getLevel(newPos.levelId);
+						// if(level != null) {
+							e.moveTo(newPos.x, newPos.y, newPos.z);
 							//System.out.println("moved client entity "+e+", new pos: "+e.getPosition(true));
-						}
+						// }
 					}
 					if(newSprite != null) {
 						e.setRenderer(EntityRenderer.deserialize(newSprite.rendererData));
@@ -179,17 +189,17 @@ public class GameClient implements GameProtocol {
 					// first, make a list of all the entities that the client has loaded. Then, go through those given here, removing them from the list just made as you go. For each one, check the position; if it is not in a loaded chunk, then unload it. Else, if a local version doesn't exist, request it from the server. Don't use this data to actually change the positions of the entities, as there is already a system that will take care of that.
 					
 					if(player == null) {
-						System.err.println("Client received entity validation without loaded world; ignoring packet.");
+						System.err.println("Client received entity validation without loaded player; ignoring packet.");
 						return;
 					}
-					ClientLevel level = player.getLevel();
+					ClientLevel level = world.getLevel();
 					if(level == null) {
-						System.err.println("Client: player level is null upon receiving entity validation; ignoring packet.");
+						System.err.println("Client: level is null upon receiving entity validation; ignoring packet.");
 						return;
 					}
 					
-					if(level.getDepth() != list.levelDepth) {
-						System.err.println("Client: player level does not match entity validation level; ignoring packet.");
+					if(level.getLevelId() != list.levelId) {
+						System.err.println("Client: level does not match entity validation level; ignoring packet.");
 						return;
 					}
 					
@@ -199,20 +209,15 @@ public class GameClient implements GameProtocol {
 							loaded.put(e.getId(), e);
 					
 					for(int i = 0; i < list.ids.length; i++) {
-						boolean chunkLoaded = level.isChunkLoaded(list.chunks[i]);
 						boolean entityLoaded = loaded.containsKey(list.ids[i]);
 						
 						// if the chunk is loaded, but the entity isn't, then request it from the server.
 						// if the entity is loaded, but the chunk isn't, then unload it.
 						// else, do nothing.
 						
-						if(chunkLoaded && !entityLoaded) {
+						if(!entityLoaded) {
 							//System.out.println("client requesting entity due to validation");
 							send(new EntityRequest(list.ids[i]));
-						}
-						if(entityLoaded && !chunkLoaded) {
-							//System.out.println("client unloading entity due to validation");
-							loaded.get(list.ids[i]).remove();
 						}
 						
 						loaded.remove(list.ids[i]);
@@ -257,9 +262,9 @@ public class GameClient implements GameProtocol {
 				});
 				
 				forPacket(object, PositionUpdate.class, newPos -> {
-					if(player == null || newPos.levelDepth == null) return;
+					if(player == null) return;
 					//player.updatePos(newPos);
-					player.moveTo(world.getLevel(newPos.levelDepth), newPos.x, newPos.y, newPos.z);
+					player.moveTo(newPos.x, newPos.y, newPos.z);
 				});
 				
 				forPacket(object, StatUpdate.class, update -> {
@@ -305,53 +310,65 @@ public class GameClient implements GameProtocol {
 		}.start();
 	}
 	
+	public InetSocketAddress getClientAddress() {
+		return client != null ? client.getLocalAddressTCP() : null;
+	}
+	
 	public void send(Object obj) { client.sendTCP(obj); }
 	public void addListener(Listener listener) { client.addListener(listener); }
 	
-	public boolean connectToServer(@NotNull LoadingScreen logger, String host, ValueFunction<Boolean> callback) { return connectToServer(logger, host, GameProtocol.PORT, callback); }
-	public boolean connectToServer(@NotNull LoadingScreen logger, String host, int port, ValueFunction<Boolean> callback) {
-		logger.pushMessage("connecting to server at "+host+':'+port+"...");
+	// public boolean connectToServer(@NotNull LoadingScreen logger, String host, ValueFunction<Boolean> callback) { return connectToServer(logger, host, GameProtocol.PORT, callback); }
+	public boolean connectToServer(@NotNull LoadingScreen logger, @Nullable ServerManager personalServer, String host, int port, ValueFunction<Boolean> callback) {
+		logger.pushMessage("Connecting to "+(personalServer!=null?"private ":"")+"server at "+host+':'+port+"...");
 		
 		try {
 			client.connect(5000, host, port);
 		} catch(IOException e) {
-			System.err.println("(caught IOException:)");
-			e.printStackTrace();
+			// e.printStackTrace();
 			// error screen
 			Gdx.app.postRunnable(() -> {
-				ClientCore.setScreen(new ErrorScreen("failed to connect to server."));
+				ClientCore.setScreen(new ErrorScreen("Failed to connect: "+e.getMessage()));
 				callback.act(false);
 			});
 			return false;
 		}
 		
-		Gdx.app.postRunnable(() -> ClientCore.setScreen(new InputScreen("Specify username:", username -> {
-			this.username = username;
+		logger.editMessage("Logging in");
+		if(personalServer != null) {
+			// personalServer.setHost(client.getLocalAddressTCP());
+			this.username = HOST;
 			send(new Login(username, GameCore.VERSION));
-			
-			logger.editMessage("Loading world from server...");
-			ClientCore.setScreen(logger);
 			callback.act(true);
-		}, () -> {
-			disconnect();
-			ClientCore.backToParentScreen();
-			callback.act(false);
-		})));
+		}
+		else {
+			Gdx.app.postRunnable(() -> ClientCore.setScreen(new InputScreen("Player name:", username -> {
+				this.username = username;
+				send(new Login(username, GameCore.VERSION));
+				
+				logger.editMessage("Logging in as '"+username+"'");
+				ClientCore.setScreen(logger);
+				callback.act(true);
+			}, () -> {
+				disconnect();
+				ClientCore.backToParentScreen();
+				callback.act(false);
+			})));
+		}
 		
 		return true;
 	}
 	
 	public void disconnect() { client.stop(); }
 	
-	private boolean isPositionLoaded(PositionUpdate posUpdate) {
+	/*private boolean isPositionLoaded(PositionUpdate posUpdate) {
 		if(posUpdate == null) return false;
-		Level level = ClientCore.getWorld().getLevel(posUpdate.levelDepth);
+		Level level = ClientCore.getWorld().getLevel(posUpdate.levelId);
 		if(level == null) return false; // entity is on unloaded level
-		Vector2 pos = new Vector2(posUpdate.x, posUpdate.y);
-		Point cpos = Chunk.getCoords(pos);
-		if(!level.isChunkLoaded(cpos))
-			return false; // entity is on unloaded chunk
+		// Vector2 pos = new Vector2(posUpdate.x, posUpdate.y);
+		// Point cpos = Chunk.getCoords(pos);
+		// if(!level.isChunkLoaded(cpos))
+		// 	return false; // entity is on unloaded chunk
 		
 		return true;
-	}
+	}*/
 }

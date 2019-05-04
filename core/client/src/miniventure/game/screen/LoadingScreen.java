@@ -1,5 +1,6 @@
 package miniventure.game.screen;
 
+import java.util.EmptyStackException;
 import java.util.Stack;
 
 import miniventure.game.screen.util.BackgroundInheritor;
@@ -36,21 +37,29 @@ public class LoadingScreen extends BackgroundInheritor implements ProgressLogger
 	@Override
 	public void pushMessage(String message) { pushMessage(message, false); }
 	public void pushMessage(String message, boolean simple) {
+		message += "...";
 		final VisLabel label = simple ? new VisLabel(message) : makeLabel(message);
 		messageLabels.push(label);
 		Gdx.app.postRunnable(() -> vGroup.addActor(label));
 	}
 	
 	@Override
-	public void editMessage(final String message) {
-		final VisLabel label = messageLabels.peek();
-		Gdx.app.postRunnable(() -> label.setText(message));
+	public void editMessage(String message) {
+		VisLabel label = messageLabels.empty() ? null : messageLabels.peek();
+		if(label == null)
+			pushMessage(message);
+		else
+			Gdx.app.postRunnable(() -> label.setText(message+"..."));
 	}
 	
 	@Override
 	public void popMessage() {
-		VisLabel removed = messageLabels.pop();
-		Gdx.app.postRunnable(() -> vGroup.removeActor(removed));
+		try {
+			VisLabel removed = messageLabels.pop();
+			Gdx.app.postRunnable(() -> vGroup.removeActor(removed));
+		} catch(EmptyStackException e) {
+			System.err.println("Cannot pop from LoadingScreen message stack; stack is empty.");
+		}
 	}
 	
 }

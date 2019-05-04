@@ -16,12 +16,15 @@ import org.jetbrains.annotations.NotNull;
 
 public class ClientTileType extends TileType {
 	
-	public static void init() {}
+	public static void init() {
+		TileTypeRenderer.init();
+		for(ClientTileTypeEnum type: ClientTileTypeEnum.values)
+			type.getType();
+	}
 	
 	@FunctionalInterface
 	private interface P {
 		Param<Float> lightRadius = new Param<>(0f);
-		Param<Float> zOffset = new Param<>(0f);
 		Param<SwimAnimation> swimAnimation = new Param<>(null);
 		Param<List<TransitionAnimation>> transitions = new Param<>(new ArrayList<>(0));
 		
@@ -31,29 +34,31 @@ public class ClientTileType extends TileType {
 	private final TileTypeRenderer renderer;
 	
 	private final float lightRadius;
-	private final float zOffset;
 	private final SwimAnimation swimAnimation;
 	private final HashMap<String, TransitionAnimation> transitions;
 	
+	// all default; goes to connection+overlap
 	private ClientTileType(@NotNull TileTypeEnum tileType, boolean isOpaque, Value... params) {
-		this(tileType, isOpaque, ConnectionManager.DEFAULT(tileType), params);
+		this(tileType, isOpaque, new ConnectionManager(tileType), new OverlapManager(tileType), params);
 	}
+	// connection only; goes to connection+overlap
 	private ClientTileType(@NotNull TileTypeEnum tileType, boolean isOpaque, ConnectionManager connectionManager, Value... params) {
-		this(tileType, isOpaque, connectionManager, OverlapManager.NONE(tileType), params);
+		this(tileType, isOpaque, connectionManager, new OverlapManager(tileType), params);
 	}
+	// overlap only; goes to connection+overlap
 	private ClientTileType(@NotNull TileTypeEnum tileType, boolean isOpaque, OverlapManager overlapManager, Value... params) {
-		this(tileType, isOpaque, ConnectionManager.DEFAULT(tileType), overlapManager, params);
+		this(tileType, isOpaque, new ConnectionManager(tileType, RenderStyle.SINGLE_FRAME), overlapManager, params);
 	}
+	// overlap+connection; goes to renderer
 	private ClientTileType(@NotNull TileTypeEnum tileType, boolean isOpaque, ConnectionManager connectionManager, OverlapManager overlapManager, Value... params) {
 		this(tileType, new TileTypeRenderer(tileType, isOpaque, connectionManager, overlapManager), params);
 	}
-	
+	// renderer; final
 	private ClientTileType(@NotNull TileTypeEnum tileType, TileTypeRenderer renderer, Value... params) {
 		super(tileType);
 		this.renderer = renderer;
 		ParamMap map = new ParamMap(params);
 		lightRadius = map.get(P.lightRadius);
-		zOffset = map.get(P.zOffset);
 		swimAnimation = map.get(P.swimAnimation);
 		
 		List<TransitionAnimation> transitions = map.get(P.transitions);
@@ -74,10 +79,6 @@ public class ClientTileType extends TileType {
 		return lightRadius;
 	}
 	
-	public float getZOffset() {
-		return zOffset;
-	}
-	
 	public SwimAnimation getSwimAnimation() {
 		return swimAnimation;
 	}
@@ -87,35 +88,29 @@ public class ClientTileType extends TileType {
 	private enum ClientTileTypeEnum {
 		
 		HOLE(type -> new ClientTileType(type, true,
-			new ConnectionManager(type, RenderStyle.SINGLE_FRAME, type, TileTypeEnum.valueOf("WATER")),
+			new ConnectionManager(type, type, TileTypeEnum.WATER),
 			P.swimAnimation.as(new SwimAnimation(type, 0.75f))
 		)),
 		
 		DIRT(type -> new ClientTileType(type, true)),
 		
-		SAND(type -> new ClientTileType(type, true,
-			new OverlapManager(type, RenderStyle.SINGLE_FRAME)
-		)),
+		SAND(type -> new ClientTileType(type, true)),
 		
-		GRASS(type -> new ClientTileType(type, true,
-			new OverlapManager(type, RenderStyle.SINGLE_FRAME)
-		)),
+		GRASS(type -> new ClientTileType(type, true)),
 		
-		STONE_PATH(type -> new ClientTileType(type, true,
-			new OverlapManager(type, RenderStyle.SINGLE_FRAME)
-		)),
+		STONE_PATH(type -> new ClientTileType(type, true)),
 		
-		SNOW(type -> new ClientTileType(type, true,
-			new OverlapManager(type, RenderStyle.SINGLE_FRAME)
-		)),
+		SNOW(type -> new ClientTileType(type, true)),
 		
 		FLINT(type -> new ClientTileType(type, false)),
 		
 		WATER(type -> new ClientTileType(type, true,
-			new ConnectionManager(type, new RenderStyle(PlayMode.LOOP_RANDOM, 0.2f)),
-			new OverlapManager(type, new RenderStyle(true, 1/24f)),
+			new ConnectionManager(type, new RenderStyle(PlayMode.LOOP_RANDOM, 5)),
+			new OverlapManager(type, new RenderStyle(true, 24)),
 			P.swimAnimation.as(new SwimAnimation(type))
 		)),
+		
+		DOCK(type -> new ClientTileType(type, false)),
 		
 		COAL_ORE(ClientTileFactory::ore),
 		IRON_ORE(ClientTileFactory::ore),
@@ -123,13 +118,10 @@ public class ClientTileType extends TileType {
 		RUBY_ORE(ClientTileFactory::ore),
 		
 		STONE(type -> new ClientTileType(type, true,
-			new ConnectionManager(type, RenderStyle.SINGLE_FRAME, COAL_ORE.mainEnum, IRON_ORE.mainEnum, TUNGSTEN_ORE.mainEnum, RUBY_ORE.mainEnum),
-			new OverlapManager(type, RenderStyle.SINGLE_FRAME)
+			new ConnectionManager(type, RenderStyle.SINGLE_FRAME, type, COAL_ORE.mainEnum, IRON_ORE.mainEnum, TUNGSTEN_ORE.mainEnum, RUBY_ORE.mainEnum)
 		)),
 		
-		STONE_FLOOR(type -> new ClientTileType(type, true,
-			new ConnectionManager(type, RenderStyle.SINGLE_FRAME, type)
-		)),
+		STONE_FLOOR(type -> new ClientTileType(type, true)),
 		
 		WOOD_WALL(ClientTileFactory::wall),
 		STONE_WALL(ClientTileFactory::wall),
@@ -138,10 +130,10 @@ public class ClientTileType extends TileType {
 		CLOSED_DOOR(type -> ClientTileFactory.door(type, false)),
 		
 		TORCH(type -> new ClientTileType(type, false,
-			new ConnectionManager(type, new RenderStyle(1/12f)),
+			new ConnectionManager(type, new RenderStyle(12)),
 			P.lightRadius.as(2f),
 			P.transitions.as(Collections.singletonList(
-				new TransitionAnimation(type, "enter", new RenderStyle(3 / 12f, false))
+				new TransitionAnimation(type, "enter", new RenderStyle(12))
 			))
 		)),
 		
@@ -150,7 +142,9 @@ public class ClientTileType extends TileType {
 		CARTOON_TREE(ClientTileFactory::tree),
 		DARK_TREE(ClientTileFactory::tree),
 		PINE_TREE(ClientTileFactory::tree),
-		POOF_TREE(ClientTileFactory::tree);
+		POOF_TREE(ClientTileFactory::tree),
+		
+		AIR(type -> new ClientTileType(type, false));
 		
 		
 		/** @noinspection NonFinalFieldInEnum*/
@@ -176,33 +170,27 @@ public class ClientTileType extends TileType {
 	private interface ClientTileFactory {
 		static ClientTileType ore(TileTypeEnum type) {
 			return new ClientTileType(type, false,
-				new ConnectionManager(type, RenderStyle.SINGLE_FRAME, TileTypeEnum.STONE),
-				new OverlapManager(type, RenderStyle.SINGLE_FRAME)
+				new ConnectionManager(type, TileTypeEnum.STONE),
+				new OverlapManager(type)
 			);
 		}
 		
 		static ClientTileType wall(TileTypeEnum type) {
-			return new ClientTileType(type, false,
-				P.zOffset.as(0.4f)
-			);
+			return new ClientTileType(type, false);
 		}
 		
 		static ClientTileType door(TileTypeEnum type, boolean open) {
 			return new ClientTileType(type, false,
-				P.zOffset.as(0.4f),
 				P.transitions.as(open?Arrays.asList(
-					new TransitionAnimation(type, "open", new RenderStyle(PlayMode.NORMAL, 3/24f, false)),
-					new TransitionAnimation(type, "close", new RenderStyle(PlayMode.NORMAL, 3/24f, false))
+					new TransitionAnimation(type, "open", new RenderStyle(PlayMode.NORMAL, 24)),
+					new TransitionAnimation(type, "close", new RenderStyle(PlayMode.NORMAL, 24))
 					):new ArrayList<>(0)
 				)
 			);
 		}
 		
 		static ClientTileType tree(TileTypeEnum type) {
-			return new ClientTileType(type, false,
-				new ConnectionManager(type, RenderStyle.SINGLE_FRAME, type),
-				P.zOffset.as(0.25f)
-			);
+			return new ClientTileType(type, false);
 		}
 	}
 }

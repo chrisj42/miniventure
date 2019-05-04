@@ -2,16 +2,13 @@ package miniventure.game.client;
 
 import miniventure.game.GameCore;
 import miniventure.game.item.HotbarTable;
-import miniventure.game.screen.ChatScreen;
-import miniventure.game.screen.ConfirmScreen;
-import miniventure.game.screen.InputScreen;
-import miniventure.game.screen.MenuScreen;
+import miniventure.game.screen.*;
 import miniventure.game.screen.util.DiscreteViewport;
 import miniventure.game.util.RelPos;
-import miniventure.game.world.ClientLevel;
-import miniventure.game.world.Level;
-import miniventure.game.world.TimeOfDay;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
+import miniventure.game.world.level.ClientLevel;
+import miniventure.game.world.level.Level;
+import miniventure.game.world.management.TimeOfDay;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.Gdx;
@@ -78,8 +75,6 @@ public class GameScreen {
 		resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 	}
 	
-	@NotNull LevelViewport getLevelView() { return levelView; }
-	
 	void dispose() {
 		levelView.dispose();
 		guiStage.dispose();
@@ -87,7 +82,7 @@ public class GameScreen {
 		chatScreen.dispose();
 	}
 	
-	void handleInput(@NotNull ClientPlayer player) {
+	public void handleInput(@NotNull ClientPlayer player) {
 		player.handleInput(getMouseInput());
 		
 		boolean shift = Gdx.input.isKeyPressed(Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Keys.SHIFT_RIGHT);
@@ -116,8 +111,8 @@ public class GameScreen {
 			if(Gdx.input.isKeyJustPressed(Keys.I))
 				ClientCore.debugInteract = !ClientCore.debugInteract;
 		}
-		else if(Gdx.input.isKeyJustPressed(Keys.B))
-			ClientCore.debugChunk = !ClientCore.debugChunk;
+		// else if(Gdx.input.isKeyJustPressed(Keys.B))
+		// 	ClientCore.debugChunk = !ClientCore.debugChunk;
 		
 		if(!ClientCore.hasMenu()) {
 			if(!shift && ClientCore.input.pressingKey(Keys.T))
@@ -126,23 +121,30 @@ public class GameScreen {
 			else if(ClientCore.input.pressingKey(Keys.SLASH))
 				chatScreen.focus("/");
 			
-			else if(ClientCore.input.pressingKey(Keys.ESCAPE)) {
-				ClientCore.setScreen(new ConfirmScreen("Leave Server?", () -> ClientCore.getWorld().exitWorld()));
-			}
+			else if(ClientCore.input.pressingKey(Keys.ESCAPE))
+				ClientCore.setScreen(new PauseScreen());
+			
+			else if(GameCore.debug && ClientCore.input.pressingKey(Keys.M))
+				ClientCore.setScreen(new MapScreen());
 		}
 	}
 	
 	public void render(@NotNull ClientPlayer mainPlayer, Color lightOverlay, @NotNull ClientLevel level) {
+		render(mainPlayer, lightOverlay, level, true);
+	}
+	public void render(@NotNull ClientPlayer mainPlayer, Color lightOverlay, @NotNull ClientLevel level, boolean drawGui) {
 		
 		levelView.render(mainPlayer.getCenter(), lightOverlay, level);
 		
 		batch.setProjectionMatrix(uiCamera.combined);
-		batch.begin();
-		renderGui(mainPlayer, level);
-		batch.end();
-		guiStage.focus();
-		guiStage.act();
-		guiStage.draw();
+		if(drawGui) {
+			batch.begin();
+			renderGui(mainPlayer, level);
+			batch.end();
+			guiStage.focus();
+			guiStage.act();
+			guiStage.draw();
+		}
 		
 		chatOverlay.act();
 		if(!(ClientCore.getScreen() instanceof ChatScreen)) {
@@ -192,16 +194,16 @@ public class GameScreen {
 		if(GameCore.debug)
 			debugInfo.add("Debug Mode ENABLED");
 		
-		debugInfo.add("Version " + GameCore.VERSION);
+		debugInfo.add("Version: " + GameCore.VERSION);
 		
 		// player coordinates, for debug
 		Rectangle playerBounds = mainPlayer.getBounds();
 		debugInfo.add("X = "+(playerBounds.x-level.getWidth()/2));
 		debugInfo.add("Y = "+(playerBounds.y-level.getHeight()/2));
 		
-		Tile playerTile = level.getClosestTile(playerBounds);
+		Tile playerTile = level.getTile(playerBounds);
 		debugInfo.add("Tile = " + (playerTile == null ? "Null" : playerTile.getType()));
-		Tile interactTile = level.getClosestTile(mainPlayer.getInteractionRect());
+		Tile interactTile = level.getTile(mainPlayer.getInteractionRect());
 		debugInfo.add("Looking at: " + (interactTile == null ? "Null" : interactTile.toLocString().replace("Client", "")));
 		
 		debugInfo.add("Mobs in level: " + level.getMobCount()+"/"+level.getMobCap());

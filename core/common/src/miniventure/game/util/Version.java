@@ -39,6 +39,18 @@ public class Version implements Comparable<Version> {
 		}
 	}
 	
+	// returns a string representation in the same form as what is expected in the constructor.
+	public String serialize() {
+		StringBuilder str = new StringBuilder(12);
+		str.append(make).append('.').append(major);
+		if(minor >= 0) {
+			str.append('.').append(minor);
+			if(dev)
+				str.append(".dev");
+		}
+		return str.toString();
+	}
+	
 	@Override
 	public int compareTo(@NotNull Version other) {
 		if(make != other.make) return Integer.compare(make, other.make);
@@ -71,6 +83,10 @@ public class Version implements Comparable<Version> {
 	
 	@Override
 	public String toString() {
-		return make+"."+major+(minor<0?" Official":", Pre-Release "+minor)+(dev?" (Alpha Build)":"");
+		// note: when major is 0, minor is ignored. There should only be one "1.0 release". Make is expected to be 3.
+		if(major == 0)
+			return "The Main Release"+(dev?" (Dev Build)":"");
+		
+		return (make==1?"Alpha ":make==2?"Beta ":"Update ")+major+(minor<0?" (Final)":"."+minor)+(dev?" (Dev Build)":"");
 	}
 }

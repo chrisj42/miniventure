@@ -4,53 +4,55 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 
+import miniventure.game.GameCore;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.RelPos;
-import miniventure.game.world.Point;
 
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class OverlapManager {
 	
 	static final EnumMap<TileTypeEnum, HashMap<String, Array<TextureHolder>>> tileAnimations = new EnumMap<>(TileTypeEnum.class);
 	
-	public static final OverlapManager NONE(@NotNull TileTypeEnum type) {
-		return new OverlapManager(type);
-	}
+	private static final HashMap<String, Array<TextureHolder>> dummy = new HashMap<>(0);
 	
-	private final TileTypeEnum type;
-	private final RenderStyle renderStyle;
+	@NotNull private final TileTypeEnum type;
+	@Nullable private final RenderStyle renderStyle;
 	private final HashMap<Integer, RenderStyle> overrides = new HashMap<>();
 	
-	public OverlapManager(@NotNull TileTypeEnum type, @NotNull RenderStyle renderStyle) {
+	// doesn't check for overlap sprites
+	public OverlapManager(@NotNull TileTypeEnum type, @Nullable RenderStyle renderStyle) {
 		this.type = type;
 		this.renderStyle = renderStyle;
 	}
-	private OverlapManager(@NotNull TileTypeEnum type) {
+	// checks for overlap sprites; only enables if found 
+	public OverlapManager(@NotNull TileTypeEnum type) {
 		this.type = type;
-		renderStyle = null;
+		
+		if(tileAnimations.getOrDefault(type, dummy).size() > 0)
+			renderStyle = RenderStyle.SINGLE_FRAME;
+		else
+			renderStyle = null;
+		
+		// if(GameCore.debug && renderStyle != null)
+			// System.out.println("overlap sprites found for "+type);
 	}
 	
-	public OverlapManager overrideSprite(int spriteIndex, RenderStyle newStyle) {
+	public OverlapManager customStyle(int spriteIndex, RenderStyle newStyle) {
 		overrides.put(spriteIndex, newStyle);
 		return this;
 	}
 	
-	/// Boolean[] says if the overlappingType is present in each of the surrounding tiles.
-	// don't call this method with a typeToOverlap that this overlappingType isn't meant to overlap.
-	public ArrayList<TileAnimation<TextureHolder>> getOverlapSprites(EnumSet<RelPos> ovLayout) {
-		ArrayList<TileAnimation<TextureHolder>> animations = new ArrayList<>();
+	/// returns sprites for the stored type assuming it is being overlapped at the given positions.
+	public ArrayList<TileAnimation> getOverlapSprites(EnumSet<RelPos> ovLayout) {
+		ArrayList<TileAnimation> animations = new ArrayList<>();
 		
 		if(renderStyle == null && overrides.size() == 0)
 			return animations;
-		
-		// if(typeToOverlap.compareTo(tileType) >= 0)
-		// 	return animations; // doesn't overlap
 		
 		Array<Integer> indexes = new Array<>(Integer.class);
 		
@@ -73,33 +75,9 @@ public class OverlapManager {
 		for(Integer idx: indexes) {
 			RenderStyle renderStyle = overrides.getOrDefault(idx, this.renderStyle);
 			if(renderStyle != null)
-				animations.add(renderStyle.getAnimation(type, (idx<10?"0":"")+idx, tileAnimations));
+				animations.add(renderStyle.getAnimation(type, (idx<10?"0":"")+idx, tileAnimations, "overlap"));
 		}
 		
 		return animations;
-	}
-	
-	
-	public static EnumMap<TileTypeEnum, EnumSet<RelPos>> mapTileTypesAround(@NotNull ClientTile tile) { return mapTileTypesAround(tile, true); }
-	/** @noinspection SameParameterValue*/ // Exclude covered means that tile types beneath ground layers won't be included.
-	private static EnumMap<TileTypeEnum, EnumSet<RelPos>> mapTileTypesAround(@NotNull ClientTile tile, boolean excludeCovered) {
-		EnumMap<TileTypeEnum, EnumSet<RelPos>> typeMap = new EnumMap<>(TileTypeEnum.class);
-		
-		HashSet<Tile> aroundTiles = tile.getAdjacentTiles(true);
-		
-		for(Tile aroundTile: aroundTiles) {
-			List<ClientTileType> types = ((ClientTileStack)aroundTile.getTypeStack()).getTypes(!excludeCovered);
-			
-			Point thisPos = tile.getLocation();
-			Point otherPos = aroundTile.getLocation();
-			RelPos tilePos = RelPos.get(otherPos.x - thisPos.x, otherPos.y - thisPos.y);
-			
-			for(ClientTileType tileType: types) {
-				typeMap.putIfAbsent(tileType.getTypeEnum(), EnumSet.noneOf(RelPos.class));
-				typeMap.get(tileType.getTypeEnum()).add(tilePos);
-			}
-		}
-		
-		return typeMap;
 	}
 }

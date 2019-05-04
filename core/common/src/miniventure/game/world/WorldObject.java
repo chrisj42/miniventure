@@ -4,6 +4,7 @@ import miniventure.game.item.Item;
 import miniventure.game.item.Result;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.player.Player;
+import miniventure.game.world.management.WorldManager;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;

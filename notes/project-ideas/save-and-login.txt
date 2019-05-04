@@ -1,0 +1,32 @@
+login uses name and password
+
+the first time you're about to start a world or connect to a server, you're asked to make a default profile: name and password.
+this is used whenever you login to a server or start a world.
+the username and password you used to initially login to a server is stored on the client (server is identified by its ip and worldname), and is used automatically when joining a server (though with an exteneral server, you get a "join as ___?" prompt where you can say ok or elect to change your credentials). For local worlds, the saved profile (the default profile you had when creating it) is used automatically. Perhaps later there will be a "change profile" button in the world select screen.
+
+to keep the world parsing to the server side, world name and version will make the worldfolder name, and that's all the client side will read when looking at saved worlds.
+To load it, a File object is sent to the server.
+To delete it, it is merely deleted... along with client-side data about it (aka the user+pass you used to connect to it).
+
+Concerning player data held by the server, the actual passwords are not saved; only the password hash is stored... along with maybe an extra hash based on a modification to the password sent, just to be sure.
+
+
+Worlds will still be located in folders for now.
+
+Concerning command-line creation of world, a worldname will be asked only. If found, the world will be loaded. If not, it will ask if you wish to create it (y/n). If "--create" option is specified, it will not prompt, unless the world already exists, in which case it will ask if you want to overwrite it (must type "yes" to overwrite). It will then attempt to acquire a lock on session.lock which should be inside the folder. If it fails, it will give an error saying the world is currently in use; otherwise it will wipe the folder as if creates the new world.
+
+process-oriented diagram:
+
+--worldname: REQ
+	- if world exists: world will be loaded
+	- if world not exists: prompt for
+	--create: skip prompt to create world, and prompt for overwrite if it already exists
+		--seed: set seed of world
+		--overwrite: skip confirmation to overwrite if world exists (must acquire lock first)
+--gamedir: set the root folder to find world data and preferences in.
+
+Preferences include keybindings, fullscreen, sound options, default profile, and game data folder.
+- game data folder in options menu can be clicked to open it in native file manager.
+
+
+as for the actual process of saving a world... that's in the code

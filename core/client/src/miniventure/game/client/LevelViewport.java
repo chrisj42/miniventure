@@ -2,9 +2,8 @@ package miniventure.game.client;
 
 import miniventure.game.GameCore;
 import miniventure.game.util.MyUtils;
-import miniventure.game.world.Chunk;
-import miniventure.game.world.RenderLevel;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
+import miniventure.game.world.level.RenderLevel;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.Gdx;
@@ -30,7 +29,7 @@ public class LevelViewport {
 	
 	private static final float DEFAULT_VIEWPORT_SIZE = 16; // in tiles
 	
-	private static final int MIN_ZOOM = -3, MAX_ZOOM = 5;
+	private static final int MIN_ZOOM = -6, MAX_ZOOM = 5;
 	
 	// these two values determine how much of the level to render in either dimension, and are also used to fit the viewport to the game window. Later, they should be customizable by the user, or the mapmaker; for now, they'll remain at 0, meaning it doesn't limit the number of tiles rendered, and the default viewport size will be used for fitting.
 	private float maxWorldViewWidth = 0;
@@ -42,8 +41,6 @@ public class LevelViewport {
 	
 	private int zoom = 0;
 	private FrameBuffer lightingBuffer;
-	
-	private boolean debug = false;
 	
 	public LevelViewport() { this(ClientCore.getBatch(), new OrthographicCamera()); }
 	public LevelViewport(SpriteBatch batch, OrthographicCamera lightingCamera) {
@@ -121,7 +118,7 @@ public class LevelViewport {
 		//System.out.println("rendering level in bounds "+renderSpace+" to camera at "+camera.position+" with offset "+offset);
 		level.render(renderSpace, batch, GameCore.getDeltaTime(), offset); // renderSpace in world coords, but offset can give render coords
 		
-		if(ClientCore.debugChunk) {
+		/*if(ClientCore.debugChunk) {
 			// render chunk boundaries
 			int minX = MathUtils.ceil(renderSpace.x) / Chunk.SIZE * Chunk.SIZE;
 			int minY = MathUtils.ceil(renderSpace.y) / Chunk.SIZE * Chunk.SIZE;
@@ -136,32 +133,20 @@ public class LevelViewport {
 			for (int y = minY; y <= maxY; y += Chunk.SIZE) {
 				MyUtils.fillRect((minX - offset.x) * Tile.SIZE, (y - offset.y) * Tile.SIZE-lineThickness, (maxX - minX) * Tile.SIZE, lineThickness*2+1, Color.PINK, batch);
 			}
-		}
+		}*/
 		
 		if(ClientCore.debugInteract || ClientCore.debugTile) {
 			ClientPlayer player = ClientCore.getWorld().getMainPlayer();
 			if(player != null) {
-				if(ClientCore.debugInteract) {
+				if(ClientCore.debugInteract)
 					// render player interaction rect
-					Rectangle rect = player.getInteractionRect();
-					rect.x = (rect.x - offset.x) * Tile.SIZE;
-					rect.y = (rect.y - offset.y) * Tile.SIZE;
-					rect.width *= Tile.SIZE;
-					rect.height *= Tile.SIZE;
-					MyUtils.drawRect(rect, 1, Color.BLACK, batch);
-				}
+					drawOutline(offset, player.getInteractionRect(), batch);
 				
 				if(ClientCore.debugTile) {
 					// outline "looking at" tile
-					Tile closest = level.getClosestTile(player.getInteractionRect());
-					if(closest != null) {
-						Rectangle rect = closest.getBounds();
-						rect.x = (rect.x - offset.x) * Tile.SIZE;
-						rect.y = (rect.y - offset.y) * Tile.SIZE;
-						rect.width *= Tile.SIZE;
-						rect.height *= Tile.SIZE;
-						MyUtils.drawRect(rect, 1, Color.BLACK, batch);
-					}
+					Tile closest = level.getTile(player.getInteractionRect());
+					if(closest != null)
+						drawOutline(offset, closest.getBounds(), batch);
 				}
 			}
 		}
@@ -172,13 +157,21 @@ public class LevelViewport {
 		batch.end();
 	}
 	
+	private static void drawOutline(Vector2 offset, Rectangle rect, SpriteBatch batch) {
+		rect.x = (rect.x - offset.x) * Tile.SIZE;
+		rect.y = (rect.y - offset.y) * Tile.SIZE;
+		rect.width *= Tile.SIZE;
+		rect.height *= Tile.SIZE;
+		MyUtils.drawRect(rect, 1, Color.BLACK, batch);
+	}
+	
 	public void zoom(int dir) {
 		zoom += dir;
 		zoom = MathUtils.clamp(zoom, MIN_ZOOM, MAX_ZOOM);
 		resetCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 	}
 	
-	private void resetCamera(int width, int height) {
+	private void resetCamera(final int width, final int height) {
 		float zoomFactor = (float) Math.pow(2, zoom);
 		
 		Rectangle window = new Rectangle(0, 0, width, height);
@@ -195,6 +188,14 @@ public class LevelViewport {
 		float viewportHeight = window.height * Tile.SIZE / zoomFactor;
 		
 		camera.setToOrtho(false, viewportWidth, viewportHeight);
+		// GameCore.debug("set level camera: "+width+'x'+height+" screen with "+viewportWidth+'x'+viewportHeight+" viewport ("+getZoomRatio(width/viewportWidth)+" actual px, "+getZoomRatio(width/viewportWidth*Tile.SCALE)+" apparent px)");
+	}
+	
+	private static String getZoomRatio(float ratio) {
+		if(ratio < 1)
+			return "1:"+(1/ratio);
+		else
+			return ratio+":1";
 	}
 	
 	public void resize(int width, int height) {

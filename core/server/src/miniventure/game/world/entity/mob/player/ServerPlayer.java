@@ -1,10 +1,12 @@
 package miniventure.game.world.entity.mob.player;
 
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
 
 import miniventure.game.GameCore;
+import miniventure.game.GameProtocol.DatalessRequest;
 import miniventure.game.GameProtocol.HotbarUpdate;
 import miniventure.game.GameProtocol.InventoryAddition;
 import miniventure.game.GameProtocol.InventoryUpdate;
@@ -14,12 +16,11 @@ import miniventure.game.item.Item;
 import miniventure.game.item.Result;
 import miniventure.game.item.ServerItem;
 import miniventure.game.server.GameServer;
-import miniventure.game.server.ServerCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.Boundable;
-import miniventure.game.world.ServerLevel;
+import miniventure.game.world.Point;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClassDataList;
 import miniventure.game.world.entity.Direction;
@@ -28,6 +29,9 @@ import miniventure.game.world.entity.mob.ServerMob;
 import miniventure.game.world.entity.particle.ActionType;
 import miniventure.game.world.entity.particle.ParticleData.ActionParticleData;
 import miniventure.game.world.entity.particle.ParticleData.TextParticleData;
+import miniventure.game.world.level.ServerLevel;
+import miniventure.game.world.management.ServerWorld;
+import miniventure.game.world.tile.ServerTile;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileTypeEnum;
 
@@ -43,13 +47,18 @@ public class ServerPlayer extends ServerMob implements Player {
 	
 	private final EnumMap<Stat, Integer> stats = new EnumMap<>(Stat.class);
 	
+	// saved spawn location; you slept in a bed, etc. This is checked when adding the player to a level. If there is no location, then the player is spawned randomly on the default level. If the location (and adjacent tiles) are not spawnable, then the player is spawned randomly on the saved level (assuming it's valid).
+	private Point spawnLoc;
+	private int spawnLevel = 0;
+	
+	
 	@NotNull private final ServerHands hands;
 	@NotNull private final Inventory inventory;
 	
 	private final String name;
 	
-	public ServerPlayer(String name) {
-		super("player", Stat.Health.initial);
+	public ServerPlayer(@NotNull ServerWorld world, String name) {
+		super(world, "player", Stat.Health.initial);
 		
 		this.name = name;
 		inventory = new Inventory(INV_SIZE);
@@ -57,20 +66,28 @@ public class ServerPlayer extends ServerMob implements Player {
 		reset();
 	}
 	
-	protected ServerPlayer(ClassDataList allData, final Version version, ValueFunction<ClassDataList> modifier) {
-		super(allData, version, modifier);
+	protected ServerPlayer(@NotNull ServerWorld world, ClassDataList allData, final Version version, ValueFunction<ClassDataList> modifier) {
+		super(world, allData, version, modifier);
 		ArrayList<String> data = allData.get(2);
 		
 		name = data.get(0);
 		inventory = new Inventory(INV_SIZE);
-		hands = new ServerHands(this, MyUtils.parseLayeredString(data.get(4)));
+		hands = new ServerHands(this, MyUtils.parseLayeredString(data.get(6)));
 		
 		stats.put(Stat.Health, getHealth());
 		stats.put(Stat.Hunger, Integer.parseInt(data.get(1)));
 		stats.put(Stat.Stamina, Integer.parseInt(data.get(2)));
-		//stats.put(Stat.Armor, Integer.parseInt(data.get(3)));
+		// stats.put(Stat.Armor, Integer.parseInt(data.get(3)));
 		
-		inventory.loadItems(MyUtils.parseLayeredString(data.get(3)));
+		if(data.get(3).equals("null"))
+			spawnLoc = null;
+		else {
+			String[] pos = data.get(3).split(";");
+			spawnLoc = new Point(Integer.parseInt(pos[0]), Integer.parseInt(pos[1]));
+		}
+		spawnLevel = Integer.parseInt(data.get(4));
+		
+		inventory.loadItems(MyUtils.parseLayeredString(data.get(5)));
 	}
 	
 	@Override
@@ -80,6 +97,8 @@ public class ServerPlayer extends ServerMob implements Player {
 			name,
 			String.valueOf(getStat(Stat.Hunger)),
 			String.valueOf(getStat(Stat.Stamina)),
+			spawnLoc == null ? "null" : spawnLoc.x+";"+spawnLoc.y,
+			String.valueOf(spawnLevel),
 			MyUtils.encodeStringArray(inventory.save()),
 			MyUtils.encodeStringArray(hands.save())
 		));
@@ -119,12 +138,12 @@ public class ServerPlayer extends ServerMob implements Player {
 		int change = stats.get(stat) - prevVal;
 		
 		if(amt != 0) {
-			ServerCore.getServer().sendToPlayer(this, new StatUpdate(stat, amt));
+			getServer().sendToPlayer(this, new StatUpdate(stat, amt));
 			
 			if(stat == Stat.Hunger && change > 0) {
 				ServerLevel level = getLevel();
 				if(level != null)
-					ServerCore.getServer().broadcastParticle(new TextParticleData(String.valueOf(amt), Color.CORAL), this);
+					getServer().broadcastParticle(new TextParticleData(String.valueOf(amt), Color.CORAL), this);
 			}
 		}
 		
@@ -157,7 +176,7 @@ public class ServerPlayer extends ServerMob implements Player {
 		if(inventory.addItem(item)) {
 			if(inventory.getCount(item) == 1) // don't add to hotbar if it already existed in inventory
 				hands.addItem(item); // add to open hotbar slot if it exists
-			GameServer server = ServerCore.getServer();
+			GameServer server = getServer();
 			server.playEntitySound("pickup", this, false);
 			
 			if(server.isInventoryMode(this))
@@ -183,7 +202,7 @@ public class ServerPlayer extends ServerMob implements Player {
 		objects.addAll(level.getOverlappingEntities(interactionBounds, this));
 		Boundable.sortByDistance(objects, getCenter());
 		
-		Tile tile = level.getClosestTile(interactionBounds);
+		Tile tile = level.getTile(interactionBounds);
 		if(tile != null)
 			objects.add(tile);
 		
@@ -192,7 +211,7 @@ public class ServerPlayer extends ServerMob implements Player {
 	
 	// this method gets called by GameServer, so in order to ensure it doesn't mix badly with server world updates, we'll post it as a runnable to the server world update thread.
 	public void doInteract(Direction dir, int index, boolean attack) {
-		ServerCore.postRunnable(() -> {
+		getWorld().postRunnable(() -> {
 			setDirection(dir);
 			ServerItem heldItem = hands.getHeldItem(index);
 			if(getStat(Stat.Stamina) < heldItem.getStaminaUsage())
@@ -217,13 +236,13 @@ public class ServerPlayer extends ServerMob implements Player {
 			
 			if (attack && level != null) {
 				if(result.success)
-					ServerCore.getServer().broadcastParticle(
+					getServer().broadcastParticle(
 						new ActionParticleData(ActionType.SLASH, getDirection()),
 						level,
 						getCenter().add(getDirection().getVector().scl(getSize().scl(0.5f, Mob.unshortenSprite(0.5f))))
 					);
 				else
-					ServerCore.getServer().broadcastParticle(
+					getServer().broadcastParticle(
 						new ActionParticleData(ActionType.PUNCH, getDirection()),
 						level,
 						getInteractionRect().getCenter(new Vector2())
@@ -237,7 +256,7 @@ public class ServerPlayer extends ServerMob implements Player {
 			
 			if(!result.success)
 				// this sound is of an empty swing; successful interaction sounds are taken care of elsewhere.
-				ServerCore.getServer().playEntitySound("swing", this);
+				getServer().playEntitySound("swing", this);
 			
 			if(result == Result.USED && !GameCore.debug)
 				hands.resetItemUsage(heldItem, index);
@@ -256,10 +275,51 @@ public class ServerPlayer extends ServerMob implements Player {
 	}
 	
 	@Override
-	public void die() { getWorld().despawnPlayer(this); }
+	public void die() {
+		getWorld().getServer().sendToPlayer(this, DatalessRequest.Death);
+		getWorld().despawnPlayer(this);
+	}
 	
 	@Override
 	public boolean maySpawn(TileTypeEnum type) {
-		return super.maySpawn(type) && type != TileTypeEnum.SAND;
+		return super.maySpawn(type)/* && type != TileTypeEnum.SAND*/;
+	}
+	
+	public int getSpawnLevel() { return spawnLevel; }
+	
+	public ValueFunction<ServerLevel> respawnPositioning() {
+		return level -> {
+			if(spawnLoc != null) {
+				ServerTile spawnTile = level.getTile(spawnLoc.x, spawnLoc.y);
+				if(maySpawn(spawnTile.getType().getTypeEnum())) {
+					moveTo(spawnTile);
+					return;
+				}
+				for(Tile tile: level.getAreaTiles(spawnLoc, 1, false)) {
+					if(maySpawn(tile.getType().getTypeEnum())) {
+						moveTo(tile);
+						return;
+					}
+				}
+				
+				// spawn location obstructed.
+				spawnLoc = null; // player loses their saved spawn location.
+				getServer().sendMessage(null, this, "Spawn location is obstructed");
+			}
+			
+			Tile tile = level.getSpawnTile(this);
+			if(tile != null) {
+				spawnLoc = tile.getLocation();
+				moveTo(tile);
+			}
+			else
+				System.err.println("Server: error spawning player "+this+" on level "+level+", no spawnable tiles found. Spawning player anyway at current position: "+getCenter());
+		};
+	}
+	
+	@Override
+	public String toString() {
+		InetSocketAddress address = getServer().getPlayerAddress(this);
+		return "ServerPlayer["+name+(address==null?']':" at "+address+']');
 	}
 }

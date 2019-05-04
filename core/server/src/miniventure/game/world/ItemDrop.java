@@ -1,5 +1,7 @@
 package miniventure.game.world;
 
+import java.util.Arrays;
+
 import miniventure.game.item.ServerItem;
 
 import com.badlogic.gdx.math.MathUtils;
@@ -46,8 +48,7 @@ public class ItemDrop {
 	
 	public ServerItem[] getDroppedItems() {
 		ServerItem[] items = new ServerItem[getItemsDropped()];
-		for(int i = 0; i < items.length; i++)
-			items[i] = item.copy();
+		Arrays.fill(items, item);
 		
 		return items;
 	}

@@ -1,7 +1,10 @@
 package miniventure.game.world.tile;
 
+import java.util.EnumSet;
 import java.util.HashMap;
 
+import miniventure.game.GameCore;
+import miniventure.game.util.MyUtils;
 import miniventure.game.util.customenum.SerialMap;
 
 import org.jetbrains.annotations.NotNull;
@@ -22,27 +25,26 @@ public class TransitionManager {
 		exitAnimations.putAll(manager.exitAnimations);
 	}
 	
-	public TransitionManager addEntranceAnimations(@NotNull ServerTileTransition... animations) {
-		for(ServerTileTransition transition: animations)
-			entranceAnimations.put(transition.name, transition);
-		
+	private void addAnimation(HashMap<String, ServerTileTransition> map, String name, float fps, TileTypeEnum... triggerTypes) {
+		int frames = GameCore.tileAtlas.countRegions(tileType.name().toLowerCase()+"/t"+name);
+		float duration = frames / fps;
+		// GameCore.debug(fps+"fps, "+frames+" frames = "+duration+" seconds duration");
+		map.put(name, new ServerTileTransition(name, duration, triggerTypes));
+	}
+	
+	public TransitionManager addEntrance(String name, float fps, TileTypeEnum... triggerTypes) {
+		// GameCore.debug("adding enter to "+tileType);
+		addAnimation(entranceAnimations, name, fps, triggerTypes);
 		return this;
 	}
 	
-	public TransitionManager addExitAnimations(@NotNull ServerTileTransition... animations) {
-		for(ServerTileTransition transition: animations)
-			exitAnimations.put(transition.name, transition);
-		
+	public TransitionManager addExit(String name, float fps, TileTypeEnum... triggerTypes) {
+		// GameCore.debug("adding exit to "+tileType);
+		addAnimation(exitAnimations, name, fps, triggerTypes);
 		return this;
 	}
 	
 	
-	/*@Nullable
-	private TransitionAnimation getAnimationStyle(DataMap dataMap) {
-		TransitionMode mode = dataMap.getOrDefault(CacheTag.TransitionMode, TransitionMode.NONE);
-		String name = dataMap.get(CacheTag.TransitionName);
-		return getAnimationStyle(mode, name);
-	}*/
 	@Nullable
 	private ServerTileTransition getAnimationStyle(TransitionMode mode, String name) {
 		ServerTileTransition animation = null;
@@ -68,6 +70,7 @@ public class TransitionManager {
 		HashMap<String, ServerTileTransition> animations = isEntering ? entranceAnimations : exitAnimations;
 		for(ServerTileTransition animation: animations.values()) {
 			if(animation.isTriggerType(other)) {
+				GameCore.debug("Server starting tile transition for tile "+tile+", from tiletype "+other+", with enter="+isEntering);
 				SerialMap dataMap = tile.getDataMap();
 				dataMap.put(TileCacheTag.TransitionName, animation.name);
 				float start = tile.getWorld().getGameTime();
@@ -85,35 +88,10 @@ public class TransitionManager {
 		return false;
 	}
 	
-	/*TileAnimation<TextureHolder> getTransitionSprite(@NotNull Tile tile) {
-		SerialMap dataMap = tile.getDataMap(tileType);
-		
-		TransitionMode mode = dataMap.get(TileCacheTag.TransitionMode);
-		String name = dataMap.get(TileCacheTag.TransitionName);
-		
-		TransitionAnimation animation = getAnimationStyle(mode, name);
-		if(animation == null)
-			throw new IllegalStateException("Cannot get transition sprite when not transitioning.");
-		
-		return animation.getAnimation(tileType, name, tileAnimations);
-	}*/
-	
-	/*public float getTimeRemaining(@NotNull Tile tile) {
-		if(!playingAnimation(tile)) return 0;
-		TransitionAnimation curTransition = getAnimationStyle(tile.getDataMap(tileType));
-		if(curTransition == null)
-			return 0;
-		
-		float start = tile.getDataMap(tileType).get(CacheTag.TransitionStart);
-		float now = tile.getWorld().getGameTime();
-		float duration = curTransition.time;
-		return duration - (now - start);
-	}*/
-	
-	void resetAnimation(@NotNull Tile tile) {
+	/*void resetAnimation(@NotNull Tile tile) {
 		SerialMap map = tile.getDataMap(tileType);
 		map.put(TileCacheTag.TransitionStart, tile.getWorld().getGameTime());
-	}
+	}*/
 	
 	private boolean isTransitionMode(@NotNull Tile tile, TransitionMode mode) {
 		SerialMap map = tile.getDataMap(tileType);
@@ -139,6 +117,7 @@ public class TransitionManager {
 		if(timeElapsed < anim.getDuration())
 			return anim.getDuration() - timeElapsed;
 		
+		GameCore.debug("Server ending tile transition for "+tile);
 		
 		TransitionMode mode = dataMap.remove(TileCacheTag.TransitionMode);
 		dataMap.remove(TileCacheTag.TransitionStart);
@@ -155,5 +134,26 @@ public class TransitionManager {
 			tile.getLevel().onTileUpdate(tile);
 		
 		return 0;
+	}
+	
+	private static class ServerTileTransition {
+		
+		private final String name;
+		private final float duration;
+		private final EnumSet<TileTypeEnum> triggerTypes;
+		
+		ServerTileTransition(String name, float duration, TileTypeEnum... triggerTypes) {
+			this.name = name;
+			this.duration = duration;
+			this.triggerTypes = MyUtils.enumSet(triggerTypes);
+			// if triggertypes is empty, then anything triggers it
+		}
+		
+		boolean isTriggerType(TileType type) { return isTriggerType(type.getTypeEnum()); }
+		boolean isTriggerType(TileTypeEnum type) {
+			return triggerTypes.size() == 0 || triggerTypes.contains(type);
+		}
+		
+		float getDuration() { return duration; }
 	}
 }

@@ -4,6 +4,7 @@ import miniventure.game.item.FoodType;
 import miniventure.game.item.ResourceType;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.entity.mob.PursuePattern.FollowBehavior;
+import miniventure.game.world.management.ServerWorld;
 import miniventure.game.world.tile.TileTypeEnum;
 
 import org.jetbrains.annotations.NotNull;
@@ -23,7 +24,7 @@ public enum AiType {
 		new ItemDrop(FoodType.Raw_Meat.get(), 1, 2)
 	) {
 		@Override
-		public MobAi makeMob() { return new Crocodile(); }
+		public MobAi makeMob(@NotNull ServerWorld world) { return new Crocodile(world); }
 	},
 	
 	Zombie(15, SpawnBehavior.DEFAULT_NIGHT, new PursuePattern(FollowBehavior.NEAREST_PLAYER), null, TouchReaction.attackPlayer(1),
@@ -48,7 +49,7 @@ public enum AiType {
 		this.deathDrops = deathDrops;
 	}
 	
-	public MobAi makeMob() { return new MobAi(this); }
+	public MobAi makeMob(@NotNull ServerWorld world) { return new MobAi(world, this); }
 	
 	public static final AiType[] values = AiType.values();
 }

@@ -2,20 +2,19 @@ package miniventure.game;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.Objects;
 
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.chat.InfoMessageLine;
 import miniventure.game.item.Item;
 import miniventure.game.item.ItemStack;
+import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.Version;
+import miniventure.game.util.function.ValueFunction;
 import miniventure.game.world.Boundable;
-import miniventure.game.world.Chunk;
-import miniventure.game.world.Chunk.ChunkData;
-import miniventure.game.world.Level;
 import miniventure.game.world.Point;
 import miniventure.game.world.Taggable.Tag;
-import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.Entity;
@@ -25,36 +24,47 @@ import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.entity.mob.player.Player.Stat;
 import miniventure.game.world.entity.particle.ActionType;
 import miniventure.game.world.entity.particle.ParticleData;
+import miniventure.game.world.level.Level;
+import miniventure.game.world.management.WorldManager;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.Tile.TileData;
 import miniventure.game.world.tile.Tile.TileTag;
+import miniventure.game.world.worldgen.island.IslandType;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Array;
+
 import com.esotericsoftware.kryo.Kryo;
 
 public interface GameProtocol {
 	
 	int PORT = 8405;
-	int writeBufferSize = 16384*3;
-	int objectBufferSize = 16384*2;
+	String HOST = "Host"; // name of host player; used only when joining a game in the same JVM. Other players are not allowed to specify this name.
+	int writeBufferSize = 1638400;
+	int objectBufferSize = 1638400;
 	
 	boolean lag = false;
 	int lagMin = lag?10:0, lagMax = lag?100:0;
 	
+	default <T> void forPacket(Object packet, Class<T> type, ValueFunction<T> response) {
+		if(type.isAssignableFrom(packet.getClass()))
+			response.act(type.cast(packet));
+	}
+	
 	static void registerClasses(Kryo kryo) {
+		kryo.register(Version.class);
+		
 		registerNestedClasses(kryo, GameProtocol.class);
 		registerNestedClasses(kryo, ParticleData.class, true);
 		
 		kryo.register(TileData.class);
 		kryo.register(TileData[].class);
 		kryo.register(TileData[][].class);
-		kryo.register(ChunkData.class);
-		kryo.register(ChunkData[].class);
-		kryo.register(Version.class);
+		// kryo.register(ChunkData.class);
+		// kryo.register(ChunkData[].class);
+		kryo.register(IslandType.class);
+		kryo.register(IslandReference[].class);
 		kryo.register(Tag.class);
 		kryo.register(EntityTag.class);
 		kryo.register(TileTag.class);
@@ -76,21 +86,6 @@ public interface GameProtocol {
 		kryo.register(Point[].class);
 	}
 	
-	@FunctionalInterface
-	// T = Request class
-	interface RequestResponse<T> {
-		void respond(T request);
-	}
-	
-	default <T> void forPacket(Object packet, Class<T> type, RequestResponse<T> response) {
-		if(type.isAssignableFrom(packet.getClass()))
-			response.respond(type.cast(packet));
-	}
-	
-	enum DatalessRequest {
-		Respawn, Tile, Clear_Console
-	}
-	
 	class Login {
 		public final String username;
 		public final Version version;
@@ -107,6 +102,14 @@ public interface GameProtocol {
 		
 		private LoginFailure() { this(null); }
 		public LoginFailure(String msg) { this.message = msg; }
+	}
+	
+	enum DatalessRequest {
+		Respawn,
+		Tile,
+		Clear_Console, // server sends to player to clear console; is a server command only to make it fit in with the others; could be implemented entirely client-side otherwise.
+		Level_Ready, // when the server has sent all the entities to the client.
+		Death // player died, show respawn screen.
 	}
 	
 	// pings always end up being started from the server.
@@ -174,39 +177,75 @@ public interface GameProtocol {
 		}
 	}
 	
+	// for server to send level data to the client. Sets the client to a loading screen, which stays open until a SpawnData is sent. A SpawnData packet will always clear a loading screen.
 	class LevelData {
-		public final int width;
-		public final int height;
-		public final int depth;
+		public final int levelId;
+		public final TileData[][] tiles;
 		
-		private LevelData() { this(0, 0, 0); }
-		public LevelData(Level level) { this(level.getWidth(), level.getHeight(), level.getDepth()); }
-		public LevelData(int width, int height, int depth) {
-			this.width = width;
-			this.height = height;
-			this.depth = depth;
+		// for client
+		public LevelData() { this(0, null); }
+		// for server
+		public LevelData(Level level) { this(level.getLevelId(), level.getTileData()); }
+		public LevelData(int levelId, TileData[][] tiles) {
+			this.levelId = levelId;
+			this.tiles = tiles;
+		}
+	}
+	
+	// used in MapRequest below; holds general data about a single island.
+	class IslandReference {
+		public final int levelId;
+		public final Point location;
+		public final IslandType type; // gen parameter
+		
+		private IslandReference() { this(0, null, null); }
+		public IslandReference(int levelId, Point location, IslandType type) {
+			this.levelId = levelId;
+			this.location = location;
+			this.type = type;
+		}
+	}
+	
+	// for server to transmit world layout to client, so it can display a world map.
+	class MapRequest {
+		public final IslandReference[] islands;
+		
+		// for client use only
+		public MapRequest() { this(null); }
+		// for server use only
+		public MapRequest(IslandReference[] islands) {
+			this.islands = islands;
+		}
+	}
+	
+	class LevelChange {
+		public final int levelid;
+		
+		private LevelChange() { this(0); }
+		public LevelChange(int levelid) {
+			this.levelid = levelid;
 		}
 	}
 	
 	class TileUpdate {
 		public final TileData tileData;
-		public final int levelDepth;
+		public final int levelId;
 		public final int x;
 		public final int y;
 		
 		private TileUpdate() { this(null, 0, 0, 0); }
 		public TileUpdate(Tile tile) { this(tile, tile.getLocation()); }
-		private TileUpdate(Tile tile, Point pos) { this(new TileData(tile), tile.getLevel().getDepth(), pos.x, pos.y); }
-		public TileUpdate(TileData data, int levelDepth, int x, int y) {
+		private TileUpdate(Tile tile, Point pos) { this(new TileData(tile), tile.getLevel().getLevelId(), pos.x, pos.y); }
+		public TileUpdate(TileData data, int levelId, int x, int y) {
 			tileData = data;
-			this.levelDepth = levelDepth;
+			this.levelId = levelId;
 			this.x = x;
 			this.y = y;
 		}
 	}
 	
 	// sent by client to ask for a chunk. Server assumes level to be the client's current level.
-	class ChunkRequest {
+	/*class ChunkRequest {
 		public final int x;
 		public final int y;
 		
@@ -216,7 +255,7 @@ public interface GameProtocol {
 			this.x = x;
 			this.y = y;
 		}
-	}
+	}*/
 	
 	class SpawnData {
 		public final EntityAddition playerData;
@@ -315,27 +354,22 @@ public interface GameProtocol {
 	
 	// sent by the server every 10 seconds or so with all entities in the 5x5 chunks surrounding the client. The client can use this to validate all the entities that it has loaded; if there are any listed that it doesn't have loaded (and the chunk it's on is loaded), it can send back an entity request to get it loaded. Also, if it finds that there are entities it has loaded, which aren't present in the list, it can unload them.
 	class EntityValidation {
-		public final int levelDepth;
+		public final int levelId;
 		public final int[] ids;
-		public final Point[] chunks;
 		
-		private EntityValidation() { this(0, null, null); }
-		public EntityValidation(Level level, Rectangle area, Entity... excluded) {
-			this.levelDepth = level.getDepth();
-			
-			Array<Entity> entities = level.getOverlappingEntities(area, excluded);
-			ids = new int[entities.size];
-			chunks = new Point[entities.size];
-			
-			for(int i = 0; i < entities.size; i++) {
-				ids[i] = entities.get(i).getId();
-				chunks[i] = Chunk.getCoords(entities.get(i).getCenter());
-			}
+		private EntityValidation() { this(0, null); }
+		public EntityValidation(Level level, Entity... excluded) {
+			this.levelId = level.getLevelId();
+			// get all entities in level
+			LinkedList<Entity> entities = new LinkedList<>(level.getEntities());
+			// remove excluded entities
+			entities.removeAll(Arrays.asList(excluded));
+			// map to ids
+			ids = ArrayUtils.mapArray(entities.toArray(), int.class, int[].class, e -> ((Entity)e).getId());
 		}
-		public EntityValidation(int levelDepth, int[] ids, Point[] chunks) {
-			this.levelDepth = levelDepth;
+		public EntityValidation(int levelId, int[] ids) {
+			this.levelId = levelId;
 			this.ids = ids;
-			this.chunks = chunks;
 		}
 	}
 	
@@ -366,38 +400,38 @@ public interface GameProtocol {
 	// sent in EntityUpdate, EntityAddition, ParticleAddition.
 	class PositionUpdate {
 		public final float x, y, z;
-		public final Integer levelDepth; // should never be null, actually, because it is always on one level or another, and if not, then it's not in the game, aka removed. An entity removal would be sent rather than a position update. However, it's a bit complicated to change now, so I'll leave it...
+		public final Integer levelId; // should never be null, actually, because it is always on one level or another, and if not, then it's not in the game, aka removed. An entity removal would be sent rather than a position update. However, it's a bit complicated to change now, so I'll leave it...
 		
 		private PositionUpdate() { this(null, 0, 0, 0); }
 		public PositionUpdate(Entity e) { this(e.getLevel(), e.getLocation()); }
 		public PositionUpdate(Level level, Vector2 pos) { this(level, new Vector3(pos, 0)); }
-		public PositionUpdate(Level level, Vector3 pos) { this(level==null?null:level.getDepth(), pos); }
-		public PositionUpdate(Integer depth, Vector3 pos) { this(depth, pos.x, pos.y, pos.z); }
-		public PositionUpdate(Integer depth, float x, float y, float z) {
-			this.levelDepth = depth;
+		public PositionUpdate(Level level, Vector3 pos) { this(level==null?null:level.getLevelId(), pos); }
+		public PositionUpdate(Integer levelId, Vector3 pos) { this(levelId, pos.x, pos.y, pos.z); }
+		public PositionUpdate(Integer levelId, float x, float y, float z) {
+			this.levelId = levelId;
 			this.x = x;
 			this.y = y;
 			this.z = z;
 		}
 		
 		public boolean variesFrom(Entity entity) { return variesFrom(entity, entity.getLevel()); }
-		private boolean variesFrom(Entity entity, Level level) { return variesFrom(entity.getPosition(), level==null?null:level.getDepth()); }
-		public boolean variesFrom(Vector3 pos, Integer levelDepth) { return variesFrom(new Vector2(pos.x, pos.y), levelDepth); }
-		public boolean variesFrom(Vector2 pos, Integer levelDepth) {
+		private boolean variesFrom(Entity entity, Level level) { return variesFrom(entity.getPosition(), level==null?null:level.getLevelId()); }
+		public boolean variesFrom(Vector3 pos, Integer levelId) { return variesFrom(new Vector2(pos.x, pos.y), levelId); }
+		public boolean variesFrom(Vector2 pos, Integer levelId) {
 			if(pos.dst(x, y) > 0.25) return true;
-			return !Objects.equals(levelDepth, this.levelDepth);
+			return !Objects.equals(levelId, this.levelId);
 		}
 		
 		public Vector3 getPos() { return new Vector3(x, y, z); }
 		
 		@Override public String toString() {
-			return "PositionUpdate("+x+","+y+","+z+",lvl"+levelDepth+")";
+			return "PositionUpdate("+x+","+y+","+z+",lvl"+levelId+")";
 		}
 		
 		public String toString(WorldManager world) {
-			if(levelDepth == null) return toString();
-			Vector2 pos = Boundable.toLevelCoords(world.getLevel(levelDepth), new Vector2(x, y));
-			return "PositionUpdate("+pos.x+","+pos.y+","+z+",lvl"+levelDepth+")";
+			if(levelId == null) return toString();
+			Vector2 pos = Boundable.toLevelCoords(world.getLevel(levelId), new Vector2(x, y));
+			return "PositionUpdate("+pos.x+","+pos.y+","+z+",lvl"+levelId+")";
 		}
 	}
 	
@@ -580,17 +614,20 @@ public interface GameProtocol {
 	}
 	
 	class SerialRecipe {
+		public final int id;
 		public final String[] result;
 		public final String[][] costs;
 		
-		private SerialRecipe() { this((String[])null, null); }
-		public SerialRecipe(ItemStack result, ItemStack[] costs) {
+		private SerialRecipe() { this(0, (String[])null, null); }
+		public SerialRecipe(int id, ItemStack result, ItemStack[] costs) {
+			this.id = id;
 			this.result = result.serialize();
 			this.costs = new String[costs.length][];
 			for(int i = 0; i < costs.length; i++)
 				this.costs[i] = costs[i].serialize();
 		}
-		public SerialRecipe(String[] result, String[][] costs) {
+		public SerialRecipe(int id, String[] result, String[][] costs) {
+			this.id = id;
 			this.result = result;
 			this.costs = costs;
 		}

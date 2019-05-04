@@ -1,15 +1,18 @@
 package miniventure.game.world.entity.particle;
 
 import miniventure.game.world.entity.ClientEntityRenderer.TextRenderer;
+import miniventure.game.world.entity.particle.ParticleData.TextParticleData;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 
+import org.jetbrains.annotations.NotNull;
+
 public class TextParticle extends ClientParticle {
 	
-	private final BounceBehavior bounceBehavior;
-	private final LifetimeTracker lifetime;
+	@NotNull private final BounceBehavior bounceBehavior;
+	@NotNull private final LifetimeTracker lifetime;
 	
 	public TextParticle(TextParticleData data) {
 		lifetime = new LifetimeTracker(this, 2f);

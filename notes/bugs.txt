@@ -1,3 +1,7 @@
-walking animations don't play on respawn screen
+debug interact / bounds / the draw boxes aren't fully rendering properly.
 
-player jumps back whenever walking into an entity that is moving toward it, when the server is remote. I'm pretty sure this is due to the delay between server updates and the server updating the client. The client thinks it can move somewhere, because the server hasn't had a chance to tell it otherwise, so it tries to move. The server then corrects it, causing the "jump-back".
+knockback ignores tile collision
+
+- possibly fixed - initial server load generates the islands lazily, so the initial save doesn't even have one generated. So new versions create new terrain.
+
+walking animations for other mobs don't play on respawn screen

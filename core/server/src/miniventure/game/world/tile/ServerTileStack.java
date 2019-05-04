@@ -1,19 +1,21 @@
 package miniventure.game.world.tile;
 
-import miniventure.game.server.ServerCore;
+import miniventure.game.world.management.ServerWorld;
+
+import org.jetbrains.annotations.NotNull;
 
 public class ServerTileStack extends TileStack<ServerTileType> {
 	
-	public ServerTileStack() {
-		super(ServerCore.getWorld());
+	public ServerTileStack(@NotNull ServerWorld world) {
+		super(world);
 	}
 	
-	public ServerTileStack(ServerTileType[] types) {
+	public ServerTileStack(@NotNull ServerWorld world, ServerTileType[] types) {
 		super(types);
 	}
 	
-	public ServerTileStack(TileTypeEnum[] enumTypes) {
-		super(ServerCore.getWorld(), enumTypes);
+	public ServerTileStack(@NotNull ServerWorld world, TileTypeEnum[] enumTypes) {
+		super(world, enumTypes);
 	}
 	
 }

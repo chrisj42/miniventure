@@ -8,11 +8,10 @@ import miniventure.game.item.ItemStack;
 import miniventure.game.item.ItemType;
 import miniventure.game.item.Result;
 import miniventure.game.item.ServerItem;
-import miniventure.game.server.ServerCore;
 import miniventure.game.util.MyUtils;
-import miniventure.game.world.ServerLevel;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.player.Player.Stat;
+import miniventure.game.world.level.ServerLevel;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -49,10 +48,10 @@ public class ServerHands {
 		this(player);
 		
 		for(int i = 0; i < hotbarItems.length; i++)
-			hotbarItems[i] = ServerItem.load(MyUtils.parseLayeredString(itemData[i]));
+			hotbarItems[i] = itemData[i].equals("null") ? null : ServerItem.load(MyUtils.parseLayeredString(itemData[i]));
 	}
 	
-	void reset() { Arrays.fill(hotbarItems, null); }
+	synchronized void reset() { Arrays.fill(hotbarItems, null); }
 	
 	private Inventory getInv() { return player.getInventory(); }
 	
@@ -63,7 +62,7 @@ public class ServerHands {
 	}
 	
 	boolean addItem(@NotNull ServerItem item) { return addItem(item, 0); }
-	private boolean addItem(@NotNull ServerItem item, int fromIndex) {
+	private synchronized boolean addItem(@NotNull ServerItem item, int fromIndex) {
 		// if(item instanceof HandItem)
 		// 	return false; // just kinda ignore these
 		
@@ -86,19 +85,19 @@ public class ServerHands {
 	}
 	
 	@Nullable
-	private ServerItem removeItem(int idx) {
+	private synchronized ServerItem removeItem(int idx) {
 		ServerItem prevItem = hotbarItems[idx];
 		hotbarItems[idx] = null;
 		return prevItem;
 	}
-	private boolean removeItem(@NotNull ServerItem item) {
+	private synchronized boolean removeItem(@NotNull ServerItem item) {
 		int idx = findItem(item);
 		if(idx < 0) return false;
 		removeItem(idx);
 		return true;
 	}
 	
-	private int findItem(@NotNull ServerItem item) {
+	private synchronized int findItem(@NotNull ServerItem item) {
 		for(int i = 0; i < hotbarItems.length; i++)
 			if(item.equals(hotbarItems[i]))
 				return i;
@@ -113,7 +112,7 @@ public class ServerHands {
 		return item;
 	}
 	
-	void resetItemUsage(@NotNull ServerItem item, int index) {
+	synchronized void resetItemUsage(@NotNull ServerItem item, int index) {
 		ServerItem newItem = item.getUsedItem();
 		
 		if(!GameCore.debug)
@@ -165,14 +164,14 @@ public class ServerHands {
 			removeItem(item);
 		
 		// we are never going to be in inventory mode here, because the client has just used an item; items can't be used with a menu open.
-		ServerCore.getServer().sendToPlayer(player, player.getHotbarUpdate());
+		player.getServer().sendToPlayer(player, player.getHotbarUpdate());
 	}
 	
 	@Nullable
-	public ServerItem getItem(int idx) { return hotbarItems[idx]; }
+	public synchronized ServerItem getItem(int idx) { return hotbarItems[idx]; }
 	
 	// check each slot and remove any that points to an item not in the inventory. Return true if an update occurs.
-	public boolean validate() {
+	public synchronized boolean validate() {
 		boolean updated = false;
 		for(int i = 0; i < hotbarItems.length; i++) {
 			if(!getInv().hasItem(hotbarItems[i])) {
@@ -184,29 +183,29 @@ public class ServerHands {
 		return updated;
 	}
 	
-	public String[][] serialize() {
+	public synchronized String[][] serialize() {
 		String[][] data = new String[hotbarItems.length][];
 		for(int i = 0; i < hotbarItems.length; i++)
 			data[i] = hotbarItems[i] == null ? null : ItemStack.serialize(hotbarItems[i], getInv().getCount(hotbarItems[i]));
 		return data;
 	}
 	
-	public String[] save() {
+	public synchronized String[] save() {
 		// make sure we don't save out-of-date information.
 		validate();
 		
 		String[] data = new String[hotbarItems.length];
 		for(int i = 0; i < hotbarItems.length; i++)
-			data[i] = MyUtils.encodeStringArray(hotbarItems[i].save());
+			data[i] = hotbarItems[i] == null ? "null" : MyUtils.encodeStringArray(hotbarItems[i].save());
 		return data;
 	}
 	
-	public void fromInventoryIndex(int[] indices) {
+	public synchronized void fromInventoryIndex(int[] indices) {
 		for(int i = 0; i < indices.length; i++)
 			hotbarItems[i] = indices[i] < 0 ? null : getInv().getItem(indices[i]);
 	}
 	
-	public int[] toInventoryIndex() {
+	public synchronized int[] toInventoryIndex() {
 		int[] indices = new int[hotbarItems.length];
 		for(int i = 0; i < indices.length; i++)
 			indices[i] = getInv().getIndex(hotbarItems[i]);
@@ -236,7 +235,6 @@ public class ServerHands {
 		}
 		
 		@Override public ServerItem getUsedItem() { return this; }
-		@Override public ServerItem copy() { return this; }
 		
 		@Override public Result interact(WorldObject obj, Player player) {
 			return obj.interactWith(player, null);

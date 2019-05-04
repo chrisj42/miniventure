@@ -1,60 +1,46 @@
 package miniventure.game.chat.command;
 
-import java.util.Arrays;
-
-import miniventure.game.server.ServerCore;
+import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.FetchFunction;
 import miniventure.game.util.function.MapFunction;
-import miniventure.game.world.Config;
-import miniventure.game.world.TimeOfDay;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
+import miniventure.game.world.management.Config;
+import miniventure.game.world.management.ServerWorld;
+import miniventure.game.world.management.TimeOfDay;
 
 import org.jetbrains.annotations.NotNull;
 
 public interface Argument {
 	
-	boolean satisfiedBy(String[] args, int offset);
+	boolean satisfiedBy(@NotNull ServerWorld world, String[] args, int offset);
 	int length();
 	
-	static Argument get(@NotNull ArgValidator... validators) {
+	/*static Argument get(@NotNull ArgValidator... validators) {
 		return new Argument() {
 			@Override
-			public boolean satisfiedBy(String[] args, int offset) {
+			public boolean satisfiedBy(@NotNull ServerWorld world, String[] args, int offset) {
 				for(int i = 0; i < validators.length; i++)
-					if(!validators[i].isValid(args[i]))
+					if(!validators[i].isValid(world, args[i]))
 						return false;
+				
 				return true;
 			}
 			
 			@Override
 			public int length() { return validators.length; }
 		};
-	}
-	
-	/*static Argument[] get(@NotNull ArgumentValidator... validators) {
-		Argument[] args = new Argument[validators.length];
-		
-		for(int i = 0; i < args.length; i++) {
-			final int index = i;
-			args[i] = new Argument() {
-				@Override
-				public boolean satisfiedBy(String[] args, int offset) {
-					return validators[index].isValid(args[offset]);
-				}
-				
-				@Override public int length() { return 1; }
-			};
-		}
-		
-		return args;
 	}*/
 	
 	static Argument varArg(ArgValidator validator) {
 		return new Argument() {
 			@Override
-			public boolean satisfiedBy(String[] args, int offset) {
-				return validator.isValid(String.join(" ", Arrays.copyOfRange(args, offset, args.length)));
+			public boolean satisfiedBy(@NotNull ServerWorld world, String[] args, int offset) {
+				if(args.length - offset <= 0) return false; // must have at least one arg
+				for(int i = offset; i < args.length; i++)
+					if(!validator.isValid(world, args[i]))
+						return false;
+				return true;
 			}
 			
 			@Override
@@ -62,79 +48,126 @@ public interface Argument {
 		};
 	}
 	
-	interface ArgValidator<T> {
-		static <T> T notNull(FetchFunction<T> function) throws IllegalArgumentException {
+	interface ArgValidator<T> extends Argument {
+		
+		@Override
+		default boolean satisfiedBy(@NotNull ServerWorld world, String[] args, int offset) {
+			return isValid(world, args[offset]);
+		}
+		
+		@Override
+		default int length() { return 1; }
+		
+		static <T> T notNull(FetchFunction<T> function, String error) throws IllegalArgumentException {
 			T obj = function.get();
 			if(obj == null)
-				throw new IllegalArgumentException();
+				throw new IllegalArgumentException("value is null", new NullPointerException(error));
 			return obj;
 		}
 		static <T> T noException(FetchFunction<T> function) throws IllegalArgumentException {
+			return noException(function, "");
+		}
+		static <T> T noException(FetchFunction<T> function, String error) throws IllegalArgumentException {
 			T obj;
 			try {
 				obj = function.get();
 			} catch(Throwable t) {
-				throw new IllegalArgumentException();
+				throw new IllegalArgumentException(error, t);
 			}
 			
 			return obj;
 		}
 		
-		ArgValidator<String> ANY = arg -> arg;
-		ArgValidator<Integer> INTEGER = arg -> noException(() -> Integer.parseInt(arg));
-		ArgValidator<Float> DECIMAL = arg -> noException(() -> Float.parseFloat(arg));
-		ArgValidator<Boolean> BOOLEAN = arg -> noException(() -> Boolean.parseBoolean(arg));
-		ArgValidator<ServerPlayer> PLAYER = arg -> notNull(() -> ServerCore.getServer().getPlayerByName(arg));
-		ArgValidator<Command> COMMAND = arg -> noException(() -> Enum.valueOf(Command.class, arg.toUpperCase()));
-		ArgValidator<Float> CLOCK_DURATION = arg -> noException(() -> {
+		SimpleArgValidator<String> ANY = arg -> arg;
+		SimpleArgValidator<Integer> INTEGER = arg -> noException(() -> Integer.parseInt(arg),
+			"arg '"+arg+"' is not an integer");
+		SimpleArgValidator<Float> DECIMAL = arg -> noException(() -> Float.parseFloat(arg),
+			"arg '"+arg+"' is not a decimal");
+		SimpleArgValidator<Boolean> BOOLEAN = arg -> {
+			if(arg == null || !arg.equalsIgnoreCase("true") && !arg.equalsIgnoreCase("false"))
+				throw new IllegalArgumentException("arg '"+arg+"' is not a boolean");
+			return Boolean.parseBoolean(arg);
+		};
+		ArgValidator<ServerPlayer> PLAYER = (world, arg) -> notNull(() -> world.getServer().getPlayerByName(arg),
+			"player '"+arg+"' does not exist");
+		SimpleArgValidator<Command> COMMAND = arg -> noException(() -> Enum.valueOf(Command.class, arg.toUpperCase()), 
+			"command '"+arg+"' does not exist");
+		SimpleArgValidator<Config> CONFIG_VALUE = arg -> notNull(() -> Config.valueOf(arg),
+			"arg '"+arg+"' is not a valid config value");
+		
+		SimpleArgValidator<Float> CLOCK_DURATION = arg -> noException(() -> {
 			String[] parts = arg.split(":");
 			int hour = Integer.parseInt(parts[0]);
 			int min = Integer.parseInt(parts[1]);
 			
-			if(hour < 0 || hour >= 24 || min < 0 || min >= 60) throw new IllegalArgumentException();
+			if(hour < 0 || hour >= 24 || min < 0 || min >= 60)
+				throw new IllegalArgumentException("hour and/or min is outside valid range");
 			
 			float time = hour + (min / 60f);
 			
 			return MyUtils.mapFloat(time, 0, 24, 0, TimeOfDay.SECONDS_IN_DAY);
-		});
-		ArgValidator<Float> CLOCK_TIME = arg -> {
+		}, "arg is not a valid duration");
+		
+		SimpleArgValidator<Float> CLOCK_TIME = arg -> {
 			float duration = CLOCK_DURATION.get(arg);
 			float total = TimeOfDay.SECONDS_IN_DAY;
 			return (duration + total - TimeOfDay.SECONDS_START_TIME_OFFSET) % total;
 			//time = (time + 24 - ) % 24;
 			//return MyUtils.mapFloat(time, 0, 24, 0, TimeOfDay.SECONDS_IN_DAY);
 		};
-		ArgValidator<TimeOfDay> TIME_RANGE = arg -> noException(() -> TimeOfDay.valueOf(MyUtils.toTitleCase(arg)));
-		ArgValidator<Float> TIME = anyOf(CLOCK_TIME, map(TIME_RANGE, TimeOfDay::getStartOffsetSeconds));
-		ArgValidator<Config> CONFIG_VALUE = arg -> notNull(() -> Config.valueOf(arg));
+		
+		SimpleArgValidator<TimeOfDay> TIME_RANGE = arg -> noException(() -> TimeOfDay.valueOf(MyUtils.toTitleCase(arg)));
+		
+		SimpleArgValidator<Float> TIME = anyOf(CLOCK_TIME, map(TIME_RANGE, TimeOfDay::getStartOffsetSeconds));
 		
 		@SafeVarargs
-		static <T> ArgValidator<T> anyOf(ArgValidator<T>... validators) {
+		static <T> SimpleArgValidator<T> anyOf(SimpleArgValidator<T>... validators) {
 			return arg -> {
-				for(ArgValidator<T> validator: validators) {
+				for(SimpleArgValidator<T> validator: validators) {
 					if(validator.isValid(arg)) {
 						return validator.get(arg);
 					}
 				}
 				
-				throw new IllegalArgumentException();
+				throw new IllegalArgumentException("no validators match");
 			};
 		}
 		
-		static <T1, T2> ArgValidator<T2> map(ArgValidator<T1> orig, MapFunction<T1, T2> mapper) { return arg -> mapper.get(orig.get(arg)); }
+		static <T1, T2> SimpleArgValidator<T2> map(SimpleArgValidator<T1> orig, MapFunction<T1, T2> mapper) { return arg -> mapper.get(orig.get(arg)); }
 		
-		static ArgValidator<String> exactString(boolean matchCase, String... matches) { return exactString(str -> str, matchCase, matches); }
-		static <T> ArgValidator<T> exactString(MapFunction<String, T> resultMapper, boolean matchCase, String... matches) {
+		static SimpleArgValidator<String> exactString(boolean matchCase, String... matches) { return exactString(str -> str, matchCase, matches); }
+		static <T> SimpleArgValidator<T> exactString(MapFunction<String, T> resultMapper, boolean matchCase, String... matches) {
 			return arg -> {
 				for(String match : matches)
 					if(matchCase ? arg.equals(match) : arg.equalsIgnoreCase(match))
 						return resultMapper.get(arg);
 				
-				throw new IllegalArgumentException();
+				throw new IllegalArgumentException("arg '"+arg+"' must be one of "+
+					ArrayUtils.arrayToString(matches, ", ", val -> "'"+val+'\''));
 			};
 		}
 		
+		T get(@NotNull ServerWorld world, String arg) throws IllegalArgumentException;
+		
+		default boolean isValid(@NotNull ServerWorld world, String arg) {
+			try {
+				get(world, arg);
+			} catch(IllegalArgumentException ex) {
+				return false;
+			}
+			
+			return true;
+		}
+	}
+	
+	interface SimpleArgValidator<T> extends ArgValidator<T> {
+		
 		T get(String arg) throws IllegalArgumentException;
+		
+		@Override
+		default T get(@NotNull ServerWorld world, String arg) throws IllegalArgumentException {
+			return get(arg);
+		}
 		
 		default boolean isValid(String arg) {
 			try {
@@ -146,5 +179,4 @@ public interface Argument {
 			return true;
 		}
 	}
-	
 }

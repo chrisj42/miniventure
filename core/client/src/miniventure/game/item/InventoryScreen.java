@@ -5,6 +5,7 @@ import javax.swing.Timer;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.InventoryAddition;
 import miniventure.game.GameProtocol.InventoryRequest;
 import miniventure.game.GameProtocol.InventoryUpdate;
@@ -173,7 +174,7 @@ public class InventoryScreen extends MenuScreen {
 	
 	// should only be called by the LibGDX Application thread
 	public synchronized void close() {
-		System.out.println("closing inventory screen");
+		GameCore.debug("closing inventory screen");
 		if(requested) {
 			if(hotbar == null)
 				hotbar = new int[0];

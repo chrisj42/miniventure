@@ -1,13 +1,17 @@
 package miniventure.game.world.tile;
 
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashSet;
 
+import miniventure.game.util.ArrayUtils;
+import miniventure.game.util.MyUtils;
+import miniventure.game.util.Version;
 import miniventure.game.util.customenum.SerialMap;
-import miniventure.game.world.Level;
 import miniventure.game.world.Point;
-import miniventure.game.world.WorldManager;
 import miniventure.game.world.WorldObject;
+import miniventure.game.world.level.Level;
+import miniventure.game.world.management.WorldManager;
 
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -32,7 +36,9 @@ public abstract class Tile implements WorldObject {
 		 Note, we might end up having a property type enum as well as a tile type enum...
 	 */
 	
-	public static final int SIZE = 32;
+	public static final int RESOLUTION = 32;
+	public static final int SCALE = 4;
+	public static final int SIZE = RESOLUTION * SCALE;
 	
 	private TileStack tileStack;
 	private final Object dataLock = new Object();
@@ -70,7 +76,7 @@ public abstract class Tile implements WorldObject {
 	
 	public SerialMap getDataMap() { return getDataMap(getType().getTypeEnum()); }
 	public SerialMap getDataMap(TileType tileType) { return getDataMap(tileType.getTypeEnum()); }
-	public SerialMap getDataMap(TileTypeEnum tileType) { return dataMaps.get(tileType); }
+	public SerialMap getDataMap(TileTypeEnum tileType) { return dataMaps.computeIfAbsent(tileType, k -> new SerialMap()); }
 	
 	
 	public HashSet<Tile> getAdjacentTiles(boolean includeCorners) {
@@ -87,21 +93,10 @@ public abstract class Tile implements WorldObject {
 		}
 	}
 	
-	/*
-	@Override @Nullable @SuppressWarnings("unchecked")
-	public Tile<T> getClosestTile(@NotNull Array<Tile> tiles) {
-		return (Tile<T>) WorldObject.super.getClosestTile(tiles);
-	}
-	@Override @Nullable @SuppressWarnings("unchecked")
-	public Tile<T> getClosestTile() {
-		return (Tile<T>) WorldObject.super.getClosestTile();
-	}
-	*/
-	
 	@Override
 	public String toString() { return getType().getName()+' '+getClass().getSimpleName(); }
 	
-	public String toLocString() { return (x-level.getWidth()/2)+","+(y-level.getHeight()/2)+" ("+toString()+")"; }
+	public String toLocString() { return (x-level.getWidth()/2)+","+(y-level.getHeight()/2)+" ("+toString()+')'; }
 	
 	@Override
 	public boolean equals(Object other) {
@@ -111,7 +106,7 @@ public abstract class Tile implements WorldObject {
 	}
 	
 	@Override
-	public int hashCode() { return Point.javaPointHashCode(x, y) + level.getDepth() * 17; }
+	public int hashCode() { return Point.javaPointHashCode(x, y) + level.getLevelId() * 17; }
 	
 	// I can use the string encoder and string parser in MyUtils to encode the tile data in a way so that I can always re-parse the encoded array. I can use this internally to, with other things, whenever I need to encode a list of objects and don't want to worry about finding the delimiter symbol in string somewhere I don't expect.
 	
@@ -119,12 +114,11 @@ public abstract class Tile implements WorldObject {
 		public final int[] typeOrdinals;
 		public final String[] data;
 		
-		private TileData() { this(null, null); }
+		private TileData() { this((int[])null, null); }
 		private TileData(int[] typeOrdinals, String[] data) {
 			this.typeOrdinals = typeOrdinals;
 			this.data = data;
 		}
-		@SuppressWarnings("unchecked")
 		public TileData(Tile tile) {
 			synchronized (tile.dataLock) {
 				TileTypeEnum[] tileTypes = tile.getTypeStack().getEnumTypes();
@@ -138,6 +132,22 @@ public abstract class Tile implements WorldObject {
 				for(int i = 0; i < data.length; i++)
 					data[i] = tile.dataMaps.get(tileTypes[i]).serialize();
 			}
+		}
+		
+		public TileData(Version dataVersion, String tileData) {
+			String[] all = MyUtils.parseLayeredString(tileData);
+			data = Arrays.copyOfRange(all, 1, all.length);
+			
+			typeOrdinals = ArrayUtils.mapArray(all[0].split(","), int.class, int[].class, Integer::parseInt);
+		}
+		
+		public String serialize() {
+			String[] all = new String[data.length+1];
+			System.arraycopy(data, 0, all, 1, data.length);
+			
+			all[0] = ArrayUtils.arrayToString(typeOrdinals, ",");
+			
+			return MyUtils.encodeStringArray(all);
 		}
 		
 		public TileTypeEnum[] getTypes() { return getTypes(typeOrdinals); }
@@ -162,20 +172,19 @@ public abstract class Tile implements WorldObject {
 	public static class TileTag implements Tag<Tile> {
 		public final int x;
 		public final int y;
-		public final int levelDepth;
+		public final int levelId;
 		
 		private TileTag() { this(0, 0, 0); }
-		public TileTag(Tile tile) { this(tile.x, tile.y, tile.getLevel().getDepth()); }
-		public TileTag(int x, int y, int levelDepth) {
+		public TileTag(Tile tile) { this(tile.x, tile.y, tile.getLevel().getLevelId()); }
+		public TileTag(int x, int y, int levelId) {
 			this.x = x;
 			this.y = y;
-			this.levelDepth = levelDepth;
+			this.levelId = levelId;
 		}
 		
 		@Override
-		@SuppressWarnings("unchecked")
 		public Tile getObject(WorldManager world) {
-			Level level = world.getLevel(levelDepth);
+			Level level = world.getLevel(levelId);
 			if(level != null)
 				return level.getTile(x, y);
 			return null;

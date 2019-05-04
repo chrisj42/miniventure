@@ -79,7 +79,7 @@ public class SerialMap {
 		return entries;
 	}
 	
-	private <T, D extends SerialEnum<T>> SerialEntry<T> getEntry(D tag) { return new SerialEntry<>(tag, get(tag)); }
+	private <T, ET extends SerialEnum<T>> SerialEntry<T> getEntry(ET tag) { return new SerialEntry<>(tag, get(tag)); }
 	
 	
 	public String serialize() {
@@ -92,7 +92,7 @@ public class SerialMap {
 		return MyUtils.encodeStringArray(entries);
 	}
 	
-	public static <D extends SerialEnum<?>> SerialMap deserialize(String alldata, Class<D> tagClass) {
+	public static <ET extends SerialEnum<?>> SerialMap deserialize(String alldata, Class<ET> tagClass) {
 		String[] data = MyUtils.parseLayeredString(alldata);
 		
 		SerialEntry<?>[] entries = new SerialEntry[data.length];
