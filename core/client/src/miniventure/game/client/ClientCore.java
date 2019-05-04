@@ -133,6 +133,7 @@ public class ClientCore extends ApplicationAdapter {
 				"Welcome to Miniventure Beta!",
 				"",
 				"This game is not finished!!! Not even close.",
+				"Though the back-end may change from time to time, who knows.",
 				"",
 				"The utmost effort is made to prevent bugs from getting into releases, but since",
 				"the sole developer has a life and very few testers, this effort doesn't amount to much.",
