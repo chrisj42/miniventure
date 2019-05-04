@@ -52,7 +52,10 @@ public class InfoScreen extends BackgroundInheritor {
 				"Lead Developer: Chris J",
 				/*"Music made by TrstN",*/
 				"Sprites made by RiverOaken and Ross, with contributions by Theta and MadDest",
-				"Sound effects made by Chris J"
+				"Sound effects made by Chris J",
+				"",
+				"",
+				"Game Dev is hard."
 			);
 		}
 	}

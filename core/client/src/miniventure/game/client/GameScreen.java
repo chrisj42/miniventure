@@ -2,11 +2,7 @@ package miniventure.game.client;
 
 import miniventure.game.GameCore;
 import miniventure.game.item.HotbarTable;
-import miniventure.game.screen.ChatScreen;
-import miniventure.game.screen.ConfirmScreen;
-import miniventure.game.screen.InputScreen;
-import miniventure.game.screen.MapScreen;
-import miniventure.game.screen.MenuScreen;
+import miniventure.game.screen.*;
 import miniventure.game.screen.util.DiscreteViewport;
 import miniventure.game.util.RelPos;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
@@ -126,7 +122,7 @@ public class GameScreen {
 				chatScreen.focus("/");
 			
 			else if(ClientCore.input.pressingKey(Keys.ESCAPE))
-				ClientCore.setScreen(new ConfirmScreen(ClientCore.getWorld().isLocalWorld() ? "Exit World?" : "Leave Server?", () -> ClientCore.getWorld().exitWorld()));
+				ClientCore.setScreen(new PauseScreen());
 			
 			else if(GameCore.debug && ClientCore.input.pressingKey(Keys.M))
 				ClientCore.setScreen(new MapScreen());

@@ -110,6 +110,12 @@ public class DesktopLauncher {
 		}
 		
 		@Override
+		public void save() {
+			if(isHosting())
+				core.getWorld().saveWorld();
+		}
+		
+		@Override
 		public int startServer(WorldDataSet worldInfo, MapFunction<InetSocketAddress, Boolean> hostFinder, ProgressLogger logger) throws IOException {
 			this.core = ServerCore.initSinglePlayer(worldInfo, hostFinder, logger);
 			int port = core.getServer().getPort();

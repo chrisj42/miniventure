@@ -15,6 +15,9 @@ public interface ServerManager {
 	// returns if a server is being run locally on the same JVM. Can be used to determine if the current world is a local single player one or not.
 	boolean isHosting();
 	
+	// save the world to file.
+	void save();
+	
 	// returns port server was started on
 	int startServer(WorldDataSet worldInfo, MapFunction<InetSocketAddress, Boolean> hostFinder, ProgressLogger logger) throws IOException;
 	// void setHost(InetSocketAddress host); // tell the server who the host is
