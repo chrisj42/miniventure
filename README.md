@@ -5,6 +5,7 @@ As of now, miniventure is still in alpha stage and probably lacks in actual game
 
   - Multiplayer functionality, allowing many people to play in the same world. The server can be run without a GUI.
   - Random island generation based on a custom variant of perlin noise, among other noise algorithms
+  - World save/load
   - Sprite animations and smooth tile transitions
   - basic world interactions, breaking/placing tiles, hurting mobs
   - mob AI behaviors
