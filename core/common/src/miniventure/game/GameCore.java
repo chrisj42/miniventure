@@ -29,7 +29,7 @@ import org.jetbrains.annotations.NotNull;
 /** @noinspection StaticNonFinalField*/
 public class GameCore {
 	
-	public static final Version VERSION = new Version("2.1.1.dev");
+	public static final Version VERSION = new Version("2.1.1");
 	
 	public static boolean debug = false;
 	
