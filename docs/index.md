@@ -6,12 +6,12 @@ Miniventure started as a remake of [Minicraft Plus](https://github.com/chrisj42/
 
 #### Miniventure is still in relatively early development despite it being in Alpha for a year and a half now.
 
-It should be ready for Beta soon though. Here's a list of the major features that *have* been implemented:
+Beta just came out though, so progress is happening slowly. Here's a list of the major features that *have* been implemented:
 
   - Multiplayer functionality, allowing many people to play in the same world. The server can be run without a GUI.
   - Procedurally generated terrain maps using noise manipulation
     - Current world system is a continguous "effectively infinite" map; however, Beta will have a different world layout.
-  - World save/load (not yet released)
+  - World save/load
   - Sprite animations and smooth tile transitions
   - Fully malleable terrain; tiles can be broken and replaced to create your own environments
   - Basic inventory management and crafting
