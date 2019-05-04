@@ -17,18 +17,28 @@ import com.kotcrab.vis.ui.widget.VisTextButton;
 
 public class MapScreen extends MenuScreen {
 	
-	private boolean requested = false;
-	
+	private boolean requested;
 	
 	private HashMap<Point, Cell> mapCells;
 	
 	private Table table;
 	
+	{
+		table = useTable();
+	}
+	
 	public MapScreen() {
 		super(false);
 		
-		table = useTable();
 		table.add(makeLabel("waiting..."));
+		requested = false;
+	}
+	
+	public MapScreen(MapRequest data) {
+		super(false);
+		
+		requested = true;
+		mapUpdate(data);
 	}
 	
 	@Override
@@ -51,17 +61,19 @@ public class MapScreen extends MenuScreen {
 	public void mapUpdate(MapRequest mapRequest) {
 		Gdx.app.postRunnable(() -> {
 			table.clearChildren();
-			table.add(makeLabel("Island travel coming soon!")).row();
+			// table.add(makeLabel("More cooler island travel coming soon!")).row();
+			Level playerLevel = ClientCore.getWorld().getLevel();
+			int curlevel = -1;
+			if(playerLevel != null)
+				curlevel = playerLevel.getLevelId();
 			for(int i = 0; i < mapRequest.islands.length; i++) {
 				// Point p = null;//mapRequest.islands[i];
 				final int levelid = i;
+				if(levelid == curlevel) continue;
 				VisTextButton btn = makeButton("Island "+(i+1)+": "+MyUtils.toTitleCase(mapRequest.islands[i].type.name()), () -> {
-					Level playerLevel = ClientCore.getWorld().getMainPlayer().getLevel();
+					// Level playerLevel = ClientCore.getWorld().getMainPlayer().getLevel();
 					if(!(playerLevel != null && playerLevel.getLevelId() == levelid))
 						ClientCore.getClient().send(new LevelChange(levelid));
-					// LoadingScreen loader = new LoadingScreen();
-					// loader.pushMessage("Loading new level...");
-					// ClientCore.setScreen(loader);
 					ClientCore.setScreen(null);
 				});
 				table.add(btn).row();

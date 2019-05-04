@@ -222,7 +222,8 @@ public class ServerWorld extends WorldManager {
 		postRunnable(() -> {
 			loadedLevels.act(map -> {
 				for(ServerLevel level: map.values())
-					level.save(islandStores[level.getLevelId()]);
+					if(level != null) // I don't know if I should catch this, it shouldn't happen to begin with...
+						level.save(islandStores[level.getLevelId()]);
 			});
 			
 			PlayerData[] pdata = server.updatePlayerData();

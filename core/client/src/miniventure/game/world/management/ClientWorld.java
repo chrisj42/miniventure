@@ -208,7 +208,13 @@ public class ClientWorld extends LevelManager {
 	@Override
 	public void deregisterEntity(final int eid) {
 		if(mainPlayer != null && eid == mainPlayer.getId()) {
-			Gdx.app.postRunnable(() -> ClientCore.setScreen(new RespawnScreen(mainPlayer, getLightingOverlay(), gameScreen)));
+			if(worldLoaded()) {
+				Gdx.app.postRunnable(() -> {
+					LoadingScreen loader = new LoadingScreen();
+					loader.pushMessage("Loading level...");
+					ClientCore.setScreen(loader);
+				});
+			}
 		}
 		else
 			super.deregisterEntity(eid);
@@ -238,6 +244,8 @@ public class ClientWorld extends LevelManager {
 		client.send(DatalessRequest.Respawn);
 	}
 	
+	public RespawnScreen getRespawnScreen() { return new RespawnScreen(mainPlayer, getLightingOverlay(), gameScreen); }
+	
 	
 	
 	/*  --- GET METHODS --- */
@@ -259,6 +267,8 @@ public class ClientWorld extends LevelManager {
 	public boolean hasRenderableLevel() { return worldLoaded() && mainPlayer != null && mainPlayer.getLevel() != null; }
 	
 	public boolean isLocalWorld() { return serverManager.isHosting(); }
+	
+	public void saveWorld() { serverManager.save(); }
 	
 	@Override
 	public String toString() { return "ClientWorld"; }

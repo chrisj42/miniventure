@@ -66,14 +66,17 @@ public class GameClient implements GameProtocol {
 					world.setLevel((LevelData)object);
 				}
 				
+				if(object == DatalessRequest.Death) {
+					Gdx.app.postRunnable(() -> ClientCore.setScreen(world.getRespawnScreen()));
+					return;
+				}
+				
 				forPacket(object, MapRequest.class, req -> {
 					MenuScreen screen = ClientCore.getScreen();
-					if(req.islands == null) {
-						if(screen == null)
-							Gdx.app.postRunnable(() -> ClientCore.setScreen(new MapScreen()));
-					}
-					else if(screen instanceof MapScreen)
+					if(screen instanceof MapScreen)
 						((MapScreen)screen).mapUpdate(req);
+					else if(screen == null)
+						Gdx.app.postRunnable(() -> ClientCore.setScreen(new MapScreen()));
 				});
 				
 				if(object instanceof SpawnData) {

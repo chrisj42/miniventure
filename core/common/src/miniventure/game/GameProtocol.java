@@ -108,7 +108,8 @@ public interface GameProtocol {
 		Respawn,
 		Tile,
 		Clear_Console, // server sends to player to clear console; is a server command only to make it fit in with the others; could be implemented entirely client-side otherwise.
-		Level_Ready // when the server has sent all the entities to the client.
+		Level_Ready, // when the server has sent all the entities to the client.
+		Death // player died, show respawn screen.
 	}
 	
 	// pings always end up being started from the server.

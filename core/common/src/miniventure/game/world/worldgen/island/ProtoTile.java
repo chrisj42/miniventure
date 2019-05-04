@@ -23,6 +23,13 @@ public class ProtoTile {
 	
 	public void addLayer(TileTypeEnum type) { stack.add(type); }
 	
+	public void replaceLayer(TileTypeEnum type) {
+		if(stack.size() == 0)
+			addLayer(type);
+		else
+			stack.set(stack.size()-1, type);
+	}
+	
 	@NotNull
 	public TileTypeEnum getTopLayer() { return stack.peekLast(); }
 	

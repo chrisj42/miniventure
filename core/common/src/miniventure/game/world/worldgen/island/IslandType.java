@@ -152,6 +152,31 @@ public enum IslandType {
 		@Override
 		void generateIsland(ProtoIsland island) {
 			// describe process
+			
+			float[][] shape = island.getFromGen(Testing.getTerrain());
+			
+			float[][] stone = island.getFromGen(new Coherent2DNoiseFunction(18).modify(combine(NoiseGenerator.islandMask(1), MULTIPLY, NoiseGenerator.islandMask(1)), FILL_VALUE_RANGE));
+			
+			float[][] trees = island.getFromGen(new Noise(new int[] {1,32,8,2,4,16}, new int[] {4,2,1,2,1,2}).modify(FILL_VALUE_RANGE));//.modify(combine(NoiseGenerator.islandMask(1), AVERAGE)));
+			
+			
+			TileProcessorChain features = new ProcessChainBuilder()
+				.add(new NoiseTileCondition(stone, val -> val > .65), TileTypeEnum.STONE)
+				// .add(new NoiseTileCondition(stone, val -> val > .6), TileTypeEnum.FLINT)
+				.add(new NoiseTileCondition(trees, val -> val > .76), TileTypeEnum.CACTUS)
+				.getChain();
+			
+			TileNoiseMap map = new TileMapBuilder(
+				15, TileTypeEnum.WATER)
+				.addRegion(5, TileTypeEnum.SAND)
+				.addRegion(82, new TileMultiProcess(
+					TileTypeEnum.SAND,
+					features,
+					SAND
+				))
+				.get(shape);
+			
+			island.forEach(map);
 		}
 	},
 	
@@ -159,6 +184,31 @@ public enum IslandType {
 		@Override
 		void generateIsland(ProtoIsland island) {
 			// describe process
+			
+			float[][] shape = island.getFromGen(Testing.getTerrain());
+			
+			float[][] stone = island.getFromGen(new Coherent2DNoiseFunction(18).modify(combine(NoiseGenerator.islandMask(1), MULTIPLY, NoiseGenerator.islandMask(1)), FILL_VALUE_RANGE));
+			
+			float[][] trees = island.getFromGen(new Noise(new int[] {1,32,8,2,4,16}, new int[] {4,2,1,2,1,2}).modify(FILL_VALUE_RANGE));//.modify(combine(NoiseGenerator.islandMask(1), AVERAGE)));
+			
+			
+			TileProcessorChain features = new ProcessChainBuilder()
+				.add(new NoiseTileCondition(stone, val -> val > .65), TileTypeEnum.STONE)
+				.add(new NoiseTileCondition(stone, val -> val > .6), TileTypeEnum.DIRT)
+				.add(new NoiseTileCondition(trees, val -> val > .76), PINE_TREE)
+				.getChain();
+			
+			TileNoiseMap map = new TileMapBuilder(
+				15, TileTypeEnum.WATER)
+				.addRegion(5, TileTypeEnum.DIRT)
+				.addRegion(82, new TileMultiProcess(
+					TileTypeEnum.GRASS,
+					features
+				))
+				.addRegion(2, WATER)
+				.get(shape);
+			
+			island.forEach(map);
 		}
 	},
 	
@@ -219,6 +269,7 @@ public enum IslandType {
 			for(int y = 0; y < height; y++) {
 				for(int x = 0; x < width; x++) {
 					if(island.getTile(x, y).getTopLayer() != WATER) {
+						island.getTile(x, y).replaceLayer(WATER);
 						island.getTile(x, y).addLayer(DOCK);
 						dock = true;
 						break;

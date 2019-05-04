@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.EnumMap;
 
 import miniventure.game.GameCore;
+import miniventure.game.GameProtocol.DatalessRequest;
 import miniventure.game.GameProtocol.HotbarUpdate;
 import miniventure.game.GameProtocol.InventoryAddition;
 import miniventure.game.GameProtocol.InventoryUpdate;
@@ -274,7 +275,10 @@ public class ServerPlayer extends ServerMob implements Player {
 	}
 	
 	@Override
-	public void die() { getWorld().despawnPlayer(this); }
+	public void die() {
+		getWorld().getServer().sendToPlayer(this, DatalessRequest.Death);
+		getWorld().despawnPlayer(this);
+	}
 	
 	@Override
 	public boolean maySpawn(TileTypeEnum type) {
