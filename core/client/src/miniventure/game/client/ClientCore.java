@@ -130,7 +130,7 @@ public class ClientCore extends ApplicationAdapter {
 			
 			setScreen(new NotifyScreen(true, () -> setScreen(new MainMenu()),
 				"Continue",
-				"Welcome to Miniventure Beta!",
+				"Welcome to Miniventure Alpha!",
 				"",
 				"This game is not finished!!! Not even close.",
 				"Though the back-end may change from time to time, who knows.",

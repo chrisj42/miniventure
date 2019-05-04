@@ -87,6 +87,6 @@ public class Version implements Comparable<Version> {
 		if(major == 0)
 			return "The Main Release"+(dev?" (Dev Build)":"");
 		
-		return (make==1?"Alpha ":make==2?"Beta ":"Update ")+major+(minor<0?" (Final)":"."+minor)+(dev?" (Dev Build)":"");
+		return (make==1?"Pre-Alpha ":make==2?"Alpha ":make==3?"Beta ":"Update ")+major+(minor<0?" (Final)":"."+minor)+(dev?" (Dev Build)":"");
 	}
 }
