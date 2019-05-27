@@ -80,7 +80,7 @@ public class ItemSlot extends Widget {
 		return this;
 	}
 	
-	private boolean showCount() { return getItem() != null && count > 0; }
+	private boolean showCount() { return getItem() != null && getCount() > 0; }
 	
 	public void setBackground(Drawable background) { this.background = background; }
 	

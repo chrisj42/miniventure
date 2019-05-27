@@ -126,7 +126,6 @@ public class GameScreen {
 	
 	private static Vector2 getMouseInput() {
 		if(Gdx.input.isTouched()) {
-			
 			Vector2 mousePos = new Vector2(Gdx.input.getX(), Gdx.input.getY());
 			mousePos.y = Gdx.graphics.getHeight() - mousePos.y; // origin is top left corner, so reverse Y dir
 			

@@ -123,7 +123,7 @@ public class InventoryScreen extends MenuScreen {
 		scrollPane.setFadeScrollBars(false);
 		scrollPane.setScrollbarsOnTop(false);*/
 		
-		mainGroup.addActor(fillBar);
+		//mainGroup.addActor(fillBar);
 		mainGroup.addActor(slotTable);
 		// mainGroup.addActor(scrollPane);
 		
@@ -164,6 +164,13 @@ public class InventoryScreen extends MenuScreen {
 						if(inventory.getSlotsTaken() <= invi)
 							return null;
 						return inventory.getItem(invi);
+					}
+					
+					@Override
+					public int getCount() {
+						if(inventory.getSlotsTaken() <= invi)
+							return 0;
+						return inventory.getItemStack(invi).count;
 					}
 				};
 				

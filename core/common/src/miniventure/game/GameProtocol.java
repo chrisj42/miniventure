@@ -509,13 +509,11 @@ public interface GameProtocol {
 	
 	// sent by client to drop an item from the inventory
 	class ItemDropRequest {
-		public final boolean hotbar; // if true, the index is translated to an inventory slot.
 		public final int index;
 		public final boolean all;
 		
-		private ItemDropRequest() { this(false, 0, false); }
-		public ItemDropRequest(boolean hotbar, int index, boolean all) {
-			this.hotbar = hotbar;
+		private ItemDropRequest() { this(0, false); }
+		public ItemDropRequest(int index, boolean all) {
 			this.index = index;
 			this.all = all;
 		}

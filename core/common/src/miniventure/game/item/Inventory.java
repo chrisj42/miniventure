@@ -83,19 +83,20 @@ public abstract class Inventory<TItem extends Item, TItemStack extends ItemStack
 		if (oldIdx == newIdx) return true;
 		
 		if (oldIdx < 0 || newIdx < 0 || oldIdx >= getSlotsTaken() || newIdx >= getSlotsTaken())
-			return false; // invalid indicies
+			return false; // invalid indices
 		
 		uniqueItems.add(newIdx, uniqueItems.remove(oldIdx));
 		return true;
 	}
 	
-	public synchronized boolean addItem(TItem item) {
+	public boolean addItem(TItem item) { return addItem(uniqueItems.size(), item); }
+	public synchronized boolean addItem(int index, TItem item) {
 		if(getSpaceLeft() < 1)
 			return false; // not enough space left in inventory.
 		
 		// add new items to uniqueItems
 		if(itemCounter.add(item) == 1)
-			uniqueItems.add(0, item);
+			uniqueItems.add(Math.min(uniqueItems.size(), index), item);
 		
 		spaceTaken++;
 		return true;

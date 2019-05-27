@@ -19,14 +19,28 @@ public class InputHandler implements InputProcessor {
 	
 	private final HashMap<Integer, Float> keyPresses = new HashMap<>(); // keys in here are currently being held down. The value stored is the initial time of press.
 	private final HashSet<Integer> pressedKeys = new HashSet<>(); // keys here are treated as being just pressed down.
+	// mouse
+	private final HashMap<Integer, Float> buttonPresses = new HashMap<>(); // keys in here are currently being held down. The value stored is the initial time of press.
+	private final HashSet<Integer> pressedButtons = new HashSet<>(); // keys here are treated as being just pressed down.
 	private float prevUpdate;
 	
 	InputHandler() {}
 	
-	void update() {
+	void update(/*boolean late*/) {
+		// if(late)
+			
+		// else {
+			final float elapTime = GameCore.getElapsedProgramTime();
+			
+			updateSet(elapTime, keyPresses, pressedKeys);
+			updateSet(elapTime, buttonPresses, pressedButtons);
+			
+			prevUpdate = elapTime;
+		// }
+	}
+	
+	private void updateSet(final float elapTime, HashMap<Integer, Float> keyPresses, HashSet<Integer> pressedKeys) {
 		pressedKeys.clear();
-		
-		final float elapTime = GameCore.getElapsedProgramTime();
 		
 		for(Entry<Integer, Float> pressTime : keyPresses.entrySet()) {
 			final float curTime = elapTime - pressTime.getValue();
@@ -40,12 +54,11 @@ public class InputHandler implements InputProcessor {
 					pressedKeys.add(pressTime.getKey());
 			}
 		}
-		
-		prevUpdate = elapTime;
 	}
 	
 	void reset() {
 		keyPresses.clear();
+		buttonPresses.clear();
 	}
 	
 	InputHandler resetDelay() { return repressDelay(REPEAT_DELAY); }
@@ -63,6 +76,9 @@ public class InputHandler implements InputProcessor {
 	 */
 	public boolean pressingKey(int keycode) {
 		return Gdx.input.isKeyJustPressed(keycode) || repressingKey(keycode);
+	}
+	public boolean pressingButton(int button) {
+		return pressedButtons.contains(button);
 	}
 	
 	/**
@@ -91,10 +107,27 @@ public class InputHandler implements InputProcessor {
 	
 	@Override public boolean keyTyped(char character) { return false; }
 	
-	@Override public boolean touchDown(int screenX, int screenY, int pointer, int button) { return false; }
-	@Override public boolean touchUp(int screenX, int screenY, int pointer, int button) { return false; }
+	@Override public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+		// if(GameCore.debug) System.out.println("button press: "+button);
+		buttonPresses.put(button, GameCore.getElapsedProgramTime());
+		pressedButtons.add(button);
+		return false;
+	}
+	@Override public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+		// if(GameCore.debug) System.out.println("button release: "+button);
+		buttonPresses.remove(button);
+		return false;
+	}
 	@Override public boolean touchDragged(int screenX, int screenY, int pointer) { return false; }
 	@Override public boolean mouseMoved(int screenX, int screenY) { return false; }
 	@Override public boolean scrolled(int amount) { return false; }
 	
+	public static boolean anyKeyJustPressed(int... keycodes) { return anyKeyPressed(true, keycodes); }
+	public static boolean anyKeyPressed(int... keycodes) { return anyKeyPressed(false, keycodes); }
+	public static boolean anyKeyPressed(boolean just, int... keycodes) {
+		for(int code: keycodes)
+			if(just ? Gdx.input.isKeyJustPressed(code) : Gdx.input.isKeyPressed(code))
+				return true;
+		return false;
+	}
 }

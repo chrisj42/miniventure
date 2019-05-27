@@ -171,12 +171,12 @@ public class ClientCore extends ApplicationAdapter {
 	
 	@Override
 	public void render() {
-		input.update();
-		
 		getBatch().setColor(Color.WHITE);
 		
 		if (clientWorld != null && clientWorld.worldLoaded())
 			clientWorld.update(GameCore.getDeltaTime()); // renders as well
+		
+		input.update();
 		
 		synchronized (screenLock) {
 			hasMenu = menuScreen != null;

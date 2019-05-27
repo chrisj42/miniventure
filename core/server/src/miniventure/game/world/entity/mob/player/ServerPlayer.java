@@ -404,7 +404,7 @@ public class ServerPlayer extends ServerMob implements Player {
 			// add the new item to the inventory, and then determine what should become the held item: previous or new item.
 			// if the new item doesn't fit, then drop it on the ground instead.
 			
-			if(!inventory.addItem(newItem)) {
+			if(!inventory.addItem(index, newItem)) {
 				// inventory is full, try to drop it on the ground
 				ServerLevel level = getLevel();
 				if(level != null)

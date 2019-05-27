@@ -6,6 +6,7 @@ import java.util.HashMap;
 import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.*;
 import miniventure.game.client.ClientCore;
+import miniventure.game.client.InputHandler;
 import miniventure.game.item.ClientInventory;
 import miniventure.game.item.CraftingScreen;
 import miniventure.game.item.InventoryScreen;
@@ -23,6 +24,7 @@ import miniventure.game.world.tile.ClientTile;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -142,15 +144,15 @@ public class ClientPlayer extends ClientEntity implements Player {
 	public void handleInput(Vector2 mouseInput) {
 		
 		Vector2 inputDir = new Vector2();
-		if(Gdx.input.isKeyPressed(Keys.LEFT)) inputDir.x--;
-		if(Gdx.input.isKeyPressed(Keys.RIGHT)) inputDir.x++;
-		if(Gdx.input.isKeyPressed(Keys.UP)) inputDir.y++;
-		if(Gdx.input.isKeyPressed(Keys.DOWN)) inputDir.y--;
+		if(InputHandler.anyKeyPressed(Keys.LEFT, Keys.A)) inputDir.x--;
+		if(InputHandler.anyKeyPressed(Keys.RIGHT, Keys.D)) inputDir.x++;
+		if(InputHandler.anyKeyPressed(Keys.UP, Keys.W)) inputDir.y++;
+		if(InputHandler.anyKeyPressed(Keys.DOWN, Keys.S)) inputDir.y--;
 		
 		inputDir.nor();
 		
-		inputDir.add(mouseInput); // mouseInput is already normalized
-		inputDir.nor();
+		// inputDir.add(mouseInput); // mouseInput is already normalized
+		// inputDir.nor();
 			
 		Direction newDir = Direction.getDirection(inputDir.x, inputDir.y);
 		if(newDir != null) {
@@ -183,9 +185,9 @@ public class ClientPlayer extends ClientEntity implements Player {
 		getStatEvo(StaminaSystem.class).isMoving = !moveDist.isZero();
 		
 		if(!isKnockedBack() && !ClientCore.hasMenu()) {
-			if(ClientCore.input.pressingKey(Input.Keys.C))
+			if(ClientCore.input.pressingKey(Input.Keys.C) || ClientCore.input.pressingButton(Buttons.LEFT))
 				ClientCore.getClient().send(new InteractRequest(true, new PositionUpdate(this), getDirection(), inventory.getSelection()));
-			else if(ClientCore.input.pressingKey(Input.Keys.V))
+			else if(ClientCore.input.pressingKey(Input.Keys.V) || ClientCore.input.pressingButton(Buttons.RIGHT))
 				ClientCore.getClient().send(new InteractRequest(false, new PositionUpdate(this), getDirection(), inventory.getSelection()));
 		}
 		//if(Gdx.input.isKeyPressed(Input.Keys.C) || Gdx.input.isKeyPressed(Input.Keys.V))

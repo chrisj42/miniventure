@@ -15,11 +15,14 @@ public class ClientInventory extends Inventory<Item, ItemStack> {
 	
 	public ClientInventory(int size) {
 		super(size, Item.class, ItemStack.class);
-		
 	}
 	
 	public void dropInvItems(boolean all) {
-		ClientCore.getClient().send(new ItemDropRequest(true, selection, all));
+		ClientCore.getClient().send(new ItemDropRequest(selection, all));
+		if(all)
+			removeItemStack(getItem(selection));
+		else
+			removeItem(getItem(selection));
 	}
 	
 	public void setSelection(int idx) {
