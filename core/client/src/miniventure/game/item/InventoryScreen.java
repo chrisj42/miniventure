@@ -120,6 +120,8 @@ public class InventoryScreen extends MenuScreen {
 			
 			@Override
 			public boolean scrolled(InputEvent event, float x, float y, int amount) {
+				if(inventory == null)
+					return false;
 				inventory.setSelection(inventory.getSelection() + amount);
 				return true;
 			}
@@ -147,8 +149,6 @@ public class InventoryScreen extends MenuScreen {
 		Timer t = new Timer(200, e -> mainGroup.setVisible(true));
 		t.setRepeats(false);
 		t.start();*/
-		
-		
 		
 		setKeyboardFocus(slotTable);
 		setScrollFocus(slotTable);

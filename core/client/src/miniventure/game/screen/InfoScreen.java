@@ -17,7 +17,7 @@ public class InfoScreen extends BackgroundInheritor {
 		// VerticalGroup vGroup = useVGroup(addButton?20:30);
 		Table table = useTable();
 		
-		table.defaults().pad(addButton?20:30);
+		table.defaults().pad(30);
 		
 		table.add(makeLabel(String.join("\n"+(addButton?"\n":""), text))).row();
 		
@@ -40,25 +40,28 @@ public class InfoScreen extends BackgroundInheritor {
 		public InstructionsScreen(boolean forced) {
 			super(forced, forced ? new String[] {
 				"CONTROLS (more on instructions screen):",
-				"Use mouse or arrow keys to move around.",
-				"C to attack.",
-				"V to interact with certain items or tiles.",
-				"E to open your inventory (1-5 to set hotbar items).",
+				"Use arrow keys or wasd to move around.",
+				"left click or C to attack.",
+				"right click or V to interact with certain items or tiles.",
+				// "E to open your inventory (1-5 to set hotbar items).",
 				"Z to open crafting screen (enter/click to craft items).",
-				"Chat with T. Commands with /.",
-				"",
-				"INVENTORY NOTES:",
-				"Inventory space is limited, the bar on the right shows fill amount.",
-				"Hotbar slots don't count as extra inventory space."
+				"Chat with T. Commands with /."
+				// "",
+				// "INVENTORY NOTES:",
+				// "Inventory space is limited, the bar on the right shows fill amount.",
+				// "Hotbar slots don't count as extra inventory space."
 			} : new String[] {
 				"Use mouse or arrow keys to move around.",
-				"C to attack, V to interact and do other things.",
-				"E to open your inventory, Z to craft items.",
-				"Q to drop an item from your inventory/hotbar. Use Shift-Q to drop all items in the stack.",
-				"1-5 keys to select hotbar items.",
-				"Inventory Screen: to put an item in your hotbar, press the 1-5 key matching the hotbar slot,",
-				"    with the inventory item you want to be there selected.",
-				"Crafting Screen: Click or press enter to craft the selected item.",
+				"LMB/C to attack, RMB/V to interact and do other things.",
+				"Z to open crafting window, click/enter to craft.",
+				"",
+				"Q to drop an item from your inventory/hotbar.",
+				"Use Shift-Q to drop all items in the stack.",
+				"Scroll to change item selection, or use number keys to select the first few items.",
+				// "Inventory Screen: to put an item in your hotbar, press the 1-5 key matching the hotbar slot,",
+				// "    with the inventory item you want to be there selected.",
+				// "On the Crafting Screen, Click or press enter to craft the selected item.",
+				"",
 				"+ and - keys to zoom in and out.",
 				"Press \"t\" to chat with other players, and \"/\" to use commands.",
 				"(Hint: use the up key to repeat messages, and tab to autocomplete command names.)",
