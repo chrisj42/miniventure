@@ -37,7 +37,7 @@ public class GameScreen {
 	public GameScreen() {
 		uiCamera = new OrthographicCamera();
 		noScaleCamera = new OrthographicCamera();
-		guiStage = new InventoryScreen();
+		guiStage = new InventoryScreen(uiCamera, batch);
 		
 		levelView = new LevelViewport(batch, noScaleCamera); // uses uiCamera for rendering lighting to the screen.
 		
@@ -108,11 +108,9 @@ public class GameScreen {
 		
 		levelView.render(mainPlayer.getCenter(), lightOverlay, level);
 		
-		batch.setProjectionMatrix(uiCamera.combined);
+		// batch.setProjectionMatrix(uiCamera.combined);
 		if(drawGui) {
-			batch.begin();
 			renderGui(mainPlayer, level);
-			batch.end();
 			guiStage.focus();
 			guiStage.act();
 			guiStage.draw();
@@ -143,11 +141,14 @@ public class GameScreen {
 	
 	private void renderGui(@NotNull ClientPlayer mainPlayer, @NotNull Level level) {
 		batch.setProjectionMatrix(uiCamera.combined);
-		
+		batch.begin();
 		// draw UI for stats
+		// System.out.println("ui viewport: "+uiCamera.viewportWidth+"x"+uiCamera.viewportHeight);
 		mainPlayer.drawGui(new Rectangle(0, 0, uiCamera.viewportWidth, uiCamera.viewportHeight), batch);
+		batch.end();
 		
 		batch.setProjectionMatrix(noScaleCamera.combined);
+		batch.begin();
 		
 		if(!ClientCore.debugInfo) {
 			if(GameCore.debug) {
@@ -156,6 +157,7 @@ public class GameScreen {
 				f.draw(batch, "Debug Mode ENABLED", 0, noScaleCamera.viewportHeight - 5);
 				f.setColor(Color.WHITE);
 			}
+			batch.end();
 			return;
 		}
 		
@@ -190,6 +192,8 @@ public class GameScreen {
 				font.setColor(Color.WHITE);
 			font.draw(batch, debugInfo.get(i), 0, noScaleCamera.viewportHeight - 5 - font.getLineHeight() * i);
 		}
+		
+		batch.end();
 	}
 	
 	void resize(int width, int height) {

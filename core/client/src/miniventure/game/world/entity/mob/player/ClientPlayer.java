@@ -255,6 +255,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 	
 	private static final float padding = 3;
 	private void drawStat(Stat stat, float x, float y, SpriteBatch batch, Vector2 hold) {
+		// if(GameCore.debug) System.out.println("drawing stat "+stat+" at "+x+","+y);
 		Vector2 size = renderBar(stat, x, y, batch);
 		hold.y += size.y+padding;
 		hold.x = Math.max(hold.x, size.x);
@@ -262,11 +263,12 @@ public class ClientPlayer extends ClientEntity implements Player {
 	public void drawGui(Rectangle canvas, SpriteBatch batch) {
 		Vector2 hold = new Vector2(0, canvas.y + padding);
 		
-		drawStat(Stat.Health, canvas.x, hold.y, batch, hold);
+		float x = canvas.x + canvas.width;
+		drawStat(Stat.Health, x, hold.y, batch, hold);
 		// if(getStat(Stat.Armor) > 0)
 		// 	drawStat(Stat.Armor, canvas.x, hold.y, batch, hold);
-		drawStat(Stat.Stamina, canvas.x, hold.y, batch, hold);
-		drawStat(Stat.Hunger, canvas.x, hold.y, batch, hold);
+		drawStat(Stat.Stamina, x, hold.y, batch, hold);
+		drawStat(Stat.Hunger, x, hold.y, batch, hold);
 	}
 	
 	private Vector2 renderBar(Stat stat, float x, float y, SpriteBatch batch) { return renderBar(stat, x, y, batch, 0); }
@@ -287,15 +289,15 @@ public class ClientPlayer extends ClientEntity implements Player {
 			
 			// converts it to a pixel width
 			int fullWidth = (int) (iconFillAmount * statWidth);
-			float fullX = rightSide ? x+i*iconWidth : x - i*iconWidth - fullWidth;
+			float fullX = rightSide ? x - i*iconWidth - fullWidth : x + i*iconWidth;
 			if(fullWidth > 0)
-				batch.draw(fullIcon.getTexture(), fullX, y, fullIcon.getRegionX() + (rightSide?0:statWidth-fullWidth), fullIcon.getRegionY(), fullWidth, statHeight);
+				batch.draw(fullIcon.getTexture(), fullX, y, fullIcon.getRegionX() + (rightSide?statWidth-fullWidth:0), fullIcon.getRegionY(), fullWidth, statHeight);
 			
 			// now draw the rest of the icon with the empty sprite.
 			int emptyWidth = statWidth-fullWidth;
-			float emptyX = rightSide ? x+i*iconWidth+fullWidth : x - (i+1)*iconWidth;
+			float emptyX = rightSide ? x - (i+1)*iconWidth : x+i*iconWidth+fullWidth;
 			if(emptyWidth > 0)
-				batch.draw(emptyIcon.getTexture(), emptyX, y, emptyIcon.getRegionX() + (rightSide?fullWidth:0), emptyIcon.getRegionY(), emptyWidth, statHeight);
+				batch.draw(emptyIcon.getTexture(), emptyX, y, emptyIcon.getRegionX() + (rightSide?0:fullWidth), emptyIcon.getRegionY(), emptyWidth, statHeight);
 		}
 		
 		return new Vector2(iconWidth * stat.iconCount, statHeight);
