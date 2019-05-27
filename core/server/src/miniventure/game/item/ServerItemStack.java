@@ -13,6 +13,12 @@ public class ServerItemStack extends ItemStack {
 		this.item = item;
 	}
 	
+	@NotNull
+	@Override
+	public ServerItem getItem() {
+		return item;
+	}
+	
 	public String[] save() { return save(item, count); }
 	
 	public static String[] save(@NotNull ServerItem item, int count) {

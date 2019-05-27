@@ -5,371 +5,378 @@ filter: Nearest,Nearest
 repeat: none
 blank
   rotate: false
-  xy: 12, 964
+  xy: 12, 988
   size: 4, 4
   orig: 4, 4
   offset: 0, 0
   index: -1
 bolt-outline
   rotate: false
-  xy: 12, 652
+  xy: 124, 764
   size: 80, 96
   orig: 80, 96
   offset: 0, 0
   index: -1
 bolt
   rotate: false
-  xy: 12, 764
+  xy: 156, 620
   size: 80, 96
   orig: 80, 96
   offset: 0, 0
   index: -1
 burger-outline
   rotate: false
-  xy: 12, 876
+  xy: 124, 876
   size: 80, 72
   orig: 80, 72
   offset: 0, 0
   index: -1
 burger
   rotate: false
-  xy: 108, 652
+  xy: 220, 732
   size: 80, 72
   orig: 80, 72
   offset: 0, 0
   index: -1
+fade-rect
+  rotate: false
+  xy: 12, 12
+  size: 320, 320
+  orig: 320, 320
+  offset: 0, 0
+  index: -1
 heart-outline
   rotate: false
-  xy: 12, 428
+  xy: 12, 764
   size: 96, 96
   orig: 96, 96
   offset: 0, 0
   index: -1
 heart
   rotate: false
-  xy: 12, 540
+  xy: 12, 876
   size: 96, 96
   orig: 96, 96
   offset: 0, 0
   index: -1
 items/food/apple
   rotate: false
-  xy: 124, 428
+  xy: 252, 620
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/food/cactus_fruit
   rotate: false
-  xy: 156, 284
+  xy: 220, 820
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/food/cherry
   rotate: false
-  xy: 124, 508
+  xy: 220, 900
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/food/cooked_bacon
   rotate: false
-  xy: 108, 740
+  xy: 300, 820
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/food/cooked_meat
   rotate: false
-  xy: 108, 820
+  xy: 316, 700
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/food/gooseberry
   rotate: false
-  xy: 108, 900
+  xy: 300, 900
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/food/pear
   rotate: false
-  xy: 188, 740
+  xy: 380, 780
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/food/raw_bacon
   rotate: false
-  xy: 188, 820
+  xy: 380, 860
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/food/raw_meat
   rotate: false
-  xy: 188, 900
+  xy: 380, 940
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/food/snow_berries
   rotate: false
-  xy: 204, 364
+  xy: 284, 348
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/food/strawberry
   rotate: false
-  xy: 236, 284
+  xy: 284, 428
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/resource/coal
   rotate: false
-  xy: 284, 12
+  xy: 284, 508
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/resource/cotton
   rotate: false
-  xy: 284, 92
+  xy: 332, 588
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/resource/fabric
   rotate: false
-  xy: 284, 172
+  xy: 396, 668
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/resource/flint
   rotate: false
-  xy: 204, 444
+  xy: 460, 748
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/resource/iron
   rotate: false
-  xy: 204, 524
+  xy: 460, 828
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/resource/log
   rotate: false
-  xy: 204, 604
+  xy: 460, 908
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/resource/ruby
   rotate: false
-  xy: 268, 684
+  xy: 348, 12
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/resource/stone
   rotate: false
-  xy: 268, 764
+  xy: 348, 92
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/resource/tungsten
   rotate: false
-  xy: 268, 844
+  xy: 348, 172
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/tile/dirt
   rotate: false
-  xy: 268, 924
+  xy: 348, 252
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/tile/sand
   rotate: false
-  xy: 284, 364
+  xy: 364, 332
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/tile/snow
   rotate: false
-  xy: 316, 252
+  xy: 364, 412
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/tools/flint_axe
   rotate: false
-  xy: 364, 12
+  xy: 364, 492
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/tools/flint_pickaxe
   rotate: false
-  xy: 364, 92
+  xy: 412, 572
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/tools/flint_shovel
   rotate: false
-  xy: 364, 172
+  xy: 476, 652
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/tools/flint_sword
   rotate: false
-  xy: 284, 444
+  xy: 540, 732
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/tools/iron_axe
   rotate: false
-  xy: 284, 524
+  xy: 540, 812
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/tools/iron_pickaxe
   rotate: false
-  xy: 284, 604
+  xy: 540, 892
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/tools/iron_shovel
   rotate: false
-  xy: 348, 684
+  xy: 428, 12
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/tools/iron_sword
   rotate: false
-  xy: 348, 764
+  xy: 428, 92
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/tools/ruby_axe
   rotate: false
-  xy: 348, 844
+  xy: 428, 172
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/tools/ruby_pickaxe
   rotate: false
-  xy: 348, 924
+  xy: 428, 252
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/tools/ruby_shovel
   rotate: false
-  xy: 364, 332
+  xy: 444, 332
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/tools/ruby_sword
   rotate: false
-  xy: 396, 252
+  xy: 444, 412
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/tools/stone_axe
   rotate: false
-  xy: 444, 12
+  xy: 444, 492
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/tools/stone_pickaxe
   rotate: false
-  xy: 444, 92
+  xy: 492, 572
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/tools/stone_shovel
   rotate: false
-  xy: 444, 172
+  xy: 556, 652
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/tools/stone_sword
   rotate: false
-  xy: 364, 412
+  xy: 620, 732
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/tools/tungsten_axe
   rotate: false
-  xy: 364, 492
+  xy: 620, 812
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/tools/tungsten_pickaxe
   rotate: false
-  xy: 364, 572
+  xy: 620, 892
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/tools/tungsten_shovel
   rotate: false
-  xy: 428, 652
+  xy: 508, 12
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 items/tools/tungsten_sword
   rotate: false
-  xy: 428, 732
+  xy: 508, 92
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 light
   rotate: false
-  xy: 12, 12
+  xy: 12, 348
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
 tile-frame
   rotate: false
-  xy: 12, 284
+  xy: 12, 620
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 white
   rotate: false
-  xy: 12, 984
+  xy: 12, 1008
   size: 4, 4
   orig: 4, 4
   offset: 0, 0

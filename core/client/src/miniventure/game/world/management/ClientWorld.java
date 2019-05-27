@@ -231,9 +231,8 @@ public class ClientWorld extends LevelManager {
 			// gameScreen.getHudPanel().remove(this.mainPlayer.getHands().getHotbarTable());
 		}
 		
-		this.mainPlayer = new ClientPlayer(data);
+		this.mainPlayer = new ClientPlayer(data, gameScreen.getGuiStage());
 		registerEntity(mainPlayer);
-		
 		// gameScreen.getHudPanel().add(mainPlayer.getHands().getHotbarTable());
 	}
 	

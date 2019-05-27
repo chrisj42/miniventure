@@ -47,7 +47,7 @@ public interface GameProtocol {
 	boolean lag = false;
 	int lagMin = lag?10:0, lagMax = lag?100:0;
 	
-	default <T> void forPacket(Object packet, Class<T> type, ValueFunction<T> response) {
+	static <T> void forPacket(Object packet, Class<T> type, ValueFunction<T> response) {
 		if(type.isAssignableFrom(packet.getClass()))
 			response.act(type.cast(packet));
 	}
@@ -259,13 +259,13 @@ public interface GameProtocol {
 	
 	class SpawnData {
 		public final EntityAddition playerData;
-		public final HotbarUpdate hotbar;
+		public final InventoryUpdate inv;
 		public final Integer[] stats;
 		
 		private SpawnData() { this(null, null, null); }
-		public SpawnData(EntityAddition playerData, HotbarUpdate hotbar, Integer[] stats) {
+		public SpawnData(EntityAddition playerData, InventoryUpdate inv, Integer[] stats) {
 			this.playerData = playerData;
-			this.hotbar = hotbar;
+			this.inv = inv;
 			this.stats = stats;
 		}
 	}
@@ -524,22 +524,22 @@ public interface GameProtocol {
 	// sent server -> client; special packet for when the client has the inventory screen open, which is communicated through an InventoryRequest with no hotbar array. This packet includes all the inventory items and the inventory indices of all the hotbar items.
 	class InventoryUpdate {
 		public final String[][] itemStacks; // the item list
-		public final int[] hotbar; // only not null the first time
+		// public final int[] hotbar; // only not null the first time
 		
-		private InventoryUpdate() { this((String[][])null, null); }
-		public InventoryUpdate(ItemStack[] inventory, int[] hotbar) {
-			this.hotbar = hotbar;
+		private InventoryUpdate() { this((String[][])null); }
+		public InventoryUpdate(ItemStack[] inventory) {
+			// this.hotbar = hotbar;
 			itemStacks = new String[inventory.length][];
 			for(int i = 0; i < inventory.length; i++)
 				itemStacks[i] = inventory[i].serialize();
 		}
-		public InventoryUpdate(String[][] itemStacks, int[] hotbar) {
+		public InventoryUpdate(String[][] itemStacks) {
 			this.itemStacks = itemStacks;
-			this.hotbar = hotbar;
+			// this.hotbar = hotbar;
 		}
 	}
 	
-	// sent server -> client; for any items added to the inventory after server sends InventoryUpdate, and before server receives InventoryRequest.
+	// sent server -> client; for items added to the inventory
 	class InventoryAddition {
 		public final String[] newItem;
 		
@@ -555,12 +555,12 @@ public interface GameProtocol {
 	class InventoryRequest {
 		// the likelihood of this being necessary is very small. If it becomes necessary I will implement it.
 		// public final int requestID; // to prevent confusion regarding late responses
-		public final int[] hotbar;
+		// public final int[] hotbar;
 		
-		private InventoryRequest() { this(null); }
-		public InventoryRequest(int[] hotbar) {
-			this.hotbar = hotbar;
-		}
+		public InventoryRequest() {  }
+		// public InventoryRequest(int[] hotbar) {
+		// 	this.hotbar = hotbar;
+		// }
 	}
 	
 	// sent by server to update clients' inventory, after dropping items and attacking/interacting.

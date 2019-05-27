@@ -39,6 +39,8 @@ import com.esotericsoftware.kryonet.MiniventureClient;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import static miniventure.game.GameProtocol.forPacket;
+
 public class GameClient implements GameProtocol {
 	
 	private MiniventureClient client;
@@ -230,24 +232,15 @@ public class GameClient implements GameProtocol {
 						e.remove();
 				});
 				
-				forPacket(object, HotbarUpdate.class, update -> {
+				/*forPacket(object, HotbarUpdate.class, update -> {
 					if(player == null || ClientCore.getScreen() instanceof InventoryScreen)
 						return;
 					
-					player.getHands().updateItems(update.itemStacks, update.fillPercent);
-				});
+					player.getInventory().updateItems(update.itemStacks, update.fillPercent);
+				});*/
 				
-				forPacket(object, InventoryUpdate.class, newInv -> {
-					MenuScreen screen = ClientCore.getScreen();
-					if(screen instanceof InventoryScreen)
-						((InventoryScreen)screen).inventoryUpdate(newInv);
-				});
-				
-				forPacket(object, InventoryAddition.class, addition -> {
-					MenuScreen screen = ClientCore.getScreen();
-					if(screen instanceof InventoryScreen)
-						((InventoryScreen)screen).itemAdded(addition);
-				});
+				if(player != null)
+					player.handlePlayerPackets(object, connection);
 				
 				forPacket(object, RecipeRequest.class, req -> {
 					MenuScreen screen = ClientCore.getScreen();
@@ -259,17 +252,6 @@ public class GameClient implements GameProtocol {
 					MenuScreen screen = ClientCore.getScreen();
 					if(screen instanceof CraftingScreen)
 						((CraftingScreen)screen).refreshCraftability(stockUpdate);
-				});
-				
-				forPacket(object, PositionUpdate.class, newPos -> {
-					if(player == null) return;
-					//player.updatePos(newPos);
-					player.moveTo(newPos.x, newPos.y, newPos.z);
-				});
-				
-				forPacket(object, StatUpdate.class, update -> {
-					if(player == null) return;
-					player.changeStat(update.stat, update.amount);
 				});
 				
 				forPacket(object, Message.class, ClientCore::addMessage);

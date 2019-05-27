@@ -80,7 +80,7 @@ public class ItemSlot extends Widget {
 		return this;
 	}
 	
-	private boolean showCount() { return item != null && count > 0; }
+	private boolean showCount() { return getItem() != null && count > 0; }
 	
 	public void setBackground(Drawable background) { this.background = background; }
 	
@@ -97,7 +97,7 @@ public class ItemSlot extends Widget {
 		super.draw(batch, parentAlpha);
 		if(background != null)
 			background.draw(batch, getX(), getY(), getWidth(), getHeight());
-		Item item = this.item;
+		Item item = getItem();
 		if(item != null) {
 			// draw icon
 			Color prev = batch.getColor();

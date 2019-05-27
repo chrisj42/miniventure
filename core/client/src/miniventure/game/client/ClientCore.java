@@ -192,10 +192,6 @@ public class ClientCore extends ApplicationAdapter {
 		synchronized (screenLock) {
 			if(screen == menuScreen) return;
 			
-			if(menuScreen instanceof InventoryScreen) {
-				((InventoryScreen) menuScreen).close();
-			}
-			
 			if(menuScreen != null && screen != null && screen == menuScreen.getParent()) {
 				backToParentScreen();
 				return;

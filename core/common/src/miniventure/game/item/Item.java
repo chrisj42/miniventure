@@ -13,26 +13,22 @@ public class Item {
 	
 	@NotNull private final String name;
 	@NotNull private final TextureHolder texture;
-	private final int spaceUsage;
 	private final float usability; // displayed as a little bar in the item icon.
 	
 	Item(@NotNull String name, @NotNull TextureHolder texture) {
 		this.name = name;
 		this.texture = texture;
-		this.spaceUsage = getSpaceUsage(); // since this is a server constructor and the server overrides this method, it will give the right number.
 		this.usability = getUsabilityStatus(); // same as with space usage.
 	}
 	
-	private Item(@NotNull String name, @NotNull TextureHolder texture, int spaceUsage, float usability) {
+	private Item(@NotNull String name, @NotNull TextureHolder texture, float usability) {
 		this.name = name;
 		this.texture = texture;
-		this.spaceUsage = spaceUsage;
 		this.usability = usability;
 	}
 	
 	@NotNull public TextureHolder getTexture() { return texture; }
 	@NotNull public String getName() { return name; }
-	public int getSpaceUsage() { return spaceUsage; }
 	// This returns a value used 
 	public float getUsabilityStatus() { return usability; }
 	
@@ -57,7 +53,6 @@ public class Item {
 		return new String[] {
 			name,
 			texture.name,
-			String.valueOf(spaceUsage),
 			String.valueOf(getUsabilityStatus())
 		};
 	}
@@ -74,8 +69,7 @@ public class Item {
 		return new Item(
 			info[0],
 			t,
-			Integer.parseInt(info[2]),
-			Float.parseFloat(info[3])
+			Float.parseFloat(info[2])
 		);
 	}
 	

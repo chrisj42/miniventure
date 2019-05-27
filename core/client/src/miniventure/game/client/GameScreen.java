@@ -1,10 +1,8 @@
 package miniventure.game.client;
 
 import miniventure.game.GameCore;
-import miniventure.game.item.HotbarTable;
+import miniventure.game.item.InventoryScreen;
 import miniventure.game.screen.*;
-import miniventure.game.screen.util.DiscreteViewport;
-import miniventure.game.util.RelPos;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
 import miniventure.game.world.level.ClientLevel;
 import miniventure.game.world.level.Level;
@@ -19,11 +17,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Container;
-import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.utils.Array;
-import com.kotcrab.vis.ui.VisUI;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -32,7 +26,7 @@ public class GameScreen {
 	@NotNull private final LevelViewport levelView;
 	
 	private SpriteBatch batch = ClientCore.getBatch();
-	private MenuScreen guiStage;
+	private InventoryScreen guiStage;
 	
 	private final OrthographicCamera uiCamera;
 	private final OrthographicCamera noScaleCamera;
@@ -43,29 +37,7 @@ public class GameScreen {
 	public GameScreen() {
 		uiCamera = new OrthographicCamera();
 		noScaleCamera = new OrthographicCamera();
-		guiStage = new MenuScreen(false, new DiscreteViewport(uiCamera), batch) {
-			{
-				ProgressBar fillBar = new ProgressBar(0, 1, .01f, true, VisUI.getSkin()) {
-					@Override
-					public float getPrefHeight() {
-						return uiCamera.viewportHeight * 2 / 5;
-					}
-					
-					/*@Override
-					public float getPrefWidth() {
-						return 20f;
-					}*/
-				};
-				fillBar.pack();
-				Container<ProgressBar> box = new Container<>(fillBar);
-				box.fill().prefWidth(20f);
-				box.pack();
-				addMainGroup(box, RelPos.RIGHT);
-				
-				HotbarTable hotbar = new HotbarTable(fillBar);
-				addMainGroup(hotbar, RelPos.BOTTOM_RIGHT);
-			}
-		};
+		guiStage = new InventoryScreen();
 		
 		levelView = new LevelViewport(batch, noScaleCamera); // uses uiCamera for rendering lighting to the screen.
 		
@@ -228,5 +200,5 @@ public class GameScreen {
 		// noScaleCamera.setToOrtho(false, width, height);
 	}
 	
-	public Stage getGuiStage() { return guiStage; }
+	public InventoryScreen getGuiStage() { return guiStage; }
 }

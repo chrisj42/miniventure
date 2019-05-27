@@ -1,44 +1,28 @@
 package miniventure.game.item;
 
-import javax.swing.Timer;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import miniventure.game.GameCore;
-import miniventure.game.GameProtocol.InventoryAddition;
-import miniventure.game.GameProtocol.InventoryRequest;
-import miniventure.game.GameProtocol.InventoryUpdate;
-import miniventure.game.GameProtocol.ItemDropRequest;
-import miniventure.game.client.ClientCore;
-import miniventure.game.client.FontStyle;
 import miniventure.game.screen.MenuScreen;
-import miniventure.game.screen.util.ColorBackground;
 import miniventure.game.util.RelPos;
 import miniventure.game.world.entity.mob.player.Player;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
-import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.utils.Align;
 import com.kotcrab.vis.ui.VisUI;
 
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-/** @noinspection SynchronizeOnThis*/
 public class InventoryScreen extends MenuScreen {
 	
 	static final Color slotBackground = Color.TEAL.cpy().lerp(Color.WHITE, .1f);
 	static final Color tableBackground = Color.TEAL;
 	private static final Color highlightBackground = Color.TEAL.cpy().lerp(Color.YELLOW, .25f);
+	
+	private static final int MAX_ITEMS_PER_ROW = 8;
 	
 	/*
 		general system:
@@ -50,76 +34,68 @@ public class InventoryScreen extends MenuScreen {
 		
 	 */
 	
-	private boolean requested = false;
-	private boolean fin = false;
+	// private boolean requested = false;
+	// private boolean fin = false;
 	
-	private ClientHands hands;
+	private ClientInventory inventory;
 	
-	private ArrayList<SlotData> inventory = null;
-	private final HashMap<Integer, SlotData> slotsById = new HashMap<>();
-	private int[] hotbar = null; // holds slot IDs
+	// private SlotData[] slots = null;
+	// private final HashMap<Integer, SlotData> slotsById = new HashMap<>();
+	// private int[] hotbar = null; // holds slot IDs
 	
 	private VerticalGroup mainGroup;
 	
-	private int spaceUsed = 0;
+	// private int spaceUsed = 0;
 	private ProgressBar fillBar;
 	
-	private ScrollPane scrollPane;
+	// private ScrollPane scrollPane;
 	private Table slotTable;
 	
-	private int selection;
+	// private int selection;
 	
-	public InventoryScreen(ClientHands hands) {
+	public InventoryScreen() {
 		super(false);
-		this.hands = hands;
+		// this.inventory = inv;
 		// setDebugAll(true);
-		mainGroup = useVGroup(2f, Align.right, false);
-		addMainGroup(mainGroup, RelPos.RIGHT);
+		mainGroup = useVGroup(2f, Align.left, false);
+		addMainGroup(mainGroup, RelPos.BOTTOM_LEFT);
 		
 		fillBar = new ProgressBar(0, 1, .01f, false, VisUI.getSkin());
 		
-		slotTable = new Table(VisUI.getSkin()) {
+		slotTable = new Table(VisUI.getSkin())/* {
 			@Override
 			protected void drawChildren(Batch batch, float parentAlpha) {
 				boolean done = false;
 				synchronized (InventoryScreen.this) {
-					if(inventory != null) {
+					if(slots != null) {
 						done = true;
-						if(inventory.size() > 0)
-							inventory.get(selection).slot.setSelected(true);
+						if(slots.size() > 0)
+							slots.get(selection).slot.setSelected(true);
 						super.drawChildren(batch, parentAlpha);
-						if(inventory.size() > 0) inventory.get(selection).slot.setSelected(false);
+						if(slots.size() > 0) slots.get(selection).slot.setSelected(false);
 					}
 				}
 				if(!done)
 					super.drawChildren(batch, parentAlpha);
 			}
-		};
-		slotTable.defaults().fillX().minSize(Item.ICON_SIZE * 3, ItemSlot.HEIGHT/2);
-		slotTable.pad(10f);
-		slotTable.background(new ColorBackground(slotTable, tableBackground));
-		slotTable.add(makeLabel("Waiting for inventory data...", FontStyle.KeepSize, false));
+		}*/;
+		slotTable.defaults().fillX().minSize(Item.ICON_SIZE * 1.5f, ItemSlot.HEIGHT * 1.5f);
+		// slotTable.pad(10f);
+		// slotTable.background(new ColorBackground(slotTable, tableBackground));
+		// slotTable.add(makeLabel("Waiting for inventory data...", FontStyle.KeepSize, false));
+		
+		// int slotsLeft = Player.INV_SIZE;
 		
 		slotTable.addListener(new InputListener() {
 			@Override
 			public boolean keyDown(InputEvent event, int keycode) {
-				if(keycode == Keys.E || keycode == Keys.ESCAPE) {
-					ClientCore.setScreen(null);
-					return true;
-				}
-				
+				if(inventory == null)
+					return false;
+				//noinspection SynchronizeOnThis
 				synchronized (InventoryScreen.this) {
-					if(inventory != null && inventory.size() > 0) {
-						for(int i = 0; i < Player.HOTBAR_SIZE; i++) {
-							if(keycode == Keys.NUM_1 + i) {
-								setHotbar(i, selection);
-								return true;
-							}
-						}
-						
-						if(keycode == Keys.ENTER) {
-							setHotbar(hands.getSelection(), selection);
-							ClientCore.setScreen(null);
+					for(int i = Keys.NUM_1; i <= Keys.NUM_9; i++) {
+						if(keycode == i) {
+							inventory.setSelection(i - Keys.NUM_1);
 							return true;
 						}
 					}
@@ -127,9 +103,15 @@ public class InventoryScreen extends MenuScreen {
 				
 				return false;
 			}
+			
+			@Override
+			public boolean scrolled(InputEvent event, float x, float y, int amount) {
+				inventory.setSelection(inventory.getSelection() + amount);
+				return true;
+			}
 		});
 		
-		scrollPane = new ScrollPane(slotTable, VisUI.getSkin()) {
+		/*scrollPane = new ScrollPane(slotTable, VisUI.getSkin()) {
 			@Override
 			public float getPrefHeight() {
 				return InventoryScreen.this.getHeight()*2/3;
@@ -139,267 +121,72 @@ public class InventoryScreen extends MenuScreen {
 		// scrollPane.setHeight(getHeight()*2/3);
 		scrollPane.setScrollingDisabled(true, false);
 		scrollPane.setFadeScrollBars(false);
-		scrollPane.setScrollbarsOnTop(false);
+		scrollPane.setScrollbarsOnTop(false);*/
 		
 		mainGroup.addActor(fillBar);
-		mainGroup.addActor(scrollPane);
+		mainGroup.addActor(slotTable);
+		// mainGroup.addActor(scrollPane);
 		
-		mainGroup.setVisible(false);
+		/*mainGroup.setVisible(false);
 		Timer t = new Timer(200, e -> mainGroup.setVisible(true));
 		t.setRepeats(false);
-		t.start();
+		t.start();*/
+		
+		
 		
 		setKeyboardFocus(slotTable);
-		setScrollFocus(scrollPane);
+		setScrollFocus(slotTable);
 	}
 	
-	@Override
-	protected void layoutActors() {
-		scrollPane.pack();
-		scrollPane.setHeight(getHeight()*2/3);
-		scrollPane.setWidth(scrollPane.getPrefWidth());
-		super.layoutActors();
-	}
-	
-	// should only be called by the LibGDX Application thread
-	@Override
-	public synchronized void focus() {
-		super.focus();
-		if(!requested) {
-			requested = true;
-			ClientCore.getClient().send(new InventoryRequest(null));
-		}
+	public void setInventory(ClientInventory inv) {
+		inventory = inv;
+		slotTable.clearChildren();
 		
-	}
-	
-	// should only be called by the LibGDX Application thread
-	public synchronized void close() {
-		GameCore.debug("closing inventory screen");
-		if(requested) {
-			if(hotbar == null)
-				hotbar = new int[0];
-			else {
-				for(int i = 0; i < hotbar.length; i++)
-					hotbar[i] = inventory.indexOf(slotsById.get(hotbar[i]));
-			}
-			
-			ClientCore.getClient().send(new InventoryRequest(hotbar));
-		}
-		fin = true;
-	}
-	
-	// should only be called by the GameClient thread
-	public void inventoryUpdate(InventoryUpdate update) {
-		if(ClientCore.getScreen() != this)
-			return; // ignore
+		int rows = (int)Math.ceil(Player.INV_SIZE / (float)MAX_ITEMS_PER_ROW);
+		int cols = Math.min(MAX_ITEMS_PER_ROW, Player.INV_SIZE);
+		ItemSlot[][] allSlots = new ItemSlot[rows][cols];
 		
-		synchronized (this) {
-			if(fin) return; // exited, ignore
-			
-			hotbar = update.hotbar;
-			inventory = new ArrayList<>(update.itemStacks.length);
-			
-			slotTable.clearChildren();
-			
-			for(String[] data: update.itemStacks)
-				addItemStack(data);
-			
-			for(int i = 0; i < hotbar.length; i++) {
-				if(hotbar[i] >= 0) {
-					SlotData data = inventory.get(hotbar[i]);
-					data.toggleHotbar(i);
-				}
-			}
-			
-			refresh();
-			mainGroup.setVisible(true); // in case the timer hasn't expired yet
-		}
-	}
-	
-	// should only be called by the GameClient thread
-	public void itemAdded(InventoryAddition addition) {
-		if(ClientCore.getScreen() != this)
-			return; // ignore
-		
-		synchronized (this) {
-			if(fin) return;
-			addItem(addition.newItem);
-			refresh();
-		}
-	}
-	
-	private void addItem(String[] data) { addItemStack(new ItemStack(Item.deserialize(data), 1)); }
-	private void addItemStack(String[] data) { addItemStack(ItemStack.deserialize(data)); }
-	private void addItemStack(ItemStack stack) {
-		SlotData slot = new SlotData(stack);
-		inventory.add(slot);
-		slotsById.put(slot.id, slot);
-		spaceUsed += stack.item.getSpaceUsage() * stack.count;
-		slot.slot.addListener(new InputListener() {
-			@Override
-			public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-				synchronized (InventoryScreen.this) {
-					selection = inventory.indexOf(slot);
-				}
-			}
-		});
-		slotTable.add(slot.slot).row();
-	}
-	
-	private void decrementItem(SlotData data) {
-		data.setCount(data.getCount()-1);
-		spaceUsed -= data.getItem().getSpaceUsage();
-		refresh();
-	}
-	
-	private void removeItem(int index, boolean all) {
-		SlotData data = inventory.get(index);
-		
-		if(!all && data.getCount() > 1) {
-			decrementItem(data);
-			return;
-		}
-		
-		inventory.remove(index);
-		if(inventory.size() > 0) 
-			selection %= inventory.size();
-		slotsById.remove(data.id);
-		spaceUsed -= data.getCount() * data.getItem().getSpaceUsage();
-		slotTable.getCell(data.slot).minHeight(0);
-		slotTable.removeActor(data.slot);
-		refresh();
-	}
-	
-	// if index is already present in location, set to -1 (remove)
-	// if present elsewhere, remove and set here
-	// else set here
-	private synchronized void setHotbar(int hotbarIdx, int invIdx) {
-		SlotData data = inventory.get(invIdx);
-		data.toggleHotbar(hotbarIdx);
-	}
-	
-	private void refresh() {
-		if(slotTable.getChildren().size == 0)
-			slotTable.add().row();
-		fillBar.setValue(spaceUsed / (float)Player.INV_SIZE);
-		hands.setFillPercent(fillBar.getValue());
-		slotTable.invalidateHierarchy();
-	}
-	
-	@Override
-	public void act(float delta) {
-		super.act(delta);
-		
-		synchronized (this) {
-			if(ClientCore.input.pressingKey(Keys.Q) && inventory.size() > 0) {
-				boolean all = Gdx.input.isKeyPressed(Keys.SHIFT_LEFT);
-				ClientCore.getClient().send(new ItemDropRequest(false, selection, all));
-				removeItem(selection, all);
-			}
-		}
-		
-		if(ClientCore.input.pressingKey(Keys.UP))
-			moveSelection(-1);
-		if(ClientCore.input.pressingKey(Keys.DOWN))
-			moveSelection(1);
-	}
-	
-	private synchronized void moveSelection(int amt) {
-		if(inventory.size() == 0) return;
-		int newSel = selection + amt;
-		while(newSel < 0) newSel += inventory.size();
-		selection = newSel % inventory.size();
-		scrollPane.setSmoothScrolling(false);
-		scrollPane.scrollTo(0, inventory.get(selection).slot.getY(), 0, ItemSlot.HEIGHT);
-		scrollPane.updateVisualScroll();
-		scrollPane.setSmoothScrolling(true);
-	}
-	
-	private static int counter = 0;
-	private static synchronized int nextId() { return counter++; }
-	
-	private class SlotData extends MutableItemStack {
-		
-		private final int id;
-		
-		private ItemSlot slot;
-		private int hotbarIndex = -1;
-		
-		public SlotData(@NotNull ItemStack stack) {
-			super(stack);
-			id = nextId();
-			slot = new ItemSlot(true, stack.item, stack.count, slotBackground);
-		}
-		
-		public SlotData(@NotNull Item item, int count) {
-			super(item, count);
-			id = nextId();
-			slot = new ItemSlot(true, item, count);
-		}
-		
-		// hotbarIndex is always >= 0
-		public void toggleHotbar(int hotbarIndex) {
-			int prev = this.hotbarIndex; // cache original hotbar index of this slot
-			
-			// clear whatever is currently at the new index to make way for this one
-			SlotData existing = slotsById.get(hotbar[hotbarIndex]);
-			if(existing != null)
-				existing.clearFromHotbar();
-			
-			// if they are the same, then the above clear already took care of matters.
-			// prev is used because if this was the same, then the hotbar index will have been reset.
-			if(prev != hotbarIndex) {
-				// the new hotbar index is different; this item may or may not have already had a place on the hotbar.
+		int idx = 0;
+		int fullSlots = inventory.getSlotsTaken();
+		for(int r = 0; r < rows && idx < Player.INV_SIZE; r++) {
+			for(int c = 0; c < cols && idx < Player.INV_SIZE; c++) {
+				ItemStack stack = idx >= fullSlots ? null : inventory.getItemStack(idx);
+				Item item = stack == null ? null : stack.item;
+				int count = stack == null ? 0 : stack.count;
 				
-				// if a previous place exists, clear it before moving to the new one.
-				clearFromHotbar(false);
+				final int invi = idx;
+				allSlots[r][c] = new ItemSlot(false, item, count, new SlotBackground(
+					() -> inventory.getSlotsTaken() > invi,
+					() -> inventory.getSelection() == invi
+				)) {
+					@Override @Nullable
+					public Item getItem() {
+						if(inventory.getSlotsTaken() <= invi)
+							return null;
+						return inventory.getItem(invi);
+					}
+				};
 				
-				this.hotbarIndex = hotbarIndex;
-				if(prev < 0) // did not used to be in hotbar, so we need to make a new highlight background
-					slot.setBackground(new ColorBackground(slot, highlightBackground));
-				
-				// update the new location
-				hands.updateItem(hotbarIndex, new ItemStack(getItem(), getCount()));
-				hotbar[hotbarIndex] = id;
+				idx++;
 			}
 		}
 		
-		private void clearFromHotbar() { clearFromHotbar(true); }
-		private void clearFromHotbar(boolean resetBackground) {
-			if(hotbarIndex < 0) return;
-			hotbar[hotbarIndex] = -1;
-			hands.updateItem(hotbarIndex, null);
-			hotbarIndex = -1;
-			if(resetBackground)
-				slot.setBackground(new ColorBackground(slot, slotBackground));
+		// go backward through the rows of the array and add them to the slot table
+		for(int r = allSlots.length - 1; r >= 0; r--) {
+			// forward through columns
+			for(int c = 0; c < allSlots[r].length; c++) {
+				// skip rest of row if one is null
+				if(allSlots[r][c] == null)
+					break;
+				
+				slotTable.add(allSlots[r][c]);
+			}
+			
+			slotTable.row();
 		}
-		
-		@Override
-		public void setItem(@NotNull Item item) {
-			super.setItem(item);
-			slot.setItem(item);
-		}
-		
-		@Override
-		public void setCount(int count) {
-			super.setCount(count);
-			slot.setCount(count);
-		}
-		
-		@Override
-		public boolean equals(Object o) {
-			if(this == o) return true;
-			if(!(o instanceof SlotData)) return false;
-			SlotData that = (SlotData) o;
-			return id == that.id;
-		}
-		
-		@Override
-		public int hashCode() { return id; }
-		
-		@Override
-		public String toString() {
-			return super.toString()+"id("+id+") w/ItemSlot "+slot;
-		}
+	}
+	
+	void setFillPercent(float amt) {
+		fillBar.setValue(amt);
 	}
 }

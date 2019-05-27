@@ -4,16 +4,12 @@ import java.util.EnumMap;
 import java.util.HashMap;
 
 import miniventure.game.GameCore;
-import miniventure.game.GameProtocol.InteractRequest;
-import miniventure.game.GameProtocol.MovementRequest;
-import miniventure.game.GameProtocol.PositionUpdate;
-import miniventure.game.GameProtocol.SelfHurt;
-import miniventure.game.GameProtocol.SpawnData;
-import miniventure.game.GameProtocol.StatUpdate;
+import miniventure.game.GameProtocol.*;
 import miniventure.game.client.ClientCore;
-import miniventure.game.item.ClientHands;
+import miniventure.game.item.ClientInventory;
 import miniventure.game.item.CraftingScreen;
 import miniventure.game.item.InventoryScreen;
+import miniventure.game.item.Item;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.WorldObject;
@@ -34,7 +30,11 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
+import com.esotericsoftware.kryonet.Connection;
+
 import org.jetbrains.annotations.NotNull;
+
+import static miniventure.game.GameProtocol.forPacket;
 
 public class ClientPlayer extends ClientEntity implements Player {
 	
@@ -69,7 +69,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 	
 	@NotNull private final EnumMap<Stat, Integer> stats = new EnumMap<>(Stat.class);
 	
-	private ClientHands hands;
+	private ClientInventory inventory;
 	
 	private float moveSpeed = Player.MOVE_SPEED;
 	@NotNull private Direction dir;
@@ -77,14 +77,15 @@ public class ClientPlayer extends ClientEntity implements Player {
 	private MobAnimationController animator;
 	private KnockbackController knockbackController;
 	
-	public ClientPlayer(SpawnData data) {
+	public ClientPlayer(SpawnData data, InventoryScreen invScreen) {
 		super(data.playerData);
 		
 		dir = Direction.DOWN;
 		
-		hands = new ClientHands();
+		inventory = new ClientInventory(INV_SIZE);
 		
-		hands.updateItems(data.hotbar.itemStacks, data.hotbar.fillPercent);
+		inventory.updateItems(data.inv.itemStacks);
+		invScreen.setInventory(inventory);
 		
 		Stat.load(data.stats, this.stats);
 		
@@ -115,7 +116,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 	}
 	
 	@Override @NotNull public Direction getDirection() { return dir; }
-	public ClientHands getHands() { return hands; }
+	public ClientInventory getInventory() { return inventory; }
 	
 	@Override
 	public boolean isKnockedBack() { return knockbackController.hasKnockback(); }
@@ -183,9 +184,9 @@ public class ClientPlayer extends ClientEntity implements Player {
 		
 		if(!isKnockedBack() && !ClientCore.hasMenu()) {
 			if(ClientCore.input.pressingKey(Input.Keys.C))
-				ClientCore.getClient().send(new InteractRequest(true, new PositionUpdate(this), getDirection(), hands.getSelection()));
+				ClientCore.getClient().send(new InteractRequest(true, new PositionUpdate(this), getDirection(), inventory.getSelection()));
 			else if(ClientCore.input.pressingKey(Input.Keys.V))
-				ClientCore.getClient().send(new InteractRequest(false, new PositionUpdate(this), getDirection(), hands.getSelection()));
+				ClientCore.getClient().send(new InteractRequest(false, new PositionUpdate(this), getDirection(), inventory.getSelection()));
 		}
 		//if(Gdx.input.isKeyPressed(Input.Keys.C) || Gdx.input.isKeyPressed(Input.Keys.V))
 		//	animator.requestState(AnimationState.ATTACK);
@@ -196,15 +197,15 @@ public class ClientPlayer extends ClientEntity implements Player {
 		
 		for(int i = 0; i < Player.HOTBAR_SIZE; i++)
 			if(Gdx.input.isKeyJustPressed(Keys.NUM_1+i))
-				hands.setSelection(i);
+				inventory.setSelection(i);
 		
 		if(!ClientCore.hasMenu()) {
-			if(ClientCore.input.pressingKey(Keys.E)) {
-				ClientCore.setScreen(new InventoryScreen(hands));
-			} else if(ClientCore.input.pressingKey(Keys.Z))
+			/*if(ClientCore.input.pressingKey(Keys.E)) {
+				ClientCore.setScreen(new InventoryScreen(inventory));
+			} else */if(ClientCore.input.pressingKey(Keys.Z))
 				ClientCore.setScreen(new CraftingScreen());
 			else if(ClientCore.input.pressingKey(Keys.Q)) {
-				hands.dropInvItems(Gdx.input.isKeyPressed(Keys.SHIFT_LEFT));
+				inventory.dropInvItems(Gdx.input.isKeyPressed(Keys.SHIFT_LEFT));
 			}
 		}
 		
@@ -228,6 +229,26 @@ public class ClientPlayer extends ClientEntity implements Player {
 	public void hurt(WorldObject source, float power) {
 		super.hurt(source, power);
 		knockbackController.knock(source, KNOCKBACK_SPEED, Mob.getKnockbackDuration(power));
+	}
+	
+	@Override
+	public void handlePlayerPackets(@NotNull Object object, @NotNull Connection connection) {
+		
+		forPacket(object, InventoryUpdate.class, newInv -> {
+			inventory.updateItems(newInv.itemStacks);
+		});
+		
+		forPacket(object, InventoryAddition.class, addition -> {
+			inventory.addItem(Item.deserialize(addition.newItem));
+		});
+		
+		forPacket(object, PositionUpdate.class, newPos -> {
+			moveTo(newPos.x, newPos.y, newPos.z);
+		});
+		
+		forPacket(object, StatUpdate.class, update -> {
+			changeStat(update.stat, update.amount);
+		});
 	}
 	
 	private static final float padding = 3;

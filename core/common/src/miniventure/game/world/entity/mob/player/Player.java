@@ -7,6 +7,8 @@ import miniventure.game.world.entity.mob.Mob;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
+import com.esotericsoftware.kryonet.Connection;
+
 import org.jetbrains.annotations.NotNull;
 
 public interface Player extends Mob {
@@ -71,4 +73,6 @@ public interface Player extends Mob {
 		bounds.y += dir.y*bounds.height*.75f;
 		return bounds;
 	}
+	
+	void handlePlayerPackets(@NotNull Object packet, @NotNull Connection connection);
 }

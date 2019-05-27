@@ -14,6 +14,9 @@ public class ItemStack {
 		this.count = count;
 	}
 	
+	@NotNull
+	public Item getItem() { return item; }
+	
 	public String[] serialize() { return serialize(item, count); }
 	
 	public static String[] serialize(@NotNull Item item, int count) {

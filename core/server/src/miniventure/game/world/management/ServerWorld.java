@@ -458,27 +458,6 @@ public class ServerWorld extends WorldManager {
 	public void respawnPlayer(ServerPlayer player) {
 		player.reset();
 		
-		if(GameCore.debug/* && !knownPlayers.containsKey(player.getName())*/) {
-			System.out.println("adding debug items to player inventory");
-			// player.getInventory().addItem(new ToolItem(ToolType.Shovel, Material.Ruby));
-			// player.getInventory().addItem(new ToolItem(ToolType.Shovel, Material.Ruby));
-			player.getInventory().addItem(new ToolItem(ToolType.Shovel, Material.Ruby));
-			// player.getInventory().addItem(new ToolItem(ToolType.Pickaxe, Material.Iron));
-			player.getInventory().addItem(new ToolItem(ToolType.Pickaxe, Material.Ruby));
-			player.getInventory().addItem(ServerTileType.getItem(TileTypeEnum.CLOSED_DOOR));
-			for(int i = 0; i < 7; i++)
-				player.getInventory().addItem(ServerTileType.getItem(TileTypeEnum.TORCH));
-			for(int i = 0; i < 7; i++)
-				player.getInventory().addItem(ResourceType.Log.get());
-			// player.getInventory().addItem(ResourceType.Tungsten.get());
-			// player.getInventory().addItem(ResourceType.Flint.get());
-			// player.getInventory().addItem(ResourceType.Fabric.get());
-			// player.getInventory().addItem(ResourceType.Cotton.get());
-			// for(FoodType food : FoodType.values())
-			for(int i = 0; i < 7; i++)
-				player.getInventory().addItem(FoodType.Cooked_Meat.get());
-		}
-		
 		loadLevel(player.getSpawnLevel(), player, player.respawnPositioning());
 	}
 	
