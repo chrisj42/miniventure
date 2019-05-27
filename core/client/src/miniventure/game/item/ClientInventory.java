@@ -37,6 +37,32 @@ public class ClientInventory extends Inventory<Item, ItemStack> {
 	
 	public ItemStack getSelectedItem() { return getItemStack(getSelection()); }
 	
+	private void checkSelection() {
+		int size = getSlotsTaken();
+		if(selection >= size)
+			selection = Math.max(0, size - 1);
+	}
+	
+	@Override
+	public synchronized boolean removeItem(Item item) {
+		boolean res = super.removeItem(item);
+		if(res) checkSelection();
+		return res;
+	}
+	
+	@Override
+	public synchronized int removeItemStack(Item item) {
+		int res = super.removeItemStack(item);
+		if(res > 0) checkSelection();
+		return res;
+	}
+	
+	@Override
+	public synchronized void updateItems(String[][] data) {
+		super.updateItems(data);
+		checkSelection();
+	}
+	
 	// public float getFillPercent() { return fillPercent; }
 	
 	// the data isn't null, but may contain null arrays.

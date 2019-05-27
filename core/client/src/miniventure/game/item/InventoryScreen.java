@@ -22,9 +22,9 @@ import org.jetbrains.annotations.Nullable;
 
 public class InventoryScreen extends MenuScreen {
 	
-	static final Color slotBackground = Color.TEAL.cpy().lerp(Color.WHITE, .1f);
-	static final Color tableBackground = Color.TEAL;
-	private static final Color highlightBackground = Color.TEAL.cpy().lerp(Color.YELLOW, .25f);
+	// static final Color slotBackground = Color.TEAL.cpy().lerp(Color.WHITE, .1f);
+	// static final Color tableBackground = Color.TEAL;
+	// private static final Color highlightBackground = Color.TEAL.cpy().lerp(Color.YELLOW, .25f);
 	
 	private static final int MAX_ITEMS_PER_ROW = 8;
 	
@@ -47,7 +47,7 @@ public class InventoryScreen extends MenuScreen {
 	// private final HashMap<Integer, SlotData> slotsById = new HashMap<>();
 	// private int[] hotbar = null; // holds slot IDs
 	
-	private VerticalGroup mainGroup;
+	private Table mainGroup;
 	
 	// private int spaceUsed = 0;
 	private ProgressBar fillBar;
@@ -55,16 +55,26 @@ public class InventoryScreen extends MenuScreen {
 	// private ScrollPane scrollPane;
 	private Table slotTable;
 	
-	// private int selection;
+	private float lastAmt;
 	
 	public InventoryScreen(Camera camera, Batch batch) {
 		super(false, new DiscreteViewport(camera), batch);
 		// this.inventory = inv;
 		// setDebugAll(true);
-		mainGroup = useVGroup(2f, Align.left, false);
+		mainGroup = useTable(Align.left, false);
+		mainGroup.defaults().padBottom(2f);
 		addMainGroup(mainGroup, RelPos.BOTTOM_LEFT);
 		
-		fillBar = new ProgressBar(0, 1, .01f, false, VisUI.getSkin());
+		fillBar = new ProgressBar(0, 1, .01f, false, VisUI.getSkin()) {
+			@Override
+			public void draw(Batch batch, float parentAlpha) {
+				float amt = inventory == null ? 0 : inventory.getPercentFilled();
+				if(amt != lastAmt)
+					setValue(amt);
+				lastAmt = amt;
+				super.draw(batch, parentAlpha);
+			}
+		};
 		
 		slotTable = new Table(VisUI.getSkin())/* {
 			@Override
@@ -127,8 +137,10 @@ public class InventoryScreen extends MenuScreen {
 		scrollPane.setFadeScrollBars(false);
 		scrollPane.setScrollbarsOnTop(false);*/
 		
-		//mainGroup.addActor(fillBar);
-		mainGroup.addActor(slotTable);
+		mainGroup.add(slotTable).colspan(2).row();
+		
+		mainGroup.add(makeLabel("Inventory Space:"));
+		mainGroup.add(fillBar).align(Align.left);
 		// mainGroup.addActor(scrollPane);
 		
 		/*mainGroup.setVisible(false);
