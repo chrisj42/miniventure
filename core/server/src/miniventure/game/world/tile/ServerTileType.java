@@ -119,6 +119,7 @@ public class ServerTileType extends TileType {
 		GRASS(type -> new ServerTileType(type,
 			new DestructionManager.DestructibleBuilder(type, 1, false)
 				.require(new RequiredTool(ToolType.Shovel))
+				.drops(new ItemDrop(getItem(TileTypeEnum.DIRT)))
 				.make(),
 			
 			P.UPDATE.as(type1 ->
