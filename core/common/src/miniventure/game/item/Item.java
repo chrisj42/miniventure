@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class Item {
 	
-	public static final int ICON_SIZE = 32;
+	public static final int ICON_SIZE = 16;
 	
 	// TO-DO allow items to be animated
 	

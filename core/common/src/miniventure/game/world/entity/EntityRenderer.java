@@ -11,6 +11,7 @@ import miniventure.game.item.Item;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.blinker.Blinker;
+import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -63,7 +64,10 @@ public abstract class EntityRenderer {
 		public String getName() { return spriteName; }
 		
 		@Override
-		public void render(float x, float y, Batch batch, float drawableHeight) { batch.draw(sprite.texture.split(sprite.width, (int)(sprite.height*drawableHeight))[0][0], x, y); }
+		public void render(float x, float y, Batch batch, float drawableHeight) {
+			Vector2 size = getSize();
+			batch.draw(sprite.texture.split(sprite.width, (int)(sprite.height*drawableHeight))[0][0], x, y, size.x, size.y);
+		}
 		
 		@Override
 		public Vector2 getSize() { return new Vector2(sprite.width, sprite.height); }
@@ -88,6 +92,12 @@ public abstract class EntityRenderer {
 		
 		protected ItemSpriteRenderer(String[] data) {
 			this(Item.deserialize(data));
+		}
+		
+		@Override
+		public Vector2 getSize() {
+			int side = Item.ICON_SIZE * Tile.SCALE;
+			return new Vector2(side, side);
 		}
 		
 		@Override

@@ -20,9 +20,9 @@ public class ItemSlot extends Widget {
 	
 	private static final Color selectionColor = new Color(.8f, .8f, .8f, 0.5f);
 	
-	private static final float SPACING = 10, XPADDING = 3, YPADDING = 2;
-	static final float HEIGHT = Item.ICON_SIZE+2+YPADDING*2;
-	private static final float USABILITY_BAR_HEIGHT = Item.ICON_SIZE/8f; // 4 pixels?
+	private static final float SPACING = 10, XPADDING = 15, YPADDING = 8;
+	private static final float ICON_WIDTH = Item.ICON_SIZE * ItemIcon.UI_SCALE + XPADDING*2;
+	static final float HEIGHT = Item.ICON_SIZE * ItemIcon.UI_SCALE + YPADDING*2;
 	
 	private final boolean showName;
 	@Nullable private Item item;
@@ -48,7 +48,7 @@ public class ItemSlot extends Widget {
 		setBackground(background);
 		setHeight(HEIGHT);
 		if(!showName) {
-			prefWidth = Item.ICON_SIZE + 2 + XPADDING * 2;
+			prefWidth = ICON_WIDTH;
 			setWidth(prefWidth);
 		}
 		setCount(count);
@@ -62,11 +62,12 @@ public class ItemSlot extends Widget {
 	public ItemSlot setItem(@Nullable Item item) {
 		if(Objects.equals(this.item, item)) return this; // no action is needed.
 		this.item = item;
-		if(!showName) return this; // the layout is always the same.
+		if(item == null || !showName)
+			prefWidth = ICON_WIDTH;
+		else
+			prefWidth = ICON_WIDTH + SPACING + ClientCore.getTextLayout(ClientCore.getFont(FontStyle.KeepSize), item.getName()).width;
 		
-		if(item == null) prefWidth = Item.ICON_SIZE * 2;
-		else prefWidth = Item.ICON_SIZE + 2 + SPACING + ClientCore.getTextLayout(ClientCore.getFont(FontStyle.KeepSize), item.getName()).width;
-		prefWidth += XPADDING * 2;
+		setWidth(prefWidth);
 		return this;
 	}
 	
@@ -102,13 +103,12 @@ public class ItemSlot extends Widget {
 			// draw icon
 			Color prev = batch.getColor();
 			batch.setColor(Color.BLACK);
-			int xoff = (Item.ICON_SIZE - item.getTexture().width) / 2;
-			int yoff = (Item.ICON_SIZE - item.getTexture().height) / 2;
-			batch.draw(item.getTexture().texture, getX()+XPADDING+xoff, getY()+YPADDING+yoff);
+			float size = Item.ICON_SIZE * ItemIcon.UI_SCALE;
+			batch.draw(item.getTexture().texture, getX()-1+XPADDING, getY()-1+YPADDING*2, size, size);
 			batch.setColor(prev);
-			batch.draw(item.getTexture().texture, getX()+2+XPADDING+xoff, getY()+2+YPADDING+yoff);
+			batch.draw(item.getTexture().texture, getX()+1+XPADDING, getY()+1+YPADDING*2, size, size);
 			
-			renderUsability(batch, getX()+2+XPADDING, getY()+2+YPADDING, item.getUsabilityStatus());
+			ItemIcon.renderUsability(batch, getX()+2+XPADDING, getY()+2+YPADDING, item.getUsabilityStatus());
 			
 			if(showName || showCount()) {
 				BitmapFont font = ClientCore.getFont(FontStyle.KeepSize);
@@ -117,11 +117,11 @@ public class ItemSlot extends Widget {
 				if(showName) {
 					float yo = font.getDescent();
 					yo = yo + (getHeight() - font.getDescent() + font.getCapHeight() + font.getAscent()) / 2;
-					font.draw(batch, item.getName().replace("_", " "), getX() + Item.ICON_SIZE + 2 + SPACING + XPADDING, getY() + yo + YPADDING);
+					font.draw(batch, item.getName().replace("_", " "), getX() + Item.ICON_SIZE * ItemIcon.UI_SCALE + 2 + SPACING + XPADDING, getY() + yo + YPADDING);
 				}
 				
 				if(showCount()) {
-					font.draw(batch, String.valueOf(getCount()), getX() + 2, getY() + 2 + font.getLineHeight());
+					font.draw(batch, String.valueOf(getCount()), getX() + XPADDING, getY() + YPADDING + font.getLineHeight());
 				}
 			}
 		}
@@ -130,13 +130,5 @@ public class ItemSlot extends Widget {
 		
 		if(selected)
 			MyUtils.fillRect(getX(), getY(), getWidth(), getHeight(), selectionColor, parentAlpha, batch);
-	}
-	
-	private static void renderUsability(Batch batch, float x, float y, float usability) {
-		if(usability <= 0 || usability >= 1) return;
-		// draw a colored bar for the durability left
-		float width = Item.ICON_SIZE * usability;
-		Color barColor = usability >= 0.5f ? Color.GREEN : usability >= 0.2f ? Color.YELLOW : Color.RED;
-		MyUtils.fillRect(x, y, width, USABILITY_BAR_HEIGHT, barColor, batch);
 	}
 }

@@ -26,7 +26,7 @@ public class InventoryScreen extends MenuScreen {
 	// static final Color tableBackground = Color.TEAL;
 	// private static final Color highlightBackground = Color.TEAL.cpy().lerp(Color.YELLOW, .25f);
 	
-	private static final int MAX_ITEMS_PER_ROW = 8;
+	private static final int MAX_ITEMS_PER_ROW = 9;
 	
 	/*
 		general system:
@@ -93,7 +93,7 @@ public class InventoryScreen extends MenuScreen {
 					super.drawChildren(batch, parentAlpha);
 			}
 		}*/;
-		slotTable.defaults().fillX().minSize(Item.ICON_SIZE * 1.5f, ItemSlot.HEIGHT * 1.5f);
+		slotTable.defaults().fillX().minSize(Item.ICON_SIZE * ItemIcon.UI_SCALE, ItemSlot.HEIGHT * ItemIcon.UI_SCALE);
 		// slotTable.pad(10f);
 		// slotTable.background(new ColorBackground(slotTable, tableBackground));
 		// slotTable.add(makeLabel("Waiting for inventory data...", FontStyle.KeepSize, false));
@@ -139,8 +139,9 @@ public class InventoryScreen extends MenuScreen {
 		scrollPane.setFadeScrollBars(false);
 		scrollPane.setScrollbarsOnTop(false);*/
 		
-		mainGroup.add(slotTable).colspan(2).row();
+		mainGroup.add(slotTable).colspan(2);
 		
+		mainGroup.row().padBottom(5f);
 		mainGroup.add(makeLabel("Inventory Space:"));
 		mainGroup.add(fillBar).align(Align.left);
 		// mainGroup.addActor(scrollPane);
