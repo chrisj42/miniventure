@@ -1,5 +1,9 @@
 package miniventure.game.item;
 
+import java.util.Objects;
+
+import miniventure.game.client.ClientCore;
+import miniventure.game.client.FontStyle;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.util.DiscreteViewport;
 import miniventure.game.util.RelPos;
@@ -12,11 +16,15 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.ui.Container;
+import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
+import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.utils.Align;
 import com.kotcrab.vis.ui.VisUI;
+import com.kotcrab.vis.ui.widget.VisLabel;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -56,11 +64,10 @@ public class InventoryScreen extends MenuScreen {
 	private Table slotTable;
 	
 	private float lastAmt;
+	private String lastItem;
 	
 	public InventoryScreen(Camera camera, Batch batch) {
 		super(false, new DiscreteViewport(camera), batch);
-		// this.inventory = inv;
-		// setDebugAll(true);
 		mainGroup = useTable(Align.left, false);
 		mainGroup.defaults().padBottom(2f);
 		addMainGroup(mainGroup, RelPos.BOTTOM_LEFT);
@@ -76,29 +83,8 @@ public class InventoryScreen extends MenuScreen {
 			}
 		};
 		
-		slotTable = new Table(VisUI.getSkin())/* {
-			@Override
-			protected void drawChildren(Batch batch, float parentAlpha) {
-				boolean done = false;
-				synchronized (InventoryScreen.this) {
-					if(slots != null) {
-						done = true;
-						if(slots.size() > 0)
-							slots.get(selection).slot.setSelected(true);
-						super.drawChildren(batch, parentAlpha);
-						if(slots.size() > 0) slots.get(selection).slot.setSelected(false);
-					}
-				}
-				if(!done)
-					super.drawChildren(batch, parentAlpha);
-			}
-		}*/;
+		slotTable = new Table(VisUI.getSkin());
 		slotTable.defaults().fillX().minSize(Item.ICON_SIZE * ItemIcon.UI_SCALE, ItemSlot.HEIGHT * ItemIcon.UI_SCALE);
-		// slotTable.pad(10f);
-		// slotTable.background(new ColorBackground(slotTable, tableBackground));
-		// slotTable.add(makeLabel("Waiting for inventory data...", FontStyle.KeepSize, false));
-		
-		// int slotsLeft = Player.INV_SIZE;
 		
 		slotTable.addListener(new InputListener() {
 			@Override
@@ -127,29 +113,35 @@ public class InventoryScreen extends MenuScreen {
 			}
 		});
 		
-		/*scrollPane = new ScrollPane(slotTable, VisUI.getSkin()) {
+		
+		mainGroup.add(slotTable).row();
+		
+		HorizontalGroup infoBar = new HorizontalGroup();
+		
+		infoBar.addActor(makeLabel("Inventory Space:   ", false));
+		infoBar.addActor(fillBar);
+		
+		VisLabel handItemLabel = new VisLabel("Held Item", new LabelStyle(ClientCore.getFont(FontStyle.Default), null)) {
 			@Override
-			public float getPrefHeight() {
-				return InventoryScreen.this.getHeight()*2/3;
+			public void draw(Batch batch, float parentAlpha) {
+				ItemStack stack = inventory == null ? null : inventory.getSelectedItem();
+				Item item = stack == null ? null : stack.item;
+				String name = item == null ? null : item.getName();
+				if(!Objects.equals(name, lastItem)) {
+					setText("Held Item: " + (name == null ? "Hand" : name));
+					lastItem = name;
+				}
+				super.draw(batch, parentAlpha);
 			}
 		};
+		handItemLabel.setAlignment(Align.left, Align.left);
+		registerLabel(FontStyle.Default, handItemLabel);
 		
-		// scrollPane.setHeight(getHeight()*2/3);
-		scrollPane.setScrollingDisabled(true, false);
-		scrollPane.setFadeScrollBars(false);
-		scrollPane.setScrollbarsOnTop(false);*/
+		Container<VisLabel> box = new Container<>(handItemLabel);
+		box.padLeft(20f);
+		infoBar.addActor(box);
 		
-		mainGroup.add(slotTable).colspan(2);
-		
-		mainGroup.row().padBottom(5f);
-		mainGroup.add(makeLabel("Inventory Space:"));
-		mainGroup.add(fillBar).align(Align.left);
-		// mainGroup.addActor(scrollPane);
-		
-		/*mainGroup.setVisible(false);
-		Timer t = new Timer(200, e -> mainGroup.setVisible(true));
-		t.setRepeats(false);
-		t.start();*/
+		mainGroup.add(infoBar).pad(5f).align(Align.left);
 		
 		setKeyboardFocus(slotTable);
 		setScrollFocus(slotTable);
