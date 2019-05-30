@@ -14,7 +14,7 @@ As of now, miniventure is still in alpha stage and probably lacks in actual game
   - inventory/hotbar management
   - chat system with commands
 
-Plans do exist for a simple storyline and perhaps a few more goals; this will be implemented soon. Along with a save system.
+Plans do exist for a simple storyline and perhaps a few more goals; this will be implemented soon.
 
 If you want to know what some of the other possible goals are in terms of development, check out the files in 
 [notes/next-projects](https://github.com/chrisj42/miniventure/tree/master/notes/next-projects). Or any of the files in 
@@ -23,4 +23,4 @@ If you want to know what some of the other possible goals are in terms of develo
 
 Note: for those goals about adding stuff, it's sort of dependent on whether I have any art to depict said stuff... and I suck at art. :P So, if anyone out there is interested in making some sprites for the game, it would be greatly apprecieated. :D
 
-You can find me on the [playminicraft discord server](https://discord.me/minicraft) pretty much daily, as Chris J. There's some other mods of minicraft there too, and a couple other active modders; or you can take a look at the official [playminicraft website](https://playminicraft.com).
+You can find me on the [playminicraft discord server](https://discord.me/minicraft) pretty much daily, as Chris J. There's some other mods of minicraft there too, and a couple other active modders; you can also take a look at the official [playminicraft website](https://playminicraft.com).
