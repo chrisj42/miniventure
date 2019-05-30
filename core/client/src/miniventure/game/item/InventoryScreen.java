@@ -30,37 +30,14 @@ import org.jetbrains.annotations.Nullable;
 
 public class InventoryScreen extends MenuScreen {
 	
-	// static final Color slotBackground = Color.TEAL.cpy().lerp(Color.WHITE, .1f);
-	// static final Color tableBackground = Color.TEAL;
-	// private static final Color highlightBackground = Color.TEAL.cpy().lerp(Color.YELLOW, .25f);
-	
 	private static final int MAX_ITEMS_PER_ROW = 9;
-	
-	/*
-		general system:
-		
-		- client normally has no reference to inventory at all, only hotbar
-			- server sends hotbar updates as necessary
-		- when inventory screen opened, client requests inventory data
-			- server sends back InventoryUpdate with inventory data and hotbar indices
-		
-	 */
-	
-	// private boolean requested = false;
-	// private boolean fin = false;
 	
 	private ClientInventory inventory;
 	
-	// private SlotData[] slots = null;
-	// private final HashMap<Integer, SlotData> slotsById = new HashMap<>();
-	// private int[] hotbar = null; // holds slot IDs
-	
 	private Table mainGroup;
 	
-	// private int spaceUsed = 0;
 	private ProgressBar fillBar;
 	
-	// private ScrollPane scrollPane;
 	private Table slotTable;
 	
 	private float lastAmt;
@@ -116,11 +93,14 @@ public class InventoryScreen extends MenuScreen {
 		
 		mainGroup.add(slotTable).row();
 		
+		// create the bar at the bottom with the space and held item info
+		
 		HorizontalGroup infoBar = new HorizontalGroup();
 		
 		infoBar.addActor(makeLabel("Inventory Space:   ", false));
 		infoBar.addActor(fillBar);
 		
+		// create the label such that it refreshes automatically when the selected item changes
 		VisLabel handItemLabel = new VisLabel("Held Item", new LabelStyle(ClientCore.getFont(FontStyle.Default), null)) {
 			@Override
 			public void draw(Batch batch, float parentAlpha) {
@@ -134,19 +114,23 @@ public class InventoryScreen extends MenuScreen {
 				super.draw(batch, parentAlpha);
 			}
 		};
+		// reapply some default behavior from makeLabel
 		handItemLabel.setAlignment(Align.left, Align.left);
 		registerLabel(FontStyle.Default, handItemLabel);
 		
+		// add some left padding to space it from the fill bar
 		Container<VisLabel> box = new Container<>(handItemLabel);
 		box.padLeft(20f);
 		infoBar.addActor(box);
 		
-		mainGroup.add(infoBar).pad(5f).align(Align.left);
+		mainGroup.add(infoBar).pad(5f).align(Align.left); // add the group to the table with some layout settings
 		
+		// set focus to the table so that scrolling and pressing the number keys actually has an effect
 		setKeyboardFocus(slotTable);
 		setScrollFocus(slotTable);
 	}
 	
+	// called on creation of a ClientPlayer, since this screen is created with the GameScreen, before the player exists.
 	public void setInventory(ClientInventory inv) {
 		inventory = inv;
 		slotTable.clearChildren();
@@ -200,9 +184,5 @@ public class InventoryScreen extends MenuScreen {
 			
 			slotTable.row();
 		}
-	}
-	
-	void setFillPercent(float amt) {
-		fillBar.setValue(amt);
 	}
 }
