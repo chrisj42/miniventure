@@ -24,6 +24,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.kotcrab.vis.ui.widget.LinkLabel.LinkLabelStyle;
 import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 
@@ -187,7 +188,7 @@ public class MainMenu extends BackgroundProvider {
 				MyLinkLabel linkLabel = new MyLinkLabel(latestVersion.releaseName + " Now Available! Click here to download.", latestVersion.assetUrl);
 				deregisterLabels(label);
 				table.getCell(label).setActor(linkLabel);
-				registerLabel(FontStyle.OnlyResize, linkLabel);
+				registerLabel(FontStyle.Default, linkLabel);
 			} else if(latestVersion.releaseName.length() > 0)
 				label.setText("You have the latest version.");
 			else

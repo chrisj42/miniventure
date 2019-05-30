@@ -137,7 +137,14 @@ public class MenuScreen extends Stage {
 		return label;
 	}
 	
-	protected void registerLabel(FontStyle style, Label label) { labels.put(label, style); }
+	protected void registerLabel(FontStyle style, Label label) {
+		labels.put(label, style);
+		Gdx.app.postRunnable(() -> {
+			// refresh the style font
+			label.getStyle().font = ClientCore.getFont(style);
+			label.setStyle(label.getStyle());
+		});
+	}
 	protected void deregisterLabels(Label... labels) {
 		for(Label label: labels)
 			this.labels.remove(label);

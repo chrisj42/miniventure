@@ -24,7 +24,7 @@
 		small: { font: small-font, fontColor: white }
 	},
 	com.kotcrab.vis.ui.widget.LinkLabel$LinkLabelStyle: {
-		default: { fontColor: link-label, underline: link-label }
+		default: { font: default, fontColor: link-label, underline: link-label }
 	},
 	com.badlogic.gdx.scenes.scene2d.ui.Button$ButtonStyle: {
 		default: { down: button-down, up: button, over: button-over }
