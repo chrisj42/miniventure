@@ -40,7 +40,7 @@ public class WorldSelectScreen extends BackgroundInheritor {
 		table.defaults().padBottom(10);
 		
 		ScrollPane scroll = new ScrollPane(worldList);
-		table.add(scroll).grow().row();
+		table.add(scroll).grow().maxHeight(getViewport().getWorldHeight()/2).row();
 		
 		VisLabel error = makeLabel("");
 		table.add(error).row();

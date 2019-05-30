@@ -210,7 +210,18 @@ public class MenuScreen extends Stage {
 	protected Table useTable(int alignment) { return useTable(alignment, true); }
 	protected Table useTable(boolean addMainCenter) { return useTable(Align.center, addMainCenter); }
 	protected Table useTable(int alignment, boolean addMainCenter) {
-		Table table = new Table();
+		Table table = new Table() {
+			// I'm not sure if this actually does anything...
+			@Override
+			public float getMaxWidth() {
+				return MenuScreen.this.getWidth();
+			}
+			
+			@Override
+			public float getMaxHeight() {
+				return MenuScreen.this.getHeight();
+			}
+		};
 		if(addMainCenter)
 			setCenterGroup(table);
 		table.align(alignment);
