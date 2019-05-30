@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Random;
@@ -63,6 +64,15 @@ public class WorldFileInterface {
 		readFile(worldFolder.resolve(VERSION_FILE), lines);
 		
 		return new Version(lines.pop());
+	}
+	
+	static long getTimestamp(Path worldFolder) throws IOException {
+		Path gameFile = worldFolder.resolve(GAME_FILE);
+		if(!Files.exists(gameFile))
+			return -1;
+		
+		FileTime time = Files.getLastModifiedTime(gameFile);
+		return time.toMillis();
 	}
 	
 	@Nullable

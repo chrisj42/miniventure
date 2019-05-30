@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
@@ -19,6 +20,7 @@ public class WorldReference {
 	public final Version version; // todo when reading this in world select screen, check if it is a dev build, and display a compatibility warning if so.
 	public final Path folder;
 	public final String worldName;
+	public final long timestamp;
 	
 	// public final boolean valid;
 	public final String[] dataErrors;
@@ -30,6 +32,7 @@ public class WorldReference {
 		this.folder = folder;
 		worldName = folder.getFileName().toString();
 		version = WorldFileInterface.getWorldVersion(folder);
+		timestamp = WorldFileInterface.getTimestamp(folder);
 		
 		Set<Path> children = Files.list(folder).collect(Collectors.toCollection(HashSet::new));
 		
@@ -45,18 +48,6 @@ public class WorldReference {
 		int i = 0;
 		for(String file: missingFiles)
 			dataErrors[i++] = "Missing file '"+file+"'!";
-		
-		/*try {
-			version = WorldFileInterface.getWorldVersion(folder);
-			if(version == null)
-				throw new FileNotFoundException("version.txt");
-			
-			testFor(folder, "game.txt");
-			testFor(folder, "players.txt");
-			testFor(folder, "island-0.txt");
-		} catch(FileNotFoundException e) {
-			throw new IllegalArgumentException("Path " + folder + " is not a valid world save.", e);
-		}*/
 	}
 	
 	public boolean isValid() {
@@ -96,6 +87,8 @@ public class WorldReference {
 			e.printStackTrace();
 		}
 		
+		// sort the worlds from newest to oldest before returning
+		worlds.sort(Comparator.comparing(ref -> ref.timestamp, (t1, t2) -> Long.compare(t2, t1)));
 		return worlds;
 	}
 }
