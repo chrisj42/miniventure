@@ -230,7 +230,7 @@ public class ServerTileType extends TileType {
 			P.TRANS.as(type1 -> new TransitionManager(type1)
 				.addEntrance("enter", 12)
 			)
-		), type -> new TileItem("torch", GameCore.tileAtlas.getRegion("torch/c00"), type, PlacementCheck.GROUND)),
+		), type -> new TileItem("Torch", GameCore.tileAtlas.getRegion("torch/c00"), type, PlacementCheck.GROUND)),
 		
 		CACTUS(type -> new ServerTileType(type,
 			new DestructionManager(type, 12, null,
