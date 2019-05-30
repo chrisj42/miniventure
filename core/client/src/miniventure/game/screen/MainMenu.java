@@ -184,12 +184,16 @@ public class MainMenu extends BackgroundProvider {
 		else {
 			// add a message saying you have the latest version, or a hyperlink message to the newest jar file.
 			VersionInfo latestVersion = GameCore.getLatestVersion();
-			if(latestVersion.version.compareTo(GameCore.VERSION) > 0) { // link new version
+			int comp = latestVersion.version.compareTo(GameCore.VERSION);
+			if(comp > 0) { // link new version
 				MyLinkLabel linkLabel = new MyLinkLabel(latestVersion.releaseName + " Now Available! Click here to download.", latestVersion.assetUrl);
 				deregisterLabels(label);
 				table.getCell(label).setActor(linkLabel);
 				registerLabel(FontStyle.Default, linkLabel);
-			} else if(latestVersion.releaseName.length() > 0)
+			}
+			else if(comp < 0)
+				label.setText("You are using an unreleased version.");
+			else if(latestVersion.releaseName.length() > 0)
 				label.setText("You have the latest version.");
 			else
 				label.setText("Connection failed, could not check for updates.");

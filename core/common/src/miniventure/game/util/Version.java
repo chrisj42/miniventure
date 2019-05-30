@@ -25,7 +25,7 @@ public class Version implements Comparable<Version> {
 			if(nums.length > 2)
 				minor = new Integer(nums[2]);
 			else
-				minor = -1;
+				minor = -1; // this is only supported for legacy purposes
 			
 			if(make < 0 || major < 0 || (nums.length > 2 && minor < 0))
 				throw new VersionFormatException(version);
