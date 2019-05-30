@@ -1,3 +1,5 @@
+food particle always reflects the total amount the food item normally gives, not the amount actually given if the player was already nearly full.
+
 debug interact / bounds / the draw boxes aren't fully rendering properly.
 
 knockback ignores tile collision
