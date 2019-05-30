@@ -1,10 +1,17 @@
-Beta 1.1:
+Alpha 1.2:
+	+ Brand new inventory screen that is hopefully much more ergonomic than the previous screen (crafting screen overhaul coming soon)
+	# Fixed a number of ui and item bugs
+	* Improved input controls to allow for wasd movement and mouse interaction
+	* Made saved world list sort by modification time, so recently played worlds appear highest
+
+
+Alpha 1.1:
 	+ Brand new terrain system consisting of islands (well, only one island right now)
 	+ Save system implemented
 	
 
 
---- below: Alpha versioning ---
+--- below: Pre-Alpha versioning ---
 
 1.5 changes:
 	
