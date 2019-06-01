@@ -1,8 +1,17 @@
 package miniventure.game.world.tile;
 
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.function.MapFunction;
+import miniventure.game.util.param.FetchParam;
 
 public abstract class TileType {
+	
+	// used in subclasses to conveniently create Params for the tile types.
+	static class TParam<T> extends FetchParam<TileTypeEnum, T> {
+		TParam(MapFunction<TileTypeEnum, T> defaultValue) {
+			super(defaultValue);
+		}
+	}
 	
 	private final TileTypeEnum enumType;
 	

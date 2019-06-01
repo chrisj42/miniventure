@@ -14,6 +14,7 @@ import miniventure.game.world.entity.mob.player.Player;
 import miniventure.game.world.level.Level;
 import miniventure.game.world.level.ServerLevel;
 import miniventure.game.world.management.ServerWorld;
+import miniventure.game.world.tile.ServerTileType.P;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
@@ -77,7 +78,7 @@ public class ServerTile extends Tile {
 		dataMaps.put(newType.getTypeEnum(), newType.getInitialData());
 		
 		// check for an entrance animation
-		newType.transitionManager.tryStartAnimation(this, prevType);
+		newType.get(P.TRANS).tryStartAnimation(this, prevType);
 		// we don't use the return value because transition or not, there's nothing we need to do. :P
 		
 		getLevel().onTileUpdate(this);
@@ -88,7 +89,7 @@ public class ServerTile extends Tile {
 	boolean breakTile(boolean checkForExitAnim) {
 		if(checkForExitAnim) {
 			ServerTileType type = getType();
-			if(type.transitionManager.tryStartAnimation(this, getTypeStack().getLayerFromTop(1, true), false)) {
+			if(type.get(P.TRANS).tryStartAnimation(this, getTypeStack().getLayerFromTop(1, true), false)) {
 				// transitioning successful
 				getLevel().onTileUpdate(this);
 				return true; // don't actually break the tile yet (but line above, still signal for update)
@@ -133,7 +134,7 @@ public class ServerTile extends Tile {
 			return false; // cannot replace tile
 		}*/
 		
-		if(type.transitionManager.tryStartAnimation(this, newType, true)) {
+		if(type.get(P.TRANS).tryStartAnimation(this, newType, true)) {
 			// there is an exit animation; it needs to be played. So let that happen, the tile will be replaced later
 			getLevel().onTileUpdate(this);
 			return true; // can replace (but will do it in a second)
@@ -148,7 +149,7 @@ public class ServerTile extends Tile {
 	private void moveEntities(ServerTileType newType) {
 		// check for entities that will not be allowed on the new tile, and move them to the closest adjacent tile they are allowed on.
 		HashSet<Tile> surroundingTileSet = getAdjacentTiles(true);
-		Tile[] surroundingTiles = surroundingTileSet.toArray(new Tile[surroundingTileSet.size()]);
+		Tile[] surroundingTiles = surroundingTileSet.toArray(new Tile[0]);
 		for(Entity entity: getLevel().getOverlappingEntities(getBounds())) {
 			// for each entity, check if it can walk on the new tile type. If not, fetch the surrounding tiles, remove those the entity can't walk on, and then fetch the closest tile of the remaining ones.
 			if(newType.isWalkable()) continue; // no worries for this entity.
@@ -204,28 +205,28 @@ public class ServerTile extends Tile {
 	
 	@Override
 	public Result attackedBy(WorldObject obj, @Nullable Item item, int damage) {
-		if(getType().transitionManager.playingExitAnimation(this))
+		if(getType().get(P.TRANS).playingExitAnimation(this))
 			return Result.NONE;
 		return getType().attacked(this, obj, (ServerItem) item, damage);
 	}
 	
 	@Override
 	public Result interactWith(Player player, @Nullable Item heldItem) {
-		if(getType().transitionManager.playingExitAnimation(this))
+		if(getType().get(P.TRANS).playingExitAnimation(this))
 			return Result.NONE;
 		return getType().interact(this, player, (ServerItem) heldItem);
 	}
 	
 	@Override
 	public boolean touchedBy(Entity entity) {
-		if(getType().transitionManager.playingExitAnimation(this))
+		if(getType().get(P.TRANS).playingExitAnimation(this))
 			return false;
 		return getType().touched(this, entity, true);
 	}
 	
 	@Override
 	public void touching(Entity entity) {
-		if(getType().transitionManager.playingExitAnimation(this))
+		if(getType().get(P.TRANS).playingExitAnimation(this))
 			return;
 		getType().touched(this, entity, false);
 	}
