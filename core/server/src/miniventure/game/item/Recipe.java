@@ -1,5 +1,7 @@
 package miniventure.game.item;
 
+import miniventure.game.GameCore;
+
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +20,7 @@ public class Recipe {
 		this.costs = costs;
 	}
 	
-	@NotNull ServerItemStack getResult() { return result; }
+	@NotNull public ServerItemStack getResult() { return result; }
 	@NotNull ServerItemStack[] getCosts() { return costs; }
 	
 	public boolean canCraft(ServerInventory inv) {
@@ -37,13 +39,17 @@ public class Recipe {
 		
 		Array<ServerItem> leftover = new Array<>(ServerItem.class);
 		
-		for(ServerItemStack cost: costs)
-			for(int i = 0; i < cost.count; i++)
-				inv.removeItem(cost.item);
+		if(!GameCore.debug) {
+			for(ServerItemStack cost : costs)
+				for(int i = 0; i < cost.count; i++)
+					inv.removeItem(cost.item);
+		}
 		
-		for(int i = 0; i < result.count; i++) {
-			if(!inv.addItem(result.item))
-				leftover.add(result.item);
+		if(!(this instanceof Blueprint)) {
+			for(int i = 0; i < result.count; i++) {
+				if(!inv.addItem(result.item))
+					leftover.add(result.item);
+			}
 		}
 		
 		return leftover.shrink();

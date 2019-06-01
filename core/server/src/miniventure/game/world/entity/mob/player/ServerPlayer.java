@@ -181,7 +181,7 @@ public class ServerPlayer extends ServerMob implements Player {
 			// if(r.playerPosition.variesFrom(client))
 			// 	connection.sendTCP(new PositionUpdate(client)); // fix the player's position
 			
-			doInteract(r.dir, r.hotbarIndex, r.attack);
+			doInteract(r.dir, getHeldItem(r.hotbarIndex), r.hotbarIndex, r.attack);
 		});
 		
 		forPacket(packet, ItemDropRequest.class, true, drop -> {
@@ -205,6 +205,33 @@ public class ServerPlayer extends ServerMob implements Player {
 		
 		forPacket(packet, CraftRequest.class, true, req -> {
 			Recipe recipe = Recipes.recipes[req.recipeIndex];
+			GameCore.debug("server got craft request for "+recipe.getResult().item);
+			if(recipe instanceof Blueprint && recipe.canCraft(inventory)) {
+				GameCore.debug("triggering blueprint");
+				// trigger an interaction
+				ServerItem item = recipe.getResult().item;
+				doInteract(getDirection(), new ServerItem(item.getType(), item.getName(), item.getTexture()) {
+					@Override
+					public int getStaminaUsage() {
+						return item.getStaminaUsage();
+					}
+					
+					@Override
+					public Result interact(WorldObject obj, Player player) {
+						return item.interact(obj, player);
+					}
+					
+					@Override
+					public ServerItem getUsedItem() {
+						return this;
+					}
+					
+					@Override
+					public String[] save() {
+						return new String[0];
+					}
+				}, -1, false);
+			}
 			ServerItem[] left = recipe.tryCraft(inventory);
 			if(left != null) {
 				ServerLevel level = getLevel();
@@ -333,9 +360,8 @@ public class ServerPlayer extends ServerMob implements Player {
 	}
 	
 	// this method gets called by GameServer, so in order to ensure it doesn't mix badly with server world updates, we'll post it as a runnable to the server world update thread.
-	private void doInteract(Direction dir, int index, boolean attack) {
+	private void doInteract(Direction dir, ServerItem heldItem, int index, boolean attack) {
 		setDirection(dir);
-		ServerItem heldItem = getHeldItem(index);
 		
 		if(getStat(Stat.Stamina) < heldItem.getStaminaUsage())
 			return;
@@ -388,8 +414,9 @@ public class ServerPlayer extends ServerMob implements Player {
 	private void resetItemUsage(@NotNull ServerItem item, int index) {
 		ServerItem newItem = item.getUsedItem();
 		
-		if(!GameCore.debug)
-			changeStat(Stat.Stamina, -item.getStaminaUsage());
+		// this is already done above
+		// if(!GameCore.debug)
+		// 	changeStat(Stat.Stamina, -item.getStaminaUsage());
 		
 		// While I could consider this asking for trouble, I'm already stacking items, so any unspecified "individual" data is lost already.
 		if(item.equals(newItem)) // this is true for the hand item.

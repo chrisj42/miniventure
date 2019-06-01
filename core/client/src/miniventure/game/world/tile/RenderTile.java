@@ -49,7 +49,11 @@ public class RenderTile extends Tile {
 		if(spriteStack == null || updateSprites)
 			compileSprites();
 		
-		for(TileAnimation animation: spriteStack)
+		renderSprites(batch, spriteStack, posOffset);
+	}
+	
+	public void renderSprites(SpriteBatch batch, List<TileAnimation> animations, Vector2 posOffset) {
+		for(TileAnimation animation: animations)
 			batch.draw(animation.getKeyFrame(this).texture, (x - posOffset.x) * SIZE, (y - posOffset.y) * SIZE);
 	}
 	

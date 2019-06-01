@@ -15,6 +15,8 @@ import miniventure.game.client.FontStyle;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.util.ColorBackground;
 import miniventure.game.util.RelPos;
+import miniventure.game.world.entity.mob.player.ClientPlayer;
+import miniventure.game.world.tile.TileTypeEnum;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
@@ -31,6 +33,7 @@ import com.badlogic.gdx.utils.Align;
 import com.kotcrab.vis.ui.VisUI;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /** @noinspection SynchronizeOnThis*/
 public class CraftingScreen extends MenuScreen {
@@ -186,7 +189,7 @@ public class CraftingScreen extends MenuScreen {
 				for(int i = 0; i < costs.length; i++)
 					costs[i] = ItemStack.deserialize(serialRecipe.costs[i]);
 				
-				RecipeSlot slot = new RecipeSlot(new ClientRecipe(serialRecipe.id, result, costs));
+				RecipeSlot slot = new RecipeSlot(new ClientRecipe(serialRecipe.listid, serialRecipe.id, result, costs, serialRecipe.blueprintTarget));
 				slot.addListener(new InputListener() {
 					@Override
 					public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
@@ -296,7 +299,16 @@ public class CraftingScreen extends MenuScreen {
 	}
 	
 	private synchronized void craftSelected() {
-		ClientCore.getClient().send(new CraftRequest(recipes.get(selection).recipe.id));
+		ClientRecipe recipe = recipes.get(selection).recipe;
+		if(recipe.blueprintTarget == null)
+			ClientCore.getClient().send(new CraftRequest(recipe.listid, recipe.id));
+		else {
+			ClientPlayer player = ClientCore.getWorld().getMainPlayer();
+			if(player != null) {
+				player.getInventory().setBlueprint(recipe);
+				ClientCore.setScreen(null);
+			}
+		}
 	}
 	
 	@Override
@@ -327,21 +339,31 @@ public class CraftingScreen extends MenuScreen {
 	}
 	
 	
-	private static class ClientRecipe extends Item {
+	public static class ClientRecipe extends Item {
 		
+		private final int listid;
 		private final int id;
 		private final ItemStack result;
-		private final ItemStack[] costs;
+		final ItemStack[] costs;
+		@Nullable private final TileTypeEnum blueprintTarget;
 		private boolean canCraft;
 		
-		ClientRecipe(int id, @NotNull ItemStack result, ItemStack... costs) {
-			super(result.item.getName(), result.item.getTexture());
+		ClientRecipe(int listid, int id, @NotNull ItemStack result, ItemStack[] costs, @Nullable TileTypeEnum blueprintTarget) {
+			super((blueprintTarget==null?"":"[BLU] ")+result.item.getName(), result.item.getTexture());
+			this.listid = listid;
 			this.id = id;
 			this.result = result;
 			this.costs = costs;
+			this.blueprintTarget = blueprintTarget;
 		}
 		
-		public void updateCanCraft(HashMap<String, Integer> itemCounts) {
+		public CraftRequest getCraftRequest() {
+			return new CraftRequest(listid, id);
+		}
+		
+		@Nullable TileTypeEnum getBlueprintTarget() { return blueprintTarget; }
+		
+		void updateCanCraft(HashMap<String, Integer> itemCounts) {
 			boolean canCraft = true;
 			for(ItemStack cost: costs) {
 				if(itemCounts.getOrDefault(cost.item.getName(), 0) < cost.count) {
@@ -359,7 +381,7 @@ public class CraftingScreen extends MenuScreen {
 		private final ClientRecipe recipe;
 		
 		RecipeSlot(ClientRecipe recipe) {
-			super(true, recipe.result.item, recipe.result.count);
+			super(true, recipe, recipe.result.count);
 			this.recipe = recipe;
 		}
 		

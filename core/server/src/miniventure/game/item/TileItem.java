@@ -94,6 +94,8 @@ public class TileItem extends ServerItem {
 		return obj.interactWith(player, this);
 	}
 	
+	@NotNull TileTypeEnum getResult() { return result; }
+	
 	@Override
 	public String[] save() {
 		return saveData;

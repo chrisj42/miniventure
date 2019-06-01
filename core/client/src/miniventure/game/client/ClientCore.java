@@ -25,6 +25,7 @@ import miniventure.game.screen.util.BackgroundProvider;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.customenum.GenericEnum;
 import miniventure.game.util.function.ValueFunction;
+import miniventure.game.world.entity.mob.player.ClientPlayer;
 import miniventure.game.world.management.ClientWorld;
 import miniventure.game.world.tile.ClientTileType;
 
@@ -201,6 +202,14 @@ public class ClientCore extends ApplicationAdapter {
 				return; // ignore it.
 			
 			if(screen != null) {
+				// going to a different screen should clear the blueprint
+				ClientWorld world = getWorld();
+				if(world != null) {
+					ClientPlayer player = world.getMainPlayer();
+					if(player != null)
+						player.getInventory().removeBlueprint();
+				}
+				
 				// determine if the given screen instance is already somewhere on the "screen" hierarchy, and if so go back to that one.
 				MenuScreen check = menuScreen;
 				while(check != null && check != screen)

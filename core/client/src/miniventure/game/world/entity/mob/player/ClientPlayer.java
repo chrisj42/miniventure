@@ -1,6 +1,7 @@
 package miniventure.game.world.entity.mob.player;
 
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.HashMap;
 
 import miniventure.game.GameCore;
@@ -9,10 +10,12 @@ import miniventure.game.client.ClientCore;
 import miniventure.game.client.InputHandler;
 import miniventure.game.item.ClientInventory;
 import miniventure.game.item.CraftingScreen;
+import miniventure.game.item.CraftingScreen.ClientRecipe;
 import miniventure.game.item.InventoryScreen;
 import miniventure.game.item.Item;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.RelPos;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClientEntity;
 import miniventure.game.world.entity.Direction;
@@ -20,12 +23,16 @@ import miniventure.game.world.entity.KnockbackController;
 import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.entity.mob.MobAnimationController;
 import miniventure.game.world.entity.mob.MobAnimationController.AnimationState;
+import miniventure.game.world.level.ClientLevel;
 import miniventure.game.world.tile.ClientTile;
+import miniventure.game.world.tile.TileTypeEnum;
+import miniventure.game.world.tile.TileTypeRenderer;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
@@ -136,6 +143,24 @@ public class ClientPlayer extends ClientEntity implements Player {
 	
 	@Override
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
+		// check for a blueprint in the inventory
+		TileTypeRenderer blueprintTile = inventory.getBlueprintRenderer();
+		if(blueprintTile != null) {
+			// blueprint
+			ClientLevel level = getLevel();
+			if(level != null) {
+				ClientTile tile = (ClientTile) level.getTile(getInteractionRect());
+				EnumMap<RelPos, EnumSet<TileTypeEnum>> aroundTypes = new EnumMap<>(RelPos.class);
+				for(RelPos rp: RelPos.values)
+					aroundTypes.put(rp, EnumSet.noneOf(TileTypeEnum.class));
+				aroundTypes.get(RelPos.CENTER).add(tile.getType().getTypeEnum());
+				Color prev = batch.getColor();
+				batch.setColor(new Color(1f, 1f, 1f, .4f));
+				tile.renderSprites(batch, blueprintTile.getConnectionSprites(tile, aroundTypes), posOffset);
+				batch.setColor(prev);
+			}
+		}
+		
 		super.render(batch, delta, posOffset);
 		animator.progressAnimation(delta);
 	}
@@ -185,10 +210,22 @@ public class ClientPlayer extends ClientEntity implements Player {
 		getStatEvo(StaminaSystem.class).isMoving = !moveDist.isZero();
 		
 		if(!isKnockedBack() && !ClientCore.hasMenu()) {
-			if(ClientCore.input.pressingKey(Input.Keys.C) || ClientCore.input.pressingButton(Buttons.LEFT))
-				ClientCore.getClient().send(new InteractRequest(true, new PositionUpdate(this), getDirection(), inventory.getSelection()));
-			else if(ClientCore.input.pressingKey(Input.Keys.V) || ClientCore.input.pressingButton(Buttons.RIGHT))
-				ClientCore.getClient().send(new InteractRequest(false, new PositionUpdate(this), getDirection(), inventory.getSelection()));
+			if(ClientCore.input.pressingKey(Input.Keys.C) || ClientCore.input.pressingButton(Buttons.LEFT)) {
+				ClientRecipe recipe = inventory.getCurrentBlueprint();
+				if(recipe != null) {
+					GameCore.debug("sending craft request because of blueprint");
+					ClientCore.getClient().send(recipe.getCraftRequest());
+				}
+				else {
+					// GameCore.debug("sending player attack");
+					ClientCore.getClient().send(new InteractRequest(true, new PositionUpdate(this), getDirection(), inventory.getSelection()));
+				}
+			}
+			else if(ClientCore.input.pressingKey(Input.Keys.V) || ClientCore.input.pressingButton(Buttons.RIGHT)) {
+				if(inventory.getCurrentBlueprint() == null) // act as a cancel only, if it isn't null
+					ClientCore.getClient().send(new InteractRequest(false, new PositionUpdate(this), getDirection(), inventory.getSelection()));
+				inventory.removeBlueprint();
+			}
 		}
 		//if(Gdx.input.isKeyPressed(Input.Keys.C) || Gdx.input.isKeyPressed(Input.Keys.V))
 		//	animator.requestState(AnimationState.ATTACK);

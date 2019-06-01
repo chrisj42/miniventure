@@ -29,6 +29,7 @@ import miniventure.game.world.management.WorldManager;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.Tile.TileData;
 import miniventure.game.world.tile.Tile.TileTag;
+import miniventure.game.world.tile.TileTypeEnum;
 import miniventure.game.world.worldgen.island.IslandType;
 
 import com.badlogic.gdx.graphics.Color;
@@ -75,6 +76,7 @@ public interface GameProtocol {
 		kryo.register(InfoMessageLine[].class);
 		kryo.register(InfoMessage.class);
 		kryo.register(SerialRecipe[].class);
+		kryo.register(TileTypeEnum.class);
 		
 		kryo.register(String[].class);
 		kryo.register(String[][].class);
@@ -563,7 +565,7 @@ public interface GameProtocol {
 	
 	// sent by server to update clients' inventory, after dropping items and attacking/interacting.
 	// sent server -> client; holds ItemStack data for all hotbar items, and fill percent of inventory.
-	class HotbarUpdate {
+	/*class HotbarUpdate {
 		public final float fillPercent; // % filled of the inventory
 		public final String[][] itemStacks; // the item list
 		
@@ -578,7 +580,7 @@ public interface GameProtocol {
 			this.itemStacks = itemStacks;
 			this.fillPercent = fillPercent;
 		}
-	}
+	}*/
 	
 	class RecipeStockUpdate {
 		public final String[] inventoryItemNames;
@@ -612,30 +614,38 @@ public interface GameProtocol {
 	}
 	
 	class SerialRecipe {
+		public final int listid;
 		public final int id;
 		public final String[] result;
 		public final String[][] costs;
+		public final TileTypeEnum blueprintTarget; // non-null only for blueprint recipes.
 		
-		private SerialRecipe() { this(0, (String[])null, null); }
-		public SerialRecipe(int id, ItemStack result, ItemStack[] costs) {
+		private SerialRecipe() { this(0, 0, (String[])null, null, null); }
+		public SerialRecipe(int listid, int id, ItemStack result, ItemStack[] costs, TileTypeEnum blueprintTarget) {
+			this.listid = listid;
 			this.id = id;
+			this.blueprintTarget = blueprintTarget;
 			this.result = result.serialize();
 			this.costs = new String[costs.length][];
 			for(int i = 0; i < costs.length; i++)
 				this.costs[i] = costs[i].serialize();
 		}
-		public SerialRecipe(int id, String[] result, String[][] costs) {
+		public SerialRecipe(int listid, int id, String[] result, String[][] costs, TileTypeEnum blueprintTarget) {
+			this.listid = listid;
 			this.id = id;
 			this.result = result;
 			this.costs = costs;
+			this.blueprintTarget = blueprintTarget;
 		}
 	}
 	
 	class CraftRequest {
+		public final int listid;
 		public final int recipeIndex; // TO-DO this only works because there is only one array of recipes; it'll have to be changed later.
 		
-		private CraftRequest() { this(0); }
-		public CraftRequest(int recipeIndex) {
+		private CraftRequest() { this(0, 0); }
+		public CraftRequest(int listid, int recipeIndex) {
+			this.listid = listid;
 			this.recipeIndex = recipeIndex;
 		}
 	}

@@ -1,5 +1,7 @@
 package miniventure.game.item;
 
+import miniventure.game.GameProtocol.SerialRecipe;
+
 // sorts recipes into various recipe lists
 public enum RecipeList {
 	
@@ -39,4 +41,16 @@ public enum RecipeList {
 		this.recipes = recipes;
 	}
 	
+	public SerialRecipe[] serializeList() {
+		SerialRecipe[] serialRecipes = new SerialRecipe[recipes.length];
+		final int ord = ordinal();
+		for(int i = 0; i < recipes.length; i++) {
+			Recipe r = recipes[i];
+			serialRecipes[i] = new SerialRecipe(ord, i, r.getResult(), r.getCosts(),
+				r instanceof Blueprint ? ((TileItem)r.getResult().item).getResult() : null
+			);
+		}
+		
+		return serialRecipes;
+	}
 }
