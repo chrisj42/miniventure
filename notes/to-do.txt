@@ -1,3 +1,12 @@
+- specify items via a single enum that takes a creator and a loader; sub enums are a little overkill
+	- also include crafting recipes for that item, if any
+- make tile-based crafting system
+	- i think active tile highlight is necessary
+	- personal crafting menu shows mainly "blueprints"
+		- these are special tile items that craft when placed
+	- menu also has a couple small items that you can craft right into your inventory 
+	- all other crafting recipes are shown only in the respective crafting screens
+
 - validate world name; can only contain alphanum, spaces, dashes, and underscores
 
 - add stuff to serverplayer
@@ -10,8 +19,6 @@
 - consider converting command execution behavior param "args" to a list for easier manipulation
 - consider checking if a world is sp, and circumventing the kryo server if so. Simply pass the packets without serialization.
 	- do this next!
-
-- when a client attempts to use a command they cannot use, tell them they don't have permission, don't act like it doesn't exist.
 
 - create a dropItems method 
 
