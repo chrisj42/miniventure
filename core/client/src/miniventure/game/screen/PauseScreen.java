@@ -30,7 +30,7 @@ public class PauseScreen extends BackgroundInheritor {
 		VisTextButton exit = makeButton("Main Menu", () -> ClientCore.setScreen(new ConfirmScreen(ClientCore.getWorld().isLocalWorld() ? "Exit World? Your progress will be saved." : "Leave Server?", () -> ClientCore.getWorld().exitWorld())));
 		table.add(exit).row();
 		
-		mapButtons(table, resume, null);
+		mapButtons(table, resume, resume);
 		
 		setKeyboardFocus(table);
 	}

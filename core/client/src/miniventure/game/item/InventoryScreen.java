@@ -4,6 +4,7 @@ import java.util.Objects;
 
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.FontStyle;
+import miniventure.game.item.CraftingScreen.ClientRecipe;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.util.DiscreteViewport;
 import miniventure.game.util.RelPos;
@@ -22,9 +23,12 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
+import com.badlogic.gdx.scenes.scene2d.utils.BaseDrawable;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.VisLabel;
+import com.kotcrab.vis.ui.widget.VisTextButton;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -48,6 +52,29 @@ public class InventoryScreen extends MenuScreen {
 		mainGroup = useTable(Align.left, false);
 		mainGroup.defaults().padBottom(2f);
 		addMainGroup(mainGroup, RelPos.BOTTOM_LEFT);
+		
+		// make crafting screen button
+		VisTextButton craftBtn = makeButton("Craft", () -> {});
+		craftBtn.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y) {
+				if(ClientCore.getScreen() instanceof CraftingScreen) {
+					ClientCore.setScreen(null);
+					craftBtn.focusLost();
+				}
+				else
+					ClientCore.setScreen(new CraftingScreen());
+			}
+		});
+		craftBtn.setBackground(new BaseDrawable(craftBtn.getBackground()) {
+			@Override
+			public void draw(Batch batch, float x, float y, float width, float height) {
+				Color prev = batch.getColor();
+				batch.setColor(new Color(1f, 1f, 1f, .4f));
+				super.draw(batch, x, y, width, height);
+				batch.setColor(prev);
+			}
+		});
 		
 		fillBar = new ProgressBar(0, 1, .01f, false, VisUI.getSkin()) {
 			@Override
@@ -90,14 +117,14 @@ public class InventoryScreen extends MenuScreen {
 			}
 		});
 		
-		
 		mainGroup.add(slotTable).row();
 		
 		// create the bar at the bottom with the space and held item info
 		
 		HorizontalGroup infoBar = new HorizontalGroup();
 		
-		infoBar.addActor(makeLabel("Inventory Space:   ", false));
+		infoBar.addActor(craftBtn);
+		infoBar.addActor(makeLabel("    Inventory Space:   ", false));
 		infoBar.addActor(fillBar);
 		
 		// create the label such that it refreshes automatically when the selected item changes
@@ -150,7 +177,12 @@ public class InventoryScreen extends MenuScreen {
 				final int invi = idx;
 				allSlots[r][c] = new ItemSlot(false, item, count, new SlotBackground(
 					() -> inventory.getSlotsTaken() > invi,
-					() -> inventory.getSelection() == invi
+					() -> {
+						ClientRecipe recipe = inventory.getCurrentBlueprint();
+						if(recipe == null)
+							return inventory.getSelection() == invi;
+						return recipe.needsItem(inventory.getItem(invi));
+					}
 				)) {
 					@Override @Nullable
 					public Item getItem() {

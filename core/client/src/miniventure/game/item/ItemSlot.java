@@ -104,9 +104,10 @@ public class ItemSlot extends Widget {
 			Color prev = batch.getColor();
 			batch.setColor(Color.BLACK);
 			float size = Item.ICON_SIZE * ItemIcon.UI_SCALE;
-			batch.draw(item.getTexture().texture, getX()-1+XPADDING, getY()-1+YPADDING*2, size, size);
+			float ypad = background instanceof SlotBackground ? YPADDING * 2 : YPADDING;
+			batch.draw(item.getTexture().texture, getX()-1+XPADDING, getY()-1+ypad, size, size);
 			batch.setColor(prev);
-			batch.draw(item.getTexture().texture, getX()+1+XPADDING, getY()+1+YPADDING*2, size, size);
+			batch.draw(item.getTexture().texture, getX()+1+XPADDING, getY()+1+ypad, size, size);
 			
 			ItemIcon.renderUsability(batch, getX()+2+XPADDING, getY()+2+YPADDING, item.getUsabilityStatus());
 			
@@ -121,7 +122,7 @@ public class ItemSlot extends Widget {
 				}
 				
 				if(showCount()) {
-					font.draw(batch, String.valueOf(getCount()), getX() + XPADDING, getY() + YPADDING + font.getLineHeight());
+					font.draw(batch, String.valueOf(getCount()), getX() + XPADDING, getY() + ypad - YPADDING + font.getLineHeight());
 				}
 			}
 		}

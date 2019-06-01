@@ -248,7 +248,8 @@ public class CraftingScreen extends MenuScreen {
 				craftableTable.clearChildren();
 				craftableTable.add(new ItemIcon(recipe.result.item, recipe.result.count)).row();
 				craftableTable.add(makeLabel(recipe.result.item.getName(), FontStyle.KeepSize, false)).row();
-				craftableTable.add(resultStockLabel = makeLabel("Stock: " + getCount(recipe.result.item), FontStyle.KeepSize, false)).row();
+				String stockText = recipe.getBlueprintTarget() == null ? "Stock: " + getCount(recipe.result.item) : "";
+				craftableTable.add(resultStockLabel = makeLabel(stockText, FontStyle.KeepSize, false)).row();
 			}
 			
 			costTable.clearChildren();
@@ -362,6 +363,14 @@ public class CraftingScreen extends MenuScreen {
 		}
 		
 		@Nullable TileTypeEnum getBlueprintTarget() { return blueprintTarget; }
+		
+		boolean needsItem(Item item) {
+			for(ItemStack stack: costs)
+				if(stack.item.equals(item))
+					return true;
+			
+			return false;
+		}
 		
 		void updateCanCraft(HashMap<String, Integer> itemCounts) {
 			boolean canCraft = true;
