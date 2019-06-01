@@ -21,7 +21,7 @@ public class Recipe {
 	@NotNull ServerItemStack getResult() { return result; }
 	@NotNull ServerItemStack[] getCosts() { return costs; }
 	
-	public boolean canCraft(Inventory inv) {
+	public boolean canCraft(ServerInventory inv) {
 		for(ServerItemStack cost: costs)
 			if(!inv.hasItem(cost.item, cost.count))
 				return false;
@@ -31,13 +31,13 @@ public class Recipe {
 	
 	// returns any items that couldn't be added to the inventory, or null if the inventory doesn't have the items required for crafting.
 	@Nullable
-	public ServerItem[] tryCraft(Inventory inv) {
+	public ServerItem[] tryCraft(ServerInventory inv) {
 		if(!canCraft(inv))
 			return null;
 		
 		Array<ServerItem> leftover = new Array<>(ServerItem.class);
 		
-		for(ServerItemStack cost: costs) 
+		for(ServerItemStack cost: costs)
 			for(int i = 0; i < cost.count; i++)
 				inv.removeItem(cost.item);
 		

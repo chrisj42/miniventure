@@ -18,6 +18,7 @@ public class TileItem extends ServerItem {
 	
 	public enum TileItemType {
 		; // here is where I can add extra TileItems that may safely conflict with the "official" TileType to TileItem mappings.
+		// ...except currently it actually won't work because the load function doesn't check this.
 		
 		final TileItem item;
 		

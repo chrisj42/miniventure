@@ -8,4 +8,8 @@ public class Blueprint extends Recipe {
 		super(result, costs);
 	}
 	
+	@Override
+	public String toString() {
+		return getResult()+" Blueprint";
+	}
 }

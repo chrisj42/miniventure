@@ -35,7 +35,7 @@ public class ToolItem extends ServerItem {
 	private final int durability;
 	
 	public ToolItem(ToolType type, Material material) { this(type, material, material.maxDurability); }
-	public ToolItem(ToolType type, Material material, int durability) {
+	ToolItem(ToolType type, Material material, int durability) {
 		super(ItemType.Tool, material.name() + ' ' + type.name(), GameCore.icons.get("items/tools/"+material.name().toLowerCase()+'_'+type.name().toLowerCase()));
 		this.toolType = type;
 		this.material = material;
