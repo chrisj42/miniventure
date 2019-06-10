@@ -3,7 +3,7 @@ package miniventure.game.screen;
 import miniventure.game.client.ClientCore;
 import miniventure.game.screen.util.BackgroundInheritor;
 import miniventure.game.util.function.Action;
-import miniventure.game.util.function.ValueFunction;
+import miniventure.game.util.function.ValueAction;
 
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
@@ -20,12 +20,12 @@ import com.kotcrab.vis.ui.widget.VisTextButton;
  */
 public class InputScreen extends BackgroundInheritor {
 	
-	public InputScreen(String prompt, ValueFunction<String> onConfirm) { this(prompt, onConfirm, ClientCore::backToParentScreen); }
-	public InputScreen(String[] prompt, ValueFunction<String> onConfirm) { this(prompt, onConfirm, ClientCore::backToParentScreen); }
-	public InputScreen(String prompt, ValueFunction<String> onConfirm, Action onCancel) {
+	public InputScreen(String prompt, ValueAction<String> onConfirm) { this(prompt, onConfirm, ClientCore::backToParentScreen); }
+	public InputScreen(String[] prompt, ValueAction<String> onConfirm) { this(prompt, onConfirm, ClientCore::backToParentScreen); }
+	public InputScreen(String prompt, ValueAction<String> onConfirm, Action onCancel) {
 		this(new String[] {prompt}, onConfirm, onCancel);
 	}
-	public InputScreen(String[] prompt, ValueFunction<String> onConfirm, Action onCancel) {
+	public InputScreen(String[] prompt, ValueAction<String> onConfirm, Action onCancel) {
 		super(new ScreenViewport());
 		
 		Table table = useTable();
@@ -49,7 +49,7 @@ public class InputScreen extends BackgroundInheritor {
 		setKeyboardFocus(field);
 	}
 	
-	public static class CircularFunction<T> implements ValueFunction<T> {
+	public static class CircularFunction<T> implements ValueAction<T> {
 		
 		@FunctionalInterface
 		public interface CircularAction<T> {

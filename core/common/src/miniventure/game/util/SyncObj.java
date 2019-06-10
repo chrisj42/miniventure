@@ -1,7 +1,7 @@
 package miniventure.game.util;
 
 import miniventure.game.util.function.MapFunction;
-import miniventure.game.util.function.ValueFunction;
+import miniventure.game.util.function.ValueAction;
 
 public class SyncObj<T> {
 	
@@ -17,7 +17,7 @@ public class SyncObj<T> {
 		}
 	}
 	
-	public void act(ValueFunction<T> action) {
+	public void act(ValueAction<T> action) {
 		synchronized (obj) {
 			action.act(obj);
 		}

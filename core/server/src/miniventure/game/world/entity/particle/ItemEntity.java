@@ -6,7 +6,7 @@ import java.util.Arrays;
 import miniventure.game.item.ServerItem;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
-import miniventure.game.util.function.ValueFunction;
+import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.entity.ClassDataList;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.EntityRenderer.ItemSpriteRenderer;
@@ -42,7 +42,7 @@ public class ItemEntity extends ServerEntity {
 		setRenderer(new ItemSpriteRenderer(item));
 	}
 	
-	protected ItemEntity(@NotNull ServerWorld world, ClassDataList allData, final Version version, ValueFunction<ClassDataList> modifier) {
+	protected ItemEntity(@NotNull ServerWorld world, ClassDataList allData, final Version version, ValueAction<ClassDataList> modifier) {
 		super(world, allData, version, modifier);
 		ArrayList<String> data = allData.get(1);
 		delayPickup = false;

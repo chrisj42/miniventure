@@ -11,7 +11,7 @@ import miniventure.game.item.Item;
 import miniventure.game.item.ItemStack;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.Version;
-import miniventure.game.util.function.ValueFunction;
+import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.Boundable;
 import miniventure.game.world.Point;
 import miniventure.game.world.Taggable.Tag;
@@ -48,7 +48,7 @@ public interface GameProtocol {
 	boolean lag = false;
 	int lagMin = lag?10:0, lagMax = lag?100:0;
 	
-	static <T> void forPacket(Object packet, Class<T> type, ValueFunction<T> response) {
+	static <T> void forPacket(Object packet, Class<T> type, ValueAction<T> response) {
 		if(type.isAssignableFrom(packet.getClass()))
 			response.act(type.cast(packet));
 	}

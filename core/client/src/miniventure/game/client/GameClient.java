@@ -8,7 +8,6 @@ import miniventure.game.GameCore;
 import miniventure.game.GameProtocol;
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.item.CraftingScreen;
-import miniventure.game.item.InventoryScreen;
 import miniventure.game.screen.ChatScreen;
 import miniventure.game.screen.ErrorScreen;
 import miniventure.game.screen.InputScreen;
@@ -16,7 +15,7 @@ import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MapScreen;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.util.MyUtils;
-import miniventure.game.util.function.ValueFunction;
+import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClientEntity;
 import miniventure.game.world.entity.Entity;
@@ -300,7 +299,7 @@ public class GameClient implements GameProtocol {
 	public void addListener(Listener listener) { client.addListener(listener); }
 	
 	// public boolean connectToServer(@NotNull LoadingScreen logger, String host, ValueFunction<Boolean> callback) { return connectToServer(logger, host, GameProtocol.PORT, callback); }
-	public boolean connectToServer(@NotNull LoadingScreen logger, @Nullable ServerManager personalServer, String host, int port, ValueFunction<Boolean> callback) {
+	public boolean connectToServer(@NotNull LoadingScreen logger, @Nullable ServerManager personalServer, String host, int port, ValueAction<Boolean> callback) {
 		logger.pushMessage("Connecting to "+(personalServer!=null?"private ":"")+"server at "+host+':'+port+"...");
 		
 		try {

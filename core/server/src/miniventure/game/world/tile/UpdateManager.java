@@ -2,7 +2,7 @@ package miniventure.game.world.tile;
 
 import miniventure.game.util.customenum.SerialMap;
 import miniventure.game.util.function.FetchFunction;
-import miniventure.game.util.function.ValueFunction;
+import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.tile.ServerTileType.P;
 
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +17,7 @@ public class UpdateManager {
 	 */
 	
 	interface UpdateAction {
-		void update(@NotNull ServerTile tile, FetchFunction<String> dataCacheFetcher, ValueFunction<String> dataCacheSetter);
+		void update(@NotNull ServerTile tile, FetchFunction<String> dataCacheFetcher, ValueAction<String> dataCacheSetter);
 		
 		boolean canUpdate(@NotNull ServerTile tile);
 		

@@ -14,7 +14,6 @@ import miniventure.game.GameCore;
 import miniventure.game.GameProtocol.Message;
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.client.FontStyle.StyleData;
-import miniventure.game.item.InventoryScreen;
 import miniventure.game.screen.ErrorScreen;
 import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MainMenu;
@@ -24,7 +23,7 @@ import miniventure.game.screen.util.BackgroundInheritor;
 import miniventure.game.screen.util.BackgroundProvider;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.customenum.GenericEnum;
-import miniventure.game.util.function.ValueFunction;
+import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
 import miniventure.game.world.management.ClientWorld;
 import miniventure.game.world.tile.ClientTileType;
@@ -84,7 +83,7 @@ public class ClientCore extends ApplicationAdapter {
 	
 	public static boolean PLAY_MUSIC = false;
 	
-	public static final ValueFunction<Throwable> exceptionNotifier = throwable -> {
+	public static final ValueAction<Throwable> exceptionNotifier = throwable -> {
 		StringWriter string = new StringWriter();
 		PrintWriter printer = new PrintWriter(string);
 		throwable.printStackTrace(printer);

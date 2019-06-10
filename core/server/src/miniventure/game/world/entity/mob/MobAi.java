@@ -7,7 +7,7 @@ import miniventure.game.item.Item;
 import miniventure.game.item.Result;
 import miniventure.game.item.ServerItem;
 import miniventure.game.util.Version;
-import miniventure.game.util.function.ValueFunction;
+import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClassDataList;
@@ -51,7 +51,7 @@ public class MobAi extends ServerMob {
 	}
 	
 	// if a subclass was made of this, then it may not save the ai type.
-	protected MobAi(@NotNull ServerWorld world, ClassDataList allData, final Version version, ValueFunction<ClassDataList> modifier) {
+	protected MobAi(@NotNull ServerWorld world, ClassDataList allData, final Version version, ValueAction<ClassDataList> modifier) {
 		super(world, allData, version, modifier);
 		ArrayList<String> data = allData.get(2);
 		aiType = AiType.valueOf(data.get(0));

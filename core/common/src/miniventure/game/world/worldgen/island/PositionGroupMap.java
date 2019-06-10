@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import miniventure.game.util.function.ValueFunction;
+import miniventure.game.util.function.ValueAction;
 
 // Contains 2 sets of groups: those that matched the condition, and those that didn't.
 // Each group consists of tiles (positions) adjacent to 1 or more tiles already in the group (if the tile is not adjacent to any known group, a new group is created).
@@ -112,7 +112,7 @@ public class PositionGroupMap {
 				final GroupedPosition pos = positionData[x][y];
 				final boolean curMatch = pos.matches;
 				
-				ValueFunction<GroupedPosition> neighborCheck = other -> {
+				ValueAction<GroupedPosition> neighborCheck = other -> {
 					PositionGroup curGroup = pos.group;
 					PositionGroup oGroup = other.group;
 					

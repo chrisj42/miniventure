@@ -11,7 +11,7 @@ import miniventure.game.item.Result;
 import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolItem.ToolType;
 import miniventure.game.util.Version;
-import miniventure.game.util.function.ValueFunction;
+import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClassDataList;
 import miniventure.game.world.entity.Direction;
@@ -64,7 +64,7 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 	// some stuff is given in the child constructor; this shouldn't need to be saved to file.
 	// these include the sprite name and the max health, in this case.
 	// these things
-	protected ServerMob(@NotNull ServerWorld world, ClassDataList allData, final Version version, ValueFunction<ClassDataList> modifier) {
+	protected ServerMob(@NotNull ServerWorld world, ClassDataList allData, final Version version, ValueAction<ClassDataList> modifier) {
 		super(world, allData, version, modifier);
 		ArrayList<String> data = allData.get(1);
 		

@@ -16,7 +16,7 @@ import java.util.Set;
 import miniventure.game.GameCore;
 import miniventure.game.util.SerialDataMap;
 import miniventure.game.util.Version;
-import miniventure.game.util.function.ValueFunction;
+import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.Point;
 import miniventure.game.world.management.TimeOfDay;
 import miniventure.game.world.worldgen.island.IslandType;
@@ -307,7 +307,7 @@ public class WorldFileInterface {
 		return true;*/
 	}
 	
-	private static boolean writeFile(Path path, @NotNull ValueFunction<LinkedList<String>> populator) {
+	private static boolean writeFile(Path path, @NotNull ValueAction<LinkedList<String>> populator) {
 		try (BufferedWriter writer = Files.newBufferedWriter(path)) {
 			
 			LinkedList<String> data = new LinkedList<>();

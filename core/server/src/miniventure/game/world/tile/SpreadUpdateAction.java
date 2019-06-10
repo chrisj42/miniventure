@@ -5,7 +5,7 @@ import java.util.HashSet;
 
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.FetchFunction;
-import miniventure.game.util.function.ValueFunction;
+import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.tile.UpdateManager.UpdateAction;
 
 import com.badlogic.gdx.math.MathUtils;
@@ -53,7 +53,7 @@ class SpreadUpdateAction implements UpdateAction {
 	}
 	
 	@Override
-	public void update(@NotNull ServerTile tile, FetchFunction<String> dataCacheFetcher, ValueFunction<String> dataCacheSetter) {
+	public void update(@NotNull ServerTile tile, FetchFunction<String> dataCacheFetcher, ValueAction<String> dataCacheSetter) {
 		if(MathUtils.random() >= spreadChance) return; // must be less to execute; a chance of 1 will always execute.
 		
 		HashSet<Tile> around = tile.getAdjacentTiles(false);

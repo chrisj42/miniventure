@@ -11,7 +11,7 @@ import miniventure.game.GameProtocol.SpriteUpdate;
 import miniventure.game.server.GameServer;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
-import miniventure.game.util.function.ValueFunction;
+import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.level.ServerLevel;
@@ -32,7 +32,7 @@ public abstract class ServerEntity extends Entity {
 		super(world, false);
 	}
 	
-	protected ServerEntity(@NotNull ServerWorld world, ClassDataList allData, final Version version, ValueFunction<ClassDataList> modifier) {
+	protected ServerEntity(@NotNull ServerWorld world, ClassDataList allData, final Version version, ValueAction<ClassDataList> modifier) {
 		this(world);
 		modifier.act(allData);
 		// the index here is based on the class count away from ServerEntity in inheritance.
@@ -154,9 +154,9 @@ public abstract class ServerEntity extends Entity {
 	public static <T extends ServerEntity> T deserialize(@NotNull ServerWorld world, Class<T> clazz, ClassDataList data, Version version) {
 		T newEntity = null;
 		try {
-			Constructor<T> constructor = clazz.getDeclaredConstructor(ServerWorld.class, ClassDataList.class, Version.class, ValueFunction.class);
+			Constructor<T> constructor = clazz.getDeclaredConstructor(ServerWorld.class, ClassDataList.class, Version.class, ValueAction.class);
 			constructor.setAccessible(true);
-			newEntity = constructor.newInstance(world, data, version, (ValueFunction)(allData -> {}));
+			newEntity = constructor.newInstance(world, data, version, (ValueAction)(allData -> {}));
 		} catch(NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
 			e.printStackTrace();
 		}

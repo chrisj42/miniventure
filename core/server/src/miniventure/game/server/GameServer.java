@@ -17,7 +17,7 @@ import miniventure.game.chat.command.CommandInputParser;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.MapFunction;
-import miniventure.game.util.function.ValueFunction;
+import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ServerEntity;
@@ -182,7 +182,7 @@ public class GameServer implements GameProtocol {
 	}
 	
 	
-	private <T> void forPacket(Object packet, Class<T> type, boolean sync, ValueFunction<T> response) {
+	private <T> void forPacket(Object packet, Class<T> type, boolean sync, ValueAction<T> response) {
 		if(sync)
 			world.postRunnable(() -> GameProtocol.forPacket(packet, type, response));
 		else

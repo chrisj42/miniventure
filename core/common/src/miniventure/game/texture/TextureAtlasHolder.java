@@ -3,13 +3,12 @@ package miniventure.game.texture;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-import miniventure.game.util.function.ValueFunction;
+import miniventure.game.util.function.ValueAction;
 
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.TextureAtlasData;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.TextureAtlasData.Region;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 
 public class TextureAtlasHolder {
@@ -57,7 +56,7 @@ public class TextureAtlasHolder {
 		return holderMap.getOrDefault(name, new Array<>(TextureHolder.class));
 	}
 	
-	public void iterRegions(ValueFunction<TextureHolder> action) {
+	public void iterRegions(ValueAction<TextureHolder> action) {
 		for(TextureHolder t: holders)
 			action.act(t);
 	}

@@ -14,7 +14,7 @@ import miniventure.game.item.ToolItem.ToolType;
 import miniventure.game.server.GameServer;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
-import miniventure.game.util.function.ValueFunction;
+import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.Boundable;
 import miniventure.game.world.Point;
 import miniventure.game.world.WorldObject;
@@ -66,7 +66,7 @@ public class ServerPlayer extends ServerMob implements Player {
 		reset();
 	}
 	
-	protected ServerPlayer(@NotNull ServerWorld world, ClassDataList allData, final Version version, ValueFunction<ClassDataList> modifier) {
+	protected ServerPlayer(@NotNull ServerWorld world, ClassDataList allData, final Version version, ValueAction<ClassDataList> modifier) {
 		super(world, allData, version, modifier);
 		ArrayList<String> data = allData.get(2);
 		
@@ -141,7 +141,7 @@ public class ServerPlayer extends ServerMob implements Player {
 	private InventoryUpdate getInventoryUpdate() { return new InventoryUpdate(inventory.serialize()); }
 	// public HotbarUpdate getHotbarUpdate() { return new HotbarUpdate(hands.serialize(), inventory.getPercentFilled()); }
 	
-	private <T> void forPacket(Object packet, Class<T> type, boolean sync, ValueFunction<T> response) {
+	private <T> void forPacket(Object packet, Class<T> type, boolean sync, ValueAction<T> response) {
 		if(sync)
 			getWorld().postRunnable(() -> GameProtocol.forPacket(packet, type, response));
 		else
@@ -491,7 +491,7 @@ public class ServerPlayer extends ServerMob implements Player {
 	
 	public int getSpawnLevel() { return spawnLevel; }
 	
-	public ValueFunction<ServerLevel> respawnPositioning() {
+	public ValueAction<ServerLevel> respawnPositioning() {
 		return level -> {
 			if(spawnLoc != null) {
 				ServerTile spawnTile = level.getTile(spawnLoc.x, spawnLoc.y);

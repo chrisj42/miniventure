@@ -12,11 +12,6 @@ import miniventure.game.GameProtocol.EntityRemoval;
 import miniventure.game.GameProtocol.IslandReference;
 import miniventure.game.GameProtocol.MapRequest;
 import miniventure.game.GameProtocol.WorldData;
-import miniventure.game.item.FoodType;
-import miniventure.game.item.ResourceType;
-import miniventure.game.item.ToolItem;
-import miniventure.game.item.ToolItem.Material;
-import miniventure.game.item.ToolItem.ToolType;
 import miniventure.game.server.GameServer;
 import miniventure.game.server.ServerCore;
 import miniventure.game.util.ArrayUtils;
@@ -24,7 +19,7 @@ import miniventure.game.util.ProgressLogger;
 import miniventure.game.util.SyncObj;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.MapFunction;
-import miniventure.game.util.function.ValueFunction;
+import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
@@ -296,7 +291,7 @@ public class ServerWorld extends WorldManager {
 	}
 	@NotNull
 	// the ordering of "get/make level", "position player", "send level data", and finally "register world/add player" is important. Doing so is the most efficient, and prevents split-second frame changes like showing the player in the previous level position, as well as minimizing the time that the player may be in-game on the server, but still loading on the client.
-	public ServerLevel loadLevel(int levelId, @NotNull ServerPlayer activator, ValueFunction<ServerLevel> playerPositioner) {
+	public ServerLevel loadLevel(int levelId, @NotNull ServerPlayer activator, ValueAction<ServerLevel> playerPositioner) {
 		
 		ServerLevel level = getLevel(levelId);
 		
