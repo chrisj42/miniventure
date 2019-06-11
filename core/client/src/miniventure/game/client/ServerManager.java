@@ -1,10 +1,10 @@
 package miniventure.game.client;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-
+import miniventure.game.network.PacketPipe.PacketPipeReader;
+import miniventure.game.network.PacketPipe.PacketPipeWriter;
+import miniventure.game.screen.LoadingScreen;
 import miniventure.game.util.ProgressLogger;
-import miniventure.game.util.function.MapFunction;
+import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.file.WorldDataSet;
 
 public interface ServerManager {
@@ -18,9 +18,10 @@ public interface ServerManager {
 	// save the world to file.
 	void save();
 	
-	// returns port server was started on
-	int startServer(WorldDataSet worldInfo, MapFunction<InetSocketAddress, Boolean> hostFinder, ProgressLogger logger) throws IOException;
-	// void setHost(InetSocketAddress host); // tell the server who the host is
+	boolean startSPServer(WorldDataSet worldInfo, PacketPipeReader serverIn, PacketPipeWriter serverOut, ProgressLogger logger);
+	
+	void startMPServer(NetworkClient netClient, WorldDataSet worldInfo, LoadingScreen logger, ValueAction<Boolean> callback);
+	
 	void open(); // allow other players to join; TODO implement this option in a pause menu on client GUI
 	void closeServer();
 	

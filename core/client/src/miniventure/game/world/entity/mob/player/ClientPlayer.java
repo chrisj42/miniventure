@@ -5,7 +5,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 
 import miniventure.game.GameCore;
-import miniventure.game.GameProtocol.*;
+import miniventure.game.network.GameProtocol.*;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.InputHandler;
 import miniventure.game.item.ClientInventory;
@@ -13,6 +13,7 @@ import miniventure.game.item.CraftingScreen;
 import miniventure.game.item.CraftingScreen.ClientRecipe;
 import miniventure.game.item.InventoryScreen;
 import miniventure.game.item.Item;
+import miniventure.game.network.PacketPipe.PacketPipeWriter;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.RelPos;
@@ -43,7 +44,7 @@ import com.esotericsoftware.kryonet.Connection;
 
 import org.jetbrains.annotations.NotNull;
 
-import static miniventure.game.GameProtocol.forPacket;
+import static miniventure.game.network.GameProtocol.forPacket;
 
 public class ClientPlayer extends ClientEntity implements Player {
 	
@@ -271,7 +272,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 	}
 	
 	@Override
-	public void handlePlayerPackets(@NotNull Object object, @NotNull Connection connection) {
+	public void handlePlayerPackets(@NotNull Object object, @NotNull PacketPipeWriter packetSender) {
 		
 		forPacket(object, InventoryUpdate.class, newInv -> {
 			inventory.updateItems(newInv.itemStacks);

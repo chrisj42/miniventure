@@ -1,6 +1,6 @@
 package miniventure.game.item;
 
-import miniventure.game.GameProtocol.ItemDropRequest;
+import miniventure.game.network.GameProtocol.ItemDropRequest;
 import miniventure.game.client.ClientCore;
 import miniventure.game.item.CraftingScreen.ClientRecipe;
 import miniventure.game.world.tile.ClientTileType;

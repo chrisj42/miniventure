@@ -39,7 +39,7 @@ import com.kotcrab.vis.ui.widget.VisTextButton;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class MenuScreen extends Stage {
+public class MenuScreen extends Screen {
 	
 	private final boolean clearGdxBackground;
 	private MenuScreen parent;

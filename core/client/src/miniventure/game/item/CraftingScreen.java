@@ -6,10 +6,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 
-import miniventure.game.GameProtocol.CraftRequest;
-import miniventure.game.GameProtocol.RecipeRequest;
-import miniventure.game.GameProtocol.RecipeStockUpdate;
-import miniventure.game.GameProtocol.SerialRecipe;
+import miniventure.game.network.GameProtocol.CraftRequest;
+import miniventure.game.network.GameProtocol.RecipeRequest;
+import miniventure.game.network.GameProtocol.RecipeStockUpdate;
+import miniventure.game.network.GameProtocol.SerialRecipe;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.FontStyle;
 import miniventure.game.screen.MenuScreen;

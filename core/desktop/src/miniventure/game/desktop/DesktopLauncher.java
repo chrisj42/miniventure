@@ -10,16 +10,26 @@ import java.util.LinkedList;
 import java.util.List;
 
 import miniventure.game.GameCore;
-import miniventure.game.GameProtocol;
+import miniventure.game.client.NetworkClient;
+import miniventure.game.network.GameProtocol;
 import miniventure.game.Preferences;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.ServerManager;
+import miniventure.game.network.PacketPipe.PacketPipeReader;
+import miniventure.game.network.PacketPipe.PacketPipeWriter;
+import miniventure.game.screen.ErrorScreen;
+import miniventure.game.screen.LoadingScreen;
+import miniventure.game.server.LocalServer;
+import miniventure.game.server.NetworkServer;
 import miniventure.game.server.ServerCore;
+import miniventure.game.server.ServerFetcher;
 import miniventure.game.util.ProgressLogger;
 import miniventure.game.util.function.MapFunction;
+import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.file.WorldDataSet;
 import miniventure.game.world.tile.ServerTileType;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 
@@ -95,6 +105,8 @@ public class DesktopLauncher {
 	
 	private static class ServerHolder implements ServerManager {
 		
+		private static final int SERVER_PORT_ATTEMPTS = 10;
+		
 		private ServerCore core;
 		
 		ServerHolder() {}
@@ -116,24 +128,61 @@ public class DesktopLauncher {
 		}
 		
 		@Override
-		public int startServer(WorldDataSet worldInfo, MapFunction<InetSocketAddress, Boolean> hostFinder, ProgressLogger logger) throws IOException {
-			this.core = ServerCore.initSinglePlayer(worldInfo, hostFinder, logger);
-			int port = core.getServer().getPort();
-			
-			// server running, and world loaded; now, get the server world updating
-			new Thread(new ThreadGroup("server"), core, "Miniventure Server").start();
-			// ready to connect
-			return port;
+		public boolean startSPServer(WorldDataSet worldInfo, PacketPipeReader serverIn, PacketPipeWriter serverOut, ProgressLogger logger) {
+			return startServer(
+				(world, playerData) -> new LocalServer(world, playerData, serverIn, serverOut),
+				worldInfo, logger
+			);
 		}
 		
-		/*@Override
-		public void setHost(InetSocketAddress host) {
-			// System.out.println("setting host to "+host);
-			core.getServer().setHost(host);
-		}*/
+		@Override
+		public void startMPServer(NetworkClient netClient, WorldDataSet worldInfo, LoadingScreen logger, ValueAction<Boolean> callback) {
+			MapFunction<InetSocketAddress, Boolean> hostFinder = addr -> addr.equals(netClient.getClientAddress());
+			
+			ServerFetcher fetcher = (world, playerData) -> {
+				int port = GameProtocol.PORT;
+				int tries = 0;
+				
+				do {
+					tries++;
+					
+					try {
+						return new NetworkServer(world, port, hostFinder, playerData);
+					} catch(IOException ignored) {}
+					
+				} while(tries < SERVER_PORT_ATTEMPTS);
+				
+				throw new IOException("Failed to find valid port for internal server after "+SERVER_PORT_ATTEMPTS+" tries. Ensure you have port "+GameProtocol.PORT+" or subsequent ports available.");
+			};
+			
+			if(startServer(fetcher, worldInfo, logger)) {
+				// server started, connect
+				int port = ((NetworkServer)core.getServer()).getPort();
+				netClient.connectToServer(logger, this, "localhost", port, success -> {
+					if(!success)
+						closeServer();
+					callback.act(success);
+				});
+			}
+			else
+				callback.act(false); // error screen will have been set during the startServer call.
+		}
+		
+		private boolean startServer(ServerFetcher fetcher, WorldDataSet worldInfo, ProgressLogger logger) {
+			try {
+				this.core = new ServerCore(fetcher, worldInfo, logger);
+				return true;
+			} catch(IOException e) {
+				Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen("Error starting world: "+e.getMessage())));
+				return false;
+			}
+		}
 		
 		@Override
-		public void open() { core.getServer().setMultiplayer(true); }
+		public void open() {
+			// TODO implement this differently; local server needs to close, and networked server needs to be created.
+			/*core.getServer().setMultiplayer(true);*/
+		}
 		
 		@Override
 		public void closeServer() {

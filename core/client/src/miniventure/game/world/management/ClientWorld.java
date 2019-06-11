@@ -1,16 +1,16 @@
 package miniventure.game.world.management;
 
-import java.io.IOException;
-
-import miniventure.game.GameProtocol.DatalessRequest;
-import miniventure.game.GameProtocol.LevelData;
-import miniventure.game.GameProtocol.SpawnData;
-import miniventure.game.GameProtocol.WorldData;
-import miniventure.game.client.ClientCore;
-import miniventure.game.client.GameClient;
-import miniventure.game.client.GameScreen;
-import miniventure.game.client.ServerManager;
-import miniventure.game.screen.ErrorScreen;
+import miniventure.game.GameCore;
+import miniventure.game.client.*;
+import miniventure.game.network.GameProtocol;
+import miniventure.game.network.GameProtocol.DatalessRequest;
+import miniventure.game.network.GameProtocol.LevelData;
+import miniventure.game.network.GameProtocol.Login;
+import miniventure.game.network.GameProtocol.SpawnData;
+import miniventure.game.network.GameProtocol.WorldData;
+import miniventure.game.network.PacketPipe;
+import miniventure.game.network.PacketPipe.PacketPipeReader;
+import miniventure.game.network.PacketPipe.PacketPipeWriter;
 import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
@@ -25,24 +25,30 @@ import com.badlogic.gdx.graphics.Color;
 
 public class ClientWorld extends LevelManager {
 	
-	/*
-		This is what contains the world. GameCore will check if the world is loaded here, and if not it won't render the game screen. Though... perhaps this class should hold a reference to the game screen instead...? Because, if you don't have a world, you don't need a game screen...
+	/* This controls world management, on the client side.
+		Only one instance is created, when the application starts up.
+			- this does not initialize the game view or the network client, it's just basic construction.
 		
-		The world will be created with this.
-		It holds references to the current game level.
-		You use this class to start processes on the whole world, like saving, loading, creating.
-			And accessing the main player... and respawning. Also changing the player level?
+		Most things are initialized when joinWorld or startLocalWorld is called.
+			- a "network" client is created, made to handle either a local or remote connection
+			- the server code is called to load the world with the given world data
+			- client tries to connect to the server
+				- assuming success, the client begins handling server packets.
 		
-		Perhaps this instance can be fetched from GameCore.
-		
-		GameScreen... game screen won't do much, just do the rendering. 
+		The server works as follows:
+			- world loading and startup is standard; updates start immediately once the world has loaded successfully
+			- when a player joins, they might not get the world info right away; if they are new to the server, then the server tells the client to play the intro sequence.
+				- while the client plays the intro, the server doesn't add the player to the server world just yet. It waits for the client to finish the intro.
+			- intro sequence may be skipped by the user, btw. Still counts as finishing the intro.
+			- When the server hears the client finished the intro, it takes note of the fact in the user file. Then, THIS is when the player actually joins the server world itself.
+				- no loading screen here. It's just normal chunk loading.
 	 */
 	
 	private final ServerManager serverManager;
 	private String ipAddress;
-	private int port;
+	private int lastPort;
 	
-	private final GameScreen gameScreen;
+	private GameView gameScreen;
 	
 	private GameClient client;
 	
@@ -50,11 +56,11 @@ public class ClientWorld extends LevelManager {
 	
 	private boolean doDaylightCycle = true;
 	
-	public ClientWorld(ServerManager serverManager, GameScreen gameScreen) {
+	// a ClientWorld is created 
+	public ClientWorld(ServerManager serverManager) {
 		this.serverManager = serverManager;
-		this.gameScreen = gameScreen;
 		
-		client = new GameClient(); // doesn't automatically connect
+		// client = new GameClient(); // doesn't automatically connect
 	}
 	
 	// Update method
@@ -92,7 +98,7 @@ public class ClientWorld extends LevelManager {
 	@Override protected boolean doDaylightCycle() { return doDaylightCycle; }
 	
 	
-	public void rejoinWorld() { joinWorld(ipAddress, port); }
+	public void rejoinWorld() { joinWorld(ipAddress, lastPort); }
 	public void joinWorld(String ipAddress, int port) {
 		ClientCore.stopMusic();
 		LoadingScreen loadingScreen = new LoadingScreen();
@@ -100,68 +106,82 @@ public class ClientWorld extends LevelManager {
 		
 		clearEntityIdMap();
 		
+		if(client != null)
+			client.disconnect();
+		
+		NetworkClient netClient = new NetworkClient();
+		this.client = netClient;
+		
 		this.ipAddress = ipAddress;
-		this.port = port;
+		this.lastPort = port;
 		
 		new Thread(() -> {
 			// connect to an existing server.
-			client.connectToServer(loadingScreen, null, ipAddress, port, success -> {
+			netClient.connectToServer(loadingScreen, null, ipAddress, port, success -> {
 				if(!success)
-					client = new GameClient();
+					client = null;
 			});
 		}).start();
 	}
 	
-	/*public InputScreen getNewWorldInput() {
-		return new InputScreen("Name your new world:", worldname -> {
-			ClientCore.setScreen(new InputScreen("Average island diameter (default "+GameCore.DEFAULT_WORLD_SIZE+"):", new CircularFunction<>((size, self) -> {
-				boolean valid;
-				int sizeVal = 0;
-				try {
-					sizeVal = Integer.parseInt(size);
-					valid = sizeVal >= 10;
-				} catch(NumberFormatException e) {
-					valid = false;
-				}
-				
-				if(!valid)
-					ClientCore.setScreen(new InputScreen(new String[] {
-						"Average island diameter (default "+GameCore.DEFAULT_WORLD_SIZE+"):",
-						"Value must be an integer >= 10"
-					}, self));
-			})));
-		});
-	}*/
+	// loads the world as a multiplayer server without having to use the command line.
+	public void startLocalServer(WorldDataSet worldInfo) {
+		this.ipAddress = "localhost";
+		
+		// ClientCore.stopMusic();
+		LoadingScreen loadingScreen = new LoadingScreen();
+		// loadingScreen.pushMessage("Initializing local server");
+		ClientCore.setScreen(loadingScreen);
+		
+		NetworkClient netClient = new NetworkClient();
+		this.client = netClient;
+		
+		new Thread(() -> {
+			
+			serverManager.startMPServer(netClient, worldInfo, loadingScreen, success -> {
+				if(!success)
+					client = null;
+			});
+			
+		}).start();
+	}
 	
-	// given a pre-initialized WorldFile (ie the world has already been read from file and/or generated successfully), this method starts up a local server on it, and logs in.
+	// given a pre-initialized WorldFile (ie the world has already been read from file and/or generated successfully), this method starts the process of loading a world in single player mode.
+	// when a world is first loaded, the intro plays. After the intro is done, the game starts; however, the world still loads before the intro plays. It just doesn't get updated until the intro finishes and the game view appears.
 	public void startLocalWorld(WorldDataSet worldInfo) {
 		// ClientCore.stopMusic();
 		LoadingScreen loadingScreen = new LoadingScreen();
-		loadingScreen.pushMessage("Initializing private server");
+		// loadingScreen.pushMessage("Initializing private server");
 		ClientCore.setScreen(loadingScreen);
 		
-		this.ipAddress = "localhost";
+		PacketPipe pipe1 = new PacketPipe("LocalClient packet reader");
+		PacketPipe pipe2 = new PacketPipe("LocalServer packet reader");
+		
+		PacketPipeWriter serverOut = pipe1.getPipeWriter();
+		PacketPipeReader clientIn = pipe1.getPipeReader();
+		
+		PacketPipeWriter clientOut = pipe2.getPipeWriter();
+		PacketPipeReader serverIn = pipe2.getPipeReader();
+		
+		LocalClient localClient = new LocalClient(clientIn, clientOut);
+		this.client = localClient;
 		
 		new Thread(() -> {
 			// start a server, and attempt to connect the client. If successful, it will set the screen to null; if not, the new server will be closed.
 			
-			int port;
-			try {
-				port = serverManager.startServer(worldInfo, addr -> addr.equals(client.getClientAddress()), loadingScreen);
-			} catch(IOException e) {
+			if(!serverManager.startSPServer(worldInfo, serverIn, serverOut, loadingScreen))
+				return; // failed.
+			
+			clientIn.start();
+			
+			// loadingScreen.popMessage(); // matched with the "init private server" msg at the start of this method.
+			
+			localClient.send(new Login(GameProtocol.HOST, GameCore.VERSION));
+			
+			/*if(errorMessage != null) {
 				Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen("Error starting world: "+e.getMessage())));
 				return;
-			}
-			
-			loadingScreen.popMessage();
-			
-			// successful server start
-			client.connectToServer(loadingScreen, serverManager, "localhost", port, success -> {
-				if(!success) {
-					serverManager.closeServer();
-					exitWorld();
-				}
-			});
+			}*/
 		}).start();
 	}
 	
@@ -169,11 +189,12 @@ public class ClientWorld extends LevelManager {
 	@Override
 	public void exitWorld() {
 		// set menu to main menu, and dispose of level/world resources
-		ClientCore.getClient().disconnect();
+		client.disconnect();
+		// ClientCore.getClient().disconnect();
 		mainPlayer = null;
 		clearEntityIdMap();
 		ClientCore.setScreen(new MainMenu());
-		client = new GameClient();
+		client = null;
 	}
 	
 	// TODO add lighting overlays, based on level and/or time of day, depending on the level and perhaps other things.

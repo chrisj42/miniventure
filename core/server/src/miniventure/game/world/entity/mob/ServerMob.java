@@ -3,9 +3,9 @@ package miniventure.game.world.entity.mob;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import miniventure.game.GameProtocol.Hurt;
-import miniventure.game.GameProtocol.MobUpdate;
-import miniventure.game.GameProtocol.SpriteUpdate;
+import miniventure.game.network.GameProtocol.Hurt;
+import miniventure.game.network.GameProtocol.MobUpdate;
+import miniventure.game.network.GameProtocol.SpriteUpdate;
 import miniventure.game.item.Item;
 import miniventure.game.item.Result;
 import miniventure.game.item.ToolItem;

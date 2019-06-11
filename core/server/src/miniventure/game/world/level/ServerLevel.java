@@ -3,7 +3,7 @@ package miniventure.game.world.level;
 import java.util.*;
 
 import miniventure.game.GameCore;
-import miniventure.game.GameProtocol.TileUpdate;
+import miniventure.game.network.GameProtocol.TileUpdate;
 import miniventure.game.item.ServerItem;
 import miniventure.game.server.GameServer;
 import miniventure.game.util.MyUtils;

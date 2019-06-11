@@ -2,7 +2,6 @@ package miniventure.game.server;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -11,15 +10,16 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 import miniventure.game.GameCore;
-import miniventure.game.GameProtocol;
+import miniventure.game.network.GameProtocol;
 import miniventure.game.ProgressPrinter;
 import miniventure.game.chat.command.CommandInputParser;
+import miniventure.game.network.PacketPipe.PacketPipeReader;
+import miniventure.game.network.PacketPipe.PacketPipeWriter;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.ProgressLogger;
 import miniventure.game.util.VersionInfo;
 import miniventure.game.util.customenum.GenericEnum;
-import miniventure.game.util.function.MapFunction;
 import miniventure.game.world.file.WorldDataSet;
 import miniventure.game.world.file.WorldFileInterface;
 import miniventure.game.world.file.WorldFormatException;
@@ -31,11 +31,11 @@ import com.badlogic.gdx.math.MathUtils;
 
 import org.jetbrains.annotations.NotNull;
 
-public class ServerCore implements Runnable {
+public class ServerCore extends Thread {
 	
 	@NotNull private final ServerWorld serverWorld;
 	@NotNull private final CommandInputParser commandParser;
-	private Thread thread;
+	private Thread updateThread;
 	
 	private final float[] frameTimes = new float[20];
 	private final int FRAME_INTERVAL = 30; // how many frames are in each time (above)
@@ -43,14 +43,16 @@ public class ServerCore implements Runnable {
 	private boolean loopedFrames = false;
 	private final Object fpsLock = new Object();
 	
-	private ServerCore(int port, boolean multiplayer, MapFunction<InetSocketAddress, Boolean> hostFinder, WorldDataSet worldInfo, ProgressLogger logger) throws IOException {
-		serverWorld = new ServerWorld(this, port, multiplayer, hostFinder, worldInfo, logger);
+	public ServerCore(@NotNull ServerFetcher serverFetcher, @NotNull WorldDataSet worldInfo, ProgressLogger logger) throws IOException {
+		super(new ThreadGroup("server"), "Miniventure Server");
+		serverWorld = new ServerWorld(this, serverFetcher, worldInfo, logger);
 		commandParser = new CommandInputParser(serverWorld);
 	}
 	
 	@Override
 	public void run() {
-		thread = Thread.currentThread();
+		updateThread = Thread.currentThread();
+		
 		// start command parser thread
 		new Thread(commandParser, "CommandInputParser").start();
 		
@@ -102,9 +104,9 @@ public class ServerCore implements Runnable {
 	@NotNull
 	public GameServer getServer() { return getWorld().getServer(); }
 	
-	public boolean isUpdateThread() { return Thread.currentThread() == thread; }
+	public boolean isUpdateThread() { return Thread.currentThread() == updateThread; }
 	
-	public boolean isRunning() { return thread != null && thread.isAlive(); }
+	public boolean isRunning() { return updateThread != null && updateThread.isAlive(); }
 	
 	public float getFPS() {
 		synchronized (fpsLock) {
@@ -118,26 +120,7 @@ public class ServerCore implements Runnable {
 		}
 	}
 	
-	
-	// single player server
-	public static ServerCore initSinglePlayer(WorldDataSet worldInfo, MapFunction<InetSocketAddress, Boolean> hostFinder, ProgressLogger logger) throws IOException {
-		int tries = 0;
-		int port = GameProtocol.PORT;
-		while(true) {
-			try {
-				return new ServerCore(port, false, hostFinder, worldInfo, logger);
-			} catch(IOException e) {
-				if(tries == 0)
-					e.printStackTrace();
-				tries++;
-				if(tries > 10)
-					throw new IOException("Failed to find valid port for internal server after "+tries+" tries. Ensure you have port "+GameProtocol.PORT+" or subsequent ports available.", e);
-				else
-					port++;// += MathUtils.random(1, 10);
-			}
-		}
-	}
-	
+	// creates a headless dedicated server
 	public static void main(String[] args) throws IOException {
 		args = ArrayUtils.mapArray(args, String.class, String::toLowerCase);
 		LinkedList<String> arglist = new LinkedList<>(Arrays.asList(args));
@@ -190,9 +173,9 @@ public class ServerCore implements Runnable {
 		}
 		
 		// check for an existing save with the given name
-		Path world = WorldFileInterface.getLocation(worldname);
+		Path worldPath = WorldFileInterface.getLocation(worldname);
 		System.out.println("looking for worlds in: "+ WorldFileInterface.getLocation("").toAbsolutePath());
-		boolean exists = Files.exists(world);
+		boolean exists = Files.exists(worldPath);
 		
 		if(!exists && !create) {
 			// doesn't exist but didn't say create; prompt for creation
@@ -221,10 +204,10 @@ public class ServerCore implements Runnable {
 		
 		if(make) {
 			// create folders to acquire lock
-			Files.createDirectories(world);
+			Files.createDirectories(worldPath);
 		}
 		
-		RandomAccessFile lockHolder = WorldFileInterface.tryLockWorld(world);
+		RandomAccessFile lockHolder = WorldFileInterface.tryLockWorld(worldPath);
 		if(lockHolder == null) {
 			System.err.println("Failed to acquire world lock; is it currently loaded by another instance?");
 			return;
@@ -241,7 +224,7 @@ public class ServerCore implements Runnable {
 		WorldDataSet worldInfo;
 		
 		if(load) { // LOAD
-			WorldReference worldRef = new WorldReference(world);
+			WorldReference worldRef = new WorldReference(worldPath);
 			try {
 				worldInfo = WorldFileInterface.loadWorld(worldRef, lockHolder);
 			} catch(WorldFormatException e) {
@@ -250,9 +233,10 @@ public class ServerCore implements Runnable {
 			}
 		}
 		else // CREATE
-			worldInfo = WorldFileInterface.createWorld(world, lockHolder, seedString);
+			worldInfo = WorldFileInterface.createWorld(worldPath, lockHolder, seedString);
 		
-		ServerCore core = new ServerCore(port, true, addr -> false, worldInfo, new ProgressPrinter());
+		final int portf = port;
+		ServerCore core = new ServerCore((world, pdata) -> new NetworkServer(world, portf, addr -> null, pdata), worldInfo, new ProgressPrinter());
 		
 		System.out.println("server ready");
 		if(!GameCore.determinedLatestVersion())

@@ -1,6 +1,6 @@
 package miniventure.game.item;
 
-import miniventure.game.GameProtocol.SerialRecipe;
+import miniventure.game.network.GameProtocol.SerialRecipe;
 import miniventure.game.item.ToolItem.Material;
 
 import static miniventure.game.world.tile.ServerTileType.getItem;

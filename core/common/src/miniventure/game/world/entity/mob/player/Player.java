@@ -2,6 +2,7 @@ package miniventure.game.world.entity.mob.player;
 
 import java.util.EnumMap;
 
+import miniventure.game.network.PacketPipe;
 import miniventure.game.world.entity.mob.Mob;
 
 import com.badlogic.gdx.math.Rectangle;
@@ -74,5 +75,5 @@ public interface Player extends Mob {
 		return bounds;
 	}
 	
-	void handlePlayerPackets(@NotNull Object packet, @NotNull Connection connection);
+	void handlePlayerPackets(@NotNull Object packet, @NotNull PacketPipe.PacketPipeWriter packetSender);
 }

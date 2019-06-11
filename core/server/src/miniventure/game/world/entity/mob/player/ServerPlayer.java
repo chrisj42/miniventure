@@ -6,11 +6,12 @@ import java.util.Arrays;
 import java.util.EnumMap;
 
 import miniventure.game.GameCore;
-import miniventure.game.GameProtocol;
-import miniventure.game.GameProtocol.*;
+import miniventure.game.network.GameProtocol;
+import miniventure.game.network.GameProtocol.*;
 import miniventure.game.item.*;
 import miniventure.game.item.ToolItem.Material;
 import miniventure.game.item.ToolItem.ToolType;
+import miniventure.game.network.PacketPipe;
 import miniventure.game.server.GameServer;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
@@ -150,7 +151,7 @@ public class ServerPlayer extends ServerMob implements Player {
 	
 	// this allows a lot of the packet handling that deals with inner workings of the ServerPlayer to occur right within the ServerPlayer class, and not require it to have a bunch of public methods that only GameServer ever uses.
 	@Override
-	public void handlePlayerPackets(@NotNull Object packet, @NotNull Connection connection) {
+	public void handlePlayerPackets(@NotNull Object packet, @NotNull PacketPipe.PacketPipeWriter connection) {
 		ServerWorld world = getWorld();
 		
 		// TODO don't allow client to update server stats
@@ -171,7 +172,7 @@ public class ServerPlayer extends ServerMob implements Player {
 			move(moveDist);
 			// compare against given end pos
 			if(move.endPos.variesFrom(this))
-				connection.sendTCP(new PositionUpdate(this));
+				connection.send(new PositionUpdate(this));
 			else
 				moveTo(move.endPos.getPos());
 			// note that the server will always have the say when it comes to which level the player should be on.
@@ -179,7 +180,7 @@ public class ServerPlayer extends ServerMob implements Player {
 		
 		forPacket(packet, InteractRequest.class, true, r -> {
 			// if(r.playerPosition.variesFrom(client))
-			// 	connection.sendTCP(new PositionUpdate(client)); // fix the player's position
+			// 	connection.send(new PositionUpdate(client)); // fix the player's position
 			
 			doInteract(r.dir, getHeldItem(r.hotbarIndex), r.hotbarIndex, r.attack);
 		});
@@ -187,17 +188,17 @@ public class ServerPlayer extends ServerMob implements Player {
 		forPacket(packet, ItemDropRequest.class, true, drop -> {
 			if(!dropItem(drop)) {
 				// drop failed, i.e. client allowed it when it shouldn't have; update client inv
-				connection.sendTCP(getInventoryUpdate());
+				connection.send(getInventoryUpdate());
 			}
 			// if successful, do nothing, because client will have pre-maturely removed the item itself.
 		});
 		
 		forPacket(packet, InventoryRequest.class, true, req -> {
-			connection.sendTCP(getInventoryUpdate());
+			connection.send(getInventoryUpdate());
 		});
 		
 		forPacket(packet, RecipeRequest.class, true, req ->
-			connection.sendTCP(new RecipeRequest(
+			connection.send(new RecipeRequest(
 				Recipes.serializeRecipes(),
 				new RecipeStockUpdate(inventory.getItemStacks())
 			))
@@ -240,14 +241,14 @@ public class ServerPlayer extends ServerMob implements Player {
 						level.dropItem(item, getPosition(), null);
 			}
 			//getHands().validate();
-			connection.sendTCP(getInventoryUpdate());
-			connection.sendTCP(new RecipeStockUpdate(inventory.getItemStacks()));
+			connection.send(getInventoryUpdate());
+			connection.send(new RecipeStockUpdate(inventory.getItemStacks()));
 		});
 		
 		if(packet.equals(DatalessRequest.Respawn)) {
 			world.postRunnable(() -> {
 				world.respawnPlayer(this);
-				connection.sendTCP(getSpawnData());
+				connection.send(getSpawnData());
 			});
 		}
 		

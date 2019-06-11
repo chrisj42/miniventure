@@ -2,7 +2,7 @@ package miniventure.game.world.entity.mob;
 
 import java.util.concurrent.PriorityBlockingQueue;
 
-import miniventure.game.GameProtocol.SpriteUpdate;
+import miniventure.game.network.GameProtocol.SpriteUpdate;
 import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.EntityRenderer.DirectionalAnimationRenderer;

@@ -20,8 +20,9 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class GameScreen {
+public class GameView extends Screen {
 	
 	@NotNull private final LevelViewport levelView;
 	
@@ -34,7 +35,8 @@ public class GameScreen {
 	final ChatScreen chatOverlay, chatScreen;
 	private boolean showDebug = false;
 	
-	public GameScreen() {
+	public GameView(@NotNull ClientPlayer player) { this(player, null); }
+	public GameView(@NotNull ClientPlayer player, @Nullable GameView prev) {
 		uiCamera = new OrthographicCamera();
 		noScaleCamera = new OrthographicCamera();
 		guiStage = new InventoryScreen(uiCamera, batch);
@@ -42,16 +44,18 @@ public class GameScreen {
 		levelView = new LevelViewport(batch, noScaleCamera); // uses uiCamera for rendering lighting to the screen.
 		
 		chatOverlay = new ChatScreen(true);
-		chatScreen = new ChatScreen(false);
+		chatScreen = prev == null ? new ChatScreen(false) : prev.chatScreen;
 		
 		resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 	}
 	
-	void dispose() {
+	@Override
+	public void dispose() {
 		levelView.dispose();
 		guiStage.dispose();
 		chatOverlay.dispose();
 		chatScreen.dispose();
+		super.dispose();
 	}
 	
 	public void handleInput(@NotNull ClientPlayer player) {

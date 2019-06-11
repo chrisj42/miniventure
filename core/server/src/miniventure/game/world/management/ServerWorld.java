@@ -2,23 +2,22 @@ package miniventure.game.world.management;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.net.InetSocketAddress;
 import java.nio.file.Path;
 import java.util.*;
 
 import miniventure.game.GameCore;
-import miniventure.game.GameProtocol.EntityAddition;
-import miniventure.game.GameProtocol.EntityRemoval;
-import miniventure.game.GameProtocol.IslandReference;
-import miniventure.game.GameProtocol.MapRequest;
-import miniventure.game.GameProtocol.WorldData;
+import miniventure.game.network.GameProtocol.EntityAddition;
+import miniventure.game.network.GameProtocol.EntityRemoval;
+import miniventure.game.network.GameProtocol.IslandReference;
+import miniventure.game.network.GameProtocol.MapRequest;
+import miniventure.game.network.GameProtocol.WorldData;
 import miniventure.game.server.GameServer;
 import miniventure.game.server.ServerCore;
+import miniventure.game.server.ServerFetcher;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.ProgressLogger;
 import miniventure.game.util.SyncObj;
 import miniventure.game.util.Version;
-import miniventure.game.util.function.MapFunction;
 import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ServerEntity;
@@ -65,7 +64,9 @@ public class ServerWorld extends WorldManager {
 		}
 	};
 	
+	@NotNull
 	private final ServerCore core;
+	@NotNull
 	private final GameServer server;
 	
 	private final SyncObj<Map<Integer, ServerLevel>> loadedLevels = new SyncObj<>(Collections.synchronizedMap(new HashMap<>()));
@@ -85,7 +86,7 @@ public class ServerWorld extends WorldManager {
 	// locks world update frames so world loading, saving, and exiting occurs before or after a full step.
 	// private final Object updateLock = new Object();
 	
-	public ServerWorld(@NotNull ServerCore core, int port, boolean multiplayer, MapFunction<InetSocketAddress, Boolean> connectionValidator, @NotNull WorldDataSet worldInfo, ProgressLogger logger) throws IOException {
+	public ServerWorld(@NotNull ServerCore core, @NotNull ServerFetcher serverFetcher, @NotNull WorldDataSet worldInfo, ProgressLogger logger) throws IOException {
 		this.core = core;
 		logger.pushMessage("Parsing world parameters");
 		final boolean old = worldInfo.dataVersion.compareTo(GameCore.VERSION) < 0;
@@ -99,7 +100,7 @@ public class ServerWorld extends WorldManager {
 			});
 		}
 		
-		this.server = new GameServer(this, port, multiplayer, connectionValidator, pinfo); // start new server on given port
+		this.server = serverFetcher.get(this, pinfo);
 		
 		gameTime = worldInfo.gameTime;
 		daylightOffset = worldInfo.timeOfDay;
@@ -496,6 +497,7 @@ public class ServerWorld extends WorldManager {
 	@Override
 	public ServerTileType getTileType(TileTypeEnum type) { return ServerTileType.get(type); }
 	
+	@NotNull
 	public GameServer getServer() { return server; }
 	
 	public MapRequest getMapData() {

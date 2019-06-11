@@ -5,9 +5,9 @@ import java.util.Deque;
 import java.util.LinkedList;
 
 import miniventure.game.GameCore;
-import miniventure.game.GameProtocol.Message;
-import miniventure.game.GameProtocol.TabRequest;
-import miniventure.game.GameProtocol.TabResponse;
+import miniventure.game.network.GameProtocol.Message;
+import miniventure.game.network.GameProtocol.TabRequest;
+import miniventure.game.network.GameProtocol.TabResponse;
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.chat.InfoMessageLine;
 import miniventure.game.client.ClientCore;

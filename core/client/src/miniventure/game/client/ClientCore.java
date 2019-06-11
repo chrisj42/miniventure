@@ -11,7 +11,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 
 import miniventure.game.GameCore;
-import miniventure.game.GameProtocol.Message;
+import miniventure.game.network.GameProtocol.Message;
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.client.FontStyle.StyleData;
 import miniventure.game.screen.ErrorScreen;
@@ -52,7 +52,7 @@ public class ClientCore extends ApplicationAdapter {
 	
 	public static final int DEFAULT_SCREEN_WIDTH = 800;
 	public static final int DEFAULT_SCREEN_HEIGHT = 450;
-	private static GameScreen gameScreen;
+	private static GameView gameScreen;
 	private static ClientWorld clientWorld;
 	
 	public static boolean viewedInstructions = false;
@@ -125,7 +125,7 @@ public class ClientCore extends ApplicationAdapter {
 			ClientTileType.init();
 			serverStarter.init();
 			
-			gameScreen = new GameScreen();
+			gameScreen = new GameView();
 			clientWorld = new ClientWorld(serverStarter, gameScreen);
 			
 			setScreen(new NotifyScreen(true, () -> setScreen(new MainMenu()),

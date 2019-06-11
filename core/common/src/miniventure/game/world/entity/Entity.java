@@ -1,6 +1,6 @@
 package miniventure.game.world.entity;
 
-import miniventure.game.GameProtocol.PositionUpdate;
+import miniventure.game.network.GameProtocol.PositionUpdate;
 import miniventure.game.item.Item;
 import miniventure.game.item.Result;
 import miniventure.game.util.blinker.Blinker;

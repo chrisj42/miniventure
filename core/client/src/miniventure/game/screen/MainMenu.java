@@ -1,7 +1,7 @@
 package miniventure.game.screen;
 
 import miniventure.game.GameCore;
-import miniventure.game.GameProtocol;
+import miniventure.game.network.GameProtocol;
 import miniventure.game.client.AudioException;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.FontStyle;
@@ -24,7 +24,6 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.kotcrab.vis.ui.widget.LinkLabel.LinkLabelStyle;
 import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 

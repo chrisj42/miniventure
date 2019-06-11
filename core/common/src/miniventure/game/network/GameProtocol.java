@@ -1,4 +1,4 @@
-package miniventure.game;
+package miniventure.game.network;
 
 import java.io.File;
 import java.util.Arrays;

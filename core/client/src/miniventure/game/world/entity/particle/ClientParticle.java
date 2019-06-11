@@ -1,7 +1,7 @@
 package miniventure.game.world.entity.particle;
 
-import miniventure.game.GameProtocol.ParticleAddition;
-import miniventure.game.GameProtocol.PositionUpdate;
+import miniventure.game.network.GameProtocol.ParticleAddition;
+import miniventure.game.network.GameProtocol.PositionUpdate;
 import miniventure.game.world.entity.ClientEntity;
 
 import com.badlogic.gdx.math.Vector2;

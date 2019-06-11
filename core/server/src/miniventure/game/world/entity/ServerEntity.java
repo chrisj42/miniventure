@@ -5,9 +5,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import miniventure.game.GameProtocol.EntityUpdate;
-import miniventure.game.GameProtocol.PositionUpdate;
-import miniventure.game.GameProtocol.SpriteUpdate;
+import miniventure.game.network.GameProtocol.EntityUpdate;
+import miniventure.game.network.GameProtocol.PositionUpdate;
+import miniventure.game.network.GameProtocol.SpriteUpdate;
 import miniventure.game.server.GameServer;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;

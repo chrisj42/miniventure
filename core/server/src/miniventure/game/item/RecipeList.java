@@ -1,6 +1,6 @@
 package miniventure.game.item;
 
-import miniventure.game.GameProtocol.SerialRecipe;
+import miniventure.game.network.GameProtocol.SerialRecipe;
 
 // sorts recipes into various recipe lists
 public enum RecipeList {

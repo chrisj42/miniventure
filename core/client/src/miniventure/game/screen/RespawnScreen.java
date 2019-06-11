@@ -1,7 +1,7 @@
 package miniventure.game.screen;
 
 import miniventure.game.client.ClientCore;
-import miniventure.game.client.GameScreen;
+import miniventure.game.client.GameView;
 import miniventure.game.screen.util.BackgroundProvider;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
 import miniventure.game.world.level.ClientLevel;
@@ -15,9 +15,9 @@ public class RespawnScreen extends BackgroundProvider {
 	private final ClientPlayer deadPlayer;
 	private final ClientLevel level;
 	private final Color lighting;
-	private final GameScreen backgroundRenderer;
+	private final GameView backgroundRenderer;
 	
-	public RespawnScreen(ClientPlayer deadPlayer, Color lighting, GameScreen backgroundRenderer) {
+	public RespawnScreen(ClientPlayer deadPlayer, Color lighting, GameView backgroundRenderer) {
 		super(false, true, new ScreenViewport()); // level renderer clears it
 		this.deadPlayer = deadPlayer;
 		level = deadPlayer.getWorld().getLevel();
