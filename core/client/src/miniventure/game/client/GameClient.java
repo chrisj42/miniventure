@@ -37,7 +37,7 @@ public abstract class GameClient implements GameProtocol {
 	public abstract void send(Object obj);
 	
 	void handlePacket(Object object, PacketPipeWriter connection) {
-		GameCore.debug("Client got packet: "+object.getClass().getSimpleName());
+		// GameCore.debug("Client got packet: "+object.getClass().getSimpleName());
 		
 		ClientWorld world = ClientCore.getWorld();
 		ClientPlayer player = world.getMainPlayer();

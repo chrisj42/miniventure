@@ -171,17 +171,12 @@ public class DesktopLauncher {
 		private boolean startServer(ServerFetcher fetcher, WorldDataSet worldInfo, ProgressLogger logger) {
 			try {
 				this.core = new ServerCore(fetcher, worldInfo, logger);
+				core.start();
 				return true;
 			} catch(IOException e) {
 				Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen("Error starting world: "+e.getMessage())));
 				return false;
 			}
-		}
-		
-		@Override
-		public void open() {
-			// TODO implement this differently; local server needs to close, and networked server needs to be created.
-			/*core.getServer().setMultiplayer(true);*/
 		}
 		
 		@Override

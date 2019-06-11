@@ -379,11 +379,10 @@ public abstract class GameServer implements GameProtocol {
 	public void sendToPlayer(@NotNull ServerPlayer player, Object obj) {
 		PacketPipeWriter toClient = getPipeWriter(player);
 		if(toClient != null) {
-			GameCore.debug("Server sending packet "+obj.getClass().getSimpleName()+" to player "+player);
 			toClient.send(obj);
 		}
 		else
-			GameCore.debug("Server could not find send pipe for client "+player+" to send packet: "+obj.getClass().getSimpleName());
+			GameCore.error("Server could not find send pipe for client "+player+" to send packet: "+obj.getClass().getSimpleName());
 	}
 	
 	// levelMask is the level a player must be on to receive this data.

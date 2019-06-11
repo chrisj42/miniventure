@@ -22,7 +22,6 @@ public interface ServerManager {
 	
 	void startMPServer(NetworkClient netClient, WorldDataSet worldInfo, LoadingScreen logger, ValueAction<Boolean> callback);
 	
-	void open(); // allow other players to join; TODO implement this option in a pause menu on client GUI
 	void closeServer();
 	
 }

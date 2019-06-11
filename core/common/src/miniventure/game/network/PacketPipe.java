@@ -82,7 +82,7 @@ public class PacketPipe {
 	// can only send through this end
 	public class PacketPipeWriter extends PacketPipeInterface {
 		public void send(Object packet) {
-			GameCore.debug("sending packet from pipe: "+readerThreadLabel+"; packet type: "+packet.getClass().getSimpleName());
+			// GameCore.debug("sending packet from pipe: "+readerThreadLabel+"; packet type: "+packet.getClass().getSimpleName());
 			PacketPipe.this.send(packet);
 		}
 	}
