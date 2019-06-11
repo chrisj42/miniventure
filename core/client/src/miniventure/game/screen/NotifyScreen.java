@@ -1,6 +1,5 @@
 package miniventure.game.screen;
 
-import miniventure.game.client.ClientCore;
 import miniventure.game.util.function.Action;
 
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -10,7 +9,7 @@ import com.kotcrab.vis.ui.widget.VisTextButton;
 public class NotifyScreen extends MenuScreen {
 	
 	public NotifyScreen(boolean clearGdxBackground, Action onConfirm, String buttonText, String... message) {
-		super(clearGdxBackground, new ScreenViewport(), ClientCore.getBatch());
+		super(clearGdxBackground, new ScreenViewport());
 		
 		Table table = useTable();
 		table.defaults().pad(5);

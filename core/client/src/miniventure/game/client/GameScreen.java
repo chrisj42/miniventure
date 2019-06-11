@@ -22,7 +22,7 @@ import com.badlogic.gdx.utils.Array;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class GameView extends Screen {
+public class GameScreen {
 	
 	@NotNull private final LevelViewport levelView;
 	
@@ -33,32 +33,39 @@ public class GameView extends Screen {
 	private final OrthographicCamera noScaleCamera;
 	
 	final ChatScreen chatOverlay, chatScreen;
-	private boolean showDebug = false;
+	// private boolean showDebug = false;
 	
-	public GameView(@NotNull ClientPlayer player) { this(player, null); }
-	public GameView(@NotNull ClientPlayer player, @Nullable GameView prev) {
+	@NotNull
+	private final ClientPlayer player;
+	
+	public GameScreen(@NotNull ClientPlayer player, @Nullable GameScreen prev, InventoryScreen invScreen) {
+		this.player = player;
+		
 		uiCamera = new OrthographicCamera();
 		noScaleCamera = new OrthographicCamera();
-		guiStage = new InventoryScreen(uiCamera, batch);
-		
-		levelView = new LevelViewport(batch, noScaleCamera); // uses uiCamera for rendering lighting to the screen.
+		guiStage = invScreen;
+		invScreen.getViewport().setCamera(uiCamera);
+		levelView = new LevelViewport(noScaleCamera); // uses uiCamera for rendering lighting to the screen.
 		
 		chatOverlay = new ChatScreen(true);
 		chatScreen = prev == null ? new ChatScreen(false) : prev.chatScreen;
+		if(prev != null)
+			prev.dispose(true);
 		
 		resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 	}
 	
-	@Override
-	public void dispose() {
+	void dispose() { dispose(false); }
+	private void dispose(boolean recycle) {
 		levelView.dispose();
 		guiStage.dispose();
 		chatOverlay.dispose();
-		chatScreen.dispose();
-		super.dispose();
+		if(!recycle)
+			chatScreen.dispose();
+		// super.dispose();
 	}
 	
-	public void handleInput(@NotNull ClientPlayer player) {
+	public void handleInput() {
 		player.handleInput(getMouseInput());
 		
 		boolean shift = Gdx.input.isKeyPressed(Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Keys.SHIFT_RIGHT);
@@ -105,16 +112,16 @@ public class GameView extends Screen {
 		}
 	}
 	
-	public void render(@NotNull ClientPlayer mainPlayer, Color lightOverlay, @NotNull ClientLevel level) {
-		render(mainPlayer, lightOverlay, level, true);
+	public void render(Color lightOverlay, @NotNull ClientLevel level) {
+		render(lightOverlay, level, true);
 	}
-	public void render(@NotNull ClientPlayer mainPlayer, Color lightOverlay, @NotNull ClientLevel level, boolean drawGui) {
+	public void render(Color lightOverlay, @NotNull ClientLevel level, boolean drawGui) {
 		
-		levelView.render(mainPlayer.getCenter(), lightOverlay, level);
+		levelView.render(player.getCenter(), lightOverlay, level);
 		
 		// batch.setProjectionMatrix(uiCamera.combined);
 		if(drawGui) {
-			renderGui(mainPlayer, level);
+			renderGui(level);
 			guiStage.focus();
 			guiStage.act();
 			guiStage.draw();
@@ -143,12 +150,12 @@ public class GameView extends Screen {
 		return new Vector2();
 	}
 	
-	private void renderGui(@NotNull ClientPlayer mainPlayer, @NotNull Level level) {
+	private void renderGui(@NotNull Level level) {
 		batch.setProjectionMatrix(uiCamera.combined);
 		batch.begin();
 		// draw UI for stats
 		// System.out.println("ui viewport: "+uiCamera.viewportWidth+"x"+uiCamera.viewportHeight);
-		mainPlayer.drawGui(new Rectangle(0, 0, uiCamera.viewportWidth, uiCamera.viewportHeight), batch);
+		player.drawGui(new Rectangle(0, 0, uiCamera.viewportWidth, uiCamera.viewportHeight), batch);
 		batch.end();
 		
 		batch.setProjectionMatrix(noScaleCamera.combined);
@@ -174,13 +181,13 @@ public class GameView extends Screen {
 		debugInfo.add("Version: " + GameCore.VERSION);
 		
 		// player coordinates, for debug
-		Rectangle playerBounds = mainPlayer.getBounds();
+		Rectangle playerBounds = player.getBounds();
 		debugInfo.add("X = "+(playerBounds.x-level.getWidth()/2));
 		debugInfo.add("Y = "+(playerBounds.y-level.getHeight()/2));
 		
 		Tile playerTile = level.getTile(playerBounds);
 		debugInfo.add("Tile = " + (playerTile == null ? "Null" : playerTile.getType()));
-		Tile interactTile = level.getTile(mainPlayer.getInteractionRect());
+		Tile interactTile = level.getTile(player.getInteractionRect());
 		debugInfo.add("Looking at: " + (interactTile == null ? "Null" : interactTile.toLocString().replace("Client", "")));
 		
 		debugInfo.add("Mobs in level: " + level.getMobCount()+"/"+level.getMobCap());

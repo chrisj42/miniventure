@@ -14,7 +14,6 @@ import miniventure.game.util.function.Action;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -22,7 +21,6 @@ import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputEvent.Type;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -49,9 +47,9 @@ public class MenuScreen extends Screen {
 	private HashMap<Label, FontStyle> labels = new HashMap<>();
 	private HashSet<TextField> textFields = new HashSet<>();
 	
-	public MenuScreen(final boolean clearGdxBackground) { this(clearGdxBackground, new DiscreteViewport(), ClientCore.getBatch()); }
-	public MenuScreen(final boolean clearGdxBackground, Viewport viewport, Batch batch) {
-		super(viewport, batch);
+	public MenuScreen(final boolean clearGdxBackground) { this(clearGdxBackground, new DiscreteViewport()); }
+	public MenuScreen(final boolean clearGdxBackground, Viewport viewport) {
+		super(viewport, ClientCore.getBatch());
 		this.clearGdxBackground = clearGdxBackground;
 	}
 	

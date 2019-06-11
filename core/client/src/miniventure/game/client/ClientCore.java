@@ -52,7 +52,7 @@ public class ClientCore extends ApplicationAdapter {
 	
 	public static final int DEFAULT_SCREEN_WIDTH = 800;
 	public static final int DEFAULT_SCREEN_HEIGHT = 450;
-	private static GameView gameScreen;
+	private static GameScreen gameScreen;
 	private static ClientWorld clientWorld;
 	
 	public static boolean viewedInstructions = false;
@@ -125,8 +125,8 @@ public class ClientCore extends ApplicationAdapter {
 			ClientTileType.init();
 			serverStarter.init();
 			
-			gameScreen = new GameView();
-			clientWorld = new ClientWorld(serverStarter, gameScreen);
+			// gameScreen = new GameScreen();
+			clientWorld = new ClientWorld(serverStarter);
 			
 			setScreen(new NotifyScreen(true, () -> setScreen(new MainMenu()),
 				"Continue",
@@ -273,6 +273,11 @@ public class ClientCore extends ApplicationAdapter {
 		}
 	}
 	
+	public static GameScreen newGameScreen(GameScreen screen) {
+		gameScreen = screen;
+		return screen;
+	}
+	
 	public static void playSound(String soundName) {
 		if(!soundEffects.containsKey(soundName)) {
 			try {
@@ -307,14 +312,17 @@ public class ClientCore extends ApplicationAdapter {
 	}
 	
 	static void addMessage(Message msg) {
+		if(gameScreen == null) return;
 		gameScreen.chatOverlay.addMessage(msg);
 		gameScreen.chatScreen.addMessage(msg);
 	}
 	static void addMessage(InfoMessage msg) {
+		if(gameScreen == null) return;
 		gameScreen.chatOverlay.addMessage(msg);
 		gameScreen.chatScreen.addMessage(msg);
 	}
 	static void clearMessages() {
+		if(gameScreen == null) return;
 		gameScreen.chatOverlay.reset();
 		gameScreen.chatScreen.reset();
 	}

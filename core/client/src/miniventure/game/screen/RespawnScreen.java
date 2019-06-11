@@ -1,7 +1,7 @@
 package miniventure.game.screen;
 
 import miniventure.game.client.ClientCore;
-import miniventure.game.client.GameView;
+import miniventure.game.client.GameScreen;
 import miniventure.game.screen.util.BackgroundProvider;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
 import miniventure.game.world.level.ClientLevel;
@@ -15,9 +15,9 @@ public class RespawnScreen extends BackgroundProvider {
 	private final ClientPlayer deadPlayer;
 	private final ClientLevel level;
 	private final Color lighting;
-	private final GameView backgroundRenderer;
+	private final GameScreen backgroundRenderer;
 	
-	public RespawnScreen(ClientPlayer deadPlayer, Color lighting, GameView backgroundRenderer) {
+	public RespawnScreen(ClientPlayer deadPlayer, Color lighting, GameScreen backgroundRenderer) {
 		super(false, true, new ScreenViewport()); // level renderer clears it
 		this.deadPlayer = deadPlayer;
 		level = deadPlayer.getWorld().getLevel();
@@ -33,7 +33,7 @@ public class RespawnScreen extends BackgroundProvider {
 	@Override
 	public void renderBackground() {
 		if(level != null)
-			backgroundRenderer.render(deadPlayer, lighting, level, false);
+			backgroundRenderer.render(lighting, level, false);
 	}
 	
 	// background is level viewport of gamescreen; ClientCore always calls that directly, so there is no need to do it again here.

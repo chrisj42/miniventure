@@ -1,6 +1,5 @@
 package miniventure.game.screen.util;
 
-import miniventure.game.client.ClientCore;
 import miniventure.game.screen.MenuScreen;
 
 import com.badlogic.gdx.Gdx;
@@ -20,7 +19,7 @@ public abstract class BackgroundProvider extends MenuScreen {
 		this.externallyCleared = externallyCleared;
 	}
 	public BackgroundProvider(boolean clearGdxBackground, boolean externallyCleared, Viewport viewport) {
-		super(false, viewport, ClientCore.getBatch());
+		super(false, viewport);
 		this.clearGdxBackground = clearGdxBackground;
 		this.externallyCleared = externallyCleared;
 	}

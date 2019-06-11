@@ -13,7 +13,6 @@ import miniventure.game.world.entity.mob.player.Player;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
@@ -22,7 +21,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.BaseDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
@@ -47,8 +45,8 @@ public class InventoryScreen extends MenuScreen {
 	private float lastAmt;
 	private String lastItem;
 	
-	public InventoryScreen(Camera camera, Batch batch) {
-		super(false, new DiscreteViewport(camera), batch);
+	public InventoryScreen(Camera camera) {
+		super(false, new DiscreteViewport(camera));
 		mainGroup = useTable(Align.left, false);
 		mainGroup.defaults().padBottom(2f);
 		addMainGroup(mainGroup, RelPos.BOTTOM_LEFT);

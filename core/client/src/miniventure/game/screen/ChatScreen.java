@@ -60,7 +60,7 @@ public class ChatScreen extends MenuScreen {
 	private String manualInput = ""; // this is the part of the command that the user entered manually, and so should not be changed when tabbing.
 	
 	public ChatScreen(boolean timeOutMessages) {
-		super(false, new ScreenViewport(), ClientCore.getBatch());
+		super(false, new ScreenViewport());
 		useTimer = timeOutMessages;
 		
 		VerticalGroup vGroup = useVGroup(0, Align.topRight, false);

@@ -35,16 +35,15 @@ public class LevelViewport {
 	private float maxWorldViewWidth = 0;
 	private float maxWorldViewHeight = 0;
 	
-	private SpriteBatch batch;
+	private final SpriteBatch batch = ClientCore.getBatch();
 	
 	private final OrthographicCamera camera, lightingCamera;
 	
 	private int zoom = 0;
 	private FrameBuffer lightingBuffer;
 	
-	public LevelViewport() { this(ClientCore.getBatch(), new OrthographicCamera()); }
-	public LevelViewport(SpriteBatch batch, OrthographicCamera lightingCamera) {
-		this.batch = batch;
+	public LevelViewport() { this(new OrthographicCamera()); }
+	public LevelViewport(OrthographicCamera lightingCamera) {
 		camera = new OrthographicCamera();
 		this.lightingCamera = lightingCamera;
 		resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());

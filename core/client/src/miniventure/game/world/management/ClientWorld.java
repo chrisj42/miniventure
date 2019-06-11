@@ -2,6 +2,7 @@ package miniventure.game.world.management;
 
 import miniventure.game.GameCore;
 import miniventure.game.client.*;
+import miniventure.game.item.InventoryScreen;
 import miniventure.game.network.GameProtocol;
 import miniventure.game.network.GameProtocol.DatalessRequest;
 import miniventure.game.network.GameProtocol.LevelData;
@@ -22,8 +23,11 @@ import miniventure.game.world.level.ClientLevel;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 
 public class ClientWorld extends LevelManager {
+	
+	// FIXME Implement the system below. Currently the GameView situation isn't as it says; do the thing about making the game view a Screen, and MenuScreen a screen, etc.
 	
 	/* This controls world management, on the client side.
 		Only one instance is created, when the application starts up.
@@ -48,7 +52,7 @@ public class ClientWorld extends LevelManager {
 	private String ipAddress;
 	private int lastPort;
 	
-	private GameView gameScreen;
+	private GameScreen gameScreen;
 	
 	private GameClient client;
 	
@@ -60,7 +64,6 @@ public class ClientWorld extends LevelManager {
 	public ClientWorld(ServerManager serverManager) {
 		this.serverManager = serverManager;
 		
-		// client = new GameClient(); // doesn't automatically connect
 	}
 	
 	// Update method
@@ -75,12 +78,12 @@ public class ClientWorld extends LevelManager {
 		if(level == null) return;
 		
 		if(menu == null)
-			gameScreen.handleInput(mainPlayer);
+			gameScreen.handleInput();
 		
 		level.update(delta);
 		
 		if(menu == null || !menu.usesWholeScreen())
-			gameScreen.render(mainPlayer, getLightingOverlay(), level);
+			gameScreen.render(getLightingOverlay(), level);
 		
 		super.update(delta);
 	}
@@ -249,12 +252,12 @@ public class ClientWorld extends LevelManager {
 		// this has to come before making the new client player, because it has the same eid and so will overwrite some things.
 		if(this.mainPlayer != null) {
 			super.deregisterEntity(this.mainPlayer.getId());
-			// gameScreen.getHudPanel().remove(this.mainPlayer.getHands().getHotbarTable());
 		}
 		
-		this.mainPlayer = new ClientPlayer(data, gameScreen.getGuiStage());
+		InventoryScreen invScreen = new InventoryScreen(new OrthographicCamera());
+		this.mainPlayer = new ClientPlayer(data, invScreen);
 		registerEntity(mainPlayer);
-		// gameScreen.getHudPanel().add(mainPlayer.getHands().getHotbarTable());
+		gameScreen = ClientCore.newGameScreen(new GameScreen(mainPlayer, gameScreen, invScreen));
 	}
 	
 	public void respawnPlayer() {
