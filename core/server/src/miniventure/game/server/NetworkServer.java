@@ -7,6 +7,7 @@ import java.util.HashMap;
 import miniventure.game.GameCore;
 import miniventure.game.network.GameProtocol;
 import miniventure.game.network.PacketPipe;
+import miniventure.game.network.PacketPipe.PacketPipeReader;
 import miniventure.game.network.PacketPipe.PacketPipeWriter;
 import miniventure.game.util.function.MapFunction;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
@@ -27,7 +28,7 @@ public class NetworkServer extends GameServer {
 	private MiniventureServer server;
 	
 	private final HashMap<PacketPipeWriter, Connection> writerToConnectionMap = new HashMap<>();
-	private final HashMap<Connection, PacketPipeWriter> connectionToWriterMap = new HashMap<>();
+	private final HashMap<Connection, PacketPipe> connectionToPipeMap = new HashMap<>();
 	private final Object connectionMapLock = new Object();
 	
 	private final MapFunction<InetSocketAddress, Boolean> hostChecker;
@@ -105,28 +106,27 @@ public class NetworkServer extends GameServer {
 				
 				// login data validated
 				
-				PacketPipe sendPipe = new PacketPipe() {
+				PacketPipe sendPipe = new PacketPipe("Server to "+connection.getRemoteAddressTCP().getHostString()) {
 					@Override
 					public String toString() {
 						return "PacketPipe[remote address: "+connection.getRemoteAddressTCP().getHostString()+']';
 					}
 				};
-				sendPipe.getPipeReader().addListener(connection::sendTCP);
+				PacketPipeReader packetPasser = sendPipe.getPipeReader();
+				packetPasser.addListener(connection::sendTCP);
 				PacketPipeWriter packetWriter = sendPipe.getPipeWriter();
 				
 				synchronized (connectionMapLock) {
 					writerToConnectionMap.put(packetWriter, connection);
-					connectionToWriterMap.put(connection, packetWriter);
+					connectionToPipeMap.put(connection, sendPipe);
 				}
 				
+				packetPasser.start();
 				login(name, isHost, packetWriter);
 				return;
 			}
 			
-			PacketPipeWriter packetWriter;
-			synchronized (connectionMapLock) {
-				packetWriter = connectionToWriterMap.get(connection);
-			}
+			PacketPipeWriter packetWriter = getSendPipe(connection);
 			
 			if(packetWriter == null) {
 				System.err.println("received packet before login, ignoring content. Client Address: "+connection.getRemoteAddressTCP().getHostString()+"; packet type: "+object.getClass().getSimpleName()+"; packet data: "+object);
@@ -138,16 +138,29 @@ public class NetworkServer extends GameServer {
 		
 		@Override
 		public void disconnected(Connection connection) {
-			PacketPipeWriter packetSender;
+			PacketPipe sendPipe;
 			synchronized (connectionMapLock) {
-				packetSender = connectionToWriterMap.get(connection);
+				sendPipe = connectionToPipeMap.get(connection);
 			}
-			
-			if(packetSender != null)
-				logout(packetSender);
+			if(sendPipe != null) {
+				sendPipe.getPipeReader().close(false);
+				logout(sendPipe.getPipeWriter());
+				synchronized (connectionMapLock) {
+					connectionToPipeMap.remove(connection);
+					writerToConnectionMap.remove(sendPipe.getPipeWriter());
+				}
+			}
 		}
 	};
 	
+	@Nullable
+	private PacketPipeWriter getSendPipe(Connection connection) {
+		PacketPipe pipe;
+		synchronized (connectionMapLock) {
+			pipe = connectionToPipeMap.get(connection);
+		}
+		return pipe == null ? null : pipe.getPipeWriter();
+	}
 	
 	@Override @Nullable
 	public InetSocketAddress getPlayerAddress(@NotNull ServerPlayer player) {

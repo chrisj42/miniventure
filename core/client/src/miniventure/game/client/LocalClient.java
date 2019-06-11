@@ -14,6 +14,8 @@ public class LocalClient extends GameClient {
 	public LocalClient(@NotNull PacketPipeReader fromServer, @NotNull PacketPipeWriter toServer) {
 		this.fromServer = fromServer;
 		this.toServer = toServer;
+		
+		fromServer.addListener(packet -> handlePacket(packet, toServer));
 	}
 	
 	@Override

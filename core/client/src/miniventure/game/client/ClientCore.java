@@ -231,7 +231,7 @@ public class ClientCore extends ApplicationAdapter {
 				screen.setParent(menuScreen);
 				screen.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 			} else if(menuScreen != null && (gameScreen == null || menuScreen != gameScreen.chatScreen))
-				menuScreen.dispose();
+				menuScreen.dispose(); // "menuScreen != null" is always true because the start of the method cut off if screen == menuScreen, and since in this branch screen == null, menuScreen cannot also be null otherwise it would be equal. A bit roundabout, I know.
 			
 			GameCore.debug("setting screen to " + screen);
 			

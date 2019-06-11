@@ -37,6 +37,8 @@ public abstract class GameClient implements GameProtocol {
 	public abstract void send(Object obj);
 	
 	void handlePacket(Object object, PacketPipeWriter connection) {
+		GameCore.debug("Client got packet: "+object.getClass().getSimpleName());
+		
 		ClientWorld world = ClientCore.getWorld();
 		ClientPlayer player = world.getMainPlayer();
 		
@@ -67,21 +69,22 @@ public abstract class GameClient implements GameProtocol {
 		if(object instanceof SpawnData) {
 			GameCore.debug("client received player");
 			SpawnData data = (SpawnData) object;
-			world.spawnPlayer(data);
-			ClientCore.setScreen(null);
-			if(ClientCore.PLAY_MUSIC) {
-				try {
-					Music song = ClientCore.setMusicTrack(Gdx.files.internal("audio/music/game.mp3"));
-					song.setOnCompletionListener(music -> {
-						music.stop();
-						MyUtils.delay(MathUtils.random(30_000, 90_000), () -> MyUtils.tryPlayMusic(music));
-					});
-					MyUtils.delay(10_000, () -> MyUtils.tryPlayMusic(song));
-				} catch(AudioException e) {
-					System.err.println("failed to fetch game music.");
-					// e.printStackTrace();
+			world.spawnPlayer(data, () -> {
+				ClientCore.setScreen(null);
+				if(ClientCore.PLAY_MUSIC) {
+					try {
+						Music song = ClientCore.setMusicTrack(Gdx.files.internal("audio/music/game.mp3"));
+						song.setOnCompletionListener(music -> {
+							music.stop();
+							MyUtils.delay(MathUtils.random(30_000, 90_000), () -> MyUtils.tryPlayMusic(music));
+						});
+						MyUtils.delay(10_000, () -> MyUtils.tryPlayMusic(song));
+					} catch(AudioException e) {
+						System.err.println("failed to fetch game music.");
+						// e.printStackTrace();
+					}
 				}
-			}
+			});
 		}
 		
 		if(object instanceof TileUpdate) {

@@ -15,6 +15,7 @@ import miniventure.game.util.function.ValueAction;
 import com.badlogic.gdx.Gdx;
 
 import com.esotericsoftware.kryonet.Connection;
+import com.esotericsoftware.kryonet.FrameworkMessage.KeepAlive;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.MiniventureClient;
 
@@ -38,6 +39,9 @@ public class NetworkClient extends GameClient {
 		client.addListener(new Listener() {
 			@Override
 			public void received(Connection connection, Object object) {
+				if(object instanceof KeepAlive)
+					return; // we don't care about these.
+				
 				handlePacket(object, sendPipe.getPipeWriter());
 			}
 			

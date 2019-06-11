@@ -62,7 +62,7 @@ public class WorldSelectScreen extends BackgroundInheritor {
 					// loader.pushMessage("Loading world '"+ref.worldName+"'...");
 					// ClientCore.setScreen(loader);
 					try {
-						ClientCore.getWorld().startLocalWorld(WorldFileInterface.loadWorld(ref, lockRef));
+						ClientCore.getWorld().startLocalServer(WorldFileInterface.loadWorld(ref, lockRef));
 						return;
 					} catch(WorldFormatException e) {
 						error.setText(MyUtils.combineThrowableCauses(e, "Failed to load world"));

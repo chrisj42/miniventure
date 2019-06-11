@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import miniventure.game.GameCore;
 import miniventure.game.util.function.ValueAction;
 
 import org.jetbrains.annotations.Nullable;
@@ -81,6 +82,7 @@ public class PacketPipe {
 	// can only send through this end
 	public class PacketPipeWriter extends PacketPipeInterface {
 		public void send(Object packet) {
+			GameCore.debug("sending packet from pipe: "+readerThreadLabel+"; packet type: "+packet.getClass().getSimpleName());
 			PacketPipe.this.send(packet);
 		}
 	}
@@ -115,6 +117,7 @@ public class PacketPipe {
 					continue;
 				}
 				
+				// GameCore.debug("PacketPipeReader \""+readerThreadLabel+"\" got packet: "+packet.getClass().getSimpleName());
 				synchronized (listeners) {
 					for(PacketHandler handler: listeners)
 						handler.act(packet);

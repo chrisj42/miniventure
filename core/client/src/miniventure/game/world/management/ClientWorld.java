@@ -16,6 +16,7 @@ import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.RespawnScreen;
+import miniventure.game.util.function.Action;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
 import miniventure.game.world.file.WorldDataSet;
@@ -248,16 +249,19 @@ public class ClientWorld extends LevelManager {
 	/*  --- PLAYER MANAGEMENT --- */
 	
 	
-	public void spawnPlayer(SpawnData data) {
+	public void spawnPlayer(SpawnData data, Action callback) {
 		// this has to come before making the new client player, because it has the same eid and so will overwrite some things.
 		if(this.mainPlayer != null) {
 			super.deregisterEntity(this.mainPlayer.getId());
 		}
 		
-		InventoryScreen invScreen = new InventoryScreen(new OrthographicCamera());
-		this.mainPlayer = new ClientPlayer(data, invScreen);
-		registerEntity(mainPlayer);
-		gameScreen = ClientCore.newGameScreen(new GameScreen(mainPlayer, gameScreen, invScreen));
+		Gdx.app.postRunnable(() -> {
+			InventoryScreen invScreen = new InventoryScreen(new OrthographicCamera());
+			this.mainPlayer = new ClientPlayer(data, invScreen);
+			registerEntity(mainPlayer);
+			gameScreen = ClientCore.newGameScreen(new GameScreen(mainPlayer, gameScreen, invScreen));
+			callback.act();
+		});
 	}
 	
 	public void respawnPlayer() {
