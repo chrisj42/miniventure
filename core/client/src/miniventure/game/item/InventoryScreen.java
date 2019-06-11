@@ -115,7 +115,7 @@ public class InventoryScreen extends MenuScreen {
 			}
 		});
 		
-		mainGroup.add(slotTable).row();
+		mainGroup.add(slotTable).align(Align.left).row();
 		
 		// create the bar at the bottom with the space and held item info
 		
