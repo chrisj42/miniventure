@@ -5,7 +5,11 @@ import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.file.*;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.util.Collection;
@@ -57,6 +61,16 @@ public class WorldFileInterface {
 	
 	private static Path dataImportSource; // stores the source location of auto-imported game data
 	public static Path getDataImportSource() { return dataImportSource; }
+	
+	// ensure all the needed folders have been created.
+	public static void initGameDir() {
+		try {
+			Files.createDirectories(getLocation(""));
+		} catch(IOException e) {
+			System.err.println("Error creating default game directory:");
+			e.printStackTrace();
+		}
+	}
 	
 	public static Path getLocation(String worldname) {
 		return GameCore.GAME_DIR.resolve("saves").resolve(worldname);

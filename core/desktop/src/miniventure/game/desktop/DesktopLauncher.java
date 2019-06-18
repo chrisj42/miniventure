@@ -27,6 +27,7 @@ import miniventure.game.util.ProgressLogger;
 import miniventure.game.util.function.MapFunction;
 import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.file.WorldDataSet;
+import miniventure.game.world.file.WorldFileInterface;
 import miniventure.game.world.tile.ServerTileType;
 
 import com.badlogic.gdx.Gdx;
@@ -88,6 +89,8 @@ public class DesktopLauncher {
 			else
 				GameCore.GAME_DIR = new File(GameCore.DEFAULT_GAME_DIR).toPath();
 		}
+		
+		WorldFileInterface.initGameDir();
 		
 		if(server) {
 			ServerCore.main(leftover.toArray(new String[0]));
