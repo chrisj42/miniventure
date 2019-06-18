@@ -4,9 +4,15 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.EnumMap;
 import java.util.HashMap;
 
@@ -14,17 +20,14 @@ import miniventure.game.GameCore;
 import miniventure.game.network.GameProtocol.Message;
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.client.FontStyle.StyleData;
-import miniventure.game.screen.ErrorScreen;
-import miniventure.game.screen.LoadingScreen;
-import miniventure.game.screen.MainMenu;
-import miniventure.game.screen.MenuScreen;
-import miniventure.game.screen.NotifyScreen;
+import miniventure.game.screen.*;
 import miniventure.game.screen.util.BackgroundInheritor;
 import miniventure.game.screen.util.BackgroundProvider;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.customenum.GenericEnum;
 import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
+import miniventure.game.world.file.WorldFileInterface;
 import miniventure.game.world.management.ClientWorld;
 import miniventure.game.world.tile.ClientTileType;
 
@@ -128,7 +131,7 @@ public class ClientCore extends ApplicationAdapter {
 			// gameScreen = new GameScreen();
 			clientWorld = new ClientWorld(serverStarter);
 			
-			setScreen(new NotifyScreen(true, () -> setScreen(new MainMenu()),
+			MenuScreen devNotice = new NotifyScreen(true, () -> setScreen(new MainMenu()),
 				"Continue",
 				"Welcome to Miniventure Alpha!",
 				"",
@@ -145,12 +148,21 @@ public class ClientCore extends ApplicationAdapter {
 				"as the world is still being fleshed out.",
 				"",
 				"Enjoy the game!"
-			));
+			);
+			
+			Path oldDataPath = WorldFileInterface.getDataImportSource();
+			if(oldDataPath != null)
+				setScreen(new ConfirmScreen("The default save location for miniventure files has changed since the previous version,\nso your files have been copied to the new location.\nDo you wish to delete the old save location? Older versions will lose their data.", () -> {
+					WorldFileInterface.deleteRecursively(oldDataPath);
+					setScreen(devNotice);
+				}, () -> setScreen(devNotice)));
+			else
+				setScreen(devNotice);
 		}));
 	}
 	
 	@Override
-	public void dispose () {
+	public void dispose() {
 		batch.dispose();
 		
 		fontGenerator.dispose();

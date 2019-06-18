@@ -7,6 +7,7 @@ import miniventure.game.texture.TextureAtlasHolder;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.Version;
 import miniventure.game.util.VersionInfo;
+import miniventure.game.world.file.WorldFileInterface;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl.LwjglFiles;
@@ -50,12 +51,14 @@ public class GameCore {
 			System.err.println(error);
 	}
 	
-	public static final String DEFAULT_GAME_DIR;
+	@NotNull public static final String DEFAULT_GAME_DIR;
 	public static Path GAME_DIR = null;
 	static {
 		String home = System.getProperty("user.home");
-		if(System.getProperty("os.name").contains("Windows"))
-			DEFAULT_GAME_DIR = home + "/AppData/Roaming/Miniventure/";
+		if(System.getProperty("os.name").contains("Windows")) {
+			DEFAULT_GAME_DIR = home + "/Documents/My Games/Miniventure/";
+			WorldFileInterface.migrate(home + "/AppData/Roaming/Miniventure/");
+		}
 		else
 			DEFAULT_GAME_DIR = home + "/.miniventure/";
 	}

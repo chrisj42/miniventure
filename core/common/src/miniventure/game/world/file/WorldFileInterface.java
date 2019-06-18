@@ -5,8 +5,8 @@ import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -14,6 +14,7 @@ import java.util.Random;
 import java.util.Set;
 
 import miniventure.game.GameCore;
+import miniventure.game.util.MyUtils;
 import miniventure.game.util.SerialDataMap;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueAction;
@@ -54,6 +55,9 @@ public class WorldFileInterface {
 	
 	private static final String LOCK_FILE = "session.lock";
 	
+	private static Path dataImportSource; // stores the source location of auto-imported game data
+	public static Path getDataImportSource() { return dataImportSource; }
+	
 	public static Path getLocation(String worldname) {
 		return GameCore.GAME_DIR.resolve("saves").resolve(worldname);
 	}
@@ -73,6 +77,72 @@ public class WorldFileInterface {
 		
 		FileTime time = Files.getLastModifiedTime(gameFile);
 		return time.toMillis();
+	}
+	
+	private static Path getPath(String path) {
+		return new java.io.File(path).toPath();
+	}
+	
+	// attempts to migrate data from an old game dir to the current one, assuming there is no current data.
+	// if old data is found, the source folder is stored for later.
+	public static void migrate(String... oldDirs) {
+		final Path gameDir = getPath(GameCore.DEFAULT_GAME_DIR);
+		
+		if(Files.exists(gameDir))
+			return;
+		
+		for(String pathName: oldDirs) {
+			Path path = getPath(pathName);
+			if(Files.exists(path)) {
+				try {
+					Files.createDirectories(gameDir.getParent());
+					Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+						@Override
+						public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+							return visitFile(dir, attrs);
+						}
+						
+						@Override
+						public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+							Files.copy(file, gameDir.resolve(path.relativize(file)), StandardCopyOption.COPY_ATTRIBUTES);
+							return FileVisitResult.CONTINUE;
+						}
+					});
+					
+					dataImportSource = path;
+				} catch(IOException e) {
+					System.err.println("Failure migrating old save data:");
+					e.printStackTrace();
+				}
+				return;
+			}
+		}
+	}
+	
+	public static boolean deleteRecursively(Path folder) {
+		try {
+			Files.walkFileTree(folder, new SimpleFileVisitor<Path>() {
+				@Override
+				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+					Files.delete(file);
+					return FileVisitResult.CONTINUE;
+				}
+				
+				@Override
+				public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+					if(!dir.equals(folder))
+						Files.delete(dir);
+					return FileVisitResult.CONTINUE;
+				}
+			});
+			MyUtils.sleep(2);
+			Files.delete(folder);
+			return true;
+		} catch(IOException e) {
+			System.err.println("Error deleting folder '"+folder+"':");
+			e.printStackTrace();
+			return false;
+		}
 	}
 	
 	@Nullable
@@ -137,37 +207,6 @@ public class WorldFileInterface {
 	// this method doesn't actually generate levels; the ServerWorld does that when it's created. So very little work is actually done here.
 	@NotNull
 	private static WorldDataSet createWorld(Path file, RandomAccessFile lockRef, long seed) {
-		
-		/*try {
-			Files.walkFileTree(file, EnumSet.noneOf(FileVisitOption.class), 1, new FileVisitor<Path>() {
-				@Override
-				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-					if(!dir.equals(file))
-						return FileVisitResult.SKIP_SUBTREE;
-					return FileVisitResult.CONTINUE;
-				}
-				
-				@Override
-				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-					if(!file.getFileName().toString().equals(LOCK_FILE))
-						Files.delete(file);
-					return FileVisitResult.CONTINUE;
-				}
-				
-				@Override
-				public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
-					return FileVisitResult.CONTINUE;
-				}
-				
-				@Override
-				public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-					return FileVisitResult.CONTINUE;
-				}
-			});
-		} catch(IOException e) {
-			System.err.println("Error deleting existing files");
-			e.printStackTrace();
-		}*/
 		
 		LevelCache[] levelCaches = new LevelCache[] {
 			new LevelCache(0, new Point(0, 0), seed, IslandType.STARTER),

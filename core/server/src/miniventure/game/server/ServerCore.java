@@ -172,14 +172,24 @@ public class ServerCore extends Thread {
 			return;
 		}
 		
+		Path oldGameDir = WorldFileInterface.getDataImportSource();
+		if(oldGameDir != null) {
+			if(prompt("The default save location for miniventure files has changed since the previous version, so your files have been copied to the new location. Do you wish to delete the old save location? Older versions will lose their data. (y/n): ").equals("y")) {
+				if(WorldFileInterface.deleteRecursively(oldGameDir))
+					System.out.println("Old save location has been deleted.");
+			}
+			else
+				System.out.println("Old save location will be ignored.");
+		}
+		
 		// check for an existing save with the given name
-		Path worldPath = WorldFileInterface.getLocation(worldname);
 		System.out.println("looking for worlds in: "+ WorldFileInterface.getLocation("").toAbsolutePath());
+		Path worldPath = WorldFileInterface.getLocation(worldname);
 		boolean exists = Files.exists(worldPath);
 		
 		if(!exists && !create) {
 			// doesn't exist but didn't say create; prompt for creation
-			create = prompt("world \""+worldname+"\" does not exist. Create it? (y/n) ").equals("y");
+			create = prompt("world \""+worldname+"\" does not exist. Create it? (y/n): ").equals("y");
 			
 			if(!create)
 				System.out.println("world not created.");
@@ -188,7 +198,7 @@ public class ServerCore extends Thread {
 		if(create && exists) {
 			// prompt for overwrite
 			if(!overwrite)
-				overwrite = prompt("world \""+worldname+"\" already exists. Are you sure you want to overwrite it? type \"yes\" to overwrite. (yes/no) ").equals("yes");
+				overwrite = prompt("world \""+worldname+"\" already exists. Are you sure you want to overwrite it? type \"yes\" to overwrite. (yes/no): ").equals("yes");
 			
 			if(!overwrite)
 				System.out.println("Not overwriting; world not created.");
@@ -200,11 +210,6 @@ public class ServerCore extends Thread {
 		if(!make && !load) {
 			// no action.
 			return;
-		}
-		
-		if(make) {
-			// create folders to acquire lock
-			Files.createDirectories(worldPath);
 		}
 		
 		RandomAccessFile lockHolder = WorldFileInterface.tryLockWorld(worldPath);
