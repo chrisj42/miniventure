@@ -11,6 +11,10 @@ import miniventure.game.world.file.WorldFileInterface;
 import miniventure.game.world.file.WorldFormatException;
 import miniventure.game.world.file.WorldReference;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.List;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
@@ -34,7 +38,18 @@ public class WorldSelectScreen extends BackgroundInheritor {
 		
 		// add delete function later
 		
-		worldList = new List<>(VisUI.getSkin());
+		worldList = new List<WorldReference>(VisUI.getSkin()) {
+			@Override
+			protected GlyphLayout drawItem(Batch batch, BitmapFont font, int index, WorldReference item, float x, float y, float width) {
+				Color color = font.getColor();
+				if(!item.compatible)
+					font.setColor(Color.RED);
+				GlyphLayout layout = super.drawItem(batch, font, index, item, x, y, width);
+				if(!item.compatible)
+					font.setColor(color);
+				return layout;
+			}
+		};
 		worldList.setItems(WorldReference.getLocalWorlds(false).toArray(new WorldReference[0]));
 		
 		table.defaults().padBottom(10);
@@ -89,8 +104,10 @@ public class WorldSelectScreen extends BackgroundInheritor {
 					load.setDisabled(true);
 				}
 				else {
-					load.setDisabled(false);
 					worldInfo.setText("Version: "+ref.version+(ref.version.compareTo(GameCore.VERSION) == 0?" (current)":""));
+					load.setDisabled(!ref.compatible);
+					if(!ref.compatible)
+						error.setText("The world version is not compatible with the current version.");
 				}
 			}
 		});

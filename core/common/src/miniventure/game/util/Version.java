@@ -6,7 +6,7 @@ public class Version implements Comparable<Version> {
 	
 	static class VersionFormatException extends IllegalArgumentException {
 		public VersionFormatException(String versionString) {
-			super("The string \"" + versionString + "\" does not represent a valid version format; valid formats are #.# or #.#.# or #.#.#.dev");
+			super("The string \"" + versionString + "\" does not represent a valid version format; valid formats are #.# (deprecated) or #.#.# or #.#.#.dev");
 		}
 	}
 	

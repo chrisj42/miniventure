@@ -30,7 +30,11 @@ import org.jetbrains.annotations.NotNull;
 /** @noinspection StaticNonFinalField*/
 public class GameCore {
 	
-	public static final Version VERSION = new Version("2.1.3.dev");
+	public static final Version VERSION = new Version("2.2.1.dev");
+	
+	public static boolean isCompatible(Version dataVersion) {
+		return dataVersion.compareTo(new Version("2.1.1.dev")) >= 0;
+	}
 	
 	public static boolean debug = false;
 	

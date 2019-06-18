@@ -13,6 +13,7 @@ import java.util.LinkedList;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import miniventure.game.GameCore;
 import miniventure.game.util.Version;
 
 public class WorldReference {
@@ -22,7 +23,7 @@ public class WorldReference {
 	public final String worldName;
 	public final long timestamp;
 	
-	// public final boolean valid;
+	public final boolean compatible;
 	public final String[] dataErrors;
 	public final String[] dataWarnings;
 	// public final int extraFiles;
@@ -33,6 +34,7 @@ public class WorldReference {
 		worldName = folder.getFileName().toString();
 		version = WorldFileInterface.getWorldVersion(folder);
 		timestamp = WorldFileInterface.getTimestamp(folder);
+		compatible = GameCore.isCompatible(version);
 		
 		Set<Path> children = Files.list(folder).collect(Collectors.toCollection(HashSet::new));
 		
