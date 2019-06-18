@@ -10,7 +10,7 @@ I think the workbench(es) should be 2x1 tiles. Would make it more substantial. B
 With the basic hammer, you can craft the 2nd tier of work bench, the economy work bench. This allows you to make a better hammer and items, etc.
 You can also craft some other tile recipes like simple floors, walls, and doors.
 
-When looking at the menu for tile recipes, you can only see recipes that fall within a teir you've had access to at some point, i.e. stuff you can build with the basic hammer isn't shown until you get a basic hammer, but once you get one the recipes never go away again, even if you don't have a basic hammer in your inventory.
+When looking at the menu for tile recipes, you can only see recipes that fall within a tier you've had access to at some point, i.e. stuff you can build with the basic hammer isn't shown until you get a basic hammer, but once you get one the recipes never go away again, even if you don't have a basic hammer in your inventory.
 
 
 That covers most of the progression, now for the UI and controls.

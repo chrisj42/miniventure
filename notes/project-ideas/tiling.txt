@@ -1,0 +1,7 @@
+make tiles smaller, so the land can have more detail.
+
+in addition to this, create group tiles so that tile types can span multiple tiles.
+Amoung others, trees will use this feature so that they can remain the same size.
+
+Group tile spriting should be easy, each tile just uses pixels from the structure sprite at whatever offset the tile is from the structure origin.
+
