@@ -1,0 +1,31 @@
+crafting occurs either at a crafting station or via a tile recipe.
+
+Craftable items are sorted by their complexity tier; each tier has a minimum hammer quality needed to craft items of that tier. The first tier doesn't need any hammer and is considered the "handmade" tier.
+
+Similar to hammer levels, there are different tiers of crafting bench.
+	- The first is a "crude work bench" and needs no hammer. This is the basic starting crafter from which you then expand to the rest of the crafting tree from. You can make a basic hammer here, and some simple items.
+
+I think the workbench(es) should be 2x1 tiles. Would make it more substantial. But that can wait until the rest of this is implemented.
+
+With the basic hammer, you can craft the 2nd tier of work bench, the economy work bench. This allows you to make a better hammer and items, etc.
+You can also craft some other tile recipes like simple floors, walls, and doors.
+
+When looking at the menu for tile recipes, you can only see recipes that fall within a teir you've had access to at some point, i.e. stuff you can build with the basic hammer isn't shown until you get a basic hammer, but once you get one the recipes never go away again, even if you don't have a basic hammer in your inventory.
+
+
+That covers most of the progression, now for the UI and controls.
+Upon picking a tile recipe, a faded version of the full sprite is shown where the placement will occur; location will follow the mouse (up to a distance, and assuming there's nothing in the way). More about the mouse control scheme further below.
+
+tip: hold shift when placing a tile to automatically deposit the necessary materials.
+
+Upon recipe placement, a sound will be played, the recipe will be placed, and the build ui will appear (ui shows only when mouse is hovering over the recipe tile(s)).
+The build UI consists of either a list of resources followed by a "deposit resources" button, or simply a "Build" button, depending on whether all the needed resources have been deposited yet.
+
+Above "Deposit Resources" is an icon list/grid of the items that must still be deposited. It shows only how many are needed at the current time, not the original cost. If the player doesn't have any of the necessary resources, the button will be disabled.
+Clicking the button will deposit as many of the needed resources as possible from the player's inventory.
+
+When the "build" button is displayed, clicking it causes the player to start building the tile with a progress bar. "Build" is replaced with "Cancel". If the player walks out of range, gets attacked, or presses cancel, the build stops and the progress bar resets.
+Btw, if the player doesn't have a good enough hammer in their inventory, the build button is disabled and an icon of the weakest hammer needed is displayed above the button.
+
+If the progress bar is allowed to complete, then the tile is officially created, the recipe stuff all goes away, and the hammer used (if any) gets penalized some durability. It's fine if the penalty results in negative durability, this fact is simply ignored and the hammer is destroyed as usual.
+
