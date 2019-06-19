@@ -1,9 +1,14 @@
 package miniventure.game.world.entity.mob.player;
 
 import java.util.EnumMap;
+import java.util.LinkedList;
+import java.util.List;
 
 import miniventure.game.network.PacketPipe;
+import miniventure.game.world.Point;
 import miniventure.game.world.entity.mob.Mob;
+import miniventure.game.world.level.Level;
+import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -77,4 +82,51 @@ public interface Player extends Mob {
 	}
 	
 	void handlePlayerPackets(@NotNull Object packet, @NotNull PacketPipe.PacketPipeWriter packetSender);
+	
+	static List<Tile> traverseCursorRoute(Vector2 center, Vector2 edge, @NotNull Level level) {
+		Vector2 dist = edge.cpy().sub(center);
+		dist.setLength(Math.min(dist.len(), MAX_CURSOR_RANGE));
+		edge.set(dist.add(center));
+		
+		dist.set(center.cpy().sub(edge));
+		Tile prevTile = null;
+		Vector2 prevPos = center.cpy();
+		List<Tile> route = new LinkedList<>();
+		while(true) {
+			Vector2 pos = edge.cpy().add(dist);
+			Tile tile = level.getClosestTile(pos);
+			if(!tile.getType().isWalkable())
+				break;
+			// GameCore.debug("outlining tile "+count+" at "+tile.getPosition(true));
+			route.add(tile);
+			
+			if(prevTile != null) {
+				Point ppos = prevTile.getLocation();
+				Point cpos = tile.getLocation();
+				if(ppos.x != cpos.x && ppos.y != cpos.y) {
+					// jumped a gap
+					Vector2 midline = pos.cpy().sub(prevPos).scl(0.5f).add(prevPos);
+					Tile otile1 = level.getTile(ppos.x, cpos.y);
+					Tile otile2 = level.getTile(cpos.x, ppos.y);
+					Vector2 ocenter1 = otile1.getCenter();
+					Vector2 ocenter2 = otile2.getCenter();
+					float dst1 = Vector2.dst(midline.x, midline.y, ocenter1.x, ocenter1.y);
+					float dst2 = Vector2.dst(midline.x, midline.y, ocenter2.x, ocenter2.y);
+					Tile fillTile = dst1 < dst2 ? otile1 : otile2;
+					if(!fillTile.getType().isWalkable())
+						break;
+					route.add(fillTile);
+				}
+			}
+			prevTile = tile;
+			prevPos.set(pos);
+			
+			if(dist.len() == 0)
+				break;
+			
+			dist.setLength(Math.max(0, dist.len() - 1));
+		}
+		
+		return route;
+	}
 }

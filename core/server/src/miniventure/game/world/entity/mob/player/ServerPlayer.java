@@ -4,6 +4,7 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
+import java.util.List;
 
 import miniventure.game.GameCore;
 import miniventure.game.network.GameProtocol;
@@ -382,11 +383,11 @@ public class ServerPlayer extends ServerMob implements Player {
 		
 		if(!result.success && level != null) {
 			Vector2 center = getCenter();
+			List<Tile> cursorRoute = Player.traverseCursorRoute(center, cursorPos, level);
 			Vector2 dist = cursorPos.cpy().sub(center);
-			dist.setLength(Math.min(dist.len(), MAX_CURSOR_RANGE));
-			cursorPos.set(center.add(dist));
 			Rectangle rect = getInteractionRect();
-			rect.setCenter(cursorPos);
+			if(cursorRoute.size() > 0)
+				rect.setCenter(cursorRoute.get(cursorRoute.size()-1).getCenter());
 			Tile tile = level.getClosestTile(rect);
 			if(tile != null)
 				result = attack ? heldItem.attack(tile, this) : heldItem.interact(tile, this);

@@ -1,7 +1,10 @@
 package miniventure.game.client;
 
+import java.util.List;
+
 import miniventure.game.GameCore;
 import miniventure.game.util.MyUtils;
+import miniventure.game.world.Point;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
 import miniventure.game.world.entity.mob.player.Player;
 import miniventure.game.world.level.RenderLevel;
@@ -72,6 +75,13 @@ public class LevelViewport {
 		pos.add(offset.x, offset.y, 0);
 	}
 	
+	private void outlineTile(Tile tile, Vector2 offset) {
+		if(tile != null) {
+			Vector2 pos = tile.getPosition().sub(offset).scl(Tile.SIZE);
+			MyUtils.drawRect(pos.x, pos.y, Tile.SIZE, Tile.SIZE, Tile.SIZE / 8, Color.BLACK, batch);
+		}
+	}
+	
 	public void render(@NotNull Vector2 cameraCenter, Color ambientLighting, @NotNull RenderLevel level) {
 		// get the size of the area of the game on screen by projecting the application window dimensions into world space.
 		Vector3 screenSize = new Vector3(Gdx.graphics.getWidth(), 0, 0); // because unproject has origin at the top, so the upper right corner is at (width, 0).
@@ -138,14 +148,15 @@ public class LevelViewport {
 		// limit range
 		Vector2 dist = cursorPos.cpy().sub(cameraCenter);
 		dist.setLength(Math.min(dist.len(), Player.MAX_CURSOR_RANGE));
+		// final float angle = dist.angle();
+		// final float len = dist.len();
 		cursorPos.set(dist.add(cameraCenter));
 		
 		// draw highlight for client cursor
-		Tile cursorTile = level.getClosestTile(cursorPos);
-		if(cursorTile != null) {
-			Vector2 pos = cursorTile.getPosition().sub(offset).scl(Tile.SIZE);
-			MyUtils.drawRect(pos.x, pos.y, Tile.SIZE, Tile.SIZE, Tile.SIZE / 8, Color.BLACK, batch);
-		}
+		List<Tile> cursorRoute = Player.traverseCursorRoute(cameraCenter, cursorPos, level);
+		// cursorRoute.forEach(tile -> outlineTile(tile, offset));
+		if(cursorRoute.size() > 0)
+			outlineTile(cursorRoute.get(cursorRoute.size() - 1), offset);
 		
 		/*if(ClientCore.debugChunk) {
 			// render chunk boundaries
