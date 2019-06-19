@@ -95,10 +95,10 @@ public interface Player extends Mob {
 		while(true) {
 			Vector2 pos = edge.cpy().add(dist);
 			Tile tile = level.getClosestTile(pos);
+			route.add(tile);
+			
 			if(!tile.getType().isWalkable())
 				break;
-			// GameCore.debug("outlining tile "+count+" at "+tile.getPosition(true));
-			route.add(tile);
 			
 			if(prevTile != null) {
 				Point ppos = prevTile.getLocation();
@@ -113,9 +113,9 @@ public interface Player extends Mob {
 					float dst1 = Vector2.dst(midline.x, midline.y, ocenter1.x, ocenter1.y);
 					float dst2 = Vector2.dst(midline.x, midline.y, ocenter2.x, ocenter2.y);
 					Tile fillTile = dst1 < dst2 ? otile1 : otile2;
+					route.add(fillTile);
 					if(!fillTile.getType().isWalkable())
 						break;
-					route.add(fillTile);
 				}
 			}
 			prevTile = tile;
