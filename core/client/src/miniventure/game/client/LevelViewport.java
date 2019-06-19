@@ -3,6 +3,7 @@ package miniventure.game.client;
 import miniventure.game.GameCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
+import miniventure.game.world.entity.mob.player.Player;
 import miniventure.game.world.level.RenderLevel;
 import miniventure.game.world.tile.Tile;
 
@@ -71,15 +72,6 @@ public class LevelViewport {
 		pos.add(offset.x, offset.y, 0);
 	}
 	
-	private Tile getCursorTile(@NotNull RenderLevel level, Vector2 offset) {
-		Vector3 cursor = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
-		camera.unproject(cursor); // screen to render coords
-		cursor.scl(1f/Tile.SIZE); // render coords to renderable world
-		cursor.add(offset.x, offset.y, 0); // tile offset; renderable world to actual world coords
-		this.cursorPos.set(cursor.x, cursor.y);
-		return level.getClosestTile(cursor.x, cursor.y);
-	}
-	
 	public void render(@NotNull Vector2 cameraCenter, Color ambientLighting, @NotNull RenderLevel level) {
 		// get the size of the area of the game on screen by projecting the application window dimensions into world space.
 		Vector3 screenSize = new Vector3(Gdx.graphics.getWidth(), 0, 0); // because unproject has origin at the top, so the upper right corner is at (width, 0).
@@ -136,8 +128,20 @@ public class LevelViewport {
 		//System.out.println("rendering level in bounds "+renderSpace+" to camera at "+camera.position+" with offset "+offset);
 		level.render(renderSpace, batch, GameCore.getDeltaTime(), offset); // renderSpace in world coords, but offset can give render coords
 		
+		
+		// cursor management
+		Vector3 cursor = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+		camera.unproject(cursor); // screen to render coords
+		cursor.scl(1f/Tile.SIZE); // render coords to renderable world
+		cursor.add(offset.x, offset.y, 0); // tile offset; renderable world to actual world coords
+		cursorPos.set(cursor.x, cursor.y);
+		// limit range
+		Vector2 dist = cursorPos.cpy().sub(cameraCenter);
+		dist.setLength(Math.min(dist.len(), Player.MAX_CURSOR_RANGE));
+		cursorPos.set(dist.add(cameraCenter));
+		
 		// draw highlight for client cursor
-		Tile cursorTile = getCursorTile(level, offset);
+		Tile cursorTile = level.getClosestTile(cursorPos);
 		if(cursorTile != null) {
 			Vector2 pos = cursorTile.getPosition().sub(offset).scl(Tile.SIZE);
 			MyUtils.drawRect(pos.x, pos.y, Tile.SIZE, Tile.SIZE, Tile.SIZE / 8, Color.BLACK, batch);

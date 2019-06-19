@@ -381,6 +381,10 @@ public class ServerPlayer extends ServerMob implements Player {
 		}
 		
 		if(!result.success && level != null) {
+			Vector2 center = getCenter();
+			Vector2 dist = cursorPos.cpy().sub(center);
+			dist.setLength(Math.min(dist.len(), MAX_CURSOR_RANGE));
+			cursorPos.set(center.add(dist));
 			Rectangle rect = getInteractionRect();
 			rect.setCenter(cursorPos);
 			Tile tile = level.getClosestTile(rect);

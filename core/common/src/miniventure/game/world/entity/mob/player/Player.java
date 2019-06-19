@@ -17,6 +17,7 @@ public interface Player extends Mob {
 	int INV_SIZE = 50;
 	int HOTBAR_SIZE = 5;
 	float MOVE_SPEED = 5;
+	float MAX_CURSOR_RANGE = 5;
 	
 	enum Stat {
 		Health("heart", 10, 20),
