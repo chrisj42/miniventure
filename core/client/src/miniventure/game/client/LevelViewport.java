@@ -42,6 +42,10 @@ public class LevelViewport {
 	private int zoom = 0;
 	private FrameBuffer lightingBuffer;
 	
+	private Vector2 cursorPos = new Vector2();
+	
+	Vector2 getCursorPos() { return cursorPos; }
+	
 	public LevelViewport() { this(new OrthographicCamera()); }
 	public LevelViewport(OrthographicCamera lightingCamera) {
 		camera = new OrthographicCamera();
@@ -59,6 +63,21 @@ public class LevelViewport {
 			zoom(-1);
 		if(Gdx.input.isKeyJustPressed(Keys.EQUALS) || Gdx.input.isKeyJustPressed(Keys.PLUS))
 			zoom(1);
+	}
+	
+	private void screenToWorld(Vector3 pos, Vector2 offset) {
+		camera.unproject(pos); // screen to render coords
+		pos.scl(1f/Tile.SIZE); // now in world coords
+		pos.add(offset.x, offset.y, 0);
+	}
+	
+	private Tile getCursorTile(@NotNull RenderLevel level, Vector2 offset) {
+		Vector3 cursor = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+		camera.unproject(cursor); // screen to render coords
+		cursor.scl(1f/Tile.SIZE); // render coords to renderable world
+		cursor.add(offset.x, offset.y, 0); // tile offset; renderable world to actual world coords
+		this.cursorPos.set(cursor.x, cursor.y);
+		return level.getClosestTile(cursor.x, cursor.y);
 	}
 	
 	public void render(@NotNull Vector2 cameraCenter, Color ambientLighting, @NotNull RenderLevel level) {
@@ -116,6 +135,13 @@ public class LevelViewport {
 		batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA); // default
 		//System.out.println("rendering level in bounds "+renderSpace+" to camera at "+camera.position+" with offset "+offset);
 		level.render(renderSpace, batch, GameCore.getDeltaTime(), offset); // renderSpace in world coords, but offset can give render coords
+		
+		// draw highlight for client cursor
+		Tile cursorTile = getCursorTile(level, offset);
+		if(cursorTile != null) {
+			Vector2 pos = cursorTile.getPosition().sub(offset).scl(Tile.SIZE);
+			MyUtils.drawRect(pos.x, pos.y, Tile.SIZE, Tile.SIZE, Tile.SIZE / 8, Color.BLACK, batch);
+		}
 		
 		/*if(ClientCore.debugChunk) {
 			// render chunk boundaries

@@ -67,7 +67,7 @@ public class GameScreen {
 	}
 	
 	public void handleInput() {
-		player.handleInput(getMouseInput());
+		player.handleInput(getMouseInput(), levelView.getCursorPos());
 		
 		boolean shift = Gdx.input.isKeyPressed(Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Keys.SHIFT_RIGHT);
 		if(shift && GameCore.debug && Gdx.input.isKeyJustPressed(Keys.S)) {

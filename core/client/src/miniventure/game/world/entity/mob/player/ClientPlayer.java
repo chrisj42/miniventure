@@ -28,6 +28,7 @@ import miniventure.game.world.entity.mob.MobAnimationController;
 import miniventure.game.world.entity.mob.MobAnimationController.AnimationState;
 import miniventure.game.world.level.ClientLevel;
 import miniventure.game.world.tile.ClientTile;
+import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileTypeEnum;
 import miniventure.game.world.tile.TileTypeRenderer;
 
@@ -169,7 +170,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 	}
 	
 	//private float lastWalkTime = 0;
-	public void handleInput(Vector2 mouseInput) {
+	public void handleInput(Vector2 mouseInput, Vector2 cursorPos) {
 		
 		Vector2 inputDir = new Vector2();
 		if(ClientCore.input.holdingControl(Control.MOVE_LEFT)) inputDir.x--;
@@ -223,12 +224,12 @@ public class ClientPlayer extends ClientEntity implements Player {
 					}
 					else {
 						// GameCore.debug("sending player attack");
-						ClientCore.getClient().send(new InteractRequest(true, new PositionUpdate(this), getDirection(), inventory.getSelection()));
+						ClientCore.getClient().send(new InteractRequest(true, cursorPos, new PositionUpdate(this), getDirection(), inventory.getSelection()));
 					}
 				}
 				else if(ClientCore.input.pressingControl(Control.INTERACT)) {
 					if(inventory.getCurrentBlueprint() == null) // act as a cancel only, if it isn't null
-						ClientCore.getClient().send(new InteractRequest(false, new PositionUpdate(this), getDirection(), inventory.getSelection()));
+						ClientCore.getClient().send(new InteractRequest(false, cursorPos, new PositionUpdate(this), getDirection(), inventory.getSelection()));
 					inventory.removeBlueprint();
 				}
 			}

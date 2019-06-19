@@ -460,13 +460,15 @@ public interface GameProtocol {
 	// sent by client to interact or attack.
 	class InteractRequest {
 		public final boolean attack;
+		public final Vector2 cursorPos;
 		public final PositionUpdate playerPosition;
 		public final Direction dir;
 		public final int hotbarIndex;
 		
-		private InteractRequest() { this(false, null, null, 0); }
-		public InteractRequest(boolean attack, PositionUpdate playerPosition, Direction dir, int hotbarIndex) {
+		private InteractRequest() { this(false, null, null, null, 0); }
+		public InteractRequest(boolean attack, Vector2 cursorPos, PositionUpdate playerPosition, Direction dir, int hotbarIndex) {
 			this.attack = attack;
+			this.cursorPos = cursorPos;
 			this.playerPosition = playerPosition;
 			this.dir = dir;
 			this.hotbarIndex = hotbarIndex;

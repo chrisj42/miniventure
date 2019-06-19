@@ -182,7 +182,7 @@ public class ServerPlayer extends ServerMob implements Player {
 			// if(r.playerPosition.variesFrom(client))
 			// 	connection.send(new PositionUpdate(client)); // fix the player's position
 			
-			doInteract(r.dir, getHeldItem(r.hotbarIndex), r.hotbarIndex, r.attack);
+			doInteract(r.dir, r.cursorPos, getHeldItem(r.hotbarIndex), r.hotbarIndex, r.attack);
 		});
 		
 		forPacket(packet, ItemDropRequest.class, true, drop -> {
@@ -211,7 +211,7 @@ public class ServerPlayer extends ServerMob implements Player {
 				GameCore.debug("triggering blueprint");
 				// trigger an interaction
 				ServerItem item = recipe.getResult().item;
-				doInteract(getDirection(), new ServerItem(item.getType(), item.getName(), item.getTexture()) {
+				doInteract(getDirection(), getInteractionRect().getCenter(new Vector2()), new ServerItem(item.getType(), item.getName(), item.getTexture()) {
 					@Override
 					public int getStaminaUsage() {
 						return item.getStaminaUsage();
@@ -346,9 +346,9 @@ public class ServerPlayer extends ServerMob implements Player {
 		objects.addAll(level.getOverlappingEntities(interactionBounds, this));
 		Boundable.sortByDistance(objects, getCenter());
 		
-		Tile tile = level.getTile(interactionBounds);
-		if(tile != null)
-			objects.add(tile);
+		// Tile tile = level.getTile(interactionBounds);
+		// if(tile != null)
+		// 	objects.add(tile);
 		
 		return objects;
 	}
@@ -361,7 +361,7 @@ public class ServerPlayer extends ServerMob implements Player {
 	}
 	
 	// this method gets called by GameServer, so in order to ensure it doesn't mix badly with server world updates, we'll post it as a runnable to the server world update thread.
-	private void doInteract(Direction dir, ServerItem heldItem, int index, boolean attack) {
+	private void doInteract(Direction dir, Vector2 cursorPos, ServerItem heldItem, int index, boolean attack) {
 		setDirection(dir);
 		
 		if(getStat(Stat.Stamina) < heldItem.getStaminaUsage())
@@ -378,6 +378,14 @@ public class ServerPlayer extends ServerMob implements Player {
 			
 			if(result.success)
 				break;
+		}
+		
+		if(!result.success && level != null) {
+			Rectangle rect = getInteractionRect();
+			rect.setCenter(cursorPos);
+			Tile tile = level.getClosestTile(rect);
+			if(tile != null)
+				result = attack ? heldItem.attack(tile, this) : heldItem.interact(tile, this);
 		}
 		
 		if(!attack && !result.success)
