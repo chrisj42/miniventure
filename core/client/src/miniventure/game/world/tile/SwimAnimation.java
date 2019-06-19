@@ -6,6 +6,7 @@ import miniventure.game.GameCore;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.world.management.WorldManager;
 
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Vector2;
 
@@ -13,9 +14,9 @@ import org.jetbrains.annotations.NotNull;
 
 public class SwimAnimation {
 	
-	private static final EnumMap<TileTypeEnum, TileAnimation> swimAnimations = new EnumMap<>(TileTypeEnum.class);
+	private static final EnumMap<TileTypeEnum, Animation<TextureHolder>> swimAnimations = new EnumMap<>(TileTypeEnum.class);
 	
-	private final TileAnimation swim;
+	private final Animation<TextureHolder> swim;
 	public final TileTypeEnum tileType;
 	public final float drawableHeight;
 	
@@ -25,7 +26,7 @@ public class SwimAnimation {
 		this.drawableHeight = drawableHeight;
 		
 		swim = swimAnimations.computeIfAbsent(enumType, k ->
-			new TileAnimation(false, 16, 
+			new Animation<>(16, 
 				GameCore.tileAtlas.getRegions(enumType.name().toLowerCase()+"/swim")
 			)
 		);
