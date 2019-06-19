@@ -138,25 +138,24 @@ public class LevelViewport {
 		//System.out.println("rendering level in bounds "+renderSpace+" to camera at "+camera.position+" with offset "+offset);
 		level.render(renderSpace, batch, GameCore.getDeltaTime(), offset); // renderSpace in world coords, but offset can give render coords
 		
-		
-		// cursor management
-		Vector3 cursor = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
-		camera.unproject(cursor); // screen to render coords
-		cursor.scl(1f/Tile.SIZE); // render coords to renderable world
-		cursor.add(offset.x, offset.y, 0); // tile offset; renderable world to actual world coords
-		cursorPos.set(cursor.x, cursor.y);
-		// limit range
-		Vector2 dist = cursorPos.cpy().sub(cameraCenter);
-		dist.setLength(Math.min(dist.len(), Player.MAX_CURSOR_RANGE));
-		// final float angle = dist.angle();
-		// final float len = dist.len();
-		cursorPos.set(dist.add(cameraCenter));
-		
-		// draw highlight for client cursor
-		List<Tile> cursorRoute = Player.traverseCursorRoute(cameraCenter, cursorPos, level);
-		// cursorRoute.forEach(tile -> outlineTile(tile, offset));
-		if(cursorRoute.size() > 0)
-			outlineTile(cursorRoute.get(cursorRoute.size() - 1), offset);
+		if(ClientCore.getWorld().getMainPlayer() != null) {
+			// cursor management
+			Vector3 cursor = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+			camera.unproject(cursor); // screen to render coords
+			cursor.scl(1f / Tile.SIZE); // render coords to renderable world
+			cursor.add(offset.x, offset.y, 0); // tile offset; renderable world to actual world coords
+			cursorPos.set(cursor.x, cursor.y);
+			// limit range
+			Vector2 dist = cursorPos.cpy().sub(cameraCenter);
+			dist.setLength(Math.min(dist.len(), Player.MAX_CURSOR_RANGE));
+			cursorPos.set(dist.add(cameraCenter));
+			
+			// draw highlight for client cursor
+			List<Tile> cursorRoute = Player.traverseCursorRoute(cameraCenter, cursorPos, level);
+			// cursorRoute.forEach(tile -> outlineTile(tile, offset));
+			if(cursorRoute.size() > 0)
+				outlineTile(cursorRoute.get(cursorRoute.size() - 1), offset);
+		}
 		
 		/*if(ClientCore.debugChunk) {
 			// render chunk boundaries
