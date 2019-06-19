@@ -53,8 +53,8 @@ import org.jetbrains.annotations.Nullable;
 /** @noinspection StaticNonFinalField*/
 public class ClientCore extends ApplicationAdapter {
 	
-	public static final int DEFAULT_SCREEN_WIDTH = 800;
-	public static final int DEFAULT_SCREEN_HEIGHT = 450;
+	public static final int DEFAULT_SCREEN_WIDTH = 1400;
+	public static final int DEFAULT_SCREEN_HEIGHT = 800;
 	private static GameScreen gameScreen;
 	private static ClientWorld clientWorld;
 	
