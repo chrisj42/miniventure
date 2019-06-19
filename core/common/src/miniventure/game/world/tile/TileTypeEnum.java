@@ -12,38 +12,40 @@ import org.jetbrains.annotations.NotNull;
 
 public enum TileTypeEnum implements TileProcessor {
 	
-	HOLE(true, Color.BLACK),
+	HOLE(true),
 	DIRT(true, new Color(200, 100, 0)),
 	SAND(true, Color.YELLOW),
 	GRASS(true, Color.GREEN),
-	STONE_PATH(true, Color.BLACK),
+	STONE_PATH(true),
 	SNOW(true, Color.WHITE),
-	FLINT(true, Color.BLACK),
+	FLINT(true),
 	WATER(true, 0.6f, Color.BLUE.darker()),
-	DOCK(true, Color.BLACK),
-	COAL_ORE(false, Color.BLACK),
-	IRON_ORE(false, Color.BLACK),
-	TUNGSTEN_ORE(false, Color.BLACK),
-	RUBY_ORE(false, Color.BLACK),
+	DOCK(true),
+	COAL_ORE(false),
+	IRON_ORE(false),
+	TUNGSTEN_ORE(false),
+	RUBY_ORE(false),
 	STONE(false, Color.GRAY),
-	STONE_FLOOR(true, Color.BLACK),
-	WOOD_WALL(false, Color.BLACK),
-	STONE_WALL(false, Color.BLACK),
-	OPEN_DOOR(true, Color.BLACK),
-	CLOSED_DOOR(false, Color.BLACK),
-	TORCH(true, Color.BLACK),
+	STONE_FLOOR(true),
+	WOOD_WALL(false),
+	STONE_WALL(false),
+	OPEN_DOOR(true),
+	CLOSED_DOOR(false),
+	TORCH(true),
 	CACTUS(false, Color.GREEN.darker().darker()),
 	CARTOON_TREE(false, Color.GREEN.darker().darker()),
 	DARK_TREE(false, Color.GREEN.darker().darker()),
 	PINE_TREE(false, Color.GREEN.darker().darker()),
 	POOF_TREE(false, Color.GREEN.darker().darker()),
-	AIR(true, Color.BLACK);
+	AIR(true);
 	
 	public final boolean walkable;
 	public final float speedRatio;
 	public final Color color;
 	
+	TileTypeEnum(boolean walkable) { this(walkable, 1); }
 	TileTypeEnum(boolean walkable, Color color) { this(walkable, 1, color); }
+	TileTypeEnum(boolean walkable, float speedRatio) { this(walkable, speedRatio, Color.BLACK); }
 	TileTypeEnum(boolean walkable, float speedRatio, Color color) {
 		this.walkable = walkable;
 		this.speedRatio = speedRatio;

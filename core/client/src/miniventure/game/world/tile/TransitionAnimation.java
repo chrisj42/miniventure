@@ -9,9 +9,9 @@ import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
 
-public class TransitionAnimation {
+class TransitionAnimation {
 	
-	static EnumMap<TileTypeEnum, HashMap<String, Array<TextureHolder>>> tileAnimations = new EnumMap<>(TileTypeEnum.class);
+	static final EnumMap<TileTypeEnum, HashMap<String, Array<TextureHolder>>> tileAnimations = new EnumMap<>(TileTypeEnum.class);
 	
 	private final TileTypeEnum tileType;
 	private final String name;
@@ -23,9 +23,9 @@ public class TransitionAnimation {
 		this.renderStyle = renderStyle;
 	}
 	
-	public String getName() { return name; }
+	String getName() { return name; }
 	
-	public TileAnimation getAnimation() {
+	TileAnimation getAnimation() {
 		return renderStyle.getAnimation(tileType, name, tileAnimations, "transition");
 	}
 }
