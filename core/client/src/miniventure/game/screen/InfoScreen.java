@@ -7,6 +7,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.kotcrab.vis.ui.widget.VisTextButton;
 
 public class InfoScreen extends BackgroundInheritor {
 	
@@ -21,13 +22,19 @@ public class InfoScreen extends BackgroundInheritor {
 		
 		table.add(makeLabel(String.join("\n"+(addButton?"\n":""), text))).row();
 		
-		if(addButton)
-			table.add(makeButton("Continue to World Config", () -> ClientCore.setScreen(new WorldGenScreen())));
+		VisTextButton cont = null;
+		if(addButton) {
+			cont = makeButton("Continue to World Config", () -> ClientCore.setScreen(new WorldGenScreen()));
+			table.add(cont);
+		}
 		
-		table.add(makeButton("Back", ClientCore::backToParentScreen)).row();
+		VisTextButton back = makeButton("Back", ClientCore::backToParentScreen); 
+		table.add(back).row();
 		
 		// table.pack();
 		// table.setBackground(new ColorRect(Color.TEAL));
+		mapButtons(table, cont, back);
+		setKeyboardFocus(table);
 	}
 	
 	@Override

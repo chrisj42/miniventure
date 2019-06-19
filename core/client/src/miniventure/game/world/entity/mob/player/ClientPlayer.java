@@ -5,6 +5,8 @@ import java.util.EnumSet;
 import java.util.HashMap;
 
 import miniventure.game.GameCore;
+import miniventure.game.client.InputHandler.Control;
+import miniventure.game.client.InputHandler.Modifier;
 import miniventure.game.network.GameProtocol.*;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.InputHandler;
@@ -170,10 +172,10 @@ public class ClientPlayer extends ClientEntity implements Player {
 	public void handleInput(Vector2 mouseInput) {
 		
 		Vector2 inputDir = new Vector2();
-		if(InputHandler.anyKeyPressed(Keys.LEFT, Keys.A)) inputDir.x--;
-		if(InputHandler.anyKeyPressed(Keys.RIGHT, Keys.D)) inputDir.x++;
-		if(InputHandler.anyKeyPressed(Keys.UP, Keys.W)) inputDir.y++;
-		if(InputHandler.anyKeyPressed(Keys.DOWN, Keys.S)) inputDir.y--;
+		if(ClientCore.input.holdingControl(Control.MOVE_LEFT)) inputDir.x--;
+		if(ClientCore.input.holdingControl(Control.MOVE_RIGHT)) inputDir.x++;
+		if(ClientCore.input.holdingControl(Control.MOVE_UP)) inputDir.y++;
+		if(ClientCore.input.holdingControl(Control.MOVE_DOWN)) inputDir.y--;
 		
 		inputDir.nor();
 		
@@ -210,46 +212,40 @@ public class ClientPlayer extends ClientEntity implements Player {
 		
 		getStatEvo(StaminaSystem.class).isMoving = !moveDist.isZero();
 		
-		if(!isKnockedBack() && !ClientCore.hasMenu()) {
-			if(ClientCore.input.pressingKey(Input.Keys.C) || ClientCore.input.pressingButton(Buttons.LEFT)) {
-				ClientRecipe recipe = inventory.getCurrentBlueprint();
-				if(recipe != null) {
-					GameCore.debug("sending craft request because of blueprint");
-					ClientCore.getClient().send(recipe.getCraftRequest());
-				}
-				else {
-					// GameCore.debug("sending player attack");
-					ClientCore.getClient().send(new InteractRequest(true, new PositionUpdate(this), getDirection(), inventory.getSelection()));
-				}
-			}
-			else if(ClientCore.input.pressingKey(Input.Keys.V) || ClientCore.input.pressingButton(Buttons.RIGHT)) {
-				if(inventory.getCurrentBlueprint() == null) // act as a cancel only, if it isn't null
-					ClientCore.getClient().send(new InteractRequest(false, new PositionUpdate(this), getDirection(), inventory.getSelection()));
-				inventory.removeBlueprint();
-			}
-		}
-		//if(Gdx.input.isKeyPressed(Input.Keys.C) || Gdx.input.isKeyPressed(Input.Keys.V))
-		//	animator.requestState(AnimationState.ATTACK);
-		//}
-		
-		// the server will update the client hotbar as necessary when item stock changes.
-		// hands.resetItemUsage();
-		
-		for(int i = 0; i < Player.HOTBAR_SIZE; i++)
-			if(Gdx.input.isKeyJustPressed(Keys.NUM_1+i))
-				inventory.setSelection(i);
-		
 		if(!ClientCore.hasMenu()) {
-			/*if(ClientCore.input.pressingKey(Keys.E)) {
-				ClientCore.setScreen(new InventoryScreen(inventory));
-			} else */if(ClientCore.input.pressingKey(Keys.Z))
-				ClientCore.setScreen(new CraftingScreen());
-			else if(ClientCore.input.pressingKey(Keys.Q)) {
-				inventory.dropInvItems(Gdx.input.isKeyPressed(Keys.SHIFT_LEFT));
+			
+			if(!isKnockedBack()) {
+				if(ClientCore.input.pressingControl(Control.USE_ITEM)) {
+					ClientRecipe recipe = inventory.getCurrentBlueprint();
+					if(recipe != null) {
+						GameCore.debug("sending craft request because of blueprint");
+						ClientCore.getClient().send(recipe.getCraftRequest());
+					}
+					else {
+						// GameCore.debug("sending player attack");
+						ClientCore.getClient().send(new InteractRequest(true, new PositionUpdate(this), getDirection(), inventory.getSelection()));
+					}
+				}
+				else if(ClientCore.input.pressingControl(Control.INTERACT)) {
+					if(inventory.getCurrentBlueprint() == null) // act as a cancel only, if it isn't null
+						ClientCore.getClient().send(new InteractRequest(false, new PositionUpdate(this), getDirection(), inventory.getSelection()));
+					inventory.removeBlueprint();
+				}
 			}
+			
+			/*if(ClientCore.input.pressingControl(Control.INVENTORY_TOGGLE)) {
+				ClientCore.setScreen(new InventoryScreen(inventory));
+			} else */if(ClientCore.input.pressingControl(Control.BLUEPRINT_TOGGLE))
+				ClientCore.setScreen(new CraftingScreen()); // fixme wrong screen, should be blueprint screen
+			else if(ClientCore.input.pressingControl(Control.DROP_ITEM)) {
+				inventory.dropInvItems(Modifier.SHIFT.isPressed());
+			}
+			/*else if(ClientCore.input.pressingControl(Control.DROP_STACK)) {
+				inventory.dropInvItems(true);
+			}*/
 		}
 		
-		if(GameCore.debug && Gdx.input.isKeyPressed(Keys.SHIFT_LEFT) && ClientCore.input.pressingKey(Keys.H))
+		if(GameCore.debug && Modifier.SHIFT.isPressed() && ClientCore.input.pressingKey(Keys.H))
 			changeStat(Stat.Health, -1);
 	}
 	

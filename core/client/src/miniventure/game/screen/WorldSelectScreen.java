@@ -119,6 +119,8 @@ public class WorldSelectScreen extends BackgroundInheritor {
 		VisTextButton back = makeButton("Back to Main Menu", ClientCore::backToParentScreen);
 		table.add(back);
 		
+		mapButtons(table, load, back);
+		setKeyboardFocus(table);
 		setScrollFocus(scroll);
 	}
 	

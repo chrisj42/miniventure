@@ -5,6 +5,7 @@ import miniventure.game.screen.util.BackgroundInheritor;
 
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.kotcrab.vis.ui.widget.VisTextButton;
 
 public class ErrorScreen extends BackgroundInheritor {
 	
@@ -19,13 +20,15 @@ public class ErrorScreen extends BackgroundInheritor {
 		
 		table.add(makeLabel(error)).row();
 		
+		VisTextButton rejoin = makeButton("Reconnect", () -> ClientCore.getWorld().rejoinWorld());
 		if(allowRejoin)
-			table.add(makeButton("Reconnect", () -> ClientCore.getWorld().rejoinWorld())).spaceTop(50).row();
+			table.add(rejoin).spaceTop(50).row();
 		
-		table.add(
-			makeButton("Back to main menu", () -> ClientCore.setScreen(getParent() != null ? getParent() : new MainMenu()))
-		).spaceTop(10).row();
+		VisTextButton back = makeButton("Back to main menu", () -> ClientCore.setScreen(getParent() != null ? getParent() : new MainMenu()));
+		table.add(back).spaceTop(10).row();
 		
+		mapButtons(table, rejoin, back);
+		setKeyboardFocus(table);
 	}
 	
 	@Override public void focus() { ClientCore.stopMusic(); super.focus(); }

@@ -1,12 +1,13 @@
 package miniventure.game.client;
 
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 import java.util.Map.Entry;
 
 import miniventure.game.GameCore;
+import miniventure.game.util.ArrayUtils;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
 
@@ -15,13 +16,120 @@ public class InputHandler implements InputProcessor {
 	private static final float INITIAL_DELAY = 0.5f; // delay between initial press and first simulated press.
 	private static final float REPEAT_DELAY = 0.2f; // delay between each simulated press.
 	
-	private float repressDelay = REPEAT_DELAY;
+	public enum Modifier {
+		SHIFT(Keys.SHIFT_LEFT, Keys.SHIFT_RIGHT),
+		ALT(Keys.ALT_LEFT, Keys.ALT_RIGHT),
+		CONTROL(Keys.CONTROL_LEFT, Keys.CONTROL_RIGHT);
+		
+		private final int leftKey, rightKey;
+		
+		Modifier(int left, int right) {
+			leftKey = left;
+			rightKey = right;
+		}
+		
+		public boolean isPressed() {
+			return Gdx.input.isKeyPressed(leftKey)
+				|| Gdx.input.isKeyPressed(rightKey);
+		}
+	}
+	
+	public static class Mapping {
+		public final int code;
+		public final boolean mouse;
+		
+		private static Mapping mouse(int code) { return new Mapping(code, true); }
+		private static Mapping key(int code) { return new Mapping(code, false); }
+		
+		private Mapping(int code, boolean mouse) {
+			this.code = code;
+			this.mouse = mouse;
+		}
+		
+		public boolean isPressed(InputHandler input, boolean held) {
+			return mouse ? held ? input.buttonPresses.containsKey(code) : input.pressingButton(code) : held ? input.keyPresses.containsKey(code) : input.pressingKey(code);
+		}
+	}
+	
+	public enum Control {
+		// gameplay
+		
+		MOVE_UP(Keys.UP, Keys.W),
+		MOVE_DOWN(Keys.DOWN, Keys.S),
+		MOVE_LEFT(Keys.LEFT, Keys.A),
+		MOVE_RIGHT(Keys.RIGHT, Keys.D),
+		
+		USE_ITEM(Mapping.mouse(Buttons.LEFT)),
+		INTERACT(Mapping.mouse(Buttons.RIGHT)),
+		
+		DROP_ITEM(Keys.Q),
+		// DROP_STACK(new Mapping(Keys.Q, Modifier.SHIFT)),
+		
+		INVENTORY_TOGGLE(Keys.E),
+		BLUEPRINT_TOGGLE(Keys.TAB),
+		
+		// these two I'm not sure I need.
+		TOGGLE_FACE_CURSOR(Keys.R), // toggles between facing the cursor, and facing the last direction moved.
+		FOLLOW_CURSOR(Mapping.mouse(Buttons.MIDDLE)), // when pressed, the player will follow the cursor.
+		// QUICK_ACTION(), // place + deposit, deposit facing, build facing
+		
+		// ui
+		
+		// CURSOR_UP(false, Keys.UP),
+		// CURSOR_DOWN(false, Keys.DOWN),
+		// CURSOR_LEFT(false, Keys.LEFT),
+		// CURSOR_RIGHT(false, Keys.RIGHT),
+		CHAT(Keys.T),
+		CONFIRM(Keys.ENTER),
+		CANCEL(Keys.ESCAPE),
+		PAUSE(Keys.ESCAPE);
+		
+		// private final boolean editable; // non-editable ones don't show up in the key binding menu.
+		private final List<Mapping> defaultMappings;
+		private final List<Mapping> mappings = new LinkedList<>();
+		
+		Control(Integer... defaultKeys) {
+			this(ArrayUtils.mapArray(defaultKeys, Mapping.class, Mapping::key));
+		}
+		Control(Mapping... defaultMappings) {
+			this.defaultMappings = Arrays.asList(defaultMappings);
+			resetMappings();
+		}
+		
+		public boolean isPressed(InputHandler input, boolean held) {
+			for(Mapping mapping: mappings)
+				if(mapping.isPressed(input, held))
+					return true;
+			
+			return false;
+		}
+		
+		public boolean matches(int code) { return matches(code, false); }
+		public boolean matches(int code, boolean mouse) {
+			for(Mapping mapping: mappings)
+				if(mapping.mouse == mouse && mapping.code == code)
+					return true;
+			
+			return false;
+		}
+		
+		public void resetMappings() {
+			mappings.clear();
+			mappings.addAll(defaultMappings);
+		}
+		
+		public static void resetAllMappings() {
+			for(Control control: Control.values())
+				control.resetMappings();
+		}
+	}
 	
 	private final HashMap<Integer, Float> keyPresses = new HashMap<>(); // keys in here are currently being held down. The value stored is the initial time of press.
 	private final HashSet<Integer> pressedKeys = new HashSet<>(); // keys here are treated as being just pressed down.
 	// mouse
 	private final HashMap<Integer, Float> buttonPresses = new HashMap<>(); // keys in here are currently being held down. The value stored is the initial time of press.
 	private final HashSet<Integer> pressedButtons = new HashSet<>(); // keys here are treated as being just pressed down.
+	private float repressDelay = REPEAT_DELAY;
 	private float prevUpdate;
 	
 	InputHandler() {}
@@ -68,6 +176,13 @@ public class InputHandler implements InputProcessor {
 		return this;
 	}
 	
+	public boolean pressingControl(Control control) {
+		return control.isPressed(this, false);
+	}
+	public boolean holdingControl(Control control) {
+		return control.isPressed(this, true);
+	}
+	
 	/**
 	 * Used to check if a given key is currently being pressed. This method differs from Gdx.input.isKeyJustPressed in that it will repeat the press event at regular intervals, after an initial larger delay.
 	 * 
@@ -92,7 +207,7 @@ public class InputHandler implements InputProcessor {
 	@Override
 	public boolean keyDown(int keycode) {
 		keyPresses.put(keycode, GameCore.getElapsedProgramTime());
-		if(Gdx.input.isKeyPressed(Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Keys.SHIFT_RIGHT))
+		if(Modifier.SHIFT.isPressed())
 			if(Gdx.input.isKeyJustPressed(Keys.D) && Gdx.input.isKeyPressed(Keys.TAB) ||
 				Gdx.input.isKeyJustPressed(Keys.TAB) && Gdx.input.isKeyPressed(Keys.D))
 				GameCore.debug = !GameCore.debug; // toggle debug mode

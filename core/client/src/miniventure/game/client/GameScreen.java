@@ -1,6 +1,7 @@
 package miniventure.game.client;
 
 import miniventure.game.GameCore;
+import miniventure.game.client.InputHandler.Control;
 import miniventure.game.item.InventoryScreen;
 import miniventure.game.screen.*;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
@@ -98,13 +99,13 @@ public class GameScreen {
 		// 	ClientCore.debugChunk = !ClientCore.debugChunk;
 		
 		if(!ClientCore.hasMenu()) {
-			if(!shift && ClientCore.input.pressingKey(Keys.T))
+			if(ClientCore.input.pressingControl(Control.CHAT))
 				chatScreen.focus("");
 			
 			else if(ClientCore.input.pressingKey(Keys.SLASH))
 				chatScreen.focus("/");
 			
-			else if(ClientCore.input.pressingKey(Keys.ESCAPE))
+			else if(ClientCore.input.pressingControl(Control.PAUSE))
 				ClientCore.setScreen(new PauseScreen());
 			
 			else if(GameCore.debug && ClientCore.input.pressingKey(Keys.M))

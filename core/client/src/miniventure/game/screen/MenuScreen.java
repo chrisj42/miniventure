@@ -7,6 +7,7 @@ import java.util.Map;
 
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.FontStyle;
+import miniventure.game.client.InputHandler.Control;
 import miniventure.game.screen.util.DiscreteViewport;
 import miniventure.game.util.RelPos;
 import miniventure.game.util.function.Action;
@@ -163,14 +164,14 @@ public class MenuScreen extends Stage {
 		focus.addListener(new InputListener() {
 			@Override
 			public boolean keyDown(InputEvent event, int keycode) {
-				if(keycode == Keys.ENTER && confirmBtn != null) {
+				if(Control.CONFIRM.matches(keycode) && confirmBtn != null) {
 					InputEvent event1 = new InputEvent();
 					event1.setType(Type.touchDown);
 					confirmBtn.fire(event1);
 					setKeyboardFocus(focus);
 					return true;
 				}
-				if(keycode == Keys.ESCAPE && cancelBtn != null) {
+				if(Control.CANCEL.matches(keycode) && cancelBtn != null) {
 					InputEvent event1 = new InputEvent();
 					event1.setType(Type.touchDown);
 					cancelBtn.fire(event1);
@@ -182,13 +183,13 @@ public class MenuScreen extends Stage {
 			
 			@Override
 			public boolean keyUp(InputEvent event, int keycode) {
-				if(keycode == Keys.ENTER && confirmBtn != null) {
+				if(Control.CONFIRM.matches(keycode) && confirmBtn != null) {
 					InputEvent event1 = new InputEvent();
 					event1.setType(Type.touchUp);
 					confirmBtn.fire(event1);
 					return true;
 				}
-				if(keycode == Keys.ESCAPE && cancelBtn != null) {
+				if(Control.CANCEL.matches(keycode) && cancelBtn != null) {
 					InputEvent event1 = new InputEvent();
 					event1.setType(Type.touchUp);
 					cancelBtn.fire(event1);

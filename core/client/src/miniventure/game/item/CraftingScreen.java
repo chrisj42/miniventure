@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 
+import miniventure.game.client.InputHandler.Control;
 import miniventure.game.network.GameProtocol.CraftRequest;
 import miniventure.game.network.GameProtocol.RecipeRequest;
 import miniventure.game.network.GameProtocol.RecipeStockUpdate;
@@ -113,14 +114,14 @@ public class CraftingScreen extends MenuScreen {
 		recipeListTable.addListener(new InputListener() {
 			@Override
 			public boolean keyDown(InputEvent event, int keycode) {
-				if(keycode == Keys.Z || keycode == Keys.ESCAPE) {
+				if(Control.CANCEL.matches(keycode)) {
 					ClientCore.setScreen(null);
 					return true;
 				}
 				
 				synchronized (CraftingScreen.this) {
 					if(recipes != null && recipes.size() > 0) {
-						if(keycode == Keys.ENTER) {
+						if(Control.CONFIRM.matches(keycode)) {
 							craftSelected();
 							return true;
 						}
