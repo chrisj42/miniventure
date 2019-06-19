@@ -103,6 +103,7 @@ public class LevelCache {
 	
 	public boolean generated() { return tileData != null; }
 	
+	// the server is the only one that calls this, since it's the only one that uses this system.
 	public Level getLevel(LevelFetcher fetcher) {
 		if(generated()) // should basically always be true
 			return fetcher.loadLevel(dataVersion, island.levelId, tileData, entityData);

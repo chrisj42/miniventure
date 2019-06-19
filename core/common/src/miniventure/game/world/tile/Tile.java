@@ -76,7 +76,9 @@ public abstract class Tile implements WorldObject {
 	
 	public SerialMap getDataMap() { return getDataMap(getType().getTypeEnum()); }
 	public SerialMap getDataMap(TileType tileType) { return getDataMap(tileType.getTypeEnum()); }
-	public SerialMap getDataMap(TileTypeEnum tileType) { return dataMaps.computeIfAbsent(tileType, k -> new SerialMap()); }
+	public SerialMap getDataMap(TileTypeEnum tileType) {
+		return dataMaps.computeIfAbsent(tileType, k -> new SerialMap());
+	}
 	
 	
 	public HashSet<Tile> getAdjacentTiles(boolean includeCorners) {
@@ -107,8 +109,6 @@ public abstract class Tile implements WorldObject {
 	
 	@Override
 	public int hashCode() { return Point.javaPointHashCode(x, y) + level.getLevelId() * 17; }
-	
-	// I can use the string encoder and string parser in MyUtils to encode the tile data in a way so that I can always re-parse the encoded array. I can use this internally to, with other things, whenever I need to encode a list of objects and don't want to worry about finding the delimiter symbol in string somewhere I don't expect.
 	
 	public static class TileData {
 		public final int[] typeOrdinals;

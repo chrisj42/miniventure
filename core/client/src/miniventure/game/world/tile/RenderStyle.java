@@ -28,12 +28,16 @@ public class RenderStyle {
 		this.fps = fps;
 	}
 	
-	TileAnimation getAnimation(@NotNull TileTypeEnum tileType, String name, EnumMap<TileTypeEnum, HashMap<String, Array<TextureHolder>>> map, String mapName) {
-		if(!map.containsKey(tileType))
-			throw new SpriteNotFoundException("tile type "+tileType+" does not have any registered sprites in map "+mapName+". (discovered when attempting to fetch sprite \""+name+"\")");
-		if(!map.get(tileType).containsKey(name))
-			throw new SpriteNotFoundException("tile type "+tileType+" does not have sprite with name \""+name+"\" in map "+mapName+'.');
-		return getAnimation(map.get(tileType).get(name));
+	TileAnimation getAnimation(@NotNull TileTypeEnum tileType, String name, EnumMap<TileTypeEnum, HashMap<String, Array<TextureHolder>>> map, String mapNameForErrorLog) {
+		HashMap<String, Array<TextureHolder>> tileAnims = map.get(tileType);
+		if(tileAnims == null)
+			throw new SpriteNotFoundException("tile type "+tileType+" does not have any registered sprites in map "+mapNameForErrorLog+". (discovered when attempting to fetch sprite \""+name+"\")");
+		
+		Array<TextureHolder> anim = tileAnims.get(name);
+		if(anim == null)
+			throw new SpriteNotFoundException("tile type "+tileType+" does not have sprite with name \""+name+"\" in map "+mapNameForErrorLog+'.');
+		
+		return getAnimation(anim);
 	}
 	private TileAnimation getAnimation(Array<TextureHolder> frames) {
 		if(fps == 0)

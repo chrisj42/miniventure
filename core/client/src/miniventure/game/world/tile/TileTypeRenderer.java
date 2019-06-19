@@ -76,6 +76,7 @@ public class TileTypeRenderer {
 	// whenever a tile changes its TileTypeEnum stack in any way, all 9 tiles around it re-fetch their overlap and main animations. Then they keep that stack of animations until the next fetch.
 	
 	// gets the sprite for when this tiletype is surrounded by the given types.
+	// note, this returns a list because some tiles have separate main and border sprites, which are overlaid to create the final connection sprite.
 	public LinkedList<TileAnimation> getConnectionSprites(@NotNull Tile tile, EnumMap<RelPos, EnumSet<TileTypeEnum>> aroundTypes) {
 		LinkedList<TileAnimation> sprites = new LinkedList<>();
 		String name = tile.getDataMap(tileType).get(TileCacheTag.TransitionName);
