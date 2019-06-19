@@ -34,7 +34,7 @@ public class ServerTile extends Tile {
 		super(level, x, y, types);
 		
 		for(TileTypeEnum type: types)
-			this.dataMaps.put(type, ServerTileType.get(type).getInitialData());
+			this.dataMaps.put(type, new SerialMap());
 	}
 	
 	public ServerTile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, SerialMap[] dataMaps) {
@@ -69,13 +69,14 @@ public class ServerTile extends Tile {
 		return (ServerTileStack) super.getTypeStack();
 	}
 	
-	public boolean addTile(@NotNull ServerTileType newType) { return addTile(newType, getType()); }
+	public synchronized boolean addTile(@NotNull ServerTileType newType) { return addTile(newType, getType()); }
+	// not synchronizing this only because it's always called in a synchronized context.
 	private boolean addTile(@NotNull ServerTileType newType, @NotNull ServerTileType prevType) {
 		
 		moveEntities(newType);
 		
 		getTypeStack().addLayer(newType);
-		dataMaps.put(newType.getTypeEnum(), newType.getInitialData());
+		dataMaps.put(newType.getTypeEnum(), new SerialMap());
 		
 		// check for an entrance animation
 		newType.get(P.TRANS).tryStartAnimation(this, prevType);
@@ -86,7 +87,7 @@ public class ServerTile extends Tile {
 	}
 	
 	boolean breakTile() { return breakTile(true); }
-	boolean breakTile(boolean checkForExitAnim) {
+	synchronized boolean breakTile(boolean checkForExitAnim) {
 		if(checkForExitAnim) {
 			ServerTileType type = getType();
 			if(type.get(P.TRANS).tryStartAnimation(this, getTypeStack().getLayerFromTop(1, true), false)) {
@@ -108,7 +109,7 @@ public class ServerTile extends Tile {
 		return false; // cannot break this tile any further.
 	}
 	
-	boolean replaceTile(@NotNull ServerTileType newType) {
+	synchronized boolean replaceTile(@NotNull ServerTileType newType) {
 		// for doors, the animations will be attached to the open door type; an entrance when coming from a closed door, and an exit when going to a closed door.
 		/*
 			when adding a type, check only for an entrance animation on the new type, and do it after adding it to the stack. when the animation finishes, do nothing except finish the animation.
@@ -122,7 +123,7 @@ public class ServerTile extends Tile {
 		
 		if(newType.equals(type)) {
 			// just reset the data
-			dataMaps.put(type.getTypeEnum(), type.getInitialData());
+			dataMaps.put(type.getTypeEnum(), new SerialMap());
 			getLevel().onTileUpdate(this);
 			return true;
 		}
@@ -148,11 +149,13 @@ public class ServerTile extends Tile {
 	
 	private void moveEntities(ServerTileType newType) {
 		// check for entities that will not be allowed on the new tile, and move them to the closest adjacent tile they are allowed on.
+		if(newType.isWalkable()) return; // no worries for this type.
+		
 		HashSet<Tile> surroundingTileSet = getAdjacentTiles(true);
 		Tile[] surroundingTiles = surroundingTileSet.toArray(new Tile[0]);
 		for(Entity entity: getLevel().getOverlappingEntities(getBounds())) {
 			// for each entity, check if it can walk on the new tile type. If not, fetch the surrounding tiles, remove those the entity can't walk on, and then fetch the closest tile of the remaining ones.
-			if(newType.isWalkable()) continue; // no worries for this entity.
+			// if(newType.isWalkable()) continue; // no worries for this entity.
 			
 			Array<Tile> aroundTiles = new Array<>(surroundingTiles);
 			for(int i = 0; i < aroundTiles.size; i++) {

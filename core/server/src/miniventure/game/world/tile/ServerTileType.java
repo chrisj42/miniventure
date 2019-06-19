@@ -98,7 +98,9 @@ public class ServerTileType extends TileType {
 		return item;
 	}
 	
-	public SerialMap getInitialData() { return new SerialMap(); }
+	// it turns out that I solved the problem of initial data differently: datamap.getOrDefaultAndPut().
+	// after all, initial data is data that should be a given, and therefore shouldn't need to be stored.
+	// public SerialMap getInitialData() { return new SerialMap(); }
 	
 	/**
 	 * Called to update the tile's state in some way, whenever an adjacent tile is updated. It is also called once on tile load to get the first value and determine future calls.
