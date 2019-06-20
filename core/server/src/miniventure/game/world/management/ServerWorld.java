@@ -30,7 +30,7 @@ import miniventure.game.world.level.Level;
 import miniventure.game.world.level.LevelFetcher;
 import miniventure.game.world.level.ServerLevel;
 import miniventure.game.world.tile.ServerTileType;
-import miniventure.game.world.tile.Tile.TileData;
+import miniventure.game.world.tile.TileStack.TileData;
 import miniventure.game.world.tile.TileTypeEnum;
 import miniventure.game.world.worldgen.island.IslandType;
 
@@ -355,18 +355,18 @@ public class ServerWorld extends WorldManager {
 	
 	protected void pruneLoadedLevels() {
 		ServerLevel[] levels = loadedLevels.get(map -> map.values().toArray(new ServerLevel[0]));
-		HashSet<Integer> safeIds = new HashSet<>(levels.length);
+		HashSet<Integer> keepAliveIds = new HashSet<>(levels.length);
 		
 		// log which levels have a keep-alive
 		for(ServerPlayer player: server.getPlayers()) {
 			Level level = player.getLevel();
 			if(level != null)
-				safeIds.add(level.getLevelId());
+				keepAliveIds.add(level.getLevelId());
 		}
 		
 		// unload any loaded level that didn't have a keep-alive
 		for(ServerLevel level: levels)
-			if(!safeIds.contains(level.getLevelId()) && !level.isPreload())
+			if(!keepAliveIds.contains(level.getLevelId()) && !level.isPreload())
 				unloadLevel(level.getLevelId());
 	}
 	

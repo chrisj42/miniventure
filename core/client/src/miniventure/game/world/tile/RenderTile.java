@@ -26,14 +26,16 @@ public class RenderTile extends Tile {
 	// private final Object spriteLock = new Object();
 	
 	public RenderTile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, @Nullable SerialMap[] data) {
-		super(level, x, y, types);
+		super(level, x, y, types, data);
 		
-		for(int i = 0; i < types.length; i++)
-			this.dataMaps.put(types[i], data == null ? new SerialMap() : data[i]);
+		// for(int i = 0; i < types.length; i++)
+		// 	this.dataMaps.put(types[i], data == null ? new SerialMap() : data[i]);
 	}
 	
 	@Override
-	ClientTileStack makeStack(@NotNull TileTypeEnum[] types) { return new ClientTileStack(types); }
+	ClientTileStack makeStack(@NotNull TileTypeEnum[] types, @Nullable SerialMap[] dataMaps) {
+		return new ClientTileStack(types, dataMaps);
+	}
 	
 	@Override
 	public ClientTileStack getTypeStack() { return (ClientTileStack) super.getTypeStack(); }

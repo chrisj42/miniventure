@@ -13,7 +13,7 @@ import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.player.Player;
 import miniventure.game.world.management.WorldManager;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.Tile.TileData;
+import miniventure.game.world.tile.TileStack.TileData;
 import miniventure.game.world.tile.TileTypeEnum;
 
 import com.badlogic.gdx.math.Rectangle;

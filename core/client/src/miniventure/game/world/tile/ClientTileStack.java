@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import miniventure.game.client.ClientCore;
+import miniventure.game.util.customenum.SerialMap;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -18,16 +19,12 @@ public class ClientTileStack extends TileStack<ClientTileType> {
 			opaqueStack = new LinkedList<>();
 	}
 	
-	public ClientTileStack() {
-		super(ClientCore.getWorld());
-	}
-	
-	public ClientTileStack(ClientTileType[] types) {
+	/*public ClientTileStack(ClientTileType[] types) {
 		super(types);
-	}
+	}*/
 	
-	public ClientTileStack(TileTypeEnum[] enumTypes) {
-		super(ClientCore.getWorld(), enumTypes);
+	public ClientTileStack(TileTypeEnum[] enumTypes, @Nullable SerialMap[] dataMaps) {
+		super(ClientCore.getWorld(), enumTypes, dataMaps);
 	}
 	
 	public ClientTileType getLowestVisibleLayer() { return opaqueStack.peekLast(); }
@@ -54,8 +51,8 @@ public class ClientTileStack extends TileStack<ClientTileType> {
 	
 	
 	@Override
-	void addLayer(@NotNull ClientTileType newLayer) {
-		super.addLayer(newLayer);
+	void addLayer(@NotNull ClientTileType newLayer, @NotNull SerialMap dataMap) {
+		super.addLayer(newLayer, dataMap);
 		if(opaqueStack == null)
 			opaqueStack = new LinkedList<>();
 		if(newLayer.getRenderer().isOpaque())

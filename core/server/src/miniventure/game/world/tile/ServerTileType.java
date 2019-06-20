@@ -110,7 +110,7 @@ public class ServerTileType extends TileType {
 	 * @return how long to wait before next call, or 0 for never (until adjacent tile update)
 	 */
 	public float update(@NotNull ServerTile tile) {
-		SerialMap dataMap = tile.getDataMap(this);
+		SerialMap dataMap = tile.getDataMap(getTypeEnum());
 		
 		float now = tile.getWorld().getGameTime();
 		float lastUpdate = dataMap.getOrDefault(TileCacheTag.LastUpdate, now);

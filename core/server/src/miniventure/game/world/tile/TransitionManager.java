@@ -66,18 +66,18 @@ public class TransitionManager {
 		return tryStartAnimation(tile, false, next, addNext);
 	}
 	// check for transition animation; tiletype is being entered or removed, and given what tile type will be the main one next.
-	private boolean tryStartAnimation(@NotNull ServerTile tile, boolean isEntering, @NotNull TileType other, boolean addNext) { // addNext is ignored if isEntering is true
+	private boolean tryStartAnimation(@NotNull ServerTile tile, boolean isEntering, @NotNull TileType nextType, boolean addNext) { // addNext is ignored if isEntering is true
 		HashMap<String, ServerTileTransition> animations = isEntering ? entranceAnimations : exitAnimations;
 		for(ServerTileTransition animation: animations.values()) {
-			if(animation.isTriggerType(other)) {
-				GameCore.debug("Server starting tile transition for tile "+tile+", from tiletype "+other+", with enter="+isEntering);
-				SerialMap dataMap = tile.getDataMap();
+			if(animation.isTriggerType(nextType)) {
+				GameCore.debug("Server starting tile transition for tile "+tile+", triggered by tiletype "+nextType+", with enter="+isEntering);
+				SerialMap dataMap = tile.getDataMap(tile.getType().getTypeEnum());
 				dataMap.put(TileCacheTag.TransitionName, animation.name);
 				float start = tile.getWorld().getGameTime();
 				dataMap.put(TileCacheTag.TransitionStart, start);
 				dataMap.put(TileCacheTag.TransitionMode, isEntering ? TransitionMode.ENTERING : TransitionMode.EXITING);
 				if(addNext)
-					dataMap.put(TileCacheTag.TransitionTile, other.getTypeEnum());
+					dataMap.put(TileCacheTag.TransitionTile, nextType.getTypeEnum());
 				else
 					dataMap.remove(TileCacheTag.TransitionTile);
 				tile.getLevel().onTileUpdate(tile);

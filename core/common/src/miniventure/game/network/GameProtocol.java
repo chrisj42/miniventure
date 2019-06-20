@@ -27,7 +27,7 @@ import miniventure.game.world.entity.particle.ParticleData;
 import miniventure.game.world.level.Level;
 import miniventure.game.world.management.WorldManager;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.Tile.TileData;
+import miniventure.game.world.tile.TileStack.TileData;
 import miniventure.game.world.tile.Tile.TileTag;
 import miniventure.game.world.tile.TileTypeEnum;
 import miniventure.game.world.worldgen.island.IslandType;

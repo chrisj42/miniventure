@@ -12,7 +12,7 @@ import miniventure.game.world.entity.Entity;
 import miniventure.game.world.management.ClientWorld;
 import miniventure.game.world.tile.ClientTile;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.Tile.TileData;
+import miniventure.game.world.tile.TileStack.TileData;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;

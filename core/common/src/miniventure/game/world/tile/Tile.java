@@ -17,6 +17,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class Tile implements WorldObject {
 	
@@ -41,21 +42,20 @@ public abstract class Tile implements WorldObject {
 	public static final int SIZE = RESOLUTION * SCALE;
 	
 	private TileStack tileStack;
-	private final Object dataLock = new Object();
 	
 	@NotNull private final Level level;
 	final int x, y;
-	final EnumMap<TileTypeEnum, SerialMap> dataMaps = new EnumMap<>(TileTypeEnum.class);
+	// final EnumMap<TileTypeEnum, SerialMap> dataMaps = new EnumMap<>(TileTypeEnum.class);
 	
 	// the TileType array is ALWAYS expected in order of bottom to top.
-	Tile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types) {
+	Tile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, @Nullable SerialMap[] dataMaps) {
 		this.level = level;
 		this.x = x;
 		this.y = y;
-		setTileStack(makeStack(types));
+		setTileStack(makeStack(types, dataMaps));
 	}
 	
-	abstract TileStack makeStack(@NotNull TileTypeEnum[] types);
+	abstract TileStack makeStack(@NotNull TileTypeEnum[] types, @Nullable SerialMap[] dataMaps);
 	
 	void setTileStack(TileStack stack) { this.tileStack = stack; }
 	
@@ -74,10 +74,16 @@ public abstract class Tile implements WorldObject {
 	public TileType getType() { return tileStack.getTopLayer(); }
 	public TileStack getTypeStack() { return tileStack; }
 	
-	public SerialMap getDataMap() { return getDataMap(getType().getTypeEnum()); }
-	public SerialMap getDataMap(TileType tileType) { return getDataMap(tileType.getTypeEnum()); }
+	// public SerialMap getDataMap(TileType tileType) { return getDataMap(tileType.getTypeEnum()); }
+	@NotNull
 	public SerialMap getDataMap(TileTypeEnum tileType) {
-		return dataMaps.computeIfAbsent(tileType, k -> new SerialMap());
+		SerialMap map = tileStack.getDataMap(tileType);
+		// should never happen, especially with the new synchronization. But this will stay, just in case.
+		if(map == null) {
+			System.err.println("ERROR: tile "+toLocString()+" came back with a null data map for tiletype "+tileType);
+			map = new SerialMap();
+		}
+		return map;
 	}
 	
 	
@@ -109,65 +115,6 @@ public abstract class Tile implements WorldObject {
 	
 	@Override
 	public int hashCode() { return Point.javaPointHashCode(x, y) + level.getLevelId() * 17; }
-	
-	public static class TileData {
-		public final int[] typeOrdinals;
-		public final String[] data;
-		
-		private TileData() { this((int[])null, null); }
-		private TileData(int[] typeOrdinals, String[] data) {
-			this.typeOrdinals = typeOrdinals;
-			this.data = data;
-		}
-		public TileData(Tile tile) {
-			synchronized (tile.dataLock) {
-				TileTypeEnum[] tileTypes = tile.getTypeStack().getEnumTypes();
-				typeOrdinals = new int[tileTypes.length];
-				for(int i = 0; i < tileTypes.length; i++) {
-					TileTypeEnum type = tileTypes[i];
-					typeOrdinals[i] = type.ordinal();
-				}
-				
-				this.data = new String[tileTypes.length];
-				for(int i = 0; i < data.length; i++)
-					data[i] = tile.dataMaps.get(tileTypes[i]).serialize();
-			}
-		}
-		
-		public TileData(Version dataVersion, String tileData) {
-			String[] all = MyUtils.parseLayeredString(tileData);
-			data = Arrays.copyOfRange(all, 1, all.length);
-			
-			typeOrdinals = ArrayUtils.mapArray(all[0].split(","), int.class, int[].class, Integer::parseInt);
-		}
-		
-		public String serialize() {
-			String[] all = new String[data.length+1];
-			System.arraycopy(data, 0, all, 1, data.length);
-			
-			all[0] = ArrayUtils.arrayToString(typeOrdinals, ",");
-			
-			return MyUtils.encodeStringArray(all);
-		}
-		
-		public TileTypeEnum[] getTypes() { return getTypes(typeOrdinals); }
-		public static TileTypeEnum[] getTypes(int[] typeOrdinals) {
-			TileTypeEnum[] types = new TileTypeEnum[typeOrdinals.length];
-			for(int i = 0; i < types.length; i++) {
-				types[i] = TileTypeEnum.value(typeOrdinals[i]);
-			}
-			return types;
-		}
-		
-		public SerialMap[] getDataMaps() { return getDataMaps(data); }
-		public static SerialMap[] getDataMaps(String[] data) {
-			SerialMap[] maps = new SerialMap[data.length];
-			for(int i = 0; i < data.length; i++)
-				maps[i] = SerialMap.deserialize(data[i], TileCacheTag.class);
-			return maps;
-		}
-		
-	}
 	
 	public static class TileTag implements Tag<Tile> {
 		public final int x;

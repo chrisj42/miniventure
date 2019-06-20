@@ -3,6 +3,7 @@ package miniventure.game.world.tile;
 import miniventure.game.util.customenum.SerialMap;
 import miniventure.game.world.level.ClientLevel;
 import miniventure.game.world.level.Level;
+import miniventure.game.world.tile.TileStack.TileData;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -22,9 +23,6 @@ public class ClientTile extends RenderTile {
 		TileTypeEnum[] types = tileData.getTypes();
 		SerialMap[] maps = tileData.getDataMaps();
 		
-		setTileStack(makeStack(types));
-		dataMaps.clear();
-		for(int i = 0; i < tileData.data.length; i++)
-			dataMaps.put(types[i], maps[i]);
+		setTileStack(makeStack(types, maps));
 	}
 }

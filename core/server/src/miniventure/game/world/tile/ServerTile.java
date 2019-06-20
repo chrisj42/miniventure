@@ -28,28 +28,21 @@ import org.jetbrains.annotations.Nullable;
 public class ServerTile extends Tile {
 	
 	public ServerTile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types) {
-		this((ServerLevel)level, x, y, types);
+		this(level, x, y, types, null);
 	}
-	public ServerTile(@NotNull ServerLevel level, int x, int y, @NotNull TileTypeEnum[] types) {
-		super(level, x, y, types);
-		
-		for(TileTypeEnum type: types)
-			this.dataMaps.put(type, new SerialMap());
-	}
-	
 	public ServerTile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, SerialMap[] dataMaps) {
 		this((ServerLevel) level, x, y, types, dataMaps);
 	}
 	public ServerTile(@NotNull ServerLevel level, int x, int y, @NotNull TileTypeEnum[] types, SerialMap[] dataMaps) {
-		super(level, x, y, types);
+		super(level, x, y, types, dataMaps);
 		
-		for(int i = 0; i < types.length; i++)
-			this.dataMaps.put(types[i], dataMaps[i]);
+		// for(int i = 0; i < types.length; i++)
+		// 	this.dataMaps.put(types[i], dataMaps[i]);
 	}
 	
 	@Override
-	TileStack<ServerTileType> makeStack(@NotNull TileTypeEnum[] types) {
-		return new ServerTileStack(getWorld(), types);
+	ServerTileStack makeStack(@NotNull TileTypeEnum[] types, @Nullable SerialMap[] dataMaps) {
+		return new ServerTileStack(getWorld(), types, dataMaps);
 	}
 	
 	@Override @NotNull
@@ -75,8 +68,7 @@ public class ServerTile extends Tile {
 		
 		moveEntities(newType);
 		
-		getTypeStack().addLayer(newType);
-		dataMaps.put(newType.getTypeEnum(), new SerialMap());
+		getTypeStack().addLayer(newType, new SerialMap());
 		
 		// check for an entrance animation
 		newType.get(P.TRANS).tryStartAnimation(this, prevType);
@@ -100,7 +92,7 @@ public class ServerTile extends Tile {
 		ServerTileType prevType = getTypeStack().removeLayer();
 		
 		if(prevType != null) {
-			dataMaps.remove(prevType.getTypeEnum());
+			// dataMaps.remove(prevType.getTypeEnum());
 			moveEntities(getType());
 			getLevel().onTileUpdate(this);
 			return true;
@@ -123,7 +115,7 @@ public class ServerTile extends Tile {
 		
 		if(newType.equals(type)) {
 			// just reset the data
-			dataMaps.put(type.getTypeEnum(), new SerialMap());
+			getTypeStack().setData(type.getTypeEnum(), new SerialMap());
 			getLevel().onTileUpdate(this);
 			return true;
 		}

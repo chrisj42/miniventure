@@ -11,7 +11,7 @@ import miniventure.game.util.Version;
 import miniventure.game.world.Point;
 import miniventure.game.world.level.Level;
 import miniventure.game.world.level.LevelFetcher;
-import miniventure.game.world.tile.Tile.TileData;
+import miniventure.game.world.tile.TileStack.TileData;
 import miniventure.game.world.worldgen.island.IslandType;
 
 public class LevelCache {

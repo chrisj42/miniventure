@@ -21,7 +21,7 @@ import miniventure.game.world.file.LevelCache;
 import miniventure.game.world.management.ServerWorld;
 import miniventure.game.world.tile.ServerTile;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.Tile.TileData;
+import miniventure.game.world.tile.TileStack.TileData;
 import miniventure.game.world.tile.TileTypeEnum;
 
 import com.badlogic.gdx.math.MathUtils;
@@ -68,6 +68,7 @@ public class ServerLevel extends Level {
 	@Override
 	public ServerTile getTile(float x, float y) { return (ServerTile) super.getTile(x, y); }
 	
+	/** @noinspection BooleanMethodIsAlwaysInverted*/
 	public boolean isPreload() { return preload; }
 	
 	public void save(@NotNull LevelCache cache) {
