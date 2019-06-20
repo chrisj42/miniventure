@@ -27,7 +27,8 @@ public class ClientTileStack extends TileStack<ClientTileType> {
 		super(ClientCore.getWorld(), enumTypes, dataMaps);
 	}
 	
-	public ClientTileType getLowestVisibleLayer() { return opaqueStack.peekLast(); }
+	// was never used.
+	// public ClientTileType getLowestVisibleLayer() { return opaqueStack.peekLast(); }
 	
 	@Override
 	public List<ClientTileType> getTypes() { return getTypes(false); }

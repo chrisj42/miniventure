@@ -87,8 +87,10 @@ public class TileItem extends ServerItem {
 	public Result interact(WorldObject obj, Player player) {
 		if(obj instanceof ServerTile) {
 			ServerTile tile = (ServerTile) obj;
-			if(placementCheck.canPlace(tile, player) && tile.addTile(ServerTileType.get(result)))
+			if(placementCheck.canPlace(tile, player)) {
+				tile.addTile(ServerTileType.get(result));
 				return Result.USED;
+			}
 		}
 		
 		return obj.interactWith(player, this);

@@ -187,7 +187,7 @@ public interface GameProtocol {
 		// for client
 		public LevelData() { this(0, null); }
 		// for server
-		public LevelData(Level level) { this(level.getLevelId(), level.getTileData()); }
+		public LevelData(Level level) { this(level.getLevelId(), level.getTileData(false)); }
 		public LevelData(int levelId, TileData[][] tiles) {
 			this.levelId = levelId;
 			this.tiles = tiles;
@@ -234,16 +234,22 @@ public interface GameProtocol {
 		public final int levelId;
 		public final int x;
 		public final int y;
+		public final TileTypeEnum updatedType;
 		
-		private TileUpdate() { this(null, 0, 0, 0); }
-		public TileUpdate(Tile tile) { this(tile, tile.getLocation()); }
-		private TileUpdate(Tile tile, Point pos) { this(new TileData(tile), tile.getLevel().getLevelId(), pos.x, pos.y); }
-		public TileUpdate(TileData data, int levelId, int x, int y) {
+		private TileUpdate() { this(null, 0, 0, 0, null); }
+		public TileUpdate(Tile tile, TileTypeEnum updatedType) { this(tile, tile.getLocation(), updatedType); }
+		private TileUpdate(Tile tile, Point pos, TileTypeEnum updatedType) { this(new TileData(tile, false), tile.getLevel().getLevelId(), pos.x, pos.y, updatedType); }
+		public TileUpdate(TileData data, int levelId, int x, int y, TileTypeEnum updatedType) {
 			tileData = data;
 			this.levelId = levelId;
 			this.x = x;
 			this.y = y;
+			this.updatedType = updatedType;
 		}
+	}
+	
+	class TileTypeUpdate {
+		
 	}
 	
 	// sent by client to ask for a chunk. Server assumes level to be the client's current level.

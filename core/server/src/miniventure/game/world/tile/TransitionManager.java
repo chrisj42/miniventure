@@ -71,16 +71,16 @@ public class TransitionManager {
 		for(ServerTileTransition animation: animations.values()) {
 			if(animation.isTriggerType(nextType)) {
 				GameCore.debug("Server starting tile transition for tile "+tile+", triggered by tiletype "+nextType+", with enter="+isEntering);
-				SerialMap dataMap = tile.getDataMap(tile.getType().getTypeEnum());
+				SerialMap dataMap = tile.getDataMap(tileType);
 				dataMap.put(TileCacheTag.TransitionName, animation.name);
 				float start = tile.getWorld().getGameTime();
-				dataMap.put(TileCacheTag.TransitionStart, start);
+				dataMap.put(TileCacheTag.AnimationStart, start);
 				dataMap.put(TileCacheTag.TransitionMode, isEntering ? TransitionMode.ENTERING : TransitionMode.EXITING);
 				if(addNext)
 					dataMap.put(TileCacheTag.TransitionTile, nextType.getTypeEnum());
 				else
 					dataMap.remove(TileCacheTag.TransitionTile);
-				tile.getLevel().onTileUpdate(tile);
+				tile.getLevel().onTileUpdate(tile, tileType);
 				return true;
 			}
 		}
@@ -111,7 +111,7 @@ public class TransitionManager {
 			return 0;
 		
 		float now = tile.getWorld().getGameTime();
-		float prev = dataMap.get(TileCacheTag.TransitionStart);
+		float prev = dataMap.get(TileCacheTag.AnimationStart);
 		float timeElapsed = now - prev;
 		
 		if(timeElapsed < anim.getDuration())
@@ -120,18 +120,20 @@ public class TransitionManager {
 		GameCore.debug("Server ending tile transition for "+tile);
 		
 		TransitionMode mode = dataMap.remove(TileCacheTag.TransitionMode);
-		dataMap.remove(TileCacheTag.TransitionStart);
+		dataMap.remove(TileCacheTag.AnimationStart);
 		dataMap.remove(TileCacheTag.TransitionName);
 		TileTypeEnum nextType = dataMap.remove(TileCacheTag.TransitionTile);
 		
 		// if entering, no action required. if removing, remove the current tile from the stack, specifying not to check for an exit animation. If removing, and there is data for a tile type, then add that tile type.
 		
+		boolean update = true;
 		if(mode == TransitionMode.EXITING) {
-			tile.breakTile(false);
-			if(nextType != null)
-				tile.addTile(ServerTileType.get(nextType));
-		} else
-			tile.getLevel().onTileUpdate(tile);
+			ServerTileType next = nextType == null ? null : ServerTileType.get(nextType);
+			update = !tile.breakTile(next); // successful breakage will handle the update
+		}
+		
+		if(update) // entering, or exit where tile could not be removed
+			tile.getLevel().onTileUpdate(tile, tileType);
 		
 		return 0;
 	}

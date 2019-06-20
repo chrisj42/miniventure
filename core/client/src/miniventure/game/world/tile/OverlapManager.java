@@ -15,6 +15,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class OverlapManager {
 	
+	// Overlap Sprites MUST BE GLOBAL.
+	
 	static final EnumMap<TileTypeEnum, HashMap<String, Array<TextureHolder>>> tileAnimations = new EnumMap<>(TileTypeEnum.class);
 	
 	private static final HashMap<String, Array<TextureHolder>> dummy = new HashMap<>(0);
@@ -46,7 +48,7 @@ public class OverlapManager {
 		return this;
 	}
 	
-	/// returns sprites for the stored type assuming it is being overlapped at the given positions.
+	/// returns sprites for the stored type assuming it is overlapping at the given positions.
 	public ArrayList<TileAnimation> getOverlapSprites(EnumSet<RelPos> ovLayout) {
 		ArrayList<TileAnimation> animations = new ArrayList<>();
 		

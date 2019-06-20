@@ -35,9 +35,6 @@ public class ServerTile extends Tile {
 	}
 	public ServerTile(@NotNull ServerLevel level, int x, int y, @NotNull TileTypeEnum[] types, SerialMap[] dataMaps) {
 		super(level, x, y, types, dataMaps);
-		
-		// for(int i = 0; i < types.length; i++)
-		// 	this.dataMaps.put(types[i], dataMaps[i]);
 	}
 	
 	@Override
@@ -62,81 +59,57 @@ public class ServerTile extends Tile {
 		return (ServerTileStack) super.getTypeStack();
 	}
 	
-	public synchronized boolean addTile(@NotNull ServerTileType newType) { return addTile(newType, getType()); }
+	public synchronized void addTile(@NotNull ServerTileType newType) { addTile(newType, getType()); }
 	// not synchronizing this only because it's always called in a synchronized context.
-	private boolean addTile(@NotNull ServerTileType newType, @NotNull ServerTileType prevType) {
+	private void addTile(@NotNull ServerTileType newType, @NotNull ServerTileType prevType) {
 		
 		moveEntities(newType);
 		
 		getTypeStack().addLayer(newType, new SerialMap());
 		
 		// check for an entrance animation
-		newType.get(P.TRANS).tryStartAnimation(this, prevType);
-		// we don't use the return value because transition or not, there's nothing we need to do. :P
-		
-		getLevel().onTileUpdate(this);
-		return true;
+		if(!newType.get(P.TRANS).tryStartAnimation(this, prevType))
+			getLevel().onTileUpdate(this, newType.getTypeEnum()); // trigger update manually since tile still changed, just without an animation; tryStartAnimation only triggers updates for transition state changes.
 	}
 	
-	boolean breakTile() { return breakTile(true); }
-	synchronized boolean breakTile(boolean checkForExitAnim) {
+	// starting point to break a tile
+	boolean breakTile() {
+		return removeTile(true, null);
+	}
+	// starting point to replace a tile
+	boolean replaceTile(@NotNull ServerTileType newType) {
+		return removeTile(true, newType);
+	}
+	// can be called down the line after either method above, after the exit animation plays
+	boolean breakTile(@Nullable ServerTileType replacementType) {
+		return removeTile(false, replacementType);
+	}
+	private synchronized boolean removeTile(boolean checkForExitAnim, @Nullable ServerTileType replacementType) {
+		ServerTileType type = getType();
 		if(checkForExitAnim) {
-			ServerTileType type = getType();
-			if(type.get(P.TRANS).tryStartAnimation(this, getTypeStack().getLayerFromTop(1, true), false)) {
-				// transitioning successful
-				getLevel().onTileUpdate(this);
+			boolean addNext = replacementType != null;
+			ServerTileType nextType = replacementType == null ? getTypeStack().getLayerFromTop(1, true) : replacementType;
+			if(type.get(P.TRANS).tryStartAnimation(this, nextType, addNext)) {
+				// transitioning successful, tile will be broken after exit animation
 				return true; // don't actually break the tile yet (but line above, still signal for update)
 			}
 		}
 		
 		ServerTileType prevType = getTypeStack().removeLayer();
 		
-		if(prevType != null) {
-			// dataMaps.remove(prevType.getTypeEnum());
+		if(replacementType != null) {
+			// don't worry if a tile type was removed or not, add the next one anyway.
+			addTile(replacementType, type); // handles entity movement and tile update
+			return true;
+		}
+		else if(prevType != null) {
+			// a tile type was removed
 			moveEntities(getType());
-			getLevel().onTileUpdate(this);
+			getLevel().onTileUpdate(this, null);
 			return true;
 		}
 		
 		return false; // cannot break this tile any further.
-	}
-	
-	synchronized boolean replaceTile(@NotNull ServerTileType newType) {
-		// for doors, the animations will be attached to the open door type; an entrance when coming from a closed door, and an exit when going to a closed door.
-		/*
-			when adding a type, check only for an entrance animation on the new type, and do it after adding it to the stack. when the animation finishes, do nothing except finish the animation.
-			when removing a type, check for an exit anim on the type, before removing. When animation finishes, remove the type for real.
-			
-			when replacing a type, the old type is checked for an exit anim. but the new type is also
-		 */
-		
-		ServerTileType type = getType();
-		// ServerTileType underType = getTypeStack().getLayerFromTop(1, true);
-		
-		if(newType.equals(type)) {
-			// just reset the data
-			getTypeStack().setData(type.getTypeEnum(), new SerialMap());
-			getLevel().onTileUpdate(this);
-			return true;
-		}
-		
-		// DISABLED because I don't check it in addTile, so checking it here seems inconsistent.
-		// check that the new type can be placed on the type that was under the previous type
-		/*if(newType.getTypeEnum().compareTo(underType.getTypeEnum()) <= 0) {
-			System.err.println("cannot replace; new type "+newType.getTypeEnum()+" does not come after under type "+underType.getTypeEnum());
-			return false; // cannot replace tile
-		}*/
-		
-		if(type.get(P.TRANS).tryStartAnimation(this, newType, true)) {
-			// there is an exit animation; it needs to be played. So let that happen, the tile will be replaced later
-			getLevel().onTileUpdate(this);
-			return true; // can replace (but will do it in a second)
-		}
-		
-		// no exit animation, so remove the current tile (without doing the exit anim obviously, since we just checked) and add the new one
-		breakTile(false);
-		return addTile(newType, type); // already checks for entrance animation, so we don't need to worry about that; but we do need to pass the previous type, otherwise it will compare with the under type.
-		// the above should always return true, btw, because we already checked with the same conditional a few lines up.
 	}
 	
 	private void moveEntities(ServerTileType newType) {

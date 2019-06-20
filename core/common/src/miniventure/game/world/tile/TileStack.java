@@ -54,11 +54,6 @@ public class TileStack<T extends TileType> {
 		return sync(() -> dataMaps.get(tileType));
 	}
 	
-	// called by ServerTile to replace a tile type with another instance of the same type
-	void setData(@NotNull TileTypeEnum tileType, @NotNull SerialMap dataMap) {
-		sync(() -> dataMaps.put(tileType, dataMap));
-	}
-	
 	public T getTopLayer() { return sync(stack::peekLast); }
 	
 	public List<T> getTypes() { return sync(() -> new ArrayList<>(stack)); }
@@ -93,7 +88,7 @@ public class TileStack<T extends TileType> {
 	void addLayer(@NotNull T newLayer, @NotNull SerialMap dataMap) {
 		synchronized (dataLock) {
 			stack.addLast(newLayer);
-			dataMaps.put(newLayer.getTypeEnum(), dataMap);	
+			dataMaps.put(newLayer.getTypeEnum(), dataMap);
 		}
 	}
 	
@@ -116,7 +111,7 @@ public class TileStack<T extends TileType> {
 			this.typeOrdinals = typeOrdinals;
 			this.data = data;
 		}
-		public TileData(Tile tile) {
+		public TileData(Tile tile, boolean save) {
 			TileStack<?> stack = tile.getTypeStack();
 			synchronized (stack.dataLock) {
 				TileTypeEnum[] tileTypes = stack.getEnumTypes();
@@ -128,7 +123,7 @@ public class TileStack<T extends TileType> {
 				
 				this.data = new String[tileTypes.length];
 				for(int i = 0; i < data.length; i++)
-					data[i] = stack.dataMaps.get(tileTypes[i]).serialize();
+					data[i] = stack.dataMaps.get(tileTypes[i]).serialize(save);
 			}
 		}
 		
@@ -165,5 +160,23 @@ public class TileStack<T extends TileType> {
 			return maps;
 		}
 		
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder str = new StringBuilder(getClass().getSimpleName()).append('[');
+		TileTypeEnum[] types;
+		SerialMap[] maps;
+		synchronized (dataLock) {
+			types = getEnumTypes();
+			maps = dataMaps.values().toArray(new SerialMap[0]);
+		}
+		for(int i = 0; i < types.length; i++) {
+			str.append(types[i]).append(':').append(maps[i]);
+			if(i < types.length - 1)
+				str.append(',');
+		}
+		str.append(']');
+		return str.toString();
 	}
 }

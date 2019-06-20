@@ -27,9 +27,6 @@ public class RenderTile extends Tile {
 	
 	public RenderTile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, @Nullable SerialMap[] data) {
 		super(level, x, y, types, data);
-		
-		// for(int i = 0; i < types.length; i++)
-		// 	this.dataMaps.put(types[i], data == null ? new SerialMap() : data[i]);
 	}
 	
 	@Override

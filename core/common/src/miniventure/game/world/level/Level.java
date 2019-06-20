@@ -91,12 +91,12 @@ public abstract class Level implements Taggable<Level> {
 	
 	public abstract Set<? extends Entity> getEntities();
 	
-	public TileData[][] getTileData() {
+	public TileData[][] getTileData(boolean save) {
 		TileData[][] data = new TileData[width][height];
 		
 		for(int x = 0; x < tiles.length; x++)
 			for(int y = 0; y < tiles[x].length; y++)
-				data[x][y] = new TileData(tiles[x][y]);
+				data[x][y] = new TileData(tiles[x][y], save);
 		
 		return data;
 	}

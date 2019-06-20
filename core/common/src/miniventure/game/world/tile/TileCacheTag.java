@@ -7,7 +7,7 @@ import miniventure.game.util.function.MapFunction;
 public class TileCacheTag<T> extends SerialEnum<T> {
 	
 	static {
-		GenericEnum.registerEnum(TileCacheTag.class, 8);
+		GenericEnum.registerEnum(TileCacheTag.class, 9);
 	}
 	
 	public static void init() {}
@@ -21,10 +21,11 @@ public class TileCacheTag<T> extends SerialEnum<T> {
 	// Transition
 	public static final TileCacheTag<String> TransitionName =
 		new TileCacheTag<>(false, true, String.class);
-	
-	public static final TileCacheTag<Float> TransitionStart = new TileCacheTag<>(Float.class);
 	public static final TileCacheTag<TransitionMode> TransitionMode = new TileCacheTag<>(TransitionMode.class);
 	public static final TileCacheTag<TileTypeEnum> TransitionTile = new TileCacheTag<>(TileTypeEnum.class);
+	
+	// used for the current sprite, transition or otherwise.
+	public static final TileCacheTag<Float> AnimationStart = new TileCacheTag<>(Float.class);
 	
 	// Update
 	public static final TileCacheTag<Float> LastUpdate = new TileCacheTag<>(Float.class);

@@ -1,5 +1,7 @@
 package miniventure.game.util.customenum;
 
+import java.util.Collection;
+
 class SerialEntry<T> {
 	
 	final SerialEnum<T> key;
@@ -12,6 +14,11 @@ class SerialEntry<T> {
 	
 	String serialize() {
 		return key.name()+','+ key.serialize(value);
+	}
+	
+	void serializeTo(Collection<String> entries, boolean save) {
+		if(save && key.save || !save && key.send)
+			entries.add(serialize());
 	}
 	
 	// the generics here actually make a lot of sense; you're given a tag class (i.e. SerialEnum subclass) along with data about the instance, and you have to get an instance. But since instances have different generic types, you can't know what that type will be, so it's a question mark.

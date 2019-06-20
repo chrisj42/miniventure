@@ -39,3 +39,7 @@ RENDERING
 
 OPTIMIZATION
 
+- add a tiles.txt to the save format, which lists all the tiletypes in order. This will be used to convert the numbers in the rest of the island files to the correct tiletype, even if the order of the tiles changed.
+
+- when writing tile data, check for runs of identical data, and if found, only write it once, and provide the number of times it should be repeated.
+	- just add "x#:" to the start of the line, where # is the number of repetitions. LevelCache will check for this and since the line will normally start with a "(", or if there's only one tiletype then a number, the "x" will stand out as duplication specifier, and the ":" will denote where the number ends.

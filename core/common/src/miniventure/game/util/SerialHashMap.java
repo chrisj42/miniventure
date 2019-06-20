@@ -3,10 +3,10 @@ package miniventure.game.util;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-public class SerialDataMap extends HashMap<String, String> {
+public class SerialHashMap extends HashMap<String, String> {
 	
-	public SerialDataMap() {}
-	public SerialDataMap(String encodedData) {
+	public SerialHashMap() {}
+	public SerialHashMap(String encodedData) {
 		String[] entries = MyUtils.parseLayeredString(encodedData);
 		for(String entry: entries) {
 			String[] parts = entry.split("=");

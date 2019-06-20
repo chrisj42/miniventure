@@ -81,7 +81,7 @@ public class ServerTileType extends TileType {
 	}
 	
 	// returns the type instance of the given type.
-	public static ServerTileType get(TileTypeEnum type) {
+	public static ServerTileType get(@NotNull TileTypeEnum type) {
 		return ServerTileTypeEnum.value(type.ordinal()).getType();
 	}
 	
@@ -145,7 +145,7 @@ public class ServerTileType extends TileType {
 		),
 		
 		GRASS(
-			P.DESTRUCT.as(type ->new DestructionManager.DestructibleBuilder(type, 1, false)
+			P.DESTRUCT.as(type -> new DestructionManager.DestructibleBuilder(type, 1, false)
 				.require(new RequiredTool(ToolType.Shovel))
 				.drops(new ItemDrop(getItem(TileTypeEnum.DIRT)))
 				.make()

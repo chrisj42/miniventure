@@ -6,7 +6,7 @@ import java.util.List;
 
 import miniventure.game.GameCore;
 import miniventure.game.network.GameProtocol.IslandReference;
-import miniventure.game.util.SerialDataMap;
+import miniventure.game.util.SerialHashMap;
 import miniventure.game.util.Version;
 import miniventure.game.world.Point;
 import miniventure.game.world.level.Level;
@@ -43,7 +43,7 @@ public class LevelCache {
 	
 	LevelCache(Version dataVersion, LinkedList<String> fileData) {
 		//noinspection MismatchedQueryAndUpdateOfCollection
-		SerialDataMap map = new SerialDataMap(fileData.pop());
+		SerialHashMap map = new SerialHashMap(fileData.pop());
 		int id = Integer.parseInt(map.get("id"));
 		int x = Integer.parseInt(map.get("x"));
 		int y = Integer.parseInt(map.get("y"));
@@ -66,6 +66,7 @@ public class LevelCache {
 		for(int i = 0; i < ec; i++)
 			entityData[i] = fileData.pop();
 		
+		// TODO here is where I can check for compressed tiles
 		for(int xp = 0; xp < width; xp++)
 			for(int yp = 0; yp < height; yp++)
 				tileData[xp][yp] = new TileData(dataVersion, fileData.pop());
@@ -73,7 +74,7 @@ public class LevelCache {
 	
 	List<String> save() { return save(new LinkedList<>()); }
 	List<String> save(List<String> data) {
-		SerialDataMap map = new SerialDataMap();
+		SerialHashMap map = new SerialHashMap();
 		map.add("id", island.levelId);
 		map.add("x", island.location.x);
 		map.add("y", island.location.y);

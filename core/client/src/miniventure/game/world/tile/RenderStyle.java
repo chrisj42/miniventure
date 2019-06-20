@@ -37,13 +37,13 @@ public class RenderStyle {
 		if(anim == null)
 			throw new SpriteNotFoundException("tile type "+tileType+" does not have sprite with name \""+name+"\" in map "+mapNameForErrorLog+'.');
 		
-		return getAnimation(anim);
+		return getAnimation(tileType, anim);
 	}
-	private TileAnimation getAnimation(Array<TextureHolder> frames) {
+	private TileAnimation getAnimation(@NotNull TileTypeEnum tileType, Array<TextureHolder> frames) {
 		if(fps == 0)
-			return new TileAnimation(sync, 1, frames.get(0));
+			return new TileAnimation(tileType, sync, 1, frames.get(0));
 		else
-			return new TileAnimation(sync, fps, frames, playMode);
+			return new TileAnimation(tileType, sync, fps, frames, playMode);
 	}
 	
 	// TODO this ought to be a checked exception

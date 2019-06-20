@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashSet;
 
+import miniventure.game.GameCore;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
@@ -80,7 +81,7 @@ public abstract class Tile implements WorldObject {
 		SerialMap map = tileStack.getDataMap(tileType);
 		// should never happen, especially with the new synchronization. But this will stay, just in case.
 		if(map == null) {
-			System.err.println("ERROR: tile "+toLocString()+" came back with a null data map for tiletype "+tileType);
+			GameCore.error("ERROR: tile " + toLocString() + " came back with a null data map for tiletype " + tileType + "; stack: " + tileStack, true, true);
 			map = new SerialMap();
 		}
 		return map;

@@ -19,7 +19,7 @@ import java.util.Set;
 
 import miniventure.game.GameCore;
 import miniventure.game.util.MyUtils;
-import miniventure.game.util.SerialDataMap;
+import miniventure.game.util.SerialHashMap;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.Point;
@@ -242,7 +242,7 @@ public class WorldFileInterface {
 		good = writeFile(main.resolve(VERSION_FILE), list -> list.add(GameCore.VERSION.serialize()));
 		
 		good = writeFile(main.resolve(GAME_FILE), list -> {
-			SerialDataMap map = new SerialDataMap();
+			SerialHashMap map = new SerialHashMap();
 			map.add("seed", worldData.seed);
 			map.add("gt", (int)worldData.gameTime); // accuracy isn't worth the extra space
 			map.add("time", (int)worldData.timeOfDay); // same here
@@ -278,7 +278,7 @@ public class WorldFileInterface {
 			readFile(folder.resolve(GAME_FILE), lines);
 			
 			//noinspection MismatchedQueryAndUpdateOfCollection
-			SerialDataMap map = new SerialDataMap(lines.pop());
+			SerialHashMap map = new SerialHashMap(lines.pop());
 			final long seed = Long.parseLong(map.get("seed"));
 			final float gameTime = Float.parseFloat(map.get("gt"));
 			final float daytime = Float.parseFloat(map.get("time"));

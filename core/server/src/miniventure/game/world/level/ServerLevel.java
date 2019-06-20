@@ -20,6 +20,7 @@ import miniventure.game.world.entity.particle.ItemEntity;
 import miniventure.game.world.file.LevelCache;
 import miniventure.game.world.management.ServerWorld;
 import miniventure.game.world.tile.ServerTile;
+import miniventure.game.world.tile.ServerTileType;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileStack.TileData;
 import miniventure.game.world.tile.TileTypeEnum;
@@ -72,7 +73,7 @@ public class ServerLevel extends Level {
 	public boolean isPreload() { return preload; }
 	
 	public void save(@NotNull LevelCache cache) {
-		TileData[][] tileData = getTileData();
+		TileData[][] tileData = getTileData(true);
 		LinkedList<String> entityData = new LinkedList<>();
 		for(Entity e: getEntities()) {
 			if(e instanceof ServerPlayer)
@@ -97,8 +98,8 @@ public class ServerLevel extends Level {
 		}
 	}*/
 	
-	public void onTileUpdate(ServerTile tile) {
-		getServer().broadcast(new TileUpdate(tile), this);
+	public void onTileUpdate(ServerTile tile, @Nullable TileTypeEnum updatedType) {
+		getServer().broadcast(new TileUpdate(tile, updatedType), this);
 		
 		HashSet<Tile> tiles = getAreaTiles(tile.getLocation(), 1, true);
 		

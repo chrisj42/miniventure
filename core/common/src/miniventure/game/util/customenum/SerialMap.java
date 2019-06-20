@@ -1,6 +1,8 @@
 package miniventure.game.util.customenum;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.MapFunction;
@@ -82,12 +84,12 @@ public class SerialMap {
 	private <T, ET extends SerialEnum<T>> SerialEntry<T> getEntry(ET tag) { return new SerialEntry<>(tag, get(tag)); }
 	
 	
-	public String serialize() {
-		String[] entries = new String[map.size()];
+	public String serialize(boolean save) {
+		ArrayList<String> entries = new ArrayList<>(map.size());
 		
 		int i = 0;
 		for(SerialEntry<?> entry: getEntries())
-			entries[i++] = entry.serialize();
+			entry.serializeTo(entries, save);
 		
 		return MyUtils.encodeStringArray(entries);
 	}
