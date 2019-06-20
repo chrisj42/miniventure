@@ -1,0 +1,8 @@
+- improve crafting
+	- ui
+	- tile blueprints
+		- only show those which have been unlocked
+	- tiered crafting tree
+	
+- improve level gen
+	- add more biomes to the starter island, like a desert section (just for while we only have one island)

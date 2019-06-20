@@ -1,9 +1,0 @@
-What if I don't have to make the world 100% editable? I mean, it's a cool premise and all, but could I get more gameplay by restricting it a little bit?
-
-what sort of experience do I want to give?
-- story loosely followed, i.e. end goal
-- very little *direct* hints on how to achieve it
-- most of gameplay involves exploring the world and finding the resources contained within
-- after finding resources, these are used to build various things; structures, wearables, tools, food, more advanced materials
-- manage creatures found in the world; attack them or befriend them, or leave them alone; if they do the same with you
-

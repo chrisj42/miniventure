@@ -20,8 +20,15 @@ ui/controls improvements:
 		- buttons to craft 1, 5, 10
 
 - inventory screen
-	- grid
-	- it kinda is a grid already
+	tabs:
+	- key items - i.e. maps.
+		- These take no official space
+		- can't drop them or lose them.
+		- I'm not totally sure how to make this work well and make sense in a multiplayer game... maybe defeated bosses leave behind shrines where you can learn the secrets of the maps.
+	- resources
+		- these may take space; if so, they can be removed, otherwise not. They cannot be placed in the hotbar.
+	- items
+		- equipment, food, and small placables; these can go in the hotbar.
 
 - storage container
 	- grids

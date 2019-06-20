@@ -1,0 +1,41 @@
+WORLD
+
+- have mob AI's pursue their attacker instead of just the "nearest player." zombies, which are naturally aggressive, actually will seek out the nearest player, but will focus on one for a time if they attack it.
+	- impl note, move getNearestPlayer method from Level to ServerLevel, so it can fetch the players on a level without having to go through all the entities on the level.
+
+- add a container so players can store their items
+
+- player armor; slots?
+ 
+---
+
+UI
+
+- improve interaction inputs
+	- primary action (LMB) should use what's in your hand, and secondary action (RMB) should interact with what the cursor is highlighting.
+	- LMB attacks with swords and tools, but places objects. RMB opens doors and chests, gets you into bed, and presses switches.
+	- for tile blueprints, RMB will put it away.
+
+- damage bar for tiles
+
+- validate world name; can only contain alphanum, spaces, dashes, and underscores
+
+- add a volume option for sounds
+
+- cut some decimals off of the ping time display
+
+- display a message when a player dies (a generic one)
+
+- echo player commands to server terminal (this includes the msg command)
+	- "player": <command>
+
+---
+
+RENDERING
+
+- reconsider rendering rules when player is in a hole; currently clips adjacent tiles. Check if the same happens with water.
+
+---
+
+OPTIMIZATION
+

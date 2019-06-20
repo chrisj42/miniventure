@@ -1,0 +1,54 @@
+
+
+island 1 progression:
+
+items
+	- twigs; found on the shoreline as driftwood, and scattered around trees
+	- reeds; found in small groups along the shoreline, assuming tropical climate
+	- stones; found inland around larger stone deposits
+	
+	- crude workbench; twigs, stones, reeds - hand blueprint
+	- crude axe; twigs, stones, reeds - crude workbench
+		- cuts trees, which give you normal wood instead of twigs
+		- also functions as weapon, since a sword is not likely
+	- crude pickaxe; twigs, stones, reeds - crude workbench
+		- able to mine stone deposits (instead of picking up loose stones)
+		- able to mine coal
+	- wooden poles; wood - crude workbench
+	- campfire; wood, twigs, stones - hand blueprint
+		- provides light; on-the-go light sources like torches require an extra element...
+	- basic hammer; wood, stone, reeds - crude workbench
+	- wood wall; wood - basic hammer
+	- wood floor; wood - basic hammer
+	- wood door; wood - basic hammer
+	- rope; reeds - crude workbench
+	- shovel; stone, wood - crude workbench
+		- allows digging of the ground for proper floor placement
+
+	- not sure how to introduce the underground...
+	- coal; found underground
+	- iron; found underground
+	
+	- smeltery; coal, stone - basic hammer
+	- iron; iron ore - smeltery
+	- amateur workbench; iron, stone - basic hammer
+	- hefty hammer; iron, wood - amateur workbench
+	- stone wall; wood - hefty hammer
+	- stone floor; wood - hefty hammer
+	- stone door; wood - hefty hammer
+	- anvil; lots of iron - hefty hammer
+	- iron sword; iron - anvil
+
+	- wool; obtained from sheep, and also cobwebs at the crude workbench
+	- loom; wood, wool - amateur workbench
+		- used to make clothes and linens
+	- bed; wood, linens - hefty hammer
+	- rug/carpet; linens - loom
+
+	- iron gear is a good time to fight the first boss
+
+
+	- next hammer: quality hammer.
+	- next island: desert
+	- glass; sand - smeltery
+	- windows; glass - quality hammer

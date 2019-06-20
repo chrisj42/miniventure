@@ -1,4 +1,0 @@
-I just had some cool thoughts: hitboxes can be made out of a collection of overlapping rectangles, for all collision checks. If any rectangle from one hitbox overlaps a rectangle from another hitbox, then they can be considered as colliding.
-The only issues I see with this is deciding exactly which direction to go to back out of a collision. I bet I could firgure out something given time, though.
-
-The other thing: property maps. After seeing the utility of a DataMap for tile properties, I kinda wish I would have done that for everything. Sure, my previous tile system was property-based, but it had all the properties integrated into a big ol' system. I kinda like the "if has property, do action" sorta setup.
