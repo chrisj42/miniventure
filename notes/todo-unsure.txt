@@ -19,6 +19,10 @@ UI
 
 - have a play with colorizing server console output
 
+- in the input settings, movement controls should be in a visually separate box, and will have two radio buttons at the top; this controls movement style: "directional", or "move to cursor"
+	- for the directional style, you get an input for each direction
+	- for the move to cursor style, you get a "move" input (defaults to LMB)
+
 - Do more intense analysis of world folders and their contents. Display all folders in the "saves" folder as if they were worlds, but display different messages depending on the validity of the world; these are cumulative:
 	- validates:
 		- white text

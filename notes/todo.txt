@@ -6,19 +6,34 @@ WORLD
 - add a container so players can store their items
 
 - player armor; slots?
+
+- set inventory limit to 200 items
+
+- substantially decrease max stamina
  
 ---
 
 UI
 
 - improve interaction inputs
+	- cursor tile highlight behavior depends on item function
+		- items which can affect tiles from a distance, i.e. placeables, will have the highlight follow the cursor
+		- items which affect the space in front of the player, i.e. swords, shovels, and similar tools, will keep the highlight in front of the player; or least only one tile away.
+			- speaking of "in front of the player", the direction that the player is facing will sometimes depend on the cursor, and sometimes on the last directional input.
+			- generally, the player direction will the directional keys, but any attack or interaction will cause the player to face toward the interaction. There is a short cooldown where the player will remain facing the cursor (even if it moves), after which direction will again be controlled by movement. If the player isn't moving, then the player will face towards the cursor.
 	- primary action (LMB) should use what's in your hand, and secondary action (RMB) should interact with what the cursor is highlighting.
 	- LMB attacks with swords and tools, but places objects. RMB opens doors and chests, gets you into bed, and presses switches.
 	- for tile blueprints, RMB will put it away.
+	
+- make inventory into vertically scrollable grid. 10 slots per row?
+	- at the top, display in large lettering the space being used, i.e. "43/200 items"
+	- searchable and sortable
 
 - damage bar for tiles
 
 - validate world name; can only contain alphanum, spaces, dashes, and underscores
+
+- when a world is too old to be compatible, display the oldest version that the current version is compatible with.
 
 - add a volume option for sounds
 

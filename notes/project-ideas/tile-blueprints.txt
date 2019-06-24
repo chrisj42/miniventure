@@ -1,0 +1,13 @@
+once on a tile, use the BLUEPRINT tile type.
+
+when the client wants to change the hammer blueprint, right click to open the blueprint menu
+to handle placing the tile, the client uses a field in the hammer item class, which stores the selected blueprint.
+	this means the client will need to know about the hammer item class, or have its own version.
+	- some items have a client-side action/instance. When the client gets one of these items, it creates a special kind of item that doesn't just go to the server.
+
+both of these are made easier if the client already knows about the item types and recipes.
+	
+once selected, the hammer will store the selected blueprint, and it will always display when the hammer is active until the player changes it again. Since the current blueprint will not be saved to file, it is client-side only.
+
+
+to place the blueprint, client asks server to place blueprint at a given position, 
