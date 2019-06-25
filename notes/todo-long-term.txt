@@ -13,6 +13,8 @@ WORLD
 
 UI
 
+- apply a delay when crafting items and building tiles. building a tile will require a small amount of time, and the player cannot be inturrupted during that time or else the build will be cancelled.
+
 - An integrated tutorial for first-time players. Pops up at key points to tell you how to do certain things. Consists of text being drawn places on screen, maybe some arrows, and highlighted screen areas.
 	- to cut down on the amount of "tutorial" immediately presented, have tooltips on many things that are more descriptive when hovered over, i.e. in the inventory screen, when it says "[x]/[max] items", hovering will show text saying that this is how many items you have, over how many items you can carry.
 

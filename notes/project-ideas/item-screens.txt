@@ -1,36 +1,37 @@
-ui/controls improvements:
+With the exception of container UIs, item screens are all merged into one overlay, with an inventory tab, and a crafting tab.
+- keybind E opens with the inventory selected
+- keybind F opens with the crafting tab selected
 
-- grid layouts
-- options are searchable with text input
-	- hides all but matches
-	- traversable with keyboard
-	- keyboard analogues for mouse presses
-		- left-mouse = enter
-		- 
+tabs are similar but differ in cell style and function
+- all displays list icon cells in a grid
+- later: all are text field searchable
 
-- crafting screen
-	- tabbed pane of grids
-	- each tab is a category; tools, exploration, house-building, food
-	- tab is icon
-	- mouse-over highlight, in addition to (non)craftable highlight
-	- on click, grid cell is selected
-		- right side of grid shows preview
-		- crafting costs
-		- inventory count
-		- buttons to craft 1, 5, 10
+inventory and container panels
+- at the top, the space usage is displayed in large lettering
+- item cells may be highlighted, and clicked
+	- inventory screen: clicking causes item to switch with the current hotbar selection
+		- right clicking an item adds it to the first open slot in the hotbar
+		- clicking a hotbar slot sets that slot as active
+		- right clicking a hotbar item puts that item back into the inventory
+		- later: items may be dragged between the hotbar and the inventory
+			- hotbar -> inv: puts back into inventory
+			- inv -> hotbar: swaps the inv item with the hotbar item
+			- hotbar -> hotbar: swaps hotbar positions of items
+	- container screen: clicking causes item to move to the other container
+		- shift click moves only one item from a stack
+		- later: right click (on a stack with more than one item) shows a slider where you choose have many items you want to move.
+	
 
-- inventory screen
-	tabs:
-	- key items - i.e. maps.
-		- These take no official space
-		- can't drop them or lose them.
-		- I'm not totally sure how to make this work well and make sense in a multiplayer game... maybe defeated bosses leave behind shrines where you can learn the secrets of the maps.
-	- resources
-		- these may take space; if so, they can be removed, otherwise not. They cannot be placed in the hotbar.
-	- items
-		- equipment, food, and small placables; these can go in the hotbar.
-
-- storage container
-	- grids
-
-items can show with labels or alone
+crafting panel
+- has sub tabs for personal crafting, the crafting station being used (if any), and building.
+	- which tab starts active depends on how the menu is reached
+		- personal crafting: if the screen was pulled up normally through either the crafting shortcut, or the inventory shortcut and then changing to the crafting tab
+		- crafting station: if this is the result of interacting with a crafting station
+		- building: if the player right clicked with the hammer (or opens the screen with a hammer selected?)
+- item cells
+	- appear more as buttons
+	- have a red or green coloring depending on if the player can afford the recipe
+	- highlighting the cell (mouse hover) displays the invCount/cost ratio for each of the costs
+		- as tooltip, or in a separate area? could use the spot the inventory screen uses for space quota display...
+	- for a crafting screen: clicking a recipe crafts it once
+	- for the building screen: clicking a blueprint sets it as the active blueprint, and the menu goes away

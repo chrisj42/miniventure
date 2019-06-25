@@ -1,4 +1,25 @@
+other games:
+	- basic resources, just used for crafting
+		- ingots and higher tier materials found in harder to reach places, or innaccessible until later
+	- decorative and useful furniture, through item or built on the spot
+	- weapons, damage entities, placed/environment unaffected
+	- equipables; armor and accessories, status effects
+	- tools and various helpful useable/passive items
+	- storage
+	- varied terrain types; a few new variations per biome
+	- housing / base-building materials
+	- random decorative stuff and a few special tiles/items
 
+----
+BY LEVEL
+----
+
+
+
+
+----
+PROGRESSION
+----
 
 island 1 progression:
 

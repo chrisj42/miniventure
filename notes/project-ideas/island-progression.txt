@@ -1,0 +1,10 @@
+when you start out on an island, there is fog all around the edges of the map, in the deep water.
+When you get a boat and attempt to go to the edge of the map, a message will display.
+	- most of the time, it will say "It is too foggy to see anything."
+	- when the boss is defeated, one section around the edge of the island will clear up. Riding a boat over here will show the message "Travel to ??? Island"
+	- if you travel to the island, you will discover what biome it is, and from then on it will say "Travel to Desert Island" or whatever kind of island it is.
+		- idk if this should be shared between clients.
+
+This is cool and all, but only really makes sense if the order of the islands is somewhat randomized. That means the progression can't be tied to certain biome, like the ores and stuff; and the bosses can't really get more difficult unless I do something simple like increase HP and damage, or I make a multi-tiered AI for them.
+
+Anyway, one advantage this has is that island unlocks aren't tied to an "item" anymore; and it natually makes sense that it would apply to everyone.

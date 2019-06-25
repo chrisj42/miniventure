@@ -9,7 +9,7 @@ WORLD
 
 - set inventory limit to 200 items
 
-- substantially decrease max stamina
+- sharply increase stamina usage and stamina recharge rate, in order to artificially reduce stamina while still keeping the refill smooth.
  
 ---
 
