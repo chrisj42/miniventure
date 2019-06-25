@@ -16,9 +16,11 @@ import java.util.stream.Collectors;
 import miniventure.game.GameCore;
 import miniventure.game.util.Version;
 
+import org.jetbrains.annotations.NotNull;
+
 public class WorldReference {
 	
-	public final Version version; // todo when reading this in world select screen, check if it is a dev build, and display a compatibility warning if so.
+	@NotNull public final Version version; // todo when reading this in world select screen, check if it is a dev build, and display a compatibility warning if so.
 	public final Path folder;
 	public final String worldName;
 	public final long timestamp;

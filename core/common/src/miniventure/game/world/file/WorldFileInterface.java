@@ -76,6 +76,7 @@ public class WorldFileInterface {
 		return GameCore.GAME_DIR.resolve("saves").resolve(worldname);
 	}
 	
+	@NotNull
 	static Version getWorldVersion(Path worldFolder) throws IOException {
 		LinkedList<String> lines = new LinkedList<>();
 		
