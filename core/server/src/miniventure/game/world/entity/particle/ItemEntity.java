@@ -46,7 +46,7 @@ public class ItemEntity extends ServerEntity {
 		super(world, allData, version, modifier);
 		ArrayList<String> data = allData.get(1);
 		delayPickup = false;
-		item = ServerItem.load(MyUtils.parseLayeredString(data.get(0)));
+		item = ServerItem.load(MyUtils.parseLayeredString(data.get(0)), version);
 		bounceBehavior = new BounceBehavior(MyUtils.parseLayeredString(data.get(1)));
 		lifetime = new LifetimeTracker(this, Float.parseFloat(data.get(2)), bounceBehavior.getTime());
 	}

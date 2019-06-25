@@ -9,6 +9,7 @@ import java.util.List;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
+import miniventure.game.util.customenum.DataMap;
 import miniventure.game.util.customenum.SerialMap;
 import miniventure.game.util.function.Action;
 import miniventure.game.util.function.FetchFunction;
@@ -27,6 +28,7 @@ public class TileStack<T extends TileType> {
 	private final LinkedList<T> stack = new LinkedList<>();
 	
 	private final EnumMap<TileTypeEnum, SerialMap> dataMaps = new EnumMap<>(TileTypeEnum.class);
+	private final EnumMap<TileTypeEnum, DataMap> cacheMaps = new EnumMap<>(TileTypeEnum.class);
 	private final Object dataLock = new Object();
 	
 	/*TileStack(T[] types) {
@@ -52,6 +54,9 @@ public class TileStack<T extends TileType> {
 	// called by Tile.java
 	SerialMap getDataMap(TileTypeEnum tileType) {
 		return sync(() -> dataMaps.get(tileType));
+	}
+	DataMap getCacheMap(TileTypeEnum tileType) {
+		return sync(() -> cacheMaps.get(tileType));
 	}
 	
 	public T getTopLayer() { return sync(stack::peekLast); }
@@ -89,6 +94,7 @@ public class TileStack<T extends TileType> {
 		synchronized (dataLock) {
 			stack.addLast(newLayer);
 			dataMaps.put(newLayer.getTypeEnum(), dataMap);
+			cacheMaps.put(newLayer.getTypeEnum(), new DataMap());
 		}
 	}
 	
@@ -98,6 +104,7 @@ public class TileStack<T extends TileType> {
 			if(stack.size() == 1) return null;
 			T type = stack.removeLast();
 			dataMaps.remove(type.getTypeEnum());
+			cacheMaps.remove(type.getTypeEnum());
 			return type;
 		}
 	}
@@ -156,14 +163,13 @@ public class TileStack<T extends TileType> {
 		public static SerialMap[] getDataMaps(String[] data) {
 			SerialMap[] maps = new SerialMap[data.length];
 			for(int i = 0; i < data.length; i++)
-				maps[i] = SerialMap.deserialize(data[i], TileCacheTag.class);
+				maps[i] = SerialMap.deserialize(data[i], TileDataTag.class);
 			return maps;
 		}
 		
 	}
 	
-	@Override
-	public String toString() {
+	public String getDebugString() {
 		StringBuilder str = new StringBuilder(getClass().getSimpleName()).append('[');
 		TileTypeEnum[] types;
 		SerialMap[] maps;

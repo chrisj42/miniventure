@@ -2,17 +2,14 @@ package miniventure.game.world.tile;
 
 import java.util.HashMap;
 
-import miniventure.game.GameCore;
 import miniventure.game.item.FoodType;
 import miniventure.game.item.ResourceType;
 import miniventure.game.item.Result;
 import miniventure.game.item.ServerItem;
-import miniventure.game.item.TileItem;
-import miniventure.game.item.TileItem.PlacementCheck;
+import miniventure.game.item.TileItemType;
 import miniventure.game.item.ToolItem.ToolType;
-import miniventure.game.util.customenum.SerialMap;
+import miniventure.game.util.customenum.DataMap;
 import miniventure.game.util.function.MapFunction;
-import miniventure.game.util.param.FetchParam;
 import miniventure.game.util.param.ParamMap;
 import miniventure.game.util.param.Value;
 import miniventure.game.world.ItemDrop;
@@ -40,7 +37,7 @@ public class ServerTileType extends TileType {
 		TParam<DestructionManager> DESTRUCT = new TParam<>(DestructionManager::INDESTRUCTIBLE);
 		TParam<UpdateManager> UPDATE = new TParam<>(UpdateManager::new);
 		TParam<TransitionManager> TRANS = new TParam<>(TransitionManager::new);
-		TParam<TileItem> ITEM = new TParam<>(type -> null);
+		// TParam<TileItem> ITEM = new TParam<>(type -> null);
 	}
 	
 	private final HashMap<TParam<?>, Object> propertyMap;
@@ -60,7 +57,7 @@ public class ServerTileType extends TileType {
 		ParamMap map = new ParamMap(params);
 		TileTypeEnum type = getTypeEnum();
 		// initializing = true;
-		propertyMap.put(P.ITEM, map.get(P.ITEM).get(type)); // important to create and set the item first
+		// propertyMap.put(P.ITEM, map.get(P.ITEM).get(type)); // important to create and set the item first
 		propertyMap.put(P.DESTRUCT, map.get(P.DESTRUCT).get(type));
 		propertyMap.put(P.UPDATE, map.get(P.UPDATE).get(type));
 		propertyMap.put(P.TRANS, map.get(P.TRANS).get(type));
@@ -91,12 +88,12 @@ public class ServerTileType extends TileType {
 	}
 	
 	// used initially by destruction manager to get tile type item while the ServerTileType object is still being constructed; also used normally throughout the code to get TileItems.
-	public static TileItem getItem(TileTypeEnum type) {
+	/*public static TileItem getItem(TileTypeEnum type) {
 		TileItem item = get(type, P.ITEM);
 		if(item == null)
 			System.err.println("warning! TileType "+type+" has no TileItem, but one is being requested. Null will be returned.");
 		return item;
-	}
+	}*/
 	
 	// it turns out that I solved the problem of initial data differently: datamap.getOrDefaultAndPut().
 	// after all, initial data is data that should be a given, and therefore shouldn't need to be stored.
@@ -110,7 +107,7 @@ public class ServerTileType extends TileType {
 	 * @return how long to wait before next call, or 0 for never (until adjacent tile update)
 	 */
 	public float update(@NotNull ServerTile tile) {
-		SerialMap dataMap = tile.getDataMap(getTypeEnum());
+		DataMap dataMap = tile.getCacheMap(getTypeEnum());
 		
 		float now = tile.getWorld().getGameTime();
 		float lastUpdate = dataMap.getOrDefault(TileCacheTag.LastUpdate, now);
@@ -135,21 +132,24 @@ public class ServerTileType extends TileType {
 		HOLE(),
 		
 		DIRT(
-			P.DESTRUCT.as(type -> new DestructionManager(type, new RequiredTool(ToolType.Shovel))),
-			P.ITEM.as(type -> new TileItem(type, true, PlacementCheck.on(TileTypeEnum.HOLE)))
+			P.DESTRUCT.as(type -> new DestructionManager(type,
+				new ItemDrop(TileItemType.Dirt.get()),
+				new RequiredTool(ToolType.Shovel)
+			))
 		),
 		
 		SAND(
-			P.DESTRUCT.as(type -> new DestructionManager(type, new RequiredTool(ToolType.Shovel))),
-			P.ITEM.as(type -> new TileItem(type, true, PlacementCheck.on(TileTypeEnum.DIRT)))
+			P.DESTRUCT.as(type -> new DestructionManager(type,
+				new ItemDrop(TileItemType.Sand.get()),
+				new RequiredTool(ToolType.Shovel)
+			))
 		),
 		
 		GRASS(
-			P.DESTRUCT.as(type -> new DestructionManager.DestructibleBuilder(type, 1, false)
-				.require(new RequiredTool(ToolType.Shovel))
-				.drops(new ItemDrop(getItem(TileTypeEnum.DIRT)))
-				.make()
-			),
+			P.DESTRUCT.as(type -> new DestructionManager(type,
+				new ItemDrop(TileItemType.Dirt.get()),
+				new RequiredTool(ToolType.Shovel)
+			)),
 			
 			P.UPDATE.as(type ->
 				new UpdateManager(type,
@@ -165,22 +165,18 @@ public class ServerTileType extends TileType {
 			P.DESTRUCT.as(type -> new DestructionManager(type,
 				new ItemDrop(ResourceType.Stone.get(), 2),
 				new RequiredTool(ToolType.Pickaxe)
-			)),
-			
-			P.ITEM.as(type -> new TileItem(type, false, PlacementCheck.groundExcluding(type)))
+			))
 		),
 		
 		SNOW(
-			P.DESTRUCT.as(type -> new DestructionManager.DestructibleBuilder(type, false)
+			P.DESTRUCT.as(type -> new DestructionManager.DestructibleBuilder(type)
 				.drops(
-					new ItemDrop(getItem(TileTypeEnum.SNOW)),
+					new ItemDrop(TileItemType.Snow.get()),
 					new ItemDrop(FoodType.Snow_Berries.get(), 0, 1, .1f)
 				)
 				.require(new RequiredTool(ToolType.Shovel))
 				.make()
-			),
-			
-			P.ITEM.as(type -> new TileItem(type, true, PlacementCheck.groundExcluding(type)))
+			)
 		),
 		
 		FLINT(
@@ -201,9 +197,7 @@ public class ServerTileType extends TileType {
 				tile.getServer().sendToPlayer((ServerPlayer) player, tile.getWorld().getMapData());
 				return Result.INTERACT;
 			}
-		},
-			P.ITEM.as(type -> new TileItem(type, false, PlacementCheck.groundExcluding(type)))
-		),
+		}),
 		
 		COAL_ORE(ServerTileFactory.ore(ResourceType.Coal, 25)),
 		IRON_ORE(ServerTileFactory.ore(ResourceType.Iron, 35)),
@@ -218,22 +212,28 @@ public class ServerTileType extends TileType {
 		),
 		
 		STONE_FLOOR(
-			P.DESTRUCT.as(type -> new DestructionManager(type, new RequiredTool(ToolType.Pickaxe))),
-			P.ITEM.as(type -> new TileItem(type, false, PlacementCheck.on(TileTypeEnum.HOLE)))
+			P.DESTRUCT.as(type -> new DestructionManager(type,
+				new ItemDrop(ResourceType.Stone.get(), 3),
+				new RequiredTool(ToolType.Pickaxe)
+			))
 		),
 		
 		WOOD_WALL(
 			P.DESTRUCT.as(type -> 
-				new DestructionManager(type, 20, new PreferredTool(ToolType.Axe, 3))
-			),
-			P.ITEM.as(type -> new TileItem(type, false, PlacementCheck.GROUND))
+				new DestructionManager(type, 20,
+					new PreferredTool(ToolType.Axe, 3),
+					new ItemDrop(ResourceType.Log.get(), 3)
+				)
+			)
 		),
 		
 		STONE_WALL(
 			P.DESTRUCT.as(type -> 
-				new DestructionManager(type, 40, new PreferredTool(ToolType.Pickaxe, 5))
-			),
-			P.ITEM.as(type -> new TileItem(type, false, PlacementCheck.GROUND))
+				new DestructionManager(type, 40,
+					new PreferredTool(ToolType.Pickaxe, 5),
+					new ItemDrop(ResourceType.Stone.get(), 3)
+				)
+			)
 		),
 		
 		OPEN_DOOR(type -> new ServerTileType(type)
@@ -245,16 +245,14 @@ public class ServerTileType extends TileType {
 			}
 		},
 			P.DESTRUCT.as(type -> new DestructionManager(type,
-				new ItemDrop(getItem(TileTypeEnum.CLOSED_DOOR)),
+				new ItemDrop(ResourceType.Log.get(), 3),
 				new RequiredTool(ToolType.Axe)
 			)),
 			
 			P.TRANS.as(type -> new TransitionManager(type)
 				.addEntrance("open", 24, TileTypeEnum.CLOSED_DOOR)
 				.addExit("close", 24, TileTypeEnum.CLOSED_DOOR)
-			),
-			
-			P.ITEM.as(type -> new TileItem("Door", type, false, PlacementCheck.GROUND))
+			)
 		),
 		
 		CLOSED_DOOR(type -> new ServerTileType(type)
@@ -265,17 +263,18 @@ public class ServerTileType extends TileType {
 				return Result.INTERACT;
 			}
 		},
-			P.DESTRUCT.as(type -> new DestructionManager(type, new RequiredTool(ToolType.Axe))),
-			P.ITEM.as(type -> new TileItem("Door", type, false, PlacementCheck.GROUND))
+			P.DESTRUCT.as(type -> new DestructionManager(type,
+				new ItemDrop(ResourceType.Log.get(), 3),
+				new RequiredTool(ToolType.Axe)
+			))
 		),
 		
 		// note / to-do: I could pretty easily make torches melt adjacent snow...
 		TORCH(
-			P.DESTRUCT.as(type -> new DestructionManager(type)),
+			P.DESTRUCT.as(type -> new DestructionManager(type, new ItemDrop(TileItemType.Torch.get()))),
 			P.TRANS.as(type -> new TransitionManager(type)
 				.addEntrance("enter", 12)
-			),
-			P.ITEM.as(type -> new TileItem("Torch", GameCore.tileAtlas.getRegion("torch/c00"), type, PlacementCheck.GROUND))
+			)
 		),
 		
 		CACTUS(type -> new ServerTileType(type)

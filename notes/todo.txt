@@ -54,6 +54,8 @@ RENDERING
 
 OPTIMIZATION
 
+- allow a recipe/blueprint to be passed in for DestructibleProperty ItemDrops; the costs of the recipe/blueprint will be used as the drops.
+
 - add a tiles.txt to the save format, which lists all the tiletypes in order. This will be used to convert the numbers in the rest of the island files to the correct tiletype, even if the order of the tiles changed.
 
 - when writing tile data, check for runs of identical data, and if found, only write it once, and provide the number of times it should be repeated.

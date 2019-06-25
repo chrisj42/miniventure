@@ -1,6 +1,7 @@
 once on a tile, use the BLUEPRINT tile type.
 
 when the client wants to change the hammer blueprint, right click to open the blueprint menu
+	- fetched from server
 to handle placing the tile, the client uses a field in the hammer item class, which stores the selected blueprint.
 	this means the client will need to know about the hammer item class, or have its own version.
 	- some items have a client-side action/instance. When the client gets one of these items, it creates a special kind of item that doesn't just go to the server.

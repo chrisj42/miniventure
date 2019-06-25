@@ -46,8 +46,7 @@ public enum RecipeList {
 		final int ord = ordinal();
 		for(int i = 0; i < recipes.length; i++) {
 			Recipe r = recipes[i];
-			serialRecipes[i] = new SerialRecipe(ord, i, r.getResult(), r.getCosts(),
-				r instanceof Blueprint ? ((TileItem)r.getResult().item).getResult() : null
+			serialRecipes[i] = new SerialRecipe(ord, i, r.getResult(), r.getCosts(), null
 			);
 		}
 		

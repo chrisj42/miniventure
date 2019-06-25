@@ -5,6 +5,7 @@ import java.util.Arrays;
 import miniventure.game.GameCore;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.Version;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.player.Player;
 
@@ -44,6 +45,9 @@ public abstract class ServerItem extends Item {
 	@Override
 	public float getUsabilityStatus() { return 0; }
 	
+	@Override @NotNull
+	public abstract Player.CursorHighlight getHighlightMode();
+	
 	/// The item has been used. For most items, this means the item is now depleted, and can no longer be used. Note that there is a contract with this method; it should not modify the state of the current item, however it can return a slightly modified version to be used instead. (space usage shouldn't change)
 	// overridden by subclasses to return a new item instance with any change in state that should happen when the item is used; usually though, using an item results in it disappearing.
 	@Nullable
@@ -66,11 +70,19 @@ public abstract class ServerItem extends Item {
 		return item.save();
 	}
 	
+	/** @noinspection ConstantConditions*/
 	@Nullable
-	public static ServerItem load(@Nullable String[] data) {
+	public static ServerItem load(@Nullable String[] data, @NotNull Version version) {
 		if(data == null) return null;
+		if(version.atOrBefore("2.2.1.1")) {
+			if(data[0].equals("Enum"))
+				// cut out the "enum" value because they got moved up
+				data = Arrays.copyOfRange(data, 1, data.length);
+			else if(data[0].equals("Misc"))
+				data[0] = "Hand";
+		}
 		ItemType type = ItemType.valueOf(data[0]);
-		return type.load(Arrays.copyOfRange(data, 1, data.length));
+		return type.load(Arrays.copyOfRange(data, 1, data.length), version);
 	}
 	
 }

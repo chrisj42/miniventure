@@ -1,11 +1,25 @@
 package miniventure.game.item;
 
 import miniventure.game.GameCore;
+import miniventure.game.world.entity.mob.player.Player;
+import miniventure.game.world.entity.mob.player.Player.CursorHighlight;
+
+import org.jetbrains.annotations.NotNull;
 
 public class ToolItem extends ServerItem {
 	
 	public enum ToolType {
-		Pickaxe, Shovel, Axe, Sword;
+		Pickaxe(CursorHighlight.TILE_ADJACENT),
+		Shovel(CursorHighlight.TILE_ADJACENT),
+		Axe(CursorHighlight.TILE_ADJACENT),
+		Sword(CursorHighlight.INVISIBLE);
+		
+		@NotNull
+		private final CursorHighlight cursorType;
+		
+		ToolType(@NotNull CursorHighlight cursorType) {
+			this.cursorType = cursorType;
+		}
 	}
 	
 	public enum Material {
@@ -59,6 +73,11 @@ public class ToolItem extends ServerItem {
 	// the the Item class will have the wrong value, but it only references it through this method so this override will negate any effects.
 	@Override
 	public float getUsabilityStatus() { return material == null ? 0 : durability / (float) material.maxDurability; }
+	
+	@Override @NotNull
+	public Player.CursorHighlight getHighlightMode() {
+		return toolType.cursorType;
+	}
 	
 	@Override
 	public boolean equals(Object other) {

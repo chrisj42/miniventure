@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import miniventure.game.world.tile.TileCacheTag;
+import miniventure.game.world.tile.TileDataTag;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -20,6 +21,7 @@ public abstract class GenericEnum<EC extends GenericEnum<EC>> implements Compara
 	}
 	
 	public static void init() {
+		TileDataTag.init();
 		TileCacheTag.init();
 	}
 	

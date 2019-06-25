@@ -1,7 +1,7 @@
 package miniventure.game.world.tile;
 
 import miniventure.game.texture.TextureHolder;
-import miniventure.game.util.customenum.SerialMap;
+import miniventure.game.util.customenum.DataMap;
 
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.utils.Array;
@@ -34,8 +34,9 @@ class TileAnimation extends Animation<TextureHolder> {
 		
 		float startTime = 0;
 		if(!sync) {
-			SerialMap dataMap = tile.getTypeStack().getDataMap(tileType);
-			if(dataMap != null) // overlap sprites will almost always have no data map, and in fact would mess up the animation if they weren't global.
+			// overlap sprites will almost always have no data map, and in fact would mess up the animation if they weren't global. So, we;ll fetch the data map the back way.
+			DataMap dataMap = tile.getTypeStack().getCacheMap(tileType);
+			if(dataMap != null)
 				startTime = dataMap.getOrDefaultAndPut(TileCacheTag.AnimationStart, time);
 		}
 		

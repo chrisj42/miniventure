@@ -5,12 +5,16 @@ import java.util.HashMap;
 
 import miniventure.game.GameCore;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.customenum.DataMap;
 import miniventure.game.util.customenum.SerialMap;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class TransitionManager {
+	
+	// note about exit animations: since the server doesn't remember midway transitions, it's important that any and all tile change actions happen *after* the exit animation plays, when the tile is actually changing. Otherwise it could be exploited, if say the items dropped and then the player quit quickly, causing both the items and the tile to be saved.
+	// Fortunately, I believe that I have tile animation set up in such a way that tile change actions do actually 
 	
 	private final TileTypeEnum tileType;
 	private final HashMap<String, ServerTileTransition> entranceAnimations = new HashMap<>();
@@ -59,27 +63,28 @@ public class TransitionManager {
 	
 	// enter animation
 	public boolean tryStartAnimation(@NotNull ServerTile tile, @NotNull TileType previous) {
-		return tryStartAnimation(tile, true, previous, false);
+		return tryStartAnimation(tile, true, new TileTypeInfo(previous), false);
 	}
 	// exit animation
-	public boolean tryStartAnimation(@NotNull ServerTile tile, @NotNull TileType next, boolean addNext) {
+	public boolean tryStartAnimation(@NotNull ServerTile tile, @NotNull TileTypeInfo next, boolean addNext) {
 		return tryStartAnimation(tile, false, next, addNext);
 	}
 	// check for transition animation; tiletype is being entered or removed, and given what tile type will be the main one next.
-	private boolean tryStartAnimation(@NotNull ServerTile tile, boolean isEntering, @NotNull TileType nextType, boolean addNext) { // addNext is ignored if isEntering is true
+	private boolean tryStartAnimation(@NotNull ServerTile tile, boolean isEntering, @NotNull TileTypeInfo nextType, boolean addNext) { // addNext is ignored if isEntering is true
 		HashMap<String, ServerTileTransition> animations = isEntering ? entranceAnimations : exitAnimations;
 		for(ServerTileTransition animation: animations.values()) {
-			if(animation.isTriggerType(nextType)) {
-				GameCore.debug("Server starting tile transition for tile "+tile+", triggered by tiletype "+nextType+", with enter="+isEntering);
+			if(animation.isTriggerType(nextType.tileType)) {
+				GameCore.debug("Server starting tile transition for tile "+tile+", triggered by tiletype "+nextType.tileType+", with enter="+isEntering);
 				SerialMap dataMap = tile.getDataMap(tileType);
-				dataMap.put(TileCacheTag.TransitionName, animation.name);
+				DataMap cacheMap = tile.getCacheMap(tileType);
+				dataMap.put(TileDataTag.TransitionName, animation.name);
 				float start = tile.getWorld().getGameTime();
-				dataMap.put(TileCacheTag.AnimationStart, start);
-				dataMap.put(TileCacheTag.TransitionMode, isEntering ? TransitionMode.ENTERING : TransitionMode.EXITING);
+				cacheMap.put(TileCacheTag.AnimationStart, start);
+				cacheMap.put(TileCacheTag.TransitionMode, isEntering ? TransitionMode.ENTERING : TransitionMode.EXITING);
 				if(addNext)
-					dataMap.put(TileCacheTag.TransitionTile, nextType.getTypeEnum());
+					cacheMap.put(TileCacheTag.TransitionTile, nextType);
 				else
-					dataMap.remove(TileCacheTag.TransitionTile);
+					cacheMap.remove(TileCacheTag.TransitionTile);
 				tile.getLevel().onTileUpdate(tile, tileType);
 				return true;
 			}
@@ -94,7 +99,7 @@ public class TransitionManager {
 	}*/
 	
 	private boolean isTransitionMode(@NotNull Tile tile, TransitionMode mode) {
-		SerialMap map = tile.getDataMap(tileType);
+		DataMap map = tile.getCacheMap(tileType);
 		return map.getOrDefault(TileCacheTag.TransitionMode, TransitionMode.NONE) == mode;
 	}
 	
@@ -104,14 +109,15 @@ public class TransitionManager {
 	
 	public float tryFinishAnimation(@NotNull ServerTile tile) {
 		SerialMap dataMap = tile.getDataMap(tileType);
+		DataMap cacheMap = tile.getCacheMap(tileType);
 		
-		ServerTileTransition anim = getAnimationStyle(dataMap.get(TileCacheTag.TransitionMode), dataMap.get(TileCacheTag.TransitionName));
+		ServerTileTransition anim = getAnimationStyle(cacheMap.get(TileCacheTag.TransitionMode), dataMap.get(TileDataTag.TransitionName));
 		
 		if(anim == null)
 			return 0;
 		
 		float now = tile.getWorld().getGameTime();
-		float prev = dataMap.get(TileCacheTag.AnimationStart);
+		float prev = cacheMap.get(TileCacheTag.AnimationStart);
 		float timeElapsed = now - prev;
 		
 		if(timeElapsed < anim.getDuration())
@@ -119,17 +125,16 @@ public class TransitionManager {
 		
 		GameCore.debug("Server ending tile transition for "+tile);
 		
-		TransitionMode mode = dataMap.remove(TileCacheTag.TransitionMode);
-		dataMap.remove(TileCacheTag.AnimationStart);
-		dataMap.remove(TileCacheTag.TransitionName);
-		TileTypeEnum nextType = dataMap.remove(TileCacheTag.TransitionTile);
+		TransitionMode mode = cacheMap.remove(TileCacheTag.TransitionMode);
+		cacheMap.remove(TileCacheTag.AnimationStart);
+		dataMap.remove(TileDataTag.TransitionName);
+		TileTypeInfo nextType = cacheMap.remove(TileCacheTag.TransitionTile);
 		
 		// if entering, no action required. if removing, remove the current tile from the stack, specifying not to check for an exit animation. If removing, and there is data for a tile type, then add that tile type.
 		
 		boolean update = true;
 		if(mode == TransitionMode.EXITING) {
-			ServerTileType next = nextType == null ? null : ServerTileType.get(nextType);
-			update = !tile.breakTile(next); // successful breakage will handle the update
+			update = !tile.breakTile(nextType); // successful breakage will handle the update
 		}
 		
 		if(update) // entering, or exit where tile could not be removed

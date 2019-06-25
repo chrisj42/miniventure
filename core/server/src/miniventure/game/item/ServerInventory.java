@@ -1,6 +1,9 @@
 package miniventure.game.item;
 
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.Version;
+
+import org.jetbrains.annotations.NotNull;
 
 public class ServerInventory extends Inventory<ServerItem, ServerItemStack> {
 	
@@ -29,18 +32,18 @@ public class ServerInventory extends Inventory<ServerItem, ServerItemStack> {
 	}
 	
 	// this expects exactly the output of the save function above.
-	public synchronized void loadItems(String[] allData) {
+	public synchronized void loadItems(String[] allData, @NotNull Version version) {
 		String[][] longData = new String[allData.length][];
 		
 		for(int i = 0; i < allData.length; i++) {
 			longData[i] = MyUtils.parseLayeredString(allData[i]);
 		}
 		
-		updateItems(longData);
+		updateItems(longData, version);
 	}
 	
 	@Override
-	ServerItemStack parseStack(String[] data) {
-		return ServerItemStack.load(data);
+	ServerItemStack parseStack(String[] data, @NotNull Version version) {
+		return ServerItemStack.load(data, version);
 	}
 }

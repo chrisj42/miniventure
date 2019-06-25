@@ -1,13 +1,9 @@
 package miniventure.game.world.tile;
 
-import java.util.Arrays;
-import java.util.EnumMap;
 import java.util.HashSet;
 
 import miniventure.game.GameCore;
-import miniventure.game.util.ArrayUtils;
-import miniventure.game.util.MyUtils;
-import miniventure.game.util.Version;
+import miniventure.game.util.customenum.DataMap;
 import miniventure.game.util.customenum.SerialMap;
 import miniventure.game.world.Point;
 import miniventure.game.world.WorldObject;
@@ -81,8 +77,19 @@ public abstract class Tile implements WorldObject {
 		SerialMap map = tileStack.getDataMap(tileType);
 		// should never happen, especially with the new synchronization. But this will stay, just in case.
 		if(map == null) {
-			GameCore.error("ERROR: tile " + toLocString() + " came back with a null data map for tiletype " + tileType + "; stack: " + tileStack, true, true);
+			GameCore.error("ERROR: tile " + toLocString() + " came back with a null data map for tiletype " + tileType + "; stack: " + tileStack.getDebugString(), true, true);
 			map = new SerialMap();
+		}
+		return map;
+	}
+	
+	@NotNull
+	public DataMap getCacheMap(TileTypeEnum tileType) {
+		DataMap map = tileStack.getCacheMap(tileType);
+		// should never happen, especially with the new synchronization. But this will stay, just in case.
+		if(map == null) {
+			GameCore.error("ERROR: tile " + toLocString() + " came back with a null cache map for tiletype " + tileType + "; stack: " + tileStack.getDebugString(), true, true);
+			map = new DataMap();
 		}
 		return map;
 	}

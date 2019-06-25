@@ -4,8 +4,11 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
+import miniventure.game.GameCore;
 import miniventure.game.util.InstanceCounter;
-import miniventure.game.util.MyUtils;
+import miniventure.game.util.Version;
+
+import org.jetbrains.annotations.NotNull;
 
 public abstract class Inventory<TItem extends Item, TItemStack extends ItemStack> {
 	
@@ -23,7 +26,7 @@ public abstract class Inventory<TItem extends Item, TItemStack extends ItemStack
 	final InstanceCounter<TItem> itemCounter;
 	private final Class<TItem> itemClass;
 	private final Class<TItemStack> stackClass;
-	int spaceTaken = 0;
+	private int spaceTaken = 0;
 	
 	public Inventory(int size, Class<TItem> itemClass, Class<TItemStack> stackClass) {
 		this.size = size;
@@ -41,9 +44,9 @@ public abstract class Inventory<TItem extends Item, TItemStack extends ItemStack
 	}
 	
 	public int getSpace() { return size; }
-	public int getSpaceLeft() { return getSpace() - spaceTaken; }
+	public synchronized int getSpaceLeft() { return getSpace() - spaceTaken; }
 	public int getSlotsTaken() { return uniqueItems.size(); }
-	public float getPercentFilled() { return spaceTaken / (float) getSpace(); }
+	public synchronized float getPercentFilled() { return spaceTaken / (float) getSpace(); }
 	
 	public synchronized int getCount(TItem item) { return itemCounter.get(item); }
 	public boolean hasItem(TItem item) { return hasItem(item, 1); }
@@ -123,17 +126,18 @@ public abstract class Inventory<TItem extends Item, TItemStack extends ItemStack
 		return count;
 	}
 	
+	public void updateItems(String[][] data) { updateItems(data, GameCore.VERSION); }
 	@SuppressWarnings("unchecked")
-	public synchronized void updateItems(String[][] data) {
+	public synchronized void updateItems(String[][] data, @NotNull Version version) {
 		reset();
 		for(String[] stackData: data) {
 			// String[] data = MyUtils.parseLayeredString(stackData);
-			TItemStack stack = parseStack(stackData);
+			TItemStack stack = parseStack(stackData, version);
 			itemCounter.put((TItem) stack.getItem(), stack.count);
 			spaceTaken += stack.count;
 			uniqueItems.add((TItem) stack.getItem());
 		}
 	}
 	
-	abstract TItemStack parseStack(String[] data);
+	abstract TItemStack parseStack(String[] data, @NotNull Version version);
 }

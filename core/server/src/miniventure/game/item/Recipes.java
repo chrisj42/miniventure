@@ -1,10 +1,7 @@
 package miniventure.game.item;
 
-import miniventure.game.network.GameProtocol.SerialRecipe;
 import miniventure.game.item.ToolItem.Material;
-
-import static miniventure.game.world.tile.ServerTileType.getItem;
-import static miniventure.game.world.tile.TileTypeEnum.*;
+import miniventure.game.network.GameProtocol.SerialRecipe;
 
 public class Recipes {
 	
@@ -111,10 +108,10 @@ public class Recipes {
 			new ServerItemStack(ResourceType.Log.get(), 1)
 		),
 		
-		new Recipe(new ServerItemStack(getItem(TORCH), 2),
+		new Recipe(new ServerItemStack(TileItemType.Torch.get(), 2),
 			new ServerItemStack(ResourceType.Log.get(), 1),
 			new ServerItemStack(ResourceType.Coal.get(), 1)
-		),
+		)/*,
 		
 		new Blueprint(getItem(CLOSED_DOOR),
 			new ServerItemStack(ResourceType.Log.get(), 3)
@@ -134,15 +131,14 @@ public class Recipes {
 		
 		new Blueprint(getItem(STONE_PATH),
 			new ServerItemStack(ResourceType.Stone.get(), 1)
-		)
+		)*/
 	};
 	
 	public static final SerialRecipe[] serializeRecipes() {
 		SerialRecipe[] serialRecipes = new SerialRecipe[Recipes.recipes.length];
 		for(int i = 0; i < recipes.length; i++) {
 			Recipe r = recipes[i];
-			serialRecipes[i] = new SerialRecipe(0, i, r.getResult(), r.getCosts(),
-				r instanceof Blueprint ? ((TileItem)r.getResult().item).getResult() : null
+			serialRecipes[i] = new SerialRecipe(0, i, r.getResult(), r.getCosts(), null
 			);
 		}
 		

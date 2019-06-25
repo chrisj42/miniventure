@@ -1,66 +1,66 @@
 package miniventure.game.item;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-
+import miniventure.game.GameCore;
 import miniventure.game.item.ToolItem.Material;
-import miniventure.game.util.MyUtils;
-import miniventure.game.world.tile.ServerTileType;
-import miniventure.game.world.tile.TileTypeEnum;
+import miniventure.game.texture.TextureHolder;
+import miniventure.game.util.Version;
+import miniventure.game.world.entity.mob.player.HandItem;
+
+import org.jetbrains.annotations.NotNull;
 
 public enum ItemType {
 	
 	// TODO add EntityItem, an item that becomes an entity when placed (like TileItems become tiles when placed). This will mainly be used for various types of furniture.
 	
+	// tools could be under the Enum ItemType, it would just handle the data a little differently.
 	Tool(data -> new ToolItem(ToolItem.ToolType.valueOf(data[0]), Material.valueOf(data[1]), Integer.parseInt(data[2]))),
 	
-	Enum(data -> EnumItemType.valueOf(data[0]).itemFetcher.get(data[1])),
+	// Enum(data -> EnumItemType.valueOf(data[0]).getItem(data[1])),
 	
-	Tile(data -> ServerTileType.getItem(TileTypeEnum.valueOf(data[0]))),
+	Food(data -> FoodType.valueOf(data[0]).get()),
 	
-	Misc(data -> {
-		// The data all items has the item type as the first entry. This item type expects the next data string to be an encoded array of the enclosing classes needed to reach the class you're trying to reach, such as a HandItem. If the class is top-level, then the encoded array should just be the name of the class.
-		// the static load method of the found class is then called with any remaining parameters from the original data array, past the first two.
-		
-		try {
-			String[] enclosingClasses = MyUtils.parseLayeredString(data[0]);
-			Class<?> clazz = Class.forName(ItemType.class.getPackage().getName()+'.'+enclosingClasses[0]);
-			for(int i = 1; i < enclosingClasses.length; i++) {
-				for(Class<?> inner: clazz.getDeclaredClasses()) {
-					if(inner.getSimpleName().equals(enclosingClasses[i])) {
-						clazz = inner;
-						break;
-					}
-				}
-			}
-			return (ServerItem) clazz.getMethod("load", String[].class).invoke(null, (Object)Arrays.copyOfRange(data, 1, data.length));
-		} catch(ClassNotFoundException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-			e.printStackTrace();
-		}
-		
-		return null;
-	});
+	Tile(data -> TileItemType.valueOf(data[0]).get()),
 	
-	/*
-		This is mainly for saving and loading.
-		Each item type should specify a method to turn a String into an ServerItem, and an item into a String.
-		There should also be some external connection, or something, so that you can fetch the ItemType from the item.
-		
-		instances of the item class require an ItemType instance in the constructor.
-	 */
+	Resource(data -> ResourceType.valueOf(data[0]).get()),
 	
-	@FunctionalInterface
-	interface ItemFetcher {
-		ServerItem load(String[] data);
-	}
+	Hand(data -> HandItem.hand);
+	
 	
 	private final ItemFetcher fetcher;
 	ItemType(ItemFetcher fetcher) {
 		this.fetcher = fetcher;
 	}
 	
-	public ServerItem load(String[] data) {
+	public ServerItem load(String[] data, @NotNull Version version) {
 		return fetcher.load(data);
 	}
 	
+	@FunctionalInterface
+	interface ItemFetcher {
+		ServerItem load(String[] data);
+	}
+	
+	// utility class for Item types that are no more than an enum value.
+	static abstract class EnumItem extends ServerItem {
+		// private final EnumItemType enumItemType;
+		// private final Enum<?> enumValue;
+		
+		private final String[] saveData;
+		
+		EnumItem(@NotNull ItemType type, @NotNull Enum<?> enumValue) {
+			this(type, enumValue, GameCore.icons.get("items/"+type.name().toLowerCase()+'/'+enumValue.name().toLowerCase()));
+		}
+		EnumItem(@NotNull ItemType type, @NotNull Enum<?> enumValue, @NotNull TextureHolder texture) {
+			super(type, enumValue.name(), true, texture);
+			// this.enumItemType = type;
+			// this.enumValue = enumValue;
+			saveData = new String[] {getType().name(), type.name(), enumValue.name()};
+		}
+		
+		@Override
+		public String[] save() {
+			return saveData;
+		}
+		
+	}
 }

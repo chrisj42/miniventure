@@ -38,20 +38,12 @@ public class DestructionManager {
 		this.drops = drops;
 	}
 	
-	// for those with health, preferred tools, and drops a tile item.
-	DestructionManager(@NotNull TileTypeEnum tileType, int totalHealth, PreferredTool preferredTool) {
-		this(tileType, totalHealth, preferredTool, new ItemDrop(ServerTileType.getItem(tileType)));
-	}
-	// above, but custom drop
+	// for those with health, preferred tools, and drops an item.
 	DestructionManager(@NotNull TileTypeEnum tileType, int totalHealth, PreferredTool preferredTool, ItemDrop... drops) {
 		this(tileType, totalHealth, preferredTool == null ? new PreferredTool[0] : new PreferredTool[] {preferredTool}, new DamageConditionCheck[0], drops);
 	}
 	
-	// for those that are one-shot, and have certain damage conditions, and drop a tile item
-	DestructionManager(@NotNull TileTypeEnum tileType, DamageConditionCheck... damageConditions) {
-		this(tileType, new ItemDrop(ServerTileType.getItem(tileType)), damageConditions);
-	}
-	// above, but custom single item drop
+	// for those that are one-shot, and have certain damage conditions, and drop an item
 	DestructionManager(@NotNull TileTypeEnum tileType, @NotNull ItemDrop drop, DamageConditionCheck... damageConditions) {
 		this(tileType, 1, new PreferredTool[0], damageConditions, new ItemDrop[] {drop});
 	}
@@ -73,17 +65,12 @@ public class DestructionManager {
 		private ItemDrop[] drops;
 		
 		public DestructibleBuilder(@NotNull TileTypeEnum type) { this(type, 1); }
-		public DestructibleBuilder(@NotNull TileTypeEnum type, int health) { this(type, health, health == 1); }
-		public DestructibleBuilder(@NotNull TileTypeEnum type, boolean dropTileItem) { this(type, 1, dropTileItem); }
-		public DestructibleBuilder(@NotNull TileTypeEnum type, int health, boolean dropTileItem) {
+		public DestructibleBuilder(@NotNull TileTypeEnum type, int health) {
 			this.type = type;
 			this.health = health;
 			preferredTools = new PreferredTool[0];
 			damageConditions = new DamageConditionCheck[0];
-			if(dropTileItem)
-				drops = new ItemDrop[] { new ItemDrop(ServerTileType.getItem(type)) };
-			else
-				drops = new ItemDrop[0];
+			drops = new ItemDrop[0];
 		}
 		
 		public DestructibleBuilder(@NotNull TileTypeEnum type, DestructionManager model) {
@@ -116,13 +103,6 @@ public class DestructionManager {
 			return this;
 		}
 		
-		public DestructibleBuilder drops(boolean dropTileItem) { return drops(true, dropTileItem); }
-		public DestructibleBuilder drops(boolean replace, boolean dropTileItem) {
-			if(dropTileItem)
-				return drops(replace, new ItemDrop(ServerTileType.getItem(type)));
-			else
-				return drops(replace, new ItemDrop[0]);
-		}
 		public DestructibleBuilder drops(@NotNull ItemDrop... drops) { return drops(true, drops); }
 		public DestructibleBuilder drops(boolean replace, @NotNull ItemDrop... drops) {
 			if(replace || this.drops.length == 0)
@@ -149,17 +129,19 @@ public class DestructionManager {
 			
 			SerialMap dataMap = tile.getDataMap(tileType);
 			
-			int health = totalHealth > 1 ? dataMap.getOrDefaultAndPut(TileCacheTag.Health, totalHealth) : 1;
+			int health = totalHealth > 1 ? dataMap.getOrDefaultAndPut(TileDataTag.Health, totalHealth) : 1;
 			health -= damage;
 			if(totalHealth > 1)
 				tile.getServer().broadcastParticle(new TextParticleData(String.valueOf(damage)), tile);
 			if(health <= 0) {
 				tile.getServer().playTileSound("break", tile, tileType);
+				tile.getCacheMap(tileType).put(TileCacheTag.DestroyAction, () -> {
+					for(ItemDrop drop: drops)
+						tile.getLevel().dropItems(drop, tile, attacker);
+				});
 				tile.breakTile();
-				for(ItemDrop drop: drops)
-					tile.getLevel().dropItems(drop, tile, attacker);
 			} else {
-				dataMap.put(TileCacheTag.Health, health);
+				dataMap.put(TileDataTag.Health, health);
 				tile.getServer().playTileSound("hit", tile, tileType);
 			}
 			

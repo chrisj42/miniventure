@@ -2,7 +2,7 @@ package miniventure.game.util.customenum;
 
 import java.util.Collection;
 
-class SerialEntry<T> {
+public class SerialEntry<T> {
 	
 	final SerialEnum<T> key;
 	final T value;

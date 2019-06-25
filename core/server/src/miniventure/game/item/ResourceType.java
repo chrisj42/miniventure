@@ -1,6 +1,8 @@
 package miniventure.game.item;
 
-import miniventure.game.item.EnumItemType.EnumItem;
+import miniventure.game.item.ItemType.EnumItem;
+import miniventure.game.world.entity.mob.player.Player;
+import miniventure.game.world.entity.mob.player.Player.CursorHighlight;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -10,7 +12,12 @@ public enum ResourceType {
 	
 	@NotNull
 	public ServerItem get() {
-		return new EnumItem(EnumItemType.Resource, this);
+		return new EnumItem(ItemType.Resource, this) {
+			@Override @NotNull
+			public Player.CursorHighlight getHighlightMode() {
+				return CursorHighlight.INVISIBLE;
+			}
+		};
 	}
 	
 }

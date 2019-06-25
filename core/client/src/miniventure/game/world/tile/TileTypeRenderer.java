@@ -79,7 +79,7 @@ public class TileTypeRenderer {
 	// note, this returns a list because some tiles have separate main and border sprites, which are overlaid to create the final connection sprite.
 	public LinkedList<TileAnimation> getConnectionSprites(@NotNull Tile tile, EnumMap<RelPos, EnumSet<TileTypeEnum>> aroundTypes) {
 		LinkedList<TileAnimation> sprites = new LinkedList<>();
-		String name = tile.getDataMap(tileType).get(TileCacheTag.TransitionName);
+		String name = tile.getDataMap(tileType).get(TileDataTag.TransitionName);
 		if(name != null)
 			sprites.add(ClientTileType.get(tileType).getTransition(name).getAnimation());
 		else

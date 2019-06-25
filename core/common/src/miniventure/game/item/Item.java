@@ -2,6 +2,7 @@ package miniventure.game.item;
 
 import miniventure.game.GameCore;
 import miniventure.game.texture.TextureHolder;
+import miniventure.game.world.entity.mob.player.Player.CursorHighlight;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -14,23 +15,28 @@ public class Item {
 	@NotNull private final String name;
 	@NotNull private final TextureHolder texture;
 	private final float usability; // displayed as a little bar in the item icon.
+	private final CursorHighlight highlightMode;
 	
 	Item(@NotNull String name, @NotNull TextureHolder texture) {
 		this.name = name;
 		this.texture = texture;
 		this.usability = getUsabilityStatus(); // same as with space usage.
+		this.highlightMode = null; // expected that the accessor method will be overridden
 	}
 	
-	private Item(@NotNull String name, @NotNull TextureHolder texture, float usability) {
+	private Item(@NotNull String name, @NotNull TextureHolder texture, float usability, @NotNull CursorHighlight highlightMode) {
 		this.name = name;
 		this.texture = texture;
 		this.usability = usability;
+		this.highlightMode = highlightMode;
 	}
 	
 	@NotNull public TextureHolder getTexture() { return texture; }
 	@NotNull public String getName() { return name; }
 	// This returns a value used 
 	public float getUsabilityStatus() { return usability; }
+	
+	@NotNull public CursorHighlight getHighlightMode() { return highlightMode; }
 	
 	// make sure this continues to reflect all important state in subclass implementations. Usually it will be covered by the name, but otherwise (such as with tools and their durability) the subclass ought to take that state into account.
 	@Override
@@ -53,7 +59,8 @@ public class Item {
 		return new String[] {
 			name,
 			texture.name,
-			String.valueOf(getUsabilityStatus())
+			String.valueOf(getUsabilityStatus()),
+			String.valueOf(getHighlightMode().ordinal())
 		};
 	}
 	
@@ -69,7 +76,8 @@ public class Item {
 		return new Item(
 			info[0],
 			t,
-			Float.parseFloat(info[2])
+			Float.parseFloat(info[2]),
+			CursorHighlight.values[Integer.parseInt(info[3])]
 		);
 	}
 	

@@ -4,20 +4,20 @@ import java.util.HashMap;
 
 import miniventure.game.util.function.MapFunction;
 
-public class PropertyMap {
+public class DataMap {
 	
 	private final HashMap<DataEnum<?>, Object> map = new HashMap<>();
 	
-	public PropertyMap() {}
-	public PropertyMap(DataEntry<?> entry) { add(entry); }
-	public PropertyMap(DataEntry<?>[] entries) { addAll(entries); }
-	public PropertyMap(PropertyMap model) { this(model.getEntries()); }
+	public DataMap() {}
+	public DataMap(DataEntry<?> entry) { add(entry); }
+	public DataMap(DataEntry<?>[] entries) { addAll(entries); }
+	public DataMap(DataMap model) { this(model.getEntries()); }
 	
-	public PropertyMap add(DataEntry<?> entry) {
+	public DataMap add(DataEntry<?> entry) {
 		put(entry);
 		return this;
 	}
-	public PropertyMap addAll(DataEntry<?>[] entries) {
+	public DataMap addAll(DataEntry<?>[] entries) {
 		for(DataEntry<?> e: entries)
 			add(e);
 		return this;

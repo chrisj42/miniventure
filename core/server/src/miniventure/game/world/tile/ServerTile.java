@@ -8,6 +8,7 @@ import miniventure.game.item.ServerItem;
 import miniventure.game.server.GameServer;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.customenum.SerialMap;
+import miniventure.game.util.function.Action;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.player.Player;
@@ -59,17 +60,19 @@ public class ServerTile extends Tile {
 		return (ServerTileStack) super.getTypeStack();
 	}
 	
-	public synchronized void addTile(@NotNull ServerTileType newType) { addTile(newType, getType()); }
+	public void addTile(@NotNull ServerTileType newType) { addTile(new TileTypeInfo(newType)); }
+	public synchronized void addTile(@NotNull TileTypeInfo newType) { addTile(newType, getType()); }
 	// not synchronizing this only because it's always called in a synchronized context.
-	private void addTile(@NotNull ServerTileType newType, @NotNull ServerTileType prevType) {
+	private void addTile(@NotNull TileTypeInfo newTypeInfo, @NotNull ServerTileType prevType) {
+		ServerTileType newType = ServerTileType.get(newTypeInfo.tileType);
 		
 		moveEntities(newType);
 		
-		getTypeStack().addLayer(newType, new SerialMap());
+		getTypeStack().addLayer(newType, newTypeInfo.initialData);
 		
 		// check for an entrance animation
 		if(!newType.get(P.TRANS).tryStartAnimation(this, prevType))
-			getLevel().onTileUpdate(this, newType.getTypeEnum()); // trigger update manually since tile still changed, just without an animation; tryStartAnimation only triggers updates for transition state changes.
+			getLevel().onTileUpdate(this, newTypeInfo.tileType); // trigger update manually since tile still changed, just without an animation; tryStartAnimation only triggers updates for transition state changes.
 	}
 	
 	// starting point to break a tile
@@ -77,25 +80,29 @@ public class ServerTile extends Tile {
 		return removeTile(true, null);
 	}
 	// starting point to replace a tile
-	boolean replaceTile(@NotNull ServerTileType newType) {
+	boolean replaceTile(@NotNull ServerTileType newType) { return replaceTile(new TileTypeInfo(newType)); }
+	boolean replaceTile(@NotNull TileTypeInfo newType) {
 		return removeTile(true, newType);
 	}
 	// can be called down the line after either method above, after the exit animation plays
-	boolean breakTile(@Nullable ServerTileType replacementType) {
+	boolean breakTile(@Nullable TileTypeInfo replacementType) {
 		return removeTile(false, replacementType);
 	}
-	private synchronized boolean removeTile(boolean checkForExitAnim, @Nullable ServerTileType replacementType) {
+	private synchronized boolean removeTile(boolean checkForExitAnim, @Nullable TileTypeInfo replacementType) {
 		ServerTileType type = getType();
 		if(checkForExitAnim) {
 			boolean addNext = replacementType != null;
-			ServerTileType nextType = replacementType == null ? getTypeStack().getLayerFromTop(1, true) : replacementType;
+			TileTypeInfo nextType = replacementType == null ? new TileTypeInfo(getTypeStack().getLayerFromTop(1, true)) : replacementType;
 			if(type.get(P.TRANS).tryStartAnimation(this, nextType, addNext)) {
 				// transitioning successful, tile will be broken after exit animation
 				return true; // don't actually break the tile yet (but line above, still signal for update)
 			}
 		}
 		
+		Action destroyAction = getCacheMap(type.getTypeEnum()).get(TileCacheTag.DestroyAction);
 		ServerTileType prevType = getTypeStack().removeLayer();
+		if(destroyAction != null)
+			destroyAction.act();
 		
 		if(replacementType != null) {
 			// don't worry if a tile type was removed or not, add the next one anyway.

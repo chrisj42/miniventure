@@ -5,15 +5,18 @@ import miniventure.game.item.ItemType;
 import miniventure.game.item.Result;
 import miniventure.game.item.ServerItem;
 import miniventure.game.world.WorldObject;
+import miniventure.game.world.entity.mob.player.Player.CursorHighlight;
 
-final class HandItem extends ServerItem {
+import org.jetbrains.annotations.NotNull;
+
+public final class HandItem extends ServerItem {
 	
 	// this is to be used only for the purposes of interaction; the inventory should not have them, and the hotbar ought to be filled with nulls for empty spaces.
 	
-	static final HandItem hand = new HandItem();
+	public static final HandItem hand = new HandItem();
 	
 	private HandItem() {
-		super(ItemType.Misc, "Hand", GameCore.icons.get("blank"));
+		super(ItemType.Hand, "Hand", GameCore.icons.get("blank"));
 	}
 	
 	@Override
@@ -23,6 +26,11 @@ final class HandItem extends ServerItem {
 	
 	public static ServerItem load(String[] data) {
 		throw new IllegalMethodReferenceException("load"); // hand items cannot be loaded
+	}
+	
+	@Override @NotNull
+	public Player.CursorHighlight getHighlightMode() {
+		return CursorHighlight.TILE_ADJACENT;
 	}
 	
 	@Override public ServerItem getUsedItem() { return this; }

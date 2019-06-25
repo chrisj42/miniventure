@@ -2,6 +2,8 @@ package miniventure.game.item;
 
 import java.util.Arrays;
 
+import miniventure.game.util.Version;
+
 import org.jetbrains.annotations.NotNull;
 
 public class ServerItemStack extends ItemStack {
@@ -31,9 +33,9 @@ public class ServerItemStack extends ItemStack {
 	}
 	
 	@NotNull
-	public static ServerItemStack load(@NotNull String[] data) {
+	public static ServerItemStack load(@NotNull String[] data, @NotNull Version version) {
 		int count = Integer.parseInt(data[0]);
-		ServerItem item = ServerItem.load(Arrays.copyOfRange(data, 1, data.length));
+		ServerItem item = ServerItem.load(Arrays.copyOfRange(data, 1, data.length), version);
 		assert item != null; // should always work due to the reason ServerItem.load returns null
 		return new ServerItemStack(item, count);
 	}

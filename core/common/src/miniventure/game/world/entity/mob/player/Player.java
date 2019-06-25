@@ -13,8 +13,6 @@ import miniventure.game.world.tile.Tile;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
-import com.esotericsoftware.kryonet.Connection;
-
 import org.jetbrains.annotations.NotNull;
 
 public interface Player extends Mob {
@@ -23,6 +21,13 @@ public interface Player extends Mob {
 	int HOTBAR_SIZE = 5;
 	float MOVE_SPEED = 5;
 	float MAX_CURSOR_RANGE = 5;
+	
+	// controls how the client determines what to highlight
+	enum CursorHighlight {
+		INVISIBLE, TILE_IN_RADIUS, TILE_ADJACENT;
+		
+		public static final CursorHighlight[] values = CursorHighlight.values();
+	}
 	
 	enum Stat {
 		Health("heart", 10, 20),

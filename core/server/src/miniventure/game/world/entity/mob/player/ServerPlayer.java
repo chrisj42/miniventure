@@ -7,11 +7,11 @@ import java.util.EnumMap;
 import java.util.List;
 
 import miniventure.game.GameCore;
-import miniventure.game.network.GameProtocol;
-import miniventure.game.network.GameProtocol.*;
 import miniventure.game.item.*;
 import miniventure.game.item.ToolItem.Material;
 import miniventure.game.item.ToolItem.ToolType;
+import miniventure.game.network.GameProtocol;
+import miniventure.game.network.GameProtocol.*;
 import miniventure.game.network.PacketPipe;
 import miniventure.game.server.GameServer;
 import miniventure.game.util.MyUtils;
@@ -30,7 +30,6 @@ import miniventure.game.world.entity.particle.ParticleData.TextParticleData;
 import miniventure.game.world.level.ServerLevel;
 import miniventure.game.world.management.ServerWorld;
 import miniventure.game.world.tile.ServerTile;
-import miniventure.game.world.tile.ServerTileType;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileTypeEnum;
 
@@ -39,8 +38,6 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
-
-import com.esotericsoftware.kryonet.Connection;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -89,7 +86,7 @@ public class ServerPlayer extends ServerMob implements Player {
 		}
 		spawnLevel = Integer.parseInt(data.get(4));
 		
-		inventory.loadItems(MyUtils.parseLayeredString(data.get(5)));
+		inventory.loadItems(MyUtils.parseLayeredString(data.get(5)), version);
 	}
 	
 	@Override
@@ -126,9 +123,9 @@ public class ServerPlayer extends ServerMob implements Player {
 			System.out.println("adding debug items to player inventory");
 			inventory.addItem(new ToolItem(ToolType.Shovel, Material.Ruby));
 			inventory.addItem(new ToolItem(ToolType.Pickaxe, Material.Ruby));
-			inventory.addItem(ServerTileType.getItem(TileTypeEnum.CLOSED_DOOR));
+			// inventory.addItem(TileItemType.Door);
 			for(int i = 0; i < 7; i++)
-				inventory.addItem(ServerTileType.getItem(TileTypeEnum.TORCH));
+				inventory.addItem(TileItemType.Torch.get());
 			for(int i = 0; i < 7; i++)
 				inventory.addItem(ResourceType.Log.get());
 			for(int i = 0; i < 7; i++)
@@ -208,32 +205,6 @@ public class ServerPlayer extends ServerMob implements Player {
 		forPacket(packet, CraftRequest.class, true, req -> {
 			Recipe recipe = Recipes.recipes[req.recipeIndex];
 			GameCore.debug("server got craft request for "+recipe.getResult().item);
-			if(recipe instanceof Blueprint && recipe.canCraft(inventory)) {
-				GameCore.debug("triggering blueprint");
-				// trigger an interaction
-				ServerItem item = recipe.getResult().item;
-				doInteract(getDirection(), getInteractionRect().getCenter(new Vector2()), new ServerItem(item.getType(), item.getName(), item.getTexture()) {
-					@Override
-					public int getStaminaUsage() {
-						return item.getStaminaUsage();
-					}
-					
-					@Override
-					public Result interact(WorldObject obj, Player player) {
-						return item.interact(obj, player);
-					}
-					
-					@Override
-					public ServerItem getUsedItem() {
-						return this;
-					}
-					
-					@Override
-					public String[] save() {
-						return new String[0];
-					}
-				}, -1, false);
-			}
 			ServerItem[] left = recipe.tryCraft(inventory);
 			if(left != null) {
 				ServerLevel level = getLevel();

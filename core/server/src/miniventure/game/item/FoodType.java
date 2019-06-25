@@ -1,7 +1,8 @@
 package miniventure.game.item;
 
-import miniventure.game.item.EnumItemType.EnumItem;
+import miniventure.game.item.ItemType.EnumItem;
 import miniventure.game.world.entity.mob.player.Player;
+import miniventure.game.world.entity.mob.player.Player.CursorHighlight;
 import miniventure.game.world.entity.mob.player.Player.Stat;
 
 import org.jetbrains.annotations.NotNull;
@@ -23,7 +24,12 @@ public enum FoodType {
 	
 	class FoodItem extends EnumItem {
 		private FoodItem() {
-			super(EnumItemType.Food, FoodType.this);
+			super(ItemType.Food, FoodType.this);
+		}
+		
+		@Override @NotNull
+		public Player.CursorHighlight getHighlightMode() {
+			return CursorHighlight.INVISIBLE;
 		}
 		
 		@Override public Result interact(Player player) {

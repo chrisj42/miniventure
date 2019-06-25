@@ -1,5 +1,6 @@
 package miniventure.game.world.tile;
 
+import miniventure.game.util.customenum.DataMap;
 import miniventure.game.util.customenum.SerialMap;
 import miniventure.game.world.level.ClientLevel;
 import miniventure.game.world.level.Level;
@@ -24,10 +25,10 @@ public class ClientTile extends RenderTile {
 		for(TileTypeEnum type: getTypeStack().getEnumTypes(true)) {
 			if(type == updatedType)
 				continue; // forget the animation start time, because this is a new animation.
-			Float curValue = getDataMap(type).get(TileCacheTag.AnimationStart);
+			Float curValue = getCacheMap(type).get(TileCacheTag.AnimationStart);
 			if(curValue == null)
 				continue; // there's no data to transfer.
-			SerialMap dest = newStack.getDataMap(type);
+			DataMap dest = newStack.getCacheMap(type);
 			if(dest != null) // can be null if the new stack is missing a type that the current stack has.
 				dest.put(TileCacheTag.AnimationStart, curValue);
 		}
