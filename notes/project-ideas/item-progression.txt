@@ -28,16 +28,16 @@ items
 	- reeds; found in small groups along the shoreline, assuming tropical climate
 	- stones; found inland around larger stone deposits
 	
-	- crude workbench; twigs, stones, reeds - hand blueprint
-	- crude axe; twigs, stones, reeds - crude workbench
+	- crude hammer; twigs, stone, reeds - hand recipe
+	- campfire; wood, twigs, stones - crude hammer
+		- provides light; on-the-go light sources like torches require an extra element...
+	- crude axe; twigs, stones, reeds - hand recipe
 		- cuts trees, which give you normal wood instead of twigs
 		- also functions as weapon, since a sword is not likely
-	- crude pickaxe; twigs, stones, reeds - crude workbench
+	- crude pickaxe; twigs, stones, reeds - hand recipe
 		- able to mine stone deposits (instead of picking up loose stones)
 		- able to mine coal
-	- wooden poles; wood - crude workbench
-	- campfire; wood, twigs, stones - hand blueprint
-		- provides light; on-the-go light sources like torches require an extra element...
+	- crude workbench; twigs, stones, reeds - crude hammer
 	- basic hammer; wood, stone, reeds - crude workbench
 	- wood wall; wood - basic hammer
 	- wood floor; wood - basic hammer
