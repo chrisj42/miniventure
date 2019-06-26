@@ -190,7 +190,7 @@ public class CraftingScreen extends MenuScreen {
 				for(int i = 0; i < costs.length; i++)
 					costs[i] = ItemStack.deserialize(serialRecipe.costs[i]);
 				
-				RecipeSlot slot = new RecipeSlot(new ClientRecipe(serialRecipe.listid, serialRecipe.id, result, costs, serialRecipe.blueprintTarget));
+				RecipeSlot slot = new RecipeSlot(new ClientRecipe(serialRecipe.listid, serialRecipe.id, result, costs));
 				slot.addListener(new InputListener() {
 					@Override
 					public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
@@ -249,7 +249,7 @@ public class CraftingScreen extends MenuScreen {
 				craftableTable.clearChildren();
 				craftableTable.add(new ItemIcon(recipe.result.item, recipe.result.count)).row();
 				craftableTable.add(makeLabel(recipe.result.item.getName(), FontStyle.KeepSize, false)).row();
-				String stockText = recipe.getBlueprintTarget() == null ? "Stock: " + getCount(recipe.result.item) : "";
+				String stockText = "Stock: " + getCount(recipe.result.item);
 				craftableTable.add(resultStockLabel = makeLabel(stockText, FontStyle.KeepSize, false)).row();
 			}
 			
@@ -302,15 +302,7 @@ public class CraftingScreen extends MenuScreen {
 	
 	private synchronized void craftSelected() {
 		ClientRecipe recipe = recipes.get(selection).recipe;
-		if(recipe.blueprintTarget == null)
-			ClientCore.getClient().send(new CraftRequest(recipe.listid, recipe.id));
-		else {
-			ClientPlayer player = ClientCore.getWorld().getMainPlayer();
-			if(player != null) {
-				player.getInventory().setBlueprint(recipe);
-				ClientCore.setScreen(null);
-			}
-		}
+		ClientCore.getClient().send(new CraftRequest(recipe.listid, recipe.id));
 	}
 	
 	@Override
@@ -347,23 +339,19 @@ public class CraftingScreen extends MenuScreen {
 		private final int id;
 		private final ItemStack result;
 		final ItemStack[] costs;
-		@Nullable private final TileTypeEnum blueprintTarget;
 		private boolean canCraft;
 		
-		ClientRecipe(int listid, int id, @NotNull ItemStack result, ItemStack[] costs, @Nullable TileTypeEnum blueprintTarget) {
-			super((blueprintTarget==null?"":"[BLU] ")+result.item.getName(), result.item.getTexture());
+		ClientRecipe(int listid, int id, @NotNull ItemStack result, ItemStack[] costs) {
+			super(result.item.getName(), result.item.getTexture());
 			this.listid = listid;
 			this.id = id;
 			this.result = result;
 			this.costs = costs;
-			this.blueprintTarget = blueprintTarget;
 		}
 		
 		public CraftRequest getCraftRequest() {
 			return new CraftRequest(listid, id);
 		}
-		
-		@Nullable TileTypeEnum getBlueprintTarget() { return blueprintTarget; }
 		
 		boolean needsItem(Item item) {
 			for(ItemStack stack: costs)

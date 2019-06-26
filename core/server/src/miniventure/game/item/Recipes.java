@@ -111,35 +111,14 @@ public class Recipes {
 		new Recipe(new ServerItemStack(TileItemType.Torch.get(), 2),
 			new ServerItemStack(ResourceType.Log.get(), 1),
 			new ServerItemStack(ResourceType.Coal.get(), 1)
-		)/*,
-		
-		new Blueprint(getItem(CLOSED_DOOR),
-			new ServerItemStack(ResourceType.Log.get(), 3)
-		),
-		
-		new Blueprint(getItem(WOOD_WALL),
-			new ServerItemStack(ResourceType.Log.get(), 3)
-		),
-		
-		new Blueprint(getItem(STONE_WALL),
-			new ServerItemStack(ResourceType.Stone.get(), 3)
-		),
-		
-		new Blueprint(getItem(STONE_FLOOR),
-			new ServerItemStack(ResourceType.Stone.get(), 1)
-		),
-		
-		new Blueprint(getItem(STONE_PATH),
-			new ServerItemStack(ResourceType.Stone.get(), 1)
-		)*/
+		)
 	};
 	
 	public static final SerialRecipe[] serializeRecipes() {
 		SerialRecipe[] serialRecipes = new SerialRecipe[Recipes.recipes.length];
 		for(int i = 0; i < recipes.length; i++) {
 			Recipe r = recipes[i];
-			serialRecipes[i] = new SerialRecipe(0, i, r.getResult(), r.getCosts(), null
-			);
+			serialRecipes[i] = new SerialRecipe(0, i, r.getResult(), r.getCosts());
 		}
 		
 		return serialRecipes;

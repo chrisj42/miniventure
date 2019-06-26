@@ -66,7 +66,7 @@ public class InputHandler implements InputProcessor {
 		// DROP_STACK(new Mapping(Keys.Q, Modifier.SHIFT)),
 		
 		INVENTORY_TOGGLE(Keys.E),
-		BLUEPRINT_TOGGLE(Keys.TAB),
+		CRAFTING_TOGGLE(Keys.TAB),
 		
 		// these two I'm not sure I need.
 		TOGGLE_FACE_CURSOR(Keys.R), // toggles between facing the cursor, and facing the last direction moved.

@@ -626,24 +626,21 @@ public interface GameProtocol {
 		public final int id;
 		public final String[] result;
 		public final String[][] costs;
-		public final TileTypeEnum blueprintTarget; // non-null only for blueprint recipes.
 		
-		private SerialRecipe() { this(0, 0, (String[])null, null, null); }
-		public SerialRecipe(int listid, int id, ItemStack result, ItemStack[] costs, TileTypeEnum blueprintTarget) {
+		private SerialRecipe() { this(0, 0, (String[])null, null); }
+		public SerialRecipe(int listid, int id, ItemStack result, ItemStack[] costs) {
 			this.listid = listid;
 			this.id = id;
-			this.blueprintTarget = blueprintTarget;
 			this.result = result.serialize();
 			this.costs = new String[costs.length][];
 			for(int i = 0; i < costs.length; i++)
 				this.costs[i] = costs[i].serialize();
 		}
-		public SerialRecipe(int listid, int id, String[] result, String[][] costs, TileTypeEnum blueprintTarget) {
+		public SerialRecipe(int listid, int id, String[] result, String[][] costs) {
 			this.listid = listid;
 			this.id = id;
 			this.result = result;
 			this.costs = costs;
-			this.blueprintTarget = blueprintTarget;
 		}
 	}
 	

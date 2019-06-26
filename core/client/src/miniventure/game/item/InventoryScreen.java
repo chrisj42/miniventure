@@ -175,12 +175,7 @@ public class InventoryScreen extends MenuScreen {
 				final int invi = idx;
 				allSlots[r][c] = new ItemSlot(false, item, count, new SlotBackground(
 					() -> inventory.getSlotsTaken() > invi,
-					() -> {
-						ClientRecipe recipe = inventory.getCurrentBlueprint();
-						if(recipe == null)
-							return inventory.getSelection() == invi;
-						return recipe.needsItem(inventory.getItem(invi));
-					}
+					() -> inventory.getSelection() == invi
 				)) {
 					@Override @Nullable
 					public Item getItem() {

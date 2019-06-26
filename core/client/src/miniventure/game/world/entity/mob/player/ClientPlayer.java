@@ -1,7 +1,6 @@
 package miniventure.game.world.entity.mob.player;
 
 import java.util.EnumMap;
-import java.util.EnumSet;
 import java.util.HashMap;
 
 import miniventure.game.GameCore;
@@ -9,16 +8,13 @@ import miniventure.game.client.InputHandler.Control;
 import miniventure.game.client.InputHandler.Modifier;
 import miniventure.game.network.GameProtocol.*;
 import miniventure.game.client.ClientCore;
-import miniventure.game.client.InputHandler;
 import miniventure.game.item.ClientInventory;
 import miniventure.game.item.CraftingScreen;
-import miniventure.game.item.CraftingScreen.ClientRecipe;
 import miniventure.game.item.InventoryScreen;
 import miniventure.game.item.Item;
 import miniventure.game.network.PacketPipe.PacketPipeWriter;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
-import miniventure.game.util.RelPos;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClientEntity;
 import miniventure.game.world.entity.Direction;
@@ -26,24 +22,14 @@ import miniventure.game.world.entity.KnockbackController;
 import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.entity.mob.MobAnimationController;
 import miniventure.game.world.entity.mob.MobAnimationController.AnimationState;
-import miniventure.game.world.level.ClientLevel;
 import miniventure.game.world.tile.ClientTile;
-import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.TileTypeEnum;
-import miniventure.game.world.tile.TileTypeRenderer;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-
-import com.esotericsoftware.kryonet.Connection;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -147,24 +133,6 @@ public class ClientPlayer extends ClientEntity implements Player {
 	
 	@Override
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
-		// check for a blueprint in the inventory
-		TileTypeRenderer blueprintTile = inventory.getBlueprintRenderer();
-		if(blueprintTile != null) {
-			// blueprint
-			ClientLevel level = getLevel();
-			if(level != null) {
-				ClientTile tile = (ClientTile) level.getTile(getInteractionRect());
-				EnumMap<RelPos, EnumSet<TileTypeEnum>> aroundTypes = new EnumMap<>(RelPos.class);
-				for(RelPos rp: RelPos.values)
-					aroundTypes.put(rp, EnumSet.noneOf(TileTypeEnum.class));
-				aroundTypes.get(RelPos.CENTER).add(tile.getType().getTypeEnum());
-				Color prev = batch.getColor();
-				batch.setColor(new Color(1f, 1f, 1f, .4f));
-				tile.renderSprites(batch, blueprintTile.getConnectionSprites(tile, aroundTypes), posOffset);
-				batch.setColor(prev);
-			}
-		}
-		
 		super.render(batch, delta, posOffset);
 		animator.progressAnimation(delta);
 	}
@@ -216,28 +184,23 @@ public class ClientPlayer extends ClientEntity implements Player {
 		if(!ClientCore.hasMenu()) {
 			
 			if(!isKnockedBack()) {
-				if(ClientCore.input.pressingControl(Control.USE_ITEM)) {
-					ClientRecipe recipe = inventory.getCurrentBlueprint();
-					if(recipe != null) {
-						GameCore.debug("sending craft request because of blueprint");
-						ClientCore.getClient().send(recipe.getCraftRequest());
-					}
-					else {
-						// GameCore.debug("sending player attack");
-						ClientCore.getClient().send(new InteractRequest(true, cursorPos, new PositionUpdate(this), getDirection(), inventory.getSelection()));
-					}
-				}
-				else if(ClientCore.input.pressingControl(Control.INTERACT)) {
-					if(inventory.getCurrentBlueprint() == null) // act as a cancel only, if it isn't null
-						ClientCore.getClient().send(new InteractRequest(false, cursorPos, new PositionUpdate(this), getDirection(), inventory.getSelection()));
-					inventory.removeBlueprint();
-				}
+				boolean attack = true;
+				boolean interact = true;
+				if(ClientCore.input.pressingControl(Control.USE_ITEM))
+					attack = true;
+				else if(ClientCore.input.pressingControl(Control.INTERACT))
+					attack = false;
+				else
+					interact = false;
+				
+				if(interact)
+					ClientCore.getClient().send(new InteractRequest(attack, cursorPos, new PositionUpdate(this), getDirection(), inventory.getSelection()));
 			}
 			
 			/*if(ClientCore.input.pressingControl(Control.INVENTORY_TOGGLE)) {
 				ClientCore.setScreen(new InventoryScreen(inventory));
-			} else */if(ClientCore.input.pressingControl(Control.BLUEPRINT_TOGGLE))
-				ClientCore.setScreen(new CraftingScreen()); // fixme wrong screen, should be blueprint screen
+			} else */if(ClientCore.input.pressingControl(Control.CRAFTING_TOGGLE))
+				ClientCore.setScreen(new CraftingScreen());
 			else if(ClientCore.input.pressingControl(Control.DROP_ITEM)) {
 				inventory.dropInvItems(Modifier.SHIFT.isPressed());
 			}

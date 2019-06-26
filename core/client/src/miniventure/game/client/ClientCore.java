@@ -213,14 +213,6 @@ public class ClientCore extends ApplicationAdapter {
 				return; // ignore it.
 			
 			if(screen != null) {
-				// going to a different screen should clear the blueprint
-				ClientWorld world = getWorld();
-				if(world != null) {
-					ClientPlayer player = world.getMainPlayer();
-					if(player != null)
-						player.getInventory().removeBlueprint();
-				}
-				
 				// determine if the given screen instance is already somewhere on the "screen" hierarchy, and if so go back to that one.
 				MenuScreen check = menuScreen;
 				while(check != null && check != screen)

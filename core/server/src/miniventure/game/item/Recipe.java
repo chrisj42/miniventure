@@ -45,11 +45,9 @@ public class Recipe {
 					inv.removeItem(cost.item);
 		}
 		
-		if(!(this instanceof Blueprint)) {
-			for(int i = 0; i < result.count; i++) {
-				if(!inv.addItem(result.item))
-					leftover.add(result.item);
-			}
+		for(int i = 0; i < result.count; i++) {
+			if(!inv.addItem(result.item))
+				leftover.add(result.item);
 		}
 		
 		return leftover.shrink();
