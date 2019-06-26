@@ -122,7 +122,7 @@ public enum IslandType {
 				- usage of noise repeatedly requires noise to be created beforehand and passed in, so it remains available
 			 */
 			
-			float[][] shape = island.getFromGen(Testing.getTerrain());
+			float[][] shape = island.getFromGen(Testing.islandShape);
 			
 			float[][] stone = island.getFromGen(new Coherent2DNoiseFunction(18).modify(combine(NoiseGenerator.islandMask(1), MULTIPLY, NoiseGenerator.islandMask(1)), FILL_VALUE_RANGE));
 			
@@ -153,7 +153,7 @@ public enum IslandType {
 		void generateIsland(ProtoIsland island) {
 			// describe process
 			
-			float[][] shape = island.getFromGen(Testing.getTerrain());
+			float[][] shape = island.getFromGen(Testing.islandShape);
 			
 			float[][] stone = island.getFromGen(new Coherent2DNoiseFunction(18).modify(combine(NoiseGenerator.islandMask(1), MULTIPLY, NoiseGenerator.islandMask(1)), FILL_VALUE_RANGE));
 			
@@ -185,7 +185,7 @@ public enum IslandType {
 		void generateIsland(ProtoIsland island) {
 			// describe process
 			
-			float[][] shape = island.getFromGen(Testing.getTerrain());
+			float[][] shape = island.getFromGen(Testing.islandShape);
 			
 			float[][] stone = island.getFromGen(new Coherent2DNoiseFunction(18).modify(combine(NoiseGenerator.islandMask(1), MULTIPLY, NoiseGenerator.islandMask(1)), FILL_VALUE_RANGE));
 			
@@ -224,7 +224,7 @@ public enum IslandType {
 		void generateIsland(ProtoIsland island) {
 			// describe process
 			
-			float[][] shape = island.getFromGen(Testing.getTerrain());
+			float[][] shape = island.getFromGen(Testing.islandShape);
 			
 			float[][] trees = island.getFromGen(new Coherent2DNoiseFunction(24));
 			

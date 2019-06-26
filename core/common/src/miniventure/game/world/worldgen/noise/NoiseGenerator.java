@@ -1,6 +1,7 @@
 package miniventure.game.world.worldgen.noise;
 
 import java.util.Arrays;
+import java.util.Random;
 
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.MapFunction;
@@ -16,18 +17,18 @@ public interface NoiseGenerator extends NoiseMapFetcher {
 	
 	// seed changes really only matter when you use the same map multiple times. The same seed used on different algorithms cannot be directly said to cause artifacts not seen by any other static association of two seeds. Hence, the need for seed changes is heavily tied to the nature of the generator.
 	// Noise instances, that start with a map of white noise and then smooth it, are an example of a generator for which having the same seed causes a noticeable effect. Let's test that...
-	default NoiseGenerator modifySeed(MapFunction<Long, Long> seedModifier) {
+	/*default NoiseGenerator modifySeed(MapFunction<Long, Long> seedModifier) {
 		return info -> get2DNoise(new GenInfo(seedModifier.get(info.seed), info.width, info.height));
-	}
+	}*/
 	
-	default NoiseGenerator modify(NoiseModifier... modifiers) {
+	default NoiseGenerator modify(NoiseModifier... modifiers) { return modify(1, modifiers); }
+	default NoiseGenerator modify(int loops, NoiseModifier... modifiers) {
 		return info -> {
 			float[][] noise = get2DNoise(info);
-			// float[][] cache = new float[info.width][info.height];
-			for(NoiseModifier mod: modifiers) {
-				// for(int i = 0; i < noise.length; i++)
-				// 	System.arraycopy(noise[i], 0, cache[i], 0, noise[i].length);
-				mod.modify(info, noise);
+			for(int i = 0; i < loops; i++) {
+				for(NoiseModifier mod : modifiers) {
+					mod.modify(info, noise);
+				}
 			}
 			return noise;
 		};

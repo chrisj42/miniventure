@@ -63,6 +63,7 @@ public interface NoiseModifier {
 		float merge(float noise1, float noise2);
 		
 		NoiseValueMerger MULTIPLY = (noise1, noise2) -> noise1 * noise2;
+		NoiseValueMerger ABS_DIFF = (noise1, noise2) -> Math.abs(noise1 - noise2);
 		NoiseValueMerger OVERWRITE = (noise1, noise2) -> noise2;
 	}
 	

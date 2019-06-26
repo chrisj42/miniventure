@@ -31,7 +31,7 @@ public class Coherent2DNoiseFunction implements NoiseGenerator {
 	
 	@Override
 	public float[][] get2DNoise(GenInfo info) {
-		hashFunction = LongHashFunction.xx(info.seed);
+		hashFunction = LongHashFunction.xx(info.nextSeed());
 		
 		float[][] smoothNoise = new float[info.width][info.height];
 		for(int x = 0; x < info.width; x++)
