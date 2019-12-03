@@ -2,6 +2,9 @@ allprojects {
 	apply plugin: "java"
 	apply plugin: "idea"
 	
+	sourceCompatibility = 1.8
+	[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+	
 	version = '2.2.1'
 	ext {
 		appName = "miniventure"
@@ -10,6 +13,8 @@ allprojects {
 		ashleyVersion = '1.7.3'
 		aiVersion = '1.8.0'
 		unirestVersion = '1.4.9'
+		kryonetVersion = '2.22.0-RC1'
+		visuiVersion = '1.4.0'
 	}
 	
 	repositories {
@@ -17,13 +22,40 @@ allprojects {
 		mavenCentral()
 		maven { url "https://oss.sonatype.org/content/repositories/releases/" }
 	}
+}
+
+subprojects {
+	sourceSets.main.java.srcDirs = [ "src/" ]
+	/*sourceSets.main.java.excludes = [
+	        "miniventure/game/world/worldgen/noise/Testing",
+			"miniventure/game/world/worldgen/WorldGenTest"
+	]
+	sourceSets.test.java.srcDirs = [ "../core/$project.name/src/" ]
+	*/
 	
 	dependencies {
 		compile "org.jetbrains:annotations:15.0"
 	}
 }
 
-project(":core:common") {
+sourceSets.main.java.srcDirs = []
+
+dependencies {
+	compile project(":desktop")
+}
+
+project(":desktop") {
+	dependencies {
+		compile project(":client")
+		compile project(":server")
+		compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
+		compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+		compile "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
+		compile "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
+	}
+}
+
+project(":common") {
 	dependencies {
 		compile "com.badlogicgames.gdx:gdx:$gdxVersion"
 		compile "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
@@ -31,31 +63,64 @@ project(":core:common") {
 		//compile "com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion"
 		//compile "com.badlogicgames.ashley:ashley:$ashleyVersion"
 		compile "net.openhft:zero-allocation-hashing:0.8"
-		compile "com.esotericsoftware:kryonet:2.22.0-RC1"
+		compile "com.esotericsoftware:kryonet:$kryonetVersion"
 		compile "com.mashape.unirest:unirest-java:$unirestVersion"
 	}
 }
 
-project(":core:client") {
+project("client") {
 	dependencies {
-		compile project(":core:common")
-		compile "com.kotcrab.vis:vis-ui:1.4.0"
+		compile project(":common")
+		compile "com.kotcrab.vis:vis-ui:$visuiVersion"
 	}
 }
 
-project(":core:server") {
+project(":server") {
 	dependencies {
-		compile project(":core:common")
+		compile project(":common")
 	}
 }
 
-project(":core:desktop") {
-	dependencies {
-		compile project(":core:client")
-		compile project(":core:server")
-		compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
-		compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
-		compile "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
-		compile "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
+ext {
+	mainClassName = "miniventure.game.desktop.DesktopLauncher"
+	assetsDir = new File("core/common/assets")
+}
+
+// build dist jar
+
+task dist(dependsOn: classes, type: Jar) {
+	from files(sourceSets.main.output.classesDirs)
+	from files(sourceSets.main.output.resourcesDir)
+	from {configurations.compile.collect {zipTree(it)}}
+	from files(assetsDir)
+	
+	manifest {
+		attributes 'Main-Class': mainClassName
 	}
+}
+
+// default "run" task
+
+task run(dependsOn: classes, type: JavaExec) {
+	main = mainClassName
+	classpath = sourceSets.main.runtimeClasspath
+	//standardInput = System.in
+	workingDir = assetsDir
+	ignoreExitValue = true
+}
+
+// test builds
+
+task worldgentest(dependsOn: classes, type: JavaExec) {
+	main = "miniventure.game.world.worldgen.WorldGenTest"
+	classpath = sourceSets.main.runtimeClasspath
+	//standardInput = System.in
+	workingDir = assetsDir
+}
+
+task noisegentest(dependsOn: classes, type: JavaExec) {
+	main = "miniventure.game.world.worldgen.noise.Testing"
+	classpath = sourceSets.main.runtimeClasspath
+	//standardInput = System.in
+	workingDir = assetsDir
 }
