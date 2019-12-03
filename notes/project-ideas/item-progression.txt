@@ -21,7 +21,22 @@ BY LEVEL
 PROGRESSION
 ----
 
-island 1 progression:
+- what are the key points that prevent you from going on?
+
+- island 0
+	- tutorial island; small
+	- twigs, reeds, stones
+	- takes you through:
+		- getting crude tools
+		- building simple tiles
+		- fighting the boss to get to the next island
+	- skippable
+
+- island 1
+	- crude tools
+	- adds trees, and wood-based furniture like chests and beds
+	- 
+- island 2
 
 items
 	- twigs; found on the shoreline as driftwood, and scattered around trees
@@ -36,7 +51,6 @@ items
 		- also functions as weapon, since a sword is not likely
 	- crude pickaxe; twigs, stones, reeds - hand recipe
 		- able to mine stone deposits (instead of picking up loose stones)
-		- able to mine coal
 	- crude workbench; twigs, stones, reeds - crude hammer
 	- basic hammer; wood, stone, reeds - crude workbench
 	- wood wall; wood - basic hammer

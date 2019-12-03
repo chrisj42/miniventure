@@ -1,3 +1,27 @@
+one island is your "home base"; from there, you go on expeditions to other islands
+- you can stay on the island for a limited amount of time before having to go back? not sure how I would justify this though.
+- you can only travel to other islands from your home island; when on other islands, your only option is to return home.
+	- this is because your home island is the only one with a dock
+- should island type be choosable? if so, how will progression adapt?
+  - how about island type is not choosable, but you have the option to relocate
+
+- idea 1: home base island has small areas that represent the various island types
+- idea 2: get to choose home island biome, but the island doesn't have the normal resources
+	- all islands have basic resources, allowing you to choose any biome type for your starter island and still be fine
+	- whatever island type you pick will be skipped in the progression
+		- you'd notice that the new map points to your island
+	- defaults to the first island
+		- advanced options allow you to select another island type, with a notice that most of the resources won't be available until later
+
+- regardless your starter island, getting the first map is quick and doesn't require fighting a boss
+	- maybe you find it in the wreckage of your original ship
+- however, if your starting island is the first one, you will find that you can't fight the boss of the second island until you defeat the first island boss.
+	- starting the boss fight requires you to have defeated the previous boss
+- for multiplayer, the starting island is global per server, so all players on that server start on the same island.
+	- island progression is also global (multiplayer is intended mainly for small groups, not massive servers.
+
+--- old idea about having relative island locations ---
+
 when you start out on an island, there is fog all around the edges of the map, in the deep water.
 When you get a boat and attempt to go to the edge of the map, a message will display.
 	- most of the time, it will say "It is too foggy to see anything."
@@ -7,4 +31,4 @@ When you get a boat and attempt to go to the edge of the map, a message will dis
 
 This is cool and all, but only really makes sense if the order of the islands is somewhat randomized. That means the progression can't be tied to certain biome, like the ores and stuff; and the bosses can't really get more difficult unless I do something simple like increase HP and damage, or I make a multi-tiered AI for them.
 
-Anyway, one advantage this has is that island unlocks aren't tied to an "item" anymore; and it natually makes sense that it would apply to everyone.
+Anyway, one advantage this has is that island unlocks aren't tied to an "item" anymore; and it naturally makes sense that it would apply to everyone.

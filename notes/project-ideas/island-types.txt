@@ -2,6 +2,7 @@ some terrain feature notes:
 - stones/boulders will be different from large stone collections...
 - the difference needs to be that in some cases, there is stone in smaller amounts, and sometimes larger...
 
+new idea for surface that might mean I don't need an underground: since islands will be quite big, there can be mini-biomes of stone "mountain" that use the connecting rock sprite from before. 
 
 characteristics of each island type:
 
