@@ -10,16 +10,22 @@ public class ProgressPrinter implements ProgressLogger {
 	
 	private Deque<String> messages = new ArrayDeque<>();
 	
+	private boolean topEphemeral = false;
+	
 	@Override
-	public void pushMessage(String message) {
+	public void pushMessage(String message, boolean ephemeral) {
+		if(topEphemeral)
+			popMessage();
 		messages.push(message);
+		topEphemeral = ephemeral;
 		printProgress();
 	}
 	
 	@Override
-	public void editMessage(String newMessage) {
+	public void editMessage(String newMessage, boolean ephemeral) {
 		popMessage();
 		messages.push(newMessage);
+		topEphemeral = ephemeral;
 		printProgress();
 	}
 	

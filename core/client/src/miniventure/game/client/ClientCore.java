@@ -114,8 +114,8 @@ public class ClientCore extends ApplicationAdapter {
 		// Style.loadStyles(skin);
 		VisUI.load(skin);
 		
-		LoadingScreen loader = new LoadingScreen();
-		loader.pushMessage("Initializing", true);
+		LoadingScreen loader = new LoadingScreen(true);
+		loader.pushMessage("Initializing");
 		setScreen(loader);
 		//System.out.println("start delay");
 		MyUtils.delay(0, () -> Gdx.app.postRunnable(() -> {
@@ -139,7 +139,7 @@ public class ClientCore extends ApplicationAdapter {
 				"Though the back-end may change from time to time, who knows.",
 				"",
 				"The utmost effort is made to prevent bugs from getting into releases, but since",
-				"the sole developer has a life and very few testers, this effort doesn't amount to much.",
+				"the sole developer has a life and very few testers, this effort only goes so far.",
 				"",
 				"Also, please keep in mind that, while the gameplay systems are (fairly) stable,",
 				"the majority of content is yet to come.",

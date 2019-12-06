@@ -17,14 +17,32 @@ public interface ProgressLogger {
 	 * 
 	 * @param message the text of the message.
 	 */
-	void pushMessage(String message);
+	default void pushMessage(String message) { pushMessage(message, false); }
+	
+	/**
+	 * adds a message to the message stack, optionally making it ephemeral.
+	 * Ephemeral messages are overwritten when anther message is pushed on top of it.
+	 * 
+	 * @param message the text of the message.
+	 * @param ephemeral whether the message is ephemeral.
+	 */
+	void pushMessage(String message, boolean ephemeral);
 	
 	/**
 	 * edits the top message in the stack.
 	 * 
 	 * @param newMessage the new text for the top message.
 	 */
-	void editMessage(String newMessage);
+	default void editMessage(String newMessage) { editMessage(newMessage, false); }
+	
+	/**
+	 * edits the top message in the stack, optionally making it ephemeral.
+	 * Ephemeral messages are overwritten when anther message is pushed on top of it.
+	 *
+	 * @param newMessage the new text for the top message.
+	 * @param ephemeral whether the message is ephemeral.   
+	 */
+	void editMessage(String newMessage, boolean ephemeral);
 	
 	/**
 	 * removes the top message from the message stack.

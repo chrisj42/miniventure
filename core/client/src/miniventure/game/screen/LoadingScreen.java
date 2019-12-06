@@ -25,31 +25,45 @@ public class LoadingScreen extends BackgroundInheritor implements ProgressLogger
 	 */
 	
 	private final VerticalGroup vGroup;
+	private final boolean initLoader;
 	private Stack<VisLabel> messageLabels = new Stack<>();
 	
-	public LoadingScreen() {
+	private boolean topEphemeral = false; // should the top message be overwritten on push?
+	
+	public LoadingScreen() { this(false); }
+	public LoadingScreen(boolean initLoader) {
 		super(new ScreenViewport());
+		this.initLoader = initLoader;
 		vGroup = new VerticalGroup();
 		setCenterGroup(vGroup);
 		vGroup.space(15);
 	}
 	
 	@Override
-	public void pushMessage(String message) { pushMessage(message, false); }
-	public void pushMessage(String message, boolean simple) {
+	public void pushMessage(String message, boolean ephemeral) {
+		if(topEphemeral) {
+			editMessage(message, ephemeral);
+			return;
+		}
+		
 		message += "...";
-		final VisLabel label = simple ? new VisLabel(message) : makeLabel(message);
+		final VisLabel label = initLoader ? new VisLabel(message) : makeLabel(message);
 		messageLabels.push(label);
+		topEphemeral = ephemeral;
 		Gdx.app.postRunnable(() -> vGroup.addActor(label));
 	}
 	
 	@Override
-	public void editMessage(String message) {
+	public void editMessage(String message, boolean ephemeral) {
 		VisLabel label = messageLabels.empty() ? null : messageLabels.peek();
-		if(label == null)
-			pushMessage(message);
-		else
-			Gdx.app.postRunnable(() -> label.setText(message+"..."));
+		if(label == null) {
+			topEphemeral = false; // without this we could go into infinite recursion
+			pushMessage(message, ephemeral);
+		}
+		else {
+			Gdx.app.postRunnable(() -> label.setText(message + "..."));
+			topEphemeral = ephemeral;
+		}
 	}
 	
 	@Override
@@ -60,6 +74,7 @@ public class LoadingScreen extends BackgroundInheritor implements ProgressLogger
 		} catch(EmptyStackException e) {
 			System.err.println("Cannot pop from LoadingScreen message stack; stack is empty.");
 		}
+		topEphemeral = false;
 	}
 	
 }
