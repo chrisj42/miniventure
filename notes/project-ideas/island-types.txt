@@ -1,3 +1,126 @@
+woodland / forest surface
+	- terrain
+		- trees
+		- stone piles
+		- rivers
+		- rocky beaches
+		- terrain shifts between heavily and lightly forested areas
+			- forests are interspersed with paths among the trees all around
+			- sometimes rivers weave their way through a forest, with a path on either side, perhaps switching sides
+		- fallen trees in forest here and there
+	- mobs
+		- cows
+		- sheep
+		- snakes (hostile)
+		- zombies
+	- resources
+		- wood
+		- granite
+		- leather
+		- wool
+		- meat
+		- forest gem (rare drop from mobs)
+	- discoverables
+		- old iron smelter - allows smelting of iron
+		- abandoned cabin ruins
+			- forest gem
+		- forest altar - boss site
+			- requires a forest offering to activate
+	- some stuff you'll make
+		- basic tools
+		- simple house
+		- bed
+
+woodland / forest caves
+	- terrain
+		- fairly wide paths with lots of branches
+		- torches and other similar items left about, lighting up areas
+		- stone walls
+		- chunks of iron ore and coal
+	- mobs
+		- bats
+		- cave trolls
+		- zombies
+	- resources
+		- iron
+		- coal
+		- stone
+		- copper
+	- some stuff you'll make
+		- 
+
+desert / savanna surface
+	- terrain
+		- sand dunes
+		- sometimes quicksand
+		- savanna areas
+			- sparse trees
+			- muddy rivers
+		- 
+	- mobs
+		- pigs
+        - crocodile
+		- 
+	- resources
+		- sand
+		- 
+	- discoverables
+		- refined smelter - allows combining coal and iron to make steel
+		- desert altar - desert boss site
+			- requires a desert offering to activate
+	- some stuff you'll make
+		- glass products
+		- steel
+
+desert / savanna caves
+	- terrain
+		- thinner paths in general than forest caves
+		- sometimes widens into caverns
+	- mobs
+		- 
+	- resources
+		- coal
+		- sandstone
+		- copper
+		- ruby
+	- some stuff you'll make
+		- 
+
+snowy surface
+	- terrain
+		- snow on everything
+	- mobs
+		- rabbits
+		- 
+	- resources
+		- hard wood
+		- 
+	- discoverables
+		- 
+		- snow altar - snowy boss site
+			- requires a snow offering to activate
+	- some stuff you'll make
+		- 
+
+snowy caves
+	- terrain
+		- 
+	- mobs
+		- 
+	- resources
+		- titanium
+		- ruby
+		- stone
+	- some stuff you'll make
+		- 
+
+
+
+
+
+
+
+
 some terrain feature notes:
 - stones/boulders will be different from large stone collections...
 - the difference needs to be that in some cases, there is stone in smaller amounts, and sometimes larger...

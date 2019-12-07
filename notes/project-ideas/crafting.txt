@@ -1,3 +1,10 @@
+- reverting crafted objects
+	- simple tools and crafted materials can be reduced to materials at a workbench that can craft them
+	- crafted tiles and placed objects can be destroyed if hit enough with the right item, but they will yield mostly scrap materials like broken wood, warped metal, etc
+	- instead, either pick up the object and deconstruct it at a workbench, or if it's a tile, then use the tools used for making it to deconstruct it. This will usually yield normal materials, often the same ones used to make it, or a subset of them.
+	- scrap materials can sometimes be returned to normal, or be used for other purposes
+
+
 crafting occurs either at a crafting station or via a tile recipe.
 
 items in general will likely be interactable in 3 ways: you can use them, you can place them, or you can build them. Mid-size items like chests and basic furniture can picked up and moved about; however, they cannot be "stowed away" into one's inventory. It remains the active item until set down.

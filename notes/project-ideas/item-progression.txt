@@ -23,6 +23,45 @@ PROGRESSION
 
 - what are the key points that prevent you from going on?
 
+-- items below that are not under a header are craftable with no tool or bench needed; only the materials.
+	- IT = holdable item
+	- LO = large object, cannot pick up
+	- TL = tile, cannot move
+
+- TL campfire: wood + reed fiber
+- LO crude workbench: graphite + wood + reeds (wood from fallen trees)
+- crude workbench - forest surface
+	- IT fiber cord: reeds
+	- IT basic axe: graphite + wood + fiber cord
+	- IT basic pickaxe: graphite + wood + fiber cord
+	- IT shovel: stone + wood
+	- IT wooden club: wood
+	- IT practical hammer: stone + wood + fiber cord
+- practical hammer - forest surface
+	- TL wood wall: wood
+	- TL wood floor: wood
+	- TL wood door: wood + fiber cord
+	- LO bed: wood + wool
+	- LO refinery (locked): iron + stone
+	- LO amateur workbench: iron + wood
+- IT forest offering: forest gem + seeds + wood
+- amateur workbench - forest caves
+	- IT iron sword: iron
+	- IT strong pickaxe: iron + stone
+	- IT strong axe: iron + stone
+	- IT artisan hammer: steel + sandstone
+- artisan hammer - desert surface
+	- 
+	- LO professional workbench: hard wood + steel
+- professional workbench - snowy surface
+	- IT titanium armor: titanium, iron plates
+	- IT superior hammer: hard wood + titanium
+- superior hammer - snowy caves
+	- 
+
+- technician's workbench? used to make fancy circuitry stuff?
+
+
 - island 0
 	- tutorial island; small
 	- twigs, reeds, stones
