@@ -41,6 +41,7 @@ PROGRESSION
 	- TL wood wall: wood
 	- TL wood floor: wood
 	- TL wood door: wood + fiber cord
+	- LO chest: wood
 	- LO bed: wood + wool
 	- LO refinery (locked): iron + stone
 	- LO amateur workbench: iron + wood

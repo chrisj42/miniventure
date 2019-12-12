@@ -2,16 +2,9 @@ WORLD
 
 - backpacks
 
-- ice tile
-
-- add moose
-    - deals two hearts of damage
-    - charges in straight line at the player on sight for a distance
-    - drops meat and sometimes bone from the antlers, replacing skeletons.
-    - could have a charging animation
-    - only spawns in forest biome
-
 - Perhaps there should be two sorts of item entities. One type disappears quickly, and the other type lasts a lot longer. The second type could be for most valuable items. Idk if I really wanna do this though... I'm sure there are better ways.
+
+- provide a separate control for the player to hit the ground in front of them vs hit the space in front of them; hitting the ground while something is on top will instead hit only what's on top.
 
 ---
 

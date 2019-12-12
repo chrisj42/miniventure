@@ -10,6 +10,14 @@ WORLD
 - set inventory limit to 200 items
 
 - sharply increase stamina usage and stamina recharge rate, in order to artificially reduce stamina while still keeping the refill smooth.
+
+- add moose
+    - deals two hearts of damage
+    - charges in straight line at the player on sight for a distance
+    - drops meat and sometimes bone from the antlers, replacing skeletons.
+    - could have a charging animation
+ 
+ - ice tile for snowy island
  
 ---
 

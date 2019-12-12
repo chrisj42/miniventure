@@ -91,7 +91,7 @@ snowy surface
 		- snow on everything
 	- mobs
 		- rabbits
-		- 
+		- moose
 	- resources
 		- hard wood
 		- 

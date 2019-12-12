@@ -4,6 +4,20 @@
 	- instead, either pick up the object and deconstruct it at a workbench, or if it's a tile, then use the tools used for making it to deconstruct it. This will usually yield normal materials, often the same ones used to make it, or a subset of them.
 	- scrap materials can sometimes be returned to normal, or be used for other purposes
 
+- crafting recipes relate to a workbench, a hammer, or neither (can be done with your hands)
+- no matter how you open the crafting menu, it goes to the same backend
+	- clicking the craft button
+	- using a hotkey
+	- interacting with a workbench
+- game checks for nearby workbenches and for any hammers in your inventory
+	- adds the appropriate tabs to the crafting menu for each one found
+- tabs across top: all, items, constructions
+	- items shows all things made with workbenches, or holdable items made with your bare hands
+		- tabs across side: all, handmade, crude workbench, ... (for each workbench level up to the highest nearby)
+	- constructions shows all things made with hammers, or placeable objects made with your bare hands 
+		- tabs across side: all, handmade, basic hammer, ... (for each hammer level up to the highest possessed) 
+- starts in the "all" tab
+
 
 crafting occurs either at a crafting station or via a tile recipe.
 
