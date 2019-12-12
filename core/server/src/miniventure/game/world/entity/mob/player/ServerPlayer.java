@@ -474,7 +474,7 @@ public class ServerPlayer extends ServerMob implements Player {
 		return super.maySpawn(type)/* && type != TileTypeEnum.SAND*/;
 	}
 	
-	public int getSpawnLevel() { return spawnLevel; }
+	public int getSpawnLevel() { return spawnLevel == 0 ? getWorld().getDefaultLevel() : spawnLevel; }
 	
 	public ValueAction<ServerLevel> respawnPositioning() {
 		return level -> {

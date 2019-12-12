@@ -39,7 +39,7 @@ public class DisplayWorld extends LevelManager {
 		
 		DisplayLevel(DisplayWorld world) {
 			super(world, 0,
-				IslandType.MENU.generateIsland(MathUtils.random.nextLong()),
+				IslandType.MENU.generateIsland(MathUtils.random.nextLong(), true),
 				DisplayTile::new
 			);
 		}

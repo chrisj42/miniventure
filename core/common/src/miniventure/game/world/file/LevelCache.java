@@ -24,7 +24,10 @@ public class LevelCache {
 		Client needs levelid, location, and levelConfig (which is the island type)
 	 */
 	
-	public final IslandReference island;
+	// public final IslandReference ref;
+	public final IslandCache island;
+	public final IslandType islandType;
+	private final boolean isSurface;
 	
 	// gen parameter
 	private final long seed;
@@ -34,18 +37,24 @@ public class LevelCache {
 	private String[] entityData;
 	private TileData[][] tileData;
 	
-	LevelCache(int levelId, long seed, IslandType islandType) {
-		this.island = new IslandReference(levelId, islandType);
+	LevelCache(IslandCache parent, boolean isSurface, long seed, IslandType islandType) {
+		// this.ref = new IslandReference(levelId, islandType);
+		this.island = parent;
+		this.isSurface = isSurface;
+		this.islandType = islandType;
 		this.seed = seed;
 		dataVersion = GameCore.VERSION;
 	}
 	
-	LevelCache(Version dataVersion, LinkedList<String> fileData) {
+	LevelCache(IslandCache parent, boolean isSurface, Version dataVersion, LinkedList<String> fileData) {
+		this.island = parent;
+		this.isSurface = isSurface;
+		
 		//noinspection MismatchedQueryAndUpdateOfCollection
 		SerialHashMap map = new SerialHashMap(fileData.pop());
-		int id = Integer.parseInt(map.get("id"));
-		String islandName = map.get("island");
-		this.island = new IslandReference(id, IslandType.valueOf(islandName));
+		String islandType = map.get("island");
+		this.islandType = IslandType.valueOf(islandType);
+		// this.ref = new IslandReference(id, IslandType.valueOf(islandType));
 		seed = Long.parseLong(map.get("seed"));
 		int ec = Integer.parseInt(map.get("ec"));
 		int width = Integer.parseInt(map.get("w"));
@@ -72,8 +81,7 @@ public class LevelCache {
 	List<String> save() { return save(new LinkedList<>()); }
 	List<String> save(List<String> data) {
 		SerialHashMap map = new SerialHashMap();
-		map.add("id", island.levelId);
-		map.add("island", island.type.name());
+		map.add("island", this.islandType.name());
 		map.add("seed", seed);
 		map.add("ec", entityData == null ? -1 : entityData.length);
 		map.add("w", tileData == null ? 0 : tileData.length);
@@ -99,11 +107,13 @@ public class LevelCache {
 	
 	public boolean generated() { return tileData != null; }
 	
+	public int getId() { return island.getId(isSurface); }
+	
 	// the server is the only one that calls this, since it's the only one that uses this system.
-	public Level getLevel(LevelFetcher fetcher) {
+	public Level getLevel(LevelFetcher<?> fetcher) {
 		if(generated()) // should basically always be true
-			return fetcher.loadLevel(dataVersion, island.levelId, tileData, entityData);
+			return fetcher.loadLevel(this, dataVersion, tileData, entityData);
 		
-		return fetcher.makeLevel(island.levelId, island.type);
+		return fetcher.makeLevel(this);
 	}
 }

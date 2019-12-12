@@ -39,6 +39,8 @@ public class ServerLevel extends Level {
 	//private static final float TILE_REFRESH_INTERVAL = 500; // every this many seconds, all tiles within the below radius of any keep-alive is updated.
 	//private static final int TILE_REFRESH_RADIUS = 4; // the radius mentioned above.
 	
+	private final LevelCache dataCache;
+	
 	private final Set<Tile> newTileUpdates = Collections.synchronizedSet(new HashSet<>());
 	private final HashMap<Tile, Float> tileUpdateQueue = new HashMap<>();
 	
@@ -46,12 +48,14 @@ public class ServerLevel extends Level {
 	private boolean preload = true;
 	//private float timeCache = 0; // this is used when you should technically be updating < 1 tile in a frame.
 	
-	public ServerLevel(@NotNull ServerWorld world, int levelId, TileTypeEnum[][][] tiles) {
-		super(world, levelId, tiles, ServerTile::new);
+	public ServerLevel(@NotNull ServerWorld world, LevelCache cache, TileTypeEnum[][][] tiles) {
+		super(world, cache.getId(), tiles, ServerTile::new);
+		this.dataCache = cache;
 	}
 	
-	public ServerLevel(@NotNull ServerWorld world, int levelId, TileData[][] tileData) {
-		super(world, levelId, tileData, ServerTile::new);
+	public ServerLevel(@NotNull ServerWorld world, LevelCache cache, TileData[][] tileData) {
+		super(world, cache.getId(), tileData, ServerTile::new);
+		this.dataCache = cache;
 	}
 	
 	@Override @NotNull
@@ -72,7 +76,7 @@ public class ServerLevel extends Level {
 	/** @noinspection BooleanMethodIsAlwaysInverted*/
 	public boolean isPreload() { return preload; }
 	
-	public void save(@NotNull LevelCache cache) {
+	public void save() {
 		TileData[][] tileData = getTileData(true);
 		LinkedList<String> entityData = new LinkedList<>();
 		for(Entity e: getEntities()) {
@@ -80,7 +84,7 @@ public class ServerLevel extends Level {
 				continue;
 			entityData.add(ServerEntity.serialize((ServerEntity)e));
 		}
-		cache.updateData(entityData.toArray(new String[0]), tileData);
+		dataCache.updateData(entityData.toArray(new String[0]), tileData);
 	}
 	
 	/*@Override

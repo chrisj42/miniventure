@@ -176,6 +176,7 @@ public class ClientWorld extends LevelManager {
 			if(!serverManager.startSPServer(worldInfo, serverIn, serverOut, loadingScreen))
 				return; // failed.
 			
+			loadingScreen.pushMessage("adding player to world", true);
 			clientIn.start();
 			
 			// loadingScreen.popMessage(); // matched with the "init private server" msg at the start of this method.

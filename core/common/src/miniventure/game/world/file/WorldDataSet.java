@@ -14,13 +14,13 @@ public class WorldDataSet {
 	public final float timeOfDay;
 	public final Version dataVersion;
 	public final PlayerData[] playerInfo;
-	public final LevelCache[] levelCaches;
+	public final IslandCache[] islandCaches;
 	public final boolean create;
 	
-	public WorldDataSet(Path worldFile, RandomAccessFile lockRef, long seed, float gameTime, float timeOfDay, Version dataVersion, PlayerData[] playerInfo, LevelCache[] levelCaches) {
-		this(worldFile, lockRef, seed, gameTime, timeOfDay, dataVersion, playerInfo, levelCaches, false);
+	public WorldDataSet(Path worldFile, RandomAccessFile lockRef, long seed, float gameTime, float timeOfDay, Version dataVersion, PlayerData[] playerInfo, IslandCache[] islandCaches) {
+		this(worldFile, lockRef, seed, gameTime, timeOfDay, dataVersion, playerInfo, islandCaches, false);
 	}
-	WorldDataSet(Path worldFile, RandomAccessFile lockRef, long seed, float gameTime, float timeOfDay, Version dataVersion, PlayerData[] playerInfo, LevelCache[] levelCaches, boolean create) {
+	WorldDataSet(Path worldFile, RandomAccessFile lockRef, long seed, float gameTime, float timeOfDay, Version dataVersion, PlayerData[] playerInfo, IslandCache[] islandCaches, boolean create) {
 		this.worldFile = worldFile;
 		this.lockRef = lockRef;
 		this.seed = seed;
@@ -28,7 +28,7 @@ public class WorldDataSet {
 		this.timeOfDay = timeOfDay;
 		this.dataVersion = dataVersion;
 		this.playerInfo = playerInfo;
-		this.levelCaches = levelCaches;
+		this.islandCaches = islandCaches;
 		this.create = create;
 	}
 }

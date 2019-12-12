@@ -152,7 +152,7 @@ public class DesktopLauncher {
 					try {
 						return new NetworkServer(world, port, hostFinder, playerData);
 					} catch(IOException ignored) {}
-					
+					port++;
 				} while(tries < SERVER_PORT_ATTEMPTS);
 				
 				throw new IOException("Failed to find valid port for internal server after "+SERVER_PORT_ATTEMPTS+" tries. Ensure you have port "+GameProtocol.PORT+" or subsequent ports available.");
@@ -174,6 +174,7 @@ public class DesktopLauncher {
 		private boolean startServer(ServerFetcher fetcher, WorldDataSet worldInfo, ProgressLogger logger) {
 			try {
 				this.core = new ServerCore(fetcher, worldInfo, logger);
+				logger.pushMessage("Starting up internal server", true);
 				core.start();
 				return true;
 			} catch(IOException e) {

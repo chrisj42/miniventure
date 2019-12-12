@@ -191,9 +191,12 @@ public enum IslandType {
 	abstract void generateIsland(ProtoIsland island);
 	abstract void generateCaverns(ProtoIsland island);
 	
-	public TileTypeEnum[][][] generateIsland(long seed) {
+	public TileTypeEnum[][][] generateIsland(long seed, boolean surface) {
 		ProtoIsland island = new ProtoIsland(seed, width, height);
-		generateIsland(island);
+		if(surface)
+			generateIsland(island);
+		else
+			generateCaverns(island);
 		
 		if(island.getTile(0, 0).getTopLayer() != WATER) {
 			island.getTile(0, 0).addLayer(DOCK);
