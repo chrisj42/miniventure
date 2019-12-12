@@ -21,44 +21,60 @@ public interface NoiseModifier {
 	}
 	
 	static void forEach(float[][] noise, NoiseValueMapper valueFunction) {
+		forEach(noise, false, valueFunction);
+	}
+	static void forEach(float[][] noise, boolean bufferValues, NoiseValueMapper valueFunction) {
+		float[][] storage;
+		if(bufferValues) {
+			storage = new float[noise.length][];
+			for(int i = 0; i < noise.length; i++)
+				storage[i] = new float[noise[i].length];
+		} else
+			storage = noise;
+		
 		for(int x = 0; x < noise.length; x++)
 			for(int y = 0; y < noise[x].length; y++)
-				noise[x][y] = valueFunction.get(noise[x][y], x, y);
+				storage[x][y] = valueFunction.get(noise[x][y], x, y);
+		
+		if(bufferValues)
+			for(int i = 0; i < noise.length; i++)
+				System.arraycopy(storage[i], 0, noise[i], 0, noise[i].length);
 	}
 	
-	static NoiseModifier getForEach(NoiseValueMapper valueFunction) {
-		return (info, noise) -> forEach(noise, valueFunction);
+	static NoiseModifier forEach(NoiseValueMapper valueFunction) { return forEach(false, valueFunction); }
+	static NoiseModifier forEach(boolean bufferValues, NoiseValueMapper valueFunction) {
+		return (info, noise) -> forEach(noise, bufferValues, valueFunction);
 	}
 	
 	@FunctionalInterface
-	interface ModInitializer {
-		NoiseValueMapper init(GenInfo info, float[][] noise);
+	interface MapperFetcher {
+		NoiseValueMapper fetchMapper(GenInfo info, float[][] noise);
 	}
 	
-	static NoiseModifier initForEach(ModInitializer maker) {
-		return (info, noise) -> forEach(noise, maker.init(info, noise));
+	static NoiseModifier forEach(MapperFetcher mapperFetcher) { return forEach(false, mapperFetcher); }
+	static NoiseModifier forEach(boolean bufferValues, MapperFetcher mapperFetcher) {
+		return (info, noise) -> forEach(noise, bufferValues, mapperFetcher.fetchMapper(info, noise));
 	}
 	
 	static NoiseModifier perturb(NoiseGenerator angle, NoiseGenerator distance, final float maxDist) {
-		return (info, noise) -> {
-			final int width = noise.length;
-			final int height = noise[0].length;
+		return forEach(true, (info, noise) -> {
+			// final int width = noise.length;
+			// final int height = noise[0].length;
 			float[][] anglev = angle.get2DNoise(info);
 			float[][] distv = distance.get2DNoise(info);
 			final Vector2 off = new Vector2();
-			float[][] copy = new float[width][height];
-			forEach(copy, (val, x, y) -> {
+			// float[][] copy = new float[info.width][info.height];
+			return (val, x, y) -> {
 				off.set(1, 1);
 				off.setAngle(anglev[x][y]*360f);
 				off.setLength(distv[x][y]*maxDist);
 				off.add(x, y);
-				return noise[MathUtils.clamp(MathUtils.round(off.x), 0, width-1)][MathUtils.clamp(MathUtils.round(off.y), 0, height-1)];
-			});
-			for(int i = 0; i < noise.length; i++)
-				System.arraycopy(copy[i], 0, noise[i], 0, noise[i].length);
-		};
+				return noise[MathUtils.clamp(MathUtils.round(off.x), 0, info.width-1)][MathUtils.clamp(MathUtils.round(off.y), 0, info.height-1)];
+			};
+		});
 	}
 	
+	@FunctionalInterface
 	interface NoiseValueMerger {
 		float merge(float noise1, float noise2);
 		
@@ -79,11 +95,11 @@ public interface NoiseModifier {
 	}
 	// use to merge two noise maps using a given merge method, but only partially apply the result.
 	static NoiseModifier combine(NoiseMapFetcher generator, NoiseValueMerger valueMapper, float deltaWeight) {
-		return combine(generator, valueMapper, NoiseMapFetcher.get(deltaWeight));
+		return combine(generator, valueMapper, NoiseMapFetcher.fetchAs(deltaWeight));
 	}
 	// use to interpolate between two noise maps.
 	static NoiseModifier combine(NoiseMapFetcher generator, float deltaWeight) {
-		return combine(generator, NoiseMapFetcher.get(deltaWeight));
+		return combine(generator, NoiseMapFetcher.fetchAs(deltaWeight));
 	}
 	// use to interpolate between two noise maps on a per-tile basis.
 	static NoiseModifier combine(NoiseMapFetcher generator, NoiseMapFetcher deltaWeight) {
@@ -92,8 +108,8 @@ public interface NoiseModifier {
 	// main
 	static NoiseModifier combine(NoiseMapFetcher generator, NoiseValueMerger valueMerger, NoiseMapFetcher deltaWeight) {
 		return (info, noise) -> {
-			NoiseValueFetcher source = generator.get(info);
-			NoiseValueFetcher weight = deltaWeight.get(info);
+			NoiseValueFetcher source = generator.preFetch(info);
+			NoiseValueFetcher weight = deltaWeight.preFetch(info);
 			forEach(noise, (val, x, y) -> (valueMerger.merge(val, source.get(x, y)) - val) * weight.get(x, y) + val);
 		};
 	}

@@ -22,7 +22,6 @@ import miniventure.game.util.MyUtils;
 import miniventure.game.util.SerialHashMap;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueAction;
-import miniventure.game.world.Point;
 import miniventure.game.world.management.TimeOfDay;
 import miniventure.game.world.worldgen.island.IslandType;
 
@@ -224,11 +223,11 @@ public class WorldFileInterface {
 	private static WorldDataSet createWorld(Path file, RandomAccessFile lockRef, long seed) {
 		
 		LevelCache[] levelCaches = new LevelCache[] {
-			new LevelCache(0, new Point(0, 0), seed, IslandType.STARTER),
-			new LevelCache(1, new Point(2, 2), seed, IslandType.DESERT),
-			new LevelCache(2, new Point(10, 0), seed, IslandType.SWAMP)
-			// new LevelCache(3, new Point(3, -5), seed, IslandType.ARCTIC),
-			// new LevelCache(4, new Point(-3, 5), seed, IslandType.JUNGLE),
+			new LevelCache(0, seed, IslandType.WOODLAND),
+			new LevelCache(1, seed, IslandType.DESERT),
+			new LevelCache(2, seed, IslandType.ARCTIC)
+			// new LevelCache(3, seed, IslandType.SWAMP),
+			// new LevelCache(4, seed, IslandType.JUNGLE),
 		};
 		
 		WorldDataSet worldData = new WorldDataSet(file, lockRef, seed, 0, TimeOfDay.Morning.getStartOffsetSeconds(), GameCore.VERSION, new PlayerData[0], levelCaches, true);

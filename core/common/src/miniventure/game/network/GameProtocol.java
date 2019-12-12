@@ -197,13 +197,11 @@ public interface GameProtocol {
 	// used in MapRequest below; holds general data about a single island.
 	class IslandReference {
 		public final int levelId;
-		public final Point location;
 		public final IslandType type; // gen parameter
 		
-		private IslandReference() { this(0, null, null); }
-		public IslandReference(int levelId, Point location, IslandType type) {
+		private IslandReference() { this(0, null); }
+		public IslandReference(int levelId, IslandType type) {
 			this.levelId = levelId;
-			this.location = location;
 			this.type = type;
 		}
 	}

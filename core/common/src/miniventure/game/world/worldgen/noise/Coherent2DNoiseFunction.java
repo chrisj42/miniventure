@@ -55,30 +55,6 @@ public class Coherent2DNoiseFunction implements NoiseGenerator {
 		
 		float xVal = x / noiseCoordsPerValue;
 		float yVal = y / noiseCoordsPerValue;
-		/*int xRound = MathUtils.floor(xVal);
-		int yRound = MathUtils.floor(yVal);
-		
-		Vector2 minCenter = new Vector2();
-		Vector2 minPos = new Vector2();
-		float minDist = -1;
-		for(int xo = -1; xo <= 1; xo++) {
-			for(int yo = -1; yo <= 1; yo++) {
-				Vector2 center = getPolygonCenter(xRound+xo, yRound+yo);
-				float dist = center.dst(xVal, yVal);
-				if(minDist < 0 || dist < minDist) {
-					minDist = dist;
-					minPos.set(xRound+xo, yRound+yo);
-					minCenter.set(center);
-				}
-			}
-		}
-		
-		// System.out.println("closest center to "+xVal+","+yVal+" is "+minCenter+" from tile pos "+minPos);
-		
-		return minDist;
-		*/
-		// rand.setSeed(hashFunction.hashInts(new int[] {MathUtils.floor(minCenter.x), MathUtils.floor(minCenter.y)}));
-		// return rand.nextFloat();
 		
 		int xMin = MathUtils.floor(xVal);
 		int yMin = MathUtils.floor(yVal);

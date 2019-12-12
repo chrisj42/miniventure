@@ -13,7 +13,7 @@ public class Noise implements NoiseGenerator {
 	public Noise(int[] samplePeriods, int[] postSmoothing) {
 		this.samplePeriods = samplePeriods;
 		this.postSmoothing = postSmoothing;
-	} 
+	}
 	
 	@Override
 	public float[][] get2DNoise(GenInfo info) {

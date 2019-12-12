@@ -1,10 +1,11 @@
-package miniventure.game.world.worldgen.island;
+package miniventure.game.world.worldgen.posmap;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 import miniventure.game.util.function.ValueAction;
+import miniventure.game.world.worldgen.posmap.PositionalFetcher.PositionalCheck;
 
 // Contains 2 sets of groups: those that matched the condition, and those that didn't.
 // Each group consists of tiles (positions) adjacent to 1 or more tiles already in the group (if the tile is not adjacent to any known group, a new group is created).
@@ -24,11 +25,6 @@ public class PositionGroupMap {
 			- track groups that are adjacent, but in the opposite set.
 		- provide these two sets of groups as output.
 	 */
-	
-	@FunctionalInterface
-	public interface PositionalFetcher<T> {
-		T get(int x, int y);
-	}
 	
 	public final HashSet<PositionGroup> matches;
 	public final HashSet<PositionGroup> fails;
@@ -61,7 +57,7 @@ public class PositionGroupMap {
 		}
 	}
 	
-	public static PositionGroupMap process(final int width, final int height, final PositionalFetcher<Boolean> matchFetcher) {
+	public static PositionGroupMap process(final int width, final int height, final PositionalCheck matchFetcher) {
 		/*
 			- create list buffer for processing tiles, add first
 			

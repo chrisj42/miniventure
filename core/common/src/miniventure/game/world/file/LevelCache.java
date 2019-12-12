@@ -8,7 +8,6 @@ import miniventure.game.GameCore;
 import miniventure.game.network.GameProtocol.IslandReference;
 import miniventure.game.util.SerialHashMap;
 import miniventure.game.util.Version;
-import miniventure.game.world.Point;
 import miniventure.game.world.level.Level;
 import miniventure.game.world.level.LevelFetcher;
 import miniventure.game.world.tile.TileStack.TileData;
@@ -35,8 +34,8 @@ public class LevelCache {
 	private String[] entityData;
 	private TileData[][] tileData;
 	
-	LevelCache(int levelId, Point location, long seed, IslandType islandType) {
-		this.island = new IslandReference(levelId, location, islandType);
+	LevelCache(int levelId, long seed, IslandType islandType) {
+		this.island = new IslandReference(levelId, islandType);
 		this.seed = seed;
 		dataVersion = GameCore.VERSION;
 	}
@@ -45,10 +44,8 @@ public class LevelCache {
 		//noinspection MismatchedQueryAndUpdateOfCollection
 		SerialHashMap map = new SerialHashMap(fileData.pop());
 		int id = Integer.parseInt(map.get("id"));
-		int x = Integer.parseInt(map.get("x"));
-		int y = Integer.parseInt(map.get("y"));
 		String islandName = map.get("island");
-		this.island = new IslandReference(id, new Point(x, y), IslandType.valueOf(islandName));
+		this.island = new IslandReference(id, IslandType.valueOf(islandName));
 		seed = Long.parseLong(map.get("seed"));
 		int ec = Integer.parseInt(map.get("ec"));
 		int width = Integer.parseInt(map.get("w"));
@@ -76,8 +73,6 @@ public class LevelCache {
 	List<String> save(List<String> data) {
 		SerialHashMap map = new SerialHashMap();
 		map.add("id", island.levelId);
-		map.add("x", island.location.x);
-		map.add("y", island.location.y);
 		map.add("island", island.type.name());
 		map.add("seed", seed);
 		map.add("ec", entityData == null ? -1 : entityData.length);

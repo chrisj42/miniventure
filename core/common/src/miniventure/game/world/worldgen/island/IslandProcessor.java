@@ -2,7 +2,7 @@ package miniventure.game.world.worldgen.island;
 
 // processes a proto-island using some method
 // noise maps are not necessarily involved; an island layer may end up using a noise map, but it will create the noise itself, using the seed fetched from the proto-island.
-public interface IslandProcess {
+public interface IslandProcessor {
 	
 	void apply(ProtoIsland island);
 	

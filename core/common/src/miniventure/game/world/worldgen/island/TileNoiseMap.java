@@ -3,24 +3,57 @@ package miniventure.game.world.worldgen.island;
 import java.util.LinkedList;
 
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.function.ValueAction;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 // a data class only, not display.
 public class TileNoiseMap implements TileProcessor {
 	
-	public static class TileMapBuilder {
+	public static TileNoiseMapBuilder builder() {
+		return new TileNoiseMapBuilder();
+	}
+	
+	public static class TileNoiseMapBuilder {
 		
 		private final LinkedList<WeightedSource> regions;
+		private TileProcessor superProcessor;
 		
-		public TileMapBuilder(float firstRegionSize, @NotNull TileProcessor firstProcessor) {
+		public TileNoiseMapBuilder() {
 			regions = new LinkedList<>();
-			addRegion(firstRegionSize, firstProcessor);
 		}
 		
-		public TileMapBuilder addRegion(float size, @NotNull TileProcessor region) {
+		public TileNoiseMapBuilder addRegion(float size, @Nullable TileProcessor region) {
+			if(superProcessor != null)
+				region = superProcessor.append(region);
 			regions.add(new WeightedSource(region, size));
 			return this;
+		}
+		
+		public TileNoiseMapBuilder addOverlapRegion(@NotNull TileProcessor region, float preExcess, float postExcess, ValueAction<TileNoiseMapBuilder> subRegionAdder) {
+			if(preExcess > 0)
+				addRegion(preExcess, region);
+			
+			TileProcessor curSuper = superProcessor;
+			superProcessor = curSuper == null ? region : curSuper.append(region);
+			subRegionAdder.act(this);
+			superProcessor = curSuper;
+			
+			if(postExcess > 0)
+				addRegion(postExcess, region);
+			return this;
+		}
+		
+		public TileNoiseMapBuilder addRoundOffRegion(@Nullable TileProcessor region) {
+			// determine the next power of 10 used by the sizes
+			float total = 0;
+			for(WeightedSource prevRegion: regions)
+				total += prevRegion.size;
+			
+			int power = (int) Math.ceil(Math.log10(total)); // round up to the next power of 10
+			float size = (float) Math.pow(10, power) - total;
+			return addRegion(size, region);
 		}
 		
 		public TileNoiseMap get(float[][] noise) {
@@ -29,11 +62,11 @@ public class TileNoiseMap implements TileProcessor {
 	}
 	
 	private static class WeightedSource {
-		@NotNull
+		@Nullable
 		private final TileProcessor source;
 		private float size; // negative size will cause undefined results.
 		
-		private WeightedSource(@NotNull TileProcessor source, float size) {
+		private WeightedSource(@Nullable TileProcessor source, float size) {
 			this.source = source;
 			this.size = size;
 		}
@@ -64,6 +97,8 @@ public class TileNoiseMap implements TileProcessor {
 	
 	@Override
 	public void processTile(ProtoTile tile) {
+		if(processors.length == 0) return;
+		
 		final float noiseVal = tile.getVal(noise);
 		
 		// in case the sizes don't add up exactly to 1 (due to floating point error or something, causing a noise value of 1 to never be reached during the loop), the default source is the last one, since that would be the intended match.
@@ -71,12 +106,13 @@ public class TileNoiseMap implements TileProcessor {
 		float total = 0;
 		for(int i = 0; i < processors.length; i++) {
 			total += sizes[i];
-			if(total >= noiseVal) {
+			if(noiseVal <= total) {
 				idx = i;
 				break;
 			}
 		}
 		
-		processors[idx].processTile(tile);
+		if(processors[idx] != null)
+			processors[idx].processTile(tile);
 	}
 }

@@ -1,9 +1,8 @@
 package miniventure.game.world.worldgen.island;
 
+import java.util.Random;
+
 import miniventure.game.world.tile.TileTypeEnum;
-import miniventure.game.world.worldgen.island.TileNoiseMap.TileMapBuilder;
-import miniventure.game.world.worldgen.island.TileProcessor.TileMultiProcess;
-import miniventure.game.world.worldgen.island.TileProcessorChain.ProcessChainBuilder;
 import miniventure.game.world.worldgen.noise.Coherent2DNoiseFunction;
 import miniventure.game.world.worldgen.noise.Noise;
 import miniventure.game.world.worldgen.noise.NoiseGenerator;
@@ -56,7 +55,7 @@ public enum IslandType {
 				new Coherent2DNoiseFunction(36, 3).modify(
 					combine(new Noise(new int[] {1,32,8,2,4,16}, new int[] {4,2,1})),
 					FILL_VALUE_RANGE,
-					combine(NoiseGenerator.islandMask(1), MULTIPLY)
+					combine(NoiseGenerator.circleMask(1), MULTIPLY)
 				)
 			);
 			
@@ -65,14 +64,11 @@ public enum IslandType {
 				.modify(FILL_VALUE_RANGE)
 			);
 			
-			// I could do this entirely (or partly) with the interfaces... but I'll try not to make so many objects.
-			TileProcessor map = new TileMapBuilder
-				(10, WATER)
+			TileProcessor map = TileNoiseMap.builder()
+				.addRegion(10, WATER)
 				.addRegion(5, SAND)
-				.addRegion(85, new TileMultiProcess(
-					DIRT,
-					new TileDelegator(
-						new NoiseTileCondition(features, val -> val < .3),
+				.addRegion(85, DIRT.append(
+					new NoiseTileCondition(features, val -> val < .3).onMatchElse(
 						STONE,
 						tile -> {
 							tile.addLayer(GRASS);
@@ -82,69 +78,52 @@ public enum IslandType {
 					)
 				)).get(terrain);
 			
-			/*TileProcessor ifelse = tile -> {
-				float terrainv = tile.getVal(terrain);
-				float featurev = tile.getVal(features);
-				if(terrainv < .1)
-					tile.addLayer(WATER);
-				else if(terrainv < .15)
-					tile.addLayer(SAND);
-				else {
-					tile.addLayer(DIRT);
-					if(featurev < .3)
-						tile.addLayer(STONE);
-					else {
-						tile.addLayer(GRASS);
-						if (Math.random() > 0.99f)
-							tile.addLayer(POOF_TREE);
-					}
-				}
-			};*/
-			
 			island.forEach(map);
 		}
+		
+		@Override
+		void generateCaverns(ProtoIsland island) {}
 	},
 	
-	STARTER() {
+	WOODLAND() {
 		@Override
 		void generateIsland(ProtoIsland island) {
-			/*
-				- refined island shape
-					- fill land as dirt
-						- all land within 2 tiles of sea is sand
-						- using noise for sand really doesn't work out too well because I post-process the island, and noise values will reflect the inconsistencies that the post-processing tried to fix.
-					- map perimeter is deep water 
-					-- else if noise value is just under land threshold, or tile is within certain radius from center, it's water
-					-- else (i.e. low noise value and outside radius) it's deep water
-				
-				
-				
-				- usage of noise repeatedly requires noise to be created beforehand and passed in, so it remains available
-			 */
+			float[][] shape = island.getFromGen(NoiseGenerator.islandShape);
 			
-			float[][] shape = island.getFromGen(Testing.islandShape);
+			float[][] trees = island.getFromGen(
+				new Coherent2DNoiseFunction(16, 4)
+				// .modify(NoiseModifier.combine(NoiseGenerator.islandShapeOld, .35f))
+			);
 			
-			float[][] stone = island.getFromGen(new Coherent2DNoiseFunction(18).modify(combine(NoiseGenerator.islandMask(1), MULTIPLY, NoiseGenerator.islandMask(1)), FILL_VALUE_RANGE));
+			float[][] sparse = island.getFromGen(
+				new Coherent2DNoiseFunction(8, 2)
+			);
 			
-			float[][] trees = island.getFromGen(new Noise(new int[] {1,32,8,2,4,16}, new int[] {4,2,1,2,1,2}).modify(FILL_VALUE_RANGE));//.modify(combine(NoiseGenerator.islandMask(1), AVERAGE)));
-			
-			
-			TileProcessorChain features = new ProcessChainBuilder()
-				.add(new NoiseTileCondition(stone, val -> val > .65), TileTypeEnum.STONE)
-				.add(new NoiseTileCondition(stone, val -> val > .6), TileTypeEnum.FLINT)
-				.add(new NoiseTileCondition(trees, val -> val > .76), TileTypeEnum.POOF_TREE)
+			TileProcessor forest = TileConditionChain.builder()
+				.add(new NoiseTileCondition(trees, val -> val > .8f), POOF_TREE)
+				.add(new NoiseTileCondition(sparse, val -> val > .925f), STONE)
 				.getChain();
 			
-			TileNoiseMap map = new TileMapBuilder(
-				15, TileTypeEnum.WATER)
-				.addRegion(3, TileTypeEnum.SAND)
-				.addRegion(82, new TileMultiProcess(
-					TileTypeEnum.GRASS,
-					features
-				))
+			TileProcessor grassland = TileNoiseMap.builder()
+				// .addRegion(25, null)
+				.addRegion(35, new NoiseTileCondition(sparse, val -> val <= .075f).onMatch(POOF_TREE))
+				.addRoundOffRegion(forest)
 				.get(shape);
 			
-			island.forEach(map);
+			TileDistanceMap map = TileDistanceMap.builder()
+				.atDistance(0, WATER)
+				.atRange(1, 5, SAND)
+				.atRange(6, 18, GRASS)
+				.get(true, GRASS.append(grassland),
+					new NoiseTileCondition(shape, val -> val <= .1f)
+				);
+			
+			map.apply(island);
+		}
+		
+		@Override
+		void generateCaverns(ProtoIsland island) {
+			
 		}
 	},
 	
@@ -153,62 +132,32 @@ public enum IslandType {
 		void generateIsland(ProtoIsland island) {
 			// describe process
 			
-			float[][] shape = island.getFromGen(Testing.islandShape);
+			float[][] shape = island.getFromGen(NoiseGenerator.islandShape);
 			
-			float[][] stone = island.getFromGen(new Coherent2DNoiseFunction(18).modify(combine(NoiseGenerator.islandMask(1), MULTIPLY, NoiseGenerator.islandMask(1)), FILL_VALUE_RANGE));
+			float[][] stone = island.getFromGen(new Coherent2DNoiseFunction(18).modify(combine(NoiseGenerator.circleMask(1), MULTIPLY, NoiseGenerator.circleMask(1)), FILL_VALUE_RANGE));
 			
 			float[][] trees = island.getFromGen(new Noise(new int[] {1,32,8,2,4,16}, new int[] {4,2,1,2,1,2}).modify(FILL_VALUE_RANGE));//.modify(combine(NoiseGenerator.islandMask(1), AVERAGE)));
 			
 			
-			TileProcessorChain features = new ProcessChainBuilder()
-				.add(new NoiseTileCondition(stone, val -> val > .65), TileTypeEnum.STONE)
-				// .add(new NoiseTileCondition(stone, val -> val > .6), TileTypeEnum.FLINT)
-				.add(new NoiseTileCondition(trees, val -> val > .76), TileTypeEnum.CACTUS)
+			TileConditionChain features = TileConditionChain.builder()
+				.add(new NoiseTileCondition(stone, val -> val > .65), STONE)
+				// .add(new NoiseTileCondition(stone, val -> val > .6), FLINT)
+				.add(new NoiseTileCondition(trees, val -> val > .76), CACTUS)
 				.getChain();
 			
-			TileNoiseMap map = new TileMapBuilder(
-				15, TileTypeEnum.WATER)
-				.addRegion(5, TileTypeEnum.SAND)
-				.addRegion(82, new TileMultiProcess(
-					TileTypeEnum.SAND,
-					features,
-					SAND
-				))
+			TileNoiseMap map = TileNoiseMap.builder()
+				.addRegion(15, WATER)
+				.addOverlapRegion(SAND, 5, 0, m -> m
+					.addRegion(82, features)
+				)
 				.get(shape);
 			
 			island.forEach(map);
 		}
-	},
-	
-	SWAMP() {
+		
 		@Override
-		void generateIsland(ProtoIsland island) {
-			// describe process
+		void generateCaverns(ProtoIsland island) {
 			
-			float[][] shape = island.getFromGen(Testing.islandShape);
-			
-			float[][] stone = island.getFromGen(new Coherent2DNoiseFunction(18).modify(combine(NoiseGenerator.islandMask(1), MULTIPLY, NoiseGenerator.islandMask(1)), FILL_VALUE_RANGE));
-			
-			float[][] trees = island.getFromGen(new Noise(new int[] {1,32,8,2,4,16}, new int[] {4,2,1,2,1,2}).modify(FILL_VALUE_RANGE));//.modify(combine(NoiseGenerator.islandMask(1), AVERAGE)));
-			
-			
-			TileProcessorChain features = new ProcessChainBuilder()
-				.add(new NoiseTileCondition(stone, val -> val > .65), TileTypeEnum.STONE)
-				.add(new NoiseTileCondition(stone, val -> val > .6), TileTypeEnum.DIRT)
-				.add(new NoiseTileCondition(trees, val -> val > .76), PINE_TREE)
-				.getChain();
-			
-			TileNoiseMap map = new TileMapBuilder(
-				15, TileTypeEnum.WATER)
-				.addRegion(5, TileTypeEnum.DIRT)
-				.addRegion(82, new TileMultiProcess(
-					TileTypeEnum.GRASS,
-					features
-				))
-				.addRegion(2, WATER)
-				.get(shape);
-			
-			island.forEach(map);
 		}
 	},
 	
@@ -217,33 +166,17 @@ public enum IslandType {
 		void generateIsland(ProtoIsland island) {
 			// describe process
 		}
-	},
-	
-	JUNGLE() {
+		
 		@Override
-		void generateIsland(ProtoIsland island) {
-			// describe process
+		void generateCaverns(ProtoIsland island) {
 			
-			float[][] shape = island.getFromGen(Testing.islandShape);
-			
-			float[][] trees = island.getFromGen(new Coherent2DNoiseFunction(24));
-			
-			island.forEach(new TileDelegator(
-				new NoiseTileCondition(shape, val -> val < .18f),
-				GRASS,
-				new TileMapBuilder(
-					1, POOF_TREE)
-				.addRegion(2, PINE_TREE)
-				.addRegion(2, CARTOON_TREE)
-				.addRegion(1, POOF_TREE).get(trees)
-			));
 		}
 	};
 	
 	private final int width;
 	private final int height;
 	
-	IslandType() { this(300, 300); }
+	IslandType() { this(600, 600); }
 	IslandType(int width, int height) {
 		this.width = width;
 		this.height = height;
@@ -256,6 +189,7 @@ public enum IslandType {
 	 	todo - I should probably, again, wait until I have an actual use case...
 	 */
 	abstract void generateIsland(ProtoIsland island);
+	abstract void generateCaverns(ProtoIsland island);
 	
 	public TileTypeEnum[][][] generateIsland(long seed) {
 		ProtoIsland island = new ProtoIsland(seed, width, height);
@@ -290,5 +224,15 @@ public enum IslandType {
 		generateIsland(island);
 		
 		return Testing.displayMap(width, height, scale, island.getColors());
+	}
+	public void displayColorMap(boolean repeat, int scale) {
+		Random rand = new Random();
+		if(!repeat)
+			displayColorMap(rand.nextLong(), scale);
+		else {
+			boolean again = true;
+			while(again)
+				again = displayColorMap(rand.nextLong(), scale);
+		}
 	}
 }
