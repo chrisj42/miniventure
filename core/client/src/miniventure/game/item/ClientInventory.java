@@ -1,12 +1,8 @@
 package miniventure.game.item;
 
 import miniventure.game.client.ClientCore;
-import miniventure.game.item.CraftingScreen.ClientRecipe;
 import miniventure.game.network.GameProtocol.ItemDropRequest;
 import miniventure.game.util.Version;
-import miniventure.game.world.tile.ClientTileType;
-import miniventure.game.world.tile.TileTypeEnum;
-import miniventure.game.world.tile.TileTypeRenderer;
 
 import org.jetbrains.annotations.NotNull;
 

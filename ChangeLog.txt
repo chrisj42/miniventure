@@ -1,6 +1,6 @@
 Alpha 2.1:
 	* Moved game data directory for Windows users to Documents/My Games/Miniventure
-	+ Completely remade crafting system
+	+ Completely remade crafting system; crafting is now done at a crafting station to make holdable items, and in-place with a hammer to make bigger objects that can't be held.
 
 Alpha 1.2:
 	+ Brand new inventory screen that is hopefully much more ergonomic than the previous screen (crafting screen overhaul coming soon)

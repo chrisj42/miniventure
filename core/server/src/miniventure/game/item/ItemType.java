@@ -1,29 +1,30 @@
 package miniventure.game.item;
 
 import miniventure.game.GameCore;
-import miniventure.game.item.ToolItem.Material;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.Version;
 import miniventure.game.world.entity.mob.player.HandItem;
+import miniventure.game.world.entity.mob.player.Player;
 
 import org.jetbrains.annotations.NotNull;
 
 public enum ItemType {
 	
-	// TODO add EntityItem, an item that becomes an entity when placed (like TileItems become tiles when placed). This will mainly be used for various types of furniture.
+	// TODO add EntityItem, an item that becomes an entity when placed (like TileItems become tiles when placed). This will be used for small placeable items that can be stored in an inventory.
 	
-	// tools could be under the Enum ItemType, it would just handle the data a little differently.
-	Tool(data -> new ToolItem(ToolItem.ToolType.valueOf(data[0]), Material.valueOf(data[1]), Integer.parseInt(data[2]))),
+	// Tools are used to interact with the world, usually through destruction.
+	// Tools have durability, and multiple levels of quality.
+	Tool(data -> new ToolItem(ToolItem.ToolType.valueOf(data[0]), MaterialQuality.valueOf(data[1]), Integer.parseInt(data[2]))),
 	
-	// Enum(data -> EnumItemType.valueOf(data[0]).getItem(data[1])),
+	Hammer(data -> HammerType.valueOf(data[0]).get()),
 	
 	Food(data -> FoodType.valueOf(data[0]).get()),
 	
-	Tile(data -> TileItemType.valueOf(data[0]).get()),
+	Placeable(data -> PlaceableItemType.valueOf(data[0]).get()),
 	
 	Resource(data -> ResourceType.valueOf(data[0]).get()),
 	
-	Hand(data -> HandItem.hand);
+	Ephemeral(data -> {throw new UnsupportedOperationException("Ephemeral items cannot be loaded.");});
 	
 	
 	private final ItemFetcher fetcher;
@@ -40,6 +41,21 @@ public enum ItemType {
 		ServerItem load(String[] data);
 	}
 	
+	public static abstract class EphemeralItem extends ServerItem {
+		
+		protected EphemeralItem(@NotNull String name) {
+			super(Ephemeral, name);
+		}
+		protected EphemeralItem(@NotNull String name, @NotNull TextureHolder texture) {
+			super(Ephemeral, name, texture);
+		}
+		
+		@Override
+		public final String[] save() {
+			throw new UnsupportedOperationException("Ephemeral items cannot be saved.");
+		}
+	}
+	
 	// utility class for Item types that are no more than an enum value.
 	static abstract class EnumItem extends ServerItem {
 		// private final EnumItemType enumItemType;
@@ -51,10 +67,10 @@ public enum ItemType {
 			this(type, enumValue, GameCore.icons.get("items/"+type.name().toLowerCase()+'/'+enumValue.name().toLowerCase()));
 		}
 		EnumItem(@NotNull ItemType type, @NotNull Enum<?> enumValue, @NotNull TextureHolder texture) {
-			super(type, enumValue.name(), true, texture);
+			super(type, enumValue.name(), texture);
 			// this.enumItemType = type;
 			// this.enumValue = enumValue;
-			saveData = new String[] {getType().name(), type.name(), enumValue.name()};
+			saveData = new String[] {type.name(), enumValue.name()};
 		}
 		
 		@Override

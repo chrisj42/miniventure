@@ -186,7 +186,6 @@ public enum IslandType {
 		This method is where the island type gets liberties with how it generates the island.
 	 	- structures such as tile groups are complicated to pin down to a certain step; moreso, noise
 	 	functions need to be initialized correctly...
-	 	todo - I should probably, again, wait until I have an actual use case...
 	 */
 	abstract void generateIsland(ProtoIsland island);
 	abstract void generateCaverns(ProtoIsland island);

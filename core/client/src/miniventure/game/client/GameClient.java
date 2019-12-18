@@ -228,7 +228,7 @@ public abstract class GameClient implements GameProtocol {
 		if(player != null)
 			player.handlePlayerPackets(object, connection);
 		
-		forPacket(object, RecipeRequest.class, req -> {
+		forPacket(object, RecipeUpdate.class, req -> {
 			MenuScreen screen = ClientCore.getScreen();
 			if(screen instanceof CraftingScreen)
 				((CraftingScreen)screen).recipeUpdate(req);

@@ -4,18 +4,18 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
-import java.util.List;
 
 import miniventure.game.GameCore;
 import miniventure.game.item.*;
-import miniventure.game.item.ToolItem.Material;
+import miniventure.game.item.MaterialQuality;
 import miniventure.game.item.ToolItem.ToolType;
 import miniventure.game.network.GameProtocol;
 import miniventure.game.network.GameProtocol.*;
-import miniventure.game.network.PacketPipe;
+import miniventure.game.network.PacketPipe.PacketPipeWriter;
 import miniventure.game.server.GameServer;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
+import miniventure.game.util.function.Action;
 import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.Boundable;
 import miniventure.game.world.Point;
@@ -53,6 +53,7 @@ public class ServerPlayer extends ServerMob implements Player {
 	
 	// @NotNull private final ServerHands hands;
 	@NotNull private final ServerInventory inventory;
+	@Nullable private HammerType equippedHammer;
 	
 	private final String name;
 	
@@ -71,22 +72,25 @@ public class ServerPlayer extends ServerMob implements Player {
 		
 		name = data.get(0);
 		inventory = new ServerInventory(INV_SIZE);
+		equippedHammer = null;
 		// hands = new ServerHands(this, MyUtils.parseLayeredString(data.get(6)));
 		
 		stats.put(Stat.Health, getHealth());
 		stats.put(Stat.Hunger, Integer.parseInt(data.get(1)));
 		stats.put(Stat.Stamina, Integer.parseInt(data.get(2)));
 		// stats.put(Stat.Armor, Integer.parseInt(data.get(3)));
+		if(!data.get(3).equals("null"))
+			equippedHammer = HammerType.values()[Integer.parseInt(data.get(3))];
 		
-		if(data.get(3).equals("null"))
+		if(data.get(4).equals("null"))
 			spawnLoc = null;
 		else {
-			String[] pos = data.get(3).split(";");
+			String[] pos = data.get(4).split(";");
 			spawnLoc = new Point(Integer.parseInt(pos[0]), Integer.parseInt(pos[1]));
 		}
-		spawnLevel = Integer.parseInt(data.get(4));
+		spawnLevel = Integer.parseInt(data.get(5));
 		
-		inventory.loadItems(MyUtils.parseLayeredString(data.get(5)), version);
+		inventory.loadItems(MyUtils.parseLayeredString(data.get(6)), version);
 	}
 	
 	@Override
@@ -96,6 +100,7 @@ public class ServerPlayer extends ServerMob implements Player {
 			name,
 			String.valueOf(getStat(Stat.Hunger)),
 			String.valueOf(getStat(Stat.Stamina)),
+			equippedHammer == null ? "null" : String.valueOf(equippedHammer.ordinal()),
 			spawnLoc == null ? "null" : spawnLoc.x+";"+spawnLoc.y,
 			String.valueOf(spawnLevel),
 			MyUtils.encodeStringArray(inventory.save())
@@ -117,15 +122,16 @@ public class ServerPlayer extends ServerMob implements Player {
 		super.reset();
 		
 		inventory.reset();
+		equippedHammer = null;
 		// hands.reset();
 		
 		if(GameCore.debug) {
 			System.out.println("adding debug items to player inventory");
-			inventory.addItem(new ToolItem(ToolType.Shovel, Material.Ruby));
-			inventory.addItem(new ToolItem(ToolType.Pickaxe, Material.Ruby));
+			inventory.addItem(new ToolItem(ToolType.Shovel, MaterialQuality.Superior));
+			inventory.addItem(new ToolItem(ToolType.Pickaxe, MaterialQuality.Superior));
 			// inventory.addItem(TileItemType.Door);
 			for(int i = 0; i < 7; i++)
-				inventory.addItem(TileItemType.Torch.get());
+				inventory.addItem(PlaceableItemType.Torch.get());
 			for(int i = 0; i < 7; i++)
 				inventory.addItem(ResourceType.Log.get());
 			for(int i = 0; i < 7; i++)
@@ -140,16 +146,16 @@ public class ServerPlayer extends ServerMob implements Player {
 	private InventoryUpdate getInventoryUpdate() { return new InventoryUpdate(inventory.serialize()); }
 	// public HotbarUpdate getHotbarUpdate() { return new HotbarUpdate(hands.serialize(), inventory.getPercentFilled()); }
 	
+	private <T> void forPacket(Object packet, DatalessRequest type, boolean sync, Action response) {
+		GameProtocol.forPacket(packet, type, response, sync ? getWorld()::postRunnable : null);
+	}
 	private <T> void forPacket(Object packet, Class<T> type, boolean sync, ValueAction<T> response) {
-		if(sync)
-			getWorld().postRunnable(() -> GameProtocol.forPacket(packet, type, response));
-		else
-			GameProtocol.forPacket(packet, type, response);
+		GameProtocol.forPacket(packet, type, response, sync ? getWorld()::postRunnable : null);
 	}
 	
 	// this allows a lot of the packet handling that deals with inner workings of the ServerPlayer to occur right within the ServerPlayer class, and not require it to have a bunch of public methods that only GameServer ever uses.
 	@Override
-	public void handlePlayerPackets(@NotNull Object packet, @NotNull PacketPipe.PacketPipeWriter connection) {
+	public void handlePlayerPackets(@NotNull Object packet, @NotNull PacketPipeWriter connection) {
 		ServerWorld world = getWorld();
 		
 		// TODO don't allow client to update server stats
@@ -180,7 +186,7 @@ public class ServerPlayer extends ServerMob implements Player {
 			// if(r.playerPosition.variesFrom(client))
 			// 	connection.send(new PositionUpdate(client)); // fix the player's position
 			
-			doInteract(r.dir, r.cursorPos, getHeldItem(r.hotbarIndex), r.hotbarIndex, r.attack);
+			doInteract(r.dir, r.actionPos, getHeldItem(r.hotbarIndex), r.hotbarIndex, r.attack);
 		});
 		
 		forPacket(packet, ItemDropRequest.class, true, drop -> {
@@ -191,38 +197,52 @@ public class ServerPlayer extends ServerMob implements Player {
 			// if successful, do nothing, because client will have pre-maturely removed the item itself.
 		});
 		
-		forPacket(packet, InventoryRequest.class, true, req -> {
+		/*forPacket(packet, InventoryRequest.class, true, req -> {
 			connection.send(getInventoryUpdate());
-		});
+		});*/
 		
-		forPacket(packet, RecipeRequest.class, true, req ->
-			connection.send(new RecipeRequest(
-				Recipes.serializeRecipes(),
-				new RecipeStockUpdate(inventory.getItemStacks())
-			))
-		);
+		forPacket(packet, DatalessRequest.Recipes, true, () -> connection.send(new RecipeUpdate(
+			equippedHammer == null ? HammerType.getHandRecipes() : equippedHammer.getRecipes(),
+			new RecipeStockUpdate(inventory.getItemStacks())
+		)));
 		
 		forPacket(packet, CraftRequest.class, true, req -> {
-			Recipe recipe = Recipes.recipes[req.recipeIndex];
+			ItemRecipeSet set = ItemRecipeSet.values[req.setOrdinal];
+			ItemRecipe recipe = set.getRecipe(req.recipeIndex);
 			GameCore.debug("server got craft request for "+recipe.getResult().item);
-			ServerItem[] left = recipe.tryCraft(inventory);
+			Integer left = recipe.tryCraft(inventory);
 			if(left != null) {
 				ServerLevel level = getLevel();
 				if(level != null)
-					for(ServerItem item : left)
-						level.dropItem(item, getPosition(), null);
+					for(int i = 0; i < left; i++)
+						level.dropItem(recipe.getResult().item, getPosition(), null);
 			}
 			//getHands().validate();
 			connection.send(getInventoryUpdate());
 			connection.send(new RecipeStockUpdate(inventory.getItemStacks()));
 		});
 		
-		if(packet.equals(DatalessRequest.Respawn)) {
-			world.postRunnable(() -> {
-				world.respawnPlayer(this);
-				connection.send(getSpawnData());
-			});
-		}
+		forPacket(packet, BuildRequest.class, true, req -> {
+			ObjectRecipeSet set = ObjectRecipeSet.values[req.setOrdinal];
+			ObjectRecipe recipe = set.getRecipe(req.recipeIndex);
+			
+			ServerLevel level = getLevel();
+			if(level == null)
+				return;
+			ServerTile tile = (ServerTile) level.getTile(req.actionPos);
+			if(tile == null)
+				return;
+			
+			if(recipe.tryCraft(tile, this, inventory)) {
+				// success, update inv
+				connection.send(getInventoryUpdate());
+			}
+		});
+		
+		forPacket(packet, DatalessRequest.Respawn, true, () -> {
+			world.respawnPlayer(this);
+			connection.send(getSpawnData());
+		});
 		
 		forPacket(packet, SelfHurt.class, true, hurt -> {
 			// assumed that the client has hurt itself in some way
@@ -333,7 +353,7 @@ public class ServerPlayer extends ServerMob implements Player {
 	}
 	
 	// this method gets called by GameServer, so in order to ensure it doesn't mix badly with server world updates, we'll post it as a runnable to the server world update thread.
-	private void doInteract(Direction dir, Vector2 cursorPos, ServerItem heldItem, int index, boolean attack) {
+	private void doInteract(Direction dir, Vector2 actionPos, ServerItem heldItem, int index, boolean attack) {
 		setDirection(dir);
 		
 		if(getStat(Stat.Stamina) < heldItem.getStaminaUsage())
@@ -353,13 +373,13 @@ public class ServerPlayer extends ServerMob implements Player {
 		}
 		
 		if(!result.success && level != null) {
-			Vector2 center = getCenter();
-			List<Tile> cursorRoute = Player.traverseCursorRoute(center, cursorPos, level);
-			Vector2 dist = cursorPos.cpy().sub(center);
-			Rectangle rect = getInteractionRect();
-			if(cursorRoute.size() > 0)
-				rect.setCenter(cursorRoute.get(cursorRoute.size()-1).getCenter());
-			Tile tile = level.getClosestTile(rect);
+			/*Tile tile = getCursorTile(actionPos, level);
+			Tile clientTile = level.getTile(actionPos);
+			// if the client tile is one off from the server tile, and it's still valid, then go with that one; this prevents some small differences in some cases from causing the interaction to happen on a different tile than the one the client expected.
+			if(clientTile != tile && clientTile != null && clientTile.getType().isWalkable()
+				&& clientTile.getPosition().sub(tile.getPosition()).len() < 2)
+				tile = clientTile; */
+			Tile tile = level.getTile(actionPos); // don't validate for now; will always match client, but open to bad packets
 			if(tile != null)
 				result = attack ? heldItem.attack(tile, this) : heldItem.interact(tile, this);
 		}

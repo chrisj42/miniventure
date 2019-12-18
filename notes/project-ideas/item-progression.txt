@@ -29,12 +29,12 @@ PROGRESSION
 	- TL = tile, cannot move
 
 - TL campfire: wood + reed fiber
-- LO crude workbench: graphite + wood + reeds (wood from fallen trees)
+- IT fiber cord: reeds
+- LO crude workbench: wood + fiber cord (wood from saplings / smaller trees)
 - crude workbench - forest surface
-	- IT fiber cord: reeds
-	- IT basic axe: graphite + wood + fiber cord
-	- IT basic pickaxe: graphite + wood + fiber cord
-	- IT shovel: stone + wood
+	- IT crude axe: stone + wood + fiber cord (stone from small rock outcrops)
+	- IT crude pickaxe: stone + wood + fiber cord
+	- IT crude shovel: stone + wood + fiber cord
 	- IT wooden club: wood
 	- IT practical hammer: stone + wood + fiber cord
 - practical hammer - forest surface

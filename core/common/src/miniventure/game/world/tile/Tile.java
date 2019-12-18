@@ -109,6 +109,8 @@ public abstract class Tile implements WorldObject {
 		}
 	}
 	
+	
+	
 	@Override
 	public String toString() { return getType().getName()+' '+getClass().getSimpleName(); }
 	

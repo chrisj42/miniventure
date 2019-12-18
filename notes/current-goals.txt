@@ -1,3 +1,6 @@
+*current*
+	making blueprint system... use special recipe types with data from ConstructableObjectTypes to get the translucent sprite, and then to follow through with the crafting.
+
 - add listener to world list in WorldSelectScreen, so the up/down keys change the selected world.
 
 - improve crafting (workbenches and hammers system, see crafting.txt)
@@ -15,3 +18,5 @@
 - make cave level underneath surface levels
 
 - restrict switching levels until the map is gotten on a level
+
+- check todos and fixmes

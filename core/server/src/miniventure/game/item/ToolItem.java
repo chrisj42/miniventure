@@ -8,71 +8,61 @@ import org.jetbrains.annotations.NotNull;
 
 public class ToolItem extends ServerItem {
 	
+	// todo determine if I want to have all tools follow the same material/upgrade path, or let them deviate
+	// - if deviate, determine how to provide levels; perhaps just a fetcher that is provided the tier?
+		// - perhaps I want to give each tool type an enum for the levels, where they all implement a "ToolLevel" interface or something
+	
+	/* Tool aspects:
+		- base damage: ToolType; provide an ineffective and effective damage stat
+		- 
+		
+	 */
+	
 	public enum ToolType {
-		Pickaxe(CursorHighlight.TILE_ADJACENT),
-		Shovel(CursorHighlight.TILE_ADJACENT),
-		Axe(CursorHighlight.TILE_ADJACENT),
-		Sword(CursorHighlight.INVISIBLE);
+		Pickaxe(CursorHighlight.TILE_ADJACENT, 1),
+		Shovel(CursorHighlight.TILE_ADJACENT, 2), // one swing per tile instead of many, so weight it more
+		Axe(CursorHighlight.TILE_ADJACENT, 1),
+		Sword(CursorHighlight.INVISIBLE, 1);
 		
 		@NotNull
 		private final CursorHighlight cursorType;
+		private final int staminaUsage;
 		
-		ToolType(@NotNull CursorHighlight cursorType) {
+		ToolType(@NotNull CursorHighlight cursorType, int staminaUsage) {
 			this.cursorType = cursorType;
-		}
-	}
-	
-	public enum Material {
-		Flint(50, 1, 1),
-		
-		Stone(120, 2, 1),
-		
-		Iron(250, 4, 1),
-		
-		Tungsten(600, 6, 1),
-		
-		Ruby(1500, 8, 1);
-		
-		public final int maxDurability; // the number of uses this level of tool gets.
-		public final int damageMultiplier; // damage done by this tool is multiplied by this number.
-		public final int staminaUsage; // the stamina points that are used up each use.
-		
-		Material(int maxDurability, int damageMultiplier, int staminaUsage) {
-			this.maxDurability = maxDurability;
-			this.damageMultiplier = damageMultiplier;
 			this.staminaUsage = staminaUsage;
 		}
 	}
 	
 	private final ToolType toolType;
-	private final Material material;
+	private final MaterialQuality quality;
 	private final int durability;
 	
-	public ToolItem(ToolType type, Material material) { this(type, material, material.maxDurability); }
-	ToolItem(ToolType type, Material material, int durability) {
-		super(ItemType.Tool, material.name() + ' ' + type.name(), GameCore.icons.get("items/tools/"+material.name().toLowerCase()+'_'+type.name().toLowerCase()));
+	public ToolItem(ToolType type, MaterialQuality quality) { this(type, quality, quality.maxDurability); }
+	ToolItem(ToolType type, MaterialQuality quality, int durability) {
+		super(ItemType.Tool, quality.name() + ' ' + type.name(), GameCore.icons.get("items/tools/"+ quality.spriteName+'_'+type.name().toLowerCase()));
 		this.toolType = type;
-		this.material = material;
+		this.quality = quality;
 		this.durability = durability;
 	}
 	
 	public ToolType getToolType() { return toolType; }
-	public Material getMaterial() { return material; }
+	public MaterialQuality getQuality() { return quality; }
 	
 	@Override
 	public ToolItem getUsedItem() {
 		if(durability > 1)
-			return new ToolItem(toolType, material, durability-1);
+			return new ToolItem(toolType, quality, durability-1);
 		
 		return null;
 	}
 	
 	@Override
-	public int getStaminaUsage() { return material.staminaUsage; }
+	public int getStaminaUsage() { return toolType.staminaUsage; }
 	
 	// the the Item class will have the wrong value, but it only references it through this method so this override will negate any effects.
 	@Override
-	public float getUsabilityStatus() { return material == null ? 0 : durability / (float) material.maxDurability; }
+	public float getUsabilityStatus() { return quality == null ? 0 : durability / (float) quality.maxDurability; }
 	
 	@Override @NotNull
 	public Player.CursorHighlight getHighlightMode() {
@@ -89,8 +79,8 @@ public class ToolItem extends ServerItem {
 	
 	@Override
 	public String[] save() {
-		return new String[] {getType().name(), toolType.name(), material.name(), String.valueOf(durability)};
+		return new String[] {getType().name(), toolType.name(), quality.name(), String.valueOf(durability)};
 	}
 	
-	@Override public String toString() { return "ToolItem("+material+' '+toolType+",dura="+durability+')'; }
+	@Override public String toString() { return "ToolItem("+ quality +' '+toolType+",dura="+durability+')'; }
 }

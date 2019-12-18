@@ -4,7 +4,6 @@ import java.util.Objects;
 
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.FontStyle;
-import miniventure.game.item.CraftingScreen.ClientRecipe;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.util.DiscreteViewport;
 import miniventure.game.util.RelPos;

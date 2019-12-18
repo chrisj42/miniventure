@@ -279,6 +279,9 @@
             <key type="filename">icon-sprites/items/food/raw_meat.png</key>
             <key type="filename">icon-sprites/items/food/snow_berries.png</key>
             <key type="filename">icon-sprites/items/food/strawberry.png</key>
+            <key type="filename">icon-sprites/items/placeable/dirt.png</key>
+            <key type="filename">icon-sprites/items/placeable/sand.png</key>
+            <key type="filename">icon-sprites/items/placeable/snow.png</key>
             <key type="filename">icon-sprites/items/resource/coal.png</key>
             <key type="filename">icon-sprites/items/resource/cotton.png</key>
             <key type="filename">icon-sprites/items/resource/fabric.png</key>
@@ -288,9 +291,6 @@
             <key type="filename">icon-sprites/items/resource/ruby.png</key>
             <key type="filename">icon-sprites/items/resource/stone.png</key>
             <key type="filename">icon-sprites/items/resource/tungsten.png</key>
-            <key type="filename">icon-sprites/items/tile/dirt.png</key>
-            <key type="filename">icon-sprites/items/tile/sand.png</key>
-            <key type="filename">icon-sprites/items/tile/snow.png</key>
             <key type="filename">icon-sprites/items/tools/flint_axe.png</key>
             <key type="filename">icon-sprites/items/tools/flint_pickaxe.png</key>
             <key type="filename">icon-sprites/items/tools/flint_shovel.png</key>
@@ -303,6 +303,7 @@
             <key type="filename">icon-sprites/items/tools/ruby_pickaxe.png</key>
             <key type="filename">icon-sprites/items/tools/ruby_shovel.png</key>
             <key type="filename">icon-sprites/items/tools/ruby_sword.png</key>
+            <key type="filename">icon-sprites/items/tools/simple_hammer.png</key>
             <key type="filename">icon-sprites/items/tools/stone_axe.png</key>
             <key type="filename">icon-sprites/items/tools/stone_pickaxe.png</key>
             <key type="filename">icon-sprites/items/tools/stone_shovel.png</key>

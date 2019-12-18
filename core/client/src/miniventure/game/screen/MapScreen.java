@@ -71,7 +71,7 @@ public class MapScreen extends MenuScreen {
 				// Point p = null;//mapRequest.islands[i];
 				final int levelid = i;
 				if(levelid == curlevel) continue;
-				VisTextButton btn = makeButton("Island "+(i+1)+": "+MyUtils.toTitleCase(mapRequest.islands[i].type.name()), () -> {
+				VisTextButton btn = makeButton("Island "+(i+1)+": "+MyUtils.toTitleFormat(mapRequest.islands[i].type.name()), () -> {
 					// Level playerLevel = ClientCore.getWorld().getMainPlayer().getLevel();
 					if(!(playerLevel != null && playerLevel.getLevelId() == levelid))
 						ClientCore.getClient().send(new LevelChange(levelid));

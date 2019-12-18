@@ -22,6 +22,7 @@ import miniventure.game.world.entity.KnockbackController;
 import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.entity.mob.MobAnimationController;
 import miniventure.game.world.entity.mob.MobAnimationController.AnimationState;
+import miniventure.game.world.level.Level;
 import miniventure.game.world.tile.ClientTile;
 
 import com.badlogic.gdx.Input.Keys;
@@ -30,6 +31,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import miniventure.game.world.tile.Tile;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -193,8 +195,12 @@ public class ClientPlayer extends ClientEntity implements Player {
 				else
 					interact = false;
 				
-				if(interact)
-					ClientCore.getClient().send(new InteractRequest(attack, cursorPos, new PositionUpdate(this), getDirection(), inventory.getSelection()));
+				if(interact) {
+					Level level = getLevel();
+					Tile cursorTile = level != null ? getCursorTile(cursorPos, level) : null;
+					if(cursorTile != null)
+						ClientCore.getClient().send(new InteractRequest(attack, cursorTile.getCenter(), getDirection(), inventory.getSelection()));
+				}
 			}
 			
 			/*if(ClientCore.input.pressingControl(Control.INVENTORY_TOGGLE)) {

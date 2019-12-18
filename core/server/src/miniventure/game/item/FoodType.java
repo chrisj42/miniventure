@@ -4,6 +4,7 @@ import miniventure.game.item.ItemType.EnumItem;
 import miniventure.game.world.entity.mob.player.Player;
 import miniventure.game.world.entity.mob.player.Player.CursorHighlight;
 import miniventure.game.world.entity.mob.player.Player.Stat;
+import miniventure.game.world.entity.mob.player.ServerPlayer;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -32,7 +33,7 @@ public enum FoodType {
 			return CursorHighlight.INVISIBLE;
 		}
 		
-		@Override public Result interact(Player player) {
+		@Override public Result interact(ServerPlayer player) {
 			int gained = player.changeStat(Stat.Hunger, healthGained);
 			if(gained > 0)
 				return Result.USED;

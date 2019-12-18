@@ -14,6 +14,8 @@ public class TileDistanceMap implements IslandProcessor {
 		return new TileDistanceMapBuilder();
 	}
 	
+	// todo move tile condition to builder constructor since these aren't likely to be used anyway
+	// todo allow distance value per tile to vary according to a noise function, so for example "5 tiles" would fluctuate a bit; adds more variability to the terrain
 	public static class TileDistanceMapBuilder {
 		
 		private TreeMap<Integer, TileProcessor> distanceProcessors;

@@ -1,14 +1,18 @@
-- you start on the surface of an island
-- there are cave entrances around, but they are inaccessible
-- defeating the boss on the island unlocks the caverns
-- caverns have lots of minerals and better materials for building than the surface
-- underground is where you find the map to the next island
-	- underground boss? or just maze of sorts?
-- next island has different surface resources, but they aren't necessarily the most useful in building
-	- you only gain a few things, most are cosmetic and 
-	- but maybe enemy loot drops can help with getting better stuff?
-- island surfaces hold more cosmetics in terms of terrain resources; main progression comes from killing enemies
-- island caves use terrain for progression; enemies exist but they are not as diverse, and are more deterrents than things you'd need to farm.
+surface vs cavern layers
+- surface
+	- start here for new island
+	- progression: mob drops
+		- craft better armor from mob loot
+	- diverse terrain but mostly cosmetic
+		- probably has variations of basic resources
+	- has boss
+- caverns
+	- entrances unlocked after defeating the boss on the island
+	- progression: mining ores
+		- craft better tools with new materials
+	- mobs: scattered about
+		- still there, but not as many, and drops aren't necessarily for progression
+	- has map to next island
 
 
 one island is your "home base"; from there, you go on expeditions to other islands

@@ -136,84 +136,84 @@ items/food/strawberry
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/resource/coal
+items/placeable/dirt
   rotate: false
   xy: 71, 127
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/resource/cotton
+items/placeable/sand
   rotate: false
   xy: 83, 147
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/resource/fabric
+items/placeable/snow
   rotate: false
   xy: 99, 167
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/resource/flint
+items/resource/coal
   rotate: false
   xy: 115, 187
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/resource/iron
+items/resource/cotton
   rotate: false
   xy: 115, 207
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/resource/log
+items/resource/fabric
   rotate: false
   xy: 115, 227
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/resource/ruby
+items/resource/flint
   rotate: false
   xy: 87, 3
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/resource/stone
+items/resource/iron
   rotate: false
   xy: 87, 23
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/resource/tungsten
+items/resource/log
   rotate: false
   xy: 87, 43
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tile/dirt
+items/resource/ruby
   rotate: false
   xy: 87, 63
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tile/sand
+items/resource/stone
   rotate: false
   xy: 91, 83
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tile/snow
+items/resource/tungsten
   rotate: false
   xy: 91, 103
   size: 16, 16
@@ -304,44 +304,51 @@ items/tools/ruby_sword
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tools/stone_axe
+items/tools/simple_hammer
   rotate: false
   xy: 111, 123
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tools/stone_pickaxe
+items/tools/stone_axe
   rotate: false
   xy: 123, 143
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tools/stone_shovel
+items/tools/stone_pickaxe
   rotate: false
   xy: 139, 163
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tools/stone_sword
+items/tools/stone_shovel
   rotate: false
   xy: 155, 183
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tools/tungsten_axe
+items/tools/stone_sword
   rotate: false
   xy: 155, 203
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tools/tungsten_pickaxe
+items/tools/tungsten_axe
   rotate: false
   xy: 155, 223
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+items/tools/tungsten_pickaxe
+  rotate: false
+  xy: 111, 123
   size: 16, 16
   orig: 16, 16
   offset: 0, 0

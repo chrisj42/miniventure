@@ -50,10 +50,10 @@ public class Item {
 	}
 	
 	@Override
-	public int hashCode() { return name.hashCode(); }
+	public int hashCode() { return name.hashCode() + Float.hashCode(usability); }
 	
 	@Override
-	public String toString() { return name + " Item"; }
+	public String toString() { return name + ' '+getClass().getSimpleName(); }
 	
 	public String[] serialize() {
 		return new String[] {
@@ -66,6 +66,7 @@ public class Item {
 	
 	@NotNull
 	public static Item deserialize(@NotNull String[] info) {
+		// FIXME surely this can't always work right... it completely disregards what map the item got the sprite from! What if it was using the regular tile atlas? Then again maybe that's a bad example. But there could be name overlap...
 		TextureHolder t = GameCore.icons.get(info[1]);
 		if(t == null)
 			t = GameCore.descaledTileAtlas.getRegion(info[1]);

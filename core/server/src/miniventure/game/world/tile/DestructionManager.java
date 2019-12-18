@@ -1,9 +1,9 @@
 package miniventure.game.world.tile;
 
+import miniventure.game.item.MaterialQuality;
 import miniventure.game.item.Result;
 import miniventure.game.item.ServerItem;
 import miniventure.game.item.ToolItem;
-import miniventure.game.item.ToolItem.Material;
 import miniventure.game.item.ToolItem.ToolType;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.customenum.SerialMap;
@@ -196,12 +196,12 @@ public class DestructionManager {
 	static class RequiredTool implements DamageConditionCheck {
 		
 		@Nullable private final ToolType toolType;
-		@Nullable private final Material material;
+		@Nullable private final MaterialQuality material;
 		
 		public RequiredTool(@Nullable ToolType toolType) {
 			this(toolType, null);
 		}
-		public RequiredTool(@Nullable ToolType toolType, @Nullable Material material) {
+		public RequiredTool(@Nullable ToolType toolType, @Nullable MaterialQuality material) {
 			this.toolType = toolType;
 			this.material = material;
 		}
@@ -212,7 +212,7 @@ public class DestructionManager {
 				return false;
 			
 			ToolItem tool = (ToolItem) attackItem;
-			return (toolType == null || tool.getToolType() == toolType) && (material == null || tool.getMaterial() == material);
+			return (toolType == null || tool.getToolType() == toolType) && (material == null || tool.getQuality() == material);
 		}
 	}
 	

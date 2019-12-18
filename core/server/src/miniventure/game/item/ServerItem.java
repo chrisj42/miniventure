@@ -8,6 +8,7 @@ import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.player.Player;
+import miniventure.game.world.entity.mob.player.ServerPlayer;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -27,16 +28,10 @@ public abstract class ServerItem extends Item {
 	@NotNull private final ItemType type;
 	
 	protected ServerItem(@NotNull ItemType type, @NotNull String name) {
-		this(type, name, true);
-	}
-	protected ServerItem(@NotNull ItemType type, @NotNull String name, boolean formatName) {
-		this(type, name, formatName, GameCore.icons.get("items/"+name.toLowerCase()));
-	}
-	protected ServerItem(@NotNull ItemType type, @NotNull String name, boolean formatName, @NotNull TextureHolder texture) {
-		this(type, formatName ? MyUtils.toTitleCase(name).replaceAll("_", " ") : name, texture);
+		this(type, name, GameCore.icons.get("items/"+name.toLowerCase()));
 	}
 	protected ServerItem(@NotNull ItemType type, @NotNull String name, @NotNull TextureHolder texture) {
-		super(name, texture);
+		super(MyUtils.toTitleFormat(name), texture);
 		this.type = type;
 	}
 	
@@ -55,11 +50,11 @@ public abstract class ServerItem extends Item {
 	
 	// these three below are in case the item has anything to do with the events.
 	
-	public Result attack(WorldObject obj, Player player) { return obj.attackedBy(player, this, 1); }
+	public Result attack(WorldObject obj, ServerPlayer player) { return obj.attackedBy(player, this, 1); }
 	
-	public Result interact(WorldObject obj, Player player) { return obj.interactWith(player, this); }
+	public Result interact(WorldObject obj, ServerPlayer player) { return obj.interactWith(player, this); }
 	// this is called after all interaction attempts.
-	public Result interact(Player player) { return Result.NONE; } // interact reflexively.
+	public Result interact(ServerPlayer player) { return Result.NONE; } // interact reflexively.
 	
 	// this is used solely for saving to file, not to-client serialization.
 	public abstract String[] save();
@@ -70,17 +65,9 @@ public abstract class ServerItem extends Item {
 		return item.save();
 	}
 	
-	/** @noinspection ConstantConditions*/
 	@Nullable
 	public static ServerItem load(@Nullable String[] data, @NotNull Version version) {
 		if(data == null) return null;
-		if(version.atOrBefore("2.2.1.1")) {
-			if(data[0].equals("Enum"))
-				// cut out the "enum" value because they got moved up
-				data = Arrays.copyOfRange(data, 1, data.length);
-			else if(data[0].equals("Misc"))
-				data[0] = "Hand";
-		}
 		ItemType type = ItemType.valueOf(data[0]);
 		return type.load(Arrays.copyOfRange(data, 1, data.length), version);
 	}

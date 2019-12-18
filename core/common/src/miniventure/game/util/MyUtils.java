@@ -25,8 +25,12 @@ public final class MyUtils {
 	/// STRING UTILS
 	
 	
+	public static String toTitleFormat(String string) {
+		return toTitleCase(string.replaceAll("_", " "));
+	}
+	
 	public static String toTitleCase(String string) {
-		return toTitleCase(toTitleCase(string, " "), "_");
+		return toTitleCase(string, " ");
 	}
 	public static String toTitleCase(String string, String delimiter) {
 		String[] words = string.split(delimiter);

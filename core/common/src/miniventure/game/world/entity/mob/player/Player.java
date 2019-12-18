@@ -134,4 +134,14 @@ public interface Player extends Mob {
 		
 		return route;
 	}
+	
+	default Tile getCursorTile(Vector2 cursorPos, @NotNull Level level) {
+		Vector2 center = getCenter();
+		List<Tile> cursorRoute = Player.traverseCursorRoute(center, cursorPos, level);
+		// Vector2 dist = cursorPos.cpy().sub(center);
+		Rectangle rect = getInteractionRect();
+		if(cursorRoute.size() > 0)
+			rect.setCenter(cursorRoute.get(cursorRoute.size()-1).getCenter());
+		return level.getClosestTile(rect);
+	}
 }

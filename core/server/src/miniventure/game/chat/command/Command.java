@@ -269,7 +269,7 @@ public enum Command {
 		this.restricted = restricted;
 		
 		this.forms = forms;
-		this.name = MyUtils.toTitleCase(name());
+		this.name = MyUtils.toTitleFormat(name());
 		this.description = description;
 		this.details = details;
 	}

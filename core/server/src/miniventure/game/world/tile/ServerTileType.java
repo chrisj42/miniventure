@@ -6,7 +6,7 @@ import miniventure.game.item.FoodType;
 import miniventure.game.item.ResourceType;
 import miniventure.game.item.Result;
 import miniventure.game.item.ServerItem;
-import miniventure.game.item.TileItemType;
+import miniventure.game.item.PlaceableItemType;
 import miniventure.game.item.ToolItem.ToolType;
 import miniventure.game.util.customenum.DataMap;
 import miniventure.game.util.function.MapFunction;
@@ -133,21 +133,21 @@ public class ServerTileType extends TileType {
 		
 		DIRT(
 			P.DESTRUCT.as(type -> new DestructionManager(type,
-				new ItemDrop(TileItemType.Dirt.get()),
+				new ItemDrop(PlaceableItemType.Dirt.get()),
 				new RequiredTool(ToolType.Shovel)
 			))
 		),
 		
 		SAND(
 			P.DESTRUCT.as(type -> new DestructionManager(type,
-				new ItemDrop(TileItemType.Sand.get()),
+				new ItemDrop(PlaceableItemType.Sand.get()),
 				new RequiredTool(ToolType.Shovel)
 			))
 		),
 		
 		GRASS(
 			P.DESTRUCT.as(type -> new DestructionManager(type,
-				new ItemDrop(TileItemType.Dirt.get()),
+				new ItemDrop(PlaceableItemType.Dirt.get()),
 				new RequiredTool(ToolType.Shovel)
 			)),
 			
@@ -171,7 +171,7 @@ public class ServerTileType extends TileType {
 		SNOW(
 			P.DESTRUCT.as(type -> new DestructionManager.DestructibleBuilder(type)
 				.drops(
-					new ItemDrop(TileItemType.Snow.get()),
+					new ItemDrop(PlaceableItemType.Snow.get()),
 					new ItemDrop(FoodType.Snow_Berries.get(), 0, 1, .1f)
 				)
 				.require(new RequiredTool(ToolType.Shovel))
@@ -271,7 +271,7 @@ public class ServerTileType extends TileType {
 		
 		// note / to-do: I could pretty easily make torches melt adjacent snow...
 		TORCH(
-			P.DESTRUCT.as(type -> new DestructionManager(type, new ItemDrop(TileItemType.Torch.get()))),
+			P.DESTRUCT.as(type -> new DestructionManager(type, new ItemDrop(PlaceableItemType.Torch.get()))),
 			P.TRANS.as(type -> new TransitionManager(type)
 				.addEntrance("enter", 12)
 			)

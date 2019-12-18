@@ -16,6 +16,7 @@ import miniventure.game.chat.command.CommandInputParser;
 import miniventure.game.network.PacketPipe.PacketPipeWriter;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.function.Action;
 import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
@@ -55,7 +56,7 @@ public abstract class GameServer implements GameProtocol {
 		
 		boolean op;
 		
-		/** @see GameProtocol.InventoryRequest */
+		// /** @see GameProtocol.InventoryRequest */
 		// private boolean inventoryMode = false; // send hotbar updates at first
 		
 		PlayerLink(PacketPipeWriter connection, @NotNull ServerPlayer player, boolean op) {
@@ -229,11 +230,11 @@ public abstract class GameServer implements GameProtocol {
 		});
 	}
 	
+	private <T> void forPacket(Object packet, DatalessRequest type, boolean sync, Action response) {
+		GameProtocol.forPacket(packet, type, response, sync ? world::postRunnable : null);
+	}
 	private <T> void forPacket(Object packet, Class<T> type, boolean sync, ValueAction<T> response) {
-		if(sync)
-			world.postRunnable(() -> GameProtocol.forPacket(packet, type, response));
-		else
-			GameProtocol.forPacket(packet, type, response);
+		GameProtocol.forPacket(packet, type, response, sync ? world::postRunnable : null);
 	}
 	
 	protected void handlePacket(PacketPipeWriter connection, Object object) {

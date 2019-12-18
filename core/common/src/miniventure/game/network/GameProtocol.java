@@ -11,6 +11,7 @@ import miniventure.game.item.Item;
 import miniventure.game.item.ItemStack;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.Version;
+import miniventure.game.util.function.Action;
 import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.Boundable;
 import miniventure.game.world.Point;
@@ -48,9 +49,27 @@ public interface GameProtocol {
 	boolean lag = false;
 	int lagMin = lag?10:0, lagMax = lag?100:0;
 	
+	static void forPacket(Object packet, DatalessRequest type, Action response) {
+		if(type.equals(packet)) response.act();
+	}
+	static void forPacket(Object packet, DatalessRequest type, Action response, ValueAction<Runnable> syncFunc) {
+		if(type.equals(packet)) {
+			if(syncFunc != null)
+				syncFunc.act(response::act);
+			else
+				response.act();
+		}
+	}
 	static <T> void forPacket(Object packet, Class<T> type, ValueAction<T> response) {
-		if(type.isAssignableFrom(packet.getClass()))
-			response.act(type.cast(packet));
+		if(type.isAssignableFrom(packet.getClass())) response.act(type.cast(packet));
+	}
+	static <T> void forPacket(Object packet, Class<T> type, ValueAction<T> response, ValueAction<Runnable> syncFunc) {
+		if(type.isAssignableFrom(packet.getClass())) {
+			if(syncFunc != null)
+				syncFunc.act(() -> response.act(type.cast(packet)));
+			else
+				response.act(type.cast(packet));
+		}
 	}
 	
 	static void registerClasses(Kryo kryo) {
@@ -111,7 +130,8 @@ public interface GameProtocol {
 		Tile,
 		Clear_Console, // server sends to player to clear console; is a server command only to make it fit in with the others; could be implemented entirely client-side otherwise.
 		Level_Ready, // when the server has sent all the entities to the client.
-		Death // player died, show respawn screen.
+		Death, // player died, show respawn screen.
+		Recipes // client asking for recipes they can make without a crafter
 	}
 	
 	// pings always end up being started from the server.
@@ -244,10 +264,6 @@ public interface GameProtocol {
 			this.y = y;
 			this.updatedType = updatedType;
 		}
-	}
-	
-	class TileTypeUpdate {
-		
 	}
 	
 	// sent by client to ask for a chunk. Server assumes level to be the client's current level.
@@ -464,16 +480,16 @@ public interface GameProtocol {
 	// sent by client to interact or attack.
 	class InteractRequest {
 		public final boolean attack;
-		public final Vector2 cursorPos;
-		public final PositionUpdate playerPosition;
+		public final Vector2 actionPos;
+		// public final PositionUpdate playerPosition;
 		public final Direction dir;
 		public final int hotbarIndex;
 		
-		private InteractRequest() { this(false, null, null, null, 0); }
-		public InteractRequest(boolean attack, Vector2 cursorPos, PositionUpdate playerPosition, Direction dir, int hotbarIndex) {
+		private InteractRequest() { this(false, null,/* null,*/ null, 0); }
+		public InteractRequest(boolean attack, Vector2 actionPos/*, PositionUpdate playerPosition*/, Direction dir, int hotbarIndex) {
 			this.attack = attack;
-			this.cursorPos = cursorPos;
-			this.playerPosition = playerPosition;
+			this.actionPos = actionPos;
+			// this.playerPosition = playerPosition;
 			this.dir = dir;
 			this.hotbarIndex = hotbarIndex;
 		}
@@ -558,7 +574,7 @@ public interface GameProtocol {
 	
 	// sent client -> server; when received, server will stop sending InventoryUpdates and resume sending HotbarUpdates. It will also use the given array to update its hotbar options. If the given array is null, then this means to start sending InventoryUpdates rather than HotbarUpdates.
 	// the server sends back a HotbarUpdate after getting this to make sure both it and the client are on the same page and the client is displaying the right items.
-	class InventoryRequest {
+	/*class InventoryRequest {
 		// the likelihood of this being necessary is very small. If it becomes necessary I will implement it.
 		// public final int requestID; // to prevent confusion regarding late responses
 		// public final int[] hotbar;
@@ -567,7 +583,7 @@ public interface GameProtocol {
 		// public InventoryRequest(int[] hotbar) {
 		// 	this.hotbar = hotbar;
 		// }
-	}
+	}*/
 	
 	// sent by server to update clients' inventory, after dropping items and attacking/interacting.
 	// sent server -> client; holds ItemStack data for all hotbar items, and fill percent of inventory.
@@ -607,49 +623,74 @@ public interface GameProtocol {
 		} 
 	}
 	
-	// called by the client with no parameters, server responds with filled parameters.
-	class RecipeRequest {
+	// called by the client with no parameters for object items, server responds with filled parameters. Server does the initial send for item recipes since they are always activated by crafters.
+	// client call gives appropriate hammer recipes, and also any item hand recipes.
+	class RecipeUpdate {
 		public final SerialRecipe[] recipes;
 		public final RecipeStockUpdate stockUpdate;
 		
-		public RecipeRequest() { this(null, null); }
-		public RecipeRequest(SerialRecipe[] recipes, RecipeStockUpdate stockUpdate) {
+		public RecipeUpdate() { this(null, null); }
+		public RecipeUpdate(SerialRecipe[] recipes, RecipeStockUpdate stockUpdate) {
 			this.recipes = recipes;
 			this.stockUpdate = stockUpdate;
 		}
 	}
 	
 	class SerialRecipe {
-		public final int listid;
-		public final int id;
+		public final int setOrdinal;
+		public final int recipeIndex;
 		public final String[] result;
 		public final String[][] costs;
+		public final boolean isBlueprint;
 		
-		private SerialRecipe() { this(0, 0, (String[])null, null); }
-		public SerialRecipe(int listid, int id, ItemStack result, ItemStack[] costs) {
-			this.listid = listid;
-			this.id = id;
-			this.result = result.serialize();
+		private SerialRecipe() { this(0, 0, null, (String[][])null, false); }
+		/*public SerialRecipe(int setOrdinal, int recipeIndex, ItemStack result, ItemStack[] costs) {
+			this(setOrdinal, recipeIndex, result.serialize(), costs, false);
+		}
+		public SerialRecipe(int setOrdinal, int recipeIndex, Item resultObjectAsItem, ItemStack[] costs) {
+			this(setOrdinal, recipeIndex, resultObjectAsItem.serialize(), costs, true);
+		}*/
+		public SerialRecipe(int setOrdinal, int recipeIndex, String[] result, ItemStack[] costs, boolean isBlueprint) {
+			this.setOrdinal = setOrdinal;
+			this.recipeIndex = recipeIndex;
+			this.result = result;
+			this.isBlueprint = isBlueprint;
 			this.costs = new String[costs.length][];
 			for(int i = 0; i < costs.length; i++)
 				this.costs[i] = costs[i].serialize();
 		}
-		public SerialRecipe(int listid, int id, String[] result, String[][] costs) {
-			this.listid = listid;
-			this.id = id;
+		private SerialRecipe(int setOrdinal, int recipeIndex, String[] result, String[][] costs, boolean isBlueprint) {
+			this.setOrdinal = setOrdinal;
+			this.recipeIndex = recipeIndex;
 			this.result = result;
 			this.costs = costs;
+			this.isBlueprint = isBlueprint;
 		}
 	}
 	
 	class CraftRequest {
-		public final int listid;
-		public final int recipeIndex; // TO-DO this only works because there is only one array of recipes; it'll have to be changed later.
+		public final int setOrdinal;
+		public final int recipeIndex;
 		
 		private CraftRequest() { this(0, 0); }
-		public CraftRequest(int listid, int recipeIndex) {
-			this.listid = listid;
+		public CraftRequest(int setOrdinal, int recipeIndex) {
+			this.setOrdinal = setOrdinal;
 			this.recipeIndex = recipeIndex;
+		}
+	}
+	
+	// sent client -> server when crafting an object on a tile, instead of an item in the inventory
+	class BuildRequest {
+		public final int setOrdinal;
+		public final int recipeIndex;
+		
+		public final Vector2 actionPos;
+		
+		private BuildRequest() { this(0, 0, null); }
+		public BuildRequest(int setOrdinal, int recipeIndex, Vector2 actionPos) {
+			this.setOrdinal = setOrdinal;
+			this.recipeIndex = recipeIndex;
+			this.actionPos = actionPos;
 		}
 	}
 	
