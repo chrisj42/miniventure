@@ -113,47 +113,18 @@ public class ServerWorld extends WorldManager {
 		worldSeed = worldInfo.seed;
 		
 		islandStores = worldInfo.islandCaches;
-		// generate levels with a new world, refresh loaded levels for an old one
-		
-		// boolean genIsland = true;
-		if(worldInfo.create) {
-			logger.pushMessage("Generating world");
-			logger.pushMessage("");
-		}
-		// else if(old)
-		// 	logger.pushMessage("Refreshing terrain data");
-		else {
-			// genIsland = false;
-			logger.pushMessage("Checking for ungenerated terrain");
-		}
-		
-		int loadIdx = 1;
-		final int totalLevels = islandStores.length * 2;
-		for(IslandCache island: islandStores) {
-			for(LevelCache cache: Arrays.asList(island.surface, island.caverns)) {
-				if(!cache.generated() || worldInfo.create/* || old*/) {
-					if(!worldInfo.create)
-						logger.editMessage("Generating missing terrain");
-					else
-						logger.editMessage("Generating level "+loadIdx+'/'+totalLevels);
-					levelFetcher.makeLevel(cache).save();
-					// genIsland = true;
-				}
-				loadIdx++;
-			}
-		}
-		// logger.popMessage();
 		
 		worldPath = worldInfo.worldFile;
 		lockRef = worldInfo.lockRef;
 		
-		if(worldInfo.create/*genIsland*/) {
-			logger.editMessage("Saving initial generated world to file"/*"Saving refreshed world data"*/);
+		if(worldInfo.create) {
+			logger.pushMessage("Generating starter island");
+			levelFetcher.makeLevel(islandStores[0].surface).save();
+			logger.editMessage("Saving generated terrain to file");
 			saveWorld();
-			logger.popMessage();
+			logger.editMessage("World Loaded.", true);
 		}
 		
-		logger.editMessage("World Loaded.", true);
 		worldLoaded = true;
 	}
 	

@@ -11,6 +11,7 @@ import miniventure.game.world.file.WorldFileInterface;
 import miniventure.game.world.file.WorldFormatException;
 import miniventure.game.world.file.WorldReference;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -73,15 +74,20 @@ public class WorldSelectScreen extends BackgroundInheritor {
 					error.setText("Failed to load world. Ensure no other programs are using the files.");
 				}
 				else {
-					// LoadingScreen loader = new LoadingScreen();
-					// loader.pushMessage("Loading world '"+ref.worldName+"'...");
-					// ClientCore.setScreen(loader);
-					try {
-						ClientCore.getWorld().startLocalWorld(WorldFileInterface.loadWorld(ref, lockRef));
-						return;
-					} catch(WorldFormatException e) {
-						error.setText(MyUtils.combineThrowableCauses(e, "Failed to load world"));
-					}
+					LoadingScreen loader = new LoadingScreen();
+					loader.pushMessage("Loading world '"+ref.worldName+'\'', true);
+					ClientCore.setScreen(loader);
+					new Thread(() -> {
+						try {
+							ClientCore.getWorld().startLocalWorld(WorldFileInterface.loadWorld(ref, lockRef), loader);
+						} catch(WorldFormatException e) {
+							Gdx.app.postRunnable(() -> {
+								error.setText(MyUtils.combineThrowableCauses(e, "Failed to load world"));
+								ClientCore.setScreen(this);
+							});
+						}
+					}).start();
+					return;
 				}
 			} catch(IOException e) {
 				error.setText(e.getMessage());

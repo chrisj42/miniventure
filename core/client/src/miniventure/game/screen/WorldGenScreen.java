@@ -61,9 +61,15 @@ public class WorldGenScreen extends BackgroundInheritor {
 			}
 			
 			String seed = seedField.getText();
-			WorldDataSet worldInfo = WorldFileInterface.createWorld(path, lockRef, seed);
 			
-			ClientCore.getWorld().startLocalWorld(worldInfo);
+			LoadingScreen loader = new LoadingScreen();
+			loader.pushMessage("creating world files", true);
+			ClientCore.setScreen(loader);
+			
+			new Thread(() -> {
+				WorldDataSet worldInfo = WorldFileInterface.createWorld(path, lockRef, seed);
+				ClientCore.getWorld().startLocalWorld(worldInfo, loader);
+			}).start();
 		});
 		table.add(genButton);
 		

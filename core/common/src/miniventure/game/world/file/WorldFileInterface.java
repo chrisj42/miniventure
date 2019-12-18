@@ -223,8 +223,7 @@ public class WorldFileInterface {
 	
 	// this method doesn't actually generate levels; the ServerWorld does that when it's created. So very little work is actually done here.
 	@NotNull
-	private static WorldDataSet createWorld(Path file, RandomAccessFile lockRef, long seed) {
-		
+	private static WorldDataSet createWorld(Path folder, RandomAccessFile lockRef, long seed) {
 		IslandCache[] levelCaches = new IslandCache[] {
 			new IslandCache(1, seed, IslandType.WOODLAND),
 			new IslandCache(2, seed, IslandType.DESERT),
@@ -233,7 +232,7 @@ public class WorldFileInterface {
 			// new LevelCache(4, seed, IslandType.JUNGLE),
 		};
 		
-		WorldDataSet worldData = new WorldDataSet(file, lockRef, seed, 0, TimeOfDay.Morning.getStartOffsetSeconds(), GameCore.VERSION, new PlayerData[0], levelCaches, true);
+		WorldDataSet worldData = new WorldDataSet(folder, lockRef, seed, 0, TimeOfDay.Morning.getStartOffsetSeconds(), GameCore.VERSION, new PlayerData[0], levelCaches, true);
 		saveWorld(worldData);
 		return worldData;
 	}
@@ -268,7 +267,7 @@ public class WorldFileInterface {
 		return good;
 	}
 	
-	// todo add a ProgressLogger parameter so load progress can be tracked... assuming the whole method takes more than half a second, at least.
+	// todo add a ProgressLogger parameter so load progress can be tracked... assuming the whole method takes more than half a second, at least. -- which I've confirmed it does.
 	@NotNull
 	public static WorldDataSet loadWorld(WorldReference worldRef, RandomAccessFile lockRef) throws WorldFormatException {
 		final Path folder = worldRef.folder;

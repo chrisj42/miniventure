@@ -41,10 +41,6 @@ UI
 
 - damage bar for tiles
 
-- validate world name; can only contain alphanum, spaces, dashes, and underscores
-
-- when a world is too old to be compatible, display the oldest version that the current version is compatible with.
-
 - add a volume option for sounds
 
 - cut some decimals off of the ping time display
@@ -53,6 +49,16 @@ UI
 
 - echo player commands to server terminal (this includes the msg command)
 	- "player": <command>
+
+---
+
+SAVE / LOAD
+
+- when a new world will overwrite an existing one (i.e. a folder for it already exists), ask for confirmation before proceeding, at which point the folder should be deleted, and then recreated.
+
+- validate world name; can only contain alphanum, spaces, dashes, and underscores
+
+- when a world is too old to be compatible, display the oldest version that the current version is compatible with.
 
 ---
 

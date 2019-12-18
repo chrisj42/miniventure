@@ -152,11 +152,10 @@ public class ClientWorld extends LevelManager {
 	
 	// given a pre-initialized WorldFile (ie the world has already been read from file and/or generated successfully), this method starts the process of loading a world in single player mode.
 	// when a world is first loaded, the intro plays. After the intro is done, the game starts; however, the world still loads before the intro plays. It just doesn't get updated until the intro finishes and the game view appears.
-	public void startLocalWorld(WorldDataSet worldInfo) {
+	// this should be run in a separate thread from the rendering thread.
+	public void startLocalWorld(WorldDataSet worldInfo, LoadingScreen loadingScreen) {
 		// ClientCore.stopMusic();
-		LoadingScreen loadingScreen = new LoadingScreen();
 		// loadingScreen.pushMessage("Initializing private server");
-		ClientCore.setScreen(loadingScreen);
 		
 		PacketPipe pipe1 = new PacketPipe("LocalClient packet reader");
 		PacketPipe pipe2 = new PacketPipe("LocalServer packet reader");
@@ -170,24 +169,24 @@ public class ClientWorld extends LevelManager {
 		LocalClient localClient = new LocalClient(clientIn, clientOut);
 		this.client = localClient;
 		
-		new Thread(() -> {
-			// start a server, and attempt to connect the client. If successful, it will set the screen to null; if not, the new server will be closed.
-			
-			if(!serverManager.startSPServer(worldInfo, serverIn, serverOut, loadingScreen))
-				return; // failed.
-			
-			loadingScreen.pushMessage("adding player to world", true);
-			clientIn.start();
-			
-			// loadingScreen.popMessage(); // matched with the "init private server" msg at the start of this method.
-			
-			localClient.send(new Login(GameProtocol.HOST, GameCore.VERSION));
-			
-			/*if(errorMessage != null) {
-				Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen("Error starting world: "+e.getMessage())));
-				return;
-			}*/
-		}).start();
+		// start a server, and attempt to connect the client. If successful, it will set the screen to null; if not, the new server will be closed.
+		
+		loadingScreen.pushMessage("creating mock server", true);
+		
+		if(!serverManager.startSPServer(worldInfo, serverIn, serverOut, loadingScreen))
+			return; // failed.
+		
+		loadingScreen.pushMessage("adding player to world", true);
+		clientIn.start();
+		
+		// loadingScreen.popMessage(); // matched with the "init private server" msg at the start of this method.
+		
+		localClient.send(new Login(GameProtocol.HOST, GameCore.VERSION));
+		
+		/*if(errorMessage != null) {
+			Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen("Error starting world: "+e.getMessage())));
+			return;
+		}*/
 	}
 	
 	// returns to title screen; this ClientWorld instance is still capable of supporting future worlds.
