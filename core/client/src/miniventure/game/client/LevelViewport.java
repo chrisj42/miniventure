@@ -3,8 +3,9 @@ package miniventure.game.client;
 import java.util.List;
 
 import miniventure.game.GameCore;
+import miniventure.game.item.CraftingScreen.ClientObjectRecipe;
+import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
-import miniventure.game.world.Point;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
 import miniventure.game.world.entity.mob.player.Player;
 import miniventure.game.world.level.RenderLevel;
@@ -26,6 +27,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class LevelViewport {
 	
@@ -75,10 +77,20 @@ public class LevelViewport {
 		pos.add(offset.x, offset.y, 0);
 	}
 	
-	private void outlineTile(Tile tile, Vector2 offset) {
+	// if texture is null, an outline is drawn, otherwise the given texture is drawn
+	private void drawOverTile(Tile tile, Vector2 offset, @Nullable TextureHolder texture) {
 		if(tile != null) {
 			Vector2 pos = tile.getPosition().sub(offset).scl(Tile.SIZE);
-			MyUtils.drawRect(pos.x, pos.y, Tile.SIZE, Tile.SIZE, Tile.SIZE / 8, Color.BLACK, batch);
+			if(texture == null)
+				MyUtils.drawRect(pos.x, pos.y, Tile.SIZE, Tile.SIZE, Tile.SIZE / 12, Color.BLACK, batch);
+			else {
+				Vector2 sizeDiff = new Vector2(Tile.SIZE, Tile.SIZE).sub(texture.width, texture.height);
+				pos.add(sizeDiff.scl(0.5f));
+				Color prev = batch.getColor();
+				batch.setColor(1, 1, 1, 0.5f);
+				batch.draw(texture.texture, pos.x, pos.y);
+				batch.setColor(prev);
+			}
 		}
 	}
 	
@@ -138,7 +150,9 @@ public class LevelViewport {
 		//System.out.println("rendering level in bounds "+renderSpace+" to camera at "+camera.position+" with offset "+offset);
 		level.render(renderSpace, batch, GameCore.getDeltaTime(), offset); // renderSpace in world coords, but offset can give render coords
 		
-		if(ClientCore.getWorld().getMainPlayer() != null) {
+		final ClientPlayer player = ClientCore.getWorld().getMainPlayer();
+		
+		if(player != null) {
 			// cursor management
 			Vector3 cursor = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
 			camera.unproject(cursor); // screen to render coords
@@ -153,8 +167,16 @@ public class LevelViewport {
 			// draw highlight for client cursor
 			List<Tile> cursorRoute = Player.traverseCursorRoute(cameraCenter, cursorPos, level);
 			// cursorRoute.forEach(tile -> outlineTile(tile, offset));
-			if(cursorRoute.size() > 0)
-				outlineTile(cursorRoute.get(cursorRoute.size() - 1), offset);
+			if(cursorRoute.size() > 0) {
+				Tile cursorTile = cursorRoute.get(cursorRoute.size() - 1);
+				ClientObjectRecipe objectRecipe = player.getObjectRecipe();
+				if(objectRecipe == null)
+					drawOverTile(cursorTile, offset, null);
+				else {
+					// draw the item sprite instead
+					drawOverTile(cursorTile, offset, objectRecipe.getTexture());
+				}
+			}
 		}
 		
 		/*if(ClientCore.debugChunk) {
@@ -175,7 +197,6 @@ public class LevelViewport {
 		}*/
 		
 		if(ClientCore.debugInteract || ClientCore.debugTile) {
-			ClientPlayer player = ClientCore.getWorld().getMainPlayer();
 			if(player != null) {
 				if(ClientCore.debugInteract)
 					// render player interaction rect

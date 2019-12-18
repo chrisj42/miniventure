@@ -18,6 +18,7 @@ import miniventure.game.client.FontStyle;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.util.ColorBackground;
 import miniventure.game.util.RelPos;
+import miniventure.game.world.entity.mob.player.ClientPlayer;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
@@ -316,7 +317,9 @@ public class CraftingScreen extends MenuScreen {
 		if(recipe.isItemRecipe())
 			ClientCore.getClient().send(((ClientItemRecipe)recipe).getCraftRequest());
 		else {
-			// todo set some field or state somewhere (ClientPlayer perhaps) to set the selected recipe as the current blueprint
+			ClientPlayer player = ClientCore.getWorld().getMainPlayer();
+			player.setObjectRecipe((ClientObjectRecipe)recipe);
+			ClientCore.setScreen(null);
 		}
 	}
 	
@@ -414,7 +417,7 @@ public class CraftingScreen extends MenuScreen {
 		}
 	}
 	
-	private static class ClientObjectRecipe extends ClientRecipe {
+	public static class ClientObjectRecipe extends ClientRecipe {
 		
 		ClientObjectRecipe(int setOrdinal, int id, @NotNull Item blueprintItem, ItemStack[] costs) {
 			super(setOrdinal, id, blueprintItem, costs);
@@ -441,7 +444,7 @@ public class CraftingScreen extends MenuScreen {
 		private final ClientRecipe recipe;
 		
 		RecipeSlot(ClientObjectRecipe recipe) {
-			super(true, recipe);
+			super(true, recipe, 0);
 			this.recipe = recipe;
 		}
 		RecipeSlot(ClientItemRecipe recipe) {

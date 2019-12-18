@@ -59,7 +59,7 @@ public class InputHandler implements InputProcessor {
 		MOVE_LEFT(Keys.LEFT, Keys.A),
 		MOVE_RIGHT(Keys.RIGHT, Keys.D),
 		
-		USE_ITEM(Mapping.mouse(Buttons.LEFT)),
+		ATTACK(Mapping.mouse(Buttons.LEFT)),
 		INTERACT(Mapping.mouse(Buttons.RIGHT)),
 		
 		DROP_ITEM(Keys.Q),

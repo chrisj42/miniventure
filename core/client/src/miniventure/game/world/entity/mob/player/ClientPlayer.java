@@ -6,6 +6,7 @@ import java.util.HashMap;
 import miniventure.game.GameCore;
 import miniventure.game.client.InputHandler.Control;
 import miniventure.game.client.InputHandler.Modifier;
+import miniventure.game.item.CraftingScreen.ClientObjectRecipe;
 import miniventure.game.network.GameProtocol.*;
 import miniventure.game.client.ClientCore;
 import miniventure.game.item.ClientInventory;
@@ -34,6 +35,7 @@ import com.badlogic.gdx.math.Vector2;
 import miniventure.game.world.tile.Tile;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import static miniventure.game.network.GameProtocol.forPacket;
 
@@ -71,6 +73,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 	@NotNull private final EnumMap<Stat, Integer> stats = new EnumMap<>(Stat.class);
 	
 	private ClientInventory inventory;
+	@Nullable private ClientObjectRecipe objectRecipe; // currently choosing a location to craft an object
 	
 	private float moveSpeed = Player.MOVE_SPEED;
 	@NotNull private Direction dir;
@@ -117,7 +120,14 @@ public class ClientPlayer extends ClientEntity implements Player {
 	}
 	
 	@Override @NotNull public Direction getDirection() { return dir; }
-	public ClientInventory getInventory() { return inventory; }
+	// public ClientInventory getInventory() { return inventory; }
+	
+	public void setObjectRecipe(@NotNull ClientObjectRecipe recipe) {
+		this.objectRecipe = recipe;
+	}
+	
+	@Nullable
+	public ClientObjectRecipe getObjectRecipe() { return objectRecipe; }
 	
 	@Override
 	public boolean isKnockedBack() { return knockbackController.hasKnockback(); }
@@ -188,7 +198,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 			if(!isKnockedBack()) {
 				boolean attack = true;
 				boolean interact = true;
-				if(ClientCore.input.pressingControl(Control.USE_ITEM))
+				if(ClientCore.input.pressingControl(Control.ATTACK))
 					attack = true;
 				else if(ClientCore.input.pressingControl(Control.INTERACT))
 					attack = false;
@@ -198,8 +208,20 @@ public class ClientPlayer extends ClientEntity implements Player {
 				if(interact) {
 					Level level = getLevel();
 					Tile cursorTile = level != null ? getCursorTile(cursorPos, level) : null;
-					if(cursorTile != null)
-						ClientCore.getClient().send(new InteractRequest(attack, cursorTile.getCenter(), getDirection(), inventory.getSelection()));
+					
+					if(objectRecipe != null) {
+						if(attack) {
+							// place the object on attack
+							if(cursorTile != null)
+								ClientCore.getClient().send(objectRecipe.getBuildRequest(cursorTile.getCenter()));
+						} else {
+							// cancel the object recipe on interact
+							objectRecipe = null;
+						}
+					} else {
+						if(cursorTile != null)
+							ClientCore.getClient().send(new InteractRequest(attack, cursorTile.getCenter(), getDirection(), inventory.getSelection()));
+					}
 				}
 			}
 			
