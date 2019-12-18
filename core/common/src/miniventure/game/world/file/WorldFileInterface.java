@@ -255,7 +255,7 @@ public class WorldFileInterface {
 		
 		int i = 0;
 		for(IslandCache island: worldData.islandCaches) {
-			good = writeFile(main.resolve(getIslandFileName(i++, true)), island.surface::save) && good;
+			good = writeFile(main.resolve(getIslandFileName(i, true)), island.surface::save) && good;
 			good = writeFile(main.resolve(getIslandFileName(i++, false)), island.caverns::save) && good;
 		}
 		
@@ -297,9 +297,9 @@ public class WorldFileInterface {
 			for(int i = 0; i < islands.length; i++) {
 				readFile(folder.resolve(getIslandFileName(i, true)), lines);
 				LevelCacheFetcher surfaceCache = (island, isSurface) -> new LevelCache(island, isSurface, version, lines);
-				readFile(folder.resolve(getIslandFileName(i, false)), lines);
+				readFile(folder.resolve(getIslandFileName(i, false)), lines, false);
 				LevelCacheFetcher cavernCache = (island, isSurface) -> new LevelCache(island, isSurface, version, lines);
-				islands[i] = new IslandCache(i, surfaceCache, cavernCache);
+				islands[i] = new IslandCache(i+1, surfaceCache, cavernCache);
 			}
 			
 			// read player data
@@ -322,6 +322,7 @@ public class WorldFileInterface {
 			// throw new WorldFormatException("Save format of world '"+folder+"' is invalid", e);
 			throw new WorldFormatException("Bad file", e);
 		} catch(Exception e) {
+			e.printStackTrace();
 			throw new WorldFormatException("Error loading world", e);
 		} finally {
 			if(lockRef != null) {
