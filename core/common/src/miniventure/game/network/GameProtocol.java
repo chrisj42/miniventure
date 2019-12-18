@@ -129,6 +129,7 @@ public interface GameProtocol {
 		Respawn,
 		Tile,
 		Clear_Console, // server sends to player to clear console; is a server command only to make it fit in with the others; could be implemented entirely client-side otherwise.
+		Level_Loading, // notifies the client that a level must be loaded before they can be added to it, allowed a loading message to be shown client-side.
 		Level_Ready, // when the server has sent all the entities to the client.
 		Death, // player died, show respawn screen.
 		Recipes // client asking for recipes they can make without a crafter

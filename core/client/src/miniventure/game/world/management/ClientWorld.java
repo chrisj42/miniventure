@@ -71,7 +71,10 @@ public class ClientWorld extends LevelManager {
 	
 	@Override
 	public void update(float delta) {
-		if(!worldLoaded() || mainPlayer == null) return;
+		if(!worldLoaded() || mainPlayer == null) {
+			super.update(delta);
+			return;
+		}
 		
 		MenuScreen menu = ClientCore.getScreen();
 		
@@ -197,6 +200,7 @@ public class ClientWorld extends LevelManager {
 		// ClientCore.getClient().disconnect();
 		mainPlayer = null;
 		clearEntityIdMap();
+		// serverManager.closeServer();
 		ClientCore.setScreen(new MainMenu());
 		client = null;
 	}
@@ -211,9 +215,11 @@ public class ClientWorld extends LevelManager {
 	/*  --- LEVEL MANAGEMENT --- */
 	
 	
-	public void setLevel(LevelData data) {
-		// todo hold the player in a loading screen until a 
+	public void setLevel(LevelData data, LoadingScreen loader) {
+		mainPlayer = null;
+		loader.pushMessage("Parsing new level data");
 		setLevel(new ClientLevel(this, data.levelId, data.tiles));
+		loader.editMessage("awaiting spawn data", true);
 	}
 	
 	/*public void loadChunk(ChunkData data) {
@@ -230,7 +236,7 @@ public class ClientWorld extends LevelManager {
 	/*  --- ENTITY MANAGEMENT --- */
 	
 	
-	@Override
+	/*@Override
 	public void deregisterEntity(final int eid) {
 		if(mainPlayer != null && eid == mainPlayer.getId()) {
 			if(worldLoaded()) {
@@ -243,7 +249,7 @@ public class ClientWorld extends LevelManager {
 		}
 		else
 			super.deregisterEntity(eid);
-	}
+	}*/
 	
 	
 	/*  --- PLAYER MANAGEMENT --- */
@@ -264,6 +270,7 @@ public class ClientWorld extends LevelManager {
 		});
 	}
 	
+	// libGDX thread only
 	public void respawnPlayer() {
 		LoadingScreen loader = new LoadingScreen();
 		ClientCore.setScreen(loader);

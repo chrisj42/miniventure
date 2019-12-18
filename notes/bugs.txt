@@ -16,10 +16,3 @@ GAMEPLAY / MECHANICS
 
 SAVE / LOAD
 
-- possibly fixed - initial server load generates the islands lazily, so the initial save doesn't even have one generated. So new versions create new terrain.
-    - seemingly broken: loading in as the host player doesn't seem to maintain the position that we left off in
-
-- sometimes after loading a save, the game will periodically freeze up during play every few seconds
-
-- sometimes after exiting a world, it fails to properly release the access lock.
-

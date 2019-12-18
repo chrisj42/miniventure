@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.*;
 
 import miniventure.game.GameCore;
+import miniventure.game.network.GameProtocol.DatalessRequest;
 import miniventure.game.network.GameProtocol.EntityAddition;
 import miniventure.game.network.GameProtocol.EntityRemoval;
 import miniventure.game.network.GameProtocol.IslandReference;
@@ -66,6 +67,7 @@ public class ServerWorld extends WorldManager {
 			
 			for(String e: entityData)
 				level.addEntity(ServerEntity.deserialize(ServerWorld.this, e, version));
+			GameCore.debug("Server finished loading level "+cache.getId()+" (including entities)");
 			return level;
 		}
 	};
@@ -119,7 +121,7 @@ public class ServerWorld extends WorldManager {
 		
 		if(worldInfo.create) {
 			logger.pushMessage("Generating starter island");
-			levelFetcher.makeLevel(islandStores[0].surface).save();
+			levelFetcher.makeLevel(islandStores[0].surface).save(); // not actually loaded, so manual save is necessary here
 			logger.editMessage("Saving generated terrain to file");
 			saveWorld();
 			logger.editMessage("World Loaded.", true);
@@ -284,6 +286,7 @@ public class ServerWorld extends WorldManager {
 		boolean put = level == null;
 		if(put) {
 			GameCore.debug("Fetching level "+levelId);
+			server.sendToPlayer(activator, DatalessRequest.Level_Loading);
 			IslandCache island = islandStores[Math.abs(levelId)-1];
 			level = (ServerLevel) (levelId > 0 ? island.surface : island.caverns).getLevel(levelFetcher);
 		}

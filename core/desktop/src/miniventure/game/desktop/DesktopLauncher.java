@@ -185,7 +185,8 @@ public class DesktopLauncher {
 		
 		@Override
 		public void closeServer() {
-			core.getWorld().exitWorld();
+			if(core != null)
+				core.getWorld().exitWorld();
 			core = null;
 		}
 		

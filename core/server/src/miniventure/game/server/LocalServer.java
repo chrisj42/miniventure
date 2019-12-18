@@ -39,7 +39,6 @@ public class LocalServer extends GameServer {
 			@Override
 			public void onDisconnect() {
 				logout(out);
-				stop(false); // if the host leaves, the server should shut down.
 			}
 		});
 		
@@ -58,5 +57,8 @@ public class LocalServer extends GameServer {
 	}
 	
 	@Override
-	void stopServer() { in.close(false); }
+	void stopServer() {
+		in.close(false);
+		out.close(false);
+	}
 }

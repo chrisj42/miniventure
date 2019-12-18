@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import miniventure.game.GameCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.customenum.SerialMap;
 import miniventure.game.world.Point;
@@ -65,20 +66,25 @@ public abstract class Level implements Taggable<Level> {
 	protected Level(@NotNull WorldManager world, int levelId, @NotNull TileTypeEnum[][][] tileTypes, @NotNull TileMaker tileFetcher) {
 		this(world, levelId, tileTypes.length, tileTypes.length == 0 ? 0 : tileTypes[0].length);
 		
+		GameCore.debug(world.getClass().getSimpleName()+": fetching level "+levelId+" initial tile data...");
 		for(int x = 0; x < tiles.length; x++)
 			for(int y = 0; y < tiles[x].length; y++)
 				tiles[x][y] = tileFetcher.get(this, x, y, tileTypes[x][y]);
+		
+		GameCore.debug(world.getClass().getSimpleName()+": tile data initialized.");
 	}
 	
 	protected Level(@NotNull WorldManager world, int levelId, TileData[][] tileData, TileLoader tileFetcher) {
 		this(world, levelId, tileData.length, tileData.length == 0 ? 0 : tileData[0].length);
 		
+		GameCore.debug(world.getClass().getSimpleName()+": loading level "+levelId+" tile data...");
 		for(int x = 0; x < tileData.length; x++) {
 			for(int y = 0; y < tileData[x].length; y++) {
 				TileData data = tileData[x][y];
 				tiles[x][y] = tileFetcher.get(this, x, y, data.getTypes(), data.getDataMaps());
 			}
 		}
+		GameCore.debug(world.getClass().getSimpleName()+": tile data loaded.");
 	}
 	
 	public int getWidth() { return width; }

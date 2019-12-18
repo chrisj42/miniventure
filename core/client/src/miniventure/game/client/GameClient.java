@@ -9,6 +9,7 @@ import miniventure.game.network.GameProtocol;
 import miniventure.game.network.PacketPipe.PacketPipeWriter;
 import miniventure.game.screen.ChatScreen;
 import miniventure.game.screen.ErrorScreen;
+import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MapScreen;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.util.MyUtils;
@@ -32,12 +33,17 @@ import static miniventure.game.network.GameProtocol.forPacket;
 /// this is a superclass for clients; the concrete class will determine if actual networking is used or not.
 public abstract class GameClient implements GameProtocol {
 	
+	private boolean suspendPackets = false;
+	
 	GameClient() {}
 	
 	public abstract void send(Object obj);
 	
 	void handlePacket(Object object, PacketPipeWriter connection) {
 		// GameCore.debug("Client got packet: "+object.getClass().getSimpleName());
+		
+		while(suspendPackets)
+			MyUtils.sleep(10);
 		
 		ClientWorld world = ClientCore.getWorld();
 		ClientPlayer player = world.getMainPlayer();
@@ -50,7 +56,31 @@ public abstract class GameClient implements GameProtocol {
 		
 		if(object instanceof LevelData) {
 			GameCore.debug("client received level");
-			world.setLevel((LevelData)object);
+			MenuScreen screen = ClientCore.getScreen();
+			if(screen instanceof LoadingScreen) {
+				LoadingScreen loader = (LoadingScreen) screen;
+				world.setLevel((LevelData)object, loader);
+			} else {
+				suspendPackets = true; // prevents spawn data from being read and screen being set to null before the render thread has a chance to set the screen in the first place; extremely unlikely that it would ever happen given how long it takes to set the level, but I really don't even want the possibility of a race condition. Even though the screen being set to null is in another postRunnable so it's actually safe already.
+				Gdx.app.postRunnable(() -> {
+					LoadingScreen loader = new LoadingScreen();
+					ClientCore.setScreen(loader);
+					new Thread(() -> {
+						Thread.yield();
+						world.setLevel((LevelData)object, loader);
+						suspendPackets = false;
+					}).start();
+				});
+				return;
+			}
+		}
+		
+		if(object == DatalessRequest.Level_Loading) {
+			MenuScreen screen = ClientCore.getScreen();
+			if(screen instanceof LoadingScreen) {
+				LoadingScreen loader = (LoadingScreen) screen;
+				loader.pushMessage("Waiting for level data", true);
+			}
 		}
 		
 		if(object == DatalessRequest.Death) {
@@ -68,8 +98,13 @@ public abstract class GameClient implements GameProtocol {
 		
 		if(object instanceof SpawnData) {
 			GameCore.debug("client received player");
+			MenuScreen screen = ClientCore.getScreen();
+			if(screen instanceof LoadingScreen) {
+				LoadingScreen loader = (LoadingScreen) screen;
+				loader.pushMessage("spawning player", true);
+			}
 			SpawnData data = (SpawnData) object;
-			world.spawnPlayer(data, () -> {
+			world.spawnPlayer(data, () -> { // hopefully nothing bad can come of reading packets before this is finished.
 				ClientCore.setScreen(null);
 				if(ClientCore.PLAY_MUSIC) {
 					try {

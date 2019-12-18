@@ -547,9 +547,8 @@ public abstract class GameServer implements GameProtocol {
 	
 	public void stop(boolean waitForClients) {
 		stopServer();
-		while(waitForClients) {
+		if(!waitForClients) return;
+		while(getPlayerCount() > 0)
 			MyUtils.sleep(25);
-			waitForClients = getPlayerCount() > 0;
-		}
 	}
 }

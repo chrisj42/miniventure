@@ -19,6 +19,8 @@ WORLD
  
  - ice tile for snowy island
  
+ - have Object recipes provide a bit of validation that the client can use to highlight invalid and valid choices
+ 
 ---
 
 UI
