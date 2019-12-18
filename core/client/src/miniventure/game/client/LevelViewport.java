@@ -164,17 +164,19 @@ public class LevelViewport {
 			dist.setLength(Math.min(dist.len(), Player.MAX_CURSOR_RANGE));
 			cursorPos.set(dist.add(cameraCenter));
 			
-			// draw highlight for client cursor
-			List<Tile> cursorRoute = Player.traverseCursorRoute(cameraCenter, cursorPos, level);
-			// cursorRoute.forEach(tile -> outlineTile(tile, offset));
-			if(cursorRoute.size() > 0) {
-				Tile cursorTile = cursorRoute.get(cursorRoute.size() - 1);
-				ClientObjectRecipe objectRecipe = player.getObjectRecipe();
-				if(objectRecipe == null)
-					drawOverTile(cursorTile, offset, null);
-				else {
-					// draw the item sprite instead
-					drawOverTile(cursorTile, offset, objectRecipe.getTexture());
+			if(ClientCore.getScreen() == null) {
+				// draw highlight for client cursor
+				List<Tile> cursorRoute = Player.traverseCursorRoute(cameraCenter, cursorPos, level);
+				// cursorRoute.forEach(tile -> outlineTile(tile, offset));
+				if (cursorRoute.size() > 0) {
+					Tile cursorTile = cursorRoute.get(cursorRoute.size() - 1);
+					ClientObjectRecipe objectRecipe = player.getObjectRecipe();
+					if (objectRecipe == null)
+						drawOverTile(cursorTile, offset, null);
+					else {
+						// draw the item sprite instead
+						drawOverTile(cursorTile, offset, objectRecipe.getTexture());
+					}
 				}
 			}
 		}

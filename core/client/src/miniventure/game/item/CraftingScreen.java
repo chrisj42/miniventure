@@ -115,7 +115,7 @@ public class CraftingScreen extends MenuScreen {
 		recipeListTable.addListener(new InputListener() {
 			@Override
 			public boolean keyDown(InputEvent event, int keycode) {
-				if(Control.CANCEL.matches(keycode)) {
+				if(Control.CANCEL.matches(keycode) || Control.CRAFTING_TOGGLE.matches(keycode)) {
 					ClientCore.setScreen(null);
 					return true;
 				}
@@ -175,6 +175,10 @@ public class CraftingScreen extends MenuScreen {
 			requested = true;
 			ClientCore.getClient().send(DatalessRequest.Recipes);
 		}
+		// reset the object recipe when this screen is viewed
+		ClientPlayer player = ClientCore.getWorld().getMainPlayer();
+		if(player != null)
+			player.setObjectRecipe(null);
 	}
 	
 	// should only be called by GameClient thread.

@@ -122,7 +122,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 	@Override @NotNull public Direction getDirection() { return dir; }
 	// public ClientInventory getInventory() { return inventory; }
 	
-	public void setObjectRecipe(@NotNull ClientObjectRecipe recipe) {
+	public void setObjectRecipe(@Nullable ClientObjectRecipe recipe) {
 		this.objectRecipe = recipe;
 	}
 	
