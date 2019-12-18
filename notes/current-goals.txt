@@ -1,19 +1,15 @@
-*current*
-	making blueprint system... use special recipe types with data from ConstructableObjectTypes to get the translucent sprite, and then to follow through with the crafting.
+*next*
+    - change inventory overlay/screen to match layout described in item-screens.txt
 
 - add listener to world list in WorldSelectScreen, so the up/down keys change the selected world.
 
-- improve crafting (workbenches and hammers system, see crafting.txt)
-	- ui
-		- only make "all" tab to show all possible recipes; will do tabbing system later
-	- recipes
-		-  make the items and entity types needed
-	
 - improve level gen
 	- get island themes sorted out and generated
 
+- add the item/entity/tile types needed for crafting progression
+    - make furniture entity types (LargeObject)
+
 - make boss altars and bosses
-- make furniture entity types (LargeObject)
 
 - make cave level underneath surface levels
 

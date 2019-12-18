@@ -23,6 +23,8 @@ WORLD
 
 UI
 
+- make the crafting screen nicer; current spacing and icon sizes don't look very nice
+
 - improve interaction inputs
 	- cursor tile highlight behavior depends on item function
 		- items which can affect tiles from a distance, i.e. placeables, will have the highlight follow the cursor

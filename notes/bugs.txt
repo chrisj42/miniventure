@@ -1,9 +1,25 @@
-food particle always reflects the total amount the food item normally gives, not the amount actually given if the player was already nearly full.
+ANIMATION / RENDERING
 
-debug interact / bounds / the draw boxes aren't fully rendering properly.
+- food particle always reflects the total amount the food item normally gives, not the amount actually given if the player was already nearly full.
 
-knockback ignores tile collision
+- debug interact bounds / draw boxes aren't fully rendering properly.
+
+- walking animations for other mobs don't play on respawn screen
+
+- the main menu background freezes up a bit while loading a world and while generating terrain; need to determine if this is a threading / sync issue (perhaps there are synchronized blocks causing the problem), or if it's just a matter of processor usage.
+
+
+GAMEPLAY / MECHANICS
+
+- knockback ignores tile collision
+
+
+SAVE / LOAD
 
 - possibly fixed - initial server load generates the islands lazily, so the initial save doesn't even have one generated. So new versions create new terrain.
+    - seemingly broken: loading in as the host player doesn't seem to maintain the position that we left off in
 
-walking animations for other mobs don't play on respawn screen
+- sometimes after loading a save, the game will periodically freeze up during play every few seconds
+
+- sometimes after exiting a world, it fails to properly release the access lock.
+

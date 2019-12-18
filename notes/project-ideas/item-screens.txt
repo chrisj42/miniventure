@@ -1,3 +1,7 @@
+note: in most screens, icons are small and difficult to see, which is not helped by the number in the corner
+- make item icons bigger and more prominent
+    - determine what makes them so hard to see: background color, sprite design (thinness etc), or size.
+
 types of item screens: crafting panel, inventory panel, container panel
 - similarities:
 	- all display item icon cells in a grid of arbitrary scrollable height
