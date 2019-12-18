@@ -69,7 +69,7 @@ public class Item {
 		// FIXME surely this can't always work right... it completely disregards what map the item got the sprite from! What if it was using the regular tile atlas? Then again maybe that's a bad example. But there could be name overlap...
 		TextureHolder t = GameCore.icons.get(info[1]);
 		if(t == null)
-			t = GameCore.descaledTileAtlas.getRegion(info[1]);
+			t = GameCore.tileAtlas.getRegion(info[1]);
 		if(t == null)
 			t = GameCore.entityAtlas.getRegion(info[1]);
 		if(t == null)

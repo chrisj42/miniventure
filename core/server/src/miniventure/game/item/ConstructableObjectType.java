@@ -41,7 +41,7 @@ public enum ConstructableObjectType implements PlacementAttempt {
 	
 	// for tiles
 	ConstructableObjectType(@NotNull TileTypeEnum tileType, @NotNull PlacementCheck placementCheck) {
-		this(tileType, false, placementCheck);
+		this(tileType, true, placementCheck);
 	}
 	ConstructableObjectType(@NotNull TileTypeEnum tileType, boolean useLargeSprite, @NotNull PlacementCheck placementCheck) {
 		this(tile(tileType), placementCheck,
