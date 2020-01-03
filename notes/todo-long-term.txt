@@ -9,6 +9,8 @@ WORLD
 
 - pre-generated structures
 
+- enemies spawn out of certain tiles occasionally when broken
+
 ---
 
 UI
