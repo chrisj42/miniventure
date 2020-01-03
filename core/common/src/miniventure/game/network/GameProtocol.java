@@ -564,16 +564,18 @@ public interface GameProtocol {
 		public final String[][] inventory; // the item list
 		@Nullable
 		public final String[][] equipment; // equipped items
+		public final String[] hotbarData;
 		
-		private InventoryUpdate() { this(null, null); }
+		private InventoryUpdate() { this(null, null, null); }
 		/*public InventoryUpdate(ItemStack[] inventory) {
 			itemStacks = new String[inventory.length][];
 			for(int i = 0; i < inventory.length; i++)
 				itemStacks[i] = inventory[i].serialize();
 		}*/
-		public InventoryUpdate(String[][] inventory, @Nullable String[][] equipment) {
+		public InventoryUpdate(String[][] inventory, @Nullable String[][] equipment, String[] hotbarData) {
 			this.inventory = inventory;
 			this.equipment = equipment;
+			this.hotbarData = hotbarData;
 		}
 	}
 	

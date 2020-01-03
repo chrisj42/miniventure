@@ -27,9 +27,9 @@ public class ClientInventory extends Inventory<Item, ItemStack> {
 	}
 	
 	public void setSelection(int idx) {
-		idx %= PlayerInventory.HOTBAR_SIZE;
+		idx %= getSlotsTaken();
 		if(idx < 0)
-			idx += PlayerInventory.HOTBAR_SIZE;
+			idx += getSlotsTaken();
 		
 		selection = idx;
 	}

@@ -19,13 +19,16 @@ public class ClientPlayerInventory extends PlayerInventory<Item, ItemStack, Clie
 		return success;
 	}
 	
-	public void updateItems(String[][] inventoryData, String[][] equipmentData) {
-		Item[] equipment = new Item[EquipmentSlot.values.length];
-		for (int i = 0; i < equipment.length; i++)
-			equipment[i] = ClientItem.deserialize(equipmentData[i]);
+	public void updateItems(String[][] inventoryData, String[][] equipmentData, String[] hotbarData) {
+		if(equipmentData != null) {
+			Item[] equipment = new Item[EquipmentSlot.values.length];
+			for (int i = 0; i < equipment.length; i++)
+				equipment[i] = ClientItem.deserialize(equipmentData[i]);
+			
+			setEquipment(equipment);
+		}
+		setHotbarSlots(hotbarData);
 		
-		int buffer = setEquipment(equipment);
-		
-		getInv().updateItems(inventoryData, buffer);
+		getInv().updateItems(inventoryData, equippedItems.size());
 	}
 }

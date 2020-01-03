@@ -4,11 +4,13 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 
 import miniventure.game.GameCore;
 import miniventure.game.util.InstanceCounter;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.MapFunction;
+import miniventure.game.util.function.ValueAction;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -23,6 +25,12 @@ public abstract class Inventory<TItem extends Item, TItemStack extends ItemStack
 		- to reference a certain item/stack, the either end just uses the stack id instead of position
 	 */
 	
+	interface ChangeListener {
+		void onInsert(int idx);
+		void onRemove(int idx);
+		// void onStackEdit(int idx, int delta);
+	}
+	
 	private final int size;
 	final ArrayList<TItem> uniqueItems;
 	final InstanceCounter<TItem> itemCounter;
@@ -30,13 +38,24 @@ public abstract class Inventory<TItem extends Item, TItemStack extends ItemStack
 	final Class<TItemStack> stackClass;
 	private int spaceTaken = 0;
 	
+	private HashSet<ChangeListener> changeListeners;
+	
 	public Inventory(int size, Class<TItem> itemClass, Class<TItemStack> stackClass) {
 		this.size = size;
 		uniqueItems = new ArrayList<>(size);
 		itemCounter = new InstanceCounter<>(size);
 		this.itemClass = itemClass;
 		this.stackClass = stackClass;
+		changeListeners = new HashSet<>();
 		reset();
+	}
+	
+	public void addListener(ChangeListener l) { changeListeners.add(l); }
+	public void removeListener(ChangeListener l) { changeListeners.remove(l); }
+	
+	private void postEvent(ValueAction<ChangeListener> action) {
+		for(ChangeListener l: changeListeners)
+			action.act(l);
 	}
 	
 	public void reset() {
@@ -96,6 +115,16 @@ public abstract class Inventory<TItem extends Item, TItemStack extends ItemStack
 			return false; // invalid indices
 		
 		uniqueItems.add(newIdx, uniqueItems.remove(oldIdx));
+		final int nIdx = newIdx;
+		postEvent(l -> l.onRemove(oldIdx));
+		postEvent(l -> l.onInsert(nIdx));
+		return true;
+	}
+	
+	public boolean swapItems(int pos1, int pos2) {
+		TItem temp = uniqueItems.get(pos1);
+		uniqueItems.set(pos1, uniqueItems.get(pos2));
+		uniqueItems.set(pos2, temp);
 		return true;
 	}
 	
@@ -106,18 +135,14 @@ public abstract class Inventory<TItem extends Item, TItemStack extends ItemStack
 			return false; // not enough space left in inventory.
 		
 		// add new items to uniqueItems
-		if(itemCounter.add(item) == 1)
+		if(itemCounter.add(item) == 1) {
 			uniqueItems.add(Math.min(uniqueItems.size(), index), item);
+			postEvent(l -> l.onInsert(index));
+		}
 		
 		if(addSpace)
 			spaceTaken++;
 		return true;
-	}
-	
-	void addItem(TItem item, int count) {
-		uniqueItems.add(item);
-		itemCounter.put(item, count);
-		spaceTaken += count;
 	}
 	
 	public boolean removeItem(TItem item) { return removeItem(item, true); }
@@ -125,8 +150,11 @@ public abstract class Inventory<TItem extends Item, TItemStack extends ItemStack
 		if(!hasItem(item)) return false;
 		
 		// remove from uniqueItems if none are left
-		if(itemCounter.removeInstance(item) == 0)
-			uniqueItems.remove(item);
+		if(itemCounter.removeInstance(item) == 0) {
+			int idx = uniqueItems.indexOf(item);
+			uniqueItems.remove(idx);
+			postEvent(l -> l.onRemove(idx));
+		}
 		
 		if(removeSpace)
 			spaceTaken--;
@@ -138,7 +166,9 @@ public abstract class Inventory<TItem extends Item, TItemStack extends ItemStack
 		int count = getCount(item);
 		if(count == 0) return 0;
 		itemCounter.remove(item);
-		uniqueItems.remove(item);
+		int idx = uniqueItems.indexOf(item);
+		uniqueItems.remove(idx);
+		postEvent(l -> l.onRemove(idx));
 		spaceTaken -= count;
 		return count;
 	}

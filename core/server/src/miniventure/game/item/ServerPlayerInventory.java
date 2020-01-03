@@ -3,6 +3,7 @@ package miniventure.game.item;
 import java.util.Arrays;
 
 import miniventure.game.network.GameProtocol.InventoryUpdate;
+import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
 
@@ -17,12 +18,14 @@ public class ServerPlayerInventory extends PlayerInventory<ServerItem, ServerIte
 	public String[] save() {
 		String[] invData = getInv().save();
 		
-		String[] allData = new String[EquipmentSlot.values.length + invData.length];
-		System.arraycopy(invData, 0, allData, EquipmentSlot.values.length, invData.length);
+		String[] allData = new String[EquipmentSlot.values.length + 1 + invData.length];
+		System.arraycopy(invData, 0, allData, EquipmentSlot.values.length+1, invData.length);
 		for (int i = 0; i < EquipmentSlot.values.length; i++) {
 			ServerItem item = equippedItems.get(EquipmentSlot.values[i]);
 			allData[i] = item == null ? null : MyUtils.encodeStringArray(item.save());
 		}
+		
+		allData[EquipmentSlot.values.length] = MyUtils.encodeStringArray(getHotbarData());
 		
 		return allData;
 	}
@@ -33,7 +36,8 @@ public class ServerPlayerInventory extends PlayerInventory<ServerItem, ServerIte
 			equipment[i] = ServerItem.load(MyUtils.parseLayeredString(data[i]), version);
 		
 		int buffer = setEquipment(equipment);
-		getInv().loadItems(Arrays.copyOfRange(data, equipment.length, data.length), buffer, version);
+		setHotbarSlots(MyUtils.parseLayeredString(data[equipment.length]));
+		getInv().loadItems(Arrays.copyOfRange(data, equipment.length+1, data.length), buffer, version);
 	}
 	
 	public InventoryUpdate getUpdate() { return getUpdate(true); }
@@ -48,6 +52,6 @@ public class ServerPlayerInventory extends PlayerInventory<ServerItem, ServerIte
 		}
 		else equipment = null;
 		
-		return new InventoryUpdate(getInv().serialize(), equipment);
+		return new InventoryUpdate(getInv().serialize(), equipment, getHotbarData());
 	}
 }

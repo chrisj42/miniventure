@@ -267,7 +267,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 	public void handlePlayerPackets(@NotNull Object object, @NotNull PacketPipeWriter packetSender) {
 		
 		forPacket(object, InventoryUpdate.class, newInv -> {
-			inventory.getInv().updateItems(newInv.inventory);
+			inventory.updateItems(newInv.inventory, newInv.equipment, newInv.hotbarData);
 		});
 		
 		forPacket(object, InventoryAddition.class, addition -> {
