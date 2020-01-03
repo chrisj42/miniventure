@@ -37,11 +37,12 @@ public abstract class ServerItem extends Item {
 	
 	@NotNull public ItemType getType() { return type; }
 	public int getStaminaUsage() { return 1; } // default; note that without a successful attack or interaction, no stamina is lost.
-	@Override
-	public float getUsabilityStatus() { return 0; }
 	
-	@Override @NotNull
-	public abstract Player.CursorHighlight getHighlightMode();
+	@Override
+	public float getUsabilityStatus() { return 0; } // most items won't have usability
+	
+	@Override @Nullable
+	public EquipmentSlot getEquipmentType() { return null; } // most items won't be equippable
 	
 	/// The item has been used. For most items, this means the item is now depleted, and can no longer be used. Note that there is a contract with this method; it should not modify the state of the current item, however it can return a slightly modified version to be used instead. (space usage shouldn't change)
 	// overridden by subclasses to return a new item instance with any change in state that should happen when the item is used; usually though, using an item results in it disappearing.
@@ -71,5 +72,4 @@ public abstract class ServerItem extends Item {
 		ItemType type = ItemType.valueOf(data[0]);
 		return type.load(Arrays.copyOfRange(data, 1, data.length), version);
 	}
-	
 }

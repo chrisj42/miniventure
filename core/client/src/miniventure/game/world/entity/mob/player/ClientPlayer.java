@@ -6,13 +6,13 @@ import java.util.HashMap;
 import miniventure.game.GameCore;
 import miniventure.game.client.InputHandler.Control;
 import miniventure.game.client.InputHandler.Modifier;
+import miniventure.game.item.ClientItem;
+import miniventure.game.item.ClientPlayerInventory;
 import miniventure.game.item.CraftingScreen.ClientObjectRecipe;
 import miniventure.game.network.GameProtocol.*;
 import miniventure.game.client.ClientCore;
-import miniventure.game.item.ClientInventory;
 import miniventure.game.item.CraftingScreen;
-import miniventure.game.item.InventoryScreen;
-import miniventure.game.item.Item;
+import miniventure.game.item.InventoryOverlay;
 import miniventure.game.network.PacketPipe.PacketPipeWriter;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
@@ -54,9 +54,12 @@ public class ClientPlayer extends ClientEntity implements Player {
 	
 	// TODO move the stat handling to the server, because it is important info that is saved, and all such info ought to be tracked and handled by the server.
 	
-	interface StatEvolver { void update(float delta); }
+	@FunctionalInterface
+	private interface StatEvolver {
+		void update(float delta);
+	}
 	
-	private final HashMap<Class<? extends StatEvolver>, StatEvolver> statEvoMap = new HashMap<>();
+	private final HashMap<Class<? extends StatEvolver>, StatEvolver> statEvoMap;
 	private <T extends StatEvolver> void addStatEvo(T evolver) {
 		statEvoMap.put(evolver.getClass(), evolver);
 	}
@@ -65,6 +68,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 		return (T) statEvoMap.get(clazz);
 	}
 	{
+		statEvoMap = new HashMap<>(3);
 		addStatEvo(new StaminaSystem());
 		addStatEvo(new HealthSystem());
 		addStatEvo(new HungerSystem());
@@ -72,23 +76,23 @@ public class ClientPlayer extends ClientEntity implements Player {
 	
 	@NotNull private final EnumMap<Stat, Integer> stats = new EnumMap<>(Stat.class);
 	
-	private ClientInventory inventory;
+	private ClientPlayerInventory inventory;
 	@Nullable private ClientObjectRecipe objectRecipe; // currently choosing a location to craft an object
 	
 	private float moveSpeed = Player.MOVE_SPEED;
 	@NotNull private Direction dir;
 	
-	private MobAnimationController animator;
+	private MobAnimationController<ClientPlayer> animator;
 	private KnockbackController knockbackController;
 	
-	public ClientPlayer(SpawnData data, InventoryScreen invScreen) {
+	public ClientPlayer(SpawnData data, InventoryOverlay invScreen) {
 		super(data.playerData);
 		
 		dir = Direction.DOWN;
 		
-		inventory = new ClientInventory(INV_SIZE);
+		inventory = new ClientPlayerInventory();
 		
-		inventory.updateItems(data.inv.itemStacks);
+		inventory.getInv().updateItems(data.inv.inventory);
 		invScreen.setInventory(inventory);
 		
 		Stat.load(data.stats, this.stats);
@@ -220,7 +224,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 						}
 					} else {
 						if(cursorTile != null)
-							ClientCore.getClient().send(new InteractRequest(attack, cursorTile.getCenter(), getDirection(), inventory.getSelection()));
+							ClientCore.getClient().send(new InteractRequest(attack, cursorTile.getCenter(), getDirection(), inventory.getInv().getSelection()));
 					}
 				}
 			}
@@ -230,7 +234,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 			} else */if(ClientCore.input.pressingControl(Control.CRAFTING_TOGGLE))
 				ClientCore.setScreen(new CraftingScreen());
 			else if(ClientCore.input.pressingControl(Control.DROP_ITEM)) {
-				inventory.dropInvItems(Modifier.SHIFT.isPressed());
+				inventory.getInv().dropInvItems(Modifier.SHIFT.isPressed());
 			}
 			/*else if(ClientCore.input.pressingControl(Control.DROP_STACK)) {
 				inventory.dropInvItems(true);
@@ -263,11 +267,11 @@ public class ClientPlayer extends ClientEntity implements Player {
 	public void handlePlayerPackets(@NotNull Object object, @NotNull PacketPipeWriter packetSender) {
 		
 		forPacket(object, InventoryUpdate.class, newInv -> {
-			inventory.updateItems(newInv.itemStacks);
+			inventory.getInv().updateItems(newInv.inventory);
 		});
 		
 		forPacket(object, InventoryAddition.class, addition -> {
-			inventory.addItem(Item.deserialize(addition.newItem));
+			inventory.getInv().addItem(ClientItem.deserialize(addition.newItem));
 		});
 		
 		forPacket(object, PositionUpdate.class, newPos -> {
@@ -330,14 +334,12 @@ public class ClientPlayer extends ClientEntity implements Player {
 	}
 	
 	
-	protected class StaminaSystem implements StatEvolver {
+	class StaminaSystem implements StatEvolver {
 		
 		private static final float STAMINA_REGEN_RATE = 0.35f; // time taken to regen 1 stamina point.
 		
 		boolean isMoving = false;
 		private float regenTime;
-		
-		StaminaSystem() {}
 		
 		@Override
 		public void update(float delta) {
@@ -355,12 +357,10 @@ public class ClientPlayer extends ClientEntity implements Player {
 		}
 	}
 	
-	protected class HealthSystem implements StatEvolver {
+	class HealthSystem implements StatEvolver {
 		
 		private static final float REGEN_RATE = 2f; // whenever the regenTime reaches this value, a health point is added.
 		private float regenTime;
-		
-		HealthSystem() {}
 		
 		@Override
 		public void update(float delta) {
@@ -378,7 +378,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 		}
 	}
 	
-	protected class HungerSystem implements StatEvolver {
+	class HungerSystem implements StatEvolver {
 		/*
 			Hunger... you get it:
 				- over time
@@ -390,8 +390,6 @@ public class ClientPlayer extends ClientEntity implements Player {
 		private static final float MAX_STAMINA_MULTIPLIER = 6; // you will lose hunger this many times as fast if you have absolutely no stamina.
 		
 		private float hunger = 0;
-		
-		HungerSystem() {}
 		
 		public void addHunger(float amt) {
 			float hungerRatio = getStat(Stat.Hunger)*1f / Stat.Hunger.max;

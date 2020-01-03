@@ -11,7 +11,7 @@ public class ServerInventory extends Inventory<ServerItem, ServerItemStack> {
 		super(size, ServerItem.class, ServerItemStack.class);
 	}
 	
-	public synchronized String[][] serialize() {
+	public String[][] serialize() {
 		String[][] data = new String[uniqueItems.size()][];
 		for(int i = 0; i < data.length; i++) {
 			ServerItem item = uniqueItems.get(i);
@@ -21,7 +21,7 @@ public class ServerInventory extends Inventory<ServerItem, ServerItemStack> {
 		return data;
 	}
 	
-	public synchronized String[] save() {
+	public String[] save() {
 		String[] data = new String[uniqueItems.size()];
 		for(int i = 0; i < data.length; i++) {
 			ServerItem item = uniqueItems.get(i);
@@ -32,18 +32,14 @@ public class ServerInventory extends Inventory<ServerItem, ServerItemStack> {
 	}
 	
 	// this expects exactly the output of the save function above.
-	public synchronized void loadItems(String[] allData, @NotNull Version version) {
-		String[][] longData = new String[allData.length][];
+	public void loadItems(String[] allData, @NotNull Version version) { loadItems(allData, 0, version); }
+	public void loadItems(String[] allData, int buffer, @NotNull Version version) {
+		ServerItemStack[] stacks = new ServerItemStack[allData.length];
 		
 		for(int i = 0; i < allData.length; i++) {
-			longData[i] = MyUtils.parseLayeredString(allData[i]);
+			stacks[i] = ServerItemStack.load(MyUtils.parseLayeredString(allData[i]), version);
 		}
 		
-		updateItems(longData, version);
-	}
-	
-	@Override
-	ServerItemStack parseStack(String[] data, @NotNull Version version) {
-		return ServerItemStack.load(data, version);
+		setItems(stacks, buffer);
 	}
 }

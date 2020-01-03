@@ -15,6 +15,7 @@ import miniventure.game.screen.MenuScreen;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClientEntity;
+import miniventure.game.world.entity.ClientEntityRenderer;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.EntityRenderer;
 import miniventure.game.world.entity.EntityRenderer.DirectionalAnimationRenderer;
@@ -196,7 +197,7 @@ public abstract class GameClient implements GameProtocol {
 				// }
 			}
 			if(newSprite != null) {
-				e.setRenderer(EntityRenderer.deserialize(newSprite.rendererData));
+				e.setRenderer(ClientEntityRenderer.deserialize(newSprite.rendererData));
 			}
 		}
 		

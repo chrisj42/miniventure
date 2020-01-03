@@ -24,20 +24,13 @@ public class ServerItemStack extends ItemStack {
 	public String[] save() { return save(item, count); }
 	
 	public static String[] save(@NotNull ServerItem item, int count) {
-		String[] itemData = item.save();
-		String[] data = new String[itemData.length+1];
-		System.arraycopy(itemData, 0, data, 1, itemData.length);
-		data[0] = String.valueOf(count);
-		
-		return data;
+		return encodeStack(item.save(), count);
 	}
 	
 	@NotNull
 	public static ServerItemStack load(@NotNull String[] data, @NotNull Version version) {
-		int count = Integer.parseInt(data[0]);
-		ServerItem item = ServerItem.load(Arrays.copyOfRange(data, 1, data.length), version);
-		assert item != null; // should always work due to the reason ServerItem.load returns null
-		return new ServerItemStack(item, count);
+		//noinspection ConstantConditions
+		return new ServerItemStack(ServerItem.load(ItemStack.fetchItemData(data), version), ItemStack.fetchCount(data));
 	}
 	
 	@Override

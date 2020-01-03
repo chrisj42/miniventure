@@ -1,7 +1,19 @@
 package miniventure.game.world.entity;
 
+import java.util.Arrays;
+import java.util.HashMap;
+
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.FontStyle;
+import miniventure.game.item.ClientItem;
+import miniventure.game.util.MyUtils;
+import miniventure.game.util.blinker.Blinker;
+import miniventure.game.util.function.MapFunction;
+import miniventure.game.world.entity.EntityRenderer.AnimationRenderer;
+import miniventure.game.world.entity.EntityRenderer.BlinkRenderer;
+import miniventure.game.world.entity.EntityRenderer.DirectionalAnimationRenderer;
+import miniventure.game.world.entity.EntityRenderer.ItemSpriteRenderer;
+import miniventure.game.world.entity.EntityRenderer.SpriteRenderer;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.graphics.Color;
@@ -16,6 +28,56 @@ public class ClientEntityRenderer {
 	
 	private ClientEntityRenderer() {}
 	
+	private static HashMap<String, RendererType> classMap;
+	
+	enum RendererType {
+		Sprite(SpriteRenderer.class, data -> new SpriteRenderer(data[0])),
+		
+		ItemSprite(ItemSpriteRenderer.class, data -> new ItemSpriteRenderer(ClientItem.deserialize(data))),
+		
+		Animation(AnimationRenderer.class, AnimationRenderer::new),
+		
+		DirectionalAnimation(DirectionalAnimationRenderer.class, DirectionalAnimationRenderer::new),
+		
+		Blink(BlinkRenderer.class, data -> new BlinkRenderer(
+			ClientEntityRenderer.deserialize(MyUtils.parseLayeredString(data[0])), data[1].equals("null")?null:Color.valueOf(data[1]), Float.parseFloat(data[2]), Boolean.parseBoolean(data[3]), Blinker.deserialize(MyUtils.parseLayeredString(data[4]))
+		)),
+		
+		Text(TextRenderer.class, TextRenderer::new);
+		
+		private final Class<? extends EntityRenderer> clazz;
+		private final MapFunction<String[], EntityRenderer> deserializer;
+		
+		RendererType(Class<? extends EntityRenderer> clazz, MapFunction<String[], EntityRenderer> deserializer) {
+			this.clazz = clazz;
+			this.deserializer = deserializer;
+			
+			if(classMap == null)
+				classMap = new HashMap<>();
+			classMap.put(clazz.getName(), this);
+		}
+		
+		public EntityRenderer deserialize(String[] data) {
+			return deserializer.get(data);
+		}
+	}
+	
+	@NotNull
+	public static EntityRenderer deserialize(String[] allData) {
+		if (allData[0].length() == 0) return EntityRenderer.BLANK;
+		
+		String className = allData[0];
+		String[] data = Arrays.copyOfRange(allData, 1, allData.length);
+		
+		RendererType type = classMap.get(className);
+		if(type == null) {
+			System.err.println("Error: could not deserialize EntityRenderer; unrecognized class '"+className+'\'');
+			return EntityRenderer.BLANK;
+		}
+		
+		return type.deserialize(data);
+	}
+		
 	public static class TextRenderer extends EntityRenderer {
 		
 		@NotNull private final String text;

@@ -11,6 +11,7 @@ import miniventure.game.world.tile.TileDataTag;
 
 import org.jetbrains.annotations.NotNull;
 
+/** @noinspection rawtypes*/
 @SuppressWarnings("unchecked")
 public abstract class GenericEnum<EC extends GenericEnum<EC>> implements Comparable<EC> {
 	
@@ -72,12 +73,17 @@ public abstract class GenericEnum<EC extends GenericEnum<EC>> implements Compara
 	}
 	
 	
-	public static final <EC extends GenericEnum> EC valueOf(Class<EC> clazz, String name) {
+	private static <EC extends GenericEnum> EnumData<EC> getData(Class<EC> clazz) {
 		if(!enumClasses.containsKey(clazz))
 			throw new EnumClassNotRegisteredException(clazz);
 		
 		EnumData<EC> enumData = (EnumData<EC>) enumClasses.get(clazz);
 		enumData.checkInit();
+		return enumData;
+	}
+	
+	public static final <EC extends GenericEnum> EC valueOf(Class<EC> clazz, String name) {
+		EnumData<EC> enumData = getData(clazz);
 		EC constant = enumData.nameToValue.get(name);
 		if(constant == null)
 			throw new EnumConstantNotFoundException(clazz, name);
@@ -86,12 +92,11 @@ public abstract class GenericEnum<EC extends GenericEnum<EC>> implements Compara
 	}
 	
 	public static final <EC extends GenericEnum> EC valueOf(Class<EC> clazz, int ordinal) {
-		if(!enumClasses.containsKey(clazz))
-			throw new EnumClassNotRegisteredException(clazz);
-		
-		EnumData<EC> enumData = (EnumData<EC>) enumClasses.get(clazz);
-		enumData.checkInit();
-		return enumData.values[ordinal];
+		return getData(clazz).values[ordinal];
+	}
+	
+	public static final <EC extends GenericEnum> EC[] values(Class<EC> clazz) {
+		return getData(clazz).values;
 	}
 	
 	
@@ -99,7 +104,6 @@ public abstract class GenericEnum<EC extends GenericEnum<EC>> implements Compara
 	private final int ordinal;
 	// private final Class<T> typeClass;
 	
-	/** @noinspection SuspiciousMethodCalls*/
 	protected GenericEnum(/*Class<T> typeClass*/) {
 		// this.typeClass = typeClass;
 		Class<? extends GenericEnum> clazz = getClass();

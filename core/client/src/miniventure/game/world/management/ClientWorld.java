@@ -2,7 +2,7 @@ package miniventure.game.world.management;
 
 import miniventure.game.GameCore;
 import miniventure.game.client.*;
-import miniventure.game.item.InventoryScreen;
+import miniventure.game.item.InventoryOverlay;
 import miniventure.game.network.GameProtocol;
 import miniventure.game.network.GameProtocol.DatalessRequest;
 import miniventure.game.network.GameProtocol.LevelData;
@@ -262,7 +262,7 @@ public class ClientWorld extends LevelManager {
 		}
 		
 		Gdx.app.postRunnable(() -> {
-			InventoryScreen invScreen = new InventoryScreen(new OrthographicCamera());
+			InventoryOverlay invScreen = new InventoryOverlay(new OrthographicCamera());
 			this.mainPlayer = new ClientPlayer(data, invScreen);
 			registerEntity(mainPlayer);
 			gameScreen = ClientCore.newGameScreen(new GameScreen(mainPlayer, gameScreen, invScreen));

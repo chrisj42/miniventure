@@ -7,6 +7,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 
 import miniventure.game.GameCore;
+import miniventure.game.item.ClientItem;
 import miniventure.game.item.Item;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
@@ -54,9 +55,9 @@ public abstract class EntityRenderer {
 			
 			sprite = textures.get(spriteName);
 		}
-		protected SpriteRenderer(String[] data) {
-			this(data[0]);
-		}
+		// private SpriteRenderer(String[] data) {
+		// 	this(data[0]);
+		// }
 		
 		@Override
 		protected String[] serialize() { return new String[] {spriteName}; }
@@ -90,9 +91,9 @@ public abstract class EntityRenderer {
 				return GameCore.descaledTileAtlas.getRegion(given.name);
 		}
 		
-		protected ItemSpriteRenderer(String[] data) {
-			this(Item.deserialize(data));
-		}
+		// private ItemSpriteRenderer(String[] data) {
+		// 	this(ClientItem.deserialize(data));
+		// }
 		
 		@Override
 		public Vector2 getSize() {
@@ -127,7 +128,7 @@ public abstract class EntityRenderer {
 			
 			animation = new Animation<>(isFrameDuration ? duration : duration/frames.size, frames);
 		}
-		private AnimationRenderer(String[] data) {
+		AnimationRenderer(String[] data) {
 			this(data[0], Float.parseFloat(data[1]), Boolean.parseBoolean(data[2]), Boolean.parseBoolean(data[3]));
 		}
 		
@@ -173,7 +174,7 @@ public abstract class EntityRenderer {
 				animations.put(dir, new AnimationRenderer(spriteFetcher.getSpriteName(dir), duration, isFrameDuration, loopAnimation));
 		}
 		
-		private DirectionalAnimationRenderer(String[] data) {
+		DirectionalAnimationRenderer(String[] data) {
 			this.dir = Direction.valueOf(data[0]);
 			
 			int i = 1;
@@ -227,9 +228,9 @@ public abstract class EntityRenderer {
 			this.blinker = blinker;
 		}
 		
-		private BlinkRenderer(String[] data) {
-			this(EntityRenderer.deserialize(MyUtils.parseLayeredString(data[0])), data[1].equals("null")?null:Color.valueOf(data[1]), Float.parseFloat(data[2]), Boolean.parseBoolean(data[3]), Blinker.deserialize(MyUtils.parseLayeredString(data[4])));
-		}
+		// private BlinkRenderer(String[] data) {
+		// 	this(EntityRenderer.deserialize(MyUtils.parseLayeredString(data[0])), data[1].equals("null")?null:Color.valueOf(data[1]), Float.parseFloat(data[2]), Boolean.parseBoolean(data[3]), Blinker.deserialize(MyUtils.parseLayeredString(data[4])));
+		// }
 		
 		public void setRenderer(EntityRenderer renderer) {
 			mainRenderer = renderer;
@@ -293,7 +294,7 @@ public abstract class EntityRenderer {
 		return allData;
 	}
 	
-	@NotNull
+	/*@NotNull
 	public static EntityRenderer deserialize(String[] allData) {
 		if(allData[0].length() == 0) return BLANK;
 		
@@ -311,5 +312,5 @@ public abstract class EntityRenderer {
 			e.printStackTrace();
 			return BLANK;
 		}
-	}
+	}*/
 }

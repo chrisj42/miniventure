@@ -10,8 +10,9 @@ public class ClientInventory extends Inventory<Item, ItemStack> {
 	
 	// the fact that there is items in the hotbar is mostly for rendering. Most of these methods are for rendering.
 	
+	// item equipping is handled here. 
+	
 	private int selection;
-	// private float fillPercent;
 	
 	public ClientInventory(int size) {
 		super(size, Item.class, ItemStack.class);
@@ -26,65 +27,35 @@ public class ClientInventory extends Inventory<Item, ItemStack> {
 	}
 	
 	public void setSelection(int idx) {
+		idx %= PlayerInventory.HOTBAR_SIZE;
 		if(idx < 0)
-			idx = getSlotsTaken() + (idx % getSlotsTaken());
+			idx += PlayerInventory.HOTBAR_SIZE;
 		
-		selection = idx % getSlotsTaken();
+		selection = idx;
 	}
 	public int getSelection() { return selection; }
-	
-	// public ItemStack getHotbarItem(int idx) { return hotbar[idx]; }
 	
 	public ItemStack getSelectedItem() {
 		return getItemStack(getSelection());
 	}
 	
-	private void checkSelection() {
-		int size = getSlotsTaken();
-		if(selection >= size)
-			selection = Math.max(0, size - 1);
-	}
-	
-	@Override
-	public synchronized boolean removeItem(Item item) {
-		boolean res = super.removeItem(item);
-		if(res) checkSelection();
-		return res;
-	}
-	
-	@Override
-	public synchronized int removeItemStack(Item item) {
-		int res = super.removeItemStack(item);
-		if(res > 0) checkSelection();
-		return res;
-	}
-	
-	@Override
-	public synchronized void updateItems(String[][] data) {
-		super.updateItems(data);
-		checkSelection();
-	}
-	
-	// public float getFillPercent() { return fillPercent; }
-	
-	// the data isn't null, but may contain null arrays.
-	/*public void updateItems(String[][] data) {
-		// this.fillPercent = fillPercent;
-		reset();
-		for(int i = 0; i < data.length; i++)
-			
-			// hotbar[i] = data[i] == null ? null : ItemStack.deserialize(data[i]);
+	// called by the inventory overlay when an 
+	/*public synchronized boolean equip(@NotNull EquipmentSlot equipmentType, int idx, @Nullable Item item) {
+		Item[] slots = equippedItems.get(equipmentType);
+		Item cur = slots[idx];
+		if(item == null || suppressItem(item)) {
+			slots[idx] = item;
+			if(cur != null)
+				unsuppressItem(cur);
+		}
 	}*/
 	
-	/*void updateItem(int index, ItemStack stack) {
-		hotbar[index] = stack;
-	}*/
-	
-	// void setFillPercent(float fillPercent) { this.fillPercent = fillPercent; }
-	
-	
-	@Override
-	ItemStack parseStack(String[] data, @NotNull Version version) {
-		return ItemStack.deserialize(data);
+	public void updateItems(String[][] data) { updateItems(data, 0); }
+	public void updateItems(String[][] data, int buffer) {
+		ItemStack[] stacks = new ItemStack[data.length];
+		for (int i = 0; i < stacks.length; i++)
+			stacks[i] = ClientItem.deserializeStack(data[i]);
+		
+		setItems(stacks, buffer);
 	}
 }

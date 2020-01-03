@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 
 import miniventure.game.GameCore;
 import miniventure.game.util.function.Action;
+import miniventure.game.util.function.MapFunction;
 import miniventure.game.world.tile.TileTypeEnum;
 
 import com.badlogic.gdx.audio.Music;
@@ -114,6 +115,11 @@ public final class MyUtils {
 			(count != 1 && word.endsWith("y") ? word.substring(0, word.length() - 1) : word) +
 			(count == 1 ? "" : word.endsWith("s") ? "es" : word.endsWith("y") ? "ies" : "s") +
 			suffix;
+	}
+	
+	public static <T> String nullableToString(T obj) { return nullableToString(obj, Object::toString); }
+	public static <T> String nullableToString(T obj, MapFunction<T, String> stringifier) {
+		return obj == null ? "null" : stringifier.get(obj);
 	}
 	
 	

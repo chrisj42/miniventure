@@ -7,6 +7,7 @@ import java.util.Objects;
 
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.chat.InfoMessageLine;
+import miniventure.game.item.EquipmentSlot;
 import miniventure.game.item.Item;
 import miniventure.game.item.ItemStack;
 import miniventure.game.util.ArrayUtils;
@@ -38,6 +39,8 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
 import com.esotericsoftware.kryo.Kryo;
+
+import org.jetbrains.annotations.Nullable;
 
 public interface GameProtocol {
 	
@@ -96,6 +99,7 @@ public interface GameProtocol {
 		kryo.register(InfoMessage.class);
 		kryo.register(SerialRecipe[].class);
 		kryo.register(TileTypeEnum.class);
+		kryo.register(EquipmentSlot.class);
 		
 		kryo.register(String[].class);
 		kryo.register(String[][].class);
@@ -544,21 +548,32 @@ public interface GameProtocol {
 		}
 	}
 	
-	// sent server -> client; special packet for when the client has the inventory screen open, which is communicated through an InventoryRequest with no hotbar array. This packet includes all the inventory items and the inventory indices of all the hotbar items.
-	class InventoryUpdate {
-		public final String[][] itemStacks; // the item list
-		// public final int[] hotbar; // only not null the first time
+	// sent client -> server when a player changes equipment
+	class EquipRequest {
+		public final EquipmentSlot equipmentType;
+		public final int invIdx;
 		
-		private InventoryUpdate() { this((String[][])null); }
-		public InventoryUpdate(ItemStack[] inventory) {
-			// this.hotbar = hotbar;
+		public EquipRequest(EquipmentSlot equipmentType, int invIdx) {
+			this.equipmentType = equipmentType;
+			this.invIdx = invIdx;
+		}
+	}
+	
+	// server -> client to update inventory and equipped items.
+	class InventoryUpdate {
+		public final String[][] inventory; // the item list
+		@Nullable
+		public final String[][] equipment; // equipped items
+		
+		private InventoryUpdate() { this(null, null); }
+		/*public InventoryUpdate(ItemStack[] inventory) {
 			itemStacks = new String[inventory.length][];
 			for(int i = 0; i < inventory.length; i++)
 				itemStacks[i] = inventory[i].serialize();
-		}
-		public InventoryUpdate(String[][] itemStacks) {
-			this.itemStacks = itemStacks;
-			// this.hotbar = hotbar;
+		}*/
+		public InventoryUpdate(String[][] inventory, @Nullable String[][] equipment) {
+			this.inventory = inventory;
+			this.equipment = equipment;
 		}
 	}
 	

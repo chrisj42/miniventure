@@ -192,17 +192,17 @@ public class CraftingScreen extends MenuScreen {
 			for(SerialRecipe serialRecipe : recipeRequest.recipes) {
 				ItemStack[] costs = new ItemStack[serialRecipe.costs.length];
 				for(int i = 0; i < costs.length; i++)
-					costs[i] = ItemStack.deserialize(serialRecipe.costs[i]);
+					costs[i] = ClientItem.deserializeStack(serialRecipe.costs[i]);
 				
 				RecipeSlot slot;
 				
 				if(serialRecipe.isBlueprint) {
-					Item result = Item.deserialize(serialRecipe.result);
+					Item result = ClientItem.deserialize(serialRecipe.result);
 					ClientObjectRecipe recipe = new ClientObjectRecipe(serialRecipe.setOrdinal, serialRecipe.recipeIndex, result, costs);
 					slot = new RecipeSlot(recipe);
 				}
 				else {
-					ItemStack result = ItemStack.deserialize(serialRecipe.result);
+					ItemStack result = ClientItem.deserializeStack(serialRecipe.result);
 					ClientItemRecipe recipe = new ClientItemRecipe(serialRecipe.setOrdinal, serialRecipe.recipeIndex, result, costs);
 					slot = new RecipeSlot(recipe);
 				}
@@ -355,7 +355,7 @@ public class CraftingScreen extends MenuScreen {
 	}
 	
 	
-	private static abstract class ClientRecipe extends Item {
+	private static abstract class ClientRecipe extends ClientItem {
 		
 		private final int setOrdinal;
 		private final int id;
@@ -364,7 +364,7 @@ public class CraftingScreen extends MenuScreen {
 		private boolean canCraft;
 		
 		ClientRecipe(int setOrdinal, int id, @NotNull Item model, ItemStack[] costs) {
-			super(model.getName(), model.getTexture());
+			super(model.getName(), model.getTexture(), model.getUsabilityStatus(), model.getHighlightMode(), model.getEquipmentType());
 			this.setOrdinal = setOrdinal;
 			this.id = id;
 			this.item = model;

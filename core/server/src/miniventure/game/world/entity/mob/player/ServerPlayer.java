@@ -51,7 +51,7 @@ public class ServerPlayer extends ServerMob implements Player {
 	private int spawnLevel = 0;
 	
 	
-	// @NotNull private final ServerHands hands;
+	@NotNull private final ServerPlayerInventory invManager;
 	@NotNull private final ServerInventory inventory;
 	@Nullable private HammerType equippedHammer;
 	
@@ -61,8 +61,8 @@ public class ServerPlayer extends ServerMob implements Player {
 		super(world, "player", Stat.Health.initial);
 		
 		this.name = name;
-		inventory = new ServerInventory(INV_SIZE);
-		// hands = new ServerHands(this);
+		invManager = new ServerPlayerInventory();
+		inventory = invManager.getInv();
 		reset();
 	}
 	
@@ -71,9 +71,9 @@ public class ServerPlayer extends ServerMob implements Player {
 		ArrayList<String> data = allData.get(2);
 		
 		name = data.get(0);
-		inventory = new ServerInventory(INV_SIZE);
+		invManager = new ServerPlayerInventory();
+		inventory = invManager.getInv();
 		equippedHammer = null;
-		// hands = new ServerHands(this, MyUtils.parseLayeredString(data.get(6)));
 		
 		stats.put(Stat.Health, getHealth());
 		stats.put(Stat.Hunger, Integer.parseInt(data.get(1)));
@@ -90,7 +90,7 @@ public class ServerPlayer extends ServerMob implements Player {
 		}
 		spawnLevel = Integer.parseInt(data.get(5));
 		
-		inventory.loadItems(MyUtils.parseLayeredString(data.get(6)), version);
+		invManager.loadItems(MyUtils.parseLayeredString(data.get(6)), version);
 	}
 	
 	@Override
@@ -103,8 +103,7 @@ public class ServerPlayer extends ServerMob implements Player {
 			equippedHammer == null ? "null" : String.valueOf(equippedHammer.ordinal()),
 			spawnLoc == null ? "null" : spawnLoc.x+";"+spawnLoc.y,
 			String.valueOf(spawnLevel),
-			MyUtils.encodeStringArray(inventory.save())
-			// MyUtils.encodeStringArray(hands.save())
+			MyUtils.encodeStringArray(invManager.save())
 		));
 		
 		allData.add(data);
@@ -121,9 +120,8 @@ public class ServerPlayer extends ServerMob implements Player {
 		
 		super.reset();
 		
-		inventory.reset();
+		invManager.reset();
 		equippedHammer = null;
-		// hands.reset();
 		
 		if(GameCore.debug) {
 			System.out.println("adding debug items to player inventory");
@@ -140,10 +138,10 @@ public class ServerPlayer extends ServerMob implements Player {
 	}
 	
 	public SpawnData getSpawnData() {
-		return new SpawnData(new EntityAddition(this), getInventoryUpdate(), saveStats());
+		return new SpawnData(new EntityAddition(this), invManager.getUpdate(), saveStats());
 	}
 	
-	private InventoryUpdate getInventoryUpdate() { return new InventoryUpdate(inventory.serialize()); }
+	// private InventoryUpdate inventory.getUpdate() { return new InventoryUpdate(inventory.serialize()); }
 	// public HotbarUpdate getHotbarUpdate() { return new HotbarUpdate(hands.serialize(), inventory.getPercentFilled()); }
 	
 	private <T> void forPacket(Object packet, DatalessRequest type, boolean sync, Action response) {
@@ -192,13 +190,13 @@ public class ServerPlayer extends ServerMob implements Player {
 		forPacket(packet, ItemDropRequest.class, true, drop -> {
 			if(!dropItem(drop)) {
 				// drop failed, i.e. client allowed it when it shouldn't have; update client inv
-				connection.send(getInventoryUpdate());
+				connection.send(invManager.getUpdate());
 			}
 			// if successful, do nothing, because client will have pre-maturely removed the item itself.
 		});
 		
 		/*forPacket(packet, InventoryRequest.class, true, req -> {
-			connection.send(getInventoryUpdate());
+			connection.send(inventory.getUpdate());
 		});*/
 		
 		forPacket(packet, DatalessRequest.Recipes, true, () -> connection.send(new RecipeUpdate(
@@ -218,7 +216,7 @@ public class ServerPlayer extends ServerMob implements Player {
 						level.dropItem(recipe.getResult().item, getPosition(), null);
 			}
 			//getHands().validate();
-			connection.send(getInventoryUpdate());
+			connection.send(invManager.getUpdate(false));
 			connection.send(new RecipeStockUpdate(inventory.getItemStacks()));
 		});
 		
@@ -235,7 +233,7 @@ public class ServerPlayer extends ServerMob implements Player {
 			
 			if(recipe.tryCraft(tile, this, inventory)) {
 				// success, update inv
-				connection.send(getInventoryUpdate());
+				connection.send(invManager.getUpdate(false));
 			}
 		});
 		
@@ -469,7 +467,7 @@ public class ServerPlayer extends ServerMob implements Player {
 		// 	removeItem(item);
 		
 		// we are never going to be in inventory mode here, because the client has just used an item; items can't be used with a menu open.
-		getServer().sendToPlayer(this, getInventoryUpdate());
+		getServer().sendToPlayer(this, invManager.getUpdate(false));
 	}
 	
 	@Override

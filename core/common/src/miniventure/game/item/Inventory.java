@@ -3,10 +3,12 @@ package miniventure.game.item;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import miniventure.game.GameCore;
 import miniventure.game.util.InstanceCounter;
 import miniventure.game.util.Version;
+import miniventure.game.util.function.MapFunction;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -24,8 +26,8 @@ public abstract class Inventory<TItem extends Item, TItemStack extends ItemStack
 	private final int size;
 	final ArrayList<TItem> uniqueItems;
 	final InstanceCounter<TItem> itemCounter;
-	private final Class<TItem> itemClass;
-	private final Class<TItemStack> stackClass;
+	final Class<TItem> itemClass;
+	final Class<TItemStack> stackClass;
 	private int spaceTaken = 0;
 	
 	public Inventory(int size, Class<TItem> itemClass, Class<TItemStack> stackClass) {
@@ -37,49 +39,54 @@ public abstract class Inventory<TItem extends Item, TItemStack extends ItemStack
 		reset();
 	}
 	
-	public synchronized void reset() {
+	public void reset() {
 		itemCounter.clear();
 		uniqueItems.clear();
 		spaceTaken = 0;
 	}
 	
 	public int getSpace() { return size; }
-	public synchronized int getSpaceLeft() { return getSpace() - spaceTaken; }
 	public int getSlotsTaken() { return uniqueItems.size(); }
-	public synchronized float getPercentFilled() { return spaceTaken / (float) getSpace(); }
+	public int getSpaceTaken() { return spaceTaken; }
+	public int getSpaceLeft() { return getSpace() - spaceTaken; }
+	public float getPercentFilled() { return spaceTaken / (float) getSpace(); }
 	
-	public synchronized int getCount(TItem item) { return itemCounter.get(item); }
+	public int getCount(TItem item) { return itemCounter.get(item); }
 	public boolean hasItem(TItem item) { return hasItem(item, 1); }
 	public boolean hasItem(TItem item, int count) { return getCount(item) >= count; }
 	
 	// public synchronized TItem[] getUniqueItems() { return uniqueItems.toArray(new TItem[0]); }
 	
-	public synchronized TItem getItem(int idx) {
+	public TItem getItem(int idx) {
 		if(idx < 0 || idx >= uniqueItems.size())
 			return null;
 		return uniqueItems.get(idx);
 	}
 	
-	public synchronized TItemStack getItemStack(int idx) {
+	public TItemStack getItemStack(int idx) {
+		TItem item = getItem(idx);
+		return getItemStack(item, getCount(item));
+	}
+	
+	private TItemStack getItemStack(TItem item, int count) {
 		try {
-			return stackClass.getConstructor(itemClass, int.class).newInstance(getItem(idx), getCount(getItem(idx)));
+			return stackClass.getConstructor(itemClass, int.class).newInstance(item, count);
 		} catch(InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-			e.printStackTrace();
-			return null;
+			throw new RuntimeException("Error creating item stack instance", e);
 		}
 	}
 	
 	@SuppressWarnings("unchecked")
-	public synchronized TItemStack[] getItemStacks() {
+	public TItemStack[] getItemStacks() {
 		TItemStack[] stacks = (TItemStack[]) Array.newInstance(stackClass, uniqueItems.size());
 		for(int i = 0; i < stacks.length; i++)
 			stacks[i] = getItemStack(i);
 		return stacks;
 	}
 	
-	public synchronized int getIndex(TItem item) { return uniqueItems.indexOf(item); }
+	int getIndex(TItem item) { return uniqueItems.indexOf(item); }
 	
-	public synchronized boolean moveItem(int oldIdx, int newIdx) {
+	public boolean moveItem(int oldIdx, int newIdx) {
 		if (oldIdx < newIdx)
 			newIdx--;
 		
@@ -93,30 +100,40 @@ public abstract class Inventory<TItem extends Item, TItemStack extends ItemStack
 	}
 	
 	public boolean addItem(TItem item) { return addItem(uniqueItems.size(), item); }
-	public synchronized boolean addItem(int index, TItem item) {
-		if(getSpaceLeft() < 1)
+	public boolean addItem(int index, TItem item) { return addItem(index, item, true); }
+	boolean addItem(int index, TItem item, boolean addSpace) {
+		if(addSpace && getSpaceLeft() < 1)
 			return false; // not enough space left in inventory.
 		
 		// add new items to uniqueItems
 		if(itemCounter.add(item) == 1)
 			uniqueItems.add(Math.min(uniqueItems.size(), index), item);
 		
-		spaceTaken++;
+		if(addSpace)
+			spaceTaken++;
 		return true;
 	}
 	
-	public synchronized boolean removeItem(TItem item) {
+	void addItem(TItem item, int count) {
+		uniqueItems.add(item);
+		itemCounter.put(item, count);
+		spaceTaken += count;
+	}
+	
+	public boolean removeItem(TItem item) { return removeItem(item, true); }
+	boolean removeItem(TItem item, boolean removeSpace) {
 		if(!hasItem(item)) return false;
 		
 		// remove from uniqueItems if none are left
 		if(itemCounter.removeInstance(item) == 0)
 			uniqueItems.remove(item);
 		
-		spaceTaken--;
+		if(removeSpace)
+			spaceTaken--;
 		return true;
 	}
 	
-	public synchronized int removeItemStack(TItem item) {
+	public int removeItemStack(TItem item) {
 		if(item == null) return 0;
 		int count = getCount(item);
 		if(count == 0) return 0;
@@ -126,18 +143,14 @@ public abstract class Inventory<TItem extends Item, TItemStack extends ItemStack
 		return count;
 	}
 	
-	public void updateItems(String[][] data) { updateItems(data, GameCore.VERSION); }
 	@SuppressWarnings("unchecked")
-	public synchronized void updateItems(String[][] data, @NotNull Version version) {
+	public void setItems(TItemStack[] items, int buffer) {
 		reset();
-		for(String[] stackData: data) {
-			// String[] data = MyUtils.parseLayeredString(stackData);
-			TItemStack stack = parseStack(stackData, version);
-			itemCounter.put((TItem) stack.getItem(), stack.count);
+		spaceTaken = buffer; // equipped items
+		for(TItemStack stack: items) {
+			itemCounter.put((TItem) stack.item, stack.count);
 			spaceTaken += stack.count;
-			uniqueItems.add((TItem) stack.getItem());
+			uniqueItems.add((TItem) stack.item);
 		}
 	}
-	
-	abstract TItemStack parseStack(String[] data, @NotNull Version version);
 }

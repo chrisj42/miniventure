@@ -2,7 +2,7 @@ package miniventure.game.client;
 
 import miniventure.game.GameCore;
 import miniventure.game.client.InputHandler.Control;
-import miniventure.game.item.InventoryScreen;
+import miniventure.game.item.InventoryOverlay;
 import miniventure.game.screen.*;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
 import miniventure.game.world.level.ClientLevel;
@@ -28,7 +28,7 @@ public class GameScreen {
 	@NotNull private final LevelViewport levelView;
 	
 	private SpriteBatch batch = ClientCore.getBatch();
-	private InventoryScreen guiStage;
+	private InventoryOverlay guiStage;
 	
 	private final OrthographicCamera uiCamera;
 	private final OrthographicCamera noScaleCamera;
@@ -39,7 +39,7 @@ public class GameScreen {
 	@NotNull
 	private final ClientPlayer player;
 	
-	public GameScreen(@NotNull ClientPlayer player, @Nullable GameScreen prev, InventoryScreen invScreen) {
+	public GameScreen(@NotNull ClientPlayer player, @Nullable GameScreen prev, InventoryOverlay invScreen) {
 		this.player = player;
 		
 		uiCamera = new OrthographicCamera();
@@ -215,5 +215,5 @@ public class GameScreen {
 		// noScaleCamera.setToOrtho(false, width, height);
 	}
 	
-	public InventoryScreen getGuiStage() { return guiStage; }
+	public InventoryOverlay getGuiStage() { return guiStage; }
 }

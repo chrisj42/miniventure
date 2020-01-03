@@ -2,6 +2,10 @@ package miniventure.game.item;
 
 import java.util.Arrays;
 
+import miniventure.game.GameCore;
+import miniventure.game.util.Version;
+import miniventure.game.util.function.MapFunction;
+
 import org.jetbrains.annotations.NotNull;
 
 public class ItemStack {
@@ -20,7 +24,10 @@ public class ItemStack {
 	public String[] serialize() { return serialize(item, count); }
 	
 	public static String[] serialize(@NotNull Item item, int count) {
-		String[] itemData = item.serialize();
+		return encodeStack(item.serialize(), count);
+	}
+	
+	public static String[] encodeStack(String[] itemData, int count) {
 		String[] data = new String[itemData.length+1];
 		System.arraycopy(itemData, 0, data, 1, itemData.length);
 		data[0] = String.valueOf(count);
@@ -28,11 +35,12 @@ public class ItemStack {
 		return data;
 	}
 	
-	@NotNull
-	public static ItemStack deserialize(@NotNull String[] data) {
-		int count = Integer.parseInt(data[0]);
-		Item item = Item.deserialize(Arrays.copyOfRange(data, 1, data.length));
-		return new ItemStack(item, count);
+	public static int fetchCount(String[] data) {
+		return Integer.parseInt(data[0]);
+	}
+	
+	public static String[] fetchItemData(String[] data) {
+		return Arrays.copyOfRange(data, 1, data.length);
 	}
 	
 	@Override
