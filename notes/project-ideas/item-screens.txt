@@ -38,7 +38,7 @@ container screen
 persistent overlay
 - shows the hotbar, equipment slots, and a craft button; inventory screen can also be toggled
 	- bottom row, left to right: Craft button / hammer slot, armor slot, inv space usage bar and label
-		- craft button contains "craft" text on right, and hammer item slot on left; mouse events go to the slot if in bounds, else go to the button. hammer slot inherits button background, but can still use highlights.
+		- craft button contains "craft" text on right, and hammer item slot on left; mouse events go to the slot if in bounds, else go to the button; normal clicks however are given back to the button. hammer slot inherits button background, but can still use highlights.
 	- hotbar directly above
 	- inventory screen appears above hotbar when toggled
 	- equipment slots all have a default background for when they have no item equipped
