@@ -48,18 +48,20 @@ public class InfoScreen extends BackgroundInheritor {
 			super(forced, forced ? new String[] {
 				"CONTROLS (more on instructions screen):",
 				"Use arrow keys or wasd to move around.",
-				"LMB/C to attack, RMB/V to interact and use items.",
-				"Z to open crafting screen (enter/click to craft items).",
+				"LMB to attack, RMB to interact and use items.",
+				"Tab to open crafting screen (click to craft items).",
 				"Chat with T. Commands with /."
 			} : new String[] {
 				"Use arrow keys or wasd to move around.",
-				"Left click or press C to attack.",
-				"Right click or press V to place tiles and use items such as food.",
-				"Z to open crafting window, click/enter to craft.",
+				"Left click to attack.",
+				"Right click to place tiles and use items such as food.",
+				"Tab to open crafting window, click to craft.",
+				"Some items create tiles directly instead of items; for these, left click to place the tile, and right click to stop placing them.",
 				"",
 				"Q to drop an item from your inventory/hotbar.",
 				"Use Shift-Q to drop all items in the stack.",
-				"Scroll to change item selection, or use number keys to select the row of items.",
+				"Scroll to change item selection, or use number keys to select the corresponding item.",
+				"Click and drag items to reorganize them.",
 				"",
 				"+ and - keys to zoom in and out.",
 				"Press \"t\" to chat with other players, and \"/\" to use commands.",
@@ -81,10 +83,13 @@ public class InfoScreen extends BackgroundInheritor {
 				"Lead Developer: Chris J",
 				"",
 				/*"Music made by TrstN",*/
-				"Sprites made by RiverOaken and Ross, with contributions by Theta and MadDest",
+				"Sprites made by RiverOaken and Ross, with contributions by Cyrano and MadDest",
 				"",
 				"Sound effects made by Chris J",
 				"",
+				"5-star QA tester: Kat",
+				"",
+				"Thanks to everyone above, as well as Mojoraven, the libGDX discord, and others, for help in bouncing off ideas and general planning.",
 				"",
 				"Game Dev is hard."
 			);
