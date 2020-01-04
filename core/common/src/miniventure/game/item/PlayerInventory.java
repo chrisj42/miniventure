@@ -124,7 +124,7 @@ public abstract class PlayerInventory<TItem extends Item, TItemStack extends Ite
 	}*/
 	
 	// this is called by the inventory overlay
-	boolean equipItem(@NotNull EquipmentSlot equipmentSlot, int index) {
+	public boolean equipItem(@NotNull EquipmentSlot equipmentSlot, int index) {
 		// final Inventory<TItem, TItemStack> inv = hotbar ? this : inventory;
 		TItem item = inventory.getItem(index);
 		if(item == null)
@@ -149,7 +149,7 @@ public abstract class PlayerInventory<TItem extends Item, TItemStack extends Ite
 		return true;
 	}
 	
-	boolean unequipItem(@NotNull EquipmentSlot equipmentSlot, int index) {
+	public boolean unequipItem(@NotNull EquipmentSlot equipmentSlot, int index) {
 		TItem item = equippedItems.remove(equipmentSlot);
 		if(item == null)
 			return false;

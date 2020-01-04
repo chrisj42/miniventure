@@ -1,5 +1,8 @@
 package miniventure.game.item;
 
+import miniventure.game.client.ClientCore;
+import miniventure.game.network.GameProtocol.InventoryMovement;
+
 public class ClientInventory extends Inventory<Item, ItemStack> {
 	
 	// the fact that there is items in the hotbar is mostly for rendering. Most of these methods are for rendering.
@@ -38,6 +41,15 @@ public class ClientInventory extends Inventory<Item, ItemStack> {
 				unsuppressItem(cur);
 		}
 	}*/
+	
+	@Override
+	public boolean moveItem(int oldIdx, int newIdx) {
+		if(super.moveItem(oldIdx, newIdx)) {
+			ClientCore.getClient().send(new InventoryMovement(oldIdx, newIdx));
+			return true;
+		}
+		return false;
+	}
 	
 	public void updateItems(String[][] data) { updateItems(data, 0); }
 	public void updateItems(String[][] data, int buffer) {

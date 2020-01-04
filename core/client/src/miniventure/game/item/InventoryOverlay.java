@@ -190,7 +190,7 @@ public class InventoryOverlay extends MenuScreen {
 					return false;
 				//noinspection SynchronizeOnThis
 				synchronized (InventoryOverlay.this) {
-					for(int i = 0; i < PlayerInventory.HOTBAR_SIZE; i++) {
+					for(int i = 0; i < 10; i++) {
 						if(keycode == Keys.NUM_1 + i) {
 							invManager.setSelection(i);
 							return true;
@@ -206,9 +206,9 @@ public class InventoryOverlay extends MenuScreen {
 				if(inventory == null)
 					return false;
 				int idx = invManager.getSelection() + amount;
-				idx %= PlayerInventory.HOTBAR_SIZE;
+				idx %= inventory.getSlotsTaken();
 				if(idx < 0)
-					idx += PlayerInventory.HOTBAR_SIZE;
+					idx += inventory.getSlotsTaken();
 				
 				invManager.setSelection(idx);
 				return true;

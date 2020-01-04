@@ -195,9 +195,16 @@ public class ServerPlayer extends ServerMob implements Player {
 			// if successful, do nothing, because client will have pre-maturely removed the item itself.
 		});
 		
-		/*forPacket(packet, InventoryRequest.class, true, req -> {
-			connection.send(inventory.getUpdate());
-		});*/
+		forPacket(packet, InventoryMovement.class, true, req -> {
+			inventory.moveItem(req.oldIdx, req.newIdx);
+		});
+		
+		forPacket(packet, EquipRequest.class, true, req -> {
+			if(req.equip)
+				invManager.equipItem(req.equipmentType, req.invIdx);
+			else
+				invManager.unequipItem(req.equipmentType, req.invIdx);
+		});
 		
 		forPacket(packet, DatalessRequest.Recipes, true, () -> connection.send(new RecipeUpdate(
 			equippedHammer == null ? HammerType.getHandRecipes() : equippedHammer.getRecipes(),

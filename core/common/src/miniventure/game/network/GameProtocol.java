@@ -552,13 +552,24 @@ public interface GameProtocol {
 	class EquipRequest {
 		public final EquipmentSlot equipmentType;
 		public final int invIdx;
-		private final boolean equip;
+		public final boolean equip;
 		
 		private EquipRequest() { this(null, 0, false); }
 		public EquipRequest(EquipmentSlot equipmentType, int invIdx, boolean equip) {
 			this.equipmentType = equipmentType;
 			this.invIdx = invIdx;
 			this.equip = equip;
+		}
+	}
+	
+	class InventoryMovement {
+		public final int oldIdx;
+		public final int newIdx;
+		
+		private InventoryMovement() { this(0, 0); }
+		public InventoryMovement(int oldIdx, int newIdx) {
+			this.oldIdx = oldIdx;
+			this.newIdx = newIdx;
 		}
 	}
 	

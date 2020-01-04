@@ -34,9 +34,9 @@ public class ClientPlayerInventory extends PlayerInventory<Item, ItemStack, Clie
 	}
 	
 	public void setSelection(int idx) {
-		idx %= HOTBAR_SIZE;
+		idx %= getInv().getSlotsTaken();
 		if(idx < 0)
-			idx += HOTBAR_SIZE;
+			idx += getInv().getSlotsTaken();
 		
 		selection = idx;
 	}
@@ -52,7 +52,7 @@ public class ClientPlayerInventory extends PlayerInventory<Item, ItemStack, Clie
 	}*/
 	
 	@Override
-	boolean equipItem(@NotNull EquipmentSlot equipmentSlot, int index) {
+	public boolean equipItem(@NotNull EquipmentSlot equipmentSlot, int index) {
 		boolean success = super.equipItem(equipmentSlot, index);
 		if(success)
 			ClientCore.getClient().send(new EquipRequest(equipmentSlot, index, true));
@@ -60,7 +60,7 @@ public class ClientPlayerInventory extends PlayerInventory<Item, ItemStack, Clie
 	}
 	
 	@Override
-	boolean unequipItem(@NotNull EquipmentSlot equipmentSlot, int index) {
+	public boolean unequipItem(@NotNull EquipmentSlot equipmentSlot, int index) {
 		boolean success = super.equipItem(equipmentSlot, index);
 		if(success)
 			ClientCore.getClient().send(new EquipRequest(equipmentSlot, index, false));
