@@ -10,8 +10,10 @@ import miniventure.game.item.Inventory.ChangeListener;
 import miniventure.game.util.ArrayUtils;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public abstract class PlayerInventory<TItem extends Item, TItemStack extends ItemStack, TInv extends Inventory<TItem, TItemStack>> implements ChangeListener {
+/** @noinspection AbstractClassWithoutAbstractMethods*/
+public abstract class PlayerInventory<TItem extends Item, TItemStack extends ItemStack, TInv extends Inventory<TItem, TItemStack>> {
 	
 	public static final int INV_SIZE = 50;
 	public static final int HOTBAR_SIZE = 5;
@@ -21,31 +23,50 @@ public abstract class PlayerInventory<TItem extends Item, TItemStack extends Ite
 	// player inventories have a hotbar which can contain empty spaces, as well as the ability to suppress certain items from showing up while still counting them towards the quota.
 	
 	@NotNull private TInv inventory;
+	// @NotNull private TInv hotbar;
 	
 	final EnumMap<EquipmentSlot, TItem> equippedItems;
 	
-	private final TreeMap<Integer, Integer> usedHotbarSlots;
+	// private final TreeMap<Integer, Integer> usedHotbarSlots;
 	
-	private boolean swapping = false; // if true, then the listeners ignore events.
+	// private boolean swapping = false; // if true, then the listeners ignore events.
 	
 	PlayerInventory(@NotNull TInv inventory) {
 		this.inventory = inventory;
-		inventory.addListener(this);
+		// this.hotbar = hotbar;
 		
 		equippedItems = new EnumMap<>(EquipmentSlot.class);
 		
-		usedHotbarSlots = new TreeMap<>();
+		// usedHotbarSlots = new TreeMap<>();
+		
+		reset();
+	}
+	
+	public void reset() {
+		inventory.reset();
+		// hotbar.reset();
+		equippedItems.clear();
+		
+		/*for (int i = 0; i < hotbar.getSpace(); i++) {
+			hotbar.uniqueItems.add(null);
+		}*/
 	}
 	
 	@NotNull
 	public TInv getInv() { return inventory; }
 	
-	public void reset() {
-		inventory.reset();
-		equippedItems.clear();
+	@Nullable
+	public Item getEquippedItem(EquipmentSlot slot) {
+		return equippedItems.get(slot);
 	}
 	
-	@Override
+	/*public int getHotbarItemCount() { return usedHotbarSlots.size(); }
+	
+	public int getInventoryIndex(int hotbarIdx) {
+		return usedHotbarSlots.getOrDefault(hotbarIdx, -1);
+	}*/
+	
+	/*@Override
 	public void onInsert(int idx) {
 		if(swapping) return;
 		// attempt to fit it into the hotbar
@@ -67,9 +88,9 @@ public abstract class PlayerInventory<TItem extends Item, TItemStack extends Ite
 			usedHotbarSlots.tailMap(hotbarIdx, false).replaceAll((k, v) -> v-1);
 			usedHotbarSlots.remove(hotbarIdx);
 		}
-	}
+	}*/
 	
-	void swapItems(int startItemIdx, int startHotbarIdx, int finItemIdx, int finHotbarIdx) {
+	/*void swapItems(int startItemIdx, int startHotbarIdx, int finItemIdx, int finHotbarIdx) {
 		assert startItemIdx >= 0; // must have starting item
 		assert finItemIdx >= 0 || finHotbarIdx >= 0; // must have destination
 		
@@ -100,38 +121,40 @@ public abstract class PlayerInventory<TItem extends Item, TItemStack extends Ite
 				inventory.moveItem(startItemIdx, finItemIdx);
 		}
 		swapping = false;
-	}
+	}*/
 	
-	/**
-	 * Equips or unequips an item to an equipment slot, or swaps one equipped item for another one. This involves:
-	 * - checking if the item is allowed into the given slot
-	 * - swapping it with what is currently there
-	 * - executing anything related to the specific slot/item being equipped/unequipped
-	 * @param equipmentSlot the type of equipment slot we want to edit
-	 * @param invIdx the index of the item to be equipped, or -1 to unequip the current item
-	 * @return if the item was equipped / unequipped successfully
-	 */
-	boolean equipItem(@NotNull EquipmentSlot equipmentSlot, int invIdx) {
-		TItem item = invIdx < 0 ? null : inventory.getItem(invIdx);
+	// this is called by the inventory overlay
+	boolean equipItem(@NotNull EquipmentSlot equipmentSlot, int index) {
+		// final Inventory<TItem, TItemStack> inv = hotbar ? this : inventory;
+		TItem item = inventory.getItem(index);
+		if(item == null)
+			return false;
 		
 		// ensure the given item is allowed to be in this slot
-		if(item != null && item.getEquipmentType() != equipmentSlot)
+		if(item.getEquipmentType() != equipmentSlot)
 			return false;
 		
 		// swap it with whatever is there
-		TItem cur = equippedItems.get(equipmentSlot);
+		TItem curEquip = equippedItems.get(equipmentSlot);
 		
-		if(Objects.equals(cur, item))
+		if(Objects.equals(curEquip, item))
 			return true; // nothing would have changed anyway, so say it went smoothly without doing anything
 		
-		int replaceIdx = item == null ? inventory.getSlotsTaken() : inventory.getIndex(item);
+		inventory.removeItem(item, false);
 		
-		if(cur != null && !inventory.removeItem(cur, false))
-			return false; // the inventory does not contain the given item; might happen if there is an inventory update during a drag or something.
+		unequipItem(equipmentSlot, index);
 		
-		if(item != null)
-			inventory.addItem(replaceIdx, item, false);
 		equippedItems.put(equipmentSlot, item);
+		
+		return true;
+	}
+	
+	boolean unequipItem(@NotNull EquipmentSlot equipmentSlot, int index) {
+		TItem item = equippedItems.remove(equipmentSlot);
+		if(item == null)
+			return false;
+		
+		inventory.addItem(index, item, false);
 		
 		return true;
 	}
@@ -145,16 +168,16 @@ public abstract class PlayerInventory<TItem extends Item, TItemStack extends Ite
 		return equippedItems.size();
 	}
 	
-	void setHotbarSlots(String[] positions) {
+	/*void setHotbarSlots(String[] positions) {
 		usedHotbarSlots.clear();
 		int invIdx = 0;
 		for(String posData: positions) {
 			usedHotbarSlots.put(Integer.parseInt(posData), invIdx++);
 		}
-	}
+	}*/
 	
-	String[] getHotbarData() {
+	/*String[] getHotbarData() {
 		Integer[] positions = usedHotbarSlots.keySet().toArray(new Integer[0]);
 		return ArrayUtils.mapArray(positions, String.class, String::valueOf);
-	}
+	}*/
 }

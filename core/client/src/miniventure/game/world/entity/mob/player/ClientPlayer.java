@@ -224,7 +224,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 						}
 					} else {
 						if(cursorTile != null)
-							ClientCore.getClient().send(new InteractRequest(attack, cursorTile.getCenter(), getDirection(), inventory.getInv().getSelection()));
+							ClientCore.getClient().send(new InteractRequest(attack, cursorTile.getCenter(), getDirection(), inventory.getSelection()));
 					}
 				}
 			}
@@ -234,7 +234,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 			} else */if(ClientCore.input.pressingControl(Control.CRAFTING_TOGGLE))
 				ClientCore.setScreen(new CraftingScreen());
 			else if(ClientCore.input.pressingControl(Control.DROP_ITEM)) {
-				inventory.getInv().dropInvItems(Modifier.SHIFT.isPressed());
+				inventory.dropInvItems(Modifier.SHIFT.isPressed());
 			}
 			/*else if(ClientCore.input.pressingControl(Control.DROP_STACK)) {
 				inventory.dropInvItems(true);
@@ -267,7 +267,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 	public void handlePlayerPackets(@NotNull Object object, @NotNull PacketPipeWriter packetSender) {
 		
 		forPacket(object, InventoryUpdate.class, newInv -> {
-			inventory.updateItems(newInv.inventory, newInv.equipment, newInv.hotbarData);
+			inventory.updateItems(newInv.inventory, newInv.equipment/*, newInv.hotbarData*/);
 		});
 		
 		forPacket(object, InventoryAddition.class, addition -> {

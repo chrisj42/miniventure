@@ -28,7 +28,11 @@ public class ClientEntityRenderer {
 	
 	private ClientEntityRenderer() {}
 	
-	private static HashMap<String, RendererType> classMap;
+	private static HashMap<String, RendererType> classMap = new HashMap<>();
+	
+	static {
+		RendererType.init();
+	}
 	
 	enum RendererType {
 		Sprite(SpriteRenderer.class, data -> new SpriteRenderer(data[0])),
@@ -55,11 +59,14 @@ public class ClientEntityRenderer {
 			if(classMap == null)
 				classMap = new HashMap<>();
 			classMap.put(clazz.getName(), this);
+			System.out.println("Adding class "+clazz.getName());
 		}
 		
 		public EntityRenderer deserialize(String[] data) {
 			return deserializer.get(data);
 		}
+		
+		public static void init() {}
 	}
 	
 	@NotNull

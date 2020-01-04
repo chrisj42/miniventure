@@ -118,7 +118,7 @@ public class ItemSlot extends Widget {
 				if(showName) {
 					float yo = font.getDescent();
 					yo = yo + (getHeight() - font.getDescent() + font.getCapHeight() + font.getAscent()) / 2;
-					font.draw(batch, item.getName().replace("_", " "), getX() + Item.ICON_SIZE * ItemIcon.UI_SCALE + 2 + SPACING + XPADDING, getY() + yo + YPADDING);
+					font.draw(batch, MyUtils.toTitleFormat(item.getName()), getX() + Item.ICON_SIZE * ItemIcon.UI_SCALE + 2 + SPACING + XPADDING, getY() + yo + YPADDING);
 				}
 				
 				if(showCount()) {

@@ -1,13 +1,9 @@
 package miniventure.game.world.entity;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashMap;
 
 import miniventure.game.GameCore;
-import miniventure.game.item.ClientItem;
 import miniventure.game.item.Item;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
@@ -29,7 +25,9 @@ public abstract class EntityRenderer {
 	
 	protected abstract String[] serialize();
 	
-	public void update(float delta) { elapsedTime += delta; }
+	public void update(float delta) {
+		elapsedTime += delta;
+	}
 	//public void reset() { elapsedTime = 0; }
 	
 	public abstract void render(float x, float y, Batch batch, float drawableHeight);
@@ -47,10 +45,11 @@ public abstract class EntityRenderer {
 			this.spriteName = spriteName;
 			this.sprite = texture;
 		}
+		
 		public SpriteRenderer(String spriteName) {
 			this.spriteName = spriteName;
 			
-			if(!textures.containsKey(spriteName))
+			if (!textures.containsKey(spriteName))
 				textures.put(spriteName, GameCore.entityAtlas.getRegion(spriteName));
 			
 			sprite = textures.get(spriteName);
@@ -60,18 +59,24 @@ public abstract class EntityRenderer {
 		// }
 		
 		@Override
-		protected String[] serialize() { return new String[] {spriteName}; }
+		protected String[] serialize() {
+			return new String[]{spriteName};
+		}
 		
-		public String getName() { return spriteName; }
+		public String getName() {
+			return spriteName;
+		}
 		
 		@Override
 		public void render(float x, float y, Batch batch, float drawableHeight) {
 			Vector2 size = getSize();
-			batch.draw(sprite.texture.split(sprite.width, (int)(sprite.height*drawableHeight))[0][0], x, y, size.x, size.y);
+			batch.draw(sprite.texture.split(sprite.width, (int) (sprite.height * drawableHeight))[0][0], x, y, size.x, size.y);
 		}
 		
 		@Override
-		public Vector2 getSize() { return new Vector2(sprite.width, sprite.height); }
+		public Vector2 getSize() {
+			return new Vector2(sprite.width, sprite.height);
+		}
 	}
 	
 	
@@ -85,7 +90,7 @@ public abstract class EntityRenderer {
 		}
 		
 		private static TextureHolder mapTexture(TextureHolder given) {
-			if(given.name.startsWith("items"))
+			if (given.name.startsWith("items"))
 				return GameCore.scaledIconAtlas.getRegion(given.name);
 			else
 				return GameCore.descaledTileAtlas.getRegion(given.name);
@@ -102,7 +107,9 @@ public abstract class EntityRenderer {
 		}
 		
 		@Override
-		protected String[] serialize() { return item.serialize(); }
+		protected String[] serialize() {
+			return item.serialize();
+		}
 	}
 	
 	
@@ -117,7 +124,10 @@ public abstract class EntityRenderer {
 		
 		private final Animation<TextureHolder> animation;
 		
-		public AnimationRenderer(String animationName, float frameTime) { this(animationName, frameTime, true, true); }
+		public AnimationRenderer(String animationName, float frameTime) {
+			this(animationName, frameTime, true, true);
+		}
+		
 		public AnimationRenderer(String animationName, float duration, boolean isFrameDuration, boolean loopAnimation) {
 			this.animationName = animationName;
 			this.duration = duration;
@@ -126,25 +136,30 @@ public abstract class EntityRenderer {
 			
 			Array<TextureHolder> frames = animationFrames.computeIfAbsent(animationName, name -> GameCore.entityAtlas.getRegions(name));
 			
-			animation = new Animation<>(isFrameDuration ? duration : duration/frames.size, frames);
+			animation = new Animation<>(isFrameDuration ? duration : duration / frames.size, frames);
 		}
+		
 		AnimationRenderer(String[] data) {
 			this(data[0], Float.parseFloat(data[1]), Boolean.parseBoolean(data[2]), Boolean.parseBoolean(data[3]));
 		}
 		
 		@Override
 		protected String[] serialize() {
-			return new String[] {animationName, String.valueOf(duration), String.valueOf(isFrameDuration), String.valueOf(loopAnimation)};
+			return new String[]{animationName, String.valueOf(duration), String.valueOf(isFrameDuration), String.valueOf(loopAnimation)};
 		}
 		
-		public String getName() { return animationName; }
+		public String getName() {
+			return animationName;
+		}
 		
-		private TextureHolder getSprite() { return animation.getKeyFrame(super.elapsedTime, loopAnimation); }
+		private TextureHolder getSprite() {
+			return animation.getKeyFrame(super.elapsedTime, loopAnimation);
+		}
 		
 		@Override
 		public void render(float x, float y, Batch batch, float drawableHeight) {
 			TextureHolder sprite = getSprite();
-			batch.draw(sprite.texture.split(sprite.width, (int)(sprite.height*drawableHeight))[0][0], x, y);
+			batch.draw(sprite.texture.split(sprite.width, (int) (sprite.height * drawableHeight))[0][0], x, y);
 		}
 		
 		@Override
@@ -164,13 +179,17 @@ public abstract class EntityRenderer {
 		
 		private final EnumMap<Direction, AnimationRenderer> animations = new EnumMap<>(Direction.class);
 		
-		@NotNull private Direction dir;
+		@NotNull
+		private Direction dir;
 		
-		public DirectionalAnimationRenderer(@NotNull Direction initialDir, DirectionalSpriteFetcher spriteFetcher, float frameTime) { this(initialDir, spriteFetcher, frameTime, true, true); }
+		public DirectionalAnimationRenderer(@NotNull Direction initialDir, DirectionalSpriteFetcher spriteFetcher, float frameTime) {
+			this(initialDir, spriteFetcher, frameTime, true, true);
+		}
+		
 		public DirectionalAnimationRenderer(@NotNull Direction initialDir, DirectionalSpriteFetcher spriteFetcher, float duration, boolean isFrameDuration, boolean loopAnimation) {
 			this.dir = initialDir;
 			
-			for(Direction dir: Direction.values)
+			for (Direction dir : Direction.values)
 				animations.put(dir, new AnimationRenderer(spriteFetcher.getSpriteName(dir), duration, isFrameDuration, loopAnimation));
 		}
 		
@@ -178,7 +197,7 @@ public abstract class EntityRenderer {
 			this.dir = Direction.valueOf(data[0]);
 			
 			int i = 1;
-			for(Direction dir: Direction.values) {
+			for (Direction dir : Direction.values) {
 				animations.put(dir, new AnimationRenderer(MyUtils.parseLayeredString(data[i])));
 				i++;
 			}
@@ -186,11 +205,11 @@ public abstract class EntityRenderer {
 		
 		@Override
 		protected String[] serialize() {
-			String[] data = new String[animations.size()+1];
+			String[] data = new String[animations.size() + 1];
 			data[0] = dir.name();
 			
 			int i = 1;
-			for(Direction dir: Direction.values) {
+			for (Direction dir : Direction.values) {
 				data[i] = MyUtils.encodeStringArray(animations.get(dir).serialize());
 				i++;
 			}
@@ -198,17 +217,21 @@ public abstract class EntityRenderer {
 			return data;
 		}
 		
-		public void setDirection(@NotNull Direction dir) { this.dir = dir; }
+		public void setDirection(@NotNull Direction dir) {
+			this.dir = dir;
+		}
 		
 		@Override
 		public void render(float x, float y, Batch batch, float drawableHeight) {
 			AnimationRenderer renderer = animations.get(dir);
-			((EntityRenderer)renderer).elapsedTime = super.elapsedTime;
+			((EntityRenderer) renderer).elapsedTime = super.elapsedTime;
 			renderer.render(x, y, batch, drawableHeight);
 		}
 		
 		@Override
-		public Vector2 getSize() { return animations.get(dir).getSize(); }
+		public Vector2 getSize() {
+			return animations.get(dir).getSize();
+		}
 	}
 	
 	// NOTE, I won't be using this for mobs. I want to just enforce blinking no matter the sprite underneath, and only for a period of time...
@@ -217,7 +240,8 @@ public abstract class EntityRenderer {
 		EntityRenderer mainRenderer;
 		private final boolean blinkFirst;
 		private final float initialDuration;
-		@Nullable private final Color blinkColor;
+		@Nullable
+		private final Color blinkColor;
 		private final Blinker blinker;
 		
 		public BlinkRenderer(EntityRenderer mainRenderer, @Nullable Color blinkColor, float initialDuration, boolean blinkFirst, Blinker blinker) {
@@ -238,9 +262,9 @@ public abstract class EntityRenderer {
 		
 		@Override
 		protected String[] serialize() {
-			return new String[] {
+			return new String[]{
 				MyUtils.encodeStringArray(EntityRenderer.serialize(mainRenderer)),
-				blinkColor==null?"null":blinkColor.toString(),
+				blinkColor == null ? "null" : blinkColor.toString(),
 				String.valueOf(initialDuration),
 				String.valueOf(blinkFirst),
 				MyUtils.encodeStringArray(blinker.serialize())
@@ -255,15 +279,15 @@ public abstract class EntityRenderer {
 		@Override
 		public void update(float delta) {
 			super.update(delta);
-			if(blinkerActive())
+			if (blinkerActive())
 				blinker.update(delta);
 		}
 		
 		@Override
 		public void render(float x, float y, Batch batch, float drawableHeight) {
-			if(!blinkerActive() || blinker.shouldRender())
+			if (!blinkerActive() || blinker.shouldRender())
 				mainRenderer.render(x, y, batch, drawableHeight);
-			else if(blinkColor != null) {
+			else if (blinkColor != null) {
 				Color c = batch.getColor();
 				batch.setColor(blinkColor);
 				mainRenderer.render(x, y, batch, drawableHeight);
@@ -272,20 +296,32 @@ public abstract class EntityRenderer {
 		}
 		
 		@Override
-		public Vector2 getSize() { return mainRenderer.getSize(); }
+		public Vector2 getSize() {
+			return mainRenderer.getSize();
+		}
 	}
 	
 	
 	public static final EntityRenderer BLANK = new EntityRenderer() {
-		@Override public void render(float x, float y, Batch batch, float drawableHeight) {}
-		@Override public Vector2 getSize() { return new Vector2(); }
-		@Override protected String[] serialize() { return new String[0]; }
+		@Override
+		public void render(float x, float y, Batch batch, float drawableHeight) {
+		}
+		
+		@Override
+		public Vector2 getSize() {
+			return new Vector2();
+		}
+		
+		@Override
+		protected String[] serialize() {
+			return new String[0];
+		}
 	};
 	
 	
 	public static String[] serialize(EntityRenderer renderer) {
 		String[] data = renderer.serialize();
-		String[] allData = new String[data.length+1];
+		String[] allData = new String[data.length + 1];
 		
 		allData[0] = renderer.getClass().getName();
 		

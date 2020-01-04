@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Widget;
 
 import org.jetbrains.annotations.Nullable;
 
+// like an item slot, but no background or interactability
 public class ItemIcon extends Widget {
 	
 	static final float UI_SCALE = 1.5f;

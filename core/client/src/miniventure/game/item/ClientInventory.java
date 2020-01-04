@@ -1,32 +1,21 @@
 package miniventure.game.item;
 
-import miniventure.game.client.ClientCore;
-import miniventure.game.network.GameProtocol.ItemDropRequest;
-import miniventure.game.util.Version;
-
-import org.jetbrains.annotations.NotNull;
-
 public class ClientInventory extends Inventory<Item, ItemStack> {
 	
 	// the fact that there is items in the hotbar is mostly for rendering. Most of these methods are for rendering.
 	
-	// item equipping is handled here. 
-	
-	private int selection;
+	// private int selection;
 	
 	public ClientInventory(int size) {
 		super(size, Item.class, ItemStack.class);
 	}
 	
-	public void dropInvItems(boolean all) {
-		ClientCore.getClient().send(new ItemDropRequest(selection, all));
-		if(all)
-			removeItemStack(getItem(selection));
-		else
-			removeItem(getItem(selection));
-	}
+	// when a hotbar slot that has no item is selected, or 
+	/*void nullSelection() {
+		selection = -1;
+	}*/
 	
-	public void setSelection(int idx) {
+	/*public void setSelection(int idx) {
 		idx %= getSlotsTaken();
 		if(idx < 0)
 			idx += getSlotsTaken();
@@ -37,7 +26,7 @@ public class ClientInventory extends Inventory<Item, ItemStack> {
 	
 	public ItemStack getSelectedItem() {
 		return getItemStack(getSelection());
-	}
+	}*/
 	
 	// called by the inventory overlay when an 
 	/*public synchronized boolean equip(@NotNull EquipmentSlot equipmentType, int idx, @Nullable Item item) {

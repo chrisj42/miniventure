@@ -10,6 +10,7 @@ import miniventure.game.world.entity.mob.player.Player;
 import miniventure.game.world.entity.mob.player.Player.CursorHighlight;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public enum HammerType {
 	
@@ -46,6 +47,11 @@ public enum HammerType {
 		@NotNull @Override
 		public Player.CursorHighlight getHighlightMode() {
 			return CursorHighlight.INVISIBLE;
+		}
+		
+		@Override
+		public EquipmentSlot getEquipmentType() {
+			return EquipmentSlot.HAMMER;
 		}
 		
 		// todo on interaction, equip the hammer.

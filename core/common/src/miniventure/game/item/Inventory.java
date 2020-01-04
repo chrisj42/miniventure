@@ -14,6 +14,7 @@ import miniventure.game.util.function.ValueAction;
 
 import org.jetbrains.annotations.NotNull;
 
+/** @noinspection AbstractClassWithoutAbstractMethods*/
 public abstract class Inventory<TItem extends Item, TItemStack extends ItemStack> {
 	
 	/*
@@ -38,25 +39,31 @@ public abstract class Inventory<TItem extends Item, TItemStack extends ItemStack
 	final Class<TItemStack> stackClass;
 	private int spaceTaken = 0;
 	
-	private HashSet<ChangeListener> changeListeners;
+	// private HashSet<ChangeListener> changeListeners;
 	
-	public Inventory(int size, Class<TItem> itemClass, Class<TItemStack> stackClass) {
+	protected Inventory(int size, Class<TItem> itemClass, Class<TItemStack> stackClass) {
 		this.size = size;
 		uniqueItems = new ArrayList<>(size);
 		itemCounter = new InstanceCounter<>(size);
 		this.itemClass = itemClass;
 		this.stackClass = stackClass;
-		changeListeners = new HashSet<>();
+		// changeListeners = new HashSet<>();
 		reset();
 	}
 	
-	public void addListener(ChangeListener l) { changeListeners.add(l); }
-	public void removeListener(ChangeListener l) { changeListeners.remove(l); }
+	// public void addListener(ChangeListener l) { changeListeners.add(l); }
+	// public void removeListener(ChangeListener l) { changeListeners.remove(l); }
 	
-	private void postEvent(ValueAction<ChangeListener> action) {
+	/*private void postEvent(ValueAction<ChangeListener> action) {
 		for(ChangeListener l: changeListeners)
 			action.act(l);
 	}
+	private void postInsert(int index) {
+		postEvent(l -> l.onInsert(index));
+	}
+	private void postRemove(int index) {
+		postEvent(l -> l.onRemove(index));
+	}*/
 	
 	public void reset() {
 		itemCounter.clear();
@@ -115,18 +122,17 @@ public abstract class Inventory<TItem extends Item, TItemStack extends ItemStack
 			return false; // invalid indices
 		
 		uniqueItems.add(newIdx, uniqueItems.remove(oldIdx));
-		final int nIdx = newIdx;
-		postEvent(l -> l.onRemove(oldIdx));
-		postEvent(l -> l.onInsert(nIdx));
+		// postRemove(oldIdx);
+		// postInsert(newIdx);
 		return true;
 	}
 	
-	public boolean swapItems(int pos1, int pos2) {
+	/*public boolean swapItems(int pos1, int pos2) {
 		TItem temp = uniqueItems.get(pos1);
 		uniqueItems.set(pos1, uniqueItems.get(pos2));
 		uniqueItems.set(pos2, temp);
 		return true;
-	}
+	}*/
 	
 	public boolean addItem(TItem item) { return addItem(uniqueItems.size(), item); }
 	public boolean addItem(int index, TItem item) { return addItem(index, item, true); }
@@ -134,10 +140,11 @@ public abstract class Inventory<TItem extends Item, TItemStack extends ItemStack
 		if(addSpace && getSpaceLeft() < 1)
 			return false; // not enough space left in inventory.
 		
+		index = Math.min(uniqueItems.size(), index);
 		// add new items to uniqueItems
 		if(itemCounter.add(item) == 1) {
-			uniqueItems.add(Math.min(uniqueItems.size(), index), item);
-			postEvent(l -> l.onInsert(index));
+			uniqueItems.add(index, item);
+			// postInsert(index);
 		}
 		
 		if(addSpace)
@@ -151,9 +158,8 @@ public abstract class Inventory<TItem extends Item, TItemStack extends ItemStack
 		
 		// remove from uniqueItems if none are left
 		if(itemCounter.removeInstance(item) == 0) {
-			int idx = uniqueItems.indexOf(item);
-			uniqueItems.remove(idx);
-			postEvent(l -> l.onRemove(idx));
+			uniqueItems.remove(item);
+			// postRemove(idx);
 		}
 		
 		if(removeSpace)
@@ -161,14 +167,12 @@ public abstract class Inventory<TItem extends Item, TItemStack extends ItemStack
 		return true;
 	}
 	
-	public int removeItemStack(TItem item) {
-		if(item == null) return 0;
-		int count = getCount(item);
-		if(count == 0) return 0;
-		itemCounter.remove(item);
-		int idx = uniqueItems.indexOf(item);
-		uniqueItems.remove(idx);
-		postEvent(l -> l.onRemove(idx));
+	public int removeItemStack(TItem item) { return removeItemStack(getIndex(item)); }
+	public int removeItemStack(int idx) {
+		if(idx < 0) return 0;
+		TItem item = uniqueItems.remove(idx);
+		int count = itemCounter.remove(item);
+		// postRemove(idx);
 		spaceTaken -= count;
 		return count;
 	}

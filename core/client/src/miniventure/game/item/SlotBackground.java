@@ -12,18 +12,24 @@ public class SlotBackground extends BaseDrawable {
 	
 	private static final Color selectionColor = new Color(.85f, .87f, 0, 1);
 	private static final Color backgroundColor = new Color(.64f, .64f, .64f, 1);
+	private static final Color highlightColor = new Color(.8f, .8f, .8f, 1);
 	
 	private static final float SHRINK_RATIO = .75f;
 	
 	private final FetchFunction<Boolean> drawSlot;
+	private final FetchFunction<Boolean> drawHighlight;
 	private final FetchFunction<Boolean> drawSelected;
 	
 	private final TextureHolder backgroundTexture;
 	// private final TextureHolder backgroundTexture;
 	// private final TextureHolder selectionTexture;
 	
-	SlotBackground(FetchFunction<Boolean> drawSlot, FetchFunction<Boolean> drawSelected) {
+	SlotBackground(FetchFunction<Boolean> drawSlot, FetchFunction<Boolean> drawHighlight) {
+		this(drawSlot, drawHighlight, () -> false);
+	}
+	SlotBackground(FetchFunction<Boolean> drawSlot, FetchFunction<Boolean> drawHighlight, FetchFunction<Boolean> drawSelected) {
 		this.drawSlot = drawSlot;
+		this.drawHighlight = drawHighlight;
 		this.drawSelected = drawSelected;
 		
 		backgroundTexture = GameCore.icons.get("fade-rect");
@@ -43,7 +49,7 @@ public class SlotBackground extends BaseDrawable {
 			batch.draw(backgroundTexture.texture, x, y, width, height);
 		}
 		
-		batch.setColor(backgroundColor);
+		batch.setColor(drawHighlight.get() ? highlightColor : backgroundColor);
 		float nwidth = width * SHRINK_RATIO;
 		float nheight = height * SHRINK_RATIO;
 		float xoff = (width - nwidth) / 2;

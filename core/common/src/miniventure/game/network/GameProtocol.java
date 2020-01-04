@@ -552,10 +552,13 @@ public interface GameProtocol {
 	class EquipRequest {
 		public final EquipmentSlot equipmentType;
 		public final int invIdx;
+		private final boolean equip;
 		
-		public EquipRequest(EquipmentSlot equipmentType, int invIdx) {
+		private EquipRequest() { this(null, 0, false); }
+		public EquipRequest(EquipmentSlot equipmentType, int invIdx, boolean equip) {
 			this.equipmentType = equipmentType;
 			this.invIdx = invIdx;
+			this.equip = equip;
 		}
 	}
 	
@@ -564,18 +567,18 @@ public interface GameProtocol {
 		public final String[][] inventory; // the item list
 		@Nullable
 		public final String[][] equipment; // equipped items
-		public final String[] hotbarData;
+		// public final String[] hotbarData;
 		
-		private InventoryUpdate() { this(null, null, null); }
+		private InventoryUpdate() { this(null, null); }
 		/*public InventoryUpdate(ItemStack[] inventory) {
 			itemStacks = new String[inventory.length][];
 			for(int i = 0; i < inventory.length; i++)
 				itemStacks[i] = inventory[i].serialize();
 		}*/
-		public InventoryUpdate(String[][] inventory, @Nullable String[][] equipment, String[] hotbarData) {
+		public InventoryUpdate(String[][] inventory, @Nullable String[][] equipment/*, String[] hotbarData*/) {
 			this.inventory = inventory;
 			this.equipment = equipment;
-			this.hotbarData = hotbarData;
+			// this.hotbarData = hotbarData;
 		}
 	}
 	

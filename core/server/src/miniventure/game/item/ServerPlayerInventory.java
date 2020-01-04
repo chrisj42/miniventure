@@ -18,14 +18,14 @@ public class ServerPlayerInventory extends PlayerInventory<ServerItem, ServerIte
 	public String[] save() {
 		String[] invData = getInv().save();
 		
-		String[] allData = new String[EquipmentSlot.values.length + 1 + invData.length];
-		System.arraycopy(invData, 0, allData, EquipmentSlot.values.length+1, invData.length);
+		String[] allData = new String[EquipmentSlot.values.length + invData.length];
+		System.arraycopy(invData, 0, allData, EquipmentSlot.values.length, invData.length);
 		for (int i = 0; i < EquipmentSlot.values.length; i++) {
 			ServerItem item = equippedItems.get(EquipmentSlot.values[i]);
-			allData[i] = item == null ? null : MyUtils.encodeStringArray(item.save());
+			allData[i] = item == null ? "null" : MyUtils.encodeStringArray(item.save());
 		}
 		
-		allData[EquipmentSlot.values.length] = MyUtils.encodeStringArray(getHotbarData());
+		// allData[EquipmentSlot.values.length] = MyUtils.encodeStringArray(getHotbarData());
 		
 		return allData;
 	}
@@ -33,11 +33,11 @@ public class ServerPlayerInventory extends PlayerInventory<ServerItem, ServerIte
 	public void loadItems(String[] data, @NotNull Version version) {
 		ServerItem[] equipment = new ServerItem[EquipmentSlot.values.length];
 		for (int i = 0; i < equipment.length; i++)
-			equipment[i] = ServerItem.load(MyUtils.parseLayeredString(data[i]), version);
+			equipment[i] = data[i].equals("null") ? null : ServerItem.load(MyUtils.parseLayeredString(data[i]), version);
 		
 		int buffer = setEquipment(equipment);
-		setHotbarSlots(MyUtils.parseLayeredString(data[equipment.length]));
-		getInv().loadItems(Arrays.copyOfRange(data, equipment.length+1, data.length), buffer, version);
+		// setHotbarSlots(MyUtils.parseLayeredString(data[equipment.length]));
+		getInv().loadItems(Arrays.copyOfRange(data, equipment.length, data.length), buffer, version);
 	}
 	
 	public InventoryUpdate getUpdate() { return getUpdate(true); }
@@ -52,6 +52,6 @@ public class ServerPlayerInventory extends PlayerInventory<ServerItem, ServerIte
 		}
 		else equipment = null;
 		
-		return new InventoryUpdate(getInv().serialize(), equipment, getHotbarData());
+		return new InventoryUpdate(getInv().serialize(), equipment);
 	}
 }
