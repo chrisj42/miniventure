@@ -13,6 +13,7 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Container;
@@ -221,7 +222,7 @@ public class InventoryOverlay extends MenuScreen {
 	}
 	
 	private ItemSlot makeEquipmentSlot(EquipmentSlot type) {
-		ItemSlot slot = new ItemSlot(false, null, Color.LIGHT_GRAY) {
+		ItemSlot slot = new ItemSlot(false, null) {
 			@Override @Nullable
 			public Item getItem() {
 				return invManager == null ? null : invManager.getEquippedItem(type);
@@ -254,8 +255,9 @@ public class InventoryOverlay extends MenuScreen {
 	private static class SlotPayload extends Payload {
 		@NotNull private final Item item;
 		
-		private SlotPayload(@NotNull Item item) {
+		private SlotPayload(Actor actor, @NotNull Item item) {
 			this.item = item;
+			setDragActor(actor);
 		}
 	}
 	
@@ -305,7 +307,7 @@ public class InventoryOverlay extends MenuScreen {
 			if(item == null)
 				return null;
 			
-			return new SlotPayload(item);
+			return new SlotPayload(new ItemIcon(item, info.slot.getCount()), item);
 		}
 	}
 	
