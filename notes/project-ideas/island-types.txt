@@ -12,7 +12,13 @@ woodland / forest surface
 		- cows
 		- sheep
 		- snakes (hostile)
-		- zombies
+		- squirrels
+		- worms (under logs, fishing)
+		- butterflies (potion base)
+		- turkeys
+		- birds (perhaps only decorative, flies away after bumping/hitting tree)
+		- hedgehogs (defensive, plains?)
+		- bears (forest)
 	- resources
 		- wood
 		- granite
@@ -39,8 +45,8 @@ woodland / forest caves
 		- chunks of iron ore and coal
 	- mobs
 		- bats
-		- cave trolls
-		- zombies
+		- worms (under logs, fishing)
+		- snakes (hostile)
 	- resources
 		- iron
 		- coal
@@ -56,11 +62,19 @@ desert / savanna surface
 		- savanna areas
 			- sparse trees
 			- muddy rivers
-		- 
+		- rocky areas; "plateaus"
 	- mobs
 		- pigs
-        - crocodile
-		- 
+        - crocodile (rivers)
+		- lizards
+		- desert tortise
+		- armadillos (savanna)
+		- mice (under small rocks)
+		- Scorpions (hostile, small)
+		- vultures?
+		- kangaroos (savanna)
+		- lions
+		- cheetah
 	- resources
 		- sand
 		- 
@@ -77,7 +91,10 @@ desert / savanna caves
 		- thinner paths in general than forest caves
 		- sometimes widens into caverns
 	- mobs
-		- 
+		- Scorpions (hostile, small)
+		- armadillos (savanna)
+		- mice (under small rocks)
+		- lizards
 	- resources
 		- coal
 		- sandstone
@@ -91,7 +108,14 @@ snowy surface
 		- snow on everything
 	- mobs
 		- rabbits
-		- moose
+		- moose (hostile)
+		- polar bears (aggressive; drop raw meat to distract it)
+		- penguins
+		- seals?
+		- arctic fox
+		- arctic wolves
+		- snowy owl?
+		- lynx
 	- resources
 		- hard wood
 		- 
@@ -106,7 +130,8 @@ snowy caves
 	- terrain
 		- 
 	- mobs
-		- 
+		- polar bears (aggressive; drop raw meat to distract it)
+		- penguins
 	- resources
 		- titanium
 		- ruby
@@ -114,6 +139,7 @@ snowy caves
 	- some stuff you'll make
 		- 
 
+- post-game bonus: dino island? :)
 
 
 
