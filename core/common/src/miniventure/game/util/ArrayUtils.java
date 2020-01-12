@@ -79,10 +79,6 @@ public final class ArrayUtils {
 		return joined;
 	}
 	
-	// this method is not really safe since it assumes the the array type is the generic type; ie it assumes there has been no casting.
-	/*public static <T> T[] mapArray(T[] startArray, MapFunction<T, T> mapper) {
-		return mapArray(startArray, (Class<T>) startArray.getClass().getComponentType(), mapper);
-	}*/
 	// useful to convert between object arrays
 	public static <PT, RT> RT[] mapArray(PT[] startArray, Class<RT> resultComponentType, MapFunction<PT, RT> mapper) {
 		return (RT[]) mapArray((Object)startArray, resultComponentType, mapper);
@@ -105,6 +101,24 @@ public final class ArrayUtils {
 		
 		for(int i = 0; i < Array.getLength(startArray); i++)
 			Array.set(endValues, i, mapper.get((PT)Array.get(startArray, i)));
+		
+		return endValues;
+	}
+	// map from a list
+	// useful to convert from a list to an object array
+	public static <PT, RT> RT[] mapArray(List<PT> startArray, Class<RT> resultComponentType, MapFunction<PT, RT> mapper) {
+		return (RT[]) mapList(startArray, resultComponentType, mapper);
+	}
+	// useful to convert from a list to a primitive array
+	public static <PT, RT, RAT> RAT mapArray(List<PT> startArray, Class<RT> resultComponentType, Class<RAT> resultArrayType, MapFunction<PT, RT> mapper) {
+		return (RAT) mapList(startArray, resultComponentType, mapper);
+	}
+	// base method that does mapping work when starting from a list
+	private static <PT, RT> Object mapList(List<PT> startArray, Class<RT> resultComponentType, MapFunction<PT, RT> mapper) {
+		Object endValues = Array.newInstance(resultComponentType, startArray.size());
+		
+		for(int i = 0; i < startArray.size(); i++)
+			Array.set(endValues, i, mapper.get(startArray.get(i)));
 		
 		return endValues;
 	}
