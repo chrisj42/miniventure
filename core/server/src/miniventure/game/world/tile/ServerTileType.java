@@ -28,6 +28,7 @@ import org.jetbrains.annotations.Nullable;
 public class ServerTileType extends TileType {
 	
 	public static void init() {
+		TileType.init();
 		for(ServerTileTypeEnum type: ServerTileTypeEnum.values)
 			type.getType();
 	}

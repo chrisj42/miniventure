@@ -30,6 +30,8 @@ import miniventure.game.world.entity.mob.player.ClientPlayer;
 import miniventure.game.world.file.WorldFileInterface;
 import miniventure.game.world.management.ClientWorld;
 import miniventure.game.world.tile.ClientTileType;
+import miniventure.game.world.tile.TileType;
+import miniventure.game.world.tile.TileTypeEnum;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -124,6 +126,7 @@ public class ClientCore extends ApplicationAdapter {
 			if(batch == null)
 				batch = new SpriteBatch();
 			
+			TileType.init();
 			GenericEnum.init();
 			ClientTileType.init();
 			serverStarter.init();

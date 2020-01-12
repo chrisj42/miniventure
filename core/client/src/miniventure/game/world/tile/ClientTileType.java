@@ -17,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 public class ClientTileType extends TileType {
 	
 	public static void init() {
+		TileType.init();
 		TileTypeRenderer.init();
 		for(ClientTileTypeEnum type: ClientTileTypeEnum.values)
 			type.getType();

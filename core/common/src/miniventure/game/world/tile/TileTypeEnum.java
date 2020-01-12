@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.Arrays;
 import java.util.EnumSet;
 
+import miniventure.game.GameCore;
 import miniventure.game.world.management.WorldManager;
 import miniventure.game.world.worldgen.island.ProtoTile;
 import miniventure.game.world.worldgen.island.TileProcessor;
@@ -50,10 +51,13 @@ public enum TileTypeEnum implements TileProcessor {
 		this.walkable = walkable;
 		this.speedRatio = speedRatio;
 		this.color = color;
+		GameCore.debug("Initialized TileType "+this);
 	}
 	
 	private static final TileTypeEnum[] values = TileTypeEnum.values();
 	public static TileTypeEnum value(int ord) { return values[ord]; }
+	
+	public static void init() {}
 	
 	public TileType getTypeInstance(@NotNull WorldManager world) {
 		return world.getTileType(this);
