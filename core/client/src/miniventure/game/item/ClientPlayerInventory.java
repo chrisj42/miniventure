@@ -32,6 +32,7 @@ public class ClientPlayerInventory extends PlayerInventory<Item, ItemStack, Clie
 			getInv().removeItemStack(index);
 		else
 			getInv().removeItem(getInv().getItem(index));
+		setSelection(Math.min(getInv().getSlotsTaken() - 1, selection));
 	}
 	
 	public void setSelection(int idx) {
@@ -83,5 +84,6 @@ public class ClientPlayerInventory extends PlayerInventory<Item, ItemStack, Clie
 		// setHotbarSlots(hotbarData);
 		
 		getInv().updateItems(inventoryData, equippedItems.size());
+		setSelection(Math.min(getInv().getSlotsTaken() - 1, selection));
 	}
 }
