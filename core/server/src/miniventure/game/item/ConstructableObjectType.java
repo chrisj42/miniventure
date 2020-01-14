@@ -28,7 +28,7 @@ public enum ConstructableObjectType implements PlacementAttempt {
 	
 	Dock(TileTypeEnum.DOCK, PlacementCheck.groundExcluding(TileTypeEnum.DOCK)),
 	
-	Stone_Floor(TileTypeEnum.STONE_FLOOR, PlacementCheck.onTile(TileTypeEnum.HOLE)),
+	Stone_Floor(TileTypeEnum.STONE_FLOOR, "c00", PlacementCheck.onTile(TileTypeEnum.HOLE)),
 	
 	Wood_Wall(TileTypeEnum.WOOD_WALL, PlacementCheck.GROUND),
 	
@@ -41,11 +41,17 @@ public enum ConstructableObjectType implements PlacementAttempt {
 	
 	// for tiles
 	ConstructableObjectType(@NotNull TileTypeEnum tileType, @NotNull PlacementCheck placementCheck) {
-		this(tileType, true, placementCheck);
+		this(tileType, "main", placementCheck);
+	}
+	ConstructableObjectType(@NotNull TileTypeEnum tileType, String tileSpriteName, @NotNull PlacementCheck placementCheck) {
+		this(tileType, true, tileSpriteName, placementCheck);
 	}
 	ConstructableObjectType(@NotNull TileTypeEnum tileType, boolean useLargeSprite, @NotNull PlacementCheck placementCheck) {
+		this(tileType, useLargeSprite, "main", placementCheck);
+	}
+	ConstructableObjectType(@NotNull TileTypeEnum tileType, boolean useLargeSprite, String tileSpriteName, @NotNull PlacementCheck placementCheck) {
 		this(tile(tileType), placementCheck,
-			(useLargeSprite ? GameCore.tileAtlas : GameCore.descaledTileAtlas).getRegion(tileType.name().toLowerCase()+"/main")
+			(useLargeSprite ? GameCore.tileAtlas : GameCore.descaledTileAtlas).getRegion(tileType.name().toLowerCase()+'/'+tileSpriteName)
 		);
 	}
 	
@@ -53,12 +59,13 @@ public enum ConstructableObjectType implements PlacementAttempt {
 	
 	
 	// general
-	ConstructableObjectType(@NotNull PlacementAction placementAction, @NotNull PlacementCheck placementCheck) {
-		this(placementAction, placementCheck, null);
-	}
-	ConstructableObjectType(@NotNull PlacementAction placementAction, @NotNull PlacementCheck placementCheck, @Nullable TextureHolder customTexture) {
+	/*ConstructableObjectType(@NotNull PlacementAction placementAction, @NotNull PlacementCheck placementCheck) {
 		this.placementAttempt = PlacementAttempt.getAttempt(placementCheck, placementAction);
-		this.item = customTexture == null ? new BlueprintItem() : new BlueprintItem(customTexture);
+		this.item = new BlueprintItem();
+	}*/
+	ConstructableObjectType(@NotNull PlacementAction placementAction, @NotNull PlacementCheck placementCheck, @NotNull TextureHolder customTexture) {
+		this.placementAttempt = PlacementAttempt.getAttempt(placementCheck, placementAction);
+		this.item = new BlueprintItem(customTexture);
 	}
 	
 	@Override
@@ -74,7 +81,7 @@ public enum ConstructableObjectType implements PlacementAttempt {
 		
 		// note that is is not actually what is set as the client's active item; this class is solely for internal use by BlueprintRecipes passed to the client.
 		
-		private BlueprintItem() { super(name()); }
+		// private BlueprintItem() { super(name()); }
 		private BlueprintItem(@NotNull TextureHolder texture) {
 			super(name(), texture);
 		}
