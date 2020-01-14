@@ -123,7 +123,7 @@ public class GameScreen {
 		// batch.setProjectionMatrix(uiCamera.combined);
 		if(drawGui) {
 			renderGui(level);
-			guiStage.focus();
+			// guiStage.focus();
 			guiStage.act();
 			guiStage.draw();
 		}

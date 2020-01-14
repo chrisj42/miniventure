@@ -4,15 +4,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.Thread.UncaughtExceptionHandler;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.EnumMap;
 import java.util.HashMap;
 
@@ -25,14 +20,10 @@ import miniventure.game.screen.util.BackgroundInheritor;
 import miniventure.game.screen.util.BackgroundProvider;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.customenum.GenericEnum;
-import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.entity.ClientEntityRenderer;
-import miniventure.game.world.entity.mob.player.ClientPlayer;
 import miniventure.game.world.file.WorldFileInterface;
 import miniventure.game.world.management.ClientWorld;
 import miniventure.game.world.tile.ClientTileType;
-import miniventure.game.world.tile.TileType;
-import miniventure.game.world.tile.TileTypeEnum;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -202,6 +193,14 @@ public class ClientCore extends ApplicationAdapter {
 		}
 	}
 	
+	private static void resetInputProcessor() {
+		if(gameScreen == null) {
+			Gdx.input.setInputProcessor(menuScreen == null ? input : new InputMultiplexer(input, menuScreen));
+		} else {
+			Gdx.input.setInputProcessor(menuScreen == null ? new InputMultiplexer(gameScreen.getGuiStage(), input) : new InputMultiplexer(input.repressDelay(.1f), menuScreen, gameScreen.getGuiStage()));
+		}
+	}
+	
 	public static void setScreen(@Nullable MenuScreen screen) {
 		synchronized (screenLock) {
 			if(screen == menuScreen) return;
@@ -251,11 +250,7 @@ public class ClientCore extends ApplicationAdapter {
 			input.resetDelay();
 			menuScreen = screen;
 			if(menuScreen != null) menuScreen.focus();
-			if(gameScreen == null) {
-				Gdx.input.setInputProcessor(menuScreen == null ? input : new InputMultiplexer(input, menuScreen));
-			} else {
-				Gdx.input.setInputProcessor(menuScreen == null ? new InputMultiplexer(gameScreen.getGuiStage(), input) : new InputMultiplexer(input.repressDelay(.1f), menuScreen, gameScreen.getGuiStage()));
-			}
+			resetInputProcessor();
 		}
 	}
 	public static void backToParentScreen() {
@@ -281,6 +276,8 @@ public class ClientCore extends ApplicationAdapter {
 	
 	public static GameScreen newGameScreen(GameScreen screen) {
 		gameScreen = screen;
+		gameScreen.getGuiStage().focus();
+		resetInputProcessor();
 		return screen;
 	}
 	
