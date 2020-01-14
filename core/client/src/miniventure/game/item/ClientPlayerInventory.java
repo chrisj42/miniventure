@@ -5,6 +5,7 @@ import miniventure.game.network.GameProtocol.EquipRequest;
 import miniventure.game.network.GameProtocol.ItemDropRequest;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class ClientPlayerInventory extends PlayerInventory<Item, ItemStack, ClientInventory> {
 	
@@ -34,14 +35,18 @@ public class ClientPlayerInventory extends PlayerInventory<Item, ItemStack, Clie
 	}
 	
 	public void setSelection(int idx) {
-		idx %= getInv().getSlotsTaken();
-		if(idx < 0)
-			idx += getInv().getSlotsTaken();
+		int slots = getInv().getSlotsTaken();
+		if(slots > 0) {
+			idx %= slots;
+			if(idx < 0)
+				idx += slots;
+		} else idx = 0;
 		
 		selection = idx;
 	}
 	public int getSelection() { return selection; }
 	
+	@Nullable
 	public ItemStack getSelectedItem() {
 		return getInv().getItemStack(getSelection());
 	}

@@ -13,6 +13,7 @@ import miniventure.game.util.function.MapFunction;
 import miniventure.game.util.function.ValueAction;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /** @noinspection AbstractClassWithoutAbstractMethods*/
 public abstract class Inventory<TItem extends Item, TItemStack extends ItemStack> {
@@ -83,18 +84,21 @@ public abstract class Inventory<TItem extends Item, TItemStack extends ItemStack
 	
 	// public synchronized TItem[] getUniqueItems() { return uniqueItems.toArray(new TItem[0]); }
 	
+	@Nullable
 	public TItem getItem(int idx) {
 		if(idx < 0 || idx >= uniqueItems.size())
 			return null;
 		return uniqueItems.get(idx);
 	}
 	
+	@Nullable
 	public TItemStack getItemStack(int idx) {
 		TItem item = getItem(idx);
-		return getItemStack(item, getCount(item));
+		return item == null ? null : getItemStack(item, getCount(item));
 	}
 	
-	private TItemStack getItemStack(TItem item, int count) {
+	@NotNull
+	private TItemStack getItemStack(@NotNull TItem item, int count) {
 		try {
 			return stackClass.getConstructor(itemClass, int.class).newInstance(item, count);
 		} catch(InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {

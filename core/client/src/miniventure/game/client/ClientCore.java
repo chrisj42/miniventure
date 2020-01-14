@@ -89,7 +89,9 @@ public class ClientCore extends ApplicationAdapter {
 	
 	public static boolean PLAY_MUSIC = false;
 	
-	public static final ValueAction<Throwable> exceptionNotifier = throwable -> {
+	public static final UncaughtExceptionHandler exceptionHandler = (thread, throwable) -> {
+		throwable.printStackTrace();
+		
 		StringWriter string = new StringWriter();
 		PrintWriter printer = new PrintWriter(string);
 		throwable.printStackTrace(printer);
@@ -98,11 +100,7 @@ public class ClientCore extends ApplicationAdapter {
 		errorDisplay.setEditable(false);
 		JScrollPane errorPane = new JScrollPane(errorDisplay);
 		JOptionPane.showMessageDialog(null, errorPane, "An error has occurred", JOptionPane.ERROR_MESSAGE);
-	};
-	
-	public static final UncaughtExceptionHandler exceptionHandler = (thread, throwable) -> {
-		exceptionNotifier.act(throwable);
-		throwable.printStackTrace();
+		
 		System.exit(1);
 	};
 	

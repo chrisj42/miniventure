@@ -207,9 +207,13 @@ public class InventoryOverlay extends MenuScreen {
 				if(inventory == null)
 					return false;
 				int idx = invManager.getSelection() + amount;
-				idx %= inventory.getSlotsTaken();
-				if(idx < 0)
-					idx += inventory.getSlotsTaken();
+				int slots = inventory.getSlotsTaken();
+				if(slots > 0) {
+					idx %= slots;
+					if(idx < 0)
+						idx += slots;
+				} else
+					return false;
 				
 				invManager.setSelection(idx);
 				return true;
