@@ -6,10 +6,6 @@ import miniventure.game.util.param.FetchParam;
 
 public abstract class TileType {
 	
-	public static void init() {
-		TileTypeEnum.init();
-	}
-	
 	// used in subclasses to conveniently create Params for the tile types.
 	static class TParam<T> extends FetchParam<TileTypeEnum, T> {
 		TParam(MapFunction<TileTypeEnum, T> defaultValue) {

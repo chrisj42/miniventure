@@ -33,7 +33,7 @@ public class GameCore {
 	public static final Version VERSION = new Version("2.2.1.4"); // the last digit increments without release or tag
 	
 	public static boolean isCompatible(Version dataVersion) {
-		return dataVersion.atOrAfter("2.2.1.3");
+		return dataVersion.atOrAfter("2.2.1.4");
 	}
 	
 	public static boolean debug = false;

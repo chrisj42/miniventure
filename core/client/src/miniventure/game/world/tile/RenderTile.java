@@ -111,7 +111,7 @@ public class RenderTile extends Tile {
 			ClientTileType prev = types.get(i-1);
 			
 			// add connection sprite (or transition) for prev
-			spriteStack.addAll(prev.getRenderer().getConnectionSprites(this, typesAtPositions));
+			spriteStack.addAll(prev.getRenderer().getCoreSprites(this, typesAtPositions));
 			
 			// check for overlaps that are above prev AND below cur
 			NavigableSet<TileTypeEnum> overlapSet;

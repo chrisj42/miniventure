@@ -45,7 +45,7 @@ public enum ConstructableObjectType implements PlacementAttempt {
 	}
 	ConstructableObjectType(@NotNull TileTypeEnum tileType, boolean useLargeSprite, @NotNull PlacementCheck placementCheck) {
 		this(tile(tileType), placementCheck,
-			(useLargeSprite ? GameCore.tileAtlas : GameCore.descaledTileAtlas).getRegion(tileType.name().toLowerCase()+"/c00")
+			(useLargeSprite ? GameCore.tileAtlas : GameCore.descaledTileAtlas).getRegion(tileType.name().toLowerCase()+"/main")
 		);
 	}
 	

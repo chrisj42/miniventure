@@ -21,6 +21,7 @@ public abstract class GenericEnum<EC extends GenericEnum<EC>> implements Compara
 		enumClasses.put(clazz, new EnumData<>(clazz, constants));
 	}
 	
+	// initializes all generic enum implementations
 	public static void init() {
 		TileDataTag.init();
 		TileCacheTag.init();

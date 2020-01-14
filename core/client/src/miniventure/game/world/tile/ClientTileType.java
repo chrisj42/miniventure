@@ -1,11 +1,6 @@
 package miniventure.game.world.tile;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-
+import miniventure.game.GameCore;
 import miniventure.game.util.param.Param;
 import miniventure.game.util.param.ParamMap;
 import miniventure.game.util.param.Value;
@@ -14,10 +9,13 @@ import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 
 import org.jetbrains.annotations.NotNull;
 
+import static miniventure.game.world.tile.TileTypeRenderer.ConnectionCheck.list;
+import static miniventure.game.world.tile.TileTypeRenderer.buildRenderer;
+
 public class ClientTileType extends TileType {
 	
 	public static void init() {
-		TileType.init();
+		GameCore.debug("about to init TileTypeRenderer");
 		TileTypeRenderer.init();
 		for(ClientTileTypeEnum type: ClientTileTypeEnum.values)
 			type.getType();
@@ -27,7 +25,7 @@ public class ClientTileType extends TileType {
 	private interface P {
 		Param<Float> lightRadius = new Param<>(0f);
 		Param<SwimAnimation> swimAnimation = new Param<>(null);
-		Param<List<TransitionAnimation>> transitions = new Param<>(new ArrayList<>(0));
+		// Param<List<TransitionAnimation>> transitions = new Param<>(new ArrayList<>(0));
 		
 		ClientTileType get(TileTypeEnum type);
 	}
@@ -36,36 +34,35 @@ public class ClientTileType extends TileType {
 	
 	private final float lightRadius;
 	private final SwimAnimation swimAnimation;
-	private final HashMap<String, TransitionAnimation> transitions;
 	
 	// all default; goes to connection+overlap
-	private ClientTileType(@NotNull TileTypeEnum tileType, boolean isOpaque, Value... params) {
-		this(tileType, isOpaque, new ConnectionManager(tileType), new OverlapManager(tileType), params);
+	private ClientTileType(@NotNull TileTypeEnum tileType, boolean isOpaque, Value<?>... params) {
+		this(tileType, TileTypeRenderer.buildRenderer(tileType, isOpaque).build(), params);
 	}
-	// connection only; goes to connection+overlap
-	private ClientTileType(@NotNull TileTypeEnum tileType, boolean isOpaque, ConnectionManager connectionManager, Value... params) {
+	/*// connection only; goes to connection+overlap
+	private ClientTileType(@NotNull TileTypeEnum tileType, boolean isOpaque, ConnectionManager connectionManager, Value<?>... params) {
 		this(tileType, isOpaque, connectionManager, new OverlapManager(tileType), params);
 	}
 	// overlap only; goes to connection+overlap
-	private ClientTileType(@NotNull TileTypeEnum tileType, boolean isOpaque, OverlapManager overlapManager, Value... params) {
+	private ClientTileType(@NotNull TileTypeEnum tileType, boolean isOpaque, OverlapManager overlapManager, Value<?>... params) {
 		this(tileType, isOpaque, new ConnectionManager(tileType, RenderStyle.SINGLE_FRAME), overlapManager, params);
 	}
 	// overlap+connection; goes to renderer
-	private ClientTileType(@NotNull TileTypeEnum tileType, boolean isOpaque, ConnectionManager connectionManager, OverlapManager overlapManager, Value... params) {
+	private ClientTileType(@NotNull TileTypeEnum tileType, boolean isOpaque, ConnectionManager connectionManager, OverlapManager overlapManager, Value<?>... params) {
 		this(tileType, new TileTypeRenderer(tileType, isOpaque, connectionManager, overlapManager), params);
-	}
+	}*/
 	// renderer; final
-	private ClientTileType(@NotNull TileTypeEnum tileType, TileTypeRenderer renderer, Value... params) {
+	private ClientTileType(@NotNull TileTypeEnum tileType, TileTypeRenderer renderer, Value<?>... params) {
 		super(tileType);
 		this.renderer = renderer;
 		ParamMap map = new ParamMap(params);
 		lightRadius = map.get(P.lightRadius);
 		swimAnimation = map.get(P.swimAnimation);
 		
-		List<TransitionAnimation> transitions = map.get(P.transitions);
+		/*List<TransitionAnimation> transitions = map.get(P.transitions);
 		this.transitions = new HashMap<>(transitions.size());
 		for(TransitionAnimation trans: transitions)
-			this.transitions.put(trans.getName(), trans);
+			this.transitions.put(trans.getName(), trans);*/
 	}
 	
 	public static ClientTileType get(TileTypeEnum type) {
@@ -84,12 +81,11 @@ public class ClientTileType extends TileType {
 		return swimAnimation;
 	}
 	
-	public TransitionAnimation getTransition(String name) { return transitions.get(name); }
-	
 	private enum ClientTileTypeEnum {
 		
-		HOLE(type -> new ClientTileType(type, true,
-			new ConnectionManager(type, type, TileTypeEnum.WATER),
+		HOLE(type -> new ClientTileType(type, buildRenderer(type, true)
+				.connect(list(type, TileTypeEnum.WATER))
+				.build(),
 			P.swimAnimation.as(new SwimAnimation(type, 0.75f))
 		)),
 		
@@ -105,9 +101,10 @@ public class ClientTileType extends TileType {
 		
 		FLINT(type -> new ClientTileType(type, false)),
 		
-		WATER(type -> new ClientTileType(type, true,
-			new ConnectionManager(type, new RenderStyle(PlayMode.LOOP_RANDOM, 5)),
-			new OverlapManager(type, new RenderStyle(true, 24)),
+		WATER(type -> new ClientTileType(type, buildRenderer(type, true,
+				new RenderStyle(PlayMode.LOOP_RANDOM, 5),
+				new RenderStyle(true, 24)
+			).build(),
 			P.swimAnimation.as(new SwimAnimation(type))
 		)),
 		
@@ -118,8 +115,9 @@ public class ClientTileType extends TileType {
 		TUNGSTEN_ORE(ClientTileFactory::ore),
 		RUBY_ORE(ClientTileFactory::ore),
 		
-		STONE(type -> new ClientTileType(type, true,
-			new ConnectionManager(type, RenderStyle.SINGLE_FRAME, type, COAL_ORE.mainEnum, IRON_ORE.mainEnum, TUNGSTEN_ORE.mainEnum, RUBY_ORE.mainEnum)
+		STONE(type -> new ClientTileType(type, buildRenderer(type, true)
+			.connect(list(type, COAL_ORE.mainEnum, IRON_ORE.mainEnum, TUNGSTEN_ORE.mainEnum, RUBY_ORE.mainEnum))
+			.build()
 		)),
 		
 		STONE_FLOOR(type -> new ClientTileType(type, true)),
@@ -127,15 +125,17 @@ public class ClientTileType extends TileType {
 		WOOD_WALL(ClientTileFactory::wall),
 		STONE_WALL(ClientTileFactory::wall),
 		
-		OPEN_DOOR(type -> ClientTileFactory.door(type, true)),
-		CLOSED_DOOR(type -> ClientTileFactory.door(type, false)),
+		OPEN_DOOR(type -> new ClientTileType(type, buildRenderer(type, false)
+			.addTransition("open", new RenderStyle(PlayMode.NORMAL, 24))
+			.addTransition("close", new RenderStyle(PlayMode.NORMAL, 24))
+			.build()
+		)),
+		CLOSED_DOOR(type -> new ClientTileType(type, false)),
 		
-		TORCH(type -> new ClientTileType(type, false,
-			new ConnectionManager(type, new RenderStyle(12)),
-			P.lightRadius.as(2f),
-			P.transitions.as(Collections.singletonList(
-				new TransitionAnimation(type, "enter", new RenderStyle(12))
-			))
+		TORCH(type -> new ClientTileType(type, buildRenderer(type, false, new RenderStyle(12))
+				.addTransition("enter", new RenderStyle(12))
+				.build(),
+			P.lightRadius.as(2f)
 		)),
 		
 		CACTUS(type -> new ClientTileType(type, false)),
@@ -170,9 +170,9 @@ public class ClientTileType extends TileType {
 	
 	private interface ClientTileFactory {
 		static ClientTileType ore(TileTypeEnum type) {
-			return new ClientTileType(type, false,
-				new ConnectionManager(type, TileTypeEnum.STONE),
-				new OverlapManager(type)
+			return new ClientTileType(type, buildRenderer(type, false)
+				.connect(list(TileTypeEnum.STONE))
+				.build()
 			);
 		}
 		
@@ -180,15 +180,18 @@ public class ClientTileType extends TileType {
 			return new ClientTileType(type, false);
 		}
 		
-		static ClientTileType door(TileTypeEnum type, boolean open) {
-			return new ClientTileType(type, false,
+		/*static ClientTileType door(TileTypeEnum type, boolean open) {
+			return new ClientTileType(type, buildRenderer(type, false)
+				.addTransition("open", new RenderStyle(PlayMode.NORMAL, 24))
+				.addTransition("close", new RenderStyle(PlayMode.NORMAL, 24))
+				.build(),
 				P.transitions.as(open?Arrays.asList(
-					new TransitionAnimation(type, "open", new RenderStyle(PlayMode.NORMAL, 24)),
-					new TransitionAnimation(type, "close", new RenderStyle(PlayMode.NORMAL, 24))
+					new TransitionAnimation(type, ),
+					new TransitionAnimation(type, )
 					):new ArrayList<>(0)
 				)
 			);
-		}
+		}*/
 		
 		static ClientTileType tree(TileTypeEnum type) {
 			return new ClientTileType(type, false);

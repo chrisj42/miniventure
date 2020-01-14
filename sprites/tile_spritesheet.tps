@@ -198,7 +198,6 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
-            <key type="filename">tile-sprites/air/c00.png</key>
             <key type="filename">tile-sprites/air/o00.png</key>
             <key type="filename">tile-sprites/air/o01.png</key>
             <key type="filename">tile-sprites/air/o02.png</key>
@@ -218,17 +217,18 @@
             <key type="filename">tile-sprites/air/o16.png</key>
             <key type="filename">tile-sprites/air/o17.png</key>
             <key type="filename">tile-sprites/air/o18.png</key>
-            <key type="filename">tile-sprites/cactus/c00.png</key>
-            <key type="filename">tile-sprites/dirt/c00.png</key>
-            <key type="filename">tile-sprites/dock/c00.png</key>
-            <key type="filename">tile-sprites/door_/closed/c00.png</key>
-            <key type="filename">tile-sprites/door_/open/c00.png</key>
+            <key type="filename">tile-sprites/cactus/main.png</key>
+            <key type="filename">tile-sprites/dirt/main.png</key>
+            <key type="filename">tile-sprites/dock/main.png</key>
+            <key type="filename">tile-sprites/door_/closed/main.png</key>
+            <key type="filename">tile-sprites/door_/open/main.png</key>
             <key type="filename">tile-sprites/door_/open/tclose_01.png</key>
             <key type="filename">tile-sprites/door_/open/tclose_02.png</key>
             <key type="filename">tile-sprites/door_/open/tclose_03.png</key>
             <key type="filename">tile-sprites/door_/open/topen_01.png</key>
             <key type="filename">tile-sprites/door_/open/topen_02.png</key>
             <key type="filename">tile-sprites/door_/open/topen_03.png</key>
+            <key type="filename">tile-sprites/flint/main.png</key>
             <key type="filename">tile-sprites/floor_/stone/c00.png</key>
             <key type="filename">tile-sprites/floor_/stone/c01.png</key>
             <key type="filename">tile-sprites/floor_/stone/c02.png</key>
@@ -276,7 +276,6 @@
             <key type="filename">tile-sprites/floor_/stone/c44.png</key>
             <key type="filename">tile-sprites/floor_/stone/c45.png</key>
             <key type="filename">tile-sprites/floor_/stone/c46.png</key>
-            <key type="filename">tile-sprites/grass/c00.png</key>
             <key type="filename">tile-sprites/grass/m00.png</key>
             <key type="filename">tile-sprites/grass/m01.png</key>
             <key type="filename">tile-sprites/grass/o00.png</key>
@@ -426,7 +425,7 @@
             <key type="filename">tile-sprites/ore_/tungsten/o16.png</key>
             <key type="filename">tile-sprites/ore_/tungsten/o17.png</key>
             <key type="filename">tile-sprites/ore_/tungsten/o18.png</key>
-            <key type="filename">tile-sprites/sand/c00.png</key>
+            <key type="filename">tile-sprites/sand/main.png</key>
             <key type="filename">tile-sprites/sand/o00.png</key>
             <key type="filename">tile-sprites/sand/o01.png</key>
             <key type="filename">tile-sprites/sand/o02.png</key>
@@ -446,7 +445,7 @@
             <key type="filename">tile-sprites/sand/o16.png</key>
             <key type="filename">tile-sprites/sand/o17.png</key>
             <key type="filename">tile-sprites/sand/o18.png</key>
-            <key type="filename">tile-sprites/snow/c00.png</key>
+            <key type="filename">tile-sprites/snow/main.png</key>
             <key type="filename">tile-sprites/snow/o00.png</key>
             <key type="filename">tile-sprites/snow/o01.png</key>
             <key type="filename">tile-sprites/snow/o02.png</key>
@@ -516,7 +515,7 @@
             <key type="filename">tile-sprites/stone/m00.png</key>
             <key type="filename">tile-sprites/stone/m01.png</key>
             <key type="filename">tile-sprites/stone/m02.png</key>
-            <key type="filename">tile-sprites/stone_path/c00.png</key>
+            <key type="filename">tile-sprites/stone_path/main.png</key>
             <key type="filename">tile-sprites/stone_path/o00.png</key>
             <key type="filename">tile-sprites/stone_path/o01.png</key>
             <key type="filename">tile-sprites/stone_path/o02.png</key>
@@ -536,9 +535,9 @@
             <key type="filename">tile-sprites/stone_path/o16.png</key>
             <key type="filename">tile-sprites/stone_path/o17.png</key>
             <key type="filename">tile-sprites/stone_path/o18.png</key>
-            <key type="filename">tile-sprites/torch/c00_01.png</key>
-            <key type="filename">tile-sprites/torch/c00_02.png</key>
-            <key type="filename">tile-sprites/torch/c00_03.png</key>
+            <key type="filename">tile-sprites/torch/main_01.png</key>
+            <key type="filename">tile-sprites/torch/main_02.png</key>
+            <key type="filename">tile-sprites/torch/main_03.png</key>
             <key type="filename">tile-sprites/torch/tenter_01.png</key>
             <key type="filename">tile-sprites/torch/tenter_02.png</key>
             <key type="filename">tile-sprites/torch/tenter_03.png</key>
@@ -731,12 +730,12 @@
             <key type="filename">tile-sprites/tree_/poof/c44.png</key>
             <key type="filename">tile-sprites/tree_/poof/c45.png</key>
             <key type="filename">tile-sprites/tree_/poof/c46.png</key>
-            <key type="filename">tile-sprites/wall_/stone/c00.png</key>
-            <key type="filename">tile-sprites/wall_/wood/c00.png</key>
-            <key type="filename">tile-sprites/water/c00_01.png</key>
-            <key type="filename">tile-sprites/water/c00_02.png</key>
-            <key type="filename">tile-sprites/water/c00_03.png</key>
-            <key type="filename">tile-sprites/water/c00_04.png</key>
+            <key type="filename">tile-sprites/wall_/stone/main.png</key>
+            <key type="filename">tile-sprites/wall_/wood/main.png</key>
+            <key type="filename">tile-sprites/water/main_01.png</key>
+            <key type="filename">tile-sprites/water/main_02.png</key>
+            <key type="filename">tile-sprites/water/main_03.png</key>
+            <key type="filename">tile-sprites/water/main_04.png</key>
             <key type="filename">tile-sprites/water/o00_01.png</key>
             <key type="filename">tile-sprites/water/o00_02.png</key>
             <key type="filename">tile-sprites/water/o00_03.png</key>
@@ -1415,19 +1414,6 @@
                 <rect>8,8,16,16</rect>
                 <key>scale9Paddings</key>
                 <rect>8,8,16,16</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">tile-sprites/flint/c00.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>4,4,8,8</rect>
-                <key>scale9Paddings</key>
-                <rect>4,4,8,8</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>

@@ -1,96 +1,259 @@
 package miniventure.game.world.tile;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.LinkedList;
-
-import miniventure.game.GameCore;
-import miniventure.game.texture.TextureHolder;
-import miniventure.game.util.RelPos;
+import java.util.*;
 
 import com.badlogic.gdx.utils.Array;
+import miniventure.game.GameCore;
+import miniventure.game.util.MyUtils;
+import miniventure.game.util.RelPos;
+
+import miniventure.game.world.tile.SpriteManager.SpriteCompiler;
+import miniventure.game.world.tile.TileTypeToAnimationMap.IndexedTileTypeToAnimationMap;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class TileTypeRenderer {
 	
-	static void init() {}
+	static final TileTypeToAnimationMap<Integer> mainAnimations = new IndexedTileTypeToAnimationMap();
+	static final TileTypeToAnimationMap<Integer> connectAnimations = new IndexedTileTypeToAnimationMap();
+	static final TileTypeToAnimationMap<Integer> overlapAnimations = new IndexedTileTypeToAnimationMap();
 	
 	static {
+		GameCore.debug("init TileTypeRenderer class");
+	}
+	
+	// moved into a static init method instead of static init block in an attempt to fix some strange errors someone was having.
+	static void init() {
 		GameCore.debug("reading tile sprites...");
 		
 		GameCore.tileAtlas.iterRegions(region -> {
-			TileTypeEnum tileType = TileTypeEnum.valueOf(region.name.substring(0, region.name.indexOf('/')).toUpperCase());
-			String spriteID = region.name.substring(region.name.indexOf('/')+1);
+			final int split = region.name.indexOf('/');
 			
-			String prefix = spriteID.substring(0, 1);
-			spriteID = spriteID.substring(1).toLowerCase();
+			TileTypeEnum tileType = TileTypeEnum.valueOf(region.name.substring(0, split).toUpperCase(Locale.ENGLISH));
 			
-			EnumMap<TileTypeEnum, HashMap<String, Array<TextureHolder>>> animationMap;
-			switch(prefix) {
-				case "c": animationMap = ConnectionManager.tileAnimations; break;
-				case "m": animationMap = ConnectionManager.mainAnimations; break;
-				case "o": animationMap = OverlapManager.tileAnimations; break;
+			String spriteName = region.name.substring(split+1);
+			
+			TileTypeToAnimationMap<?> animationMap;
+			switch(spriteName.substring(0, 1)) {
+				case "m": animationMap = mainAnimations;
+					if(spriteName.equals("main"))
+						spriteName = "m00";
+					break;
+				case "c": animationMap = connectAnimations; break;
+				case "o": animationMap = overlapAnimations; break;
 				case "t": animationMap = TransitionAnimation.tileAnimations; break;
 				default:
-					if(!(prefix + spriteID).equals("swim"))
-						System.err.println("Unknown Tile Sprite Frame for " + tileType + ": " + prefix + spriteID);
+					if(!spriteName.equals("swim")) // these are not part of the main animation system
+						System.err.println("Unknown Tile Sprite Frame for " + tileType + ": " + spriteName);
 					return;
 			}
 			
-			animationMap
-				.computeIfAbsent(tileType, k -> new HashMap<>())
-				.computeIfAbsent(spriteID, k -> new Array<>(TextureHolder.class))
-				.add(region);
+			animationMap.addFrame(tileType, spriteName.substring(1), region);
 		});
 		
 		GameCore.debug("tile sprites read successfully.");
 	}
 	
+	@FunctionalInterface
+	interface ConnectionCheck {
+		boolean connects(RenderTile tile, TileTypeEnum adjacentType);
+		
+		static ConnectionCheck list(TileTypeEnum... connectingTypes) {
+			final EnumSet<TileTypeEnum> matches = MyUtils.enumSet(connectingTypes);
+			return (tile, type) -> matches.contains(type);
+		}
+	}
+	
+	static RendererBuilder buildRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque) {
+		return buildRenderer(tileType, isOpaque, RenderStyle.SINGLE_FRAME);
+	}
+	static RendererBuilder buildRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque, RenderStyle defaultStyle) {
+		return buildRenderer(tileType, isOpaque, defaultStyle, defaultStyle);
+	}
+	static RendererBuilder buildRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque, RenderStyle defaultCoreStyle, RenderStyle defaultOverlapStyle) {
+		return buildRenderer(tileType, isOpaque, defaultCoreStyle, defaultCoreStyle, defaultOverlapStyle);
+	}
+	static RendererBuilder buildRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque, RenderStyle defaultMainStyle, RenderStyle defaultConnectionStyle, RenderStyle defaultOverlapStyle) {
+		return new RendererBuilder(tileType, isOpaque, defaultMainStyle, defaultConnectionStyle, defaultOverlapStyle);
+	}
+	
+	static class RendererBuilder {
+		
+		private final TileTypeEnum tileType;
+		private final boolean isOpaque;
+		private final SpriteCompiler<Integer> mainSpriteManager;
+		private final SpriteCompiler<Integer> connectionSpriteManager;
+		private final SpriteCompiler<Integer> overlapSpriteManager;
+		// if later on, animation framerates become more standardized, then I'll consider making transitions a SpriteManager too. But for now it's special.
+		private final HashMap<String, TransitionAnimation> transitions;
+		
+		@Nullable // a null check means that we explicitly want to ignore any connection sprites even if they exist
+		private ConnectionCheck connectionCheck;
+		
+		private RendererBuilder(@NotNull TileTypeEnum tileType, boolean isOpaque, RenderStyle defaultMainStyle, RenderStyle defaultConnectionStyle, RenderStyle defaultOverlapStyle) {
+			this.tileType = tileType;
+			this.isOpaque = isOpaque;
+			
+			mainSpriteManager = new SpriteCompiler<>(this, tileType, defaultMainStyle, mainAnimations, "main");
+			connectionSpriteManager = new SpriteCompiler<>(this, tileType, defaultConnectionStyle, connectAnimations, "connection");
+			overlapSpriteManager = new SpriteCompiler<>(this, tileType, defaultOverlapStyle, overlapAnimations, "overlap");
+			
+			transitions = new HashMap<>();
+			
+			// by default, if connection sprites exist, the tile type will connect only to itself
+			if(connectAnimations.hasAnimations(tileType))
+				connectionCheck = ConnectionCheck.list(tileType);
+			else
+				connectionCheck = null;
+		}
+		
+		// MAIN SPRITES
+		SpriteCompiler<Integer> mainSprites() { return mainSpriteManager; }
+		
+		// OVERLAP SPRITES
+		SpriteCompiler<Integer> overlapSprites() { return overlapSpriteManager; }
+		
+		// CONNECTION SPRITES
+		RendererBuilder connect(@Nullable ConnectionCheck connectionCheck) {
+			this.connectionCheck = connectionCheck;
+			return this;
+		}
+		SpriteCompiler<Integer> connectionSprites() { return connectionSpriteManager; }
+		SpriteCompiler<Integer> connections(@Nullable ConnectionCheck connectionCheck) {
+			this.connectionCheck = connectionCheck;
+			return connectionSprites();
+		}
+		
+		// TRANSITION SPRITES
+		RendererBuilder addTransition(String name, @NotNull RenderStyle renderStyle) {
+			transitions.put(name, new TransitionAnimation(tileType, name, renderStyle));
+			return this;
+		}
+		
+		TileTypeRenderer build() {
+			return new TileTypeRenderer(tileType, isOpaque, connectionCheck, mainSpriteManager.getManager(), connectionSpriteManager.getManager(), overlapSpriteManager.getManager(), transitions);
+		}
+	}
 	
 	private final TileTypeEnum tileType;
 	private final boolean isOpaque;
-	private final ConnectionManager connectionManager;
-	private final OverlapManager overlapManager;
+	private final ConnectionCheck connectionCheck;
+	private final SpriteManager<Integer> mainSpriteManager;
+	private final SpriteManager<Integer> connectionSpriteManager;
+	private final SpriteManager<Integer> overlapSpriteManager;
 	
+	private final HashMap<String, TransitionAnimation> transitions;
 	
-	public TileTypeRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque, ConnectionManager connectionManager, OverlapManager overlapManager) {
+	private TileTypeRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque, ConnectionCheck connectionCheck, SpriteManager<Integer> mainSpriteManager, SpriteManager<Integer> connectionSpriteManager, SpriteManager<Integer> overlapSpriteManager, HashMap<String, TransitionAnimation> transitions) {
 		this.tileType = tileType;
 		this.isOpaque = isOpaque;
-		this.connectionManager = connectionManager;
-		this.overlapManager = overlapManager;
-	}
-	
-	public TileTypeRenderer(@NotNull TileTypeRenderer model, @Nullable ConnectionManager connectionManager, @Nullable OverlapManager overlapManager) {
-		this.tileType = model.tileType;
-		isOpaque = model.isOpaque;
-		this.connectionManager = connectionManager == null ? model.connectionManager : connectionManager;
-		this.overlapManager = overlapManager == null ? model.overlapManager : overlapManager;
+		this.connectionCheck = connectionCheck;
+		this.mainSpriteManager = mainSpriteManager;
+		this.connectionSpriteManager = connectionSpriteManager;
+		this.overlapSpriteManager = overlapSpriteManager;
+		this.transitions = transitions;
 	}
 	
 	public boolean isOpaque() { return isOpaque; }
 	
 	// whenever a tile changes its TileTypeEnum stack in any way, all 9 tiles around it re-fetch their overlap and main animations. Then they keep that stack of animations until the next fetch.
 	
-	// gets the sprite for when this tiletype is surrounded by the given types.
-	// note, this returns a list because some tiles have separate main and border sprites, which are overlaid to create the final connection sprite.
-	public LinkedList<TileAnimation> getConnectionSprites(@NotNull Tile tile, EnumMap<RelPos, EnumSet<TileTypeEnum>> aroundTypes) {
+	// fetches sprites that represent this TileType on the given tile, including a main sprite and/or a connection sprite; or a transition sprite, if there is a current transition.
+	public LinkedList<TileAnimation> getCoreSprites(@NotNull Tile tile, EnumMap<RelPos, EnumSet<TileTypeEnum>> aroundTypes) {
 		LinkedList<TileAnimation> sprites = new LinkedList<>();
-		String name = tile.getDataMap(tileType).get(TileDataTag.TransitionName);
-		if(name != null)
-			sprites.add(ClientTileType.get(tileType).getTransition(name).getAnimation());
-		else
-			connectionManager.addConnectionSprites(sprites, (RenderTile) tile, aroundTypes);
+		String tName = tile.getDataMap(tileType).get(TileDataTag.TransitionName);
+		if(tName != null)
+			sprites.add(transitions.get(tName).getAnimation());
+		else {
+			addMainSprite(sprites, tile);
+			addConnectionSprite(sprites, (RenderTile) tile, aroundTypes);
+		}
 		
 		return sprites;
 	}
 	
-	// gets the overlap sprite (sides + any isolated corners) for this tiletype overlapping a tile at the given positions.
-	public ArrayList<TileAnimation> getOverlapSprites(EnumSet<RelPos> overlapPositions) {
-		return overlapManager.getOverlapSprites(overlapPositions);
+	// todo later on, if I decide to have multiple named main sprites, I'll need to provide a way to specify which one to use; but until then, this method will expect them to be indexed if there is more than one.
+	private void addMainSprite(List<TileAnimation> sprites, Tile tile) {
+		final int mainAnimCount = mainAnimations.getAnimationCount(tileType);
+		if(mainAnimCount <= 0)
+			return;
+		
+		int idx = 0;
+		if(mainAnimCount > 1) {
+			// pick a random sprite based on the tile position and tile type
+			Random rand = MyUtils.getRandom(tile.x * 17 + tile.y * 131 + tileType.ordinal() * 79);
+			idx = rand.nextInt(mainAnimCount);
+		}
+		
+		sprites.add(mainSpriteManager.getAnimation(idx));
 	}
 	
+	/// Checks the given aroundTypes for all types
+	private void addConnectionSprite(List<TileAnimation> sprites, RenderTile tile, EnumMap<RelPos, EnumSet<TileTypeEnum>> aroundTypes) {
+		if(connectAnimations.getAnimationCount(tileType) <= 0)
+			return;
+		
+		if(connectionCheck == null) {
+			sprites.add(connectionSpriteManager.getAnimation(0));
+			return;
+		}
+		
+		EnumMap<RelPos, Boolean> tileConnections = new EnumMap<>(RelPos.class);
+		
+		for(RelPos rp: RelPos.values) {
+			// check if each surrounding tile has something in the connectingTypes array
+			boolean connects = false;
+			for(TileTypeEnum aroundType: aroundTypes.get(rp)) {
+				if(connectionCheck.connects(tile, aroundType)) {
+					connects = true;
+					break;
+				}
+			}
+			tileConnections.put(rp, connects);
+		}
+		
+		int spriteIdx = 0;
+		for (int i = 0; i < TileTouchCheck.connectionChecks.length; i++) {
+			if (TileTouchCheck.connectionChecks[i].checkMatch(tileConnections)) {
+				spriteIdx = i;
+				break;
+			}
+		}
+		
+		sprites.add(connectionSpriteManager.getAnimation(spriteIdx));
+	}
+	
+	// gets the overlap sprite (sides + any isolated corners) for this tiletype overlapping a tile at the given positions.
+	/// returns sprites for the stored type assuming it is overlapping at the given positions.
+	public ArrayList<TileAnimation> getOverlapSprites(EnumSet<RelPos> ovLayout) {
+		ArrayList<TileAnimation> animations = new ArrayList<>();
+		
+		if(!overlapAnimations.hasAnimations(tileType))
+			return animations;
+		
+		Array<Integer> indexes = new Array<>(Integer.class);
+		
+		int[] bits = new int[4];
+		if(ovLayout.contains(RelPos.LEFT))   bits[0] = 1; // 1
+		if(ovLayout.contains(RelPos.TOP))    bits[1] = 1; // 5
+		if(ovLayout.contains(RelPos.RIGHT))  bits[2] = 1; // 7
+		if(ovLayout.contains(RelPos.BOTTOM)) bits[3] = 1; // 3
+		int total = 0, value = 1;
+		for(int num: bits) {
+			total += num * value;
+			value *= 2;
+		}
+		if(total > 0) indexes.add(total+3); // don't care to add if all zeros, because then it's just blank. Also, the +3 is to skip past the first 4 sprites, which are the corners (we add 3 instead of 4 because total will start at 1 rather than 0).
+		// four corners; NOTE, the artist should work on the corner sprites in one tile-sized image, to make sure that they only use a quarter of it at absolute most.
+		if(ovLayout.contains(RelPos.TOP_LEFT)     && bits[0] == 0 && bits[1] == 0) indexes.add(0); // 2
+		if(ovLayout.contains(RelPos.TOP_RIGHT)    && bits[1] == 0 && bits[2] == 0) indexes.add(1); // 8
+		if(ovLayout.contains(RelPos.BOTTOM_RIGHT) && bits[2] == 0 && bits[3] == 0) indexes.add(2); // 6
+		if(ovLayout.contains(RelPos.BOTTOM_LEFT)  && bits[3] == 0 && bits[0] == 0) indexes.add(3); // 0
+		for(Integer idx: indexes) {
+			animations.add(overlapSpriteManager.getAnimation(idx));
+		}
+		
+		return animations;
+	}
 }

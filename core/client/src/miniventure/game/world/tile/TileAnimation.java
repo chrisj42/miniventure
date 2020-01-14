@@ -34,10 +34,10 @@ class TileAnimation extends Animation<TextureHolder> {
 		
 		float startTime = 0;
 		if(!sync) {
-			// overlap sprites will almost always have no data map, and in fact would mess up the animation if they weren't global. So, we;ll fetch the data map the back way.
+			// overlap sprites will almost always have no data map, and in fact would mess up the animation if they weren't global. So, we'll fetch the data map the back way.
 			DataMap dataMap = tile.getTypeStack().getCacheMap(tileType);
 			if(dataMap != null)
-				startTime = dataMap.getOrDefaultAndPut(TileCacheTag.AnimationStart, time);
+				startTime = dataMap.putIfAbsent(TileCacheTag.AnimationStart, time);
 		}
 		
 		return super.getKeyFrame(time - startTime);

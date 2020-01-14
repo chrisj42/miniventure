@@ -7,7 +7,7 @@ import miniventure.game.util.function.Action;
 public class TileCacheTag<T> extends DataEnum<T> {
 	
 	static {
-		GenericEnum.registerEnum(TileCacheTag.class, 9);
+		GenericEnum.registerEnum(TileCacheTag.class, 7);
 	}
 	
 	public static void init() {}

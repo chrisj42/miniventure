@@ -1,10 +1,6 @@
 package miniventure.game.util;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import miniventure.game.GameCore;
@@ -257,6 +253,17 @@ public final class MyUtils {
 	
 	// MISC UTILS
 	
+	// I'm thinking that making it weak will prevent it from hanging on to mappings for dead threads.
+	private static WeakHashMap<Thread, Random> threadRandoms = new WeakHashMap<>();
+	// fetches an instance of Random that is local to the thread, so that it won't be messed with.
+	public static Random getRandom(long seed) {
+		Random rand = getRandom();
+		rand.setSeed(seed);
+		return rand;
+	}
+	public static Random getRandom() {
+		return threadRandoms.computeIfAbsent(Thread.currentThread(), thread -> new Random());
+	}
 	
 	public static void delay(int milliDelay, Action action) { new DelayedAction(milliDelay, action).start(); }
 	

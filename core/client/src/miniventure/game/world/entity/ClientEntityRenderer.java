@@ -30,9 +30,7 @@ public class ClientEntityRenderer {
 	
 	private static HashMap<String, RendererType> classMap = new HashMap<>();
 	
-	static {
-		RendererType.init();
-	}
+	public static void init() {}
 	
 	enum RendererType {
 		Sprite(SpriteRenderer.class, data -> new SpriteRenderer(data[0])),
@@ -65,8 +63,6 @@ public class ClientEntityRenderer {
 		public EntityRenderer deserialize(String[] data) {
 			return deserializer.get(data);
 		}
-		
-		public static void init() {}
 	}
 	
 	@NotNull

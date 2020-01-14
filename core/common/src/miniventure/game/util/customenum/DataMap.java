@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import miniventure.game.util.function.MapFunction;
 
+@SuppressWarnings("unchecked")
 public class DataMap {
 	
 	private final HashMap<DataEnum<?>, Object> map = new HashMap<>();
@@ -24,12 +25,10 @@ public class DataMap {
 	}
 	
 	public <T> T put(DataEntry<T> entry) { return put(entry.key, entry.value); }
-	@SuppressWarnings("unchecked")
 	public <T> T put(DataEnum<T> key, T value) {
 		return (T) map.put(key, value);
 	}
 	
-	@SuppressWarnings("unchecked")
 	public <T> T remove(DataEnum<T> tag) {
 		return (T) map.remove(tag);
 	}
@@ -38,7 +37,6 @@ public class DataMap {
 	
 	public boolean contains(DataEnum<?> tag) { return map.containsKey(tag); }
 	
-	@SuppressWarnings("unchecked")
 	public <T> T get(DataEnum<T> tag) {
 		return (T) map.get(tag);
 	}
@@ -48,7 +46,8 @@ public class DataMap {
 		return (val = get(tag)) == null ? defaultValue : val;
 	}
 	// fetches the value for the given key. If there is no key, the default value is added for it and returned.
-	public <T, U extends T> T getOrDefaultAndPut(DataEnum<T> tag, U defaultValue) {
+	public <T> T putIfAbsent(DataEnum<T> tag, T defaultValue) {
+		// return (T) map.computeIfAbsent(tag, t -> defaultValue);
 		T val = get(tag);
 		if(val == null) {
 			put(tag, defaultValue);
@@ -57,12 +56,13 @@ public class DataMap {
 		else
 			return val;
 	}
-	public <T, U> U computeFrom(DataEnum<T> tag, MapFunction<T, U> mapper, U defaultValue) {
-		if(!map.containsKey(tag))
-			return defaultValue;
-		else
-			return mapper.get(get(tag));
-	}
+	/*public <T, U> U computeFrom(DataEnum<T> tag, MapFunction<T, U> mapper, U defaultValue) {
+		return (U) map.compute(tag, (t, val) -> val == null ? defaultValue : mapper.get((T) val));
+		// if(!map.containsKey(tag))
+		// 	return defaultValue;
+		// else
+		// 	return mapper.get(get(tag));
+	}*/
 	
 	// asClass should match the class in DataTag, generally.
 	// public <T> T get(DataEnum<?, T> tag, Class<? extends T> asClass) {

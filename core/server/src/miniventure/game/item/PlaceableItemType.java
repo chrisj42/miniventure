@@ -24,7 +24,7 @@ public enum PlaceableItemType {
 	Snow(tile(TileTypeEnum.SNOW), PlacementCheck.groundExcluding(TileTypeEnum.SNOW)),
 	
 	Torch(tile(TileTypeEnum.TORCH), PlacementCheck.GROUND,
-		GameCore.tileAtlas.getRegion("torch/c00")
+		GameCore.tileAtlas.getRegion("torch/main")
 	);
 	
 	// here is where I can add extra TileItems that may safely conflict with the "official" TileType to TileItem mappings.

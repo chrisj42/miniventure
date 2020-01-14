@@ -57,8 +57,6 @@ public enum TileTypeEnum implements TileProcessor {
 	private static final TileTypeEnum[] values = TileTypeEnum.values();
 	public static TileTypeEnum value(int ord) { return values[ord]; }
 	
-	public static void init() {}
-	
 	public TileType getTypeInstance(@NotNull WorldManager world) {
 		return world.getTileType(this);
 	}

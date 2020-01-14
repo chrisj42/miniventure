@@ -1,17 +1,12 @@
 package miniventure.game.world.tile;
 
-import java.util.EnumMap;
-import java.util.HashMap;
-
-import miniventure.game.texture.TextureHolder;
-
-import com.badlogic.gdx.utils.Array;
+import miniventure.game.world.tile.TileTypeToAnimationMap.StringTileTypeToAnimationMap;
 
 import org.jetbrains.annotations.NotNull;
 
 class TransitionAnimation {
 	
-	static final EnumMap<TileTypeEnum, HashMap<String, Array<TextureHolder>>> tileAnimations = new EnumMap<>(TileTypeEnum.class);
+	static final TileTypeToAnimationMap<String> tileAnimations = new StringTileTypeToAnimationMap();
 	
 	private final TileTypeEnum tileType;
 	private final String name;
@@ -25,6 +20,7 @@ class TransitionAnimation {
 	
 	String getName() { return name; }
 	
+	// we specifically don't want to cache this because otherwise the animation wouldn't reset; it needs to be fresh every call.
 	TileAnimation getAnimation() {
 		return renderStyle.getAnimation(tileType, name, tileAnimations, "transition");
 	}
