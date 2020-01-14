@@ -30,7 +30,11 @@ public class ClientEntityRenderer {
 	
 	private static HashMap<String, RendererType> classMap = new HashMap<>();
 	
-	public static void init() {}
+	public static void init() {
+		// so turns out that inner enums are not initialized when the class is, so classMap won't get filled until we use RendererType directly. So, instead we're just going to fill it directly right here.
+		for(RendererType type: RendererType.values())
+			classMap.put(type.clazz.getName(), type);
+	}
 	
 	enum RendererType {
 		Sprite(SpriteRenderer.class, data -> new SpriteRenderer(data[0])),
@@ -53,11 +57,6 @@ public class ClientEntityRenderer {
 		RendererType(Class<? extends EntityRenderer> clazz, MapFunction<String[], EntityRenderer> deserializer) {
 			this.clazz = clazz;
 			this.deserializer = deserializer;
-			
-			if(classMap == null)
-				classMap = new HashMap<>();
-			classMap.put(clazz.getName(), this);
-			System.out.println("Adding class "+clazz.getName());
 		}
 		
 		public EntityRenderer deserialize(String[] data) {
