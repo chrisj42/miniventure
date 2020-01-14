@@ -93,7 +93,7 @@ public interface Player extends Mob {
 	
 	static Vector2 getClampedCursorPos(Vector2 center, Vector2 cursor, CursorHighlight highlightMode) {
 		Vector2 dist = cursor.cpy().sub(center);
-		clampCursorRange(cursor, highlightMode);
+		clampCursorRange(dist, highlightMode);
 		dist.add(center);
 		return dist;
 	}

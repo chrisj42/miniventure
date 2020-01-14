@@ -183,7 +183,6 @@ public class ServerPlayer extends ServerMob implements Player {
 		forPacket(packet, InteractRequest.class, true, r -> {
 			// if(r.playerPosition.variesFrom(client))
 			// 	connection.send(new PositionUpdate(client)); // fix the player's position
-			
 			doInteract(r.dir, r.actionPos, getHeldItem(r.hotbarIndex), r.hotbarIndex, r.attack);
 		});
 		
