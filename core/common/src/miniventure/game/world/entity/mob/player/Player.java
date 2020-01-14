@@ -17,8 +17,10 @@ import org.jetbrains.annotations.NotNull;
 
 public interface Player extends Mob {
 	
+	// these are all measured in tiles
 	float MOVE_SPEED = 5;
 	float MAX_CURSOR_RANGE = 5;
+	float INTERACT_RECT_SIZE = 1;
 	
 	// controls how the client determines what to highlight
 	enum CursorHighlight {
@@ -73,14 +75,17 @@ public interface Player extends Mob {
 	int changeStat(@NotNull Stat stat, int amt);
 	
 	default Rectangle getInteractionRect(Vector2 center) {
-		Rectangle bounds = getBounds();
-		bounds.height = Mob.unshortenSprite(bounds.height);
-		// Vector2 center = bounds.getCenter(new Vector2());
-		Vector2 dir = getDirection().getVector();
-		bounds.setSize(Math.abs(bounds.width*(1.5f*dir.x+1*dir.y)), Math.abs(bounds.height*(1*dir.x+1.5f*dir.y)));
+		// Rectangle bounds = getBounds();
+		// bounds.height = Mob.unshortenSprite(bounds.height);
+		// // Vector2 center = bounds.getCenter(new Vector2());
+		// Vector2 dir = getDirection().getVector();
+		// bounds.setSize(Math.abs(bounds.width*(1.5f*dir.x+1*dir.y)), Math.abs(bounds.height*(1*dir.x+1.5f*dir.y)));
+		// bounds.setCenter(center);
+		// bounds.x += dir.x*bounds.width*.75f;
+		// bounds.y += dir.y*bounds.height*.75f;
+		Rectangle bounds = new Rectangle();
+		bounds.setSize(INTERACT_RECT_SIZE);
 		bounds.setCenter(center);
-		bounds.x += dir.x*bounds.width*.75f;
-		bounds.y += dir.y*bounds.height*.75f;
 		return bounds;
 	}
 	
