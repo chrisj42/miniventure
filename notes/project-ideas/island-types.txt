@@ -1,3 +1,14 @@
+all surface
+	- scattered ruins
+	- mine entrances
+	- boss area
+all caves
+	- remnants of a mine system; some straight areas with scattered torches
+	- occasional burrows?
+	- resource deposits
+	
+note: The caves are open when you reach the island initially
+
 woodland / forest surface
 	- terrain
 		- trees
@@ -47,11 +58,11 @@ woodland / forest caves
 		- bats
 		- worms (under logs, fishing)
 		- snakes (hostile)
+		- spiders (hostile)
 	- resources
 		- iron
 		- coal
 		- stone
-		- copper
 	- some stuff you'll make
 		- 
 
@@ -67,7 +78,7 @@ desert / savanna surface
 		- pigs
         - crocodile (rivers)
 		- lizards
-		- desert tortise
+		- desert tortoise
 		- armadillos (savanna)
 		- mice (under small rocks)
 		- Scorpions (hostile, small)
@@ -77,7 +88,7 @@ desert / savanna surface
 		- cheetah
 	- resources
 		- sand
-		- 
+		- cactus (flat desert)
 	- discoverables
 		- refined smelter - allows combining coal and iron to make steel
 		- desert altar - desert boss site
@@ -95,13 +106,15 @@ desert / savanna caves
 		- armadillos (savanna)
 		- mice (under small rocks)
 		- lizards
+		- spiders (hostile)
 	- resources
 		- coal
 		- sandstone
 		- copper
 		- ruby
 	- some stuff you'll make
-		- 
+		- electronics?
+		- some stuff with rubies...
 
 snowy surface
 	- terrain

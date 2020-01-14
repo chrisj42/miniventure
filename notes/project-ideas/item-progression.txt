@@ -10,11 +10,39 @@ other games:
 	- housing / base-building materials
 	- random decorative stuff and a few special tiles/items
 
+
+I need to think of what you can make from various animals parts, and from various minerals.
+particularly, the later-on ones.
+
+Better torches? Better gear? Better furniture? Electronics?
+
 ----
-BY LEVEL
+AVAILABLE RESOURCES
 ----
 
-
+forest surface
+- reeds
+	- reed fiber
+- saplings
+	- twigs
+	- leaves
+- trees
+	- wood
+	- twigs
+	- leaves
+- stone piles
+	- stone
+- stone deposits
+	- stone
+- cows
+	- leather
+	- meat
+- squirrels
+	- decorative
+- sheep
+	- wool
+	- meat
+- 
 
 
 ----
@@ -22,6 +50,21 @@ PROGRESSION
 ----
 
 - what are the key points that prevent you from going on?
+
+- collect twigs, stones, and reed fiber to make simple tools
+- use tools to cut trees, attack mobs, harvest resources
+	- make your crude tools, head into the forest
+- get some better resources in the forest
+	- a few different kinds of trees
+	- various plants
+		- colors
+	- various animals
+
+
+- add a map to aid in discovering island
+	- shacks around the island sometimes have charts of points of interest
+		- mine entrances, other shacks/outposts
+	- defeating the boss lets you access what it is guarding, which includes a complete map of the island and surrounding waters, which shows the location of the next island
 
 -- items below that are not under a header are craftable with no tool or bench needed; only the materials.
 	- IT = holdable item
@@ -31,13 +74,15 @@ PROGRESSION
 - TL campfire: wood + reed fiber
 - IT fiber cord: reeds
 - LO crude workbench: wood + fiber cord (wood from saplings / smaller trees)
-- crude workbench - forest surface
+- IT torch: wood + reed fiber
+- crude workbench - forest surface - can craft simple tools
 	- IT crude axe: stone + wood + fiber cord (stone from small rock outcrops)
 	- IT crude pickaxe: stone + wood + fiber cord
 	- IT crude shovel: stone + wood + fiber cord
 	- IT wooden club: wood
-	- IT practical hammer: stone + wood + fiber cord
-- practical hammer - forest surface
+	- IT simple hammer: stone + wood + fiber cord
+	- IT map: reed fiber
+- simple hammer - forest surface
 	- TL wood wall: wood
 	- TL wood floor: wood
 	- TL wood door: wood + fiber cord
