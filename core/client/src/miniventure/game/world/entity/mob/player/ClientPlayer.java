@@ -134,6 +134,8 @@ public class ClientPlayer extends ClientEntity implements Player {
 	public boolean isKnockedBack() { return knockbackController.hasKnockback(); }
 	
 	public CursorHighlight getCurrentHighlightMode() {
+		if(objectRecipe != null)
+			return CursorHighlight.TILE_IN_RADIUS;
 		ItemStack cur = inventory.getSelectedItem();
 		return cur == null ? CursorHighlight.TILE_ADJACENT : cur.item.getHighlightMode();
 	}
