@@ -6,13 +6,10 @@ import java.util.HashMap;
 import miniventure.game.GameCore;
 import miniventure.game.client.InputHandler.Control;
 import miniventure.game.client.InputHandler.Modifier;
-import miniventure.game.item.ClientItem;
-import miniventure.game.item.ClientPlayerInventory;
+import miniventure.game.item.*;
 import miniventure.game.item.CraftingScreen.ClientObjectRecipe;
 import miniventure.game.network.GameProtocol.*;
 import miniventure.game.client.ClientCore;
-import miniventure.game.item.CraftingScreen;
-import miniventure.game.item.InventoryOverlay;
 import miniventure.game.network.PacketPipe.PacketPipeWriter;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
@@ -136,6 +133,16 @@ public class ClientPlayer extends ClientEntity implements Player {
 	@Override
 	public boolean isKnockedBack() { return knockbackController.hasKnockback(); }
 	
+	public CursorHighlight getCurrentHighlightMode() {
+		ItemStack cur = inventory.getSelectedItem();
+		return cur == null ? CursorHighlight.TILE_ADJACENT : cur.item.getHighlightMode();
+	}
+	
+	public Rectangle computeInteractionRect(Vector2 cursorPos) {
+		Vector2 clampedPos = Player.getClampedCursorPos(getCenter(), cursorPos, getCurrentHighlightMode());
+		return getInteractionRect(clampedPos);
+	}
+	
 	@Override
 	public void update(float delta) {
 		super.update(delta);
@@ -200,31 +207,27 @@ public class ClientPlayer extends ClientEntity implements Player {
 		if(!ClientCore.hasMenu()) {
 			
 			if(!isKnockedBack()) {
-				boolean attack = true;
-				boolean interact = true;
-				if(ClientCore.input.pressingControl(Control.ATTACK))
-					attack = true;
-				else if(ClientCore.input.pressingControl(Control.INTERACT))
-					attack = false;
-				else
-					interact = false;
+				boolean attack = ClientCore.input.pressingControl(Control.ATTACK);
+				boolean interact = attack || ClientCore.input.pressingControl(Control.INTERACT);
 				
 				if(interact) {
 					Level level = getLevel();
-					Tile cursorTile = level != null ? getCursorTile(cursorPos, level) : null;
+					// Tile cursorTile = level != null ? getCursorTile(cursorPos, level, getCurrentHighlightMode()) : null;
+					
+					Vector2 clampedPos = Player.getClampedCursorPos(getCenter(), cursorPos, getCurrentHighlightMode());
 					
 					if(objectRecipe != null) {
 						if(attack) {
 							// place the object on attack
-							if(cursorTile != null)
-								ClientCore.getClient().send(objectRecipe.getBuildRequest(cursorTile.getCenter()));
+							// if(cursorTile != null)
+							ClientCore.getClient().send(objectRecipe.getBuildRequest(clampedPos));
 						} else {
 							// cancel the object recipe on interact
 							objectRecipe = null;
 						}
 					} else {
-						if(cursorTile != null)
-							ClientCore.getClient().send(new InteractRequest(attack, cursorTile.getCenter(), getDirection(), inventory.getSelection()));
+						// if(cursorTile != null)
+						ClientCore.getClient().send(new InteractRequest(attack, clampedPos, getDirection(), inventory.getSelection()));
 					}
 				}
 			}

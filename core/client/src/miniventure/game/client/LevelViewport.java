@@ -1,13 +1,12 @@
 package miniventure.game.client;
 
-import java.util.List;
-
 import miniventure.game.GameCore;
 import miniventure.game.item.CraftingScreen.ClientObjectRecipe;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
 import miniventure.game.world.entity.mob.player.Player;
+import miniventure.game.world.entity.mob.player.Player.CursorHighlight;
 import miniventure.game.world.level.RenderLevel;
 import miniventure.game.world.tile.Tile;
 
@@ -165,17 +164,25 @@ public class LevelViewport {
 			cursorPos.set(dist.add(cameraCenter));
 			
 			if(ClientCore.getScreen() == null) {
-				// draw highlight for client cursor
-				List<Tile> cursorRoute = Player.traverseCursorRoute(cameraCenter, cursorPos, level);
-				// cursorRoute.forEach(tile -> outlineTile(tile, offset));
-				if (cursorRoute.size() > 0) {
-					Tile cursorTile = cursorRoute.get(cursorRoute.size() - 1);
-					ClientObjectRecipe objectRecipe = player.getObjectRecipe();
-					if (objectRecipe == null)
-						drawOverTile(cursorTile, offset, null);
-					else {
-						// draw the item sprite instead
-						drawOverTile(cursorTile, offset, objectRecipe.getTexture());
+				CursorHighlight highlightMode = player.getCurrentHighlightMode();
+				Tile cursorTile = player.getCursorTile(cursorPos, level, highlightMode);
+				
+				if (cursorTile != null) {
+					if(highlightMode != CursorHighlight.INVISIBLE) {
+						// draw highlight for client cursor
+						ClientObjectRecipe objectRecipe = player.getObjectRecipe();
+						if (objectRecipe == null)
+							drawOverTile(cursorTile, offset, null);
+						else {
+							// draw the item sprite instead
+							drawOverTile(cursorTile, offset, objectRecipe.getTexture());
+						}
+					}
+					
+					// interaction bounds debug
+					if(ClientCore.debugInteract) {
+						// render player interaction rect
+						drawOutline(offset, player.computeInteractionRect(cursorPos), batch);
 					}
 				}
 			}
@@ -198,21 +205,6 @@ public class LevelViewport {
 			}
 		}*/
 		
-		if(ClientCore.debugInteract || ClientCore.debugTile) {
-			if(player != null) {
-				if(ClientCore.debugInteract)
-					// render player interaction rect
-					drawOutline(offset, player.getInteractionRect(), batch);
-				
-				if(ClientCore.debugTile) {
-					// outline "looking at" tile
-					Tile closest = level.getTile(player.getInteractionRect());
-					if(closest != null)
-						drawOutline(offset, closest.getBounds(), batch);
-				}
-			}
-		}
-		
 		batch.setProjectionMatrix(lightingCamera.combined); // batch uses coords as is, screen to screen
 		batch.draw(lightingBuffer.getColorBufferTexture(), 0, 0);
 		
@@ -224,7 +216,7 @@ public class LevelViewport {
 		rect.y = (rect.y - offset.y) * Tile.SIZE;
 		rect.width *= Tile.SIZE;
 		rect.height *= Tile.SIZE;
-		MyUtils.drawRect(rect, 1, Color.BLACK, batch);
+		MyUtils.drawRect(rect, 2, Color.BLACK, batch);
 	}
 	
 	public void zoom(int dir) {

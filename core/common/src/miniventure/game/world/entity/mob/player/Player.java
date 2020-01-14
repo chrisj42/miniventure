@@ -72,10 +72,10 @@ public interface Player extends Mob {
 	int getStat(@NotNull Stat stat);
 	int changeStat(@NotNull Stat stat, int amt);
 	
-	default Rectangle getInteractionRect() {
+	default Rectangle getInteractionRect(Vector2 center) {
 		Rectangle bounds = getBounds();
 		bounds.height = Mob.unshortenSprite(bounds.height);
-		Vector2 center = bounds.getCenter(new Vector2());
+		// Vector2 center = bounds.getCenter(new Vector2());
 		Vector2 dir = getDirection().getVector();
 		bounds.setSize(Math.abs(bounds.width*(1.5f*dir.x+1*dir.y)), Math.abs(bounds.height*(1*dir.x+1.5f*dir.y)));
 		bounds.setCenter(center);
@@ -86,17 +86,28 @@ public interface Player extends Mob {
 	
 	void handlePlayerPackets(@NotNull Object packet, @NotNull PacketPipe.PacketPipeWriter packetSender);
 	
-	static List<Tile> traverseCursorRoute(Vector2 center, Vector2 edge, @NotNull Level level) {
-		Vector2 dist = edge.cpy().sub(center);
-		dist.setLength(Math.min(dist.len(), MAX_CURSOR_RANGE));
-		edge.set(dist.add(center));
+	static Vector2 getClampedCursorPos(Vector2 center, Vector2 cursor, CursorHighlight highlightMode) {
+		Vector2 dist = cursor.cpy().sub(center);
+		clampCursorRange(cursor, highlightMode);
+		dist.add(center);
+		return dist;
+	}
+	static void clampCursorRange(Vector2 dist, CursorHighlight highlightMode) {
+		final float max = highlightMode == CursorHighlight.TILE_IN_RADIUS ? MAX_CURSOR_RANGE : 1;
+		dist.setLength(Math.min(dist.len(), max));
+	}
+	
+	static List<Tile> traverseCursorRoute(Vector2 center, Vector2 cursor, @NotNull Level level, CursorHighlight highlightMode) {
+		Vector2 dist = cursor.cpy().sub(center);
+		clampCursorRange(dist, highlightMode);
+		cursor.set(dist.add(center));
 		
-		dist.set(center.cpy().sub(edge));
+		dist.set(center.cpy().sub(cursor));
 		Tile prevTile = null;
 		Vector2 prevPos = center.cpy();
 		List<Tile> route = new LinkedList<>();
 		while(true) {
-			Vector2 pos = edge.cpy().add(dist);
+			Vector2 pos = cursor.cpy().add(dist);
 			Tile tile = level.getClosestTile(pos);
 			route.add(tile);
 			
@@ -133,13 +144,13 @@ public interface Player extends Mob {
 		return route;
 	}
 	
-	default Tile getCursorTile(Vector2 cursorPos, @NotNull Level level) {
+	default Tile getCursorTile(Vector2 cursorPos, @NotNull Level level, CursorHighlight highlightMode) {
 		Vector2 center = getCenter();
-		List<Tile> cursorRoute = Player.traverseCursorRoute(center, cursorPos, level);
-		// Vector2 dist = cursorPos.cpy().sub(center);
-		Rectangle rect = getInteractionRect();
+		List<Tile> cursorRoute = Player.traverseCursorRoute(center, cursorPos, level, highlightMode);
+		
 		if(cursorRoute.size() > 0)
-			rect.setCenter(cursorRoute.get(cursorRoute.size()-1).getCenter());
-		return level.getClosestTile(rect);
+			return cursorRoute.get(cursorRoute.size() - 1);
+		
+		return null;
 	}
 }

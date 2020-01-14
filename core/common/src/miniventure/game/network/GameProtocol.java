@@ -29,8 +29,8 @@ import miniventure.game.world.entity.particle.ParticleData;
 import miniventure.game.world.level.Level;
 import miniventure.game.world.management.WorldManager;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.TileStack.TileData;
 import miniventure.game.world.tile.Tile.TileTag;
+import miniventure.game.world.tile.TileStack.TileData;
 import miniventure.game.world.tile.TileTypeEnum;
 import miniventure.game.world.worldgen.island.IslandType;
 
@@ -131,7 +131,7 @@ public interface GameProtocol {
 	
 	enum DatalessRequest {
 		Respawn,
-		Tile,
+		// Tile,
 		Clear_Console, // server sends to player to clear console; is a server command only to make it fit in with the others; could be implemented entirely client-side otherwise.
 		Level_Loading, // notifies the client that a level must be loaded before they can be added to it, allowed a loading message to be shown client-side.
 		Level_Ready, // when the server has sent all the entities to the client.
@@ -716,13 +716,13 @@ public interface GameProtocol {
 		public final int setOrdinal;
 		public final int recipeIndex;
 		
-		public final Vector2 actionPos;
+		public final Vector2 tilePos;
 		
 		private BuildRequest() { this(0, 0, null); }
-		public BuildRequest(int setOrdinal, int recipeIndex, Vector2 actionPos) {
+		public BuildRequest(int setOrdinal, int recipeIndex, Vector2 tilePos) {
 			this.setOrdinal = setOrdinal;
 			this.recipeIndex = recipeIndex;
-			this.actionPos = actionPos;
+			this.tilePos = tilePos;
 		}
 	}
 	

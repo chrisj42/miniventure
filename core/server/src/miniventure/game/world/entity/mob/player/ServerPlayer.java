@@ -234,7 +234,7 @@ public class ServerPlayer extends ServerMob implements Player {
 			ServerLevel level = getLevel();
 			if(level == null)
 				return;
-			ServerTile tile = (ServerTile) level.getTile(req.actionPos);
+			ServerTile tile = (ServerTile) level.getTile(req.tilePos);
 			if(tile == null)
 				return;
 			
@@ -289,7 +289,6 @@ public class ServerPlayer extends ServerMob implements Player {
 	@Override
 	public Integer[] saveStats() { return Stat.save(stats); }
 	
-	
 	public boolean takeItem(@NotNull ServerItem item) {
 		if(inventory.addItem(item)) {
 			// if(inventory.getCount(item) == 1) // don't add to hotbar if it already existed in inventory
@@ -331,21 +330,21 @@ public class ServerPlayer extends ServerMob implements Player {
 	}
 	
 	@NotNull
-	private Array<WorldObject> getInteractionQueue() {
+	private Array<WorldObject> getInteractionQueue(Vector2 center) {
 		Array<WorldObject> objects = new Array<>();
 		
 		// get level, and don't interact if level is not found
 		ServerLevel level = getLevel();
 		if(level == null) return objects;
 		
-		Rectangle interactionBounds = getInteractionRect();
+		Rectangle interactionBounds = getInteractionRect(center);
 		
 		objects.addAll(level.getOverlappingEntities(interactionBounds, this));
 		Boundable.sortByDistance(objects, getCenter());
 		
-		// Tile tile = level.getTile(interactionBounds);
-		// if(tile != null)
-		// 	objects.add(tile);
+		Tile tile = level.getTile(center);
+		if(tile != null)
+			objects.add(tile);
 		
 		return objects;
 	}
@@ -367,7 +366,7 @@ public class ServerPlayer extends ServerMob implements Player {
 		ServerLevel level = getLevel();
 		
 		Result result = Result.NONE;
-		for(WorldObject obj: getInteractionQueue()) {
+		for(WorldObject obj: getInteractionQueue(actionPos)) {
 			if(attack)
 				result = heldItem.attack(obj, this);
 			else
@@ -375,18 +374,6 @@ public class ServerPlayer extends ServerMob implements Player {
 			
 			if(result.success)
 				break;
-		}
-		
-		if(!result.success && level != null) {
-			/*Tile tile = getCursorTile(actionPos, level);
-			Tile clientTile = level.getTile(actionPos);
-			// if the client tile is one off from the server tile, and it's still valid, then go with that one; this prevents some small differences in some cases from causing the interaction to happen on a different tile than the one the client expected.
-			if(clientTile != tile && clientTile != null && clientTile.getType().isWalkable()
-				&& clientTile.getPosition().sub(tile.getPosition()).len() < 2)
-				tile = clientTile; */
-			Tile tile = level.getTile(actionPos); // don't validate for now; will always match client, but open to bad packets
-			if(tile != null)
-				result = attack ? heldItem.attack(tile, this) : heldItem.interact(tile, this);
 		}
 		
 		if(!attack && !result.success)
@@ -404,7 +391,7 @@ public class ServerPlayer extends ServerMob implements Player {
 				getServer().broadcastParticle(
 					new ActionParticleData(ActionType.PUNCH, getDirection()),
 					level,
-					getInteractionRect().getCenter(new Vector2())
+					getInteractionRect(actionPos).getCenter(new Vector2())
 				);
 		}
 		

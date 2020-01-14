@@ -437,8 +437,8 @@ public class CraftingScreen extends MenuScreen {
 			return new ItemIcon(super.item, 0);
 		}
 		
-		public BuildRequest getBuildRequest(Vector2 actionPos) {
-			return new BuildRequest(super.setOrdinal, super.id, actionPos);
+		public BuildRequest getBuildRequest(Vector2 tilePos) {
+			return new BuildRequest(super.setOrdinal, super.id, tilePos);
 		}
 	}
 	

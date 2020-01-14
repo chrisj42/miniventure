@@ -323,13 +323,13 @@ public abstract class GameServer implements GameProtocol {
 				connection.send(new EntityAddition(e));
 		});
 		
-		if(object.equals(DatalessRequest.Tile)) {
+		/*if(object.equals(DatalessRequest.Tile)) {
 			Level level = client.getLevel();
 			if(level != null) {
 				Tile t = level.getTile(client.getInteractionRect());
 				connection.send(new Message(client+" looking at "+(t==null?null:t.toLocString()), GameCore.DEFAULT_CHAT_COLOR));
 			}
-		}
+		}*/
 		
 		client.handlePlayerPackets(object, connection);
 		

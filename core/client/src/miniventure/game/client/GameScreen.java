@@ -86,8 +86,8 @@ public class GameScreen {
 			if(Gdx.input.isKeyJustPressed(Keys.D) && !Gdx.input.isKeyPressed(Keys.TAB))
 				ClientCore.debugInfo = !ClientCore.debugInfo;
 			
-			if(Gdx.input.isKeyJustPressed(Keys.T))
-				ClientCore.debugTile = !ClientCore.debugTile;
+			// if(Gdx.input.isKeyJustPressed(Keys.T))
+			// 	ClientCore.debugTile = !ClientCore.debugTile;
 			
 			if(Gdx.input.isKeyJustPressed(Keys.B))
 				ClientCore.debugBounds = !ClientCore.debugBounds;
@@ -188,7 +188,7 @@ public class GameScreen {
 		
 		Tile playerTile = level.getTile(playerBounds);
 		debugInfo.add("Tile = " + (playerTile == null ? "Null" : playerTile.getType()));
-		Tile interactTile = level.getTile(player.getInteractionRect());
+		Tile interactTile = level.getTile(player.computeInteractionRect(levelView.getCursorPos()));
 		debugInfo.add("Looking at: " + (interactTile == null ? "Null" : interactTile.toLocString().replace("Client", "")));
 		
 		debugInfo.add("Mobs in level: " + level.getMobCount()+"/"+level.getMobCap());

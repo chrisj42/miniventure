@@ -66,7 +66,7 @@ public class ClientCore extends ApplicationAdapter {
 	// debug flags
 	static boolean debugInfo = false;
 	// static boolean debugChunk = false;
-	static boolean debugTile = false;
+	// static boolean debugTile = false;
 	static boolean debugInteract = false;
 	public static boolean debugBounds = false;
 	
