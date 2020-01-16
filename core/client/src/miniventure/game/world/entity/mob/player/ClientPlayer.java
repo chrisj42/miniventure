@@ -29,7 +29,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import miniventure.game.world.tile.Tile;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -140,10 +139,10 @@ public class ClientPlayer extends ClientEntity implements Player {
 		return cur == null ? CursorHighlight.TILE_ADJACENT : cur.item.getHighlightMode();
 	}
 	
-	public Rectangle computeInteractionRect(Vector2 cursorPos) {
-		Vector2 clampedPos = Player.getClampedCursorPos(getCenter(), cursorPos, getCurrentHighlightMode());
+	/*public Rectangle computeInteractionRect(Vector2 cursorPos) {
+		Vector2 clampedPos = Player.clampCursorPos(getCenter(), cursorPos, getCurrentHighlightMode());
 		return getInteractionRect(clampedPos);
-	}
+	}*/
 	
 	@Override
 	public void update(float delta) {
@@ -163,7 +162,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 	}
 	
 	//private float lastWalkTime = 0;
-	public void handleInput(Vector2 mouseInput, Vector2 cursorPos) {
+	public void handleInput(Vector2 mouseInput, @Nullable Vector2 cursorPos) {
 		
 		Vector2 inputDir = new Vector2();
 		if(ClientCore.input.holdingControl(Control.MOVE_LEFT)) inputDir.x--;
@@ -182,7 +181,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 				dir = newDir;
 		}
 		
-		Vector2 moveDist = inputDir.cpy().scl(moveSpeed*GameCore.getDeltaTime());
+		Vector2 moveDist = inputDir.cpy().scl(moveSpeed * GameCore.getDeltaTime());
 		// FIXME speed needs to be set in server 
 		ClientTile closest = (ClientTile) getClosestTile();
 		if(closest != null)
@@ -208,28 +207,29 @@ public class ClientPlayer extends ClientEntity implements Player {
 		
 		if(!ClientCore.hasMenu()) {
 			
-			if(!isKnockedBack()) {
+			if(!isKnockedBack() && cursorPos != null) {
 				boolean attack = ClientCore.input.pressingControl(Control.ATTACK);
 				boolean interact = attack || ClientCore.input.pressingControl(Control.INTERACT);
 				
 				if(interact) {
-					Level level = getLevel();
+					// Level level = getLevel();
 					// Tile cursorTile = level != null ? getCursorTile(cursorPos, level, getCurrentHighlightMode()) : null;
 					
-					Vector2 clampedPos = Player.getClampedCursorPos(getCenter(), cursorPos, getCurrentHighlightMode());
+					// level cursor is already clamped
+					// Vector2 clampedPos = Player.clampCursorPos(getCenter(), cursorPos.cpy(), getCurrentHighlightMode());
 					
 					if(objectRecipe != null) {
 						if(attack) {
 							// place the object on attack
 							// if(cursorTile != null)
-							ClientCore.getClient().send(objectRecipe.getBuildRequest(clampedPos));
+							ClientCore.getClient().send(objectRecipe.getBuildRequest(cursorPos));
 						} else {
 							// cancel the object recipe on interact
 							objectRecipe = null;
 						}
 					} else {
 						// if(cursorTile != null)
-						ClientCore.getClient().send(new InteractRequest(attack, clampedPos, getDirection(), inventory.getSelection()));
+						ClientCore.getClient().send(new InteractRequest(attack, cursorPos, getDirection(), inventory.getSelection()));
 					}
 				}
 			}

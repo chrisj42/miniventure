@@ -1,5 +1,7 @@
 package miniventure.game.client;
 
+import java.util.List;
+
 import miniventure.game.GameCore;
 import miniventure.game.item.CraftingScreen.ClientObjectRecipe;
 import miniventure.game.texture.TextureHolder;
@@ -48,8 +50,10 @@ public class LevelViewport {
 	private FrameBuffer lightingBuffer;
 	
 	private Vector2 cursorPos = new Vector2();
+	private boolean cursorValid = true;
 	
-	Vector2 getCursorPos() { return cursorPos; }
+	@Nullable
+	Vector2 getCursorPos() { return cursorValid ? cursorPos : null; }
 	
 	public LevelViewport() { this(new OrthographicCamera()); }
 	public LevelViewport(OrthographicCamera lightingCamera) {
@@ -77,16 +81,17 @@ public class LevelViewport {
 	}
 	
 	// if texture is null, an outline is drawn, otherwise the given texture is drawn
-	private void drawOverTile(Tile tile, Vector2 offset, @Nullable TextureHolder texture) {
+	private void drawOverTile(Tile tile, Vector2 offset, @Nullable TextureHolder texture, @Nullable Color tint) {
 		if(tile != null) {
 			Vector2 pos = tile.getPosition().sub(offset).scl(Tile.SIZE);
 			if(texture == null)
-				MyUtils.drawRect(pos.x, pos.y, Tile.SIZE, Tile.SIZE, Tile.SIZE / 16, Color.BLACK, batch);
+				MyUtils.drawRect(pos.x, pos.y, Tile.SIZE, Tile.SIZE, Tile.SIZE / 16, tint == null ? Color.BLACK : tint, batch);
 			else {
 				Vector2 sizeDiff = new Vector2(Tile.SIZE, Tile.SIZE).sub(texture.width, texture.height);
 				pos.add(sizeDiff.scl(0.5f));
 				Color prev = batch.getColor();
-				batch.setColor(1, 1, 1, 0.5f);
+				if(tint == null) batch.setColor(1, 1, 1, 0.5f);
+				else batch.setColor(tint);
 				batch.draw(texture.texture, pos.x, pos.y);
 				batch.setColor(prev);
 			}
@@ -159,31 +164,50 @@ public class LevelViewport {
 			cursor.add(offset.x, offset.y, 0); // tile offset; renderable world to actual world coords
 			cursorPos.set(cursor.x, cursor.y);
 			// limit range
-			Vector2 dist = cursorPos.cpy().sub(cameraCenter);
-			dist.setLength(Math.min(dist.len(), Player.MAX_CURSOR_RANGE));
-			cursorPos.set(dist.add(cameraCenter));
+			CursorHighlight highlightMode = player.getCurrentHighlightMode();
+			List<Tile> path = Player.computeCursorPos(cameraCenter, cursorPos, level, highlightMode);
+			Tile cursorTile = level.getTile(cursorPos);
+			Tile last = path.get(path.size()-1);
+			Color invalidColor = new Color(1, 0, 0, .5f);
+			if(ClientCore.debugInteract) {
+				boolean invalid = false;
+				invalidColor.mul(1, 1, 1, .5f);
+				Color norm = Color.BLACK.cpy().mul(1, 1, 1, 0.5f);
+				for(Tile t: path) {
+					drawOverTile(t, offset, null, invalid ? invalidColor : norm);
+					if(t == cursorTile)
+						invalid = true;
+				}
+			}
+			drawOverTile(cursorTile, offset, null, null);
+			cursorValid = last == cursorTile;
+			if(!cursorValid)
+				drawOverTile(last, offset, null, invalidColor);
+			
+			// Vector2 dist = cursorPos.cpy().sub(cameraCenter);
+			// dist.setLength(Math.min(dist.len(), Player.MAX_CURSOR_RANGE));
+			// cursorPos.set(dist.add(cameraCenter));
 			
 			if(ClientCore.getScreen() == null) {
-				CursorHighlight highlightMode = player.getCurrentHighlightMode();
-				Tile cursorTile = player.getCursorTile(cursorPos, level, highlightMode);
+				// Tile cursorTile = level.getTile(cursorPos);
 				
 				if (cursorTile != null) {
 					if(highlightMode != CursorHighlight.INVISIBLE) {
 						// draw highlight for client cursor
 						ClientObjectRecipe objectRecipe = player.getObjectRecipe();
 						if (objectRecipe == null)
-							drawOverTile(cursorTile, offset, null);
+							drawOverTile(cursorTile, offset, null, null);
 						else {
 							// draw the item sprite instead
-							drawOverTile(cursorTile, offset, objectRecipe.getTexture());
+							drawOverTile(cursorTile, offset, objectRecipe.getTexture(), null);
 						}
 					}
 					
 					// interaction bounds debug
-					if(ClientCore.debugInteract) {
+					/*if(ClientCore.debugInteract) {
 						// render player interaction rect
-						drawOutline(offset, player.computeInteractionRect(cursorPos), batch);
-					}
+						drawOutline(offset, player.getInteractionRect(cursorPos), batch);
+					}*/
 				}
 			}
 		}
@@ -211,13 +235,13 @@ public class LevelViewport {
 		batch.end();
 	}
 	
-	private static void drawOutline(Vector2 offset, Rectangle rect, SpriteBatch batch) {
+	/*private static void drawOutline(Vector2 offset, Rectangle rect, SpriteBatch batch) {
 		rect.x = (rect.x - offset.x) * Tile.SIZE;
 		rect.y = (rect.y - offset.y) * Tile.SIZE;
 		rect.width *= Tile.SIZE;
 		rect.height *= Tile.SIZE;
 		MyUtils.drawRect(rect, 2, Color.BLACK, batch);
-	}
+	}*/
 	
 	public void zoom(int dir) {
 		zoom += dir;

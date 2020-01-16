@@ -188,7 +188,7 @@ public class GameScreen {
 		
 		Tile playerTile = level.getTile(playerBounds);
 		debugInfo.add("Tile = " + (playerTile == null ? "Null" : playerTile.getType()));
-		Tile interactTile = level.getTile(player.computeInteractionRect(levelView.getCursorPos()));
+		Tile interactTile = level.getTile(player.getInteractionRect(levelView.getCursorPos()));
 		debugInfo.add("Looking at: " + (interactTile == null ? "Null" : interactTile.toLocString().replace("Client", "")));
 		
 		debugInfo.add("Mobs in level: " + level.getMobCount()+"/"+level.getMobCap());

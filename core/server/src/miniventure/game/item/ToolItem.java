@@ -19,9 +19,9 @@ public class ToolItem extends ServerItem {
 	 */
 	
 	public enum ToolType {
-		Pickaxe(CursorHighlight.TILE_ADJACENT, 1),
-		Shovel(CursorHighlight.TILE_ADJACENT, 2), // one swing per tile instead of many, so weight it more
-		Axe(CursorHighlight.TILE_ADJACENT, 1),
+		Pickaxe(CursorHighlight.TILE_IN_RADIUS, 1),
+		Shovel(CursorHighlight.TILE_IN_RADIUS, 2), // one swing per tile instead of many, so weight it more
+		Axe(CursorHighlight.TILE_IN_RADIUS, 1),
 		Sword(CursorHighlight.INVISIBLE, 1);
 		
 		@NotNull

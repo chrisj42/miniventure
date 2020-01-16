@@ -1,5 +1,8 @@
 package miniventure.game.world;
 
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
+
 public class Point {
 	
 	public final int x, y;
@@ -8,6 +11,13 @@ public class Point {
 	public Point(int x, int y) {
 		this.x = x;
 		this.y = y;
+	}
+	
+	public static Point floorVector(Vector2 v) {
+		return new Point(MathUtils.floor(v.x), MathUtils.floor(v.y));
+	}
+	public static Point roundVector(Vector2 v) {
+		return new Point(MathUtils.round(v.x), MathUtils.round(v.y));
 	}
 	
 	@Override

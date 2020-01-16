@@ -1,8 +1,6 @@
 package miniventure.game.world.entity.mob.player;
 
-import java.util.EnumMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import miniventure.game.network.PacketPipe;
 import miniventure.game.world.Point;
@@ -75,14 +73,9 @@ public interface Player extends Mob {
 	int changeStat(@NotNull Stat stat, int amt);
 	
 	default Rectangle getInteractionRect(Vector2 center) {
-		// Rectangle bounds = getBounds();
-		// bounds.height = Mob.unshortenSprite(bounds.height);
-		// // Vector2 center = bounds.getCenter(new Vector2());
-		// Vector2 dir = getDirection().getVector();
-		// bounds.setSize(Math.abs(bounds.width*(1.5f*dir.x+1*dir.y)), Math.abs(bounds.height*(1*dir.x+1.5f*dir.y)));
-		// bounds.setCenter(center);
-		// bounds.x += dir.x*bounds.width*.75f;
-		// bounds.y += dir.y*bounds.height*.75f;
+		if(center == null)
+			return new Rectangle(-1, -1, 0 ,0);
+		
 		Rectangle bounds = new Rectangle();
 		bounds.setSize(INTERACT_RECT_SIZE);
 		bounds.setCenter(center);
@@ -91,71 +84,92 @@ public interface Player extends Mob {
 	
 	void handlePlayerPackets(@NotNull Object packet, @NotNull PacketPipe.PacketPipeWriter packetSender);
 	
-	static Vector2 getClampedCursorPos(Vector2 center, Vector2 cursor, CursorHighlight highlightMode) {
-		Vector2 dist = cursor.cpy().sub(center);
-		clampCursorRange(dist, highlightMode);
-		dist.add(center);
-		return dist;
-	}
-	static void clampCursorRange(Vector2 dist, CursorHighlight highlightMode) {
-		final float max = highlightMode == CursorHighlight.TILE_IN_RADIUS ? MAX_CURSOR_RANGE : 1;
-		dist.setLength(Math.min(dist.len(), max));
-	}
-	
-	static List<Tile> traverseCursorRoute(Vector2 center, Vector2 cursor, @NotNull Level level, CursorHighlight highlightMode) {
-		Vector2 dist = cursor.cpy().sub(center);
-		clampCursorRange(dist, highlightMode);
-		cursor.set(dist.add(center));
+	static List<Tile> computeCursorPos(Vector2 center, Vector2 cursor, @NotNull Level level, CursorHighlight highlightMode) {
+		// final boolean print = Gdx.input.isButtonPressed(Buttos.LEFT);
 		
-		dist.set(center.cpy().sub(cursor));
-		Tile prevTile = null;
-		Vector2 prevPos = center.cpy();
-		List<Tile> route = new LinkedList<>();
-		while(true) {
-			Vector2 pos = cursor.cpy().add(dist);
-			Tile tile = level.getClosestTile(pos);
-			route.add(tile);
+		final float max = highlightMode == CursorHighlight.TILE_IN_RADIUS ? MAX_CURSOR_RANGE : 1;
+		// get vector to target pos
+		Vector2 dist = cursor.cpy().sub(center).clamp(0, max);
+		cursor.set(center).add(dist);
+		
+		// determine the closest
+		final Point startTile = Point.floorVector(center);
+		final Point cursorTile = Point.floorVector(cursor);
+		
+		// first, check if we can take shortcuts
+		if(startTile.equals(cursorTile))
+			return new LinkedList<>(Collections.singletonList(level.getTile(center))); // it's within the same tile, so no checks are needed.
+		
+		// this was originally going to account for the fact that tile coordinates are the bottom right corner, but it seems I didn't need that to make it work well.
+		// final int startOffX = startTile.x < cursorTile.x ? 1 : 0;
+		// final int startOffY = startTile.y < cursorTile.y ? 1 : 0;
+		// final int endOffX = cursorTile.x < startTile.x ? 1 : 0;
+		// final int endOffY = cursorTile.y < startTile.y ? 1 : 0;
+		
+		final int xDelta = cursorTile.x - startTile.x;
+		final int yDelta = cursorTile.y - startTile.y;
+		final int xDiff = Math.abs(xDelta);
+		final int yDiff = Math.abs(yDelta);
+		
+		final int xdir = xDelta < 0 ? -1 : 1;
+		final int ydir = yDelta < 0 ? -1 : 1;
+		
+		final boolean useX = xDiff > yDiff;
+		
+		LinkedList<Point> path = new LinkedList<>();
+		LinkedList<Point> altPath = new LinkedList<>();
+		
+		int curX = startTile.x;
+		int curY = startTile.y;
+		
+		final float accumDelta = useX ? yDiff / (float) xDiff : xDiff / (float) yDiff;
+		float accumPos = (useX?yDiff:xDiff) > 0 && accumDelta >= .5f ? 1 - accumDelta : 0;
+		
+		for(int i = 0; i <= (useX ? xDiff : yDiff); i++) {
+			path.add(new Point(curX, curY));
 			
-			if(!tile.getType().isWalkable())
-				break;
-			
-			if(prevTile != null) {
-				Point ppos = prevTile.getLocation();
-				Point cpos = tile.getLocation();
-				if(ppos.x != cpos.x && ppos.y != cpos.y) {
-					// jumped a gap
-					Vector2 midline = pos.cpy().sub(prevPos).scl(0.5f).add(prevPos);
-					Tile otile1 = level.getTile(ppos.x, cpos.y);
-					Tile otile2 = level.getTile(cpos.x, ppos.y);
-					Vector2 ocenter1 = otile1.getCenter();
-					Vector2 ocenter2 = otile2.getCenter();
-					float dst1 = Vector2.dst(midline.x, midline.y, ocenter1.x, ocenter1.y);
-					float dst2 = Vector2.dst(midline.x, midline.y, ocenter2.x, ocenter2.y);
-					Tile fillTile = dst1 < dst2 ? otile1 : otile2;
-					route.add(fillTile);
-					if(!fillTile.getType().isWalkable())
-						break;
-				}
+			if(accumPos >= 1) {
+				accumPos -= 1;
+				if(useX) curY += ydir;
+				else curX += xdir;
+				path.add(new Point(curX, curY));
+				
+				if(useX) altPath.add(new Point(curX-xdir, curY));
+				else altPath.add(new Point(curX, curY-ydir));
 			}
-			prevTile = tile;
-			prevPos.set(pos);
 			
-			if(dist.len() == 0)
-				break;
+			altPath.add(new Point(curX, curY));
 			
-			dist.setLength(Math.max(0, dist.len() - 1));
+			accumPos += accumDelta;
+			if(useX) curX += xdir;
+			else curY += ydir;
 		}
 		
-		return route;
-	}
-	
-	default Tile getCursorTile(Vector2 cursorPos, @NotNull Level level, CursorHighlight highlightMode) {
-		Vector2 center = getCenter();
-		List<Tile> cursorRoute = Player.traverseCursorRoute(center, cursorPos, level, highlightMode);
-		
-		if(cursorRoute.size() > 0)
-			return cursorRoute.get(cursorRoute.size() - 1);
-		
-		return null;
+		List<Tile> tiles = new ArrayList<>(path.size());
+		boolean blocked = false;
+		while(path.size() > 0) {
+			Point loc = path.removeFirst();
+			Tile tile = level.getTile(loc.x, loc.y);
+			if(!tile.isPermeable()) {
+				Point altLoc = altPath.removeFirst();
+				Tile altTile = level.getTile(altLoc.x, altLoc.y);
+				if(blocked) {
+					tiles.add(altTile);
+					tiles.add(tile);
+				}
+				else if(altTile.isPermeable()) {
+					tiles.add(altTile);
+				} else {
+					tiles.add(tile);
+					// restrict cursor to this tile
+					cursor.set(tile.getCenter());
+					blocked = true;
+				}
+			} else {
+				altPath.removeFirst();
+				tiles.add(tile); 
+			}
+		}
+		return tiles;
 	}
 }
