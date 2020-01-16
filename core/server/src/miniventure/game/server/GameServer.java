@@ -201,6 +201,7 @@ public abstract class GameServer implements GameProtocol {
 			System.out.println("Server: new player successfully connected: "+player.getName());
 			if(info == null) {
 				knownPlayers.put(name, new PlayerData(name, "", player.serialize(), player.getSpawnLevel(), op));
+				world.saveWorld();
 			}
 			
 			pinfo.validationTimer.start();
