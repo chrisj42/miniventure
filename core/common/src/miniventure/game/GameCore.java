@@ -30,12 +30,6 @@ import org.jetbrains.annotations.NotNull;
 /** @noinspection StaticNonFinalField*/
 public class GameCore {
 	
-	public static final Version VERSION = new Version("2.2.1.4"); // the last digit increments without release or tag
-	
-	public static boolean isCompatible(Version dataVersion) {
-		return dataVersion.atOrAfter("2.2.1.4");
-	}
-	
 	public static boolean debug = false;
 	
 	public static void debug(String msg) {
@@ -152,14 +146,14 @@ public class GameCore {
 			if(response.getStatus() != 200) {
 				System.err.println("version request returned status code "+response.getStatus()+": "+response.getStatusText());
 				System.err.println("response body: "+response.getBody());
-				return latestVersion = new VersionInfo(VERSION, "", "");
+				return latestVersion = new VersionInfo(Version.CURRENT, "", "");
 			}
 			else {
 				return latestVersion = new VersionInfo(response.getBody().getArray().getJSONObject(0));
 			}
 		} catch(UnirestException e) {
 			e.printStackTrace();
-			return latestVersion = new VersionInfo(VERSION, "", "");
+			return latestVersion = new VersionInfo(Version.CURRENT, "", "");
 		}
 	}
 }

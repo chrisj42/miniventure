@@ -3,13 +3,13 @@ package miniventure.game.client;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
-import miniventure.game.GameCore;
 import miniventure.game.network.GameProtocol;
 import miniventure.game.network.PacketPipe;
 import miniventure.game.network.PacketPipe.PacketPipeReader;
 import miniventure.game.screen.ErrorScreen;
 import miniventure.game.screen.InputScreen;
 import miniventure.game.screen.LoadingScreen;
+import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueAction;
 
 import com.badlogic.gdx.Gdx;
@@ -93,13 +93,13 @@ public class NetworkClient extends GameClient {
 		logger.editMessage("Logging in");
 		if(personalServer != null) {
 			this.username = HOST;
-			send(new Login(username, GameCore.VERSION));
+			send(new Login(username, Version.CURRENT));
 			callback.act(true);
 		}
 		else {
 			Gdx.app.postRunnable(() -> ClientCore.setScreen(new InputScreen("Player name:", username -> {
 				this.username = username;
-				send(new Login(username, GameCore.VERSION));
+				send(new Login(username, Version.CURRENT));
 				
 				logger.editMessage("Logging in as '"+username+'\'');
 				ClientCore.setScreen(logger);

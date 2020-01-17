@@ -13,11 +13,10 @@ import miniventure.game.GameCore;
 import miniventure.game.network.GameProtocol;
 import miniventure.game.ProgressPrinter;
 import miniventure.game.chat.command.CommandInputParser;
-import miniventure.game.network.PacketPipe.PacketPipeReader;
-import miniventure.game.network.PacketPipe.PacketPipeWriter;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.ProgressLogger;
+import miniventure.game.util.Version;
 import miniventure.game.util.VersionInfo;
 import miniventure.game.util.customenum.GenericEnum;
 import miniventure.game.world.file.WorldDataSet;
@@ -247,7 +246,7 @@ public class ServerCore extends Thread {
 		if(!GameCore.determinedLatestVersion())
 			System.out.println("Checking for newer versions...");
 		VersionInfo info = GameCore.getLatestVersion();
-		if(info.version.compareTo(GameCore.VERSION) > 0) {
+		if(info.version.compareTo(Version.CURRENT) > 0) {
 			// there's a newer version
 			System.out.println("Newer game version found: "+info.version+". Download the jar file here: "+info.assetUrl);
 		}

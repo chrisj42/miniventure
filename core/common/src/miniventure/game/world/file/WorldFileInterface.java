@@ -21,6 +21,7 @@ import miniventure.game.GameCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.SerialHashMap;
 import miniventure.game.util.Version;
+import miniventure.game.util.Version.VersionFormatException;
 import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.file.IslandCache.LevelCacheFetcher;
 import miniventure.game.world.management.TimeOfDay;
@@ -79,7 +80,7 @@ public class WorldFileInterface {
 	}
 	
 	@NotNull
-	static Version getWorldVersion(Path worldFolder) throws IOException {
+	static Version getWorldVersion(Path worldFolder) throws IOException, VersionFormatException {
 		LinkedList<String> lines = new LinkedList<>();
 		
 		readFile(worldFolder.resolve(VERSION_FILE), lines);
@@ -232,7 +233,7 @@ public class WorldFileInterface {
 			// new LevelCache(4, seed, IslandType.JUNGLE),
 		};
 		
-		WorldDataSet worldData = new WorldDataSet(folder, lockRef, seed, 0, TimeOfDay.Morning.getStartOffsetSeconds(), GameCore.VERSION, new PlayerData[0], levelCaches, true);
+		WorldDataSet worldData = new WorldDataSet(folder, lockRef, seed, 0, TimeOfDay.Morning.getStartOffsetSeconds(), Version.CURRENT, new PlayerData[0], levelCaches, true);
 		saveWorld(worldData);
 		return worldData;
 	}
@@ -241,7 +242,7 @@ public class WorldFileInterface {
 		Path main = worldData.worldFile;
 		boolean good;
 		
-		good = writeFile(main.resolve(VERSION_FILE), list -> list.add(GameCore.VERSION.serialize()));
+		good = writeFile(main.resolve(VERSION_FILE), list -> list.add(Version.CURRENT.serialize()));
 		
 		good = writeFile(main.resolve(GAME_FILE), list -> {
 			SerialHashMap map = new SerialHashMap();
@@ -320,7 +321,9 @@ public class WorldFileInterface {
 		} catch(IOException e) {
 			// throw new WorldFormatException("Save format of world '"+folder+"' is invalid", e);
 			throw new WorldFormatException("Bad file", e);
-		} catch(Exception e) {
+		} catch(VersionFormatException e) {
+			throw new WorldFormatException("Unsupported version format", e);
+		} catch (Exception e) {
 			e.printStackTrace();
 			throw new WorldFormatException("Error loading world", e);
 		} finally {

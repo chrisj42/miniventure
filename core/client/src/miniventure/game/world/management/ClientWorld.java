@@ -1,6 +1,5 @@
 package miniventure.game.world.management;
 
-import miniventure.game.GameCore;
 import miniventure.game.client.*;
 import miniventure.game.item.InventoryOverlay;
 import miniventure.game.network.GameProtocol;
@@ -16,6 +15,7 @@ import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.RespawnScreen;
+import miniventure.game.util.Version;
 import miniventure.game.util.function.Action;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
@@ -184,7 +184,7 @@ public class ClientWorld extends LevelManager {
 		
 		// loadingScreen.popMessage(); // matched with the "init private server" msg at the start of this method.
 		
-		localClient.send(new Login(GameProtocol.HOST, GameCore.VERSION));
+		localClient.send(new Login(GameProtocol.HOST, Version.CURRENT));
 		
 		/*if(errorMessage != null) {
 			Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen("Error starting world: "+e.getMessage())));

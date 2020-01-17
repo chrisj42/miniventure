@@ -3,10 +3,10 @@ package miniventure.game.screen;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-import miniventure.game.GameCore;
 import miniventure.game.client.ClientCore;
 import miniventure.game.screen.util.BackgroundInheritor;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.Version;
 import miniventure.game.world.file.WorldFileInterface;
 import miniventure.game.world.file.WorldFormatException;
 import miniventure.game.world.file.WorldReference;
@@ -42,13 +42,15 @@ public class WorldSelectScreen extends BackgroundInheritor {
 		worldList = new List<WorldReference>(VisUI.getSkin()) {
 			@Override
 			protected GlyphLayout drawItem(Batch batch, BitmapFont font, int index, WorldReference item, float x, float y, float width) {
-				Color color = font.getColor();
-				if(!item.compatible)
-					font.setColor(Color.RED);
-				GlyphLayout layout = super.drawItem(batch, font, index, item, x, y, width);
-				if(!item.compatible)
+				if(!item.equivalent) {
+					Color color = font.getColor();
+					font.setColor(item.compatible ? Color.YELLOW : Color.RED);
+					GlyphLayout layout = super.drawItem(batch, font, index, item, x, y, width);
 					font.setColor(color);
-				return layout;
+					return layout;
+				}
+				
+				return super.drawItem(batch, font, index, item, x, y, width);
 			}
 		};
 		worldList.setItems(WorldReference.getLocalWorlds(false).toArray(new WorldReference[0]));
@@ -58,11 +60,11 @@ public class WorldSelectScreen extends BackgroundInheritor {
 		ScrollPane scroll = new ScrollPane(worldList);
 		table.add(scroll).grow().maxHeight(getViewport().getWorldHeight()/2).row();
 		
-		VisLabel error = makeLabel("");
-		table.add(error).row();
-		
 		VisLabel worldInfo = makeLabel("Select a World");
 		table.add(worldInfo).row();
+		
+		VisLabel error = makeLabel("");
+		table.add(error).row();
 		
 		VisTextButton load = makeButton("Load World", () -> {
 			WorldReference ref = worldList.getSelected();
@@ -110,10 +112,23 @@ public class WorldSelectScreen extends BackgroundInheritor {
 					load.setDisabled(true);
 				}
 				else {
-					worldInfo.setText("Version: "+ref.version+(ref.version.compareTo(GameCore.VERSION) == 0?" (current)":""));
+					worldInfo.setText("Version: "+ref.version+(Version.CURRENT.equals(ref.version)?" (current)":""));
 					load.setDisabled(!ref.compatible);
 					if(!ref.compatible)
-						error.setText("The world version is not compatible with the current version.");
+						error.setText("The world version is not compatible with the current version.\n"+
+							// if it was supported on later versions, display what the latest version was.
+							(ref.lastCompatible.equals(ref.version)
+								?""
+								:"It was last supported in version "+ref.lastCompatible+".\n"
+							)+
+							// display whether updating to the current version is possible
+							(ref.updatable
+								?"To restore compatibility, load and save the world in that version, then try again." 
+								:"It is not possible to update it to the current version."
+							)
+						);
+					else if(!ref.equivalent) // notify the player that things will be changing
+						error.setText("The save format has changed since this world was last saved.\nThe data will be migrated.");
 				}
 			}
 		});

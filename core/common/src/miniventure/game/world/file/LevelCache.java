@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import miniventure.game.GameCore;
-import miniventure.game.network.GameProtocol.IslandReference;
 import miniventure.game.util.SerialHashMap;
 import miniventure.game.util.Version;
 import miniventure.game.world.level.Level;
@@ -43,7 +41,7 @@ public class LevelCache {
 		this.isSurface = isSurface;
 		this.islandType = islandType;
 		this.seed = seed;
-		dataVersion = GameCore.VERSION;
+		dataVersion = Version.CURRENT;
 	}
 	
 	LevelCache(IslandCache parent, boolean isSurface, Version dataVersion, LinkedList<String> fileData) {
@@ -102,7 +100,7 @@ public class LevelCache {
 	public void updateData(String[] entityData, TileData[][] tileData) {
 		this.entityData = entityData;
 		this.tileData = tileData;
-		dataVersion = GameCore.VERSION;
+		dataVersion = Version.CURRENT;
 	}
 	
 	public boolean generated() { return tileData != null; }

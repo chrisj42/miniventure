@@ -1,5 +1,7 @@
 package miniventure.game.util;
 
+import miniventure.game.util.Version.VersionFormatException;
+
 import org.json.JSONObject;
 
 public class VersionInfo {
@@ -10,7 +12,15 @@ public class VersionInfo {
 	
 	public VersionInfo(JSONObject releaseInfo) {
 		String versionTag = releaseInfo.getString("tag_name").substring(1); // cut off the "v" at the beginning
-		version = new Version(versionTag);
+		Version v;
+		try {
+			v = new Version(versionTag);
+		} catch (VersionFormatException e) {
+			System.err.println("Github version tag was malformed:");
+			e.printStackTrace();
+			v = Version.CURRENT;
+		}
+		version = v;
 		
 		assetUrl = releaseInfo.getJSONArray("assets").getJSONObject(0).getString("browser_download_url");
 		

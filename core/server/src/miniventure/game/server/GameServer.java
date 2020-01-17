@@ -16,6 +16,7 @@ import miniventure.game.chat.command.CommandInputParser;
 import miniventure.game.network.PacketPipe.PacketPipeWriter;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.Version;
 import miniventure.game.util.function.Action;
 import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.WorldObject;
@@ -34,8 +35,6 @@ import miniventure.game.world.tile.TileTypeEnum;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-
-import com.esotericsoftware.kryonet.Connection;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -172,7 +171,7 @@ public abstract class GameServer implements GameProtocol {
 			// TODO passwords
 			// if(!info.passhash.equals(passhash))
 			// 	return null; // incorrect password
-			player = (ServerPlayer) ServerEntity.deserialize(world, info.data, GameCore.VERSION);
+			player = (ServerPlayer) ServerEntity.deserialize(world, info.data, Version.CURRENT);
 			op = info.op;
 		} else {
 			GameCore.debug("Player '"+name+"' is not known, creating new player.");
@@ -526,7 +525,7 @@ public abstract class GameServer implements GameProtocol {
 	}
 	
 	public void printStatus(MessageBuilder out) {
-		out.println("Miniventure Version: "+GameCore.VERSION);
+		out.println("Miniventure Version: "+ Version.CURRENT);
 		out.println("Server Running: "+isRunning());
 		out.println("FPS: " + world.getFPS());
 		out.println("Players connected: "+playerToConnectionMap.size());

@@ -1,32 +1,78 @@
 package miniventure.game.util;
 
+import java.util.TreeMap;
+
 import org.jetbrains.annotations.NotNull;
 
 public class Version implements Comparable<Version> {
 	
-	static class VersionFormatException extends IllegalArgumentException {
-		public VersionFormatException(String versionString) {
-			super("The string \"" + versionString + "\" does not represent a valid version format; valid formats are #.#.# or #.#.#.#");
-			// deprecated formats are #.# and #.#.#.dev
+	// the last digit increments without release or tag
+	public static final Version CURRENT = makeVersion("2.2.1.5");
+	
+	// the last time there was a change in the save format
+	private static final Version latestFormatChange = makeVersion("2.2.1.5");
+	
+	// use this to determine the latest version a world is compatible with
+	private static final TreeMap<Version, Version> endOfSupportVersions = new TreeMap<>();
+	static {
+		// this is the oldest version that the current version supports
+		endOfSupportVersions.put(makeVersion("2.2.1.5"), CURRENT);
+		// below is for older versions; add an entry whenever a version loses support
+		// no need to add an entry if it was only supported for one version
+		// addEoSVersion("2.1.2", "2.1.2");
+		// addEoSVersion("2.2.1.4", "2.2.1.4");
+	}
+	
+	private static void addEoSVersion(String version, String lastSupportingVersion) {
+		endOfSupportVersions.put(makeVersion(version), makeVersion(lastSupportingVersion));
+	}
+	
+	/*
+		knowing the latest format change shows when to highlight the world yellow.
+		It can then say that "file format was changed in version x, your file will be migrated"
+		
+		the oldest supported version shows when to highlight it red.
+		it can then say "version unsupported, support ended in version x"
+	 */
+	
+	// returns the latest version that supports the given version
+	@NotNull
+	public static Version getSupportFor(@NotNull Version dataVersion) {
+		Version floored = endOfSupportVersions.floorKey(dataVersion);
+		Version support = floored == null ? null : endOfSupportVersions.get(floored);
+		if(support == null || support.isBefore(dataVersion))
+			return dataVersion; // unknown, or unspecified; assume data version
+		return support;
+	}
+	
+	public static boolean matchesCurrentFormat(@NotNull Version dataVersion) {
+		return dataVersion.atOrAfter(latestFormatChange);
+	}
+	
+	public static class VersionFormatException extends Exception {
+		private VersionFormatException(String versionString, String reason, Throwable cause) {
+			super("The string \"" + versionString + "\" does not represent a valid version format: "+reason, cause);
+		}
+	}
+	private static class UncaughtVersionFormatException extends IllegalArgumentException {
+		UncaughtVersionFormatException(VersionFormatException e) { super(e); }
+	}
+	private static Version makeVersion(String version) {
+		try {
+			return new Version(version);
+		} catch (VersionFormatException e) {
+			throw new UncaughtVersionFormatException(e);
 		}
 	}
 	
 	private final int make, major, minor, build;
 	
 	private Version() {make = 0; major = 0; minor = 0; build = 0;}
-	public Version(String version) {
+	public Version(String version) throws VersionFormatException {
 		String[] nums = version.split("\\.");
-		if(nums.length == 2 || version.contains("dev")) {
-			OldVersion v = new OldVersion(version);
-			make = v.make;
-			major = v.major;
-			minor = v.minor;
-			build = v.dev ? 1 : 0;
-			return;
-		}
 		
 		if(nums.length < 3 || nums.length > 4)
-			throw new VersionFormatException(version);
+			throw new VersionFormatException(version, "3-4 numbers required", null);
 		
 		try {
 			make = new Integer(nums[0]);
@@ -38,8 +84,11 @@ public class Version implements Comparable<Version> {
 				build = new Integer(nums[3]);
 			
 		} catch(NumberFormatException ex) {
-			throw new VersionFormatException(version);
+			throw new VersionFormatException(version, "", ex);
 		}
+		
+		if(make < 0 || major < 0 || minor < 0 || build < 0)
+			throw new VersionFormatException(version, "", null);
 	}
 	
 	// returns a string representation in the same form as what is expected in the constructor.
@@ -47,20 +96,20 @@ public class Version implements Comparable<Version> {
 		return String.valueOf(make) + '.' + major + '.' + minor + '.' + build;
 	}
 	
-	public boolean isBefore(String version) { return isBefore(new Version(version)); }
+	public boolean isBefore(String version) { return isBefore(makeVersion(version)); }
 	public boolean isBefore(@NotNull Version version) {
 		return compareTo(version) < 0;
 	}
-	public boolean atOrBefore(String version) { return atOrBefore(new Version(version)); }
+	public boolean atOrBefore(String version) { return atOrBefore(makeVersion(version)); }
 	public boolean atOrBefore(@NotNull Version version) {
 		return compareTo(version) <= 0;
 	}
 	
-	public boolean isAfter(String version) { return isAfter(new Version(version)); }
+	public boolean isAfter(String version) { return isAfter(makeVersion(version)); }
 	public boolean isAfter(@NotNull Version version) {
 		return compareTo(version) > 0;
 	}
-	public boolean atOrAfter(String version) { return atOrAfter(new Version(version)); }
+	public boolean atOrAfter(String version) { return atOrAfter(makeVersion(version)); }
 	public boolean atOrAfter(@NotNull Version version) {
 		return compareTo(version) >= 0;
 	}
@@ -102,35 +151,5 @@ public class Version implements Comparable<Version> {
 			return "The Main Release"+(build>0?" (Dev Build "+build+')':"");
 		
 		return (make==1?"Pre-Alpha ":make==2?"Alpha ":make==3?"Beta ":"Update ")+major+(minor<0?" (Final)":"."+minor)+(build>0?" (Dev Build "+build+')':"");
-	}
-	
-	private static class OldVersion {
-		private final int make, major, minor;
-		private final boolean dev;
-		
-		OldVersion(String version) {
-			String[] nums = version.split("\\.");
-			if(nums.length > 4 || nums.length < 2)
-				throw new VersionFormatException(version);
-			
-			try {
-				make = new Integer(nums[0]);
-				major = new Integer(nums[1]);
-				if(nums.length > 2)
-					minor = new Integer(nums[2]);
-				else
-					minor = -1; // this is only supported for legacy purposes
-				
-				if(make < 0 || major < 0 || (nums.length > 2 && minor < 0))
-					throw new VersionFormatException(version);
-				
-				dev = nums.length > 3;
-				if(dev && !nums[3].equalsIgnoreCase("dev"))
-					throw new VersionFormatException(version);
-				
-			} catch(NumberFormatException ex) {
-				throw new VersionFormatException(version);
-			}
-		}
 	}
 }

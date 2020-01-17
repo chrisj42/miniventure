@@ -24,6 +24,7 @@ import miniventure.game.server.NetworkServer;
 import miniventure.game.server.ServerCore;
 import miniventure.game.server.ServerFetcher;
 import miniventure.game.util.ProgressLogger;
+import miniventure.game.util.Version;
 import miniventure.game.util.function.MapFunction;
 import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.file.WorldDataSet;
@@ -98,7 +99,7 @@ public class DesktopLauncher {
 			GameCore.debug("Starting GUI client...");
 			Thread.setDefaultUncaughtExceptionHandler(ClientCore.exceptionHandler);
 			LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-			config.title = "Miniventure - " + GameCore.VERSION;
+			config.title = "Miniventure - " + Version.CURRENT;
 			config.width = ClientCore.DEFAULT_SCREEN_WIDTH;
 			config.height = ClientCore.DEFAULT_SCREEN_HEIGHT;
 			// config.fullscreen = true;

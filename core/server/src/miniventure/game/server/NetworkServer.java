@@ -9,6 +9,7 @@ import miniventure.game.network.GameProtocol;
 import miniventure.game.network.PacketPipe;
 import miniventure.game.network.PacketPipe.PacketPipeReader;
 import miniventure.game.network.PacketPipe.PacketPipeWriter;
+import miniventure.game.util.Version;
 import miniventure.game.util.function.MapFunction;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.file.PlayerData;
@@ -77,8 +78,8 @@ public class NetworkServer extends GameServer {
 				GameCore.debug("server received login");
 				Login login = (Login) object;
 				
-				if(login.version.compareTo(GameCore.VERSION) != 0) {
-					connection.sendTCP(new LoginFailure("Required version: "+GameCore.VERSION));
+				if(login.version.compareTo(Version.CURRENT) != 0) {
+					connection.sendTCP(new LoginFailure("Required version: "+ Version.CURRENT));
 					return;
 				}
 				

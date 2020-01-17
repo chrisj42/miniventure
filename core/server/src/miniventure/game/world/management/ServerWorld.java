@@ -97,7 +97,7 @@ public class ServerWorld extends WorldManager {
 	public ServerWorld(@NotNull ServerCore core, @NotNull ServerFetcher serverFetcher, @NotNull WorldDataSet worldInfo, ProgressLogger logger) throws IOException {
 		this.core = core;
 		logger.pushMessage("Parsing world parameters", true);
-		final boolean old = worldInfo.dataVersion.compareTo(GameCore.VERSION) < 0;
+		final boolean old = worldInfo.dataVersion.compareTo(Version.CURRENT) < 0;
 		
 		PlayerData[] pinfo = worldInfo.playerInfo;
 		if(old) {
@@ -215,7 +215,7 @@ public class ServerWorld extends WorldManager {
 			// 	savePlayer(player);
 			// }
 			
-			WorldFileInterface.saveWorld(new WorldDataSet(worldPath, lockRef, worldSeed, gameTime, daylightOffset, GameCore.VERSION, pdata, islandStores));
+			WorldFileInterface.saveWorld(new WorldDataSet(worldPath, lockRef, worldSeed, gameTime, daylightOffset, Version.CURRENT, pdata, islandStores));
 		});
 	}
 	

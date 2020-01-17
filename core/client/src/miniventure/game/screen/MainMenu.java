@@ -10,6 +10,7 @@ import miniventure.game.screen.InfoScreen.CreditsScreen;
 import miniventure.game.screen.InfoScreen.InstructionsScreen;
 import miniventure.game.screen.util.BackgroundProvider;
 import miniventure.game.screen.util.MyLinkLabel;
+import miniventure.game.util.Version;
 import miniventure.game.util.VersionInfo;
 import miniventure.game.world.level.RenderLevel;
 import miniventure.game.world.management.ClientWorld;
@@ -48,7 +49,7 @@ public class MainMenu extends BackgroundProvider {
 		table = useTable();
 		
 		addLabel("Welcome to Miniventure!", 20);
-		addLabel("You are playing " + GameCore.VERSION.toString().replace("The","the"), 25);
+		addLabel("You are playing " + Version.CURRENT.toString().replace("The","the"), 25);
 		
 		VisLabel updateLabel = addLabel("Checking for higher versions...", 45);
 		setVersionUpdateLabel(updateLabel);
@@ -183,7 +184,7 @@ public class MainMenu extends BackgroundProvider {
 		else {
 			// add a message saying you have the latest version, or a hyperlink message to the newest jar file.
 			VersionInfo latestVersion = GameCore.getLatestVersion();
-			int comp = latestVersion.version.compareTo(GameCore.VERSION);
+			int comp = latestVersion.version.compareTo(Version.CURRENT);
 			if(comp > 0) { // link new version
 				MyLinkLabel linkLabel = new MyLinkLabel(latestVersion.releaseName + " Now Available! Click here to download.", latestVersion.assetUrl);
 				deregisterLabels(label);

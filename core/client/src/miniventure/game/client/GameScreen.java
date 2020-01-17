@@ -4,6 +4,7 @@ import miniventure.game.GameCore;
 import miniventure.game.client.InputHandler.Control;
 import miniventure.game.item.InventoryOverlay;
 import miniventure.game.screen.*;
+import miniventure.game.util.Version;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
 import miniventure.game.world.level.ClientLevel;
 import miniventure.game.world.level.Level;
@@ -179,7 +180,7 @@ public class GameScreen {
 		if(GameCore.debug)
 			debugInfo.add("Debug Mode ENABLED");
 		
-		debugInfo.add("Version: " + GameCore.VERSION);
+		debugInfo.add("Version: " + Version.CURRENT);
 		
 		// player coordinates, for debug
 		Rectangle playerBounds = player.getBounds();
