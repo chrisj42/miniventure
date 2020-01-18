@@ -17,6 +17,7 @@ import miniventure.game.client.ClientCore;
 import miniventure.game.client.FontStyle;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.util.ColorBackground;
+import miniventure.game.util.MyUtils;
 import miniventure.game.util.RelPos;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
 
@@ -123,7 +124,7 @@ public class CraftingScreen extends MenuScreen {
 				synchronized (CraftingScreen.this) {
 					if(recipes != null && recipes.size() > 0) {
 						if(Control.CONFIRM.matches(keycode)) {
-							craftSelected();
+							craft(recipes.get(selection).recipe);
 							return true;
 						}
 					}
@@ -219,7 +220,7 @@ public class CraftingScreen extends MenuScreen {
 				slot.addListener(new ClickListener() {
 					@Override
 					public void clicked(InputEvent event, float x, float y) {
-						craftSelected();
+						craft(slot.recipe);
 					}
 				});
 				slot.updateCanCraft(inventoryCounts);
@@ -316,8 +317,8 @@ public class CraftingScreen extends MenuScreen {
 		}
 	}
 	
-	private synchronized void craftSelected() {
-		ClientRecipe recipe = recipes.get(selection).recipe;
+	private synchronized void craft(ClientRecipe recipe) {
+		// ClientRecipe recipe = recipes.get(selection).recipe;
 		if(recipe.isItemRecipe())
 			ClientCore.getClient().send(((ClientItemRecipe)recipe).getCraftRequest());
 		else {
@@ -344,9 +345,7 @@ public class CraftingScreen extends MenuScreen {
 	
 	private synchronized void moveSelection(int amt) {
 		if(recipes.size() == 0) return;
-		int newSel = selection + amt;
-		while(newSel < 0) newSel += recipes.size();
-		selection = newSel % recipes.size();
+		selection = MyUtils.wrapIndex(selection + amt, recipes.size());
 		scrollPane.setSmoothScrolling(false);
 		scrollPane.scrollTo(0, recipes.get(selection).getY(), 0, ItemSlot.HEIGHT);
 		scrollPane.updateVisualScroll();

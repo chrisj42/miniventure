@@ -122,6 +122,13 @@ public final class MyUtils {
 	// MATH UTILS
 	
 	
+	public static int wrapIndex(int idx, int max) {
+		idx %= max;
+		if(idx < 0)
+			idx += max;
+		return idx;
+	}
+	
 	public static float mapFloat(float num, float prevMin, float prevMax, float newMin, float newMax) {
 		return (num-prevMin)/(prevMax-prevMin) * (newMax-newMin) + newMin;
 	}

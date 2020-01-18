@@ -33,6 +33,7 @@ public class ItemSlot extends Widget {
 	
 	private boolean selected = false;
 	void setSelected(boolean selected) { this.selected = selected; }
+	boolean getSelected() { return selected; }
 	
 	public ItemSlot(boolean showName, @Nullable Item item) { this(showName, item, 1); }
 	public ItemSlot(boolean showName, @Nullable Item item, int count) { this(showName, item, count, (Drawable)null); }

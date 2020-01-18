@@ -12,5 +12,3 @@
 - restrict switching levels until the map is gotten on a level
 
 - check todos and fixmes
-
-- add listener to world list in WorldSelectScreen, so the up/down keys change the selected world.

@@ -7,6 +7,7 @@ import miniventure.game.client.ClientCore;
 import miniventure.game.client.FontStyle;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.util.DiscreteViewport;
+import miniventure.game.util.MyUtils;
 import miniventure.game.util.RelPos;
 
 import com.badlogic.gdx.Input.Keys;
@@ -209,9 +210,7 @@ public class InventoryOverlay extends MenuScreen {
 				int idx = invManager.getSelection() + amount;
 				int slots = inventory.getSlotsTaken();
 				if(slots > 0) {
-					idx %= slots;
-					if(idx < 0)
-						idx += slots;
+					idx = MyUtils.wrapIndex(idx, slots);
 				} else
 					return false;
 				

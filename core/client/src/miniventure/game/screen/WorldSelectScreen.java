@@ -12,11 +12,13 @@ import miniventure.game.world.file.WorldFormatException;
 import miniventure.game.world.file.WorldReference;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.List;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -28,7 +30,10 @@ import com.kotcrab.vis.ui.widget.VisTextButton;
 
 public class WorldSelectScreen extends BackgroundInheritor {
 	
+	private static final Color invalidColor = new Color(1, .5f, .5f, 1);
+	
 	private List<WorldReference> worldList;
+	private ScrollPane scrollPane;
 	
 	// TODO use the info strings in WorldReference to highlight the world a certain color,
 	//  and display info about it.
@@ -44,7 +49,7 @@ public class WorldSelectScreen extends BackgroundInheritor {
 			protected GlyphLayout drawItem(Batch batch, BitmapFont font, int index, WorldReference item, float x, float y, float width) {
 				if(!item.equivalent) {
 					Color color = font.getColor();
-					font.setColor(item.compatible ? Color.YELLOW : Color.RED);
+					font.setColor(item.compatible ? Color.YELLOW : invalidColor);
 					GlyphLayout layout = super.drawItem(batch, font, index, item, x, y, width);
 					font.setColor(color);
 					return layout;
@@ -57,14 +62,17 @@ public class WorldSelectScreen extends BackgroundInheritor {
 		
 		table.defaults().padBottom(10);
 		
-		ScrollPane scroll = new ScrollPane(worldList);
-		table.add(scroll).grow().maxHeight(getViewport().getWorldHeight()/2).row();
+		scrollPane = new ScrollPane(worldList);
+		table.add(scrollPane).grow()
+			.maxHeight(getViewport().getWorldHeight()/3)
+			.minHeight(getViewport().getWorldHeight()/5)
+			.row();
 		
 		VisLabel worldInfo = makeLabel("Select a World");
-		table.add(worldInfo).row();
+		table.add(worldInfo).height(ClientCore.getFont().getLineHeight() * 3).row();
 		
 		VisLabel error = makeLabel("");
-		table.add(error).row();
+		table.add(error).height(ClientCore.getFont().getLineHeight() * 3).row();
 		
 		VisTextButton load = makeButton("Load World", () -> {
 			WorldReference ref = worldList.getSelected();
@@ -139,14 +147,36 @@ public class WorldSelectScreen extends BackgroundInheritor {
 		
 		VisTextButton back = makeButton("Back to Main Menu", ClientCore::backToParentScreen);
 		table.add(back);
-		
-		mapButtons(table, load, back);
-		setKeyboardFocus(table);
-		setScrollFocus(scroll);
+		mapButtons(getRoot(), load, back);
+		setKeyboardFocus(null);
+		setScrollFocus(scrollPane);
 	}
 	
 	@Override
 	public boolean allowChildren() {
 		return true;
+	}
+	
+	@Override
+	public void act(float delta) {
+		super.act(delta);
+		
+		int scroll = 0;
+		if(ClientCore.input.pressingKey(Keys.UP))
+			scroll--;
+		if(ClientCore.input.pressingKey(Keys.DOWN))
+			scroll++;
+		
+		if(scroll != 0) {
+			int prev = worldList.getSelectedIndex();
+			int sel = MyUtils.wrapIndex(prev + scroll, worldList.getItems().size);
+			worldList.setSelectedIndex(sel);
+			boolean wrapped = sel != prev + scroll;
+			int highlight = wrapped ? sel : MyUtils.clamp(sel + scroll * 2, 0, worldList.getItems().size-1);
+			scrollPane.setSmoothScrolling(false);
+			scrollPane.scrollTo(0, worldList.getHeight() - worldList.getItemHeight() * (highlight+1), 0, worldList.getItemHeight());
+			scrollPane.updateVisualScroll();
+			scrollPane.setSmoothScrolling(true);
+		}
 	}
 }
