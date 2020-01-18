@@ -92,7 +92,6 @@ public abstract class Entity implements WorldObject {
 	}
 	
 	public Vector3 getLocation() { return new Vector3(x, y, z); }
-	public Vector3 getLocation(boolean worldOriginCenter) { return new Vector3(getPosition(worldOriginCenter), z); }
 	
 	public float getZ() { return z; }
 	public void setZ(float z) { this.z = z; }

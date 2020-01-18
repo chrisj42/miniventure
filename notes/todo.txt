@@ -1,7 +1,5 @@
 WORLD
 
-- remove the coordinate change that makes 0,0, the center
-
 - entities get affected by player interactions in front of the player; the cursor only determines which blocks are affected.
 
 - remove equipped hammer from ServerPlayer; instead, add a toolkit to the crafting requirement of constructable objects, and have the crafting remove some durability

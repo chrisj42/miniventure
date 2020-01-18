@@ -536,7 +536,7 @@ public abstract class GameServer implements GameProtocol {
 		for(PlayerLink pd: data) {
 			out.print("     Player '"+pd.player.getName()+"' ");
 			if(pd.op) out.print("(admin) ");
-			out.print(pd.player.getLocation(true));
+			out.print(pd.player.getLocation());
 			out.println();
 		}
 		if(GameCore.debug)

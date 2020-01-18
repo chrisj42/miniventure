@@ -457,8 +457,7 @@ public interface GameProtocol {
 		
 		public String toString(WorldManager world) {
 			if(levelId == null) return toString();
-			Vector2 pos = Boundable.toLevelCoords(world.getLevel(levelId), new Vector2(x, y));
-			return "PositionUpdate("+pos.x+","+pos.y+","+z+",lvl"+levelId+")";
+			return "PositionUpdate("+x+','+y+','+z+",lvl"+levelId+')';
 		}
 	}
 	

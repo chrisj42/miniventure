@@ -211,7 +211,7 @@ public enum Command {
 			if(level != null) {
 				toMove.moveTo(dest.getPosition());
 				world.getServer().sendToPlayer(toMove, new PositionUpdate(toMove));
-				out.println("teleported "+toMove.getName()+" to "+toMove.getPosition(true)+".");
+				out.println("teleported "+toMove.getName()+" to "+toMove.getPosition()+'.');
 			} else
 				err.println("player "+dest.getName()+" is not on a valid level; cannot tp to their location.");
 		}, ArgValidator.PLAYER, ArgValidator.PLAYER),
@@ -227,11 +227,9 @@ public enum Command {
 			float y = ArgValidator.DECIMAL.get(args[2]);
 			ServerLevel level = player.getLevel();
 			if(level != null) {
-				x += level.getWidth()/2f;
-				y += level.getHeight()/2f;
 				player.moveTo(x, y);
 				world.getServer().sendToPlayer(player, new PositionUpdate(player));
-				out.println("teleported "+player.getName()+" to "+player.getPosition(true)+'.');
+				out.println("teleported "+player.getName()+" to "+player.getPosition()+'.');
 			} else
 				err.println("player "+player.getName()+" is not on a valid level; cannot be teleported.");
 		}), ArgValidator.PLAYER, ArgValidator.DECIMAL, ArgValidator.DECIMAL),
