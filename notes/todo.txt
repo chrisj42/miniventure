@@ -4,6 +4,8 @@ WORLD
 
 - entities get affected by player interactions in front of the player; the cursor only determines which blocks are affected.
 
+- remove equipped hammer from ServerPlayer; instead, add a toolkit to the crafting requirement of constructable objects, and have the crafting remove some durability
+
 - have mob AI's pursue their attacker instead of just the "nearest player." zombies, which are naturally aggressive, actually will seek out the nearest player, but will focus on one for a time if they attack it.
 	- impl note, move getNearestPlayer method from Level to ServerLevel, so it can fetch the players on a level without having to go through all the entities on the level.
 

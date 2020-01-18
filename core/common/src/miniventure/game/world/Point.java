@@ -12,12 +12,21 @@ public class Point {
 		this.x = x;
 		this.y = y;
 	}
+	public Point(String data) {
+		String[] info = data.split(";");
+		this.x = new Integer(info[0]);
+		this.y = new Integer(info[1]);
+	}
 	
 	public static Point floorVector(Vector2 v) {
 		return new Point(MathUtils.floor(v.x), MathUtils.floor(v.y));
 	}
 	public static Point roundVector(Vector2 v) {
 		return new Point(MathUtils.round(v.x), MathUtils.round(v.y));
+	}
+	
+	public String serialize() {
+		return x+";"+y;
 	}
 	
 	@Override

@@ -283,10 +283,10 @@ public class WorldFileInterface {
 			
 			//noinspection MismatchedQueryAndUpdateOfCollection
 			SerialHashMap map = new SerialHashMap(lines.pop());
-			final long seed = Long.parseLong(map.get("seed"));
-			final float gameTime = Float.parseFloat(map.get("gt"));
-			final float daytime = Float.parseFloat(map.get("time"));
-			final int islandCount = Integer.parseInt(map.get("islands"));
+			final long seed = map.get("seed", Long::parseLong);
+			final float gameTime = map.get("gt", Float::parseFloat);
+			final float daytime = map.get("time", Float::parseFloat);
+			final int islandCount = map.get("islands", Integer::parseInt);
 			
 			// read terrain / entity / level data
 			/*Set<Path> islandFiles = Files.list(folder)

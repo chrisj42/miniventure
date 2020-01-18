@@ -343,7 +343,7 @@ public abstract class GameServer implements GameProtocol {
 		
 		GameProtocol.forPacket(object, TabRequest.class, request -> {
 			String text = request.manualText;
-			if(text.split(" ").length == 1) {
+			if(!text.contains(" ")) {
 				// hasn't finished entering command name, autocomplete that
 				Array<String> matches = new Array<>(String.class);
 				for(Command c: Command.valuesFor(client)) {

@@ -11,6 +11,8 @@ import miniventure.game.world.level.LevelFetcher;
 import miniventure.game.world.tile.TileStack.TileData;
 import miniventure.game.world.worldgen.island.IslandType;
 
+import org.jetbrains.annotations.NotNull;
+
 public class LevelCache {
 	
 	/*
@@ -31,6 +33,7 @@ public class LevelCache {
 	private final long seed;
 	
 	// load parameters
+	@NotNull
 	private Version dataVersion;
 	private String[] entityData;
 	private TileData[][] tileData;
@@ -44,19 +47,19 @@ public class LevelCache {
 		dataVersion = Version.CURRENT;
 	}
 	
-	LevelCache(IslandCache parent, boolean isSurface, Version dataVersion, LinkedList<String> fileData) {
+	LevelCache(IslandCache parent, boolean isSurface, @NotNull Version dataVersion, LinkedList<String> fileData) {
 		this.island = parent;
 		this.isSurface = isSurface;
+		this.dataVersion = dataVersion;
 		
 		//noinspection MismatchedQueryAndUpdateOfCollection
 		SerialHashMap map = new SerialHashMap(fileData.pop());
-		String islandType = map.get("island");
-		this.islandType = IslandType.valueOf(islandType);
+		this.islandType = map.get("island", IslandType::valueOf);
 		// this.ref = new IslandReference(id, IslandType.valueOf(islandType));
-		seed = Long.parseLong(map.get("seed"));
-		int ec = Integer.parseInt(map.get("ec"));
-		int width = Integer.parseInt(map.get("w"));
-		int height = Integer.parseInt(map.get("h"));
+		seed = map.get("seed", Long::parseLong);
+		int ec = map.get("ec", Integer::parseInt);
+		int width = map.get("w", Integer::parseInt);
+		int height = map.get("h", Integer::parseInt);
 		
 		if(ec < 0) {
 			entityData = null;
@@ -79,7 +82,7 @@ public class LevelCache {
 	List<String> save() { return save(new LinkedList<>()); }
 	List<String> save(List<String> data) {
 		SerialHashMap map = new SerialHashMap();
-		map.add("island", this.islandType.name());
+		map.add("island", this.islandType);
 		map.add("seed", seed);
 		map.add("ec", entityData == null ? -1 : entityData.length);
 		map.add("w", tileData == null ? 0 : tileData.length);

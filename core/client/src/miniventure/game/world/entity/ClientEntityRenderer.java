@@ -49,7 +49,9 @@ public class ClientEntityRenderer {
 			ClientEntityRenderer.deserialize(MyUtils.parseLayeredString(data[0])), data[1].equals("null")?null:Color.valueOf(data[1]), Float.parseFloat(data[2]), Boolean.parseBoolean(data[3]), Blinker.deserialize(MyUtils.parseLayeredString(data[4]))
 		)),
 		
-		Text(TextRenderer.class, TextRenderer::new);
+		Text(TextRenderer.class, TextRenderer::new),
+		
+		Blank(EntityRenderer.BLANK.getClass(), data -> EntityRenderer.BLANK);
 		
 		private final Class<? extends EntityRenderer> clazz;
 		private final MapFunction<String[], EntityRenderer> deserializer;

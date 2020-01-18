@@ -4,12 +4,14 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map.Entry;
 
 import miniventure.game.network.GameProtocol.EntityUpdate;
 import miniventure.game.network.GameProtocol.PositionUpdate;
 import miniventure.game.network.GameProtocol.SpriteUpdate;
 import miniventure.game.server.GameServer;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.SerialHashMap;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.WorldObject;
@@ -32,24 +34,24 @@ public abstract class ServerEntity extends Entity {
 		super(world, false);
 	}
 	
-	protected ServerEntity(@NotNull ServerWorld world, ClassDataList allData, final Version version, ValueAction<ClassDataList> modifier) {
+	protected ServerEntity(@NotNull ServerWorld world, EntityDataSet allData, final Version version, ValueAction<EntityDataSet> modifier) {
 		this(world);
 		modifier.act(allData);
-		// the index here is based on the class count away from ServerEntity in inheritance.
-		ArrayList<String> data = allData.get(0);
-		x = Float.parseFloat(data.get(0));
-		y = Float.parseFloat(data.get(1));
-		z = Float.parseFloat(data.get(2));
+		
+		SerialHashMap data = allData.get("e");
+		x = data.get("x", Float::parseFloat);
+		y = data.get("y", Float::parseFloat);
+		z = data.get("z", Float::parseFloat);
 	}
 	
-	public ClassDataList save() {
-		ClassDataList allData = new ClassDataList();
-		ArrayList<String> data = new ArrayList<>(Arrays.asList(
-			String.valueOf(x),
-			String.valueOf(y),
-			String.valueOf(z)
-		));
-		allData.add(data);
+	public EntityDataSet save() {
+		EntityDataSet allData = new EntityDataSet();
+		SerialHashMap data = new SerialHashMap();
+		data.add("x", x);
+		data.add("y", y);
+		data.add("z", z);
+		
+		allData.put("e", data);
 		return allData;
 	}
 	
@@ -114,32 +116,31 @@ public abstract class ServerEntity extends Entity {
 	public String serialize() { return serialize(this); }
 	
 	public static String serialize(ServerEntity e) {
-		ClassDataList data = e.save();
+		EntityDataSet data = e.save();
 		
-		String[] partEncodedData = new String[data.size()+1];
-		for(int i = 0; i < data.size(); i++) {
-			partEncodedData[i+1] = MyUtils.encodeStringArray(data.get(i));
-		}
+		SerialHashMap allData = new SerialHashMap();
+		for(Entry<String, SerialHashMap> entry: data.entrySet())
+			allData.put(entry.getKey(), entry.getValue().serialize());
 		
-		partEncodedData[0] = e.getClass().getCanonicalName().replace(Entity.class.getPackage().getName()+".", "");
+		allData.add("class", e.getClass().getCanonicalName().replace(Entity.class.getPackage().getName()+".", ""));
 		
-		return MyUtils.encodeStringArray(partEncodedData);
+		return allData.serialize();
 	}
 	
-	public static ServerEntity deserialize(@NotNull ServerWorld world, String data, Version version) {
-		String[] partData = MyUtils.parseLayeredString(data);
+	public static ServerEntity deserialize(@NotNull ServerWorld world, String data, @NotNull Version version) {
+		SerialHashMap allData = new SerialHashMap(data);
 		
-		ClassDataList map = new ClassDataList();
-		for(int i = 1; i < partData.length; i++) {
-			map.add(new ArrayList<>(Arrays.asList(
-				MyUtils.parseLayeredString(partData[i])
-			)));
+		String entityType = allData.remove("class");
+		
+		EntityDataSet map = new EntityDataSet();
+		for(Entry<String, String> entry: allData.entrySet()) {
+			map.put(entry.getKey(), new SerialHashMap(entry.getValue()));
 		}
 		
 		ServerEntity entity = null;
 		
 		try {
-			Class<?> clazz = Class.forName(Entity.class.getPackage().getName()+"."+partData[0]);
+			Class<?> clazz = Class.forName(Entity.class.getPackage().getName()+'.'+entityType);
 			
 			Class<? extends ServerEntity> entityClass = clazz.asSubclass(ServerEntity.class);
 			
@@ -151,12 +152,12 @@ public abstract class ServerEntity extends Entity {
 		
 		return entity;
 	}
-	public static <T extends ServerEntity> T deserialize(@NotNull ServerWorld world, Class<T> clazz, ClassDataList data, Version version) {
+	public static <T extends ServerEntity> T deserialize(@NotNull ServerWorld world, Class<T> clazz, EntityDataSet data, @NotNull Version version) {
 		T newEntity = null;
 		try {
-			Constructor<T> constructor = clazz.getDeclaredConstructor(ServerWorld.class, ClassDataList.class, Version.class, ValueAction.class);
+			Constructor<T> constructor = clazz.getDeclaredConstructor(ServerWorld.class, EntityDataSet.class, Version.class, ValueAction.class);
 			constructor.setAccessible(true);
-			newEntity = constructor.newInstance(world, data, version, (ValueAction)(allData -> {}));
+			newEntity = constructor.newInstance(world, data, version, (ValueAction<EntityDataSet>)(allData -> {}));
 		} catch(NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
 			e.printStackTrace();
 		}

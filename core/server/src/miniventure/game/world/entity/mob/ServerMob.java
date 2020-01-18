@@ -10,10 +10,11 @@ import miniventure.game.item.Item;
 import miniventure.game.item.Result;
 import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolItem.ToolType;
+import miniventure.game.util.SerialHashMap;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.WorldObject;
-import miniventure.game.world.entity.ClassDataList;
+import miniventure.game.world.entity.EntityDataSet;
 import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.KnockbackController;
 import miniventure.game.world.entity.ServerEntity;
@@ -64,32 +65,29 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 	// some stuff is given in the child constructor; this shouldn't need to be saved to file.
 	// these include the sprite name and the max health, in this case.
 	// these things
-	protected ServerMob(@NotNull ServerWorld world, ClassDataList allData, final Version version, ValueAction<ClassDataList> modifier) {
+	protected ServerMob(@NotNull ServerWorld world, EntityDataSet allData, final Version version, ValueAction<EntityDataSet> modifier) {
 		super(world, allData, version, modifier);
-		ArrayList<String> data = allData.get(1);
+		SerialHashMap data = allData.get("mob");
 		
-		this.spriteName = data.get(0);
-		dir = Direction.valueOf(data.get(1));
-		maxHealth = Integer.parseInt(data.get(2));
-		health = Integer.parseInt(data.get(3));
-		// invulnerableTime = Float.parseFloat(data.get(4));
+		this.spriteName = data.get("sprite");
+		dir = data.get("dir", Direction::valueOf);
+		maxHealth = data.get("mhp", Integer::parseInt);
+		health = data.get("hp", Integer::parseInt);
 		
 		knockbackController = new KnockbackController(this);
 		animator = new MobAnimationController<>(this, spriteName);
 	}
 	
 	@Override
-	public ClassDataList save() {
-		ClassDataList allData = super.save();
-		ArrayList<String> data = new ArrayList<>(Arrays.asList(
-			spriteName,
-			dir.name(),
-			String.valueOf(maxHealth),
-			String.valueOf(health)
-			// String.valueOf(invulnerableTime)
-		));
+	public EntityDataSet save() {
+		EntityDataSet allData = super.save();
+		SerialHashMap data = new SerialHashMap();
+		data.add("sprite", spriteName);
+		data.add("dir", dir);
+		data.add("mhp", maxHealth);
+		data.add("hp", health);
 		
-		allData.add(data);
+		allData.put("mob", data);
 		return allData;
 	}
 	

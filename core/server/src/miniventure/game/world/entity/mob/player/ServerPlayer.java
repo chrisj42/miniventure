@@ -14,13 +14,14 @@ import miniventure.game.network.GameProtocol.*;
 import miniventure.game.network.PacketPipe.PacketPipeWriter;
 import miniventure.game.server.GameServer;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.SerialHashMap;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.Action;
 import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.Boundable;
 import miniventure.game.world.Point;
 import miniventure.game.world.WorldObject;
-import miniventure.game.world.entity.ClassDataList;
+import miniventure.game.world.entity.EntityDataSet;
 import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.entity.mob.ServerMob;
@@ -66,47 +67,50 @@ public class ServerPlayer extends ServerMob implements Player {
 		reset();
 	}
 	
-	protected ServerPlayer(@NotNull ServerWorld world, ClassDataList allData, final Version version, ValueAction<ClassDataList> modifier) {
-		super(world, allData, version, modifier);
-		ArrayList<String> data = allData.get(2);
+	protected ServerPlayer(@NotNull ServerWorld world, EntityDataSet allData, final Version version, ValueAction<EntityDataSet> modifier) {
+		super(world, allData, version, data -> {
+			data.get("mob").add("sprite", "player");
+		});
+		SerialHashMap data = allData.get("player");
 		
-		name = data.get(0);
+		name = data.get("name");
 		invManager = new ServerPlayerInventory();
 		inventory = invManager.getInv();
 		equippedHammer = null;
 		
 		stats.put(Stat.Health, getHealth());
-		stats.put(Stat.Hunger, Integer.parseInt(data.get(1)));
-		stats.put(Stat.Stamina, Integer.parseInt(data.get(2)));
+		stats.put(Stat.Hunger, data.get("hunger", Integer::parseInt));
+		stats.put(Stat.Stamina, data.get("stamina", Integer::parseInt));
 		// stats.put(Stat.Armor, Integer.parseInt(data.get(3)));
-		if(!data.get(3).equals("null"))
-			equippedHammer = HammerType.values()[Integer.parseInt(data.get(3))];
+		// todo remove "equippedHammer", see todo notes
+		if(!data.get("tool").equals("null"))
+			equippedHammer = data.get("tool", HammerType::valueOf);
 		
-		if(data.get(4).equals("null"))
+		if(data.get("sloc").equals("null"))
 			spawnLoc = null;
-		else {
-			String[] pos = data.get(4).split(";");
-			spawnLoc = new Point(Integer.parseInt(pos[0]), Integer.parseInt(pos[1]));
-		}
-		spawnLevel = Integer.parseInt(data.get(5));
+		else
+			spawnLoc = data.get("sloc", Point::new);
 		
-		invManager.loadItems(MyUtils.parseLayeredString(data.get(6)), version);
+		spawnLevel = data.get("slvl", Integer::parseInt);
+		
+		invManager.loadItems(MyUtils.parseLayeredString(data.get("inv")), version);
 	}
 	
 	@Override
-	public ClassDataList save() {
-		ClassDataList allData = super.save();
-		ArrayList<String> data = new ArrayList<>(Arrays.asList(
-			name,
-			String.valueOf(getStat(Stat.Hunger)),
-			String.valueOf(getStat(Stat.Stamina)),
-			equippedHammer == null ? "null" : String.valueOf(equippedHammer.ordinal()),
-			spawnLoc == null ? "null" : spawnLoc.x+";"+spawnLoc.y,
-			String.valueOf(spawnLevel),
-			MyUtils.encodeStringArray(invManager.save())
-		));
+	public EntityDataSet save() {
+		EntityDataSet allData = super.save();
+		allData.get("mob").remove("sprite");
 		
-		allData.add(data);
+		SerialHashMap data = new SerialHashMap();
+		data.add("name", name);
+		data.add("hunger", getStat(Stat.Hunger));
+		data.add("stamina", getStat(Stat.Stamina));
+		data.add("tool", equippedHammer);
+		data.add("sloc", spawnLoc == null ? null : spawnLoc.serialize());
+		data.add("slvl", spawnLevel);
+		data.add("inv", MyUtils.encodeStringArray(invManager.save()));
+		
+		allData.put("player", data);
 		return allData;
 	}
 	

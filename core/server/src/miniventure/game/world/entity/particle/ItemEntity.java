@@ -5,9 +5,10 @@ import java.util.Arrays;
 
 import miniventure.game.item.ServerItem;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.SerialHashMap;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueAction;
-import miniventure.game.world.entity.ClassDataList;
+import miniventure.game.world.entity.EntityDataSet;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.EntityRenderer.ItemSpriteRenderer;
 import miniventure.game.world.entity.ServerEntity;
@@ -42,25 +43,24 @@ public class ItemEntity extends ServerEntity {
 		setRenderer(new ItemSpriteRenderer(item));
 	}
 	
-	protected ItemEntity(@NotNull ServerWorld world, ClassDataList allData, final Version version, ValueAction<ClassDataList> modifier) {
+	protected ItemEntity(@NotNull ServerWorld world, EntityDataSet allData, final Version version, ValueAction<EntityDataSet> modifier) {
 		super(world, allData, version, modifier);
-		ArrayList<String> data = allData.get(1);
+		SerialHashMap data = allData.get("item");
 		delayPickup = false;
-		item = ServerItem.load(MyUtils.parseLayeredString(data.get(0)), version);
-		bounceBehavior = new BounceBehavior(MyUtils.parseLayeredString(data.get(1)));
-		lifetime = new LifetimeTracker(this, Float.parseFloat(data.get(2)), bounceBehavior.getTime());
+		item = ServerItem.load(MyUtils.parseLayeredString(data.get("item")), version);
+		bounceBehavior = new BounceBehavior(MyUtils.parseLayeredString(data.get("bounce")));
+		lifetime = new LifetimeTracker(this, data.get("life", Float::parseFloat), bounceBehavior.getTime());
 	}
 	
 	@Override
-	public ClassDataList save() {
-		ClassDataList allData = super.save();
-		ArrayList<String> data = new ArrayList<>(Arrays.asList(
-			MyUtils.encodeStringArray(item.save()),
-			MyUtils.encodeStringArray(bounceBehavior.save()),
-			String.valueOf(lifetime.getLifetime())
-		));
+	public EntityDataSet save() {
+		EntityDataSet allData = super.save();
+		SerialHashMap data = new SerialHashMap();
+		data.add("item", MyUtils.encodeStringArray(item.save()));
+		data.add("bounce", MyUtils.encodeStringArray(bounceBehavior.save()));
+		data.add("life", lifetime.getLifetime());
 		
-		allData.add(data);
+		allData.put("item", data);
 		return allData;
 	}
 	

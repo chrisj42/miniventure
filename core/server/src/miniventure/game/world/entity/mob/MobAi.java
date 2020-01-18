@@ -2,15 +2,17 @@ package miniventure.game.world.entity.mob;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Locale;
 
 import miniventure.game.item.Item;
 import miniventure.game.item.Result;
 import miniventure.game.item.ServerItem;
+import miniventure.game.util.SerialHashMap;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.WorldObject;
-import miniventure.game.world.entity.ClassDataList;
+import miniventure.game.world.entity.EntityDataSet;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.level.ServerLevel;
 import miniventure.game.world.management.ServerWorld;
@@ -44,29 +46,36 @@ public class MobAi extends ServerMob {
 	private float tempTimeLeft = 0;
 	
 	protected MobAi(@NotNull ServerWorld world, @NotNull AiType aiType) {
-		super(world, aiType.name().toLowerCase(), aiType.health);
+		super(world, aiType.name().toLowerCase(Locale.ENGLISH), aiType.health);
 		this.aiType = aiType;
 		this.itemDrops = aiType.deathDrops;
 		this.movePattern = aiType.defaultPattern.copy();
 	}
 	
 	// if a subclass was made of this, then it may not save the ai type.
-	protected MobAi(@NotNull ServerWorld world, ClassDataList allData, final Version version, ValueAction<ClassDataList> modifier) {
-		super(world, allData, version, modifier);
-		ArrayList<String> data = allData.get(2);
-		aiType = AiType.valueOf(data.get(0));
+	protected MobAi(@NotNull ServerWorld world, EntityDataSet allData, final Version version, ValueAction<EntityDataSet> modifier) {
+		super(world, allData, version, data -> {
+			modifier.act(data);
+			AiType type = data.get("ai").get("type", AiType::valueOf);
+			data.get("mob").add("sprite", type.name().toLowerCase(Locale.ENGLISH));
+			data.get("mob").add("mhp", type.health);
+		});
+		SerialHashMap data = allData.get("ai");
+		aiType = data.get("type", AiType::valueOf);
 		this.itemDrops = aiType.deathDrops;
 		this.movePattern = aiType.defaultPattern.copy();
 	}
 	
 	@Override
-	public ClassDataList save() {
-		ClassDataList allData = super.save();
-		ArrayList<String> data = new ArrayList<>(Arrays.asList(
-			aiType.name()
-		));
+	public EntityDataSet save() {
+		EntityDataSet allData = super.save();
+		allData.get("mob").remove("sprite");
+		allData.get("mob").remove("mhp");
 		
-		allData.add(data);
+		SerialHashMap data = new SerialHashMap();
+		data.add("type", aiType);
+		
+		allData.put("ai", data);
 		return allData;
 	}
 	
