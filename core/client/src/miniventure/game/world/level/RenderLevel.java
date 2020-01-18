@@ -4,6 +4,7 @@ import java.util.Set;
 
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
+import miniventure.game.world.entity.particle.ActionParticle;
 import miniventure.game.world.management.LevelManager;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileStack.TileData;
@@ -45,7 +46,7 @@ public abstract class RenderLevel extends Level {
 		Array<Tile> under = new Array<>(); // ground tiles
 		Array<Entity> over = new Array<>();
 		for(Entity e: entities) {
-			if(e.isFloating())
+			if(e.isFloating() && !(e instanceof ActionParticle))
 				over.add(e);
 			else
 				objects.add(e);

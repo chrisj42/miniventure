@@ -28,7 +28,7 @@ public abstract class EntityRenderer {
 	public void update(float delta) {
 		elapsedTime += delta;
 	}
-	//public void reset() { elapsedTime = 0; }
+	public void resetAnimation() { elapsedTime = 0; }
 	
 	public abstract void render(float x, float y, Batch batch, float drawableHeight);
 	

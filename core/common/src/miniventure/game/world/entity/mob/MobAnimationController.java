@@ -1,5 +1,6 @@
 package miniventure.game.world.entity.mob;
 
+import java.util.EnumMap;
 import java.util.concurrent.PriorityBlockingQueue;
 
 import miniventure.game.network.GameProtocol.SpriteUpdate;
@@ -19,7 +20,7 @@ public class MobAnimationController<M extends Entity & Mob> {
 			Enum implements Comparable, and compares based on the ordinal, I imagine.
 			I will use the order of the enums to specify the "priority" of the animation state.
 		*/
-		BLOCK(2f), ATTACK(0.3f), RUN(0.3f), WALK(.5f), IDLE(2f);
+		/*BLOCK(2f), ATTACK(0.3f), RUN(0.3f), */WALK(.5f), IDLE(2f);
 		
 		public final float loopDuration;
 		
@@ -30,6 +31,7 @@ public class MobAnimationController<M extends Entity & Mob> {
 	
 	private M mob;
 	private final String mobSpriteName;
+	private final EnumMap<AnimationState, DirectionalAnimationRenderer> renderers;
 	/** @noinspection FieldCanBeLocal*/
 	private AnimationState prevState = null, state = null;
 	
@@ -43,6 +45,12 @@ public class MobAnimationController<M extends Entity & Mob> {
 		mobSpriteName = spriteName;
 		
 		requestedAnimations = new PriorityBlockingQueue<>();
+		
+		renderers = new EnumMap<>(AnimationState.class);
+		for(AnimationState state: AnimationState.values) {
+			String textureName = mobSpriteName + '/' + state.name().toLowerCase() + '-';
+			renderers.put(state, new DirectionalAnimationRenderer(mob.getDirection(), dir -> textureName + dir.name().toLowerCase(), state.loopDuration, false, true));
+		}
 		
 		progressAnimation(0);
 	}
@@ -94,17 +102,15 @@ public class MobAnimationController<M extends Entity & Mob> {
 		
 		// reset the animation
 		prevState = state;
-		try {
-			state = requestedAnimations.poll();
-			if(state == null) state = AnimationState.IDLE;
-		} catch(NullPointerException ex) {
-			state = AnimationState.IDLE;
-		}
+		state = requestedAnimations.poll();
+		if(state == null) state = AnimationState.IDLE;
+		
 		if(state != prevState) {
 			animationChanged = true;
 			
-			String textureName = mobSpriteName + '/' + state.name().toLowerCase() + '-';
-			renderer = new DirectionalAnimationRenderer(mob.getDirection(), dir -> textureName+dir.name().toLowerCase(), state.loopDuration, false, true);
+			renderer = renderers.get(state);
+			renderer.resetAnimation();
+			renderer.setDirection(mob.getDirection());
 			mob.setRenderer(renderer);
 		}
 		requestedAnimations.clear();

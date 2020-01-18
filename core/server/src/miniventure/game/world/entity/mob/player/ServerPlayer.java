@@ -13,6 +13,7 @@ import miniventure.game.network.GameProtocol;
 import miniventure.game.network.GameProtocol.*;
 import miniventure.game.network.PacketPipe.PacketPipeWriter;
 import miniventure.game.server.GameServer;
+import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.SerialHashMap;
 import miniventure.game.util.Version;
@@ -384,18 +385,20 @@ public class ServerPlayer extends ServerMob implements Player {
 			result = heldItem.interact(this);
 		
 		if (attack && level != null) {
-			if(result.success)
-				getServer().broadcastParticle(
-					new ActionParticleData(ActionType.SLASH, getDirection()),
-					level,
-					getCenter().add(getDirection().getVector().scl(getSize().scl(0.5f, Mob.unshortenSprite(0.5f))))
-				);
-			else
-				getServer().broadcastParticle(
-					new ActionParticleData(ActionType.PUNCH, getDirection()),
-					level,
-					getInteractionRect(actionPos).getCenter(new Vector2())
-				);
+			ActionType actionType = result.success ? ActionType.SLASH : ActionType.PUNCH;
+			
+			TextureHolder tex = GameCore.entityAtlas.getRegion(actionType.getSpriteName(dir));
+			Vector2 offset = getSize();
+			offset.y = Mob.unshortenSprite(offset.y);
+			offset.scl(0.5f);
+			// if(dir == Direction.LEFT)
+			// 	offset.x += tex.width / (float) Tile.SIZE;
+			// if(dir == Direction.DOWN)
+			// 	offset.y += tex.height / (float) Tile.SIZE;
+			
+			Vector2 pos = getCenter().add(dir.getVector().scl(offset));
+			
+			getServer().broadcastParticle(new ActionParticleData(actionType, dir), level, pos);
 		}
 		
 		if(result == Result.USED)
