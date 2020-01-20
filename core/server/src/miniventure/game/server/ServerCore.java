@@ -250,6 +250,7 @@ public class ServerCore extends Thread {
 			// there's a newer version
 			System.out.println("Newer game version found: "+info.version+". Download the jar file here: "+info.assetUrl);
 		}
+		//noinspection CallToThreadRun
 		core.run();
 	}
 	
