@@ -1,6 +1,9 @@
 Alpha 2.1:
 	* Moved game data directory for Windows users to Documents/My Games/Miniventure
-	+ Completely remade crafting system; crafting is now done at a crafting station to make holdable items, and in-place with a hammer to make bigger objects that can't be held.
+	+ Completely remade crafting system; craftables now come in two types: items, and objects. Objects are created in the world itself, instead of going into your inventory. Items go into your inventory as usual.
+	+ Added better interaction with world list; compatibility issues and possible solutions will be displayed for older versions, as well as a notice when changes occur to the save format.
+	+ Cursor-based interaction is more obvious by highlighting the tile that will be interacted with
+	+ When constructing objects, and with some items, there is a range of a few tiles away that you can interact, instead of it always being next to the player. This is blocked by solid tiles however.
 
 Alpha 1.2:
 	+ Brand new inventory screen that is hopefully much more ergonomic than the previous screen (crafting screen overhaul coming soon)
