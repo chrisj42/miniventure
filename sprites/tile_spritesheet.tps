@@ -228,7 +228,6 @@
             <key type="filename">tile-sprites/door_/open/topen_01.png</key>
             <key type="filename">tile-sprites/door_/open/topen_02.png</key>
             <key type="filename">tile-sprites/door_/open/topen_03.png</key>
-            <key type="filename">tile-sprites/flint/main.png</key>
             <key type="filename">tile-sprites/floor_/stone/c00.png</key>
             <key type="filename">tile-sprites/floor_/stone/c01.png</key>
             <key type="filename">tile-sprites/floor_/stone/c02.png</key>
@@ -445,6 +444,7 @@
             <key type="filename">tile-sprites/sand/o16.png</key>
             <key type="filename">tile-sprites/sand/o17.png</key>
             <key type="filename">tile-sprites/sand/o18.png</key>
+            <key type="filename">tile-sprites/small_stone/main.png</key>
             <key type="filename">tile-sprites/snow/main.png</key>
             <key type="filename">tile-sprites/snow/o00.png</key>
             <key type="filename">tile-sprites/snow/o01.png</key>

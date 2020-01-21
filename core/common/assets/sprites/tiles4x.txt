@@ -213,1519 +213,1519 @@ door_/open/topen
   orig: 128, 128
   offset: 0, 0
   index: 3
-flint/main
+floor_/stone/c00
   rotate: false
   xy: 3896, 8
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-floor_/stone/c00
-  rotate: false
-  xy: 8, 152
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: -1
 floor_/stone/c01
   rotate: false
-  xy: 152, 152
+  xy: 8, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c02
   rotate: false
-  xy: 296, 152
+  xy: 152, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c03
   rotate: false
-  xy: 440, 152
+  xy: 296, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c04
   rotate: false
-  xy: 8, 152
+  xy: 3896, 8
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c05
   rotate: false
-  xy: 584, 152
+  xy: 440, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c06
   rotate: false
-  xy: 296, 152
+  xy: 152, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c07
   rotate: false
-  xy: 728, 152
+  xy: 584, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c08
   rotate: false
-  xy: 872, 152
+  xy: 728, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c09
   rotate: false
-  xy: 440, 152
+  xy: 296, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c10
   rotate: false
-  xy: 152, 152
+  xy: 8, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c11
   rotate: false
-  xy: 1016, 152
+  xy: 872, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c12
   rotate: false
-  xy: 1160, 152
+  xy: 1016, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c13
   rotate: false
-  xy: 440, 152
+  xy: 296, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c14
   rotate: false
-  xy: 152, 152
+  xy: 8, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c15
   rotate: false
-  xy: 728, 152
+  xy: 584, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c16
   rotate: false
-  xy: 1304, 152
+  xy: 1160, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c17
   rotate: false
-  xy: 872, 152
+  xy: 728, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c18
   rotate: false
-  xy: 584, 152
+  xy: 440, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c19
   rotate: false
-  xy: 1016, 152
+  xy: 872, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c20
   rotate: false
-  xy: 1448, 152
+  xy: 1304, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c21
   rotate: false
-  xy: 872, 152
+  xy: 728, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c22
   rotate: false
-  xy: 584, 152
+  xy: 440, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c23
   rotate: false
-  xy: 728, 152
+  xy: 584, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c24
   rotate: false
-  xy: 1592, 152
+  xy: 1448, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c25
   rotate: false
-  xy: 1160, 152
+  xy: 1016, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c26
   rotate: false
-  xy: 584, 152
+  xy: 440, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c27
   rotate: false
-  xy: 1016, 152
+  xy: 872, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c28
   rotate: false
-  xy: 1736, 152
+  xy: 1592, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c29
   rotate: false
-  xy: 1160, 152
+  xy: 1016, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c30
   rotate: false
-  xy: 584, 152
+  xy: 440, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c31
   rotate: false
-  xy: 1304, 152
+  xy: 1160, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c32
   rotate: false
-  xy: 1592, 152
+  xy: 1448, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c33
   rotate: false
-  xy: 1448, 152
+  xy: 1304, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c34
   rotate: false
-  xy: 1304, 152
+  xy: 1160, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c35
   rotate: false
-  xy: 1304, 152
+  xy: 1160, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c36
   rotate: false
-  xy: 1592, 152
+  xy: 1448, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c37
   rotate: false
-  xy: 1736, 152
+  xy: 1592, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c38
   rotate: false
-  xy: 1448, 152
+  xy: 1304, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c39
   rotate: false
-  xy: 1304, 152
+  xy: 1160, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c40
   rotate: false
-  xy: 1592, 152
+  xy: 1448, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c41
   rotate: false
-  xy: 1448, 152
+  xy: 1304, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c42
   rotate: false
-  xy: 1448, 152
+  xy: 1304, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c43
   rotate: false
-  xy: 1592, 152
+  xy: 1448, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c44
   rotate: false
-  xy: 1736, 152
+  xy: 1592, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c45
   rotate: false
-  xy: 1736, 152
+  xy: 1592, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 floor_/stone/c46
   rotate: false
-  xy: 1736, 152
+  xy: 1592, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 grass/m00
   rotate: false
-  xy: 1880, 152
+  xy: 1736, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 grass/m01
   rotate: false
-  xy: 2024, 152
+  xy: 1880, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 grass/o00
   rotate: false
-  xy: 2168, 152
+  xy: 2024, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 grass/o01
   rotate: false
-  xy: 2312, 152
+  xy: 2168, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 grass/o02
   rotate: false
-  xy: 2456, 152
+  xy: 2312, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 grass/o03
   rotate: false
-  xy: 2600, 152
+  xy: 2456, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 grass/o04
   rotate: false
-  xy: 2744, 152
+  xy: 2600, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 grass/o05
   rotate: false
-  xy: 2888, 152
+  xy: 2744, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 grass/o06
   rotate: false
-  xy: 3032, 152
+  xy: 2888, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 grass/o07
   rotate: false
-  xy: 3176, 152
+  xy: 3032, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 grass/o08
   rotate: false
-  xy: 3320, 152
+  xy: 3176, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 grass/o09
   rotate: false
-  xy: 3464, 152
+  xy: 3320, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 grass/o10
   rotate: false
-  xy: 3608, 152
+  xy: 3464, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 grass/o11
   rotate: false
-  xy: 3752, 152
+  xy: 3608, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 grass/o12
   rotate: false
-  xy: 3896, 152
+  xy: 3752, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 grass/o13
   rotate: false
-  xy: 8, 296
+  xy: 3896, 152
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 grass/o14
   rotate: false
-  xy: 152, 296
+  xy: 8, 296
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 grass/o15
   rotate: false
-  xy: 296, 296
+  xy: 152, 296
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 grass/o16
   rotate: false
-  xy: 440, 296
+  xy: 296, 296
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 grass/o17
   rotate: false
-  xy: 584, 296
+  xy: 440, 296
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 grass/o18
   rotate: false
-  xy: 728, 296
+  xy: 584, 296
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c00
   rotate: false
-  xy: 872, 296
+  xy: 728, 296
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c01
   rotate: false
-  xy: 1016, 296
+  xy: 872, 296
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c02
   rotate: false
-  xy: 1160, 296
+  xy: 1016, 296
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c03
   rotate: false
-  xy: 1304, 296
+  xy: 1160, 296
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c04
   rotate: false
-  xy: 1448, 296
+  xy: 1304, 296
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c05
   rotate: false
-  xy: 1592, 296
+  xy: 1448, 296
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c06
   rotate: false
-  xy: 1736, 296
+  xy: 1592, 296
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c07
   rotate: false
-  xy: 1880, 296
+  xy: 1736, 296
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c08
   rotate: false
-  xy: 2024, 296
+  xy: 1880, 296
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c09
   rotate: false
-  xy: 2168, 296
+  xy: 2024, 296
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c10
   rotate: false
-  xy: 2312, 296
+  xy: 2168, 296
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c11
   rotate: false
-  xy: 2456, 296
+  xy: 2312, 296
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c12
   rotate: false
-  xy: 2600, 296
+  xy: 2456, 296
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c13
   rotate: false
-  xy: 2744, 296
+  xy: 2600, 296
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c14
   rotate: false
-  xy: 2888, 296
+  xy: 2744, 296
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c15
   rotate: false
-  xy: 3032, 296
+  xy: 2888, 296
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c16
   rotate: false
-  xy: 3176, 296
+  xy: 3032, 296
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c17
   rotate: false
-  xy: 3320, 296
+  xy: 3176, 296
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c18
   rotate: false
-  xy: 3464, 296
+  xy: 3320, 296
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c19
   rotate: false
-  xy: 3608, 296
+  xy: 3464, 296
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c20
   rotate: false
-  xy: 3752, 296
+  xy: 3608, 296
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c21
   rotate: false
-  xy: 3896, 296
+  xy: 3752, 296
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c22
   rotate: false
-  xy: 8, 440
+  xy: 3896, 296
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c23
   rotate: false
-  xy: 152, 440
+  xy: 8, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c24
   rotate: false
-  xy: 296, 440
+  xy: 152, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c25
   rotate: false
-  xy: 440, 440
+  xy: 296, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c26
   rotate: false
-  xy: 584, 440
+  xy: 440, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c27
   rotate: false
-  xy: 728, 440
+  xy: 584, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c28
   rotate: false
-  xy: 872, 440
+  xy: 728, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c29
   rotate: false
-  xy: 1016, 440
+  xy: 872, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c30
   rotate: false
-  xy: 1160, 440
+  xy: 1016, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c31
   rotate: false
-  xy: 1304, 440
+  xy: 1160, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c32
   rotate: false
-  xy: 1448, 440
+  xy: 1304, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c33
   rotate: false
-  xy: 1592, 440
+  xy: 1448, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c34
   rotate: false
-  xy: 1736, 440
+  xy: 1592, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c35
   rotate: false
-  xy: 1880, 440
+  xy: 1736, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c36
   rotate: false
-  xy: 2024, 440
+  xy: 1880, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c37
   rotate: false
-  xy: 2168, 440
+  xy: 2024, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c38
   rotate: false
-  xy: 2312, 440
+  xy: 2168, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c39
   rotate: false
-  xy: 2456, 440
+  xy: 2312, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c40
   rotate: false
-  xy: 2600, 440
+  xy: 2456, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c41
   rotate: false
-  xy: 2744, 440
+  xy: 2600, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c42
   rotate: false
-  xy: 2888, 440
+  xy: 2744, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c43
   rotate: false
-  xy: 3032, 440
+  xy: 2888, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c44
   rotate: false
-  xy: 3176, 440
+  xy: 3032, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c45
   rotate: false
-  xy: 3320, 440
+  xy: 3176, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/c46
   rotate: false
-  xy: 3464, 440
+  xy: 3320, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 hole/swim
   rotate: false
-  xy: 3608, 440
+  xy: 3464, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/coal/c00
   rotate: false
-  xy: 3752, 440
+  xy: 3608, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/coal/o00
   rotate: false
-  xy: 3896, 440
+  xy: 3752, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/coal/o01
   rotate: false
-  xy: 8, 584
+  xy: 3896, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/coal/o02
   rotate: false
-  xy: 152, 584
+  xy: 8, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/coal/o03
   rotate: false
-  xy: 296, 584
+  xy: 152, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/coal/o04
   rotate: false
-  xy: 440, 584
+  xy: 296, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/coal/o05
   rotate: false
-  xy: 584, 584
+  xy: 440, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/coal/o06
   rotate: false
-  xy: 728, 584
+  xy: 584, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/coal/o07
   rotate: false
-  xy: 872, 584
+  xy: 728, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/coal/o08
   rotate: false
-  xy: 1016, 584
+  xy: 872, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/coal/o09
   rotate: false
-  xy: 1160, 584
+  xy: 1016, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/coal/o10
   rotate: false
-  xy: 1304, 584
+  xy: 1160, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/coal/o11
   rotate: false
-  xy: 1448, 584
+  xy: 1304, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/coal/o12
   rotate: false
-  xy: 1592, 584
+  xy: 1448, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/coal/o13
   rotate: false
-  xy: 1736, 584
+  xy: 1592, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/coal/o14
   rotate: false
-  xy: 1880, 584
+  xy: 1736, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/coal/o15
   rotate: false
-  xy: 2024, 584
+  xy: 1880, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/coal/o16
   rotate: false
-  xy: 2168, 584
+  xy: 2024, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/coal/o17
   rotate: false
-  xy: 2312, 584
+  xy: 2168, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/coal/o18
   rotate: false
-  xy: 2456, 584
+  xy: 2312, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/iron/c00
   rotate: false
-  xy: 2600, 584
+  xy: 2456, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/iron/o00
   rotate: false
-  xy: 3896, 440
+  xy: 3752, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/iron/o01
   rotate: false
-  xy: 8, 584
+  xy: 3896, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/iron/o02
   rotate: false
-  xy: 152, 584
+  xy: 8, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/iron/o03
   rotate: false
-  xy: 296, 584
+  xy: 152, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/iron/o04
   rotate: false
-  xy: 440, 584
+  xy: 296, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/iron/o05
   rotate: false
-  xy: 584, 584
+  xy: 440, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/iron/o06
   rotate: false
-  xy: 728, 584
+  xy: 584, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/iron/o07
   rotate: false
-  xy: 872, 584
+  xy: 728, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/iron/o08
   rotate: false
-  xy: 1016, 584
+  xy: 872, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/iron/o09
   rotate: false
-  xy: 1160, 584
+  xy: 1016, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/iron/o10
   rotate: false
-  xy: 1304, 584
+  xy: 1160, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/iron/o11
   rotate: false
-  xy: 1448, 584
+  xy: 1304, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/iron/o12
   rotate: false
-  xy: 1592, 584
+  xy: 1448, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/iron/o13
   rotate: false
-  xy: 1736, 584
+  xy: 1592, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/iron/o14
   rotate: false
-  xy: 1880, 584
+  xy: 1736, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/iron/o15
   rotate: false
-  xy: 2024, 584
+  xy: 1880, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/iron/o16
   rotate: false
-  xy: 2168, 584
+  xy: 2024, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/iron/o17
   rotate: false
-  xy: 2312, 584
+  xy: 2168, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/iron/o18
   rotate: false
-  xy: 2456, 584
+  xy: 2312, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/ruby/c00
   rotate: false
-  xy: 2744, 584
+  xy: 2600, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/ruby/o00
   rotate: false
-  xy: 3896, 440
+  xy: 3752, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/ruby/o01
   rotate: false
-  xy: 8, 584
+  xy: 3896, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/ruby/o02
   rotate: false
-  xy: 152, 584
+  xy: 8, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/ruby/o03
   rotate: false
-  xy: 296, 584
+  xy: 152, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/ruby/o04
   rotate: false
-  xy: 440, 584
+  xy: 296, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/ruby/o05
   rotate: false
-  xy: 584, 584
+  xy: 440, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/ruby/o06
   rotate: false
-  xy: 728, 584
+  xy: 584, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/ruby/o07
   rotate: false
-  xy: 872, 584
+  xy: 728, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/ruby/o08
   rotate: false
-  xy: 1016, 584
+  xy: 872, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/ruby/o09
   rotate: false
-  xy: 1160, 584
+  xy: 1016, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/ruby/o10
   rotate: false
-  xy: 1304, 584
+  xy: 1160, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/ruby/o11
   rotate: false
-  xy: 1448, 584
+  xy: 1304, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/ruby/o12
   rotate: false
-  xy: 1592, 584
+  xy: 1448, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/ruby/o13
   rotate: false
-  xy: 1736, 584
+  xy: 1592, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/ruby/o14
   rotate: false
-  xy: 1880, 584
+  xy: 1736, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/ruby/o15
   rotate: false
-  xy: 2024, 584
+  xy: 1880, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/ruby/o16
   rotate: false
-  xy: 2168, 584
+  xy: 2024, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/ruby/o17
   rotate: false
-  xy: 2312, 584
+  xy: 2168, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/ruby/o18
   rotate: false
-  xy: 2456, 584
+  xy: 2312, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/tungsten/c00
   rotate: false
-  xy: 2888, 584
+  xy: 2744, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/tungsten/o00
   rotate: false
-  xy: 3896, 440
+  xy: 3752, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/tungsten/o01
   rotate: false
-  xy: 8, 584
+  xy: 3896, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/tungsten/o02
   rotate: false
-  xy: 152, 584
+  xy: 8, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/tungsten/o03
   rotate: false
-  xy: 296, 584
+  xy: 152, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/tungsten/o04
   rotate: false
-  xy: 440, 584
+  xy: 296, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/tungsten/o05
   rotate: false
-  xy: 584, 584
+  xy: 440, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/tungsten/o06
   rotate: false
-  xy: 728, 584
+  xy: 584, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/tungsten/o07
   rotate: false
-  xy: 872, 584
+  xy: 728, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/tungsten/o08
   rotate: false
-  xy: 1016, 584
+  xy: 872, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/tungsten/o09
   rotate: false
-  xy: 1160, 584
+  xy: 1016, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/tungsten/o10
   rotate: false
-  xy: 1304, 584
+  xy: 1160, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/tungsten/o11
   rotate: false
-  xy: 1448, 584
+  xy: 1304, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/tungsten/o12
   rotate: false
-  xy: 1592, 584
+  xy: 1448, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/tungsten/o13
   rotate: false
-  xy: 1736, 584
+  xy: 1592, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/tungsten/o14
   rotate: false
-  xy: 1880, 584
+  xy: 1736, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/tungsten/o15
   rotate: false
-  xy: 2024, 584
+  xy: 1880, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/tungsten/o16
   rotate: false
-  xy: 2168, 584
+  xy: 2024, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/tungsten/o17
   rotate: false
-  xy: 2312, 584
+  xy: 2168, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ore_/tungsten/o18
   rotate: false
-  xy: 2456, 584
+  xy: 2312, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 sand/main
   rotate: false
-  xy: 3032, 584
+  xy: 2888, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 sand/o00
   rotate: false
-  xy: 3176, 584
+  xy: 3032, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 sand/o01
   rotate: false
-  xy: 3320, 584
+  xy: 3176, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 sand/o02
   rotate: false
-  xy: 3464, 584
+  xy: 3320, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 sand/o03
   rotate: false
-  xy: 3608, 584
+  xy: 3464, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 sand/o04
   rotate: false
-  xy: 3752, 584
+  xy: 3608, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 sand/o05
   rotate: false
-  xy: 3896, 584
+  xy: 3752, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 sand/o06
   rotate: false
-  xy: 8, 728
+  xy: 3896, 584
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 sand/o07
   rotate: false
-  xy: 152, 728
+  xy: 8, 728
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 sand/o08
   rotate: false
-  xy: 296, 728
+  xy: 152, 728
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 sand/o09
   rotate: false
-  xy: 440, 728
+  xy: 296, 728
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 sand/o10
   rotate: false
-  xy: 584, 728
+  xy: 440, 728
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 sand/o11
   rotate: false
-  xy: 728, 728
+  xy: 584, 728
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 sand/o12
   rotate: false
-  xy: 872, 728
+  xy: 728, 728
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 sand/o13
   rotate: false
-  xy: 1016, 728
+  xy: 872, 728
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 sand/o14
   rotate: false
-  xy: 1160, 728
+  xy: 1016, 728
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 sand/o15
   rotate: false
-  xy: 1304, 728
+  xy: 1160, 728
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 sand/o16
   rotate: false
-  xy: 1448, 728
+  xy: 1304, 728
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 sand/o17
   rotate: false
-  xy: 1592, 728
+  xy: 1448, 728
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 sand/o18
+  rotate: false
+  xy: 1592, 728
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+small_stone/main
   rotate: false
   xy: 1736, 728
   size: 128, 128
@@ -2196,7 +2196,7 @@ stone/c45
   index: -1
 stone/c46
   rotate: false
-  xy: 3608, 440
+  xy: 3464, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
@@ -3771,14 +3771,14 @@ water/main
   index: 4
 water/o00
   rotate: false
-  xy: 3608, 440
+  xy: 3464, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: 1
 water/o00
   rotate: false
-  xy: 3608, 440
+  xy: 3464, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
@@ -4009,21 +4009,21 @@ water/o00
   index: 34
 water/o00
   rotate: false
-  xy: 3608, 440
+  xy: 3464, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: 35
 water/o01
   rotate: false
-  xy: 3608, 440
+  xy: 3464, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: 1
 water/o01
   rotate: false
-  xy: 3608, 440
+  xy: 3464, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
@@ -4254,21 +4254,21 @@ water/o01
   index: 34
 water/o01
   rotate: false
-  xy: 3608, 440
+  xy: 3464, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: 35
 water/o02
   rotate: false
-  xy: 3608, 440
+  xy: 3464, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: 1
 water/o02
   rotate: false
-  xy: 3608, 440
+  xy: 3464, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
@@ -4499,21 +4499,21 @@ water/o02
   index: 34
 water/o02
   rotate: false
-  xy: 3608, 440
+  xy: 3464, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: 35
 water/o03
   rotate: false
-  xy: 3608, 440
+  xy: 3464, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: 1
 water/o03
   rotate: false
-  xy: 3608, 440
+  xy: 3464, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
@@ -4744,7 +4744,7 @@ water/o03
   index: 34
 water/o03
   rotate: false
-  xy: 3608, 440
+  xy: 3464, 440
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
