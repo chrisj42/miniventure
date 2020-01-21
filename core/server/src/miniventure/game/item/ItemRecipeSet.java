@@ -8,7 +8,7 @@ public enum ItemRecipeSet implements RecipeSet<ItemRecipe> {
 	
 	// crafter types
 	HAND(
-		new ItemRecipe(new ToolItem(ToolItem.ToolType.Pickaxe, MaterialQuality.Crude),
+		/*new ItemRecipe(new ToolItem(ToolItem.ToolType.Pickaxe, MaterialQuality.Crude),
 			new ServerItemStack(ResourceType.Flint.get(), 2),
 			new ServerItemStack(ResourceType.Log.get(), 1)
 		),
@@ -26,7 +26,7 @@ public enum ItemRecipeSet implements RecipeSet<ItemRecipe> {
 		new ItemRecipe(new ToolItem(ToolItem.ToolType.Shovel, MaterialQuality.Crude),
 			new ServerItemStack(ResourceType.Flint.get(), 1),
 			new ServerItemStack(ResourceType.Log.get(), 1)
-		),
+		),*/
 		
 		new ItemRecipe(new ToolItem(ToolItem.ToolType.Pickaxe, MaterialQuality.Basic),
 			new ServerItemStack(ResourceType.Stone.get(), 2),
@@ -48,7 +48,7 @@ public enum ItemRecipeSet implements RecipeSet<ItemRecipe> {
 			new ServerItemStack(ResourceType.Log.get(), 1)
 		),
 		
-		new ItemRecipe(new ToolItem(ToolItem.ToolType.Pickaxe, MaterialQuality.Sturdy),
+		/*new ItemRecipe(new ToolItem(ToolItem.ToolType.Pickaxe, MaterialQuality.Sturdy),
 			new ServerItemStack(ResourceType.Iron.get(), 2),
 			new ServerItemStack(ResourceType.Log.get(), 1)
 		),
@@ -106,7 +106,7 @@ public enum ItemRecipeSet implements RecipeSet<ItemRecipe> {
 		new ItemRecipe(new ToolItem(ToolItem.ToolType.Shovel, MaterialQuality.Superior),
 			new ServerItemStack(ResourceType.Ruby.get(), 1),
 			new ServerItemStack(ResourceType.Log.get(), 1)
-		),
+		),*/
 		
 		new ItemRecipe(new ServerItemStack(PlaceableItemType.Torch.get(), 2),
 			new ServerItemStack(ResourceType.Log.get(), 1),

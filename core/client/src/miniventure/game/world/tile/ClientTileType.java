@@ -99,7 +99,7 @@ public class ClientTileType extends TileType {
 		
 		SNOW(type -> new ClientTileType(type, true)),
 		
-		FLINT(type -> new ClientTileType(type, false)),
+		SMALL_STONE(type -> new ClientTileType(type, false)),
 		
 		WATER(type -> new ClientTileType(type, buildRenderer(type, true,
 				new RenderStyle(PlayMode.LOOP_RANDOM, 5),

@@ -13,10 +13,12 @@ public class ProtoTile {
 	private static final TileTypeEnum[] EMPTY = new TileTypeEnum[0];
 	
 	public final Point pos;
+	public final int id;
 	private final LinkedList<TileTypeEnum> stack;
 	
-	ProtoTile(int x, int y) {
+	ProtoTile(int x, int y, int id) {
 		pos = new Point(x, y);
+		this.id = id;
 		stack = new LinkedList<>();
 		addLayer(TileTypeEnum.HOLE);
 	}

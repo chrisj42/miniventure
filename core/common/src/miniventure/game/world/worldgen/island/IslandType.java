@@ -107,20 +107,28 @@ public enum IslandType {
 				new Coherent2DNoiseFunction(8, 2)
 			);
 			
+			float[][] flint = island.getFromGen(
+				new Coherent2DNoiseFunction(16, 2)
+				.modify(NoiseModifier.combine(new Coherent2DNoiseFunction(16, 2), MULTIPLY))
+			);
+			
 			TileProcessor coastal = TileConditionChain.builder()
 				.add(new NoiseTileCondition(sparse, val -> val <= .075f), POOF_TREE)
 				.add(new NoiseTileCondition(sparse, val -> val > .92f), STONE)
+				.add(new NoiseTileCondition(sparse, val -> val > .91f), SMALL_STONE)
 				.getChain();
 			
 			TileProcessor middle = TileConditionChain.builder()
 				.add(new NoiseTileCondition(trees, val -> val > .95f), POOF_TREE)
 				.add(new NoiseTileCondition(sparse, val -> val > .85f), STONE)
+				.add(new NoiseTileCondition(sparse, val -> val > .84f), SMALL_STONE)
 				.getChain();
 			
 			TileProcessor forest = TileConditionChain.builder()
 				.add(new NoiseTileCondition(trees2, val -> val > .25f),
 					new NoiseTileCondition(sparse, val -> val < .875f).onMatch(POOF_TREE))
 				.add(new NoiseTileCondition(sparse, val -> val > .9f), STONE)
+				.add(new NoiseTileCondition(sparse, val -> val > .89f), SMALL_STONE)
 				.getChain();
 			
 			TileProcessor grassland = TileNoiseMap.builder()

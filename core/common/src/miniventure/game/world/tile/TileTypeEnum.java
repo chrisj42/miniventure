@@ -19,7 +19,7 @@ public enum TileTypeEnum implements TileProcessor {
 	GRASS(true, Color.GREEN),
 	STONE_PATH(true),
 	SNOW(true, Color.WHITE),
-	FLINT(true),
+	SMALL_STONE(true, Color.LIGHT_GRAY),
 	WATER(true, 0.6f, Color.BLUE.darker()),
 	DOCK(true),
 	COAL_ORE(false),

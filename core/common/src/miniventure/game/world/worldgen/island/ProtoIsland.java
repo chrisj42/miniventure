@@ -26,7 +26,7 @@ public class ProtoIsland extends GenInfo {
 		tiles = new ProtoTile[width][height];
 		for(int x = 0; x < width; x++)
 			for(int y = 0; y < height; y++)
-				tiles[x][y] = new ProtoTile(x, y);
+				tiles[x][y] = new ProtoTile(x, y, x * height + y);
 	}
 	
 	long requestSeed() {

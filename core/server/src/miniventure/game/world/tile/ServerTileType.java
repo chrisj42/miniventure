@@ -179,8 +179,8 @@ public class ServerTileType extends TileType {
 			)
 		),
 		
-		FLINT(
-			P.DESTRUCT.as(type -> new DestructionManager(type, new ItemDrop(ResourceType.Flint.get())))
+		SMALL_STONE(
+			P.DESTRUCT.as(type -> new DestructionManager(type, new ItemDrop(ResourceType.Stone.get())))
 		),
 		
 		WATER(

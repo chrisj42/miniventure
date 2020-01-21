@@ -24,6 +24,6 @@ public class NoiseTileCondition implements TileCondition {
 	
 	@Override
 	public boolean isMatch(ProtoTile tile) {
-		return valueChecker.get(noise[tile.pos.x][tile.pos.y]);
+		return valueChecker.get(tile.getVal(noise));
 	}
 }
