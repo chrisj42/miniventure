@@ -156,7 +156,7 @@ public class LevelViewport {
 		
 		final ClientPlayer player = ClientCore.getWorld().getMainPlayer();
 		
-		if(player != null) {
+		if(player != null && ClientCore.getScreen() == null) {
 			// cursor management
 			Vector3 cursor = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
 			camera.unproject(cursor); // screen to render coords
@@ -179,16 +179,21 @@ public class LevelViewport {
 						invalid = true;
 				}
 			}
+			
 			drawOverTile(cursorTile, offset, null, null);
 			cursorValid = last == cursorTile;
 			if(!cursorValid)
 				drawOverTile(last, offset, null, invalidColor);
 			
+			ClientObjectRecipe objectRecipe = player.getObjectRecipe();
+			if(objectRecipe != null)
+				drawOverTile(cursorTile, offset, objectRecipe.getTexture(), null);
+			
 			// Vector2 dist = cursorPos.cpy().sub(cameraCenter);
 			// dist.setLength(Math.min(dist.len(), Player.MAX_CURSOR_RANGE));
 			// cursorPos.set(dist.add(cameraCenter));
 			
-			if(ClientCore.getScreen() == null) {
+			/*if(ClientCore.getScreen() == null) {
 				// Tile cursorTile = level.getTile(cursorPos);
 				
 				if (cursorTile != null) {
@@ -202,14 +207,8 @@ public class LevelViewport {
 							drawOverTile(cursorTile, offset, objectRecipe.getTexture(), null);
 						}
 					}
-					
-					// interaction bounds debug
-					/*if(ClientCore.debugInteract) {
-						// render player interaction rect
-						drawOutline(offset, player.getInteractionRect(cursorPos), batch);
-					}*/
 				}
-			}
+			}*/
 		}
 		
 		/*if(ClientCore.debugChunk) {
