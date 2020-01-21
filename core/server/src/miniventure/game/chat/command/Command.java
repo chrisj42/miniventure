@@ -3,12 +3,12 @@ package miniventure.game.chat.command;
 import java.util.Arrays;
 
 import miniventure.game.GameCore;
+import miniventure.game.chat.MessageBuilder;
+import miniventure.game.chat.command.Argument.ArgValidator;
 import miniventure.game.network.GameProtocol.DatalessRequest;
 import miniventure.game.network.GameProtocol.Message;
 import miniventure.game.network.GameProtocol.Ping;
 import miniventure.game.network.GameProtocol.PositionUpdate;
-import miniventure.game.chat.MessageBuilder;
-import miniventure.game.chat.command.Argument.ArgValidator;
 import miniventure.game.server.GameServer;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;

@@ -2,7 +2,6 @@ package miniventure.game.util.customenum;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.MapFunction;

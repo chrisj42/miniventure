@@ -1,22 +1,22 @@
 package miniventure.game.screen;
 
 import miniventure.game.GameCore;
-import miniventure.game.network.GameProtocol;
 import miniventure.game.client.AudioException;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.FontStyle;
 import miniventure.game.client.LevelViewport;
+import miniventure.game.network.GameProtocol;
 import miniventure.game.screen.InfoScreen.CreditsScreen;
 import miniventure.game.screen.InfoScreen.InstructionsScreen;
 import miniventure.game.screen.util.BackgroundProvider;
 import miniventure.game.screen.util.MyLinkLabel;
 import miniventure.game.util.Version;
 import miniventure.game.util.VersionInfo;
+import miniventure.game.world.file.WorldReference;
 import miniventure.game.world.level.RenderLevel;
 import miniventure.game.world.management.ClientWorld;
 import miniventure.game.world.management.DisplayWorld;
 import miniventure.game.world.management.TimeOfDay;
-import miniventure.game.world.file.WorldReference;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;

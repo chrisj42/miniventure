@@ -7,7 +7,6 @@ import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
 import miniventure.game.world.WorldObject;
-import miniventure.game.world.entity.mob.player.Player;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
 
 import org.jetbrains.annotations.NotNull;

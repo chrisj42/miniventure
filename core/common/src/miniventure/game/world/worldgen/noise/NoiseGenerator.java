@@ -4,9 +4,9 @@ import java.util.Arrays;
 
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.MapFunction;
+import miniventure.game.world.worldgen.noise.NoiseModifier.NoiseValueMerger;
 
 import com.badlogic.gdx.math.Vector2;
-import miniventure.game.world.worldgen.noise.NoiseModifier.NoiseValueMerger;
 
 import static miniventure.game.world.worldgen.noise.NoiseModifier.FILL_VALUE_RANGE;
 import static miniventure.game.world.worldgen.noise.NoiseModifier.combine;

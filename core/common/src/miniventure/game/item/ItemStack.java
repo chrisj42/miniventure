@@ -2,10 +2,6 @@ package miniventure.game.item;
 
 import java.util.Arrays;
 
-import miniventure.game.GameCore;
-import miniventure.game.util.Version;
-import miniventure.game.util.function.MapFunction;
-
 import org.jetbrains.annotations.NotNull;
 
 public class ItemStack {

@@ -4,8 +4,9 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.badlogic.gdx.utils.Array;
 import miniventure.game.texture.TextureHolder;
+
+import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
 

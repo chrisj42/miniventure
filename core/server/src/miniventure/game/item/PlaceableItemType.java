@@ -12,8 +12,10 @@ import miniventure.game.world.tile.TileTypeEnum;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static miniventure.game.item.PlacementAttempt.*;
+import static miniventure.game.item.PlacementAttempt.PlacementAction;
 import static miniventure.game.item.PlacementAttempt.PlacementAction.tile;
+import static miniventure.game.item.PlacementAttempt.PlacementCheck;
+import static miniventure.game.item.PlacementAttempt.getAttempt;
 
 public enum PlaceableItemType {
 	

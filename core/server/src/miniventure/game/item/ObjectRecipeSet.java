@@ -1,8 +1,5 @@
 package miniventure.game.item;
 
-import java.util.Collection;
-import java.util.LinkedList;
-
 import miniventure.game.network.GameProtocol.SerialRecipe;
 
 public enum ObjectRecipeSet implements RecipeSet<ObjectRecipe> {

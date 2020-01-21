@@ -1,7 +1,5 @@
 package miniventure.game.item;
 
-import java.util.Arrays;
-
 import miniventure.game.util.Version;
 
 import org.jetbrains.annotations.NotNull;

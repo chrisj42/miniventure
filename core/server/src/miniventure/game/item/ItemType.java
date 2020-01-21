@@ -3,8 +3,6 @@ package miniventure.game.item;
 import miniventure.game.GameCore;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.Version;
-import miniventure.game.world.entity.mob.player.HandItem;
-import miniventure.game.world.entity.mob.player.Player;
 
 import org.jetbrains.annotations.NotNull;
 

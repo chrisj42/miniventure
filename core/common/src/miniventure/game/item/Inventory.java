@@ -3,14 +3,8 @@ package miniventure.game.item;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 
-import miniventure.game.GameCore;
 import miniventure.game.util.InstanceCounter;
-import miniventure.game.util.Version;
-import miniventure.game.util.function.MapFunction;
-import miniventure.game.util.function.ValueAction;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

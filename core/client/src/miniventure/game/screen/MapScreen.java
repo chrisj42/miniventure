@@ -2,16 +2,15 @@ package miniventure.game.screen;
 
 import java.util.HashMap;
 
+import miniventure.game.client.ClientCore;
 import miniventure.game.client.InputHandler.Control;
 import miniventure.game.network.GameProtocol.LevelChange;
 import miniventure.game.network.GameProtocol.MapRequest;
-import miniventure.game.client.ClientCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Point;
 import miniventure.game.world.level.Level;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.kotcrab.vis.ui.widget.VisTextButton;

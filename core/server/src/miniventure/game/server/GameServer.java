@@ -6,13 +6,13 @@ import java.net.InetSocketAddress;
 import java.util.*;
 
 import miniventure.game.GameCore;
-import miniventure.game.network.GameProtocol;
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.chat.InfoMessageBuilder;
 import miniventure.game.chat.InfoMessageLine;
 import miniventure.game.chat.MessageBuilder;
 import miniventure.game.chat.command.Command;
 import miniventure.game.chat.command.CommandInputParser;
+import miniventure.game.network.GameProtocol;
 import miniventure.game.network.PacketPipe.PacketPipeWriter;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;

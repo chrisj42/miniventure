@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 import miniventure.game.util.Version;
 import miniventure.game.util.Version.VersionFormatException;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class WorldReference {

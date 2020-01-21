@@ -1,15 +1,12 @@
 package miniventure.game.world.entity.particle;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import miniventure.game.item.ServerItem;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.SerialHashMap;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueAction;
-import miniventure.game.world.entity.EntityDataSet;
 import miniventure.game.world.entity.Entity;
+import miniventure.game.world.entity.EntityDataSet;
 import miniventure.game.world.entity.EntityRenderer.ItemSpriteRenderer;
 import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.player.ServerPlayer;

@@ -1,20 +1,16 @@
 package miniventure.game.world.entity.mob.player;
 
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EnumMap;
 
 import miniventure.game.GameCore;
 import miniventure.game.item.*;
 import miniventure.game.item.HammerType.HammerItem;
-import miniventure.game.item.MaterialQuality;
 import miniventure.game.item.ToolItem.ToolType;
 import miniventure.game.network.GameProtocol;
 import miniventure.game.network.GameProtocol.*;
 import miniventure.game.network.PacketPipe.PacketPipeWriter;
 import miniventure.game.server.GameServer;
-import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.SerialHashMap;
 import miniventure.game.util.Version;
@@ -23,8 +19,8 @@ import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.Boundable;
 import miniventure.game.world.Point;
 import miniventure.game.world.WorldObject;
-import miniventure.game.world.entity.EntityDataSet;
 import miniventure.game.world.entity.Direction;
+import miniventure.game.world.entity.EntityDataSet;
 import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.entity.mob.ServerMob;
 import miniventure.game.world.entity.particle.ActionType;

@@ -1,21 +1,18 @@
 package miniventure.game.world.entity.mob;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
-import miniventure.game.network.GameProtocol.Hurt;
-import miniventure.game.network.GameProtocol.MobUpdate;
-import miniventure.game.network.GameProtocol.SpriteUpdate;
 import miniventure.game.item.Item;
 import miniventure.game.item.Result;
 import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolItem.ToolType;
+import miniventure.game.network.GameProtocol.Hurt;
+import miniventure.game.network.GameProtocol.MobUpdate;
+import miniventure.game.network.GameProtocol.SpriteUpdate;
 import miniventure.game.util.SerialHashMap;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.WorldObject;
-import miniventure.game.world.entity.EntityDataSet;
 import miniventure.game.world.entity.Direction;
+import miniventure.game.world.entity.EntityDataSet;
 import miniventure.game.world.entity.KnockbackController;
 import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.MobAnimationController.AnimationState;

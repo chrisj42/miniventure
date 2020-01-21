@@ -1,7 +1,6 @@
 package miniventure.game.util;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 
 import miniventure.game.util.function.MapFunction;
 

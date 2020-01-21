@@ -8,10 +8,8 @@ import miniventure.game.item.ItemType.EnumItem;
 import miniventure.game.network.GameProtocol.SerialRecipe;
 import miniventure.game.world.entity.mob.player.Player;
 import miniventure.game.world.entity.mob.player.Player.CursorHighlight;
-import miniventure.game.world.entity.mob.player.ServerPlayer;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public enum HammerType {
 	

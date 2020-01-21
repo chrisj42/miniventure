@@ -2,10 +2,7 @@ package miniventure.game.item;
 
 import miniventure.game.GameCore;
 import miniventure.game.item.ItemType.EphemeralItem;
-import miniventure.game.item.PlacementAttempt.PlacementAction;
-import miniventure.game.item.PlacementAttempt.PlacementCheck;
 import miniventure.game.texture.TextureHolder;
-import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.player.Player;
 import miniventure.game.world.entity.mob.player.Player.CursorHighlight;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
@@ -13,7 +10,6 @@ import miniventure.game.world.tile.ServerTile;
 import miniventure.game.world.tile.TileTypeEnum;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import static miniventure.game.item.PlacementAttempt.PlacementAction.tile;
 

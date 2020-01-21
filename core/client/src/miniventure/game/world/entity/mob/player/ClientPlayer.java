@@ -4,12 +4,16 @@ import java.util.EnumMap;
 import java.util.HashMap;
 
 import miniventure.game.GameCore;
+import miniventure.game.client.ClientCore;
 import miniventure.game.client.InputHandler.Control;
 import miniventure.game.client.InputHandler.Modifier;
-import miniventure.game.item.*;
+import miniventure.game.item.ClientItem;
+import miniventure.game.item.ClientPlayerInventory;
+import miniventure.game.item.CraftingScreen;
 import miniventure.game.item.CraftingScreen.ClientObjectRecipe;
+import miniventure.game.item.InventoryOverlay;
+import miniventure.game.item.ItemStack;
 import miniventure.game.network.GameProtocol.*;
-import miniventure.game.client.ClientCore;
 import miniventure.game.network.PacketPipe.PacketPipeWriter;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
@@ -20,7 +24,6 @@ import miniventure.game.world.entity.KnockbackController;
 import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.entity.mob.MobAnimationController;
 import miniventure.game.world.entity.mob.MobAnimationController.AnimationState;
-import miniventure.game.world.level.Level;
 import miniventure.game.world.tile.ClientTile;
 
 import com.badlogic.gdx.Input.Keys;
@@ -33,7 +36,7 @@ import com.badlogic.gdx.math.Vector2;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static miniventure.game.network.GameProtocol.forPacket;
+import static miniventure.game.network.GameProtocol.*;
 
 public class ClientPlayer extends ClientEntity implements Player {
 	

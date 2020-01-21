@@ -12,10 +12,15 @@ import java.util.EnumMap;
 import java.util.HashMap;
 
 import miniventure.game.GameCore;
-import miniventure.game.network.GameProtocol.Message;
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.client.FontStyle.StyleData;
-import miniventure.game.screen.*;
+import miniventure.game.network.GameProtocol.Message;
+import miniventure.game.screen.ConfirmScreen;
+import miniventure.game.screen.ErrorScreen;
+import miniventure.game.screen.LoadingScreen;
+import miniventure.game.screen.MainMenu;
+import miniventure.game.screen.MenuScreen;
+import miniventure.game.screen.NotifyScreen;
 import miniventure.game.screen.util.BackgroundInheritor;
 import miniventure.game.screen.util.BackgroundProvider;
 import miniventure.game.util.MyUtils;

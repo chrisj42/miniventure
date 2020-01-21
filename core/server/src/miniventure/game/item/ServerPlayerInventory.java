@@ -3,7 +3,6 @@ package miniventure.game.item;
 import java.util.Arrays;
 
 import miniventure.game.network.GameProtocol.InventoryUpdate;
-import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
 

@@ -11,11 +11,11 @@ import java.util.List;
 import java.util.Locale;
 
 import miniventure.game.GameCore;
-import miniventure.game.client.NetworkClient;
-import miniventure.game.network.GameProtocol;
 import miniventure.game.Preferences;
 import miniventure.game.client.ClientCore;
+import miniventure.game.client.NetworkClient;
 import miniventure.game.client.ServerManager;
+import miniventure.game.network.GameProtocol;
 import miniventure.game.network.PacketPipe.PacketPipeReader;
 import miniventure.game.network.PacketPipe.PacketPipeWriter;
 import miniventure.game.screen.ErrorScreen;

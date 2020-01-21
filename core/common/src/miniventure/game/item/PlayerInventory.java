@@ -1,13 +1,7 @@
 package miniventure.game.item;
 
-import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.TreeMap;
-
-import miniventure.game.item.Inventory.ChangeListener;
-import miniventure.game.util.ArrayUtils;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

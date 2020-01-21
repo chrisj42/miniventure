@@ -1,6 +1,5 @@
 package miniventure.game.world.entity;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import miniventure.game.util.SerialHashMap;

@@ -3,7 +3,6 @@ package miniventure.game.world.level;
 import miniventure.game.util.Version;
 import miniventure.game.world.file.LevelCache;
 import miniventure.game.world.tile.TileStack.TileData;
-import miniventure.game.world.worldgen.island.IslandType;
 
 public interface LevelFetcher<L extends Level> {
 	

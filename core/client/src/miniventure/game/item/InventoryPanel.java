@@ -1,13 +1,11 @@
 package miniventure.game.item;
 
 import miniventure.game.util.function.FetchFunction;
-import miniventure.game.world.entity.mob.player.Player;
 
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.kotcrab.vis.ui.VisUI;
 
 import org.jetbrains.annotations.Nullable;

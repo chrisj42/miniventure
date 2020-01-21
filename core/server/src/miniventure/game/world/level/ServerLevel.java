@@ -3,8 +3,8 @@ package miniventure.game.world.level;
 import java.util.*;
 
 import miniventure.game.GameCore;
-import miniventure.game.network.GameProtocol.TileUpdate;
 import miniventure.game.item.ServerItem;
+import miniventure.game.network.GameProtocol.TileUpdate;
 import miniventure.game.server.GameServer;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Boundable;
@@ -20,7 +20,6 @@ import miniventure.game.world.entity.particle.ItemEntity;
 import miniventure.game.world.file.LevelCache;
 import miniventure.game.world.management.ServerWorld;
 import miniventure.game.world.tile.ServerTile;
-import miniventure.game.world.tile.ServerTileType;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileStack.TileData;
 import miniventure.game.world.tile.TileTypeEnum;

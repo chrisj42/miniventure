@@ -2,8 +2,6 @@ package miniventure.game.util.customenum;
 
 import java.util.HashMap;
 
-import miniventure.game.util.function.MapFunction;
-
 @SuppressWarnings("unchecked")
 public class DataMap {
 	

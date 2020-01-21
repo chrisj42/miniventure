@@ -5,13 +5,13 @@ import java.util.Deque;
 import java.util.LinkedList;
 
 import miniventure.game.GameCore;
-import miniventure.game.network.GameProtocol.Message;
-import miniventure.game.network.GameProtocol.TabRequest;
-import miniventure.game.network.GameProtocol.TabResponse;
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.chat.InfoMessageLine;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.FontStyle;
+import miniventure.game.network.GameProtocol.Message;
+import miniventure.game.network.GameProtocol.TabRequest;
+import miniventure.game.network.GameProtocol.TabResponse;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.RelPos;
 

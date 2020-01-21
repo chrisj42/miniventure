@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import miniventure.game.GameCore;
 import miniventure.game.util.function.ValueAction;
 
 import org.jetbrains.annotations.Nullable;

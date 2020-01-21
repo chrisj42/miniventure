@@ -14,7 +14,6 @@ import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.Action;
 import miniventure.game.util.function.ValueAction;
-import miniventure.game.world.Boundable;
 import miniventure.game.world.Point;
 import miniventure.game.world.Taggable.Tag;
 import miniventure.game.world.WorldObject;

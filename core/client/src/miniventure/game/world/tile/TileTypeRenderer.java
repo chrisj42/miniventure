@@ -2,13 +2,13 @@ package miniventure.game.world.tile;
 
 import java.util.*;
 
-import com.badlogic.gdx.utils.Array;
 import miniventure.game.GameCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.RelPos;
-
 import miniventure.game.world.tile.SpriteManager.SpriteCompiler;
 import miniventure.game.world.tile.TileTypeToAnimationMap.IndexedTileTypeToAnimationMap;
+
+import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

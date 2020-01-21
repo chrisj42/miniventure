@@ -10,9 +10,9 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 import miniventure.game.GameCore;
-import miniventure.game.network.GameProtocol;
 import miniventure.game.ProgressPrinter;
 import miniventure.game.chat.command.CommandInputParser;
+import miniventure.game.network.GameProtocol;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.ProgressLogger;

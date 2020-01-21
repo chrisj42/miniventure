@@ -1,7 +1,5 @@
 package miniventure.game.world.worldgen.island;
 
-import miniventure.game.world.worldgen.island.IslandType;
-
 public class TestIslandGen {
 	
 	public static void main(String[] args) {

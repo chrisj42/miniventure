@@ -3,7 +3,6 @@ package miniventure.game.world.entity.mob;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Direction;
-import miniventure.game.world.entity.EntityRenderer.DirectionalAnimationRenderer;
 
 public interface Mob extends WorldObject {
 	

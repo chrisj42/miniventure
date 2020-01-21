@@ -1,6 +1,5 @@
 package miniventure.game.client;
 
-import miniventure.game.GameCore;
 import miniventure.game.network.PacketPipe.PacketPipeReader;
 import miniventure.game.network.PacketPipe.PacketPipeWriter;
 

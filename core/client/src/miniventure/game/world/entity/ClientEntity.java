@@ -1,7 +1,7 @@
 package miniventure.game.world.entity;
 
-import miniventure.game.network.GameProtocol.EntityAddition;
 import miniventure.game.client.ClientCore;
+import miniventure.game.network.GameProtocol.EntityAddition;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.blinker.FrameBlinker;
 import miniventure.game.world.WorldObject;

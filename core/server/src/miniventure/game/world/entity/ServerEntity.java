@@ -2,15 +2,12 @@ package miniventure.game.world.entity;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Map.Entry;
 
 import miniventure.game.network.GameProtocol.EntityUpdate;
 import miniventure.game.network.GameProtocol.PositionUpdate;
 import miniventure.game.network.GameProtocol.SpriteUpdate;
 import miniventure.game.server.GameServer;
-import miniventure.game.util.MyUtils;
 import miniventure.game.util.SerialHashMap;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueAction;

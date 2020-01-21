@@ -1,11 +1,9 @@
 package miniventure.game.item;
 
-import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.tile.ServerTile;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class ObjectRecipe extends Recipe<ConstructableObjectType> {
 	

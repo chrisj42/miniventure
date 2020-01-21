@@ -1,7 +1,5 @@
 package miniventure.game.item;
 
-import java.util.Arrays;
-
 import miniventure.game.GameCore;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.world.entity.mob.player.Player.CursorHighlight;
