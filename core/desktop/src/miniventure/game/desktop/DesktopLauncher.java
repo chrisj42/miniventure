@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 
 import miniventure.game.GameCore;
 import miniventure.game.client.NetworkClient;
@@ -43,6 +44,8 @@ public class DesktopLauncher {
 	 * @param args arguments of application
 	 */
 	public static void main (String[] args) throws IOException {
+		Locale.setDefault(Locale.ENGLISH);
+		
 		List<String> arglist = new LinkedList<>(Arrays.asList(args));
 		
 		if(arglist.contains("--help")) {
@@ -94,7 +97,7 @@ public class DesktopLauncher {
 		WorldFileInterface.initGameDir();
 		
 		if(server) {
-			ServerCore.main(leftover.toArray(new String[0]));
+			ServerCore.initHeadless(leftover.toArray(new String[0]));
 		} else {
 			GameCore.debug("Starting GUI client...");
 			Thread.setDefaultUncaughtExceptionHandler(ClientCore.exceptionHandler);

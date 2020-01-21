@@ -120,7 +120,7 @@ public class ServerCore extends Thread {
 	}
 	
 	// creates a headless dedicated server
-	public static void main(String[] args) throws IOException {
+	public static void initHeadless(String[] args) throws IOException {
 		args = ArrayUtils.mapArray(args, String.class, String::toLowerCase);
 		LinkedList<String> arglist = new LinkedList<>(Arrays.asList(args));
 		

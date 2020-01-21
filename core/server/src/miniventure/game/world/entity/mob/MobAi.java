@@ -46,7 +46,7 @@ public class MobAi extends ServerMob {
 	private float tempTimeLeft = 0;
 	
 	protected MobAi(@NotNull ServerWorld world, @NotNull AiType aiType) {
-		super(world, aiType.name().toLowerCase(Locale.ENGLISH), aiType.health);
+		super(world, aiType.name().toLowerCase(), aiType.health);
 		this.aiType = aiType;
 		this.itemDrops = aiType.deathDrops;
 		this.movePattern = aiType.defaultPattern.copy();
@@ -57,7 +57,7 @@ public class MobAi extends ServerMob {
 		super(world, allData, version, data -> {
 			modifier.act(data);
 			AiType type = data.get("ai").get("type", AiType::valueOf);
-			data.get("mob").add("sprite", type.name().toLowerCase(Locale.ENGLISH));
+			data.get("mob").add("sprite", type.name().toLowerCase());
 			data.get("mob").add("mhp", type.health);
 		});
 		SerialHashMap data = allData.get("ai");

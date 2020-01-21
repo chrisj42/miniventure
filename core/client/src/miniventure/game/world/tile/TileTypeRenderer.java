@@ -30,7 +30,7 @@ public class TileTypeRenderer {
 		GameCore.tileAtlas.iterRegions(region -> {
 			final int split = region.name.indexOf('/');
 			
-			TileTypeEnum tileType = TileTypeEnum.valueOf(region.name.substring(0, split).toUpperCase(Locale.ENGLISH));
+			TileTypeEnum tileType = TileTypeEnum.valueOf(region.name.substring(0, split).toUpperCase());
 			
 			String spriteName = region.name.substring(split+1);
 			
