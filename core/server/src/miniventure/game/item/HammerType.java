@@ -8,13 +8,14 @@ import miniventure.game.item.ItemType.EnumItem;
 import miniventure.game.network.GameProtocol.SerialRecipe;
 import miniventure.game.world.entity.mob.player.Player;
 import miniventure.game.world.entity.mob.player.Player.CursorHighlight;
+import miniventure.game.world.entity.mob.player.ServerPlayer;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public enum HammerType {
 	
-	Simple(ObjectRecipeSet.HAND);
+	Simple(ObjectRecipeSet.SIMPLE);
 	
 	private static SerialRecipe[] fetchRecipes(ObjectRecipeSet maxRecipeSet) {
 		// add the hand-craftable items
@@ -25,24 +26,35 @@ public enum HammerType {
 		return recipes.toArray(new SerialRecipe[0]);
 	}
 	
-	private static final SerialRecipe[] NO_HAMMER = fetchRecipes(ObjectRecipeSet.HAND);
-	public static SerialRecipe[] getHandRecipes() { return NO_HAMMER; }
-	
-	private final SerialRecipe[] availableRecipes;
-	
-	HammerType(ObjectRecipeSet maxRecipeSet) {
-		this.availableRecipes = fetchRecipes(maxRecipeSet);
+	private static SerialRecipe[] NO_HAMMER = null;
+	public static SerialRecipe[] getHandRecipes() {
+		if(NO_HAMMER == null)
+			NO_HAMMER = fetchRecipes(ObjectRecipeSet.HAND);
+		return NO_HAMMER;
 	}
 	
-	public SerialRecipe[] getRecipes() { return availableRecipes; }
+	private SerialRecipe[] availableRecipes = null;
+	private final ObjectRecipeSet maxRecipeSet;
+	
+	HammerType(ObjectRecipeSet maxRecipeSet) {
+		this.maxRecipeSet = maxRecipeSet;
+	}
+	
+	public SerialRecipe[] getRecipes() {
+		if(availableRecipes == null)
+			availableRecipes = fetchRecipes(maxRecipeSet);
+		return availableRecipes;
+	}
 	
 	public HammerItem get() { return new HammerItem(); }
 	
 	public class HammerItem extends EnumItem {
 		
 		private HammerItem() {
-			super(ItemType.Hammer, HammerType.this, GameCore.icons.get("items/tool/"+HammerType.this.name().toLowerCase()+"_hammer"));
+			super(ItemType.Hammer, HammerType.this, GameCore.icons.get("items/tools/"+HammerType.this.name().toLowerCase()+"_hammer"));
 		}
+		
+		public HammerType getHammerType() { return HammerType.this; }
 		
 		@NotNull @Override
 		public Player.CursorHighlight getHighlightMode() {
@@ -53,7 +65,5 @@ public enum HammerType {
 		public EquipmentSlot getEquipmentType() {
 			return EquipmentSlot.HAMMER;
 		}
-		
-		// todo on interaction, equip the hammer.
 	}
 }

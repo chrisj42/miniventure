@@ -7,7 +7,9 @@ import miniventure.game.network.GameProtocol.SerialRecipe;
 
 public enum ObjectRecipeSet implements RecipeSet<ObjectRecipe> {
 	
-	HAND(
+	HAND(),
+	
+	SIMPLE(
 		new ObjectRecipe(ConstructableObjectType.Stone_Path,
 			new ServerItemStack(ResourceType.Stone.get(), 2)
 		),

@@ -78,8 +78,8 @@ public class InventoryOverlay extends MenuScreen {
 		
 		// make crafting screen button
 		VisTextButton craftBtn = makeButton("Craft", () -> {});
-		craftBtn.addActorBefore(craftBtn.getLabel(), makeEquipmentSlot(EquipmentSlot.HAMMER));
-		craftBtn.pack();
+		// craftBtn.addActorBefore(craftBtn.getLabel(), makeEquipmentSlot(EquipmentSlot.HAMMER));
+		// craftBtn.invalidate();
 		craftBtn.addListener(new ClickListener() {
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
@@ -155,6 +155,7 @@ public class InventoryOverlay extends MenuScreen {
 		HorizontalGroup infoBar = new HorizontalGroup();
 		
 		infoBar.addActor(craftBtn);
+		infoBar.addActor(makeEquipmentSlot(EquipmentSlot.HAMMER));
 		infoBar.addActor(makeEquipmentSlot(EquipmentSlot.ARMOR));
 		infoBar.addActor(makeEquipmentSlot(EquipmentSlot.ACCESSORY));
 		infoBar.addActor(makeLabel("    Inventory Space:   ", false));

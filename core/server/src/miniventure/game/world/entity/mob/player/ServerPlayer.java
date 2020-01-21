@@ -7,6 +7,7 @@ import java.util.EnumMap;
 
 import miniventure.game.GameCore;
 import miniventure.game.item.*;
+import miniventure.game.item.HammerType.HammerItem;
 import miniventure.game.item.MaterialQuality;
 import miniventure.game.item.ToolItem.ToolType;
 import miniventure.game.network.GameProtocol;
@@ -55,7 +56,6 @@ public class ServerPlayer extends ServerMob implements Player {
 	
 	@NotNull private final ServerPlayerInventory invManager;
 	@NotNull private final ServerInventory inventory;
-	@Nullable private HammerType equippedHammer;
 	
 	private final String name;
 	
@@ -77,15 +77,11 @@ public class ServerPlayer extends ServerMob implements Player {
 		name = data.get("name");
 		invManager = new ServerPlayerInventory();
 		inventory = invManager.getInv();
-		equippedHammer = null;
 		
 		stats.put(Stat.Health, getHealth());
 		stats.put(Stat.Hunger, data.get("hunger", Integer::parseInt));
 		stats.put(Stat.Stamina, data.get("stamina", Integer::parseInt));
 		// stats.put(Stat.Armor, Integer.parseInt(data.get(3)));
-		// todo remove "equippedHammer", see todo notes
-		if(!data.get("tool").equals("null"))
-			equippedHammer = data.get("tool", HammerType::valueOf);
 		
 		if(data.get("sloc").equals("null"))
 			spawnLoc = null;
@@ -106,7 +102,6 @@ public class ServerPlayer extends ServerMob implements Player {
 		data.add("name", name);
 		data.add("hunger", getStat(Stat.Hunger));
 		data.add("stamina", getStat(Stat.Stamina));
-		data.add("tool", equippedHammer);
 		data.add("sloc", spawnLoc == null ? null : spawnLoc.serialize());
 		data.add("slvl", spawnLevel);
 		data.add("inv", MyUtils.encodeStringArray(invManager.save()));
@@ -126,7 +121,6 @@ public class ServerPlayer extends ServerMob implements Player {
 		super.reset();
 		
 		invManager.reset();
-		equippedHammer = null;
 		
 		if(GameCore.debug) {
 			System.out.println("adding debug items to player inventory");
@@ -208,12 +202,17 @@ public class ServerPlayer extends ServerMob implements Player {
 				invManager.equipItem(req.equipmentType, req.invIdx);
 			else
 				invManager.unequipItem(req.equipmentType, req.invIdx);
+			
+			getServer().sendToPlayer(this, invManager.getUpdate(true));
 		});
 		
-		forPacket(packet, DatalessRequest.Recipes, true, () -> connection.send(new RecipeUpdate(
-			equippedHammer == null ? HammerType.getHandRecipes() : equippedHammer.getRecipes(),
-			new RecipeStockUpdate(inventory.getItemStacks())
-		)));
+		forPacket(packet, DatalessRequest.Recipes, true, () -> {
+			HammerItem hammer = (HammerItem) invManager.getEquippedItem(EquipmentSlot.HAMMER);
+			connection.send(new RecipeUpdate(
+				hammer == null ? HammerType.getHandRecipes() : hammer.getHammerType().getRecipes(),
+				new RecipeStockUpdate(inventory.getItemStacks())
+			));
+		});
 		
 		forPacket(packet, CraftRequest.class, true, req -> {
 			ItemRecipeSet set = ItemRecipeSet.values[req.setOrdinal];
@@ -384,10 +383,17 @@ public class ServerPlayer extends ServerMob implements Player {
 			// none of the above interactions were successful, do the reflexive use.
 			result = heldItem.interact(this);
 		
+		if(!result.success && heldItem.getEquipmentType() != null) {
+			if(invManager.equipItem(heldItem.getEquipmentType(), index)) {
+				result = Result.USED;
+				getServer().sendToPlayer(this, invManager.getUpdate(true));
+			}
+		}
+		
 		if (attack && level != null) {
 			ActionType actionType = result.success ? ActionType.SLASH : ActionType.PUNCH;
 			
-			TextureHolder tex = GameCore.entityAtlas.getRegion(actionType.getSpriteName(dir));
+			// TextureHolder tex = GameCore.entityAtlas.getRegion(actionType.getSpriteName(dir));
 			Vector2 offset = getSize();
 			offset.y = Mob.unshortenSprite(offset.y);
 			offset.scl(0.5f);

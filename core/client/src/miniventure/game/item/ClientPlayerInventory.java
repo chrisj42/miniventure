@@ -67,7 +67,7 @@ public class ClientPlayerInventory extends PlayerInventory<Item, ItemStack, Clie
 	
 	@Override
 	public boolean unequipItem(@NotNull EquipmentSlot equipmentSlot, int index) {
-		boolean success = super.equipItem(equipmentSlot, index);
+		boolean success = super.unequipItem(equipmentSlot, index);
 		if(success)
 			ClientCore.getClient().send(new EquipRequest(equipmentSlot, index, false));
 		return success;

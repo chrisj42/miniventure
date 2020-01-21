@@ -47,7 +47,7 @@ public abstract class ServerItem extends Item {
 	/// The item has been used. For most items, this means the item is now depleted, and can no longer be used. Note that there is a contract with this method; it should not modify the state of the current item, however it can return a slightly modified version to be used instead. (space usage shouldn't change)
 	// overridden by subclasses to return a new item instance with any change in state that should happen when the item is used; usually though, using an item results in it disappearing.
 	@Nullable
-	public ServerItem getUsedItem() { return null; }
+	public ServerItem getUsedItem() { return getEquipmentType() == null ? null : this; }
 	
 	// these three below are in case the item has anything to do with the events.
 	
