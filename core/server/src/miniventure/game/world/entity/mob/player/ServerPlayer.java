@@ -131,8 +131,8 @@ public class ServerPlayer extends ServerMob implements Player {
 		if(GameCore.debug) {
 			System.out.println("adding debug items to player inventory");
 			inventory.addItem(new ToolItem(ToolType.Shovel, MaterialQuality.Superior));
+			inventory.addItem(new ToolItem(ToolType.Axe, MaterialQuality.Superior));
 			inventory.addItem(new ToolItem(ToolType.Pickaxe, MaterialQuality.Superior));
-			// inventory.addItem(TileItemType.Door);
 			for(int i = 0; i < 7; i++)
 				inventory.addItem(PlaceableItemType.Torch.get());
 			for(int i = 0; i < 7; i++)
