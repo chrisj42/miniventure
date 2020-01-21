@@ -15,6 +15,15 @@ public enum ObjectRecipeSet implements RecipeSet<ObjectRecipe> {
 		),
 		new ObjectRecipe(ConstructableObjectType.Door,
 			new ServerItemStack(ResourceType.Log.get(), 2)
+		),
+		new ObjectRecipe(ConstructableObjectType.Wood_Wall,
+			new ServerItemStack(ResourceType.Log.get(), 3)
+		),
+		new ObjectRecipe(ConstructableObjectType.Stone_Wall,
+			new ServerItemStack(ResourceType.Stone.get(), 3)
+		),
+		new ObjectRecipe(ConstructableObjectType.Stone_Floor,
+			new ServerItemStack(ResourceType.Stone.get(), 3)
 		)
 	); // hammer types
 	
