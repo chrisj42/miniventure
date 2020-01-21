@@ -40,7 +40,7 @@ public class ServerPlayerInventory extends PlayerInventory<ServerItem, ServerIte
 		getInv().loadItems(Arrays.copyOfRange(data, equipment.length, data.length), buffer, version);
 	}
 	
-	public InventoryUpdate getUpdate() { return getUpdate(true); }
+	// public InventoryUpdate getUpdate() { return getUpdate(true); }
 	public InventoryUpdate getUpdate(boolean includeEquipment) {
 		String[][] equipment;
 		if(includeEquipment) {

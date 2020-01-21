@@ -91,7 +91,7 @@ public class InventoryOverlay extends MenuScreen {
 					ClientCore.setScreen(new CraftingScreen());
 			}
 		});
-		craftBtn.setBackground(new BaseDrawable(craftBtn.getBackground()) {
+		/*craftBtn.setBackground(new BaseDrawable(craftBtn.getBackground()) {
 			@Override
 			public void draw(Batch batch, float x, float y, float width, float height) {
 				Color prev = batch.getColor();
@@ -99,7 +99,7 @@ public class InventoryOverlay extends MenuScreen {
 				super.draw(batch, x, y, width, height);
 				batch.setColor(prev);
 			}
-		});
+		});*/
 		
 		fillBar = new ProgressBar(0, 1, .01f, false, VisUI.getSkin()) {
 			@Override
@@ -156,8 +156,8 @@ public class InventoryOverlay extends MenuScreen {
 		
 		infoBar.addActor(craftBtn);
 		infoBar.addActor(makeEquipmentSlot(EquipmentSlot.HAMMER));
-		infoBar.addActor(makeEquipmentSlot(EquipmentSlot.ARMOR));
-		infoBar.addActor(makeEquipmentSlot(EquipmentSlot.ACCESSORY));
+		// infoBar.addActor(makeEquipmentSlot(EquipmentSlot.ARMOR));
+		// infoBar.addActor(makeEquipmentSlot(EquipmentSlot.ACCESSORY));
 		infoBar.addActor(makeLabel("    Inventory Space:   ", false));
 		infoBar.addActor(fillBar);
 		
@@ -237,6 +237,18 @@ public class InventoryOverlay extends MenuScreen {
 				return 0;
 			}
 		};
+		slot.addListener(new InputListener() {
+			@Override
+			public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+				slot.setSelected(true);
+			}
+			
+			@Override
+			public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+				slot.setSelected(false);
+			}
+		});
+		slot.setBackground(new SlotBackground(() -> false, slot::getSelected));
 		equipmentSlots.put(type, slot);
 		return slot;
 	}

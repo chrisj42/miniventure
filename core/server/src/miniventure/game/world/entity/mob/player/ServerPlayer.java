@@ -137,7 +137,7 @@ public class ServerPlayer extends ServerMob implements Player {
 	}
 	
 	public SpawnData getSpawnData() {
-		return new SpawnData(new EntityAddition(this), invManager.getUpdate(), saveStats());
+		return new SpawnData(new EntityAddition(this), invManager.getUpdate(true), saveStats());
 	}
 	
 	// private InventoryUpdate inventory.getUpdate() { return new InventoryUpdate(inventory.serialize()); }
@@ -188,7 +188,7 @@ public class ServerPlayer extends ServerMob implements Player {
 		forPacket(packet, ItemDropRequest.class, true, drop -> {
 			if(!dropItem(drop)) {
 				// drop failed, i.e. client allowed it when it shouldn't have; update client inv
-				connection.send(invManager.getUpdate());
+				connection.send(invManager.getUpdate(false));
 			}
 			// if successful, do nothing, because client will have pre-maturely removed the item itself.
 		});

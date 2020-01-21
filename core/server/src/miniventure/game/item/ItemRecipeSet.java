@@ -1,15 +1,12 @@
 package miniventure.game.item;
 
-import java.util.LinkedList;
-
-import miniventure.game.item.HammerType.HammerItem;
 import miniventure.game.network.GameProtocol.SerialRecipe;
 
 public enum ItemRecipeSet implements RecipeSet<ItemRecipe> {
 	
 	// crafter types
 	HAND(
-		new ItemRecipe(HammerType.Simple.get(),
+		new ItemRecipe(HammerType.Simple_Hammer.get(),
 			new ServerItemStack(ResourceType.Stone.get(), 2),
 			new ServerItemStack(ResourceType.Log.get(), 1)
 		),

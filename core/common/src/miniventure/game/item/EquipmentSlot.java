@@ -1,7 +1,7 @@
 package miniventure.game.item;
 
 public enum EquipmentSlot {
-	HAMMER, ARMOR, ACCESSORY;
+	HAMMER/*, ARMOR, ACCESSORY*/;
 	
 	EquipmentSlot() {}
 	

@@ -15,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
 
 public enum HammerType {
 	
-	Simple(ObjectRecipeSet.SIMPLE);
+	Simple_Hammer(ObjectRecipeSet.SIMPLE);
 	
 	private static SerialRecipe[] fetchRecipes(ObjectRecipeSet maxRecipeSet) {
 		// add the hand-craftable items
@@ -51,7 +51,7 @@ public enum HammerType {
 	public class HammerItem extends EnumItem {
 		
 		private HammerItem() {
-			super(ItemType.Hammer, HammerType.this, GameCore.icons.get("items/tools/"+HammerType.this.name().toLowerCase()+"_hammer"));
+			super(ItemType.Hammer, HammerType.this, GameCore.icons.get("items/tools/"+HammerType.this.name().toLowerCase()));
 		}
 		
 		public HammerType getHammerType() { return HammerType.this; }

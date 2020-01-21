@@ -88,7 +88,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 		
 		inventory = new ClientPlayerInventory();
 		
-		inventory.getInv().updateItems(data.inv.inventory);
+		inventory.updateItems(data.inv.inventory, data.inv.equipment);
 		invScreen.setInventory(inventory);
 		
 		Stat.load(data.stats, this.stats);
