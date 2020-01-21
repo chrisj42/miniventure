@@ -84,6 +84,7 @@ public class InfoScreen extends BackgroundInheritor {
 				"",
 				/*"Music made by TrstN",*/
 				"Sprites made by RiverOaken and Ross, with contributions by Cyrano and MadDest",
+				"Player sprite from https://opengameart.org/content/zelda-like-tilesets-and-sprites",
 				"",
 				"Sound effects made by Chris J",
 				"",
