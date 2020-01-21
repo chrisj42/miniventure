@@ -10,6 +10,7 @@ hs_err_pid*
 /desktop/out/
 /gentest/out/
 notes/ignored/
+sprites/cache/
 scripts/
 /*.jar
 
