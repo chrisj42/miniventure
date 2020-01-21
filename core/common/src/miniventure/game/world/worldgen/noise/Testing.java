@@ -163,7 +163,11 @@ public class Testing {
 		// 	.modify(NoiseModifier.combine(NoiseGenerator.islandShape, .35f));
 		// return islandShape(info -> NoiseGenerator.MIN_RADIUS.get(info)*.8f, .15f, 2, false, new Coherent2DNoiseFunction(36, 3));
 		
-		return NoiseGenerator.islandShape;
+		// return NoiseGenerator.islandShape;
+		return NoiseGenerator.tunnelPattern(
+			new Coherent2DNoiseFunction(16),
+			new Coherent2DNoiseFunction(32)
+		);
 		// return NoiseGenerator.getFromFetcher(info -> (x, y) -> 1 - Math.abs(info.width/2f - (x+.5f))/(info.width/2f) * Math.abs(info.height/2f - (y+.5f))/(info.height/2f));
 		
 		/*return NoiseGenerator.rectMask(3, .8f).modify(
@@ -197,8 +201,8 @@ public class Testing {
 		// Color[] colors = {Color.GREEN.darker(), Color.GREEN, Color.GREEN.darker()};
 		
 		Random rand = new Random();
-		// NoiseGenerator testGen = getTerrain();
-		NoiseGenerator testGen = convertToDistanceMap(getTerrain(), val -> val <= .1f, 0, 5);
+		NoiseGenerator testGen = getTerrain();
+		// NoiseGenerator testGen = convertToDistanceMap(getTerrain(), val -> val <= .1f, 0, 5);
 		boolean repeat = true;
 		while(repeat) {
 			repeat = displayNoise(width, height, scale, testGen.get2DNoise(new GenInfo(rand.nextLong(), width, height)), thresholds, colors);

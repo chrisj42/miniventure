@@ -23,13 +23,20 @@ public interface NoiseGenerator extends NoiseMapFetcher {
 	MapFunction<GenInfo, Float> HYPOT = info -> (float) Math.hypot(info.width/2f, info.height/2f);
 	
 	NoiseGenerator islandShapeOld = islandShape(MIN_RADIUS, .8f, .1f, 3, false, new Coherent2DNoiseFunction(36, 3));
-	NoiseGenerator islandShape = /*Testing.removeHoles(Testing.removeHoles(*/NoiseGenerator.rectMask(2, .9f).modify(
+	NoiseGenerator islandShape600 = /*Testing.removeHoles(Testing.removeHoles(*/NoiseGenerator.rectMask(2, .9f).modify(
 		NoiseModifier.perturb(
 			new Coherent2DNoiseFunction(128, 1),
 			new Coherent2DNoiseFunction(48, 2),
 			45
 		)
 	);//, .1f), .2f);
+	NoiseGenerator islandShape = NoiseGenerator.rectMask(2, .8f).modify(
+		NoiseModifier.perturb(
+			new Coherent2DNoiseFunction(128, 1),
+			new Coherent2DNoiseFunction(36, 2),
+			30
+		)
+	);
 	
 	NoiseGenerator EMPTY = info -> new float[info.width][info.height];
 	NoiseGenerator FULL = info -> {

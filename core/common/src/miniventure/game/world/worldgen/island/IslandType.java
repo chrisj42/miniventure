@@ -6,6 +6,7 @@ import miniventure.game.world.tile.TileTypeEnum;
 import miniventure.game.world.worldgen.noise.Coherent2DNoiseFunction;
 import miniventure.game.world.worldgen.noise.Noise;
 import miniventure.game.world.worldgen.noise.NoiseGenerator;
+import miniventure.game.world.worldgen.noise.NoiseModifier;
 import miniventure.game.world.worldgen.noise.Testing;
 
 import static miniventure.game.world.tile.TileTypeEnum.*;
@@ -91,22 +92,41 @@ public enum IslandType {
 			float[][] shape = island.getFromGen(NoiseGenerator.islandShape);
 			
 			float[][] trees = island.getFromGen(
-				new Coherent2DNoiseFunction(16, 4)
+				new Coherent2DNoiseFunction(8, 3)
 				// .modify(NoiseModifier.combine(NoiseGenerator.islandShapeOld, .35f))
+			);
+			float[][] trees2 = island.getFromGen(
+				NoiseGenerator.tunnelPattern(
+					new Coherent2DNoiseFunction(16, 5),
+					new Coherent2DNoiseFunction(8, 3)
+				)
+				.modify(NoiseModifier.combine(NoiseGenerator.circleMask(1.4f), MULTIPLY))
 			);
 			
 			float[][] sparse = island.getFromGen(
 				new Coherent2DNoiseFunction(8, 2)
 			);
 			
+			TileProcessor coastal = TileConditionChain.builder()
+				.add(new NoiseTileCondition(sparse, val -> val <= .075f), POOF_TREE)
+				.add(new NoiseTileCondition(sparse, val -> val > .92f), STONE)
+				.getChain();
+			
+			TileProcessor middle = TileConditionChain.builder()
+				.add(new NoiseTileCondition(trees, val -> val > .95f), POOF_TREE)
+				.add(new NoiseTileCondition(sparse, val -> val > .85f), STONE)
+				.getChain();
+			
 			TileProcessor forest = TileConditionChain.builder()
-				.add(new NoiseTileCondition(trees, val -> val > .8f), POOF_TREE)
-				.add(new NoiseTileCondition(sparse, val -> val > .925f), STONE)
+				.add(new NoiseTileCondition(trees2, val -> val > .25f),
+					new NoiseTileCondition(sparse, val -> val < .875f).onMatch(POOF_TREE))
+				.add(new NoiseTileCondition(sparse, val -> val > .9f), STONE)
 				.getChain();
 			
 			TileProcessor grassland = TileNoiseMap.builder()
 				// .addRegion(25, null)
-				.addRegion(35, new NoiseTileCondition(sparse, val -> val <= .075f).onMatch(POOF_TREE))
+				.addRegion(32, coastal)
+				.addRegion(10, middle)
 				.addRoundOffRegion(forest)
 				.get(shape);
 			
@@ -176,7 +196,7 @@ public enum IslandType {
 	private final int width;
 	private final int height;
 	
-	IslandType() { this(300, 300); }
+	IslandType() { this(500, 500); }
 	IslandType(int width, int height) {
 		this.width = width;
 		this.height = height;

@@ -6,7 +6,7 @@ public class TestIslandGen {
 	
 	public static void main(String[] args) {
 		
-		final int scale = 1;
+		final int scale = 2;
 		// IslandType.SWAMP.displayColorMap(true, scale);
 		IslandType.WOODLAND.displayColorMap(true, scale);
 		// IslandType.JUNGLE.displayColorMap(true, scale);
