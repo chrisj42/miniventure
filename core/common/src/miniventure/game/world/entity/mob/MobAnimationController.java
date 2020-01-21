@@ -20,11 +20,11 @@ public class MobAnimationController<M extends Entity & Mob> {
 			Enum implements Comparable, and compares based on the ordinal, I imagine.
 			I will use the order of the enums to specify the "priority" of the animation state.
 		*/
-		/*BLOCK(2f), ATTACK(0.3f), RUN(0.3f), */WALK(.5f), IDLE(2f);
+		/*BLOCK(2f), ATTACK(0.3f), RUN(0.3f), */WALK(.25f), IDLE(2f);
 		
-		public final float loopDuration;
+		public final float frameRate;
 		
-		AnimationState(float loopDuration) { this.loopDuration = loopDuration; }
+		AnimationState(float frameRate) { this.frameRate = frameRate; }
 		
 		public static final AnimationState[] values = values();
 	}
@@ -49,7 +49,7 @@ public class MobAnimationController<M extends Entity & Mob> {
 		renderers = new EnumMap<>(AnimationState.class);
 		for(AnimationState state: AnimationState.values) {
 			String textureName = mobSpriteName + '/' + state.name().toLowerCase() + '-';
-			renderers.put(state, new DirectionalAnimationRenderer(mob.getDirection(), dir -> textureName + dir.name().toLowerCase(), state.loopDuration, false, true));
+			renderers.put(state, new DirectionalAnimationRenderer(mob.getDirection(), dir -> textureName + dir.name().toLowerCase(), state.frameRate, true, true));
 		}
 		
 		progressAnimation(0);

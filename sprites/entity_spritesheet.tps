@@ -368,6 +368,26 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">entity-sprites/player/walk-down_3.png</key>
+            <key type="filename">entity-sprites/player/walk-down_4.png</key>
+            <key type="filename">entity-sprites/player/walk-left_3.png</key>
+            <key type="filename">entity-sprites/player/walk-left_4.png</key>
+            <key type="filename">entity-sprites/player/walk-right_3.png</key>
+            <key type="filename">entity-sprites/player/walk-right_4.png</key>
+            <key type="filename">entity-sprites/player/walk-up_3.png</key>
+            <key type="filename">entity-sprites/player/walk-up_4.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,5,8,11</rect>
+                <key>scale9Paddings</key>
+                <rect>4,5,8,11</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
         </map>
         <key>fileList</key>
         <array>

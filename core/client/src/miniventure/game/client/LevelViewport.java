@@ -36,7 +36,7 @@ public class LevelViewport {
 	
 	private static final float DEFAULT_VIEWPORT_SIZE = 32; // in tiles
 	
-	private static final int MIN_ZOOM = -4, MAX_ZOOM = 5;
+	private static final int MIN_ZOOM = -4, MAX_ZOOM = 3;
 	
 	// these two values determine how much of the level to render in either dimension, and are also used to fit the viewport to the game window. Later, they should be customizable by the user, or the mapmaker; for now, they'll remain at 0, meaning it doesn't limit the number of tiles rendered, and the default viewport size will be used for fitting.
 	private float maxWorldViewWidth = 0;
