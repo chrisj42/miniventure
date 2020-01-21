@@ -17,7 +17,7 @@ public interface Player extends Mob {
 	
 	// these are all measured in tiles
 	float MOVE_SPEED = 5;
-	float MAX_CURSOR_RANGE = 5;
+	float MAX_CURSOR_RANGE = 3;
 	float INTERACT_RECT_SIZE = 1;
 	
 	// controls how the client determines what to highlight
