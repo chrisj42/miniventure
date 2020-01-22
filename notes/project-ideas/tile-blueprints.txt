@@ -1,6 +1,0 @@
-Blueprint list is fetched from the server on inventory open
-Current blueprint is set when selected from blueprint list
-Draw current blueprint only if current item name contains "hammer"
-- blueprint contains TileTypeInfo or something; it really just needs the sprites
-
-Inventory is not manually sortable for now; but there are tabs
