@@ -57,7 +57,9 @@ public abstract class SerialEnum<T, ET extends SerialEnum<T, ET>> extends Generi
 	}
 	
 	private static <T> MapFunction<T, String> defaultValueWriter(final Class<T> valueClass) {
-		return ar -> ArrayUtils.deepToString(ar, MyUtils::encodeStringArray, String::valueOf);
+		if(valueClass.isArray())
+			return ar -> ArrayUtils.deepToString(ar, MyUtils::encodeStringArray, String::valueOf);
+		return String::valueOf;
 	}
 	
 	private static <T> MapFunction<String, T> defaultValueParser(final Class<T> valueClass) {
@@ -90,12 +92,6 @@ public abstract class SerialEnum<T, ET extends SerialEnum<T, ET>> extends Generi
 		});
 	}
 	
-	private static <T> MapFunction<T, String> getValueWriter(Class<T> valueClass, MapFunction<Object, String> baseParser) {
-		if(valueClass.isArray())
-			return ar -> ArrayUtils.deepToString(ar, MyUtils::encodeStringArray, baseParser);
-		return (MapFunction<T, String>) baseParser;
-	}
-	
 	private static <T, B> MapFunction<String, T> getValueParser(Class<T> valueClass, ClassParser<B> baseValueParser) {
 		if(valueClass.isArray())
 			return (MapFunction<String, T>) getArrayParser(valueClass.getComponentType(), baseValueParser);
@@ -117,9 +113,16 @@ public abstract class SerialEnum<T, ET extends SerialEnum<T, ET>> extends Generi
 		return ar;
 	}
 	
-	// public SerialEntry<T> as(T value) { return new SerialEntry<>(this, value); }
-	// SerialEntry<T> serialEntry(String value) { return new SerialEntry<>(this, deserialize(value)); }
-	
 	public String serialize(T value) { return valueWriter.get(value); }
 	public T deserialize(String data) { return valueParser.get(data); }
+	
+	String serializeEntry(SerialEnumMap<? super ET> map) {
+		return name()+'='+serialize(map.get(this));
+	}
+	
+	static <T, ET extends SerialEnum<T, ET>> void deserializeEntry(String data, Class<ET> tagClass, SerialEnumMap<ET> map) {
+		String[] parts = data.split("=", 2);
+		ET tag = GenericEnum.valueOf(tagClass, parts[0]);
+		map.put(tag, tag.deserialize(data));
+	}
 }

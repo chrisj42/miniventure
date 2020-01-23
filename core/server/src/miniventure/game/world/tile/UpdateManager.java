@@ -1,6 +1,6 @@
 package miniventure.game.world.tile;
 
-import miniventure.game.util.customenum.DataMap;
+import miniventure.game.world.tile.TileCacheTag.TileDataCache;
 import miniventure.game.util.function.FetchFunction;
 import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.tile.ServerTileType.P;
@@ -39,7 +39,7 @@ public class UpdateManager {
 			return man.tryFinishAnimation(tile);
 		
 		float minWait = 0;
-		DataMap dataMap = tile.getCacheMap(tileType);
+		TileDataCache dataMap = tile.getCacheMap(tileType);
 		float[] deltas = dataMap.getOrDefaultAndPut(TileCacheTag.UpdateTimers, new float[actions.length]);
 		String[] datas = dataMap.getOrDefaultAndPut(TileCacheTag.UpdateActionCaches, new String[actions.length]);
 		for(int i = 0; i < actions.length; i++) {

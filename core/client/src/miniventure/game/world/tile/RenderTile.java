@@ -5,7 +5,7 @@ import java.util.*;
 import miniventure.game.item.Item;
 import miniventure.game.item.Result;
 import miniventure.game.util.RelPos;
-import miniventure.game.util.customenum.SerialMap;
+import miniventure.game.world.tile.TileDataTag.TileDataMap;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.player.Player;
@@ -25,12 +25,12 @@ public class RenderTile extends Tile {
 	// spriteLock is unnecessary because all access occurs in the same thread: the libGDX render thread.
 	// private final Object spriteLock = new Object();
 	
-	public RenderTile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, @Nullable SerialMap[] data) {
+	public RenderTile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, @Nullable TileDataMap[] data) {
 		super(level, x, y, types, data);
 	}
 	
 	@Override
-	ClientTileStack makeStack(@NotNull TileTypeEnum[] types, @Nullable SerialMap[] dataMaps) {
+	ClientTileStack makeStack(@NotNull TileTypeEnum[] types, @Nullable TileDataMap[] dataMaps) {
 		return new ClientTileStack(types, dataMaps);
 	}
 	

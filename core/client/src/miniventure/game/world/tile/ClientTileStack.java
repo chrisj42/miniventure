@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import miniventure.game.client.ClientCore;
-import miniventure.game.util.customenum.SerialMap;
+import miniventure.game.world.tile.TileDataTag.TileDataMap;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -23,7 +23,7 @@ public class ClientTileStack extends TileStack<ClientTileType> {
 		super(types);
 	}*/
 	
-	public ClientTileStack(TileTypeEnum[] enumTypes, @Nullable SerialMap[] dataMaps) {
+	public ClientTileStack(TileTypeEnum[] enumTypes, @Nullable TileDataMap[] dataMaps) {
 		super(ClientCore.getWorld(), enumTypes, dataMaps);
 	}
 	
@@ -52,7 +52,7 @@ public class ClientTileStack extends TileStack<ClientTileType> {
 	
 	
 	@Override
-	void addLayer(@NotNull ClientTileType newLayer, @NotNull SerialMap dataMap) {
+	void addLayer(@NotNull ClientTileType newLayer, @NotNull TileDataMap dataMap) {
 		super.addLayer(newLayer, dataMap);
 		if(opaqueStack == null)
 			opaqueStack = new LinkedList<>();

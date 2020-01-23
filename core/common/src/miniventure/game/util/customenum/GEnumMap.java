@@ -2,8 +2,9 @@ package miniventure.game.util.customenum;
 
 import java.util.HashMap;
 
+/** @noinspection rawtypes*/
 @SuppressWarnings("unchecked")
-public class GEnumMap<ET extends GenericEnum<?, ?>> {
+public class GEnumMap<ET extends GenericEnum> {
 	
 	final HashMap<ET, Object> map = new HashMap<>();
 	
@@ -74,17 +75,17 @@ public class GEnumMap<ET extends GenericEnum<?, ?>> {
 	// 	return asClass.cast(get(tag));
 	// }
 	
-	public DataEntry<?, ? extends ET>[] getEntries() {
+	/*public DataEntry<?, ? extends ET>[] getEntries() {
 		DataEntry<?, ? extends ET>[] entries = new DataEntry[map.size()];
 		int i = 0;
 		for(ET tag: map.keySet())
 			entries[i++] = getEntry(tag);
 		
 		return entries;
-	}
+	}*/
 	
-	<T, CET extends GenericEnum<T, ? extends ET>> DataEntry<T, ? extends ET> getEntry(Object tag) {
+	/*<T, CET extends GenericEnum<T, ? extends ET>> DataEntry<T, ? extends ET> getEntry(Object tag) {
 		// return tag.as((T) map.get(tag));
-		return /*(DataEntry<T, ? extends ET>) */((CET)tag).as((T) map.get(tag));
-	}
+		return *//*(DataEntry<T, ? extends ET>) *//*((CET)tag).as((T) map.get(tag));
+	}*/
 }

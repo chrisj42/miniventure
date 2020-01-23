@@ -1,7 +1,7 @@
 package miniventure.game.world.tile;
 
-import miniventure.game.util.customenum.DataMap;
-import miniventure.game.util.customenum.SerialMap;
+import miniventure.game.world.tile.TileCacheTag.TileDataCache;
+import miniventure.game.world.tile.TileDataTag.TileDataMap;
 import miniventure.game.world.level.ClientLevel;
 import miniventure.game.world.level.Level;
 import miniventure.game.world.tile.TileStack.TileData;
@@ -10,10 +10,10 @@ import org.jetbrains.annotations.NotNull;
 
 public class ClientTile extends RenderTile {
 	
-	public ClientTile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, @NotNull SerialMap[] data) {
+	public ClientTile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, @NotNull TileDataMap[] data) {
 		this((ClientLevel)level, x, y, types, data);
 	}
-	public ClientTile(@NotNull ClientLevel level, int x, int y, @NotNull TileTypeEnum[] types, @NotNull SerialMap[] data) {
+	public ClientTile(@NotNull ClientLevel level, int x, int y, @NotNull TileTypeEnum[] types, @NotNull TileDataMap[] data) {
 		super(level, x, y, types, data);
 	}
 	
@@ -28,7 +28,7 @@ public class ClientTile extends RenderTile {
 			Float curValue = getCacheMap(type).get(TileCacheTag.AnimationStart);
 			if(curValue == null)
 				continue; // there's no data to transfer.
-			DataMap dest = newStack.getCacheMap(type);
+			TileDataCache dest = newStack.getCacheMap(type);
 			if(dest != null) // can be null if the new stack is missing a type that the current stack has.
 				dest.put(TileCacheTag.AnimationStart, curValue);
 		}

@@ -1,13 +1,13 @@
 package miniventure.game.world.tile;
 
-import miniventure.game.util.customenum.GenericEnum;
+import miniventure.game.util.customenum.DataEntry;
 import miniventure.game.util.customenum.SerialEnum;
+import miniventure.game.util.customenum.SerialEnumMap;
 import miniventure.game.util.function.MapFunction;
 
 public class TileDataTag<T> extends SerialEnum<T, TileDataTag<T>> {
 	
 	/* --- ENUMERATION VALUES --- */
-	
 	
 	public static final TileDataTag<Integer> Health =
 		new TileDataTag<>(true, false, Integer.class);
@@ -34,4 +34,24 @@ public class TileDataTag<T> extends SerialEnum<T, TileDataTag<T>> {
 		super(save, send, valueClass);
 	}
 	
+	/** @noinspection rawtypes*/
+	@SuppressWarnings("unchecked")
+	public static class TileDataMap extends SerialEnumMap<TileDataTag> {
+		
+		public TileDataMap() {
+			super();
+		}
+		
+		public TileDataMap(DataEntry<?, ? extends TileDataTag>... entries) {
+			super(entries);
+		}
+		
+		public TileDataMap(SerialEnumMap<TileDataTag> model) {
+			super(model);
+		}
+		
+		public TileDataMap(String alldata) {
+			super(alldata, TileDataTag.class);
+		}
+	}
 }

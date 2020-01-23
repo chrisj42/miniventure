@@ -1,12 +1,14 @@
 package miniventure.game.world.tile;
 
+import miniventure.game.util.customenum.GEnumMap;
 import miniventure.game.util.customenum.GenericEnum;
 import miniventure.game.util.function.Action;
 
 public class TileCacheTag<T> extends GenericEnum<T, TileCacheTag<T>> {
 	
-	/* --- ENUMERATION VALUES --- */
+	public static class TileDataCache extends GEnumMap<TileCacheTag<?>> {}
 	
+	/* --- ENUMERATION VALUES --- */
 	
 	// Transition
 	public static final TileCacheTag<TransitionMode> TransitionMode = new TileCacheTag<>();
@@ -39,5 +41,4 @@ public class TileCacheTag<T> extends GenericEnum<T, TileCacheTag<T>> {
 	private TileCacheTag(boolean save, boolean send, Class<T> valueClass) {
 		super(save, send, valueClass);
 	}*/
-	
 }

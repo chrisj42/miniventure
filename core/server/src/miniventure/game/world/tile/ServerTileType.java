@@ -8,7 +8,7 @@ import miniventure.game.item.ResourceType;
 import miniventure.game.item.Result;
 import miniventure.game.item.ServerItem;
 import miniventure.game.item.ToolItem.ToolType;
-import miniventure.game.util.customenum.DataMap;
+import miniventure.game.world.tile.TileCacheTag.TileDataCache;
 import miniventure.game.util.function.MapFunction;
 import miniventure.game.util.param.ParamMap;
 import miniventure.game.util.param.Value;
@@ -107,7 +107,7 @@ public class ServerTileType extends TileType {
 	 * @return how long to wait before next call, or 0 for never (until adjacent tile update)
 	 */
 	public float update(@NotNull ServerTile tile) {
-		DataMap dataMap = tile.getCacheMap(getTypeEnum());
+		TileDataCache dataMap = tile.getCacheMap(getTypeEnum());
 		
 		float now = tile.getWorld().getGameTime();
 		float lastUpdate = dataMap.getOrDefault(TileCacheTag.LastUpdate, now);

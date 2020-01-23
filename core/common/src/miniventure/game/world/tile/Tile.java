@@ -3,8 +3,8 @@ package miniventure.game.world.tile;
 import java.util.HashSet;
 
 import miniventure.game.GameCore;
-import miniventure.game.util.customenum.DataMap;
-import miniventure.game.util.customenum.SerialMap;
+import miniventure.game.world.tile.TileCacheTag.TileDataCache;
+import miniventure.game.world.tile.TileDataTag.TileDataMap;
 import miniventure.game.world.Point;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.level.Level;
@@ -45,14 +45,14 @@ public abstract class Tile implements WorldObject {
 	// final EnumMap<TileTypeEnum, SerialMap> dataMaps = new EnumMap<>(TileTypeEnum.class);
 	
 	// the TileType array is ALWAYS expected in order of bottom to top.
-	Tile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, @Nullable SerialMap[] dataMaps) {
+	Tile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, @Nullable TileDataMap[] dataMaps) {
 		this.level = level;
 		this.x = x;
 		this.y = y;
 		setTileStack(makeStack(types, dataMaps));
 	}
 	
-	abstract TileStack makeStack(@NotNull TileTypeEnum[] types, @Nullable SerialMap[] dataMaps);
+	abstract TileStack makeStack(@NotNull TileTypeEnum[] types, @Nullable TileDataMap[] dataMaps);
 	
 	void setTileStack(TileStack stack) { this.tileStack = stack; }
 	
@@ -73,23 +73,23 @@ public abstract class Tile implements WorldObject {
 	
 	// public SerialMap getDataMap(TileType tileType) { return getDataMap(tileType.getTypeEnum()); }
 	@NotNull
-	public SerialMap getDataMap(TileTypeEnum tileType) {
-		SerialMap map = tileStack.getDataMap(tileType);
+	public TileDataMap getDataMap(TileTypeEnum tileType) {
+		TileDataMap map = tileStack.getDataMap(tileType);
 		// should never happen, especially with the new synchronization. But this will stay, just in case.
 		if(map == null) {
 			GameCore.error("ERROR: tile " + toLocString() + " came back with a null data map for tiletype " + tileType + "; stack: " + tileStack.getDebugString(), true, true);
-			map = new SerialMap();
+			map = new TileDataMap();
 		}
 		return map;
 	}
 	
 	@NotNull
-	public DataMap getCacheMap(TileTypeEnum tileType) {
-		DataMap map = tileStack.getCacheMap(tileType);
+	public TileCacheTag.TileDataCache getCacheMap(TileTypeEnum tileType) {
+		TileDataCache map = tileStack.getCacheMap(tileType);
 		// should never happen, especially with the new synchronization. But this will stay, just in case.
 		if(map == null) {
 			GameCore.error("ERROR: tile " + toLocString() + " came back with a null cache map for tiletype " + tileType + "; stack: " + tileStack.getDebugString(), true, true);
-			map = new DataMap();
+			map = new TileDataCache();
 		}
 		return map;
 	}

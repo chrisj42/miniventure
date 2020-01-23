@@ -9,8 +9,8 @@ import java.util.List;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
-import miniventure.game.util.customenum.DataMap;
-import miniventure.game.util.customenum.SerialMap;
+import miniventure.game.world.tile.TileCacheTag.TileDataCache;
+import miniventure.game.world.tile.TileDataTag.TileDataMap;
 import miniventure.game.util.function.Action;
 import miniventure.game.util.function.FetchFunction;
 import miniventure.game.world.management.WorldManager;
@@ -27,8 +27,8 @@ public class TileStack<T extends TileType> {
 	// bottom tile is first, top tile is last.
 	private final LinkedList<T> stack = new LinkedList<>();
 	
-	private final EnumMap<TileTypeEnum, SerialMap> dataMaps = new EnumMap<>(TileTypeEnum.class);
-	private final EnumMap<TileTypeEnum, DataMap> cacheMaps = new EnumMap<>(TileTypeEnum.class);
+	private final EnumMap<TileTypeEnum, TileDataMap> dataMaps = new EnumMap<>(TileTypeEnum.class);
+	private final EnumMap<TileTypeEnum, TileDataCache> cacheMaps = new EnumMap<>(TileTypeEnum.class);
 	private final Object dataLock = new Object();
 	
 	/*TileStack(T[] types) {
@@ -36,10 +36,10 @@ public class TileStack<T extends TileType> {
 			addLayer(type);
 	}*/
 	@SuppressWarnings("unchecked")
-	TileStack(@NotNull WorldManager world, TileTypeEnum[] enumTypes, @Nullable SerialMap[] dataMaps) {
+	TileStack(@NotNull WorldManager world, TileTypeEnum[] enumTypes, @Nullable TileDataMap[] dataMaps) {
 		for(int i = 0; i < enumTypes.length; i++)
 			//noinspection ConstantConditions // IntelliJ doesn't realize that just because dataMaps can be null, doesn't mean the elements of a non-null instance can also be null.
-			addLayer((T) enumTypes[i].getTypeInstance(world), dataMaps == null ? new SerialMap() : dataMaps[i]);
+			addLayer((T) enumTypes[i].getTypeInstance(world), dataMaps == null ? new TileDataMap() : dataMaps[i]);
 	}
 	
 	private void sync(Action a) {
@@ -52,10 +52,10 @@ public class TileStack<T extends TileType> {
 	public int size() { return sync(stack::size); }
 	
 	// called by Tile.java
-	SerialMap getDataMap(TileTypeEnum tileType) {
+	TileDataMap getDataMap(TileTypeEnum tileType) {
 		return sync(() -> dataMaps.get(tileType));
 	}
-	DataMap getCacheMap(TileTypeEnum tileType) {
+	TileDataCache getCacheMap(TileTypeEnum tileType) {
 		return sync(() -> cacheMaps.get(tileType));
 	}
 	
@@ -90,11 +90,11 @@ public class TileStack<T extends TileType> {
 	private int clamp(int idx) { return clamp(idx, true); }
 	private int clamp(int idx, boolean doClamp) { return doClamp ? Math.max(Math.min(idx, size()-1), 0) : idx; }
 	
-	void addLayer(@NotNull T newLayer, @NotNull SerialMap dataMap) {
+	void addLayer(@NotNull T newLayer, @NotNull TileDataMap dataMap) {
 		synchronized (dataLock) {
 			stack.addLast(newLayer);
 			dataMaps.put(newLayer.getTypeEnum(), dataMap);
-			cacheMaps.put(newLayer.getTypeEnum(), new DataMap());
+			cacheMaps.put(newLayer.getTypeEnum(), new TileDataCache());
 		}
 	}
 	
@@ -159,11 +159,11 @@ public class TileStack<T extends TileType> {
 			return types;
 		}
 		
-		public SerialMap[] getDataMaps() { return getDataMaps(data); }
-		public static SerialMap[] getDataMaps(String[] data) {
-			SerialMap[] maps = new SerialMap[data.length];
+		public TileDataMap[] getDataMaps() { return getDataMaps(data); }
+		public static TileDataMap[] getDataMaps(String[] data) {
+			TileDataMap[] maps = new TileDataMap[data.length];
 			for(int i = 0; i < data.length; i++)
-				maps[i] = SerialMap.deserialize(data[i], TileDataTag.class);
+				maps[i] = new TileDataMap(data[i]);
 			return maps;
 		}
 		
@@ -172,10 +172,10 @@ public class TileStack<T extends TileType> {
 	public String getDebugString() {
 		StringBuilder str = new StringBuilder(getClass().getSimpleName()).append('[');
 		TileTypeEnum[] types;
-		SerialMap[] maps;
+		TileDataMap[] maps;
 		synchronized (dataLock) {
 			types = getEnumTypes();
-			maps = dataMaps.values().toArray(new SerialMap[0]);
+			maps = dataMaps.values().toArray(new TileDataMap[0]);
 		}
 		for(int i = 0; i < types.length; i++) {
 			str.append(types[i]).append(':').append(maps[i]);

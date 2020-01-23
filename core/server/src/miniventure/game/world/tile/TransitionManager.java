@@ -5,8 +5,8 @@ import java.util.HashMap;
 
 import miniventure.game.GameCore;
 import miniventure.game.util.MyUtils;
-import miniventure.game.util.customenum.DataMap;
-import miniventure.game.util.customenum.SerialMap;
+import miniventure.game.world.tile.TileCacheTag.TileDataCache;
+import miniventure.game.world.tile.TileDataTag.TileDataMap;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -75,8 +75,8 @@ public class TransitionManager {
 		for(ServerTileTransition animation: animations.values()) {
 			if(animation.isTriggerType(nextType.tileType)) {
 				GameCore.debug("Server starting tile transition for tile "+tile+", triggered by tiletype "+nextType.tileType+", with enter="+isEntering);
-				SerialMap dataMap = tile.getDataMap(tileType);
-				DataMap cacheMap = tile.getCacheMap(tileType);
+				TileDataMap dataMap = tile.getDataMap(tileType);
+				TileDataCache cacheMap = tile.getCacheMap(tileType);
 				dataMap.put(TileDataTag.TransitionName, animation.name);
 				float start = tile.getWorld().getGameTime();
 				cacheMap.put(TileCacheTag.AnimationStart, start);
@@ -99,7 +99,7 @@ public class TransitionManager {
 	}*/
 	
 	private boolean isTransitionMode(@NotNull Tile tile, TransitionMode mode) {
-		DataMap map = tile.getCacheMap(tileType);
+		TileDataCache map = tile.getCacheMap(tileType);
 		return map.getOrDefault(TileCacheTag.TransitionMode, TransitionMode.NONE) == mode;
 	}
 	
@@ -108,8 +108,8 @@ public class TransitionManager {
 	public boolean playingExitAnimation(@NotNull Tile tile) { return isTransitionMode(tile, TransitionMode.EXITING); }
 	
 	public float tryFinishAnimation(@NotNull ServerTile tile) {
-		SerialMap dataMap = tile.getDataMap(tileType);
-		DataMap cacheMap = tile.getCacheMap(tileType);
+		TileDataMap dataMap = tile.getDataMap(tileType);
+		TileDataCache cacheMap = tile.getCacheMap(tileType);
 		
 		ServerTileTransition anim = getAnimationStyle(cacheMap.get(TileCacheTag.TransitionMode), dataMap.get(TileDataTag.TransitionName));
 		

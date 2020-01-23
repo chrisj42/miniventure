@@ -6,7 +6,7 @@ import java.util.Set;
 
 import miniventure.game.GameCore;
 import miniventure.game.util.MyUtils;
-import miniventure.game.util.customenum.SerialMap;
+import miniventure.game.world.tile.TileDataTag.TileDataMap;
 import miniventure.game.world.Point;
 import miniventure.game.world.Taggable;
 import miniventure.game.world.WorldObject;
@@ -51,7 +51,7 @@ public abstract class Level implements Taggable<Level> {
 	
 	@FunctionalInterface
 	public interface TileLoader {
-		Tile get(Level level, int x, int y, TileTypeEnum[] types, SerialMap[] dataMaps);
+		Tile get(Level level, int x, int y, TileTypeEnum[] types, TileDataMap[] dataMaps);
 	}
 	
 	private Level(@NotNull WorldManager world, int levelId, int width, int height) {
