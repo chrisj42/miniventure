@@ -1,16 +1,9 @@
 package miniventure.game.world.tile;
 
-import miniventure.game.util.customenum.DataEnum;
 import miniventure.game.util.customenum.GenericEnum;
 import miniventure.game.util.function.Action;
 
-public class TileCacheTag<T> extends DataEnum<T> {
-	
-	static {
-		GenericEnum.registerEnum(TileCacheTag.class, 7);
-	}
-	
-	public static void init() {}
+public class TileCacheTag<T> extends GenericEnum<T, TileCacheTag<T>> {
 	
 	/* --- ENUMERATION VALUES --- */
 	

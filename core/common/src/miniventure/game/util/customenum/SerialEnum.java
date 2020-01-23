@@ -8,7 +8,7 @@ import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.MapFunction;
 
 @SuppressWarnings("unchecked")
-public abstract class SerialEnum<T> extends GenericEnum<SerialEnum<T>> {
+public abstract class SerialEnum<T, ET extends SerialEnum<T, ET>> extends GenericEnum<T, ET> {
 	
 	/* Some notes:
 		
@@ -57,7 +57,7 @@ public abstract class SerialEnum<T> extends GenericEnum<SerialEnum<T>> {
 	}
 	
 	private static <T> MapFunction<T, String> defaultValueWriter(final Class<T> valueClass) {
-		return getValueWriter(valueClass, String::valueOf);
+		return ar -> ArrayUtils.deepToString(ar, MyUtils::encodeStringArray, String::valueOf);
 	}
 	
 	private static <T> MapFunction<String, T> defaultValueParser(final Class<T> valueClass) {
@@ -117,8 +117,8 @@ public abstract class SerialEnum<T> extends GenericEnum<SerialEnum<T>> {
 		return ar;
 	}
 	
-	public SerialEntry<T> as(T value) { return new SerialEntry<>(this, value); }
-	SerialEntry<T> serialEntry(String value) { return new SerialEntry<>(this, deserialize(value)); }
+	// public SerialEntry<T> as(T value) { return new SerialEntry<>(this, value); }
+	// SerialEntry<T> serialEntry(String value) { return new SerialEntry<>(this, deserialize(value)); }
 	
 	public String serialize(T value) { return valueWriter.get(value); }
 	public T deserialize(String data) { return valueParser.get(data); }

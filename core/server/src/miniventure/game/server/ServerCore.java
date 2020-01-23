@@ -18,7 +18,6 @@ import miniventure.game.util.MyUtils;
 import miniventure.game.util.ProgressLogger;
 import miniventure.game.util.Version;
 import miniventure.game.util.VersionInfo;
-import miniventure.game.util.customenum.GenericEnum;
 import miniventure.game.world.file.WorldDataSet;
 import miniventure.game.world.file.WorldFileInterface;
 import miniventure.game.world.file.WorldFormatException;
@@ -220,7 +219,7 @@ public class ServerCore extends Thread {
 		// lock acquired, we can now be reasonably sure it's going to work out, so let's initialize everything.
 		
 		GameCore.initNonGdxTextures();
-		GenericEnum.init();
+		// GenericEnum.init();
 		ServerTileType.init();
 		
 		System.out.println("loading server world...");

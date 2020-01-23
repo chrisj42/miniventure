@@ -1,105 +1,37 @@
 package miniventure.game.util.customenum;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import miniventure.game.util.MyUtils;
-import miniventure.game.util.function.MapFunction;
+import miniventure.game.world.tile.TileDataTag;
 
-public class SerialMap {
-	
-	private final HashMap<SerialEnum<?>, Object> map = new HashMap<>();
-	
-	public SerialMap() {}
-	public SerialMap(SerialEntry<?> entry) { add(entry); }
-	public SerialMap(SerialEntry<?>[] entries) { addAll(entries); }
-	public SerialMap(SerialMap model) { this(model.getEntries()); }
-	
-	public SerialMap add(SerialEntry<?> entry) {
-		put(entry);
-		return this;
-	}
-	public SerialMap addAll(SerialEntry<?>[] entries) {
-		for(SerialEntry<?> e: entries)
-			add(e);
-		return this;
+@SuppressWarnings("unchecked")
+public class SerialMap extends SerialEnumMap<TileDataTag<?>> {
+	public SerialMap() {
+		super();
 	}
 	
-	public <T> T put(SerialEntry<T> entry) { return put(entry.key, entry.value); }
-	@SuppressWarnings("unchecked")
-	public <T> T put(SerialEnum<T> key, T value) {
-		return (T) map.put(key, value);
+	public SerialMap(DataEntry<?, ? extends TileDataTag<?>>... entries) {
+		super(entries);
 	}
 	
-	@SuppressWarnings("unchecked")
-	public <T> T remove(SerialEnum<T> tag) {
-		return (T) map.remove(tag);
+	public SerialMap(GEnumMap<TileDataTag<?>> model) {
+		super(model);
 	}
 	
-	public void clear() { map.clear(); }
-	
-	public boolean contains(SerialEnum<?> tag) { return map.containsKey(tag); }
-	
-	@SuppressWarnings("unchecked")
-	public <T> T get(SerialEnum<T> tag) {
-		return (T) map.get(tag);
-	}
-	
-	public <T, U extends T> T getOrDefault(SerialEnum<T> tag, U defaultValue) {
-		T val;
-		return (val = get(tag)) == null ? defaultValue : val;
-	}
-	// fetches the value for the given key. If there is no key, the default value is added for it and returned.
-	public <T, U extends T> T getOrDefaultAndPut(SerialEnum<T> tag, U defaultValue) {
-		T val = get(tag);
-		if(val == null) {
-			put(tag, defaultValue);
-			return defaultValue;
-		}
-		else
-			return val;
-	}
-	public <T, U> U computeFrom(SerialEnum<T> tag, MapFunction<T, U> mapper, U defaultValue) {
-		if(!map.containsKey(tag))
-			return defaultValue;
-		else
-			return mapper.get(get(tag));
-	}
-	
-	// asClass should match the class in DataTag, generally.
-	public <T> T get(SerialEnum<T> tag, Class<? extends T> asClass) {
-		return asClass.cast(get(tag));
-	}
-	
-	public SerialEntry<?>[] getEntries() {
-		SerialEntry<?>[] entries = new SerialEntry[map.size()];
-		int i = 0;
-		for(SerialEnum<?> tag: map.keySet())
-			entries[i++] = getEntry(tag);
-		
-		return entries;
-	}
-	
-	private <T, ET extends SerialEnum<T>> SerialEntry<T> getEntry(ET tag) { return new SerialEntry<>(tag, get(tag)); }
-	
-	
-	public String serialize(boolean save) {
-		ArrayList<String> entries = new ArrayList<>(map.size());
-		
-		int i = 0;
-		for(SerialEntry<?> entry: getEntries())
-			entry.serializeTo(entries, save);
-		
-		return MyUtils.encodeStringArray(entries);
-	}
-	
-	public static <ET extends SerialEnum<?>> SerialMap deserialize(String alldata, Class<ET> tagClass) {
+	public static <ET extends TileDataTag<?>> SerialMap deserialize(String alldata, Class<TileDataTag> tagClass) {
 		String[] data = MyUtils.parseLayeredString(alldata);
 		
-		SerialEntry<?>[] entries = new SerialEntry[data.length];
-		for(int i = 0; i < entries.length; i++)
-			entries[i] = SerialEntry.deserialize(data[i], tagClass);
+		SerialMap map = new SerialMap();
 		
-		return new SerialMap(entries);
+		for(String item: data) {
+			String[] parts = item.split("=", 2);
+			TileDataTag<?> tag = TileDataTag.valueOf(parts[0]);
+			deserializeTag(tag, parts[1], map);
+		}
+		
+		return map;
+	}
+	
+	private static <T> void deserializeTag(TileDataTag<T> tag, String data, SerialMap map) {
+		map.put(tag, tag.deserialize(data));
 	}
 }

@@ -3,44 +3,52 @@ package miniventure.game.util.customenum;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.HashMap;
-
-import miniventure.game.world.tile.TileCacheTag;
-import miniventure.game.world.tile.TileDataTag;
+import java.util.LinkedList;
 
 import org.jetbrains.annotations.NotNull;
 
 /** @noinspection rawtypes*/
 @SuppressWarnings("unchecked")
-public abstract class GenericEnum<EC extends GenericEnum<EC>> implements Comparable<EC> {
+public abstract class GenericEnum<T, ET extends GenericEnum<T, ET>> implements Comparable<ET> {
 	
-	private static final HashMap<Class<? extends GenericEnum>, EnumData<? extends GenericEnum>> enumClasses = new HashMap<>();
+	private static final HashMap<Class<? extends GenericEnum>, EnumData<? extends GenericEnum>> enumClassData = new HashMap<>();
 	
-	protected static final <EC extends GenericEnum> void registerEnum(Class<EC> clazz, int constants) {
-		enumClasses.put(clazz, new EnumData<>(clazz, constants));
-	}
+	/*protected static final <ET extends GenericEnum> void registerEnum(Class<ET> clazz, int constants) {
+		enumClassData.put(clazz, new EnumData<>(clazz, constants));
+	}*/
 	
 	// initializes all generic enum implementations
-	public static void init() {
+	/*public static void init() {
 		TileDataTag.init();
 		TileCacheTag.init();
-	}
+	}*/
 	
-	private static final class EnumData<EC extends GenericEnum> {
-		private final Class<EC> enumClass;
+	private static final class EnumData<ET extends GenericEnum> {
+		private final Class<ET> enumClass;
 		private final String[] names;
-		private final EC[] values;
-		private final HashMap<String, EC> nameToValue;
+		private final ET[] values;
+		private final HashMap<String, ET> nameToValue;
 		
 		private int counter = 0;
 		private boolean initialized = false;
 		
-		private EnumData(Class<EC> enumClass, int constants) {
+		private final Field[] constantFields;
+		
+		private EnumData(Class<ET> enumClass) {
 			this.enumClass = enumClass;
-			names = new String[constants];
-			values = (EC[])Array.newInstance(enumClass, constants);
-			nameToValue = new HashMap<>(constants);
+			
+			LinkedList<Field> fields = new LinkedList<>();
+			// WARNING: getDeclaredFields makes no guarantee that the fields are returned in order of declaration. So don't rely on that.
+			for(Field field: enumClass.getDeclaredFields()) {
+				if(Modifier.isStatic(field.getModifiers()) && enumClass.isAssignableFrom(field.getType()))
+					fields.add(field);
+			}
+			constantFields = fields.toArray(new Field[0]);
+			
+			names = new String[constantFields.length];
+			values = (ET[])Array.newInstance(enumClass, constantFields.length);
+			nameToValue = new HashMap<>(constantFields.length);
 		}
 		
 		void checkInit() {
@@ -50,17 +58,10 @@ public abstract class GenericEnum<EC extends GenericEnum<EC>> implements Compara
 		
 		private void initialize() {
 			initialized = true;
-			ArrayList<Field> enumTypes = new ArrayList<>(values.length);
-			
-			// WARNING: getDeclaredFields makes no guarantee that the fields are returned in order of declaration. So don't rely on that.
-			for(Field field: enumClass.getDeclaredFields()) {
-				if(Modifier.isStatic(field.getModifiers()) && enumClass.isAssignableFrom(field.getType()))
-					enumTypes.add(field);
-			}
 			
 			try {
-				for(Field type: enumTypes) {
-					EC instance = enumClass.cast(type.get(null));
+				for(Field type: constantFields) {
+					ET instance = enumClass.cast(type.get(null));
 					String name = type.getName();
 					nameToValue.put(name, instance);
 					names[((GenericEnum)instance).ordinal] = name;
@@ -74,34 +75,45 @@ public abstract class GenericEnum<EC extends GenericEnum<EC>> implements Compara
 	}
 	
 	
-	private static <EC extends GenericEnum> EnumData<EC> getData(Class<EC> clazz) {
-		if(!enumClasses.containsKey(clazz))
-			throw new EnumClassNotRegisteredException(clazz);
+	private static <ET extends GenericEnum> EnumData<ET> getData(Class<ET> clazz) {
+		EnumData<ET> enumData = (EnumData<ET>) enumClassData.get(clazz);
 		
-		EnumData<EC> enumData = (EnumData<EC>) enumClasses.get(clazz);
+		if(enumData == null) {
+			try {
+				Class.forName(clazz.getName()); // ensure the class is initialized
+			} catch (ClassNotFoundException e) {
+				throw new RuntimeException(e); // shouldn't happen of course
+			}
+			
+			// should be initialized now, assuming there was at least one constant
+			enumData = (EnumData<ET>) enumClassData.get(clazz);
+			if(enumData == null) // the only reason I can see this happening is if a class has no constants.
+				throw new MissingEnumDataException(clazz);
+		}
+		
 		enumData.checkInit();
 		return enumData;
 	}
 	
-	public static final <EC extends GenericEnum> EC valueOf(Class<EC> clazz, String name) {
-		EnumData<EC> enumData = getData(clazz);
-		EC constant = enumData.nameToValue.get(name);
+	public static final <ET extends GenericEnum> ET valueOf(Class<ET> clazz, String name) {
+		EnumData<ET> enumData = getData(clazz);
+		ET constant = enumData.nameToValue.get(name);
 		if(constant == null)
 			throw new EnumConstantNotFoundException(clazz, name);
 		
 		return constant;
 	}
 	
-	public static final <EC extends GenericEnum> EC valueOf(Class<EC> clazz, int ordinal) {
+	public static final <ET extends GenericEnum> ET valueOf(Class<ET> clazz, int ordinal) {
 		return getData(clazz).values[ordinal];
 	}
 	
-	public static final <EC extends GenericEnum> EC[] values(Class<EC> clazz) {
+	public static final <ET extends GenericEnum> ET[] values(Class<ET> clazz) {
 		return getData(clazz).values;
 	}
 	
 	
-	private final EnumData<EC> enumData;
+	private final EnumData<ET> enumData;
 	private final int ordinal;
 	// private final Class<T> typeClass;
 	
@@ -110,13 +122,16 @@ public abstract class GenericEnum<EC extends GenericEnum<EC>> implements Compara
 		Class<? extends GenericEnum> clazz = getClass();
 		if(clazz.isAnonymousClass())
 			clazz = (Class<? extends GenericEnum>) clazz.getSuperclass();
-		if(!enumClasses.containsKey(clazz))
-			throw new EnumClassNotRegisteredException(clazz);
+		
+		if(!enumClassData.containsKey(clazz)) {
+			// this is the first enum constant for this class; initialize stuff
+			enumClassData.put(clazz, new EnumData<>(clazz));
+		}
 		
 		try {
-			enumData = (EnumData<EC>) enumClasses.get(clazz);
+			enumData = (EnumData<ET>) enumClassData.get(clazz);
 			ordinal = enumData.counter++;
-			enumData.values[ordinal] = (EC) this;
+			enumData.values[ordinal] = (ET) this;
 		} catch(ClassCastException e) {
 			throw new EnumGenericTypeMismatchException(this, e);
 		}
@@ -129,21 +144,29 @@ public abstract class GenericEnum<EC extends GenericEnum<EC>> implements Compara
 	}
 	
 	@Override
-	public final int compareTo(@NotNull EC o) {
-		return Integer.compare(ordinal(), o.ordinal());
+	public final int compareTo(@NotNull ET o) {
+		return ordinal - o.ordinal();
 	}
 	
 	@Override
 	public final boolean equals(Object obj) {
-		return enumData.enumClass.isAssignableFrom(obj.getClass()) // same enum class
-			&& ((EC)obj).ordinal() == ordinal(); // same enum value
+		return this == obj;
+		// return enumData.enumClass.isAssignableFrom(obj.getClass()) // same enum class
+		// 	&& ((ET)obj).ordinal() == ordinal; // same enum value
 	}
 	
 	@Override
 	public final int hashCode() {
-		return ordinal;
+		return super.hashCode();
 	}
 	
 	@Override
-	public final String toString() { return getClass().getSimpleName()+'-'+(enumData.initialized?name():String.valueOf(ordinal)); }
+	public String toString() { return getClass().getSimpleName()+'-'+(enumData.initialized?name():String.valueOf(ordinal)); }
+	
+	// the below methods provide support for GEnumMap
+	
+	public DataEntry<T, ET> as(T value) {
+		enumData.checkInit();
+		return new DataEntry<>(enumData.values[ordinal], value);
+	}
 }

@@ -4,13 +4,7 @@ import miniventure.game.util.customenum.GenericEnum;
 import miniventure.game.util.customenum.SerialEnum;
 import miniventure.game.util.function.MapFunction;
 
-public class TileDataTag<T> extends SerialEnum<T> {
-	
-	static {
-		GenericEnum.registerEnum(TileDataTag.class, 2);
-	}
-	
-	public static void init() {}
+public class TileDataTag<T> extends SerialEnum<T, TileDataTag<T>> {
 	
 	/* --- ENUMERATION VALUES --- */
 	

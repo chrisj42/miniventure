@@ -24,7 +24,6 @@ import miniventure.game.screen.NotifyScreen;
 import miniventure.game.screen.util.BackgroundInheritor;
 import miniventure.game.screen.util.BackgroundProvider;
 import miniventure.game.util.MyUtils;
-import miniventure.game.util.customenum.GenericEnum;
 import miniventure.game.world.entity.ClientEntityRenderer;
 import miniventure.game.world.file.WorldFileInterface;
 import miniventure.game.world.management.ClientWorld;
@@ -121,7 +120,7 @@ public class ClientCore extends ApplicationAdapter {
 			if(batch == null)
 				batch = new SpriteBatch();
 			
-			GenericEnum.init();
+			// GenericEnum.init();
 			ClientTileType.init();
 			ClientEntityRenderer.init();
 			serverStarter.init();

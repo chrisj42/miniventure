@@ -40,8 +40,8 @@ public class UpdateManager {
 		
 		float minWait = 0;
 		DataMap dataMap = tile.getCacheMap(tileType);
-		float[] deltas = dataMap.putIfAbsent(TileCacheTag.UpdateTimers, new float[actions.length]);
-		String[] datas = dataMap.putIfAbsent(TileCacheTag.UpdateActionCaches, new String[actions.length]);
+		float[] deltas = dataMap.getOrDefaultAndPut(TileCacheTag.UpdateTimers, new float[actions.length]);
+		String[] datas = dataMap.getOrDefaultAndPut(TileCacheTag.UpdateActionCaches, new String[actions.length]);
 		for(int i = 0; i < actions.length; i++) {
 			if(!actions[i].canUpdate(tile))
 				deltas[i] = 0;
