@@ -123,6 +123,6 @@ public abstract class SerialEnum<T, ET extends SerialEnum<T, ET>> extends Generi
 	static <T, ET extends SerialEnum<T, ET>> void deserializeEntry(String data, Class<ET> tagClass, SerialEnumMap<ET> map) {
 		String[] parts = data.split("=", 2);
 		ET tag = GenericEnum.valueOf(tagClass, parts[0]);
-		map.put(tag, tag.deserialize(data));
+		map.put(tag, tag.deserialize(parts[1]));
 	}
 }
