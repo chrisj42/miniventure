@@ -5,6 +5,7 @@ import miniventure.game.network.GameProtocol.EquipRequest;
 import miniventure.game.network.GameProtocol.ItemDropRequest;
 import miniventure.game.network.GameProtocol.SerialItem;
 import miniventure.game.network.GameProtocol.SerialItemStack;
+import miniventure.game.util.MyUtils;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,7 +14,7 @@ public class ClientPlayerInventory extends PlayerInventory<Item, ItemStack, Clie
 	
 	// private final ClientInventory inv;
 	// private final ClientInventory hotbar;
-	private int selection;
+	private int selection = -1; // this is reserved for an empty hand.
 	
 	public ClientPlayerInventory() {
 		super(new ClientInventory(PlayerInventory.INV_SIZE));
@@ -39,13 +40,8 @@ public class ClientPlayerInventory extends PlayerInventory<Item, ItemStack, Clie
 	
 	public void setSelection(int idx) {
 		int slots = getInv().getSlotsTaken();
-		if(slots > 0) {
-			idx %= slots;
-			if(idx < 0)
-				idx += slots;
-		} else idx = 0;
-		
-		selection = idx;
+		// add one to buffer for the -1 option
+		selection = MyUtils.wrapIndex(idx+1, slots+1) - 1;
 	}
 	public int getSelection() { return selection; }
 	

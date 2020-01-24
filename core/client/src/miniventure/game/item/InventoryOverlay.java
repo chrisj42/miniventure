@@ -118,11 +118,22 @@ public class InventoryOverlay extends MenuScreen {
 			
 			@Override
 			ItemSlot makeItemSlot(int idx) {
-				ItemSlot slot = new InventorySlot(idx, () -> invManager.getSelection() == idx);
-				// add drag-and-drop functions
-				SlotInfo info = new SlotInfo(slot, idx);
-				dragAndDrop.addSource(new SlotSource(info));
-				dragAndDrop.addTarget(new SlotTarget(info));
+				final int index = idx - 1; // each will track the index before in the inventory; the first one is special
+				
+				ItemSlot slot = new InventorySlot(index, () -> invManager.getSelection() == index);
+				slot.addListener(new InputListener() {
+					@Override
+					public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+						invManager.setSelection(index);
+						return true;
+					}
+				});
+				if(index >= 0) {
+					// add drag-and-drop functions
+					SlotInfo info = new SlotInfo(slot, index);
+					dragAndDrop.addSource(new SlotSource(info));
+					dragAndDrop.addTarget(new SlotTarget(info));
+				}
 				return slot;
 			}
 		};
@@ -191,9 +202,9 @@ public class InventoryOverlay extends MenuScreen {
 					return false;
 				//noinspection SynchronizeOnThis
 				synchronized (InventoryOverlay.this) {
-					for(int i = 0; i < 10; i++) {
+					for(int i = 0; i <= Math.min(inventory.getSlotsTaken(), 9); i++) {
 						if(keycode == Keys.NUM_1 + i) {
-							invManager.setSelection(i);
+							invManager.setSelection(i - 1); // -1 to buffer for hand space
 							return true;
 						}
 					}
@@ -204,15 +215,9 @@ public class InventoryOverlay extends MenuScreen {
 			
 			@Override
 			public boolean scrolled(InputEvent event, float x, float y, int amount) {
-				if(inventory == null)
+				if(invManager == null)
 					return false;
 				int idx = invManager.getSelection() + amount;
-				int slots = inventory.getSlotsTaken();
-				if(slots > 0) {
-					idx = MyUtils.wrapIndex(idx, slots);
-				} else
-					return false;
-				
 				invManager.setSelection(idx);
 				return true;
 			}
