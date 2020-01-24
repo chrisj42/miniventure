@@ -253,7 +253,7 @@ public class ServerPlayer extends ServerMob implements Player {
 			}
 		});
 		
-		forPacket(packet, BuildRequest.class, true, req -> {
+		/*forPacket(packet, BuildRequest.class, true, req -> {
 			ObjectRecipeSet set = ObjectRecipeSet.values[req.setOrdinal];
 			ObjectRecipe recipe = set.getRecipe(req.recipeIndex);
 			
@@ -268,7 +268,7 @@ public class ServerPlayer extends ServerMob implements Player {
 				// success, update inv
 				connection.send(invManager.getUpdate(false));
 			}
-		});
+		});*/
 		
 		forPacket(packet, DatalessRequest.Respawn, true, () -> {
 			world.respawnPlayer(this);

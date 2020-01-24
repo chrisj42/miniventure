@@ -239,7 +239,7 @@ public class ServerCore extends Thread {
 			worldInfo = WorldFileInterface.createWorld(worldPath, lockHolder, seedString);
 		
 		final int portf = port;
-		ServerCore core = new ServerCore((world, pdata) -> new NetworkServer(world, portf, addr -> null, pdata), worldInfo, new ProgressPrinter());
+		ServerCore core = new ServerCore((world, pdata) -> new NetworkServer(world, portf, addr -> false, pdata), worldInfo, new ProgressPrinter());
 		
 		System.out.println("server ready");
 		if(!GameCore.determinedLatestVersion())

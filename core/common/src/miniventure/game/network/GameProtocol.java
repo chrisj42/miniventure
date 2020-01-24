@@ -100,8 +100,12 @@ public interface GameProtocol {
 		kryo.register(InfoMessageLine.class);
 		kryo.register(InfoMessageLine[].class);
 		kryo.register(InfoMessage.class);
-		kryo.register(SerialRecipe[].class);
 		kryo.register(TileTypeEnum.class);
+		kryo.register(ItemTextureSource.class);
+		kryo.register(SerialItem[].class);
+		kryo.register(SerialItemStack[].class);
+		kryo.register(SerialRecipe[].class);
+		kryo.register(CursorHighlight.class);
 		kryo.register(EquipmentType.class);
 		
 		kryo.register(String[].class);
@@ -751,7 +755,7 @@ public interface GameProtocol {
 	}
 	
 	// sent client -> server when crafting an object on a tile, instead of an item in the inventory
-	class BuildRequest {
+	/*class BuildRequest {
 		public final int setOrdinal;
 		public final int recipeIndex;
 		
@@ -763,7 +767,7 @@ public interface GameProtocol {
 			this.recipeIndex = recipeIndex;
 			this.tilePos = tilePos;
 		}
-	}
+	}*/
 	
 	class SoundRequest {
 		public final String sound;

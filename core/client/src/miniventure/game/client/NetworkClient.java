@@ -57,13 +57,13 @@ public class NetworkClient extends GameClient {
 		
 		new Thread(client) {
 			@Override
-			public void start() {
-				client.start();
-				client.getUpdateThread().setUncaughtExceptionHandler((t, e) -> {
+			public void run() {
+				Thread.currentThread().setUncaughtExceptionHandler((t, e) -> {
 					ClientCore.exceptionHandler.uncaughtException(t, e);
 					t.getThreadGroup().uncaughtException(t, e);
 					client.close();
 				});
+				client.run();
 			}
 		}.start();
 	}
