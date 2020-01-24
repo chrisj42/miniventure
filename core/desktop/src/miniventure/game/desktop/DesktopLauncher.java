@@ -97,6 +97,10 @@ public class DesktopLauncher {
 		WorldFileInterface.initGameDir();
 		
 		if(server) {
+			Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
+				e.printStackTrace();
+				System.exit(1);
+			});
 			ServerCore.initHeadless(leftover.toArray(new String[0]));
 		} else {
 			GameCore.debug("Starting GUI client...");
