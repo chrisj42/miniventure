@@ -3,7 +3,7 @@ package miniventure.game.item;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class ItemRecipe extends Recipe<ServerItemStack> {
+public class ItemRecipe extends Recipe {
 	
 	public ItemRecipe(@NotNull ServerItem result, @NotNull ServerItemStack... costs) {
 		this(new ServerItemStack(result, 1), costs);

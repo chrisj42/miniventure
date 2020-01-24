@@ -18,16 +18,16 @@ public class ItemIcon extends Widget {
 	
 	private static final float USABILITY_BAR_HEIGHT = (Item.ICON_SIZE * UI_SCALE)/8f; // 2 pixels?
 	
-	private final Item item;
+	private final ClientItem item;
 	private final int count;
 	
-	public ItemIcon(Item item, int count) {
+	public ItemIcon(ClientItem item, int count) {
 		this.item = item;
 		this.count = count;
 	}
 	
 	@Nullable
-	public Item getItem() { return item; }
+	public ClientItem getItem() { return item; }
 	
 	private boolean showCount() { return item != null && count > 0; }
 	

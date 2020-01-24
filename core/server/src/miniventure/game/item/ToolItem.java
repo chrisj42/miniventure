@@ -1,6 +1,6 @@
 package miniventure.game.item;
 
-import miniventure.game.GameCore;
+import miniventure.game.util.customenum.SerialEnumMap;
 import miniventure.game.world.entity.mob.player.Player;
 import miniventure.game.world.entity.mob.player.Player.CursorHighlight;
 
@@ -19,10 +19,10 @@ public class ToolItem extends ServerItem {
 	 */
 	
 	public enum ToolType {
-		Pickaxe(CursorHighlight.TILE_IN_RADIUS, 1),
-		Shovel(CursorHighlight.TILE_IN_RADIUS, 2), // one swing per tile instead of many, so weight it more
-		Axe(CursorHighlight.TILE_IN_RADIUS, 1),
-		Sword(CursorHighlight.INVISIBLE, 1);
+		Pickaxe(CursorHighlight.TILE_ADJACENT, 1),
+		Shovel(CursorHighlight.TILE_ADJACENT, 2), // one swing per tile instead of many, so weight it more
+		Axe(CursorHighlight.TILE_ADJACENT, 1),
+		Sword(CursorHighlight.FRONT_AREA, 1);
 		
 		@NotNull
 		private final CursorHighlight cursorType;
@@ -40,7 +40,7 @@ public class ToolItem extends ServerItem {
 	
 	public ToolItem(ToolType type, MaterialQuality quality) { this(type, quality, quality.maxDurability); }
 	ToolItem(ToolType type, MaterialQuality quality, int durability) {
-		super(ItemType.Tool, quality.name() + ' ' + type.name(), GameCore.icons.get("items/tools/"+ quality.spriteName+'_'+type.name().toLowerCase()));
+		super(ItemType.Tool, quality.spriteName + '_' + type.name(), "tools");
 		this.toolType = type;
 		this.quality = quality;
 		this.durability = durability;
@@ -61,12 +61,17 @@ public class ToolItem extends ServerItem {
 	public int getStaminaUsage() { return toolType.staminaUsage; }
 	
 	// the the Item class will have the wrong value, but it only references it through this method so this override will negate any effects.
-	@Override
-	public float getUsabilityStatus() { return quality == null ? 0 : durability / (float) quality.maxDurability; }
+	public float getDurability() { return quality == null ? 0 : durability / (float) quality.maxDurability; }
 	
 	@Override @NotNull
 	public Player.CursorHighlight getHighlightMode() {
 		return toolType.cursorType;
+	}
+	
+	@Override
+	protected void addSerialData(SerialEnumMap<ItemDataTag<?>> map) {
+		super.addSerialData(map);
+		map.put(ItemDataTag.Usability, getDurability());
 	}
 	
 	@Override

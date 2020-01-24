@@ -6,7 +6,7 @@ public enum ItemRecipeSet implements RecipeSet<ItemRecipe> {
 	
 	// crafter types
 	HAND(
-		new ItemRecipe(HammerType.Simple_Hammer.get(),
+		new ItemRecipe(new HammerItem(ObjectRecipeSet.SIMPLE),
 			new ServerItemStack(ResourceType.Stone.get(), 2),
 			new ServerItemStack(ResourceType.Log.get(), 1)
 		),
@@ -145,7 +145,7 @@ public enum ItemRecipeSet implements RecipeSet<ItemRecipe> {
 	
 	ItemRecipeSet(ItemRecipe... recipes) {
 		this.recipes = recipes;
-		serializedRecipes = RecipeSet.serializeRecipes(ordinal(), false, recipes, ItemStack::serialize);
+		serializedRecipes = RecipeSet.serializeRecipes(recipes, ordinal());
 	}
 	
 	@Override

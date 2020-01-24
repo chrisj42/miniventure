@@ -9,12 +9,7 @@ import java.util.HashMap;
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.FontStyle;
 import miniventure.game.client.InputHandler.Control;
-import miniventure.game.network.GameProtocol.BuildRequest;
-import miniventure.game.network.GameProtocol.CraftRequest;
-import miniventure.game.network.GameProtocol.DatalessRequest;
-import miniventure.game.network.GameProtocol.RecipeStockUpdate;
-import miniventure.game.network.GameProtocol.RecipeUpdate;
-import miniventure.game.network.GameProtocol.SerialRecipe;
+import miniventure.game.network.GameProtocol.*;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.util.ColorBackground;
 import miniventure.game.util.MyUtils;
@@ -25,7 +20,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
@@ -37,6 +31,7 @@ import com.badlogic.gdx.utils.Align;
 import com.kotcrab.vis.ui.VisUI;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /** @noinspection SynchronizeOnThis*/
 public class CraftingScreen extends MenuScreen {
@@ -57,6 +52,7 @@ public class CraftingScreen extends MenuScreen {
 	 */
 	
 	private boolean requested = false;
+	private RecipeUpdate update;
 	
 	private ArrayList<RecipeSlot> recipes = null;
 	private final HashMap<String, Integer> inventoryCounts = new HashMap<>();
@@ -74,7 +70,8 @@ public class CraftingScreen extends MenuScreen {
 	
 	private int selection;
 	
-	public CraftingScreen() {
+	public CraftingScreen() { this(null); }
+	public CraftingScreen(@Nullable RecipeUpdate update) {
 		super(false);
 		
 		mainGroup = useTable(Align.topLeft, false);
@@ -124,7 +121,7 @@ public class CraftingScreen extends MenuScreen {
 				synchronized (CraftingScreen.this) {
 					if(recipes != null && recipes.size() > 0) {
 						if(Control.CONFIRM.matches(keycode)) {
-							craft(recipes.get(selection).recipe);
+							recipes.get(selection).recipe.onSelect();
 							return true;
 						}
 					}
@@ -166,6 +163,10 @@ public class CraftingScreen extends MenuScreen {
 		
 		setKeyboardFocus(recipeListTable);
 		setScrollFocus(scrollPane);
+		
+		if(update != null) {
+			this.update = update;
+		}
 	}
 	
 	// should only be called by the LibGDX Application thread
@@ -174,15 +175,14 @@ public class CraftingScreen extends MenuScreen {
 		super.focus();
 		if(!requested) {
 			requested = true;
-			ClientCore.getClient().send(DatalessRequest.Recipes);
+			if(update != null)
+				recipeUpdate(update);
+			else
+				ClientCore.getClient().send(DatalessRequest.Recipes);
 		}
-		// reset the object recipe when this screen is viewed
-		ClientPlayer player = ClientCore.getWorld().getMainPlayer();
-		if(player != null)
-			player.setObjectRecipe(null);
 	}
 	
-	// should only be called by GameClient thread.
+	// should only be called by GameClient thread, or the libGDX thread.
 	public void recipeUpdate(RecipeUpdate recipeRequest) {
 		if(ClientCore.getScreen() != this)
 			return; // don't care
@@ -195,19 +195,10 @@ public class CraftingScreen extends MenuScreen {
 				for(int i = 0; i < costs.length; i++)
 					costs[i] = ClientItem.deserializeStack(serialRecipe.costs[i]);
 				
-				RecipeSlot slot;
+				ItemStack result = ClientItem.deserializeStack(serialRecipe.result);
+				ClientRecipe recipe = new ClientRecipe(serialRecipe.setOrdinal, serialRecipe.recipeIndex, (ClientItem) result.item, result.count, costs);
 				
-				if(serialRecipe.isBlueprint) {
-					Item result = ClientItem.deserialize(serialRecipe.result);
-					ClientObjectRecipe recipe = new ClientObjectRecipe(serialRecipe.setOrdinal, serialRecipe.recipeIndex, result, costs);
-					slot = new RecipeSlot(recipe);
-				}
-				else {
-					ItemStack result = ClientItem.deserializeStack(serialRecipe.result);
-					ClientItemRecipe recipe = new ClientItemRecipe(serialRecipe.setOrdinal, serialRecipe.recipeIndex, result, costs);
-					slot = new RecipeSlot(recipe);
-				}
-				
+				RecipeSlot slot = new RecipeSlot(recipe);
 				slot.addListener(new InputListener() {
 					@Override
 					public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
@@ -220,7 +211,7 @@ public class CraftingScreen extends MenuScreen {
 				slot.addListener(new ClickListener() {
 					@Override
 					public void clicked(InputEvent event, float x, float y) {
-						craft(slot.recipe);
+						slot.recipe.onSelect();
 					}
 				});
 				slot.updateCanCraft(inventoryCounts);
@@ -264,7 +255,7 @@ public class CraftingScreen extends MenuScreen {
 				recipe = recipes.get(selection).recipe;
 				
 				craftableTable.clearChildren();
-				craftableTable.add(recipe.getItemIcon()).row();
+				craftableTable.add(new ItemIcon(recipe.item, recipe.count)).row();
 				craftableTable.add(makeLabel(recipe.item.getName(), FontStyle.KeepSize, false)).row();
 				String stockText = recipe.isItemRecipe() ? "Stock: " + getCount(recipe.item) : "";
 				craftableTable.add(resultStockLabel = makeLabel(stockText, FontStyle.KeepSize, false)).row();
@@ -317,17 +308,6 @@ public class CraftingScreen extends MenuScreen {
 		}
 	}
 	
-	private synchronized void craft(ClientRecipe recipe) {
-		// ClientRecipe recipe = recipes.get(selection).recipe;
-		if(recipe.isItemRecipe())
-			ClientCore.getClient().send(((ClientItemRecipe)recipe).getCraftRequest());
-		else {
-			ClientPlayer player = ClientCore.getWorld().getMainPlayer();
-			player.setObjectRecipe((ClientObjectRecipe)recipe);
-			ClientCore.setScreen(null);
-		}
-	}
-	
 	@Override
 	public synchronized void draw() {
 		super.draw();
@@ -354,26 +334,30 @@ public class CraftingScreen extends MenuScreen {
 	}
 	
 	
-	private static abstract class ClientRecipe extends ClientItem {
+	private static class ClientRecipe {
 		
 		private final int setOrdinal;
 		private final int id;
-		private final Item item;
-		final ItemStack[] costs;
+		private final ClientItem item;
+		private final int count;
+		private final ItemStack[] costs;
 		private boolean canCraft;
 		
-		ClientRecipe(int setOrdinal, int id, @NotNull Item model, ItemStack[] costs) {
-			super(model.getName(), model.getTexture(), model.getUsabilityStatus(), model.getHighlightMode(), model.getEquipmentType());
+		ClientRecipe(int setOrdinal, int id, @NotNull ClientItem model, int count, ItemStack[] costs) {
 			this.setOrdinal = setOrdinal;
 			this.id = id;
 			this.item = model;
-			// this.result = result;
+			this.count = count;
 			this.costs = costs;
 		}
 		
-		abstract boolean isItemRecipe();
+		private boolean isItemRecipe() { return count > 0; }
 		
-		abstract ItemIcon getItemIcon();
+		void onSelect() {
+			ClientCore.getClient().send(new RecipeSelectionRequest(isItemRecipe(), setOrdinal, id));
+			if(!isItemRecipe())
+				ClientCore.setScreen(null);
+		}
 		
 		/*boolean needsItem(Item item) {
 			for(ItemStack stack: costs)
@@ -396,62 +380,12 @@ public class CraftingScreen extends MenuScreen {
 		}
 	}
 	
-	private static class ClientItemRecipe extends ClientRecipe {
-		
-		private final ItemStack result;
-		
-		ClientItemRecipe(int setOrdinal, int id, @NotNull ItemStack result, ItemStack[] costs) {
-			super(setOrdinal, id, result.item, costs);
-			this.result = result;
-		}
-		
-		@Override
-		boolean isItemRecipe() {
-			return true;
-		}
-		
-		@Override
-		ItemIcon getItemIcon() {
-			return new ItemIcon(result.item, result.count);
-		}
-		
-		public CraftRequest getCraftRequest() {
-			return new CraftRequest(super.setOrdinal, super.id);
-		}
-	}
-	
-	public static class ClientObjectRecipe extends ClientRecipe {
-		
-		ClientObjectRecipe(int setOrdinal, int id, @NotNull Item blueprintItem, ItemStack[] costs) {
-			super(setOrdinal, id, blueprintItem, costs);
-		}
-		
-		@Override
-		boolean isItemRecipe() {
-			return false;
-		}
-		
-		@Override
-		ItemIcon getItemIcon() {
-			return new ItemIcon(super.item, 0);
-		}
-		
-		public BuildRequest getBuildRequest(Vector2 tilePos) {
-			return new BuildRequest(super.setOrdinal, super.id, tilePos);
-		}
-	}
-	
-	
 	private static final class RecipeSlot extends ItemSlot {
 		
 		private final ClientRecipe recipe;
 		
-		RecipeSlot(ClientObjectRecipe recipe) {
-			super(true, recipe, 0);
-			this.recipe = recipe;
-		}
-		RecipeSlot(ClientItemRecipe recipe) {
-			super(true, recipe, recipe.result.count);
+		RecipeSlot(ClientRecipe recipe) {
+			super(true, recipe.item, recipe.count);
 			this.recipe = recipe;
 		}
 		

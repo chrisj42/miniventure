@@ -4,8 +4,6 @@ import miniventure.game.network.GameProtocol.SerialRecipe;
 
 public enum ObjectRecipeSet implements RecipeSet<ObjectRecipe> {
 	
-	HAND(),
-	
 	SIMPLE(
 		new ObjectRecipe(ConstructableObjectType.Stone_Path,
 			new ServerItemStack(ResourceType.Stone.get(), 2)
@@ -29,7 +27,7 @@ public enum ObjectRecipeSet implements RecipeSet<ObjectRecipe> {
 	
 	ObjectRecipeSet(ObjectRecipe... recipes) {
 		this.recipes = recipes;
-		serializedRecipes = RecipeSet.serializeRecipes(ordinal(), true, recipes, type -> type.getItem().serialize());
+		serializedRecipes = RecipeSet.serializeRecipes(recipes, ordinal());
 	}
 	
 	@Override

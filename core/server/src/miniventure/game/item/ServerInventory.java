@@ -1,5 +1,6 @@
 package miniventure.game.item;
 
+import miniventure.game.network.GameProtocol.SerialItemStack;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
 
@@ -11,11 +12,11 @@ public class ServerInventory extends Inventory<ServerItem, ServerItemStack> {
 		super(size, ServerItem.class, ServerItemStack.class);
 	}
 	
-	public String[][] serialize() {
-		String[][] data = new String[uniqueItems.size()][];
+	public SerialItemStack[] serialize() {
+		SerialItemStack[] data = new SerialItemStack[uniqueItems.size()];
 		for(int i = 0; i < data.length; i++) {
 			ServerItem item = uniqueItems.get(i);
-			data[i] = ItemStack.serialize(item, itemCounter.get(item));
+			data[i] = new SerialItemStack(item.serialize(), itemCounter.get(item));
 		}
 		
 		return data;

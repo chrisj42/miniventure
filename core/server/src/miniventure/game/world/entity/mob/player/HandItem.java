@@ -1,9 +1,9 @@
 package miniventure.game.world.entity.mob.player;
 
-import miniventure.game.GameCore;
 import miniventure.game.item.ItemType.EphemeralItem;
 import miniventure.game.item.Result;
 import miniventure.game.item.ServerItem;
+import miniventure.game.texture.ItemTextureSource;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.player.Player.CursorHighlight;
 
@@ -16,7 +16,7 @@ public final class HandItem extends EphemeralItem {
 	public static final HandItem hand = new HandItem();
 	
 	private HandItem() {
-		super("Hand", GameCore.icons.get("blank"));
+		super("Hand", ItemTextureSource.Icon_Map.get("blank"));
 	}
 	
 	@Override @NotNull

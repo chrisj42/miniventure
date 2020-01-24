@@ -53,7 +53,7 @@ public class ItemEntity extends ServerEntity {
 	public EntityDataSet save() {
 		EntityDataSet allData = super.save();
 		SerialHashMap data = new SerialHashMap();
-		data.add("item", MyUtils.encodeStringArray(item.save()));
+		data.add("item", MyUtils.encodeStringArray(item.getSaveData()));
 		data.add("bounce", MyUtils.encodeStringArray(bounceBehavior.save()));
 		data.add("life", lifetime.getLifetime());
 		

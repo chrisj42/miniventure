@@ -19,7 +19,7 @@ public abstract class PlayerInventory<TItem extends Item, TItemStack extends Ite
 	@NotNull private TInv inventory;
 	// @NotNull private TInv hotbar;
 	
-	final EnumMap<EquipmentSlot, TItem> equippedItems;
+	final EnumMap<EquipmentType, TItem> equippedItems;
 	
 	// private final TreeMap<Integer, Integer> usedHotbarSlots;
 	
@@ -29,7 +29,7 @@ public abstract class PlayerInventory<TItem extends Item, TItemStack extends Ite
 		this.inventory = inventory;
 		// this.hotbar = hotbar;
 		
-		equippedItems = new EnumMap<>(EquipmentSlot.class);
+		equippedItems = new EnumMap<>(EquipmentType.class);
 		
 		// usedHotbarSlots = new TreeMap<>();
 		
@@ -50,7 +50,7 @@ public abstract class PlayerInventory<TItem extends Item, TItemStack extends Ite
 	public TInv getInv() { return inventory; }
 	
 	@Nullable
-	public Item getEquippedItem(EquipmentSlot slot) {
+	public Item getEquippedItem(EquipmentType slot) {
 		return equippedItems.get(slot);
 	}
 	
@@ -118,14 +118,12 @@ public abstract class PlayerInventory<TItem extends Item, TItemStack extends Ite
 	}*/
 	
 	// this is called by the inventory overlay
-	public boolean equipItem(@NotNull EquipmentSlot equipmentSlot, int index) {
+	public boolean equipItem(@NotNull EquipmentType equipmentSlot, int index) {
 		// final Inventory<TItem, TItemStack> inv = hotbar ? this : inventory;
 		TItem item = inventory.getItem(index);
-		if(item == null)
-			return false;
 		
 		// ensure the given item is allowed to be in this slot
-		if(item.getEquipmentType() != equipmentSlot)
+		if(!(item instanceof EquipmentItem) || ((EquipmentItem)item).getEquipmentType() != equipmentSlot)
 			return false;
 		
 		// swap it with whatever is there
@@ -143,7 +141,7 @@ public abstract class PlayerInventory<TItem extends Item, TItemStack extends Ite
 		return true;
 	}
 	
-	public boolean unequipItem(@NotNull EquipmentSlot equipmentSlot, int index) {
+	public boolean unequipItem(@NotNull EquipmentType equipmentSlot, int index) {
 		TItem item = equippedItems.remove(equipmentSlot);
 		if(item == null)
 			return false;
@@ -157,7 +155,7 @@ public abstract class PlayerInventory<TItem extends Item, TItemStack extends Ite
 		equippedItems.clear();
 		for(int i = 0; i < equipment.length; i++) {
 			if(equipment[i] != null)
-				equippedItems.put(EquipmentSlot.values[i], equipment[i]);
+				equippedItems.put(EquipmentType.values[i], equipment[i]);
 		}
 		return equippedItems.size();
 	}

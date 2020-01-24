@@ -61,7 +61,7 @@ public class InventoryPanel extends Table {
 	}
 	
 	// allows a dynamic offset to be provided
-	int getIndex(int idx) { return idx; }
+	// int getIndex(int idx) { return idx; }
 	
 	ItemSlot makeItemSlot(int idx) {
 		return new InventorySlot(idx, () -> false);
@@ -77,7 +77,7 @@ public class InventoryPanel extends Table {
 			this.idx = idx;
 			
 			setBackground(new SlotBackground(
-				() -> inventory.getSlotsTaken() > getIndex(idx) || minSlots > idx,
+				() -> inventory.getSlotsTaken() > idx || minSlots > idx,
 				() -> over,
 				drawSelected
 			));
@@ -97,7 +97,6 @@ public class InventoryPanel extends Table {
 		
 		@Override @Nullable
 		public Item getItem() {
-			int idx = getIndex(this.idx);
 			if(idx < 0 || inventory.getSlotsTaken() <= idx)
 				return null;
 			return inventory.getItem(idx);
@@ -105,7 +104,6 @@ public class InventoryPanel extends Table {
 		
 		@Override
 		public int getCount() {
-			int idx = getIndex(this.idx);
 			if(idx < 0 || inventory.getSlotsTaken() <= idx)
 				return 0;
 			return inventory.getCount(inventory.getItem(idx));

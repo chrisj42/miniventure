@@ -4,18 +4,18 @@ import miniventure.game.GameCore;
 
 import org.jetbrains.annotations.NotNull;
 
-public abstract class Recipe<T> {
+public abstract class Recipe {
 	
-	@NotNull private final T result;
+	@NotNull private final ServerItemStack result;
 	@NotNull private final ServerItemStack[] costs;
 	
-	protected Recipe(@NotNull T result, @NotNull ServerItemStack... costs) {
+	protected Recipe(@NotNull ServerItemStack result, @NotNull ServerItemStack... costs) {
 		this.result = result;
 		this.costs = costs;
 	}
 	
 	@NotNull
-	public T getResult() { return result; }
+	public ServerItemStack getResult() { return result; }
 	
 	@NotNull
 	public ServerItemStack[] getCosts() { return costs; }

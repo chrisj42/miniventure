@@ -7,11 +7,14 @@ import java.util.Objects;
 
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.chat.InfoMessageLine;
-import miniventure.game.item.EquipmentSlot;
-import miniventure.game.item.Item;
+import miniventure.game.item.EquipmentType;
+import miniventure.game.item.ItemDataTag;
 import miniventure.game.item.ItemStack;
+import miniventure.game.texture.FetchableTextureHolder;
+import miniventure.game.texture.ItemTextureSource;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.Version;
+import miniventure.game.util.customenum.SerialEnumMap;
 import miniventure.game.util.function.Action;
 import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.Point;
@@ -22,6 +25,7 @@ import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.Entity.EntityTag;
 import miniventure.game.world.entity.EntityRenderer;
 import miniventure.game.world.entity.mob.Mob;
+import miniventure.game.world.entity.mob.player.Player.CursorHighlight;
 import miniventure.game.world.entity.mob.player.Player.Stat;
 import miniventure.game.world.entity.particle.ActionType;
 import miniventure.game.world.entity.particle.ParticleData;
@@ -98,7 +102,7 @@ public interface GameProtocol {
 		kryo.register(InfoMessage.class);
 		kryo.register(SerialRecipe[].class);
 		kryo.register(TileTypeEnum.class);
-		kryo.register(EquipmentSlot.class);
+		kryo.register(EquipmentType.class);
 		
 		kryo.register(String[].class);
 		kryo.register(String[][].class);
@@ -548,12 +552,12 @@ public interface GameProtocol {
 	
 	// sent client -> server when a player changes equipment
 	class EquipRequest {
-		public final EquipmentSlot equipmentType;
+		public final EquipmentType equipmentType;
 		public final int invIdx;
 		public final boolean equip;
 		
 		private EquipRequest() { this(null, 0, false); }
-		public EquipRequest(EquipmentSlot equipmentType, int invIdx, boolean equip) {
+		public EquipRequest(EquipmentType equipmentType, int invIdx, boolean equip) {
 			this.equipmentType = equipmentType;
 			this.invIdx = invIdx;
 			this.equip = equip;
@@ -573,32 +577,65 @@ public interface GameProtocol {
 	
 	// server -> client to update inventory and equipped items.
 	class InventoryUpdate {
-		public final String[][] inventory; // the item list
+		public final SerialItemStack[] inventory; // the item list
 		@Nullable
-		public final String[][] equipment; // equipped items
+		public final SerialItem[] equipment; // equipped items
 		// public final String[] hotbarData;
 		
 		private InventoryUpdate() { this(null, null); }
-		/*public InventoryUpdate(ItemStack[] inventory) {
-			itemStacks = new String[inventory.length][];
-			for(int i = 0; i < inventory.length; i++)
-				itemStacks[i] = inventory[i].serialize();
-		}*/
-		public InventoryUpdate(String[][] inventory, @Nullable String[][] equipment/*, String[] hotbarData*/) {
+		public InventoryUpdate(SerialItemStack[] inventory, @Nullable SerialItem[] equipment) {
 			this.inventory = inventory;
 			this.equipment = equipment;
 			// this.hotbarData = hotbarData;
 		}
 	}
 	
-	// sent server -> client; for items added to the inventory
-	class InventoryAddition {
-		public final String[] newItem;
+	class SerialItemTexture {
+		public final ItemTextureSource textureSource;
+		public final String textureName;
 		
-		private InventoryAddition() { this((String[])null); }
-		public InventoryAddition(Item item) { this(item.serialize()); }
-		public InventoryAddition(String[] item) {
-			newItem = item;
+		private SerialItemTexture() { this(null, null); }
+		public SerialItemTexture(FetchableTextureHolder texture) { this(texture.source, texture.tex.name); }
+		public SerialItemTexture(ItemTextureSource textureSource, String textureName) {
+			this.textureSource = textureSource;
+			this.textureName = textureName;
+		}
+		
+		public FetchableTextureHolder getTexture() {
+			return textureSource.get(textureName);
+		}
+	}
+	
+	// sent server -> client; for items added to the inventory
+	class SerialItem {
+		
+		// public final ItemSerialType type;
+		public final String name;
+		public final SerialItemTexture texture;
+		public final CursorHighlight highlightMode;
+		public final String data;
+		
+		// @Nullable public Integer durability;
+		// @Nullable public EquipmentType equipmentType;
+		// @Nullable public SerialItemTexture cursorTexture;
+		
+		private SerialItem() { this(null, null, null, null); }
+		public SerialItem(String name, SerialItemTexture texture, CursorHighlight highlightMode, String data) {
+			this.name = name;
+			this.texture = texture;
+			this.highlightMode = highlightMode;
+			this.data = data;
+		}
+	}
+	
+	class SerialItemStack {
+		public final SerialItem item;
+		public final int count;
+		
+		private SerialItemStack() { this(null, 0); }
+		public SerialItemStack(SerialItem item, int count) {
+			this.item = item;
+			this.count = count;
 		}
 	}
 	
@@ -669,41 +706,45 @@ public interface GameProtocol {
 	class SerialRecipe {
 		public final int setOrdinal;
 		public final int recipeIndex;
-		public final String[] result;
-		public final String[][] costs;
-		public final boolean isBlueprint;
+		public final SerialItemStack result;
+		public final SerialItemStack[] costs;
 		
-		private SerialRecipe() { this(0, 0, null, (String[][])null, false); }
+		private SerialRecipe() { this(0, 0, null, (SerialItemStack[])null); }
 		/*public SerialRecipe(int setOrdinal, int recipeIndex, ItemStack result, ItemStack[] costs) {
 			this(setOrdinal, recipeIndex, result.serialize(), costs, false);
 		}
 		public SerialRecipe(int setOrdinal, int recipeIndex, Item resultObjectAsItem, ItemStack[] costs) {
 			this(setOrdinal, recipeIndex, resultObjectAsItem.serialize(), costs, true);
 		}*/
-		public SerialRecipe(int setOrdinal, int recipeIndex, String[] result, ItemStack[] costs, boolean isBlueprint) {
+		/*public SerialRecipe(int setOrdinal, int recipeIndex, SerialItemStack result, ItemStack[] costs) {
 			this.setOrdinal = setOrdinal;
 			this.recipeIndex = recipeIndex;
 			this.result = result;
-			this.isBlueprint = isBlueprint;
-			this.costs = new String[costs.length][];
+			// this.isBlueprint = isBlueprint;
+			this.costs = new SerialItemStack[costs.length];
 			for(int i = 0; i < costs.length; i++)
 				this.costs[i] = costs[i].serialize();
-		}
-		private SerialRecipe(int setOrdinal, int recipeIndex, String[] result, String[][] costs, boolean isBlueprint) {
+		}*/
+		/*public SerialRecipe(int setOrdinal, int recipeIndex, SerialItem result, SerialItemStack[] costs) {
+			this(setOrdinal, recipeIndex, new SerialItemStack(result, 0), costs);
+		}*/
+		public SerialRecipe(int setOrdinal, int recipeIndex, SerialItemStack result, SerialItemStack[] costs) {
 			this.setOrdinal = setOrdinal;
 			this.recipeIndex = recipeIndex;
 			this.result = result;
 			this.costs = costs;
-			this.isBlueprint = isBlueprint;
+			// this.isBlueprint = isBlueprint;
 		}
 	}
 	
-	class CraftRequest {
+	class RecipeSelectionRequest {
+		public final boolean isItem;
 		public final int setOrdinal;
 		public final int recipeIndex;
 		
-		private CraftRequest() { this(0, 0); }
-		public CraftRequest(int setOrdinal, int recipeIndex) {
+		private RecipeSelectionRequest() { this(false, 0, 0); }
+		public RecipeSelectionRequest(boolean isItem, int setOrdinal, int recipeIndex) {
+			this.isItem = isItem;
 			this.setOrdinal = setOrdinal;
 			this.recipeIndex = recipeIndex;
 		}

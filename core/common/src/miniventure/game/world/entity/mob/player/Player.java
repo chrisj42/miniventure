@@ -26,7 +26,18 @@ public interface Player extends Mob {
 	
 	// controls how the client determines what to highlight
 	enum CursorHighlight {
-		INVISIBLE, TILE_IN_RADIUS, TILE_ADJACENT;
+		// no cursor; item likely does not interact with the world. If it can be used, it's probably something the player uses on themselves
+		INVISIBLE,
+		
+		// cursor on the tile in front of the player; used for things which expect to interact with a tile
+		TILE_ADJACENT,
+		
+		// cursor in the area in front of the player; used for things that expect to interact with entities, not a particular tile
+		FRONT_AREA,
+		
+		// cursor on a tile that can be a few tiles away; used for placeable objects
+		// will generally also show a custom sprite at the cursor
+		TILE_IN_RADIUS;
 		
 		public static final CursorHighlight[] values = CursorHighlight.values();
 	}
@@ -91,7 +102,7 @@ public interface Player extends Mob {
 	static List<Tile> computeCursorPos(Vector2 center, Vector2 cursor, @NotNull Level level, CursorHighlight highlightMode) {
 		// final boolean print = Gdx.input.isButtonPressed(Buttos.LEFT);
 		
-		final float max = highlightMode == CursorHighlight.TILE_IN_RADIUS ? MAX_CURSOR_RANGE : 1;
+		final float max = highlightMode == CursorHighlight.TILE_IN_RADIUS ? MAX_CURSOR_RANGE : highlightMode == CursorHighlight.INVISIBLE ? 0 : 1;
 		// get vector to target pos
 		Vector2 dist = cursor.cpy().sub(center).clamp(0, max);
 		cursor.set(center).add(dist);

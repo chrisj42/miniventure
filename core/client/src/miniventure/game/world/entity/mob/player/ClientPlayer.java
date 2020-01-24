@@ -10,7 +10,6 @@ import miniventure.game.client.InputHandler.Modifier;
 import miniventure.game.item.ClientItem;
 import miniventure.game.item.ClientPlayerInventory;
 import miniventure.game.item.CraftingScreen;
-import miniventure.game.item.CraftingScreen.ClientObjectRecipe;
 import miniventure.game.item.InventoryOverlay;
 import miniventure.game.item.ItemStack;
 import miniventure.game.network.GameProtocol.*;
@@ -76,7 +75,6 @@ public class ClientPlayer extends ClientEntity implements Player {
 	@NotNull private final EnumMap<Stat, Integer> stats = new EnumMap<>(Stat.class);
 	
 	private ClientPlayerInventory inventory;
-	@Nullable private ClientObjectRecipe objectRecipe; // currently choosing a location to craft an object
 	
 	private float moveSpeed = Player.MOVE_SPEED;
 	@NotNull private Direction dir;
@@ -125,21 +123,18 @@ public class ClientPlayer extends ClientEntity implements Player {
 	@Override @NotNull public Direction getDirection() { return dir; }
 	// public ClientInventory getInventory() { return inventory; }
 	
-	public void setObjectRecipe(@Nullable ClientObjectRecipe recipe) {
-		this.objectRecipe = recipe;
-	}
-	
-	@Nullable
-	public ClientObjectRecipe getObjectRecipe() { return objectRecipe; }
-	
 	@Override
 	public boolean isKnockedBack() { return knockbackController.hasKnockback(); }
 	
-	public CursorHighlight getCurrentHighlightMode() {
-		if(objectRecipe != null)
-			return CursorHighlight.TILE_IN_RADIUS;
+	@Nullable
+	public TextureHolder getCursorTexture() {
 		ItemStack cur = inventory.getSelectedItem();
-		return cur == null ? CursorHighlight.TILE_ADJACENT : cur.item.getHighlightMode();
+		return cur == null ? null : ((ClientItem)cur.item).getCursorTexture();
+	}
+	
+	public CursorHighlight getCurrentHighlightMode() {
+		ItemStack cur = inventory.getSelectedItem();
+		return cur == null ? CursorHighlight.FRONT_AREA : cur.item.getHighlightMode();
 	}
 	
 	/*public Rectangle computeInteractionRect(Vector2 cursorPos) {
@@ -220,20 +215,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 					
 					// level cursor is already clamped
 					// Vector2 clampedPos = Player.clampCursorPos(getCenter(), cursorPos.cpy(), getCurrentHighlightMode());
-					
-					if(objectRecipe != null) {
-						if(attack) {
-							// place the object on attack
-							// if(cursorTile != null)
-							ClientCore.getClient().send(objectRecipe.getBuildRequest(cursorPos));
-						} else {
-							// cancel the object recipe on interact
-							objectRecipe = null;
-						}
-					} else {
-						// if(cursorTile != null)
-						ClientCore.getClient().send(new InteractRequest(attack, cursorPos, getDirection(), inventory.getSelection()));
-					}
+					ClientCore.getClient().send(new InteractRequest(attack, cursorPos, getDirection(), inventory.getSelection()));
 				}
 			}
 			
@@ -278,8 +260,8 @@ public class ClientPlayer extends ClientEntity implements Player {
 			inventory.updateItems(newInv.inventory, newInv.equipment/*, newInv.hotbarData*/);
 		});
 		
-		forPacket(object, InventoryAddition.class, addition -> {
-			inventory.getInv().addItem(ClientItem.deserialize(addition.newItem));
+		forPacket(object, SerialItem.class, addition -> {
+			inventory.getInv().addItem(new ClientItem(addition));
 		});
 		
 		forPacket(object, PositionUpdate.class, newPos -> {

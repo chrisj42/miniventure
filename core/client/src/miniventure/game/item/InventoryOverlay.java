@@ -59,7 +59,7 @@ public class InventoryOverlay extends MenuScreen {
 	
 	private InventoryPanel slotTable;
 	// private InventoryPanel hotbar;
-	private EnumMap<EquipmentSlot, ItemSlot> equipmentSlots;
+	private EnumMap<EquipmentType, ItemSlot> equipmentSlots;
 	
 	private float lastAmt; // cache for progress bar
 	private String lastItem; // cache for held item label
@@ -70,7 +70,7 @@ public class InventoryOverlay extends MenuScreen {
 		mainGroup.defaults().padBottom(2f);
 		addMainGroup(mainGroup, RelPos.BOTTOM_LEFT);
 		
-		equipmentSlots = new EnumMap<>(EquipmentSlot.class);
+		equipmentSlots = new EnumMap<>(EquipmentType.class);
 		
 		dragAndDrop = new DragAndDrop();
 		
@@ -153,9 +153,9 @@ public class InventoryOverlay extends MenuScreen {
 		HorizontalGroup infoBar = new HorizontalGroup();
 		
 		infoBar.addActor(craftBtn);
-		infoBar.addActor(makeEquipmentSlot(EquipmentSlot.HAMMER));
-		// infoBar.addActor(makeEquipmentSlot(EquipmentSlot.ARMOR));
-		// infoBar.addActor(makeEquipmentSlot(EquipmentSlot.ACCESSORY));
+		// infoBar.addActor(makeEquipmentSlot(EquipmentType.HAMMER));
+		// infoBar.addActor(makeEquipmentSlot(EquipmentType.ARMOR));
+		// infoBar.addActor(makeEquipmentSlot(EquipmentType.ACCESSORY));
 		infoBar.addActor(makeLabel("    Inventory Space:   ", false));
 		infoBar.addActor(fillBar);
 		
@@ -223,7 +223,7 @@ public class InventoryOverlay extends MenuScreen {
 		setScrollFocus(null);
 	}
 	
-	private ItemSlot makeEquipmentSlot(EquipmentSlot type) {
+	private ItemSlot makeEquipmentSlot(EquipmentType type) {
 		ItemSlot slot = new ItemSlot(false, null) {
 			@Override @Nullable
 			public Item getItem() {
@@ -259,17 +259,19 @@ public class InventoryOverlay extends MenuScreen {
 		slotTable.setInventory(inventory);
 		// hotbar.setInventory(inventory);
 		// add drag-and-drop to equipment slots
-		for(EquipmentSlot slotType: EquipmentSlot.values) {
+		
+		// no slots for now, so disable
+		/*for(EquipmentType slotType: EquipmentType.values) {
 			SlotInfo info = new SlotInfo(slotType);
 			dragAndDrop.addSource(new SlotSource(info));
 			dragAndDrop.addTarget(new SlotTarget(info));
-		}
+		}*/
 	}
 	
 	private static class SlotPayload extends Payload {
-		@NotNull private final Item item;
+		@NotNull private final ClientItem item;
 		
-		private SlotPayload(Actor actor, @NotNull Item item) {
+		private SlotPayload(Actor actor, @NotNull ClientItem item) {
 			this.item = item;
 			setDragActor(actor);
 		}
@@ -280,21 +282,21 @@ public class InventoryOverlay extends MenuScreen {
 		private final ItemSlot slot;
 		private final int index;
 		// private final boolean isHotbar;
-		private final EquipmentSlot equipmentSlot;
+		private final EquipmentType equipmentType;
 		
 		public SlotInfo(ItemSlot slot, int index) {
 			this(slot, index, null);
 		}
 		
-		public SlotInfo(EquipmentSlot equipmentSlot) {
-			this(equipmentSlots.get(equipmentSlot), -1, equipmentSlot);
+		public SlotInfo(EquipmentType equipmentType) {
+			this(equipmentSlots.get(equipmentType), -1, equipmentType);
 		}
 		
-		private SlotInfo(ItemSlot slot, int index, EquipmentSlot equipmentSlot) {
+		private SlotInfo(ItemSlot slot, int index, EquipmentType equipmentType) {
 			this.slot = slot;
 			this.index = index;
 			// this.isHotbar = isHotbar;
-			this.equipmentSlot = equipmentSlot;
+			this.equipmentType = equipmentType;
 		}
 		
 		/*public int getInvIndex() {
@@ -317,7 +319,7 @@ public class InventoryOverlay extends MenuScreen {
 		@Override
 		public Payload dragStart(InputEvent event, float x, float y, int pointer) {
 			// only allow dragging if there's an item in the slot
-			Item item = info.slot.getItem();
+			ClientItem item = (ClientItem) info.slot.getItem();
 			if(item == null)
 				return null;
 			
@@ -346,8 +348,11 @@ public class InventoryOverlay extends MenuScreen {
 				return false;
 			
 			// the equipment type must match to equip an item
-			if(info.equipmentSlot != null && ((SlotPayload)payload).item.getEquipmentType() != info.equipmentSlot)
-				return false;
+			if(info.equipmentType != null) {
+				ClientItem item = ((SlotPayload)payload).item;
+				if(item.getEquipmentType() != info.equipmentType)
+					return false;
+			}
 			
 			return true;
 		}
@@ -356,10 +361,10 @@ public class InventoryOverlay extends MenuScreen {
 		public void drop(Source source, Payload payload, float x, float y, int pointer) {
 			SlotInfo other = ((SlotSource)source).info;
 			
-			if(info.equipmentSlot != null) // equip item
-				invManager.equipItem(info.equipmentSlot, other.index);
-			else if(other.equipmentSlot != null) // unequip item
-				invManager.unequipItem(other.equipmentSlot, info.index);
+			if(info.equipmentType != null) // equip item
+				invManager.equipItem(info.equipmentType, other.index);
+			else if(other.equipmentType != null) // unequip item
+				invManager.unequipItem(other.equipmentType, info.index);
 			else // inv movement
 				inventory.moveItem(other.index, info.index);
 		}

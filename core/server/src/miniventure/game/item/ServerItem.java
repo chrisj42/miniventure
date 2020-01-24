@@ -2,10 +2,13 @@ package miniventure.game.item;
 
 import java.util.Arrays;
 
-import miniventure.game.GameCore;
-import miniventure.game.texture.TextureHolder;
+import miniventure.game.network.GameProtocol.SerialItem;
+import miniventure.game.network.GameProtocol.SerialItemTexture;
+import miniventure.game.texture.FetchableTextureHolder;
+import miniventure.game.texture.ItemTextureSource;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
+import miniventure.game.util.customenum.SerialEnumMap;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
 
@@ -25,11 +28,16 @@ public abstract class ServerItem extends Item {
 	 */
 	
 	@NotNull private final ItemType type;
+	private String[] saveData = null;
+	private SerialItem serialData = null;
 	
-	protected ServerItem(@NotNull ItemType type, @NotNull String name) {
+	/*protected ServerItem(@NotNull ItemType type, @NotNull String name) {
 		this(type, name, GameCore.icons.get("items/"+name.toLowerCase()));
+	}*/
+	protected ServerItem(@NotNull ItemType type, @NotNull String name, String category) {
+		this(type, name, ItemTextureSource.Icon_Map.get("items/"+category+'/'+name.toLowerCase()));
 	}
-	protected ServerItem(@NotNull ItemType type, @NotNull String name, @NotNull TextureHolder texture) {
+	protected ServerItem(@NotNull ItemType type, @NotNull String name, @NotNull FetchableTextureHolder texture) {
 		super(MyUtils.toTitleFormat(name), texture);
 		this.type = type;
 	}
@@ -37,16 +45,10 @@ public abstract class ServerItem extends Item {
 	@NotNull public ItemType getType() { return type; }
 	public int getStaminaUsage() { return 1; } // default; note that without a successful attack or interaction, no stamina is lost.
 	
-	@Override
-	public float getUsabilityStatus() { return 0; } // most items won't have usability
-	
-	@Override @Nullable
-	public EquipmentSlot getEquipmentType() { return null; } // most items won't be equippable
-	
 	/// The item has been used. For most items, this means the item is now depleted, and can no longer be used. Note that there is a contract with this method; it should not modify the state of the current item, however it can return a slightly modified version to be used instead. (space usage shouldn't change)
 	// overridden by subclasses to return a new item instance with any change in state that should happen when the item is used; usually though, using an item results in it disappearing.
 	@Nullable
-	public ServerItem getUsedItem() { return getEquipmentType() == null ? null : this; }
+	public ServerItem getUsedItem() { return null; }
 	
 	// these three below are in case the item has anything to do with the events.
 	
@@ -56,18 +58,31 @@ public abstract class ServerItem extends Item {
 	// this is called after all interaction attempts.
 	public Result interact(ServerPlayer player) { return Result.NONE; } // interact reflexively.
 	
-	// this is used solely for saving to file, not to-client serialization.
-	public abstract String[] save();
+	// most items don't have any extra data
+	protected void addSerialData(SerialEnumMap<ItemDataTag<?>> map) {}
 	
-	
-	public static String[] save(@Nullable ServerItem item) {
-		if(item == null) return null;
-		return item.save();
+	public SerialItem serialize() {
+		if(serialData == null) {
+			SerialEnumMap<ItemDataTag<?>> map = new SerialEnumMap<>();
+			addSerialData(map);
+			serialData = new SerialItem(getName(), new SerialItemTexture(getFetchableTexture()), getHighlightMode(), map.serialize(false));
+		}
+		
+		return serialData;
 	}
 	
-	@Nullable
-	public static ServerItem load(@Nullable String[] data, @NotNull Version version) {
-		if(data == null) return null;
+	// this is used solely for saving to file, not to-client serialization.
+	public String[] getSaveData() {
+		if(saveData == null)
+			saveData = save();
+		return saveData;
+	}
+	
+	// generates item save data.
+	// since items are immutable, this is not meant to be called multiple times. The ServerItem class calls it once, caches the result, and uses that from then on.
+	protected abstract String[] save();
+	
+	public static ServerItem load(@NotNull String[] data, @NotNull Version version) {
 		ItemType type = ItemType.valueOf(data[0]);
 		return type.load(Arrays.copyOfRange(data, 1, data.length), version);
 	}

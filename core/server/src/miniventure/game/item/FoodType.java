@@ -15,13 +15,15 @@ public enum FoodType {
 	Raw_Bacon(2), Cooked_Bacon(3), Raw_Meat(3), Cooked_Meat(6);
 	
 	private final int healthGained;
+	private final ServerItem item;
 	
 	FoodType(int healthGained) {
 		this.healthGained = healthGained;
+		item = new FoodItem();
 	}
 	
 	@NotNull
-	public ServerItem get() { return new FoodItem(); }
+	public ServerItem get() { return item; }
 	
 	class FoodItem extends EnumItem {
 		private FoodItem() {

@@ -1,5 +1,7 @@
 package miniventure.game.item;
 
+import miniventure.game.network.GameProtocol.SerialItem;
+import miniventure.game.texture.FetchableTextureHolder;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.world.entity.mob.player.Player.CursorHighlight;
 
@@ -13,23 +15,19 @@ public abstract class Item {
 	// TO-DO allow items to be animated
 	
 	@NotNull private final String name;
-	@NotNull private final TextureHolder texture;
+	@NotNull private final FetchableTextureHolder texture;
 	
-	Item(@NotNull String name, @NotNull TextureHolder texture) {
+	Item(@NotNull String name, @NotNull FetchableTextureHolder texture) {
 		this.name = name;
 		this.texture = texture;
 	}
 	
-	@NotNull public TextureHolder getTexture() { return texture; }
+	@NotNull public TextureHolder getTexture() { return texture.tex; }
+	@NotNull public FetchableTextureHolder getFetchableTexture() { return texture; }
 	@NotNull public String getName() { return name; }
-	
-	public abstract float getUsabilityStatus();
 	
 	@NotNull
 	public abstract CursorHighlight getHighlightMode();
-	
-	@Nullable
-	public abstract EquipmentSlot getEquipmentType();
 	
 	// make sure this continues to reflect all important state in subclass implementations. Usually it will be covered by the name, but otherwise (such as with tools and their durability) the subclass ought to take that state into account.
 	@Override
@@ -45,15 +43,4 @@ public abstract class Item {
 	
 	@Override
 	public String toString() { return name + ' '+getClass().getSimpleName(); }
-	
-	public String[] serialize() {
-		EquipmentSlot equipmentType = getEquipmentType();
-		return new String[] {
-			name,
-			texture.name,
-			String.valueOf(getUsabilityStatus()),
-			String.valueOf(getHighlightMode().ordinal()),
-			equipmentType == null ? "null" : String.valueOf(equipmentType.ordinal())
-		};
-	}
 }

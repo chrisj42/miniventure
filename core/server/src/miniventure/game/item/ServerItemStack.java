@@ -1,5 +1,8 @@
 package miniventure.game.item;
 
+import java.util.Arrays;
+
+import miniventure.game.network.GameProtocol.SerialItemStack;
 import miniventure.game.util.Version;
 
 import org.jetbrains.annotations.NotNull;
@@ -19,16 +22,28 @@ public class ServerItemStack extends ItemStack {
 		return item;
 	}
 	
+	public SerialItemStack serialize() {
+		return new SerialItemStack(item.serialize(), count);
+	}
+	
 	public String[] save() { return save(item, count); }
 	
 	public static String[] save(@NotNull ServerItem item, int count) {
-		return encodeStack(item.save(), count);
+		String[] itemData = item.getSaveData();
+		
+		String[] data = new String[itemData.length+1];
+		System.arraycopy(itemData, 0, data, 1, itemData.length);
+		data[0] = String.valueOf(count);
+		
+		return data;
 	}
 	
 	@NotNull
 	public static ServerItemStack load(@NotNull String[] data, @NotNull Version version) {
-		//noinspection ConstantConditions
-		return new ServerItemStack(ServerItem.load(ItemStack.fetchItemData(data), version), ItemStack.fetchCount(data));
+		return new ServerItemStack(
+			ServerItem.load(Arrays.copyOfRange(data, 1, data.length), version),
+			Integer.parseInt(data[0])
+		);
 	}
 	
 	@Override

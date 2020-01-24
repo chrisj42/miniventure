@@ -11,13 +11,20 @@ public enum ResourceType {
 	Log, Flint, Coal, Cotton, Fabric, Stone, Iron, Tungsten, Ruby;
 	
 	@NotNull
-	public ServerItem get() {
-		return new EnumItem(ItemType.Resource, this) {
+	private final ServerItem item;
+	
+	ResourceType() {
+		item = new EnumItem(ItemType.Resource, this) {
 			@Override @NotNull
 			public Player.CursorHighlight getHighlightMode() {
 				return CursorHighlight.INVISIBLE;
 			}
 		};
+	}
+	
+	@NotNull
+	public ServerItem get() {
+		return item;
 	}
 	
 }

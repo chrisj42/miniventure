@@ -3,6 +3,8 @@ package miniventure.game.item;
 import miniventure.game.client.ClientCore;
 import miniventure.game.network.GameProtocol.EquipRequest;
 import miniventure.game.network.GameProtocol.ItemDropRequest;
+import miniventure.game.network.GameProtocol.SerialItem;
+import miniventure.game.network.GameProtocol.SerialItemStack;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -58,7 +60,7 @@ public class ClientPlayerInventory extends PlayerInventory<Item, ItemStack, Clie
 	}*/
 	
 	@Override
-	public boolean equipItem(@NotNull EquipmentSlot equipmentSlot, int index) {
+	public boolean equipItem(@NotNull EquipmentType equipmentSlot, int index) {
 		boolean success = super.equipItem(equipmentSlot, index);
 		if(success)
 			ClientCore.getClient().send(new EquipRequest(equipmentSlot, index, true));
@@ -66,22 +68,21 @@ public class ClientPlayerInventory extends PlayerInventory<Item, ItemStack, Clie
 	}
 	
 	@Override
-	public boolean unequipItem(@NotNull EquipmentSlot equipmentSlot, int index) {
+	public boolean unequipItem(@NotNull EquipmentType equipmentSlot, int index) {
 		boolean success = super.unequipItem(equipmentSlot, index);
 		if(success)
 			ClientCore.getClient().send(new EquipRequest(equipmentSlot, index, false));
 		return success;
 	}
 	
-	public void updateItems(String[][] inventoryData, String[][] equipmentData/*, String[] hotbarData*/) {
+	public void updateItems(SerialItemStack[] inventoryData, SerialItem[] equipmentData) {
 		if(equipmentData != null) {
-			Item[] equipment = new Item[EquipmentSlot.values.length];
+			Item[] equipment = new Item[EquipmentType.values.length];
 			for (int i = 0; i < equipment.length; i++)
-				equipment[i] = ClientItem.deserialize(equipmentData[i]);
+				equipment[i] = equipmentData[i] == null ? null : new ClientItem(equipmentData[i]);
 			
 			setEquipment(equipment);
 		}
-		// setHotbarSlots(hotbarData);
 		
 		getInv().updateItems(inventoryData, equippedItems.size());
 		setSelection(Math.min(getInv().getSlotsTaken() - 1, selection));

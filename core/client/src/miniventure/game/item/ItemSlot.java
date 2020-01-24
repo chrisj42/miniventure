@@ -99,7 +99,7 @@ public class ItemSlot extends Widget {
 		super.draw(batch, parentAlpha);
 		if(background != null)
 			background.draw(batch, getX(), getY(), getWidth(), getHeight());
-		Item item = getItem();
+		ClientItem item = (ClientItem) getItem();
 		if(item != null) {
 			// draw icon
 			Color prev = batch.getColor();

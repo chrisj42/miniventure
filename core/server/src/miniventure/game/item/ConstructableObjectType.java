@@ -1,10 +1,9 @@
 package miniventure.game.item;
 
-import miniventure.game.GameCore;
 import miniventure.game.item.ItemType.EphemeralItem;
-import miniventure.game.texture.TextureHolder;
+import miniventure.game.texture.FetchableTextureHolder;
+import miniventure.game.texture.ItemTextureSource;
 import miniventure.game.world.entity.mob.player.Player;
-import miniventure.game.world.entity.mob.player.Player.CursorHighlight;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.tile.ServerTile;
 import miniventure.game.world.tile.TileTypeEnum;
@@ -40,16 +39,19 @@ public enum ConstructableObjectType implements PlacementAttempt {
 		this(tileType, "main", placementCheck);
 	}
 	ConstructableObjectType(@NotNull TileTypeEnum tileType, String tileSpriteName, @NotNull PlacementCheck placementCheck) {
-		this(tileType, true, tileSpriteName, placementCheck);
+		// this(tileType, true, tileSpriteName, placementCheck);
+		this(tile(tileType), placementCheck,
+			ItemTextureSource.Tile_Atlas.get(tileType.name().toLowerCase()+'/'+tileSpriteName)
+		);
 	}
-	ConstructableObjectType(@NotNull TileTypeEnum tileType, boolean useLargeSprite, @NotNull PlacementCheck placementCheck) {
+	/*ConstructableObjectType(@NotNull TileTypeEnum tileType, boolean useLargeSprite, @NotNull PlacementCheck placementCheck) {
 		this(tileType, useLargeSprite, "main", placementCheck);
-	}
-	ConstructableObjectType(@NotNull TileTypeEnum tileType, boolean useLargeSprite, String tileSpriteName, @NotNull PlacementCheck placementCheck) {
+	}*/
+	/*ConstructableObjectType(@NotNull TileTypeEnum tileType, boolean useLargeSprite, String tileSpriteName, @NotNull PlacementCheck placementCheck) {
 		this(tile(tileType), placementCheck,
 			(useLargeSprite ? GameCore.tileAtlas : GameCore.descaledTileAtlas).getRegion(tileType.name().toLowerCase()+'/'+tileSpriteName)
 		);
-	}
+	}*/
 	
 	// for entities
 	
@@ -59,7 +61,7 @@ public enum ConstructableObjectType implements PlacementAttempt {
 		this.placementAttempt = PlacementAttempt.getAttempt(placementCheck, placementAction);
 		this.item = new BlueprintItem();
 	}*/
-	ConstructableObjectType(@NotNull PlacementAction placementAction, @NotNull PlacementCheck placementCheck, @NotNull TextureHolder customTexture) {
+	ConstructableObjectType(@NotNull PlacementAction placementAction, @NotNull PlacementCheck placementCheck, @NotNull FetchableTextureHolder customTexture) {
 		this.placementAttempt = PlacementAttempt.getAttempt(placementCheck, placementAction);
 		this.item = new BlueprintItem(customTexture);
 	}
@@ -78,13 +80,13 @@ public enum ConstructableObjectType implements PlacementAttempt {
 		// note that is is not actually what is set as the client's active item; this class is solely for internal use by BlueprintRecipes passed to the client.
 		
 		// private BlueprintItem() { super(name()); }
-		private BlueprintItem(@NotNull TextureHolder texture) {
+		private BlueprintItem(@NotNull FetchableTextureHolder texture) {
 			super(name(), texture);
 		}
 		
 		@NotNull @Override
 		public Player.CursorHighlight getHighlightMode() {
-			return CursorHighlight.TILE_IN_RADIUS;
+			return HammerItem.CONSTRUCTION_CURSOR;
 		}
 	}
 	

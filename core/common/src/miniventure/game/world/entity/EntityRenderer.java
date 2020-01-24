@@ -5,6 +5,8 @@ import java.util.HashMap;
 
 import miniventure.game.GameCore;
 import miniventure.game.item.Item;
+import miniventure.game.network.GameProtocol.SerialItem;
+import miniventure.game.texture.ItemTextureSource;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.blinker.Blinker;
@@ -82,19 +84,29 @@ public abstract class EntityRenderer {
 	
 	public static class ItemSpriteRenderer extends SpriteRenderer {
 		
-		private final Item item;
+		private final String[] data;
 		
 		public ItemSpriteRenderer(Item item) {
-			super(item.getName(), mapTexture(item.getTexture()));
-			this.item = item;
+			super(item.getName(), item.getTexture()/*mapTexture(item.getTexture())*/);
+			
+			data = new String[] {
+				item.getName(),
+				String.valueOf(item.getFetchableTexture().source.ordinal()),
+				item.getTexture().name
+			};
 		}
 		
-		private static TextureHolder mapTexture(TextureHolder given) {
+		ItemSpriteRenderer(String[] data) {
+			super(data[0], ItemTextureSource.values[Integer.parseInt(data[1])].getTexture(data[2]));
+			this.data = data;
+		}
+		
+		/*private static TextureHolder mapTexture(TextureHolder given) {
 			if (given.name.startsWith("items"))
 				return GameCore.scaledIconAtlas.getRegion(given.name);
 			else
 				return GameCore.descaledTileAtlas.getRegion(given.name);
-		}
+		}*/
 		
 		// private ItemSpriteRenderer(String[] data) {
 		// 	this(ClientItem.deserialize(data));
@@ -108,7 +120,7 @@ public abstract class EntityRenderer {
 		
 		@Override
 		protected String[] serialize() {
-			return item.serialize();
+			return data;
 		}
 	}
 	

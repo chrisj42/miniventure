@@ -3,7 +3,6 @@ package miniventure.game.client;
 import java.util.List;
 
 import miniventure.game.GameCore;
-import miniventure.game.item.CraftingScreen.ClientObjectRecipe;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
@@ -167,27 +166,29 @@ public class LevelViewport {
 			CursorHighlight highlightMode = player.getCurrentHighlightMode();
 			List<Tile> path = Player.computeCursorPos(cameraCenter, cursorPos, level, highlightMode);
 			Tile cursorTile = level.getTile(cursorPos);
-			Tile last = path.get(path.size()-1);
-			Color invalidColor = new Color(1, 0, 0, .5f);
-			if(ClientCore.debugInteract) {
-				boolean invalid = false;
-				invalidColor.mul(1, 1, 1, .5f);
-				Color norm = Color.BLACK.cpy().mul(1, 1, 1, 0.5f);
-				for(Tile t: path) {
-					drawOverTile(t, offset, null, invalid ? invalidColor : norm);
-					if(t == cursorTile)
-						invalid = true;
+			if(highlightMode != CursorHighlight.INVISIBLE) {
+				Tile last = path.get(path.size() - 1);
+				Color invalidColor = new Color(1, 0, 0, .5f);
+				if (ClientCore.debugInteract) {
+					boolean invalid = false;
+					invalidColor.mul(1, 1, 1, .5f);
+					Color norm = Color.BLACK.cpy().mul(1, 1, 1, 0.5f);
+					for (Tile t : path) {
+						drawOverTile(t, offset, null, invalid ? invalidColor : norm);
+						if (t == cursorTile)
+							invalid = true;
+					}
 				}
+				
+				drawOverTile(cursorTile, offset, null, null);
+				cursorValid = last == cursorTile;
+				if (!cursorValid)
+					drawOverTile(last, offset, null, invalidColor);
 			}
 			
-			drawOverTile(cursorTile, offset, null, null);
-			cursorValid = last == cursorTile;
-			if(!cursorValid)
-				drawOverTile(last, offset, null, invalidColor);
-			
-			ClientObjectRecipe objectRecipe = player.getObjectRecipe();
-			if(objectRecipe != null)
-				drawOverTile(cursorTile, offset, objectRecipe.getTexture(), null);
+			TextureHolder cursorTexture = player.getCursorTexture();
+			if(cursorTexture != null)
+				drawOverTile(cursorTile, offset, cursorTexture, null);
 			
 			// Vector2 dist = cursorPos.cpy().sub(cameraCenter);
 			// dist.setLength(Math.min(dist.len(), Player.MAX_CURSOR_RANGE));

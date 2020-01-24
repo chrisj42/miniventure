@@ -108,7 +108,7 @@ public abstract class Inventory<TItem extends Item, TItemStack extends ItemStack
 		return stacks;
 	}
 	
-	int getIndex(TItem item) { return uniqueItems.indexOf(item); }
+	public int getIndex(TItem item) { return uniqueItems.indexOf(item); }
 	
 	public boolean moveItem(int oldIdx, int newIdx) {
 		if (oldIdx < newIdx)

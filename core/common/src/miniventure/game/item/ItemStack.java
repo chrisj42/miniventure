@@ -2,6 +2,9 @@ package miniventure.game.item;
 
 import java.util.Arrays;
 
+import miniventure.game.network.GameProtocol.SerialItem;
+import miniventure.game.network.GameProtocol.SerialItemStack;
+
 import org.jetbrains.annotations.NotNull;
 
 public class ItemStack {
@@ -16,20 +19,6 @@ public class ItemStack {
 	
 	@NotNull
 	public Item getItem() { return item; }
-	
-	public String[] serialize() { return serialize(item, count); }
-	
-	public static String[] serialize(@NotNull Item item, int count) {
-		return encodeStack(item.serialize(), count);
-	}
-	
-	public static String[] encodeStack(String[] itemData, int count) {
-		String[] data = new String[itemData.length+1];
-		System.arraycopy(itemData, 0, data, 1, itemData.length);
-		data[0] = String.valueOf(count);
-		
-		return data;
-	}
 	
 	public static int fetchCount(String[] data) {
 		return Integer.parseInt(data[0]);

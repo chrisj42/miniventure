@@ -2,6 +2,7 @@ package miniventure.game.item;
 
 import miniventure.game.client.ClientCore;
 import miniventure.game.network.GameProtocol.InventoryMovement;
+import miniventure.game.network.GameProtocol.SerialItemStack;
 
 public class ClientInventory extends Inventory<Item, ItemStack> {
 	
@@ -51,8 +52,8 @@ public class ClientInventory extends Inventory<Item, ItemStack> {
 		return false;
 	}
 	
-	public void updateItems(String[][] data) { updateItems(data, 0); }
-	public void updateItems(String[][] data, int buffer) {
+	public void updateItems(SerialItemStack[] data) { updateItems(data, 0); }
+	public void updateItems(SerialItemStack[] data, int buffer) {
 		ItemStack[] stacks = new ItemStack[data.length];
 		for (int i = 0; i < stacks.length; i++)
 			stacks[i] = ClientItem.deserializeStack(data[i]);

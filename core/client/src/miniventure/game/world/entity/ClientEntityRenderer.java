@@ -5,7 +5,6 @@ import java.util.HashMap;
 
 import miniventure.game.client.ClientCore;
 import miniventure.game.client.FontStyle;
-import miniventure.game.item.ClientItem;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.blinker.Blinker;
 import miniventure.game.util.function.MapFunction;
@@ -39,7 +38,7 @@ public class ClientEntityRenderer {
 	enum RendererType {
 		Sprite(SpriteRenderer.class, data -> new SpriteRenderer(data[0])),
 		
-		ItemSprite(ItemSpriteRenderer.class, data -> new ItemSpriteRenderer(ClientItem.deserialize(data))),
+		ItemSprite(ItemSpriteRenderer.class, ItemSpriteRenderer::new),
 		
 		Animation(AnimationRenderer.class, AnimationRenderer::new),
 		

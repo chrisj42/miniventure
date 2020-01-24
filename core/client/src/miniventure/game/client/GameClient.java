@@ -265,7 +265,9 @@ public abstract class GameClient implements GameProtocol {
 		
 		forPacket(object, RecipeUpdate.class, req -> {
 			MenuScreen screen = ClientCore.getScreen();
-			if(screen instanceof CraftingScreen)
+			if(!(screen instanceof CraftingScreen))
+				Gdx.app.postRunnable(() -> ClientCore.setScreen(new CraftingScreen(req)));
+			else
 				((CraftingScreen)screen).recipeUpdate(req);
 		});
 		

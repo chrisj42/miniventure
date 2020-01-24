@@ -3,6 +3,7 @@ package miniventure.game.item;
 import java.util.Arrays;
 
 import miniventure.game.network.GameProtocol.InventoryUpdate;
+import miniventure.game.network.GameProtocol.SerialItem;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
 
@@ -17,11 +18,11 @@ public class ServerPlayerInventory extends PlayerInventory<ServerItem, ServerIte
 	public String[] save() {
 		String[] invData = getInv().save();
 		
-		String[] allData = new String[EquipmentSlot.values.length + invData.length];
-		System.arraycopy(invData, 0, allData, EquipmentSlot.values.length, invData.length);
-		for (int i = 0; i < EquipmentSlot.values.length; i++) {
-			ServerItem item = equippedItems.get(EquipmentSlot.values[i]);
-			allData[i] = item == null ? "null" : MyUtils.encodeStringArray(item.save());
+		String[] allData = new String[EquipmentType.values.length + invData.length];
+		System.arraycopy(invData, 0, allData, EquipmentType.values.length, invData.length);
+		for (int i = 0; i < EquipmentType.values.length; i++) {
+			ServerItem item = equippedItems.get(EquipmentType.values[i]);
+			allData[i] = item == null ? "null" : MyUtils.encodeStringArray(item.getSaveData());
 		}
 		
 		// allData[EquipmentSlot.values.length] = MyUtils.encodeStringArray(getHotbarData());
@@ -30,7 +31,7 @@ public class ServerPlayerInventory extends PlayerInventory<ServerItem, ServerIte
 	}
 	
 	public void loadItems(String[] data, @NotNull Version version) {
-		ServerItem[] equipment = new ServerItem[EquipmentSlot.values.length];
+		ServerItem[] equipment = new ServerItem[EquipmentType.values.length];
 		for (int i = 0; i < equipment.length; i++)
 			equipment[i] = data[i].equals("null") ? null : ServerItem.load(MyUtils.parseLayeredString(data[i]), version);
 		
@@ -41,11 +42,11 @@ public class ServerPlayerInventory extends PlayerInventory<ServerItem, ServerIte
 	
 	// public InventoryUpdate getUpdate() { return getUpdate(true); }
 	public InventoryUpdate getUpdate(boolean includeEquipment) {
-		String[][] equipment;
+		SerialItem[] equipment;
 		if(includeEquipment) {
-			equipment = new String[EquipmentSlot.values.length][];
+			equipment = new SerialItem[EquipmentType.values.length];
 			for (int i = 0; i < equipment.length; i++) {
-				Item item = equippedItems.get(EquipmentSlot.values[i]);
+				ServerItem item = equippedItems.get(EquipmentType.values[i]);
 				equipment[i] = item == null ? null : item.serialize();
 			}
 		}

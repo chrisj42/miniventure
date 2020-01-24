@@ -5,7 +5,6 @@ import java.util.EnumMap;
 
 import miniventure.game.GameCore;
 import miniventure.game.item.*;
-import miniventure.game.item.HammerType.HammerItem;
 import miniventure.game.item.ToolItem.ToolType;
 import miniventure.game.network.GameProtocol;
 import miniventure.game.network.GameProtocol.*;
@@ -52,6 +51,11 @@ public class ServerPlayer extends ServerMob implements Player {
 	
 	@NotNull private final ServerPlayerInventory invManager;
 	@NotNull private final ServerInventory inventory;
+	
+	// when a player interacts with a hammer, that hammer is saved and then the recipes are given.
+	// if a recipe selection request is then received, then the saved hammer is modified and the inventory is updated.
+	// this is reset when the normal crafting screen is opened, so that if a selection request is made when this is null, then we'll search for a hammer that provides the given recipe
+	private HammerItem lastQueried = null;
 	
 	private final String name;
 	
@@ -203,27 +207,50 @@ public class ServerPlayer extends ServerMob implements Player {
 		});
 		
 		forPacket(packet, DatalessRequest.Recipes, true, () -> {
-			HammerItem hammer = (HammerItem) invManager.getEquippedItem(EquipmentSlot.HAMMER);
+			lastQueried = null; // opened crafting screen
 			connection.send(new RecipeUpdate(
-				hammer == null ? HammerType.getHandRecipes() : hammer.getHammerType().getRecipes(),
+				ItemRecipeSet.HAND.getSerialRecipes(),
 				new RecipeStockUpdate(inventory.getItemStacks())
 			));
 		});
 		
-		forPacket(packet, CraftRequest.class, true, req -> {
-			ItemRecipeSet set = ItemRecipeSet.values[req.setOrdinal];
-			ItemRecipe recipe = set.getRecipe(req.recipeIndex);
-			GameCore.debug("server got craft request for "+recipe.getResult().item);
-			Integer left = recipe.tryCraft(inventory);
-			if(left != null) {
-				ServerLevel level = getLevel();
-				if(level != null)
-					for(int i = 0; i < left; i++)
-						level.dropItem(recipe.getResult().item, getPosition(), null);
+		forPacket(packet, RecipeSelectionRequest.class, true, req -> {
+			if(req.isItem) {
+				ItemRecipeSet set = ItemRecipeSet.values[req.setOrdinal];
+				ItemRecipe recipe = set.getRecipe(req.recipeIndex);
+				GameCore.debug("server got craft request for " + recipe.getResult().item);
+				Integer left = recipe.tryCraft(inventory);
+				if (left != null) {
+					ServerLevel level = getLevel();
+					if (level != null)
+						for (int i = 0; i < left; i++)
+							level.dropItem(recipe.getResult().item, getPosition(), null);
+				}
+				
+				connection.send(invManager.getUpdate(false));
+				connection.send(new RecipeStockUpdate(inventory.getItemStacks()));
+			} else {
+				// TODO when the main crafting screen shows buildable recipes, I'll have to find the right hammer for it in the inventory. But for now, we don't need to do that.
+				/*ItemStack[] stacks = inventory.getItemStacks();
+				for (int i = 0; i < stacks.length; i++) {
+					if(stacks[i].item instanceof HammerItem) {
+						
+					}
+				}*/
+				if(lastQueried == null) // unexpected request; make sure the client has the right item info
+					connection.send(invManager.getUpdate(true));
+				else {
+					HammerItem newHammer = lastQueried.setSelection(req.recipeIndex);
+					if(newHammer.equals(lastQueried))
+						return;
+					int idx = inventory.getIndex(lastQueried); // there's no reason this should ever fail...
+					if(idx >= 0) { // ...but I'll add this check anyway
+						inventory.removeItemStack(idx);
+						inventory.addItem(idx, newHammer);
+						getWorld().getServer().sendToPlayer(this, invManager.getUpdate(false));
+					}
+				}
 			}
-			//getHands().validate();
-			connection.send(invManager.getUpdate(false));
-			connection.send(new RecipeStockUpdate(inventory.getItemStacks()));
 		});
 		
 		forPacket(packet, BuildRequest.class, true, req -> {
@@ -294,7 +321,7 @@ public class ServerPlayer extends ServerMob implements Player {
 			// 	inventory.addItem(item); // add to open hotbar slot if it exists
 			GameServer server = getServer();
 			server.playEntitySound("pickup", this, false);
-			server.sendToPlayer(this, new InventoryAddition(item));
+			server.sendToPlayer(this, item.serialize());
 			return true;
 		}
 		
@@ -379,8 +406,8 @@ public class ServerPlayer extends ServerMob implements Player {
 			// none of the above interactions were successful, do the reflexive use.
 			result = heldItem.interact(this);
 		
-		if(!result.success && heldItem.getEquipmentType() != null) {
-			if(invManager.equipItem(heldItem.getEquipmentType(), index)) {
+		if(!result.success && heldItem instanceof EquipmentItem) {
+			if(invManager.equipItem(((EquipmentItem)heldItem).getEquipmentType(), index)) {
 				result = Result.USED;
 				getServer().sendToPlayer(this, invManager.getUpdate(true));
 			}
@@ -470,6 +497,36 @@ public class ServerPlayer extends ServerMob implements Player {
 		
 		// we are never going to be in inventory mode here, because the client has just used an item; items can't be used with a menu open.
 		getServer().sendToPlayer(this, invManager.getUpdate(false));
+	}
+	
+	public void useHammer(HammerItem item) {
+		lastQueried = item;
+		// reset the selected recipe for this hammer
+		HammerItem newHammer = item.setSelection(null);
+		if(!newHammer.equals(item)) {
+			// replace the inventory item
+			int idx = inventory.getIndex(item); // there's no reason this should ever fail...
+			if(idx >= 0) { // ...but I'll add this check anyway
+				inventory.removeItemStack(idx);
+				inventory.addItem(idx, newHammer);
+				getWorld().getServer().sendToPlayer(this, invManager.getUpdate(false));
+			}
+			lastQueried = newHammer;
+		}
+		// give the client the info to open the crafting screen
+		getWorld().getServer().sendToPlayer(this, new RecipeUpdate(
+			item.getRecipeSet().getSerialRecipes(),
+			new RecipeStockUpdate(inventory.getItemStacks())
+		));
+	}
+	
+	public boolean tryBuild(ObjectRecipe recipe, ServerTile tile) {
+		if(recipe.tryCraft(tile, this, inventory)) {
+			// success, update inv
+			getWorld().getServer().sendToPlayer(this, invManager.getUpdate(false));
+			return true;
+		}
+		return false;
 	}
 	
 	@Override
