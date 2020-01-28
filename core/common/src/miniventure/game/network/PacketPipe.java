@@ -1,11 +1,8 @@
 package miniventure.game.network;
 
-import java.util.Collections;
 import java.util.LinkedList;
-import java.util.List;
 
 import miniventure.game.GameCore;
-import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.ValueAction;
 
 import org.jetbrains.annotations.NotNull;
@@ -80,9 +77,6 @@ public class PacketPipe {
 	// can only read/listen through this end
 	public class PacketPipeReader extends PacketPipeInterface implements Runnable {
 		
-		private static final int MAX_EMPTY = 50;
-		private static final int MIL_WAIT = 50;
-		private int emptyPolls = 0;
 		@NotNull private PacketHandler listener = obj -> {};
 		
 		public void setListener(@NotNull PacketHandler handler) {
@@ -110,13 +104,6 @@ public class PacketPipe {
 				if(packet == null) {
 					if(canExit)
 						running = false;
-					else {
-						emptyPolls++;
-						if(emptyPolls == MAX_EMPTY) {
-							emptyPolls = 0;
-							MyUtils.sleep(MIL_WAIT);
-						}
-					}
 					continue;
 				}
 				
