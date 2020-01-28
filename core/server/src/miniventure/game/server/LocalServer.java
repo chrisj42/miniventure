@@ -25,7 +25,7 @@ public class LocalServer extends GameServer {
 		this.in = serverIn;
 		this.out = serverOut;
 		
-		in.addListener(new PacketHandler() {
+		in.setListener(new PacketHandler() {
 			@Override
 			public void act(Object obj) {
 				if(obj instanceof Login)

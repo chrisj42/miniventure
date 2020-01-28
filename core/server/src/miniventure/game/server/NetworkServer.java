@@ -40,7 +40,7 @@ public class NetworkServer extends GameServer {
 		this.port = port;
 		this.hostChecker = hostChecker;
 		
-		server = new MiniventureServer(writeBufferSize*5, objectBufferSize);
+		server = new MiniventureServer(serverWriteBufferSize, objectBufferSize);
 		GameProtocol.registerClasses(server.getKryo());
 		server.addListener(networkListener);
 		server.start();
@@ -114,7 +114,7 @@ public class NetworkServer extends GameServer {
 					}
 				};
 				PacketPipeReader packetPasser = sendPipe.getPipeReader();
-				packetPasser.addListener(connection::sendTCP);
+				packetPasser.setListener(connection::sendTCP);
 				PacketPipeWriter packetWriter = sendPipe.getPipeWriter();
 				
 				synchronized (connectionMapLock) {

@@ -7,6 +7,7 @@ import miniventure.game.world.tile.ClientTileType;
 import miniventure.game.world.tile.TileTypeEnum;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 // A world manager that specifically loads only one level at a time.
 // all registered entities are assumed to be on the current level.
@@ -26,7 +27,7 @@ public abstract class LevelManager extends WorldManager {
 	/*  --- LEVEL MANAGEMENT --- */
 	
 	
-	protected void setLevel(@NotNull RenderLevel level) {
+	protected void setLevel(@Nullable RenderLevel level) {
 		clearEntityIdMap();
 		this.level = level;
 	}

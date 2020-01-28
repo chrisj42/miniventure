@@ -4,8 +4,11 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import miniventure.game.GameCore;
+import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.ValueAction;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class PacketPipe {
@@ -17,9 +20,6 @@ public class PacketPipe {
 	
 	// this is the list of packets that have been "sent" and have yet to be processed.
 	private final LinkedList<Object> packetQueue;
-	
-	// this is the list of actions that should be called for every packet
-	private final List<PacketHandler> listeners;
 	
 	private boolean canExit = false; // a note that it is okay to stop checking for packets once the current ones are dealt with.
 	private boolean running = false; // there are no more packets; at least, no more packets should be parsed. This is set to true if canExit is true and there are no packets in the queue, however it can be set directly if finishing the queue is not necessary.
@@ -35,7 +35,6 @@ public class PacketPipe {
 		this.readerThreadLabel = readerThreadLabel;
 		
 		packetQueue = new LinkedList<>(); // I need pollFirst, so I can't use collections synchronization.
-		listeners = Collections.synchronizedList(new LinkedList<>());
 		
 		reader = new PacketPipeReader();
 		writer = new PacketPipeWriter();
@@ -45,19 +44,9 @@ public class PacketPipe {
 	public PacketPipeWriter getPipeWriter() { return writer; }
 	
 	
-	private void send(Object obj) {
-		synchronized (packetQueue) {
-			packetQueue.add(obj);
-		}
-	}
-	
-	private void addListener(PacketHandler handler) {
-		listeners.add(handler);
-	}
-	
 	private void closePipe(boolean finishPackets) {
-		canExit = false;
-		running = finishPackets;
+		canExit = true;
+		running = running && finishPackets;
 	}
 	
 	
@@ -82,15 +71,22 @@ public class PacketPipe {
 	public class PacketPipeWriter extends PacketPipeInterface {
 		public void send(Object packet) {
 			// GameCore.debug("sending packet from pipe: "+readerThreadLabel+"; packet type: "+packet.getClass().getSimpleName());
-			PacketPipe.this.send(packet);
+			synchronized (packetQueue) {
+				packetQueue.add(packet);
+			}
 		}
 	}
 	
 	// can only read/listen through this end
 	public class PacketPipeReader extends PacketPipeInterface implements Runnable {
 		
-		public void addListener(PacketHandler handler) {
-			PacketPipe.this.addListener(handler);
+		private static final int MAX_EMPTY = 50;
+		private static final int MIL_WAIT = 50;
+		private int emptyPolls = 0;
+		@NotNull private PacketHandler listener = obj -> {};
+		
+		public void setListener(@NotNull PacketHandler handler) {
+			this.listener = handler;
 		}
 		
 		public void start() {
@@ -104,6 +100,7 @@ public class PacketPipe {
 		public void run() {
 			running = true;
 			canExit = false;
+			GameCore.debug("Starting pipe flow: "+readerThreadLabel);
 			while(running) {
 				Object packet;
 				synchronized (packetQueue) {
@@ -113,20 +110,23 @@ public class PacketPipe {
 				if(packet == null) {
 					if(canExit)
 						running = false;
+					else {
+						emptyPolls++;
+						if(emptyPolls == MAX_EMPTY) {
+							emptyPolls = 0;
+							MyUtils.sleep(MIL_WAIT);
+						}
+					}
 					continue;
 				}
 				
 				// GameCore.debug("PacketPipeReader \""+readerThreadLabel+"\" got packet: "+packet.getClass().getSimpleName());
-				synchronized (listeners) {
-					for(PacketHandler handler: listeners)
-						handler.act(packet);
-				}
+				listener.act(packet);
 			}
 			
-			synchronized (listeners) {
-				for(PacketHandler handler: listeners)
-					handler.onDisconnect();
-			}
+			listener.onDisconnect();
+			
+			GameCore.debug("Pipe ending: "+readerThreadLabel);
 		}
 	}
 }

@@ -81,11 +81,10 @@ public class ClientWorld extends LevelManager {
 			return;
 		}
 		
-		MenuScreen menu = ClientCore.getScreen();
-		
 		ClientLevel level = mainPlayer.getLevel();
 		if(level == null) return;
 		
+		MenuScreen menu = ClientCore.getScreen();
 		if(menu == null)
 			gameScreen.handleInput();
 		
@@ -165,8 +164,8 @@ public class ClientWorld extends LevelManager {
 		// ClientCore.stopMusic();
 		// loadingScreen.pushMessage("Initializing private server");
 		
-		PacketPipe pipe1 = new PacketPipe("LocalClient packet reader");
-		PacketPipe pipe2 = new PacketPipe("LocalServer packet reader");
+		PacketPipe pipe1 = new PacketPipe("Local Server to Client");
+		PacketPipe pipe2 = new PacketPipe("Local Client to Server");
 		
 		PacketPipeWriter serverOut = pipe1.getPipeWriter();
 		PacketPipeReader clientIn = pipe1.getPipeReader();
@@ -200,14 +199,14 @@ public class ClientWorld extends LevelManager {
 	// returns to title screen; this ClientWorld instance is still capable of supporting future worlds.
 	@Override
 	public void exitWorld() {
-		// set menu to main menu, and dispose of level/world resources
-		client.disconnect();
-		// ClientCore.getClient().disconnect();
-		mainPlayer = null;
-		clearEntityIdMap();
-		// serverManager.closeServer();
-		ClientCore.setScreen(new MainMenu());
-		client = null;
+		Gdx.app.postRunnable(() -> {
+			// set menu to main menu, and dispose of level/world resources
+			client.disconnect();
+			setLevel(null);
+			mainPlayer = null;
+			client = null;
+			ClientCore.setScreen(new MainMenu());
+		});
 	}
 	
 	// TODO add lighting overlays, based on level and/or time of day, depending on the level and perhaps other things.

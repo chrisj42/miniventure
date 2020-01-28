@@ -14,7 +14,7 @@ public class LocalClient extends GameClient {
 		this.fromServer = fromServer;
 		this.toServer = toServer;
 		
-		fromServer.addListener(packet -> handlePacket(packet, toServer));
+		fromServer.setListener(packet -> handlePacket(packet, toServer));
 	}
 	
 	@Override
@@ -22,7 +22,7 @@ public class LocalClient extends GameClient {
 	
 	@Override
 	public void disconnect() {
-		toServer.close(false);
+		toServer.close(true);
 		fromServer.close(false);
 	}
 }

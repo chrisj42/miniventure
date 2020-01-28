@@ -5,6 +5,7 @@ import java.net.InetSocketAddress;
 
 import miniventure.game.network.GameProtocol;
 import miniventure.game.network.PacketPipe;
+import miniventure.game.network.PacketPipe.PacketHandler;
 import miniventure.game.network.PacketPipe.PacketPipeReader;
 import miniventure.game.screen.ErrorScreen;
 import miniventure.game.screen.InputScreen;
@@ -33,9 +34,19 @@ public class NetworkClient extends GameClient {
 	public NetworkClient() {
 		PacketPipe sendPipe = new PacketPipe();
 		packetSendQueue = sendPipe.getPipeReader();
-		packetSendQueue.addListener(this::send);
+		packetSendQueue.setListener(new PacketHandler() {
+			@Override
+			public void act(Object obj) {
+				send(obj);
+			}
+			
+			@Override
+			public void onDisconnect() {
+				client.stop();
+			}
+		});
 		
-		client = new MiniventureClient(writeBufferSize, objectBufferSize);
+		client = new MiniventureClient(clientWriteBufferSize, objectBufferSize);
 		client.addListener(new Listener() {
 			@Override
 			public void received(Connection connection, Object object) {
@@ -49,6 +60,7 @@ public class NetworkClient extends GameClient {
 			public void disconnected(Connection connection) {
 				System.err.println("client disconnected from server.");
 				Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen("Lost connection with server.")));
+				packetSendQueue.close(false);
 			}
 		});
 		
@@ -114,7 +126,7 @@ public class NetworkClient extends GameClient {
 	
 	@Override
 	public void disconnect() {
-		packetSendQueue.close(false);
-		client.stop();
+		packetSendQueue.close(true);
+		// client.stop();
 	}
 }

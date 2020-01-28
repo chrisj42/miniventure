@@ -1,5 +1,7 @@
 package com.esotericsoftware.kryonet;
 
+import miniventure.game.GameCore;
+
 public class MiniventureServer extends Server {
 	
 	public MiniventureServer() {
@@ -22,6 +24,13 @@ public class MiniventureServer extends Server {
 			close();
 		});
 		thread.start();
+	}
+	
+	@Override
+	public void run() {
+		GameCore.debug("Starting Network server update thread");
+		super.run();
+		GameCore.debug("Ending Network server update thread");
 	}
 	
 	@Override

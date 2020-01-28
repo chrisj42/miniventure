@@ -49,6 +49,7 @@ public class ServerCore extends Thread {
 	
 	@Override
 	public void run() {
+		GameCore.debug("ServerCore starting up");
 		updateThread = Thread.currentThread();
 		
 		// start command parser thread
@@ -95,6 +96,7 @@ public class ServerCore extends Thread {
 		}
 		
 		commandParser.end();
+		GameCore.debug("ServerCore ending");
 	}
 	
 	@NotNull
