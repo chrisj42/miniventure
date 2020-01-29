@@ -1,6 +1,6 @@
 package com.esotericsoftware.kryonet;
 
-import miniventure.game.GameCore;
+import miniventure.game.core.GameCore;
 
 public class MiniventureServer extends Server {
 	

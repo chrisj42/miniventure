@@ -2,7 +2,7 @@ package com.esotericsoftware.kryonet;
 
 import java.net.InetSocketAddress;
 
-import miniventure.game.GameCore;
+import miniventure.game.core.GameCore;
 
 public class MiniventureClient extends Client {
 	

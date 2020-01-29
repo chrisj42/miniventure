@@ -1,7 +1,7 @@
 package miniventure.game.screen;
 
-import miniventure.game.client.ClientCore;
-import miniventure.game.client.GameScreen;
+import miniventure.game.core.ClientCore;
+import miniventure.game.core.GameScreen;
 import miniventure.game.screen.util.BackgroundProvider;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
 import miniventure.game.world.level.ClientLevel;

@@ -3,7 +3,7 @@ package miniventure.game.world.entity.mob.player;
 import java.net.InetSocketAddress;
 import java.util.EnumMap;
 
-import miniventure.game.GameCore;
+import miniventure.game.core.GameCore;
 import miniventure.game.item.*;
 import miniventure.game.item.ToolItem.ToolType;
 import miniventure.game.network.GameProtocol;

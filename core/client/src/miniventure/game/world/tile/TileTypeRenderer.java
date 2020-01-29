@@ -2,7 +2,7 @@ package miniventure.game.world.tile;
 
 import java.util.*;
 
-import miniventure.game.GameCore;
+import miniventure.game.core.GameCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.RelPos;
 import miniventure.game.world.tile.SpriteManager.SpriteCompiler;

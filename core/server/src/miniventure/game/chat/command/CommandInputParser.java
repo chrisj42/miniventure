@@ -8,11 +8,10 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import miniventure.game.GameCore;
+import miniventure.game.core.GameCore;
 import miniventure.game.chat.ConsoleMessageBuilder;
 import miniventure.game.chat.MessageBuilder;
 import miniventure.game.util.MyUtils;
-import miniventure.game.util.function.Action;
 import miniventure.game.util.function.MapFunction;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.management.ServerWorld;

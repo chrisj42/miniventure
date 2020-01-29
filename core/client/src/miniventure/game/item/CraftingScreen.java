@@ -6,15 +6,14 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 
-import miniventure.game.client.ClientCore;
-import miniventure.game.client.FontStyle;
-import miniventure.game.client.InputHandler.Control;
+import miniventure.game.core.ClientCore;
+import miniventure.game.core.FontStyle;
+import miniventure.game.core.InputHandler.Control;
 import miniventure.game.network.GameProtocol.*;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.util.ColorBackground;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.RelPos;
-import miniventure.game.world.entity.mob.player.ClientPlayer;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;

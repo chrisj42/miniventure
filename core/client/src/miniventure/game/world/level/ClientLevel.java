@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import miniventure.game.client.ClientCore;
+import miniventure.game.core.ClientCore;
 import miniventure.game.screen.RespawnScreen;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.management.ClientWorld;

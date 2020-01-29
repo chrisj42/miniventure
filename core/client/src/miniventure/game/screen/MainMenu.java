@@ -1,10 +1,10 @@
 package miniventure.game.screen;
 
-import miniventure.game.GameCore;
-import miniventure.game.client.AudioException;
-import miniventure.game.client.ClientCore;
-import miniventure.game.client.FontStyle;
-import miniventure.game.client.LevelViewport;
+import miniventure.game.core.GameCore;
+import miniventure.game.core.AudioException;
+import miniventure.game.core.ClientCore;
+import miniventure.game.core.FontStyle;
+import miniventure.game.core.LevelViewport;
 import miniventure.game.network.GameProtocol;
 import miniventure.game.screen.InfoScreen.CreditsScreen;
 import miniventure.game.screen.InfoScreen.InstructionsScreen;

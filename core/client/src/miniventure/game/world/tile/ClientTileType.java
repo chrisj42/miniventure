@@ -1,6 +1,6 @@
 package miniventure.game.world.tile;
 
-import miniventure.game.GameCore;
+import miniventure.game.core.GameCore;
 import miniventure.game.util.param.Param;
 import miniventure.game.util.param.ParamMap;
 import miniventure.game.util.param.Value;

@@ -3,7 +3,7 @@ package miniventure.game.util;
 import java.util.*;
 import java.util.Map.Entry;
 
-import miniventure.game.GameCore;
+import miniventure.game.core.GameCore;
 import miniventure.game.util.function.Action;
 import miniventure.game.util.function.MapFunction;
 import miniventure.game.world.tile.TileTypeEnum;

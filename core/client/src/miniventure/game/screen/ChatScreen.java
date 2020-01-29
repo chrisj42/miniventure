@@ -4,11 +4,11 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.LinkedList;
 
-import miniventure.game.GameCore;
+import miniventure.game.core.GameCore;
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.chat.InfoMessageLine;
-import miniventure.game.client.ClientCore;
-import miniventure.game.client.FontStyle;
+import miniventure.game.core.ClientCore;
+import miniventure.game.core.FontStyle;
 import miniventure.game.network.GameProtocol.Message;
 import miniventure.game.network.GameProtocol.TabRequest;
 import miniventure.game.network.GameProtocol.TabResponse;

@@ -17,7 +17,7 @@ import java.util.LinkedList;
 import java.util.Random;
 import java.util.Set;
 
-import miniventure.game.GameCore;
+import miniventure.game.core.GameCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.SerialHashMap;
 import miniventure.game.util.Version;

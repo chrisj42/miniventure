@@ -2,8 +2,8 @@ package miniventure.game.screen;
 
 import java.util.HashMap;
 
-import miniventure.game.client.ClientCore;
-import miniventure.game.client.InputHandler.Control;
+import miniventure.game.core.ClientCore;
+import miniventure.game.core.InputHandler.Control;
 import miniventure.game.network.GameProtocol.LevelChange;
 import miniventure.game.network.GameProtocol.MapRequest;
 import miniventure.game.util.MyUtils;

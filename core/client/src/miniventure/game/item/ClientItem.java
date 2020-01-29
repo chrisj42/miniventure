@@ -1,6 +1,5 @@
 package miniventure.game.item;
 
-import miniventure.game.GameCore;
 import miniventure.game.network.GameProtocol.SerialItem;
 import miniventure.game.network.GameProtocol.SerialItemStack;
 import miniventure.game.texture.FetchableTextureHolder;

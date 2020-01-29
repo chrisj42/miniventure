@@ -1,4 +1,4 @@
-package miniventure.game;
+package miniventure.game.core;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
+import miniventure.game.util.ProgressPrinter;
 import miniventure.game.chat.command.CommandInputParser;
 import miniventure.game.network.GameProtocol;
 import miniventure.game.network.GameServer;

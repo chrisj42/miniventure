@@ -1,4 +1,4 @@
-package miniventure.game.client;
+package miniventure.game.core;
 
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
@@ -11,9 +11,8 @@ import java.nio.file.Path;
 import java.util.EnumMap;
 import java.util.HashMap;
 
-import miniventure.game.GameCore;
 import miniventure.game.chat.InfoMessage;
-import miniventure.game.client.FontStyle.StyleData;
+import miniventure.game.core.FontStyle.StyleData;
 import miniventure.game.network.GameClient;
 import miniventure.game.network.GameProtocol.DatalessRequest;
 import miniventure.game.network.GameProtocol.Message;

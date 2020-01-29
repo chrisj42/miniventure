@@ -1,4 +1,4 @@
-package miniventure.game.client;
+package miniventure.game.core;
 
 public class AudioException extends Exception {
 	

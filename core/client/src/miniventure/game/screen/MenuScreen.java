@@ -5,9 +5,9 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 
-import miniventure.game.client.ClientCore;
-import miniventure.game.client.FontStyle;
-import miniventure.game.client.InputHandler.Control;
+import miniventure.game.core.ClientCore;
+import miniventure.game.core.FontStyle;
+import miniventure.game.core.InputHandler.Control;
 import miniventure.game.screen.util.DiscreteViewport;
 import miniventure.game.util.RelPos;
 import miniventure.game.util.function.Action;

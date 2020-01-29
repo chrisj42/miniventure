@@ -1,6 +1,6 @@
 package miniventure.game.screen;
 
-import miniventure.game.client.ClientCore;
+import miniventure.game.core.ClientCore;
 import miniventure.game.screen.InfoScreen.InstructionsScreen;
 import miniventure.game.screen.util.BackgroundInheritor;
 

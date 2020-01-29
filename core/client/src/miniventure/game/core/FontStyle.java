@@ -1,4 +1,4 @@
-package miniventure.game.client;
+package miniventure.game.core;
 
 import miniventure.game.world.tile.Tile;
 

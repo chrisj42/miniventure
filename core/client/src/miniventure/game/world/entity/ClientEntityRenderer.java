@@ -3,8 +3,8 @@ package miniventure.game.world.entity;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import miniventure.game.client.ClientCore;
-import miniventure.game.client.FontStyle;
+import miniventure.game.core.ClientCore;
+import miniventure.game.core.FontStyle;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.blinker.Blinker;
 import miniventure.game.util.function.MapFunction;

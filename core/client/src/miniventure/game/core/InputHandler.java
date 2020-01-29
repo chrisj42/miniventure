@@ -1,4 +1,4 @@
-package miniventure.game.client;
+package miniventure.game.core;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -7,7 +7,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 
-import miniventure.game.GameCore;
 import miniventure.game.util.ArrayUtils;
 
 import com.badlogic.gdx.Gdx;

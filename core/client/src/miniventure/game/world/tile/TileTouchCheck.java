@@ -2,7 +2,7 @@ package miniventure.game.world.tile;
 
 import java.util.EnumMap;
 
-import miniventure.game.GameCore;
+import miniventure.game.core.GameCore;
 import miniventure.game.util.RelPos;
 
 import com.badlogic.gdx.graphics.Color;

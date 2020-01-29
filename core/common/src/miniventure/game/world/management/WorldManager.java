@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import miniventure.game.GameCore;
+import miniventure.game.core.GameCore;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.level.Level;
 import miniventure.game.world.tile.TileType;

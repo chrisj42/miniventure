@@ -3,7 +3,7 @@ package miniventure.game.screen;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-import miniventure.game.client.ClientCore;
+import miniventure.game.core.ClientCore;
 import miniventure.game.screen.util.BackgroundInheritor;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;

@@ -3,7 +3,7 @@ package miniventure.game.network;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
-import miniventure.game.client.ClientCore;
+import miniventure.game.core.ClientCore;
 import miniventure.game.network.PacketPipe.PacketHandler;
 import miniventure.game.network.PacketPipe.PacketPipeReader;
 import miniventure.game.screen.ErrorScreen;

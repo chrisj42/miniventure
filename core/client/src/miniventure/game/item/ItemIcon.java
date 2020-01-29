@@ -1,7 +1,7 @@
 package miniventure.game.item;
 
-import miniventure.game.client.ClientCore;
-import miniventure.game.client.FontStyle;
+import miniventure.game.core.ClientCore;
+import miniventure.game.core.FontStyle;
 import miniventure.game.util.MyUtils;
 
 import com.badlogic.gdx.graphics.Color;

@@ -1,8 +1,8 @@
 package miniventure.game.world.management;
 
-import miniventure.game.client.ClientCore;
+import miniventure.game.core.ClientCore;
 import miniventure.game.network.GameClient;
-import miniventure.game.client.GameScreen;
+import miniventure.game.core.GameScreen;
 import miniventure.game.network.LocalClient;
 import miniventure.game.network.NetworkClient;
 import miniventure.game.network.ServerManager;

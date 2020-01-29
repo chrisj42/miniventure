@@ -2,7 +2,7 @@ package miniventure.game.world.tile;
 
 import java.util.HashSet;
 
-import miniventure.game.GameCore;
+import miniventure.game.core.GameCore;
 import miniventure.game.world.tile.TileCacheTag.TileDataCache;
 import miniventure.game.world.tile.TileDataTag.TileDataMap;
 import miniventure.game.world.Point;

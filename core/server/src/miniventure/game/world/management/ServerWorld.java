@@ -10,7 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import miniventure.game.GameCore;
+import miniventure.game.core.GameCore;
 import miniventure.game.network.GameProtocol.DatalessRequest;
 import miniventure.game.network.GameProtocol.EntityAddition;
 import miniventure.game.network.GameProtocol.EntityRemoval;
@@ -18,7 +18,7 @@ import miniventure.game.network.GameProtocol.IslandReference;
 import miniventure.game.network.GameProtocol.MapRequest;
 import miniventure.game.network.GameProtocol.WorldData;
 import miniventure.game.network.GameServer;
-import miniventure.game.ServerCore;
+import miniventure.game.core.ServerCore;
 import miniventure.game.network.ServerFetcher;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.ProgressLogger;

@@ -1,6 +1,6 @@
 package miniventure.game.item;
 
-import miniventure.game.client.ClientCore;
+import miniventure.game.core.ClientCore;
 import miniventure.game.network.GameProtocol.EquipRequest;
 import miniventure.game.network.GameProtocol.ItemDropRequest;
 import miniventure.game.network.GameProtocol.SerialItem;

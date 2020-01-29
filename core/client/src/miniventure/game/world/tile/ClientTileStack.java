@@ -3,7 +3,7 @@ package miniventure.game.world.tile;
 import java.util.LinkedList;
 import java.util.List;
 
-import miniventure.game.client.ClientCore;
+import miniventure.game.core.ClientCore;
 import miniventure.game.world.tile.TileDataTag.TileDataMap;
 
 import org.jetbrains.annotations.NotNull;

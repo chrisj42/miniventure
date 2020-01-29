@@ -1,6 +1,6 @@
 package miniventure.game.item;
 
-import miniventure.game.GameCore;
+import miniventure.game.core.GameCore;
 
 import org.jetbrains.annotations.NotNull;
 

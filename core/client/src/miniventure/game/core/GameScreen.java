@@ -1,7 +1,6 @@
-package miniventure.game.client;
+package miniventure.game.core;
 
-import miniventure.game.GameCore;
-import miniventure.game.client.InputHandler.Control;
+import miniventure.game.core.InputHandler.Control;
 import miniventure.game.item.InventoryOverlay;
 import miniventure.game.screen.ChatScreen;
 import miniventure.game.screen.InputScreen;

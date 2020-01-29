@@ -1,4 +1,4 @@
-package miniventure.game;
+package miniventure.game.core;
 
 import java.nio.file.Path;
 import java.util.HashMap;

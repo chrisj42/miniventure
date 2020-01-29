@@ -3,11 +3,10 @@ package miniventure.game.item;
 import java.util.EnumMap;
 import java.util.Objects;
 
-import miniventure.game.client.ClientCore;
-import miniventure.game.client.FontStyle;
+import miniventure.game.core.ClientCore;
+import miniventure.game.core.FontStyle;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.util.DiscreteViewport;
-import miniventure.game.util.MyUtils;
 import miniventure.game.util.RelPos;
 
 import com.badlogic.gdx.Input.Keys;

@@ -7,7 +7,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.Predicate;
 
-import miniventure.game.GameCore;
+import miniventure.game.core.GameCore;
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.chat.InfoMessageBuilder;
 import miniventure.game.chat.InfoMessageLine;

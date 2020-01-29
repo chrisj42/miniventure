@@ -1,6 +1,6 @@
 package miniventure.game.screen.util;
 
-import miniventure.game.client.ClientCore;
+import miniventure.game.core.ClientCore;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;

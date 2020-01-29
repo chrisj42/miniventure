@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-import miniventure.game.GameCore;
+import miniventure.game.core.GameCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.tile.TileDataTag.TileDataMap;
 import miniventure.game.world.Point;

@@ -2,12 +2,10 @@ package miniventure.game.network;
 
 import java.util.HashMap;
 
-import miniventure.game.GameCore;
-import miniventure.game.chat.InfoMessage;
-import miniventure.game.client.AudioException;
-import miniventure.game.client.ClientCore;
+import miniventure.game.core.GameCore;
+import miniventure.game.core.AudioException;
+import miniventure.game.core.ClientCore;
 import miniventure.game.item.CraftingScreen;
-import miniventure.game.network.GameProtocol;
 import miniventure.game.network.PacketPipe.PacketPipeWriter;
 import miniventure.game.screen.ChatScreen;
 import miniventure.game.screen.ErrorScreen;

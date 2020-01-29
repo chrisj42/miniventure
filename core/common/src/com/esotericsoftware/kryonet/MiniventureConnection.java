@@ -4,7 +4,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.channels.SocketChannel;
 
-import miniventure.game.GameCore;
+import miniventure.game.core.GameCore;
 
 public class MiniventureConnection extends Connection {
 	

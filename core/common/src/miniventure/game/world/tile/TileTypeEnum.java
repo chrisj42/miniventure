@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.util.Arrays;
 import java.util.EnumSet;
 
-import miniventure.game.GameCore;
+import miniventure.game.core.GameCore;
 import miniventure.game.world.management.WorldManager;
 import miniventure.game.world.worldgen.island.ProtoTile;
 import miniventure.game.world.worldgen.island.TileProcessor;

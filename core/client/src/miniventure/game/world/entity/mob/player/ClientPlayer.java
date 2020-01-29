@@ -3,10 +3,10 @@ package miniventure.game.world.entity.mob.player;
 import java.util.EnumMap;
 import java.util.HashMap;
 
-import miniventure.game.GameCore;
-import miniventure.game.client.ClientCore;
-import miniventure.game.client.InputHandler.Control;
-import miniventure.game.client.InputHandler.Modifier;
+import miniventure.game.core.GameCore;
+import miniventure.game.core.ClientCore;
+import miniventure.game.core.InputHandler.Control;
+import miniventure.game.core.InputHandler.Modifier;
 import miniventure.game.item.ClientItem;
 import miniventure.game.item.ClientPlayerInventory;
 import miniventure.game.item.CraftingScreen;

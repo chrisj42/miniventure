@@ -1,6 +1,6 @@
 package miniventure.game.texture;
 
-import miniventure.game.GameCore;
+import miniventure.game.core.GameCore;
 import miniventure.game.util.function.MapFunction;
 
 public enum ItemTextureSource {

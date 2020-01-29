@@ -1,6 +1,6 @@
 package miniventure.game.item;
 
-import miniventure.game.GameCore;
+import miniventure.game.core.GameCore;
 import miniventure.game.item.ItemType.EnumItem;
 import miniventure.game.texture.FetchableTextureHolder;
 import miniventure.game.texture.ItemTextureSource;
@@ -14,7 +14,6 @@ import miniventure.game.world.tile.TileTypeEnum;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static miniventure.game.item.PlacementAttempt.PlacementAction;
 import static miniventure.game.item.PlacementAttempt.PlacementAction.tile;
 import static miniventure.game.item.PlacementAttempt.PlacementCheck;
 import static miniventure.game.item.PlacementAttempt.getAttempt;

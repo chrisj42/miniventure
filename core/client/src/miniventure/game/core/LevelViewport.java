@@ -1,8 +1,7 @@
-package miniventure.game.client;
+package miniventure.game.core;
 
 import java.util.List;
 
-import miniventure.game.GameCore;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.entity.mob.player.ClientPlayer;

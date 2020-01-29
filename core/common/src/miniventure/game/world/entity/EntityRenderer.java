@@ -3,9 +3,8 @@ package miniventure.game.world.entity;
 import java.util.EnumMap;
 import java.util.HashMap;
 
-import miniventure.game.GameCore;
+import miniventure.game.core.GameCore;
 import miniventure.game.item.Item;
-import miniventure.game.network.GameProtocol.SerialItem;
 import miniventure.game.texture.ItemTextureSource;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;

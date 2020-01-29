@@ -2,7 +2,7 @@ package miniventure.game.chat.command;
 
 import java.util.Arrays;
 
-import miniventure.game.GameCore;
+import miniventure.game.core.GameCore;
 import miniventure.game.chat.MessageBuilder;
 import miniventure.game.chat.command.Argument.ArgValidator;
 import miniventure.game.network.GameProtocol.DatalessRequest;
