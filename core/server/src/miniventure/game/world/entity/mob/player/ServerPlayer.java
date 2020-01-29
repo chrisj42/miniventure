@@ -40,6 +40,8 @@ import com.badlogic.gdx.utils.Array;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import static miniventure.game.network.GameProtocol.forPacket;
+
 public class ServerPlayer extends ServerMob implements Player {
 	
 	private final EnumMap<Stat, Integer> stats = new EnumMap<>(Stat.class);
@@ -70,6 +72,7 @@ public class ServerPlayer extends ServerMob implements Player {
 	
 	protected ServerPlayer(@NotNull ServerWorld world, EntityDataSet allData, final Version version, ValueAction<EntityDataSet> modifier) {
 		super(world, allData, version, data -> {
+			modifier.act(data);
 			data.get("mob").add("sprite", "player");
 		});
 		SerialHashMap data = allData.get("player");
@@ -143,12 +146,12 @@ public class ServerPlayer extends ServerMob implements Player {
 	// private InventoryUpdate inventory.getUpdate() { return new InventoryUpdate(inventory.serialize()); }
 	// public HotbarUpdate getHotbarUpdate() { return new HotbarUpdate(hands.serialize(), inventory.getPercentFilled()); }
 	
-	private <T> void forPacket(Object packet, DatalessRequest type, boolean sync, Action response) {
-		GameProtocol.forPacket(packet, type, response, sync ? getWorld()::postRunnable : null);
-	}
-	private <T> void forPacket(Object packet, Class<T> type, boolean sync, ValueAction<T> response) {
-		GameProtocol.forPacket(packet, type, response, sync ? getWorld()::postRunnable : null);
-	}
+	/*private <T> void forPacket(Object packet, DatalessRequest type, Action response) {
+		GameProtocol.forPacket(packet, type, response);
+	}*/
+	/*private <T> void forPacket(Object packet, Class<T> type, ValueAction<T> response) {
+		GameProtocol.forPacket(packet, type, response);
+	}*/
 	
 	// this allows a lot of the packet handling that deals with inner workings of the ServerPlayer to occur right within the ServerPlayer class, and not require it to have a bunch of public methods that only GameServer ever uses.
 	@Override
@@ -156,9 +159,9 @@ public class ServerPlayer extends ServerMob implements Player {
 		ServerWorld world = getWorld();
 		
 		// TODO don't allow client to update server stats
-		forPacket(packet, StatUpdate.class, true, this::loadStat);
+		forPacket(packet, StatUpdate.class, this::loadStat);
 		
-		forPacket(packet, MovementRequest.class, true, move -> {
+		forPacket(packet, MovementRequest.class, move -> {
 			/*Vector3 loc = client.getLocation();
 			if(move.getMoveDist().len() < 1 && !move.startPos.variesFrom(client)) {
 				// move to start pos
@@ -179,13 +182,13 @@ public class ServerPlayer extends ServerMob implements Player {
 			// note that the server will always have the say when it comes to which level the player should be on.
 		});
 		
-		forPacket(packet, InteractRequest.class, true, r -> {
+		forPacket(packet, InteractRequest.class, r -> {
 			// if(r.playerPosition.variesFrom(client))
 			// 	connection.send(new PositionUpdate(client)); // fix the player's position
 			doInteract(r.dir, r.actionPos, getHeldItem(r.hotbarIndex), r.hotbarIndex, r.attack);
 		});
 		
-		forPacket(packet, ItemDropRequest.class, true, drop -> {
+		forPacket(packet, ItemDropRequest.class, drop -> {
 			if(!dropItem(drop)) {
 				// drop failed, i.e. client allowed it when it shouldn't have; update client inv
 				connection.send(invManager.getUpdate(false));
@@ -193,11 +196,11 @@ public class ServerPlayer extends ServerMob implements Player {
 			// if successful, do nothing, because client will have pre-maturely removed the item itself.
 		});
 		
-		forPacket(packet, InventoryMovement.class, true, req -> {
+		forPacket(packet, InventoryMovement.class, req -> {
 			inventory.moveItem(req.oldIdx, req.newIdx);
 		});
 		
-		forPacket(packet, EquipRequest.class, true, req -> {
+		forPacket(packet, EquipRequest.class, req -> {
 			if(req.equip)
 				invManager.equipItem(req.equipmentType, req.invIdx);
 			else
@@ -206,7 +209,7 @@ public class ServerPlayer extends ServerMob implements Player {
 			getServer().sendToPlayer(this, invManager.getUpdate(true));
 		});
 		
-		forPacket(packet, DatalessRequest.Recipes, true, () -> {
+		forPacket(packet, DatalessRequest.Recipes, () -> {
 			lastQueried = null; // opened crafting screen
 			connection.send(new RecipeUpdate(
 				ItemRecipeSet.HAND.getSerialRecipes(),
@@ -214,7 +217,7 @@ public class ServerPlayer extends ServerMob implements Player {
 			));
 		});
 		
-		forPacket(packet, RecipeSelectionRequest.class, true, req -> {
+		forPacket(packet, RecipeSelectionRequest.class, req -> {
 			if(req.isItem) {
 				ItemRecipeSet set = ItemRecipeSet.values[req.setOrdinal];
 				ItemRecipe recipe = set.getRecipe(req.recipeIndex);
@@ -253,7 +256,7 @@ public class ServerPlayer extends ServerMob implements Player {
 			}
 		});
 		
-		/*forPacket(packet, BuildRequest.class, true, req -> {
+		/*forPacket(packet, BuildRequest.class, req -> {
 			ObjectRecipeSet set = ObjectRecipeSet.values[req.setOrdinal];
 			ObjectRecipe recipe = set.getRecipe(req.recipeIndex);
 			
@@ -270,12 +273,12 @@ public class ServerPlayer extends ServerMob implements Player {
 			}
 		});*/
 		
-		forPacket(packet, DatalessRequest.Respawn, true, () -> {
+		forPacket(packet, DatalessRequest.Respawn, () -> {
 			world.respawnPlayer(this);
 			connection.send(getSpawnData());
 		});
 		
-		forPacket(packet, SelfHurt.class, true, hurt -> {
+		forPacket(packet, SelfHurt.class, hurt -> {
 			// assumed that the client has hurt itself in some way
 			attackedBy(this, null, hurt.dmg);
 		});

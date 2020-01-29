@@ -144,7 +144,9 @@ public class ServerWorld extends WorldManager {
 		if(!core.isRunning() || core.isUpdateThread())
 			r.run();
 		else if(allowAsync)
-			runnables.add(r);
+			synchronized (runnables) {
+				runnables.add(r);
+			}
 		else {
 			synchronized (updateLock) {
 				r.run();
@@ -207,7 +209,7 @@ public class ServerWorld extends WorldManager {
 	/** Saves the world to file; specific to ServerWorld. */
 	public void saveWorld() {
 		// update island store caches
-		postRunnable(() -> {
+		// postRunnable(() -> {
 			loadedLevels.act(map -> {
 				for(ServerLevel level: map.values())
 					if(level != null) // I don't know if I should catch this, it shouldn't happen to begin with...
@@ -221,7 +223,7 @@ public class ServerWorld extends WorldManager {
 			// }
 			
 			WorldFileInterface.saveWorld(new WorldDataSet(worldPath, lockRef, worldSeed, gameTime, daylightOffset, Version.CURRENT, pdata, islandStores));
-		});
+		// });
 	}
 	
 	/*public void savePlayer(@NotNull ServerPlayer player) {
@@ -244,7 +246,7 @@ public class ServerWorld extends WorldManager {
 	
 	@Override
 	public void exitWorld() {
-		postRunnable(() -> {
+		// postRunnable(() -> {
 			if(!worldLoaded) return;
 			server.stop(true);
 			worldLoaded = false;
@@ -264,7 +266,7 @@ public class ServerWorld extends WorldManager {
 				// lockRef = null;
 				// worldPath = null;
 			}
-		});
+		// });
 	}
 	
 	

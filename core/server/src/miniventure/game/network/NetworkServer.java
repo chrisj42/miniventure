@@ -108,12 +108,12 @@ public class NetworkServer extends GameServer {
 		
 		// here, split off into an update thread operation
 		
-		for(ServerPlayer p: getPlayers()) {
-			if(p.getName().equals(name)) {
+		// for(ServerPlayer p: getPlayers()) {
+			if(getPlayerByName(name) != null) {
 				connection.sendTCP(new LoginFailure("A player named '"+name+"' is already logged in."));
 				return;
 			}
-		}
+		// }
 		
 		// login data validated
 		
