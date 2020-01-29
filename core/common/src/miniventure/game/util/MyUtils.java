@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 import miniventure.game.core.GameCore;
 import miniventure.game.util.function.Action;
 import miniventure.game.util.function.MapFunction;
+import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.tile.TileTypeEnum;
 
 import com.badlogic.gdx.audio.Music;
@@ -278,6 +279,27 @@ public final class MyUtils {
 		try {
 			Thread.sleep(millis);
 		} catch (InterruptedException ignored) {
+		}
+	}
+	
+	// suspends the current thread until the given action is completed in a separate thread, started by the thread starter.
+	public static void waitUntilFinished(ValueAction<Runnable> threadStarter, Runnable action) {
+		final ValueWrapper<Boolean> finished = new ValueWrapper<>(false);
+		synchronized (finished) {
+			threadStarter.act(() -> {
+				action.run();
+				synchronized (finished) {
+					finished.value = true;
+					finished.notify();
+				}
+			});
+			
+			while(!finished.value) {
+				try {
+					finished.wait();
+				} catch (InterruptedException ignored) {
+				}
+			}
 		}
 	}
 	

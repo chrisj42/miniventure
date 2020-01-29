@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import miniventure.game.core.ClientCore;
+import miniventure.game.network.GameProtocol.LevelChunk;
 import miniventure.game.screen.RespawnScreen;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.management.ClientWorld;
@@ -26,12 +27,15 @@ import org.jetbrains.annotations.Nullable;
 public class ClientLevel extends RenderLevel {
 	
 	@NotNull private ClientWorld world;
+	private final boolean[][] loaded;
 	
 	private final Map<ClientTile, CachedTileUpdate> tileUpdates = Collections.synchronizedMap(new HashMap<>());
 	
-	public ClientLevel(@NotNull ClientWorld world, int levelId, TileData[][] tiles) {
-		super(world, levelId, tiles, ClientTile::new);
+	public ClientLevel(@NotNull ClientWorld world, int levelId, int width, int height) {
+		super(world, levelId, width, height, ClientTile::new);
 		this.world = world;
+		
+		loaded = new boolean[width][height];
 	}
 	
 	@Override @NotNull
@@ -39,6 +43,8 @@ public class ClientLevel extends RenderLevel {
 	
 	@Override
 	public ClientTile getTile(float x, float y) { return (ClientTile) super.getTile(x, y); }
+	@Override
+	public ClientTile getTile(int x, int y) { return (ClientTile) super.getTile(x, y); }
 	
 	@Override
 	public void render(Rectangle renderSpace, SpriteBatch batch, float delta, Vector2 posOffset) {
@@ -54,6 +60,14 @@ public class ClientLevel extends RenderLevel {
 			entities.removeValue(ClientCore.getWorld().getMainPlayer(), true);
 		
 		render(tiles, entities, batch, delta, posOffset);
+	}
+	
+	public void setTiles(LevelChunk data) {
+		for (int i = 0; i < data.tileData.length; i++) {
+			for (int j = 0; j < data.tileData[i].length; j++) {
+				getTile(data.offset.x + i, data.offset.y + j).apply(data.tileData[i][j], null);
+			}
+		}
 	}
 	
 	@SuppressWarnings("unchecked")

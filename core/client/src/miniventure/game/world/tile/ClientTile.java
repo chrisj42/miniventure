@@ -10,11 +10,17 @@ import org.jetbrains.annotations.NotNull;
 
 public class ClientTile extends RenderTile {
 	
-	public ClientTile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, @NotNull TileDataMap[] data) {
+	/*public ClientTile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, @NotNull TileDataMap[] data) {
 		this((ClientLevel)level, x, y, types, data);
 	}
 	public ClientTile(@NotNull ClientLevel level, int x, int y, @NotNull TileTypeEnum[] types, @NotNull TileDataMap[] data) {
 		super(level, x, y, types, data);
+	}*/
+	public ClientTile(@NotNull Level level, int x, int y) {
+		this((ClientLevel)level, x, y);
+	}
+	public ClientTile(@NotNull ClientLevel level, int x, int y) {
+		super(level, x, y, new TileTypeEnum[0], null);
 	}
 	
 	@NotNull @Override

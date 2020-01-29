@@ -35,6 +35,7 @@ import org.jetbrains.annotations.Nullable;
 /** @noinspection EqualsAndHashcode*/
 public class ServerLevel extends Level {
 	
+	public static final int CHUNK_SIZE = 20;
 	//private static final float TILE_REFRESH_INTERVAL = 500; // every this many seconds, all tiles within the below radius of any keep-alive is updated.
 	//private static final int TILE_REFRESH_RADIUS = 4; // the radius mentioned above.
 	
@@ -71,6 +72,8 @@ public class ServerLevel extends Level {
 	
 	@Override
 	public ServerTile getTile(float x, float y) { return (ServerTile) super.getTile(x, y); }
+	@Override
+	public ServerTile getTile(int x, int y) { return (ServerTile) super.getTile(x, y); }
 	
 	/** @noinspection BooleanMethodIsAlwaysInverted*/
 	public boolean isPreload() { return preload; }

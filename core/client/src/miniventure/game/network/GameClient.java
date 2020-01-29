@@ -13,6 +13,7 @@ import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MapScreen;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.ValueWrapper;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClientEntity;
 import miniventure.game.world.entity.ClientEntityRenderer;
@@ -54,26 +55,37 @@ public abstract class GameClient implements GameProtocol {
 		if(object instanceof WorldData)
 			world.init((WorldData)object);
 		
-		if(object instanceof LevelData) {
+		forPacket(object, LevelInfo.class, info -> {
+			Gdx.app.postRunnable(() -> {
+				LoadingScreen loader = new LoadingScreen();
+				loader.pushMessage("reading level data", true);
+				ClientCore.setScreen(loader);
+				world.setLevel(info, loader);
+			});
+		});
+		
+		forPacket(object, LevelChunk.class, chunk -> {
+			ClientLevel level = world.getLevel();
+			if(level == null) return;
+			level.setTiles(chunk);
+		});
+		
+		/*if(object instanceof LevelData) {
 			GameCore.debug("client received level");
+			LoadingScreen loader;
 			MenuScreen screen = ClientCore.getScreen();
-			if(screen instanceof LoadingScreen) {
-				LoadingScreen loader = (LoadingScreen) screen;
-				world.setLevel((LevelData)object, loader);
-			} else {
-				suspendPackets = true; // prevents spawn data from being read and screen being set to null before the render thread has a chance to set the screen in the first place; extremely unlikely that it would ever happen given how long it takes to set the level, but I really don't even want the possibility of a race condition. Even though the screen being set to null is in another postRunnable so it's actually safe already.
-				Gdx.app.postRunnable(() -> {
-					LoadingScreen loader = new LoadingScreen();
-					ClientCore.setScreen(loader);
-					new Thread(() -> {
-						Thread.yield();
-						world.setLevel((LevelData)object, loader);
-						suspendPackets = false;
-					}).start();
+			if(screen instanceof LoadingScreen)
+				loader = (LoadingScreen) screen;
+			else {
+				ValueWrapper<LoadingScreen> loadWrapper = new ValueWrapper<>(null);
+				MyUtils.waitUntilFinished(Gdx.app::postRunnable, () -> {
+					loadWrapper.value = new LoadingScreen();
+					ClientCore.setScreen(loadWrapper.value);
 				});
-				return;
+				loader = loadWrapper.value;
 			}
-		}
+			world.setLevel((LevelData)object, loader);
+		}*/
 		
 		if(object == DatalessRequest.Level_Loading) {
 			MenuScreen screen = ClientCore.getScreen();

@@ -47,9 +47,9 @@ public interface GameProtocol {
 	
 	int PORT = 8405;
 	String HOST = "Host"; // name of host player; used only when joining a game in the same JVM. Other players are not allowed to specify this name.
-	int objectBufferSize = 2_000_000;
-	int clientWriteBufferSize = 2_000_000;
-	int serverWriteBufferSize = clientWriteBufferSize * 3;
+	int objectBufferSize = 5000;
+	int clientWriteBufferSize = 1000;
+	int serverWriteBufferSize = 10_000;
 	
 	boolean lag = false;
 	int lagMin = lag?10:0, lagMax = lag?100:0;
@@ -222,6 +222,26 @@ public interface GameProtocol {
 			this.levelId = levelId;
 			this.width = width;
 			this.height = height;
+		}
+	}
+	
+	class LevelChunk {
+		public final Point offset;
+		public final TileData[][] tileData;
+		
+		private LevelChunk() { this(null, null); }
+		public LevelChunk(Point offset, int width, int height, TileData[][] allData) {
+			this.offset = offset;
+			this.tileData = new TileData[width][height];
+			for (int i = 0; i < width; i++) {
+				for (int j = 0; j < height; j++) {
+					tileData[i][j] = allData[i + offset.x][j + offset.y];
+				}
+			}
+		}
+		public LevelChunk(Point offset, TileData[][] tileData) {
+			this.offset = offset;
+			this.tileData = tileData;
 		}
 	}
 	

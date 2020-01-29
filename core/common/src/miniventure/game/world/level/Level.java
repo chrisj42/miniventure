@@ -6,6 +6,7 @@ import java.util.Set;
 
 import miniventure.game.core.GameCore;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.function.FetchFunction;
 import miniventure.game.world.tile.TileDataTag.TileDataMap;
 import miniventure.game.world.Point;
 import miniventure.game.world.Taggable;
@@ -54,6 +55,11 @@ public abstract class Level implements Taggable<Level> {
 		Tile get(Level level, int x, int y, TileTypeEnum[] types, TileDataMap[] dataMaps);
 	}
 	
+	@FunctionalInterface
+	public interface TileFetcher {
+		Tile get(Level level, int x, int y);
+	}
+	
 	private Level(@NotNull WorldManager world, int levelId, int width, int height) {
 		this.world = world;
 		this.levelId = levelId;
@@ -85,6 +91,17 @@ public abstract class Level implements Taggable<Level> {
 			}
 		}
 		GameCore.debug(world.getClass().getSimpleName()+": tile data loaded.");
+	}
+	
+	protected Level(@NotNull WorldManager world, int levelId, int width, int height, TileFetcher tileFetcher) {
+		this(world, levelId, width, height);
+		GameCore.debug(world.getClass().getSimpleName()+": loading level "+levelId+" tile placeholders...");
+		for(int x = 0; x < width; x++) {
+			for(int y = 0; y < height; y++) {
+				tiles[x][y] = tileFetcher.get(this, x, y);
+			}
+		}
+		GameCore.debug(world.getClass().getSimpleName()+": tile placeholders loaded.");
 	}
 	
 	public int getWidth() { return width; }
@@ -176,15 +193,17 @@ public abstract class Level implements Taggable<Level> {
 	
 	public Tile getTile(Rectangle rect) { return getTile(rect.getCenter(new Vector2())); }
 	public Tile getTile(Vector2 pos) { return getTile(pos.x, pos.y); }
-	public Tile getTile(float x, float y) {
+	public Tile getTile(float x, float y) { return getTile((int)x, (int)y); }
+	public Tile getTile(Point pos) { return getTile(pos.x, pos.y); }
+	public Tile getTile(int x, int y) {
 		if(x < 0 || y < 0 || x >= getWidth() || y >= getHeight())
 			return null;
 			// System.err.println("out of bounds tile request on level "+levelId+" at "+x+','+y+"; using nearest tile");
 		
-		int xt = (int)x;//MyUtils.clamp((int)x, 0, getWidth()-1);
-		int yt = (int)y;//MyUtils.clamp((int)y, 0, getHeight()-1);
+		// int xt = (int)x;//MyUtils.clamp((int)x, 0, getWidth()-1);
+		// int yt = (int)y;//MyUtils.clamp((int)y, 0, getHeight()-1);
 		
-		return tiles[xt][yt];
+		return tiles[x][y];
 		
 		// int chunkX = xt / Chunk.SIZE;
 		// int chunkY = yt / Chunk.SIZE;

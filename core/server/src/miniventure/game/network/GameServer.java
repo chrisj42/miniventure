@@ -18,6 +18,7 @@ import miniventure.game.network.PacketPipe.PacketPipeWriter;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
+import miniventure.game.world.Point;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ServerEntity;
@@ -29,6 +30,7 @@ import miniventure.game.world.level.Level;
 import miniventure.game.world.level.ServerLevel;
 import miniventure.game.world.management.ServerWorld;
 import miniventure.game.world.tile.Tile;
+import miniventure.game.world.tile.TileStack.TileData;
 import miniventure.game.world.tile.TileTypeEnum;
 
 import com.badlogic.gdx.graphics.Color;
@@ -222,6 +224,7 @@ public abstract class GameServer implements GameProtocol {
 			// synchronized (playerLock) {
 				connectionToPlayerInfoMap.remove(connection);
 				playerToConnectionMap.remove(player);
+				playersByName.remove(player.getName());
 			// }
 			broadcastGlobal(new Message(player.getName()+" left the server.", STATUS_MSG_COLOR));
 			//System.out.println("server disconnected from client: " + connection.getRemoteAddressTCP().getHostString());
@@ -460,10 +463,22 @@ public abstract class GameServer implements GameProtocol {
 		}
 		
 		// world.postRunnable(() -> {
-			connection.send(new LevelData(level));
-			connection.send(player.getSpawnData());
-			for(Entity e: level.getEntities())
-				connection.send(new EntityAddition(e));
+		connection.send(new LevelInfo(level.getLevelId(), level.getWidth(), level.getHeight()));
+		
+		TileData[][] tileData = level.getTileData(false);
+		for (int i = 0; i < tileData.length; i += ServerLevel.CHUNK_SIZE) {
+			for (int j = 0; j < tileData[i].length; j += ServerLevel.CHUNK_SIZE) {
+				Point offset = new Point(i, j);
+				int width = Math.min(ServerLevel.CHUNK_SIZE, tileData.length - i);
+				int height = Math.min(ServerLevel.CHUNK_SIZE, tileData[i].length - j);
+				connection.send(new LevelChunk(offset, width, height, tileData));
+				MyUtils.sleep(2);
+			}
+		}
+		
+		for(Entity e: level.getEntities())
+			connection.send(new EntityAddition(e));
+		connection.send(player.getSpawnData());
 		// });
 	}
 	

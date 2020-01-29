@@ -1,5 +1,7 @@
 package com.esotericsoftware.kryonet;
 
+import java.io.IOException;
+
 import miniventure.game.core.GameCore;
 
 public class MiniventureServer extends Server {
@@ -31,6 +33,12 @@ public class MiniventureServer extends Server {
 		GameCore.debug("Starting Network server update thread");
 		super.run();
 		GameCore.debug("Ending Network server update thread");
+	}
+	
+	@Override
+	public void update(int timeout) throws IOException {
+		super.update(timeout);
+		
 	}
 	
 	@Override

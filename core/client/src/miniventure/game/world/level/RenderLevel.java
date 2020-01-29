@@ -24,8 +24,8 @@ public abstract class RenderLevel extends Level {
 		super(world, levelId, tileTypes, tileFetcher);
 	}
 	
-	protected RenderLevel(@NotNull LevelManager world, int levelId, TileData[][] tileData, TileLoader tileFetcher) {
-		super(world, levelId, tileData, tileFetcher);
+	protected RenderLevel(@NotNull LevelManager world, int levelId, int width, int height, TileFetcher tileFetcher) {
+		super(world, levelId, width, height, tileFetcher);
 	}
 	
 	@Override @NotNull

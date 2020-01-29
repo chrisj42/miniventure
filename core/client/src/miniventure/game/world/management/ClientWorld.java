@@ -3,6 +3,7 @@ package miniventure.game.world.management;
 import miniventure.game.core.ClientCore;
 import miniventure.game.network.GameClient;
 import miniventure.game.core.GameScreen;
+import miniventure.game.network.GameProtocol.LevelInfo;
 import miniventure.game.network.LocalClient;
 import miniventure.game.network.NetworkClient;
 import miniventure.game.network.ServerManager;
@@ -219,11 +220,11 @@ public class ClientWorld extends LevelManager {
 	/*  --- LEVEL MANAGEMENT --- */
 	
 	
-	public void setLevel(LevelData data, LoadingScreen loader) {
+	public void setLevel(LevelInfo data, LoadingScreen loader) {
 		mainPlayer = null;
-		loader.pushMessage("Parsing new level data");
-		setLevel(new ClientLevel(this, data.levelId, data.tiles));
-		loader.editMessage("awaiting spawn data", true);
+		// loader.pushMessage("Parsing new level data");
+		setLevel(new ClientLevel(this, data.levelId, data.width, data.height));
+		// loader.editMessage("awaiting spawn data", true);
 	}
 	
 	/*public void loadChunk(ChunkData data) {

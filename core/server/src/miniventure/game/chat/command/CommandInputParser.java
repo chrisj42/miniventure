@@ -63,22 +63,7 @@ public class CommandInputParser implements Runnable {
 				break;
 			}
 			
-			synchronized (executionLock) {
-				executing = true;
-				world.postRunnable(() -> {
-					executeCommand(world, input, null, out, err);
-					synchronized (executionLock) {
-						executing = false;
-						executionLock.notify();
-					}
-				});
-				while(executing) {
-					try {
-						executionLock.wait();
-					} catch (InterruptedException ignored) {
-					}
-				}
-			}
+			MyUtils.waitUntilFinished(world::postRunnable, () -> executeCommand(world, input, null, out, err));
 			
 			out.println();
 		}
