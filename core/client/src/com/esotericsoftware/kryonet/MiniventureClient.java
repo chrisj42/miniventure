@@ -28,4 +28,17 @@ public class MiniventureClient extends Client {
 		super.run();
 		GameCore.debug("Ending Network client update thread");
 	}
+	
+	private int maxSize = 0;
+	
+	@Override
+	public int sendTCP(Object object) {
+		int sent = super.sendTCP(object);
+		
+		if(sent > maxSize) {
+			GameCore.debug("new largest packet of "+sent+" bytes is of type "+object.getClass().getSimpleName());
+			maxSize = sent;
+		}
+		return sent;
+	}
 }

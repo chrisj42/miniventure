@@ -4,6 +4,8 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.channels.SocketChannel;
 
+import miniventure.game.GameCore;
+
 public class MiniventureConnection extends Connection {
 	
 	protected MiniventureConnection() {
@@ -23,5 +25,17 @@ public class MiniventureConnection extends Connection {
 			}
 		}
 		return null;
+	}
+	
+	private int maxSize = 0;
+	
+	@Override
+	public int sendTCP(Object object) {
+		int sent = super.sendTCP(object);
+		if(sent > maxSize) {
+			GameCore.debug("new largest packet of "+sent+" bytes is of type "+object.getClass().getSimpleName());
+			maxSize = sent;
+		}
+		return sent;
 	}
 }
