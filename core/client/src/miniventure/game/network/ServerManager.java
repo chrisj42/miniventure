@@ -1,4 +1,4 @@
-package miniventure.game.client;
+package miniventure.game.network;
 
 import miniventure.game.network.PacketPipe.PacketPipeReader;
 import miniventure.game.network.PacketPipe.PacketPipeWriter;

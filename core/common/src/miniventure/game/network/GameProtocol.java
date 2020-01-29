@@ -8,13 +8,11 @@ import java.util.Objects;
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.chat.InfoMessageLine;
 import miniventure.game.item.EquipmentType;
-import miniventure.game.item.ItemDataTag;
 import miniventure.game.item.ItemStack;
 import miniventure.game.texture.FetchableTextureHolder;
 import miniventure.game.texture.ItemTextureSource;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.Version;
-import miniventure.game.util.customenum.SerialEnumMap;
 import miniventure.game.util.function.Action;
 import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.Point;
@@ -210,6 +208,20 @@ public interface GameProtocol {
 			this.gameTime = gameTime;
 			this.daylightOffset = daylightOffset;
 			this.doDaylightCycle = doDaylightCycle;
+		}
+	}
+	
+	// sent to a client in preparation of loading a new level
+	class LevelInfo {
+		public final int levelId;
+		public final int width;
+		public final int height;
+		
+		private LevelInfo() { this(0, 0, 0); }
+		public LevelInfo(int levelId, int width, int height) {
+			this.levelId = levelId;
+			this.width = width;
+			this.height = height;
 		}
 	}
 	

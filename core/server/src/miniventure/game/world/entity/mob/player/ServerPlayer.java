@@ -9,7 +9,7 @@ import miniventure.game.item.ToolItem.ToolType;
 import miniventure.game.network.GameProtocol;
 import miniventure.game.network.GameProtocol.*;
 import miniventure.game.network.PacketPipe.PacketPipeWriter;
-import miniventure.game.server.GameServer;
+import miniventure.game.network.GameServer;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.SerialHashMap;
 import miniventure.game.util.Version;

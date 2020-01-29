@@ -1,10 +1,9 @@
-package miniventure.game.client;
+package miniventure.game.network;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
-import miniventure.game.network.GameProtocol;
-import miniventure.game.network.PacketPipe;
+import miniventure.game.client.ClientCore;
 import miniventure.game.network.PacketPipe.PacketHandler;
 import miniventure.game.network.PacketPipe.PacketPipeReader;
 import miniventure.game.screen.ErrorScreen;

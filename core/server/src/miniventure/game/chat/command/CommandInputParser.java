@@ -12,6 +12,7 @@ import miniventure.game.GameCore;
 import miniventure.game.chat.ConsoleMessageBuilder;
 import miniventure.game.chat.MessageBuilder;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.function.Action;
 import miniventure.game.util.function.MapFunction;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.management.ServerWorld;
@@ -32,6 +33,9 @@ public class CommandInputParser implements Runnable {
 	
 	private ConsoleMessageBuilder out, err;
 	
+	private final Object executionLock = new Object();
+	private boolean executing = false;
+	
 	public CommandInputParser(@NotNull ServerWorld world) {
 		this.world = world;
 		
@@ -48,7 +52,7 @@ public class CommandInputParser implements Runnable {
 		while(shouldRun) {
 			out.print("Enter a command: ");
 			out.flush();
-			String input = "";
+			String input;
 			try {
 				while(shouldRun && !in.ready()) {
 					MyUtils.sleep(5);
@@ -57,10 +61,26 @@ public class CommandInputParser implements Runnable {
 				input = in.readLine();
 			} catch(IOException e) {
 				e.printStackTrace();
+				break;
 			}
-			if(!shouldRun) break;
 			
-			executeCommand(world, input, null, out, err);
+			synchronized (executionLock) {
+				executing = true;
+				world.postRunnable(() -> {
+					executeCommand(world, input, null, out, err);
+					synchronized (executionLock) {
+						executing = false;
+						executionLock.notify();
+					}
+				});
+				while(executing) {
+					try {
+						executionLock.wait();
+					} catch (InterruptedException ignored) {
+					}
+				}
+			}
+			
 			out.println();
 		}
 		
@@ -114,10 +134,10 @@ public class CommandInputParser implements Runnable {
 		
 		String commandName = args.remove(0);
 		Command command = Command.getCommand(commandName);
-		if(command == null && commandName.startsWith("/")) {
+		/*if(command == null && commandName.startsWith("/")) {
 			commandName = commandName.substring(1);
 			command = Command.getCommand(commandName);
-		}
+		}*/
 		if(command == null)
 			err.println("Command not recognized: \""+commandName+"\". Type \"/help\" for a list of commands.");
 		else

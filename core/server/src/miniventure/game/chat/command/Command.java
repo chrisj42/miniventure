@@ -9,7 +9,7 @@ import miniventure.game.network.GameProtocol.DatalessRequest;
 import miniventure.game.network.GameProtocol.Message;
 import miniventure.game.network.GameProtocol.Ping;
 import miniventure.game.network.GameProtocol.PositionUpdate;
-import miniventure.game.server.GameServer;
+import miniventure.game.network.GameServer;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
@@ -125,13 +125,13 @@ public enum Command {
 			// pings always come from the server.
 			Ping ping = new Ping(executor == null ? null : executor.getName());
 			if(executor == null)
-				world.getServer().broadcast(ping);
+				world.getServer().broadcastGlobal(ping);
 			else
 				world.getServer().sendToPlayer(executor, new Ping(executor.getName()));
 		}),
 		new CommandUsageForm(true, "all", "Tests connection speed of all clients.", SERVER_ONLY,
 			(world, executor, args, out, err) ->
-				world.getServer().broadcast(new Ping(executor == null ? null : executor.getName())),
+				world.getServer().broadcastGlobal(new Ping(executor == null ? null : executor.getName())),
 			ArgValidator.exactString(false, "all")
 		),
 		new CommandUsageForm(true, "<players...>", "Tests connection speed of all specified players in the given order.", SERVER_ONLY,
@@ -156,11 +156,9 @@ public enum Command {
 	
 	SAVE("Save the world to file.",
 		new CommandUsageForm(true, "", "Save the current state of the game to file, so it can be loaded later.", (world, executor, args, out, err) -> {
-			world.postRunnable(() -> {
-				world.saveWorld();
-				System.out.println("World Saved."); // for server console, and debug in general
-				world.getServer().broadcast(new Message("World Saved.", GameServer.STATUS_MSG_COLOR));
-			});
+			world.saveWorld();
+			System.out.println("World Saved."); // for server console, and debug in general
+			world.getServer().broadcastGlobal(new Message("World Saved.", GameServer.STATUS_MSG_COLOR));
 		})
 	),
 	

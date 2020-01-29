@@ -5,7 +5,7 @@ import java.util.HashSet;
 import miniventure.game.item.Item;
 import miniventure.game.item.Result;
 import miniventure.game.item.ServerItem;
-import miniventure.game.server.GameServer;
+import miniventure.game.network.GameServer;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.tile.TileDataTag.TileDataMap;
 import miniventure.game.util.function.Action;

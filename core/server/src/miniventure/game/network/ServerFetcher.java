@@ -1,4 +1,4 @@
-package miniventure.game.server;
+package miniventure.game.network;
 
 import java.io.IOException;
 

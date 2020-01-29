@@ -5,7 +5,7 @@ import java.util.*;
 import miniventure.game.GameCore;
 import miniventure.game.item.ServerItem;
 import miniventure.game.network.GameProtocol.TileUpdate;
-import miniventure.game.server.GameServer;
+import miniventure.game.network.GameServer;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Boundable;
 import miniventure.game.world.ItemDrop;
@@ -102,7 +102,7 @@ public class ServerLevel extends Level {
 	}*/
 	
 	public void onTileUpdate(ServerTile tile, @Nullable TileTypeEnum updatedType) {
-		getServer().broadcast(new TileUpdate(tile, updatedType), this);
+		getServer().broadcastLocal(this, new TileUpdate(tile, updatedType));
 		
 		HashSet<Tile> tiles = getAreaTiles(tile.getLocation(), 1, true);
 		

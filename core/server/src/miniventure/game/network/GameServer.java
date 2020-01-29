@@ -1,9 +1,11 @@
-package miniventure.game.server;
+package miniventure.game.network;
 
 import javax.swing.Timer;
 
 import java.net.InetSocketAddress;
 import java.util.*;
+import java.util.Map.Entry;
+import java.util.function.Predicate;
 
 import miniventure.game.GameCore;
 import miniventure.game.chat.InfoMessage;
@@ -12,7 +14,6 @@ import miniventure.game.chat.InfoMessageLine;
 import miniventure.game.chat.MessageBuilder;
 import miniventure.game.chat.command.Command;
 import miniventure.game.chat.command.CommandInputParser;
-import miniventure.game.network.GameProtocol;
 import miniventure.game.network.PacketPipe.PacketPipeWriter;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
@@ -66,7 +67,7 @@ public abstract class GameServer implements GameProtocol {
 			toClientOut = new InfoMessageBuilder(text -> new InfoMessageLine(GameCore.DEFAULT_CHAT_COLOR, text));
 			toClientErr = new InfoMessageBuilder(toClientOut, text -> new InfoMessageLine(ERROR_CHAT_COLOR, text));
 			
-			validationTimer = new Timer(5000, e -> sendEntityValidation(this));
+			validationTimer = new Timer(5000, e -> player.getWorld().postRunnable(() -> sendEntityValidation(this)));
 			validationTimer.setRepeats(true);
 		}
 	}
@@ -75,6 +76,7 @@ public abstract class GameServer implements GameProtocol {
 	
 	private final Map<PacketPipeWriter, PlayerLink> connectionToPlayerInfoMap = new HashMap<>();
 	private final Map<ServerPlayer, PacketPipeWriter> playerToConnectionMap = new HashMap<>();
+	private final Map<String, ServerPlayer> playersByName = new HashMap<>();
 	private final Object playerLock = new Object();
 	
 	@NotNull private final ServerWorld world;
@@ -123,14 +125,12 @@ public abstract class GameServer implements GameProtocol {
 			return;
 		}
 		
-		world.postRunnable(false, () -> {
-			final String name = player.getName();
-			final String data = player.serialize();
-			final Level level = player.getLevel();
-			// using the pdata level id is better than using the spawn level because it doesn't lose the info if an extra update request is sent after the player is removed from their level.
-			final int levelid = level == null ? pdata.levelId : level.getLevelId();
-			knownPlayers.put(name, new PlayerData(name, pdata.passhash, data, levelid, info.op));
-		});
+		final String name = player.getName();
+		final String data = player.serialize();
+		final Level level = player.getLevel();
+		// using the pdata level id is better than using the spawn level because it doesn't lose the info if an extra update request is sent after the player is removed from their level.
+		final int levelid = level == null ? pdata.levelId : level.getLevelId();
+		knownPlayers.put(name, new PlayerData(name, pdata.passhash, data, levelid, info.op));
 	}
 	
 	public int getPlayerCount() {
@@ -186,6 +186,7 @@ public abstract class GameServer implements GameProtocol {
 		synchronized (playerLock) {
 			connectionToPlayerInfoMap.put(connection, pinfo);
 			playerToConnectionMap.put(player, connection);
+			playersByName.put(player.getName(), player);
 		}
 		
 		// TODO delay sending world updates; here is where we check if the player has seen the intro or not.
@@ -205,7 +206,7 @@ public abstract class GameServer implements GameProtocol {
 			
 			pinfo.validationTimer.start();
 			
-			broadcast(new Message(player.getName()+" joined the server.", STATUS_MSG_COLOR), false, player);
+			broadcastGlobal(player, new Message(player.getName()+" joined the server.", STATUS_MSG_COLOR));
 		});
 	}
 	
@@ -222,7 +223,7 @@ public abstract class GameServer implements GameProtocol {
 				connectionToPlayerInfoMap.remove(connection);
 				playerToConnectionMap.remove(player);
 			}
-			broadcast(new Message(player.getName()+" left the server.", STATUS_MSG_COLOR));
+			broadcastGlobal(new Message(player.getName()+" left the server.", STATUS_MSG_COLOR));
 			//System.out.println("server disconnected from client: " + connection.getRemoteAddressTCP().getHostString());
 			
 			if(player.getName().equals(HOST)) // quit server when host exits
@@ -237,8 +238,14 @@ public abstract class GameServer implements GameProtocol {
 		GameProtocol.forPacket(packet, type, response, sync ? world::postRunnable : null);
 	}
 	
+	protected void handleAsyncPacket(PacketPipeWriter connection, Object object) {
+		
+		
+		world.postRunnable(() -> handlePacket(connection, object));
+	}
+	
 	protected void handlePacket(PacketPipeWriter connection, Object object) {
-		final ServerWorld world = GameServer.this.world;
+		// final ServerWorld world = GameServer.this.world;
 		
 		PlayerLink clientData = getPlayerInfo(connection);
 		if(clientData == null) {
@@ -268,8 +275,10 @@ public abstract class GameServer implements GameProtocol {
 			else {
 				PacketPipeWriter toClient;
 				if(ping.source.equals(client.getName()))
+					// this client is the one who requested the ping
 					toClient = connection;
 				else {
+					// another player requested a ping of this player
 					synchronized (playerLock) {
 						toClient = playerToConnectionMap.get(getPlayerByName(ping.source));
 					}
@@ -386,8 +395,37 @@ public abstract class GameServer implements GameProtocol {
 			GameCore.error("Server could not find send pipe for client "+player+" to send packet: "+obj.getClass().getSimpleName());
 	}
 	
+	public void broadcastGlobal(Object obj) {
+		synchronized (playerLock) {
+			for(PacketPipeWriter out: playerToConnectionMap.values())
+				out.send(obj);
+		}
+	}
+	private void broadcastFilter(Object obj, Predicate<ServerPlayer> filter) {
+		synchronized (playerLock) {
+			for(Entry<ServerPlayer, PacketPipeWriter> entry: playerToConnectionMap.entrySet())
+				if(filter.test(entry.getKey()))
+					entry.getValue().send(obj);
+		}
+	}
+	public void broadcastGlobal(@NotNull ServerPlayer exclude, Object obj) {
+		broadcastFilter(obj, player -> player != exclude);
+	}
+	public void broadcastLocal(ServerLevel levelMask, Object obj) {
+		if(levelMask == null)
+			return;
+		broadcastFilter(obj, player -> player.getLevel() == levelMask);
+	}
+	public void broadcastLocal(ServerLevel levelMask, @NotNull ServerEntity excludeIfPlayer, Object obj) {
+		if(levelMask == null)
+			return;
+		/*if(!(excludeIfPlayer instanceof ServerPlayer))
+			broadcastLocal(levelMask, obj);
+		else
+			*/broadcastFilter(obj, player -> player != excludeIfPlayer && player.getLevel() == levelMask);
+	}
 	// levelMask is the level a player must be on to receive this data.
-	public void broadcast(Object obj, Level levelMask, @NotNull ServerEntity... exclude) {
+	/*public void broadcast(Level levelMask, Object obj, @NotNull ServerEntity... exclude) {
 		if(levelMask == null) return; // no level, no packet.
 		
 		Set<ServerPlayer> players = getPlayers();
@@ -398,14 +436,6 @@ public abstract class GameServer implements GameProtocol {
 		
 		broadcast(obj, true, players);
 	}
-	public void broadcast(Object obj, @NotNull ServerEntity excludeIfPlayer) {
-		if(excludeIfPlayer instanceof ServerPlayer)
-			broadcast(obj, false, (ServerPlayer)excludeIfPlayer);
-		else
-			broadcast(obj);
-	}
-	public void broadcast(Object obj, @NotNull ServerPlayer... excludedPlayers) { broadcast(obj, false, excludedPlayers); }
-	public void broadcast(Object obj, boolean includeGiven, @NotNull ServerPlayer... players) { broadcast(obj, includeGiven, new HashSet<>(Arrays.asList(players))); }
 	private void broadcast(Object obj, boolean includeGiven, @NotNull Set<ServerPlayer> players) {
 		if(!includeGiven) {
 			Set<ServerPlayer> playerSet = getPlayers();
@@ -415,15 +445,13 @@ public abstract class GameServer implements GameProtocol {
 		
 		for(ServerPlayer p: players)
 			sendToPlayer(p, obj);
-	}
+	}*/
 	
 	@Nullable
 	public ServerPlayer getPlayerByName(String name) {
-		for(ServerPlayer player: getPlayers())
-			if(player.getName().equalsIgnoreCase(name))
-				return player;
-		
-		return null;
+		synchronized (playerLock) {
+			return playersByName.get(name);
+		}
 	}
 	
 	@Nullable
@@ -468,7 +496,7 @@ public abstract class GameServer implements GameProtocol {
 		sendToPlayer(reciever, getMessage(sender, msg));
 	}
 	public void broadcastMessage(@Nullable ServerPlayer sender, String msg) {
-		broadcast(getMessage(sender, msg));
+		broadcastGlobal(getMessage(sender, msg));
 	}
 	
 	public Message getMessage(@Nullable ServerPlayer sender, String msg) {
@@ -480,7 +508,7 @@ public abstract class GameServer implements GameProtocol {
 		broadcastParticle(data, posMarker.getLevel(), posMarker.getCenter());
 	}
 	public void broadcastParticle(ParticleData data, Level level, Vector2 pos) {
-		broadcast(new ParticleAddition(data, new PositionUpdate(level, pos)));
+		broadcastGlobal(new ParticleAddition(data, new PositionUpdate(level, pos)));
 	}
 	
 	private void sendEntityValidation(@NotNull PlayerLink pData) {

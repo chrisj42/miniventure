@@ -14,7 +14,10 @@ import java.util.HashMap;
 import miniventure.game.GameCore;
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.client.FontStyle.StyleData;
+import miniventure.game.network.GameClient;
+import miniventure.game.network.GameProtocol.DatalessRequest;
 import miniventure.game.network.GameProtocol.Message;
+import miniventure.game.network.ServerManager;
 import miniventure.game.screen.ConfirmScreen;
 import miniventure.game.screen.ErrorScreen;
 import miniventure.game.screen.LoadingScreen;
@@ -318,20 +321,20 @@ public class ClientCore extends ApplicationAdapter {
 		song = null;
 	}
 	
-	static void addMessage(Message msg) {
+	public static void manageChatPackets(Object obj) {
 		if(gameScreen == null) return;
-		gameScreen.chatOverlay.addMessage(msg);
-		gameScreen.chatScreen.addMessage(msg);
-	}
-	static void addMessage(InfoMessage msg) {
-		if(gameScreen == null) return;
-		gameScreen.chatOverlay.addMessage(msg);
-		gameScreen.chatScreen.addMessage(msg);
-	}
-	static void clearMessages() {
-		if(gameScreen == null) return;
-		gameScreen.chatOverlay.reset();
-		gameScreen.chatScreen.reset();
+		if(obj instanceof Message) {
+			gameScreen.chatOverlay.addMessage((Message)obj);
+			gameScreen.chatScreen.addMessage((Message)obj);
+		}
+		else if(obj instanceof InfoMessage) {
+			gameScreen.chatOverlay.addMessage((InfoMessage)obj);
+			gameScreen.chatScreen.addMessage((InfoMessage)obj);
+		}
+		else if(obj == DatalessRequest.Clear_Console) {
+			gameScreen.chatOverlay.reset();
+			gameScreen.chatScreen.reset();
+		}
 	}
 	
 	@Override

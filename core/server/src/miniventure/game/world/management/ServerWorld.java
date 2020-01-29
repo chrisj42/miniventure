@@ -17,9 +17,9 @@ import miniventure.game.network.GameProtocol.EntityRemoval;
 import miniventure.game.network.GameProtocol.IslandReference;
 import miniventure.game.network.GameProtocol.MapRequest;
 import miniventure.game.network.GameProtocol.WorldData;
-import miniventure.game.server.GameServer;
-import miniventure.game.server.ServerCore;
-import miniventure.game.server.ServerFetcher;
+import miniventure.game.network.GameServer;
+import miniventure.game.ServerCore;
+import miniventure.game.network.ServerFetcher;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.ProgressLogger;
 import miniventure.game.util.SyncObj;
@@ -184,7 +184,7 @@ public class ServerWorld extends WorldManager {
 	
 	
 	public WorldData getWorldUpdate() { return new WorldData(gameTime, this.daylightOffset, Config.DaylightCycle.get()); }
-	public void broadcastWorldUpdate() { server.broadcast(getWorldUpdate()); }
+	public void broadcastWorldUpdate() { server.broadcastGlobal(getWorldUpdate()); }
 	
 	public void setTimeOfDay(float daylightOffset) {
 		this.daylightOffset = daylightOffset % TimeOfDay.SECONDS_IN_DAY;
@@ -391,7 +391,7 @@ public class ServerWorld extends WorldManager {
 	private void removeEntityLevel(@NotNull ServerEntity e) {
 		entityManager.removeEntity(e);
 		
-		server.broadcast(new EntityRemoval(e));
+		server.broadcastGlobal(new EntityRemoval(e));
 		
 		if(e instanceof ServerPlayer)
 			pruneLoadedLevels();
@@ -432,7 +432,7 @@ public class ServerWorld extends WorldManager {
 		entityManager.addEntity(e, level);
 		level.entityAdded(e);
 		
-		server.broadcast(new EntityAddition(e), level, e);
+		server.broadcastLocal(level, e, new EntityAddition(e));
 	}
 	
 	

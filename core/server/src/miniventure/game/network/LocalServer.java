@@ -1,4 +1,4 @@
-package miniventure.game.server;
+package miniventure.game.network;
 
 import java.net.InetSocketAddress;
 
@@ -28,15 +28,17 @@ public class LocalServer extends GameServer {
 		in.setListener(new PacketHandler() {
 			@Override
 			public void act(Object obj) {
-				if(obj instanceof Login)
-					login(HOST, true, out);
-				else
-					handlePacket(out, obj);
+				world.postRunnable(() -> {
+					if(obj instanceof Login)
+						login(HOST, true, out);
+					else
+						handlePacket(out, obj);
+				});
 			}
 			
 			@Override
 			public void onDisconnect() {
-				logout(out);
+				world.postRunnable(() -> logout(out));
 			}
 		});
 		

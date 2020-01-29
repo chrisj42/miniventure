@@ -7,7 +7,7 @@ import java.util.Map.Entry;
 import miniventure.game.network.GameProtocol.EntityUpdate;
 import miniventure.game.network.GameProtocol.PositionUpdate;
 import miniventure.game.network.GameProtocol.SpriteUpdate;
-import miniventure.game.server.GameServer;
+import miniventure.game.network.GameServer;
 import miniventure.game.util.SerialHashMap;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueAction;
@@ -67,7 +67,7 @@ public abstract class ServerEntity extends Entity {
 	@Override
 	public void update(float delta) {
 		if(newSprite != null || newPos != null) {
-			getServer().broadcast(new EntityUpdate(getTag(), newPos, newSprite), this);
+			getServer().broadcastLocal(getLevel(), this, new EntityUpdate(getTag(), newPos, newSprite));
 			newPos = null;
 			newSprite = null;
 		}

@@ -104,7 +104,7 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 	protected void setDirection(@NotNull Direction dir) {
 		if(animator.setDirection(dir)) {
 			this.dir = dir;
-			getServer().broadcast(new MobUpdate(getTag(), dir), this);
+			getServer().broadcastLocal(getLevel(), this, new MobUpdate(getTag(), dir));
 		}
 	}
 	
@@ -177,7 +177,7 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 		
 		ServerLevel level = getLevel();
 		if(level != null) {
-			getServer().broadcast(new Hurt(obj.getTag(), getTag(), damage*1f/maxHealth));
+			getServer().broadcastGlobal(new Hurt(obj.getTag(), getTag(), damage*1f/maxHealth));
 			getServer().broadcastParticle(new TextParticleData(String.valueOf(damage), this instanceof ServerPlayer ? Color.PINK : Color.RED), this);
 		}
 		

@@ -1,9 +1,11 @@
-package miniventure.game.client;
+package miniventure.game.network;
 
 import java.util.HashMap;
 
 import miniventure.game.GameCore;
 import miniventure.game.chat.InfoMessage;
+import miniventure.game.client.AudioException;
+import miniventure.game.client.ClientCore;
 import miniventure.game.item.CraftingScreen;
 import miniventure.game.network.GameProtocol;
 import miniventure.game.network.PacketPipe.PacketPipeWriter;
@@ -277,8 +279,7 @@ public abstract class GameClient implements GameProtocol {
 				((CraftingScreen)screen).refreshCraftability(stockUpdate);
 		});
 		
-		forPacket(object, Message.class, ClientCore::addMessage);
-		forPacket(object, InfoMessage.class, ClientCore::addMessage);
+		ClientCore.manageChatPackets(object);
 		
 		forPacket(object, TabResponse.class, response -> {
 			MenuScreen screen = ClientCore.getScreen();
@@ -290,9 +291,6 @@ public abstract class GameClient implements GameProtocol {
 		forPacket(object, LoginFailure.class, failure -> Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen(failure.message))));
 		
 		forPacket(object, SoundRequest.class, sound -> ClientCore.playSound(sound.sound));
-		
-		if(object == DatalessRequest.Clear_Console)
-			ClientCore.clearMessages();
 	}
 	
 	public abstract void disconnect();

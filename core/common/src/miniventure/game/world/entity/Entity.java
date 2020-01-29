@@ -25,6 +25,7 @@ public abstract class Entity implements WorldObject {
 	
 	@NotNull private final WorldManager world;
 	
+	private final EntityTag tag;
 	private final int eid;
 	float x, y, z = 0;
 	
@@ -36,6 +37,7 @@ public abstract class Entity implements WorldObject {
 	protected Entity(@NotNull WorldManager world, boolean negative) {
 		this.world = world;
 		eid = world.reserveNewEntityId(negative);
+		this.tag = new EntityTag(eid);
 	}
 	
 	// for client, on entities updated by the server
@@ -45,6 +47,7 @@ public abstract class Entity implements WorldObject {
 		x = position.x;
 		z = position.z;
 		y = position.y;
+		this.tag = new EntityTag(eid);
 		// world.registerEntity(this); // considered to be part of the level as well
 	}
 	
@@ -276,7 +279,7 @@ public abstract class Entity implements WorldObject {
 	}
 	
 	@Override
-	public EntityTag getTag() { return new EntityTag(eid); }
+	public EntityTag getTag() { return tag; }
 	
 	@Override
 	public String toString() { return Integer.toHexString(super.hashCode())+'_'+getClass().getSimpleName()+'-'+eid; }
