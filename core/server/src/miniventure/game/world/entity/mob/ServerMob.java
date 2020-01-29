@@ -35,7 +35,7 @@ import org.jetbrains.annotations.Nullable;
 public abstract class ServerMob extends ServerEntity implements Mob {
 	
 	@NotNull private Direction dir;
-	@NotNull private MobAnimationController animator;
+	@NotNull private MobAnimationController<ServerMob> animator;
 	
 	private final int maxHealth;
 	private int health;
