@@ -3,12 +3,15 @@ package miniventure.game.network;
 import java.util.LinkedList;
 
 import miniventure.game.core.GameCore;
+import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.ValueAction;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class PacketPipe {
+	
+	private static final int MS_EMPTY_LOOP_INTERVAL = 50; // if the reader thread runs through the loop and finds no packets to process less than this many milliseconds since the last empty pass, it will suspend the thread to reach this amount of time.
 	
 	@FunctionalInterface
 	public interface PacketHandler extends ValueAction<Object> {
@@ -94,6 +97,7 @@ public class PacketPipe {
 		public void run() {
 			running = true;
 			canExit = false;
+			long lastWait = System.nanoTime();
 			GameCore.debug("Starting pipe flow: "+readerThreadLabel);
 			while(running) {
 				Object packet;
@@ -104,6 +108,13 @@ public class PacketPipe {
 				if(packet == null) {
 					if(canExit)
 						running = false;
+					else {
+						long time = System.nanoTime();
+						double msSinceLastWait = (lastWait - time) / 1E6D;
+						if(msSinceLastWait < MS_EMPTY_LOOP_INTERVAL)
+							MyUtils.sleep(MS_EMPTY_LOOP_INTERVAL - (int) msSinceLastWait);
+					}
+					lastWait = System.nanoTime();
 					continue;
 				}
 				
