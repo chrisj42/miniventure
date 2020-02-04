@@ -148,7 +148,7 @@ public class Version implements Comparable<Version> {
 	public String toString() {
 		// note: when major is 0, minor is ignored. There should only be one "1.0 release". Make is expected to be 3.
 		if(major == 0)
-			return "The Main Release"+(build>0?" (Dev Build "+build+')':"");
+			return "Full Release"+(build>0?" (Dev Build "+build+')':"");
 		
 		return (make==1?"Pre-Alpha ":make==2?"Alpha ":make==3?"Beta ":"Update ")+major+(minor<0?" (Final)":"."+minor)+(build>0?" (Dev Build "+build+')':"");
 	}
