@@ -3,15 +3,12 @@ package miniventure.game.network;
 import java.util.LinkedList;
 
 import miniventure.game.core.GameCore;
-import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.ValueAction;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class PacketPipe {
-	
-	private static final int MS_EMPTY_LOOP_INTERVAL = 50; // if the reader thread runs through the loop and finds no packets to process less than this many milliseconds since the last empty pass, it will suspend the thread to reach this amount of time.
 	
 	@FunctionalInterface
 	public interface PacketHandler extends ValueAction<Object> {
@@ -20,6 +17,8 @@ public class PacketPipe {
 	
 	// this is the list of packets that have been "sent" and have yet to be processed.
 	private final LinkedList<Object> packetQueue;
+	// A locking object for the new thread
+	private final Object lock = new Object();
 	
 	private boolean canExit = false; // a note that it is okay to stop checking for packets once the current ones are dealt with.
 	private boolean running = false; // there are no more packets; at least, no more packets should be parsed. This is set to true if canExit is true and there are no packets in the queue, however it can be set directly if finishing the queue is not necessary.
@@ -74,6 +73,10 @@ public class PacketPipe {
 			synchronized (packetQueue) {
 				packetQueue.add(packet);
 			}
+			// Start the thread again to read a new packet
+			synchronized (lock) {
+				lock.notify();
+			}
 		}
 	}
 	
@@ -97,8 +100,8 @@ public class PacketPipe {
 		public void run() {
 			running = true;
 			canExit = false;
-			long lastWait = System.nanoTime();
 			GameCore.debug("Starting pipe flow: "+readerThreadLabel);
+
 			while(running) {
 				Object packet;
 				synchronized (packetQueue) {
@@ -106,15 +109,19 @@ public class PacketPipe {
 				}
 				
 				if(packet == null) {
-					if(canExit)
+					if (canExit) {
 						running = false;
-					else {
-						long time = System.nanoTime();
-						double msSinceLastWait = (lastWait - time) / 1E6D;
-						if(msSinceLastWait < MS_EMPTY_LOOP_INTERVAL)
-							MyUtils.sleep(MS_EMPTY_LOOP_INTERVAL - (int) msSinceLastWait);
+					} else {
+						// Wait until a new packet
+						// to avoid executing the thread yet
+						synchronized (lock) {
+							try {
+								lock.wait();
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
+						}
 					}
-					lastWait = System.nanoTime();
 					continue;
 				}
 				
