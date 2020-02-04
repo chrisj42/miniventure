@@ -20,7 +20,7 @@ public class ClientTile extends RenderTile {
 		this((ClientLevel)level, x, y);
 	}
 	public ClientTile(@NotNull ClientLevel level, int x, int y) {
-		super(level, x, y, new TileTypeEnum[0], null);
+		super(level, x, y, new TileTypeEnum[] {TileTypeEnum.HOLE}, null);
 	}
 	
 	@NotNull @Override
