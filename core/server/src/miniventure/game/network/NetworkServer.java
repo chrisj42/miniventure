@@ -142,7 +142,7 @@ public class NetworkServer extends GameServer {
 			sendPipe = connectionToPipeMap.get(connection);
 		// }
 		if(sendPipe != null) {
-			sendPipe.getPipeReader().close(false);
+			sendPipe.getPipeReader().close();
 			logout(sendPipe.getPipeWriter());
 			// synchronized (connectionMapLock) {
 				connectionToPipeMap.remove(connection);
