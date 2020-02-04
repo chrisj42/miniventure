@@ -22,7 +22,7 @@ public class LocalClient extends GameClient {
 	
 	@Override
 	public void disconnect() {
-		toServer.close(true);
-		fromServer.close(false);
+		toServer.close();
+		fromServer.close();
 	}
 }

@@ -59,7 +59,7 @@ public class NetworkClient extends GameClient {
 			public void disconnected(Connection connection) {
 				System.err.println("client disconnected from server.");
 				Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen("Lost connection with server.")));
-				packetSendQueue.close(false);
+				packetSendQueue.close();
 			}
 		});
 		
@@ -125,7 +125,7 @@ public class NetworkClient extends GameClient {
 	
 	@Override
 	public void disconnect() {
-		packetSendQueue.close(true);
+		packetSendQueue.close();
 		// client.stop();
 	}
 }

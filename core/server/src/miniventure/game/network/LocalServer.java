@@ -58,7 +58,7 @@ public class LocalServer extends GameServer {
 	
 	@Override
 	void stopServer() {
-		in.close(false);
-		out.close(false);
+		in.close();
+		out.close();
 	}
 }

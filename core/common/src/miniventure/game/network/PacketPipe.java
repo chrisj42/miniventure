@@ -20,44 +20,37 @@ public class PacketPipe {
 	// A locking object for the new thread
 	private final Object lock = new Object();
 	
-	private boolean canExit = false; // a note that it is okay to stop checking for packets once the current ones are dealt with.
-	private boolean running = false; // there are no more packets; at least, no more packets should be parsed. This is set to true if canExit is true and there are no packets in the queue, however it can be set directly if finishing the queue is not necessary.
+	private boolean running = false; // whether the packet pipe is running and processing packets / is ready to process packets
 	
 	private final PacketPipeReader reader;
 	private final PacketPipeWriter writer;
 	
-	@Nullable
-	private final String readerThreadLabel;
-	
 	public PacketPipe() { this(null); }
 	public PacketPipe(@Nullable String readerThreadLabel) {
-		this.readerThreadLabel = readerThreadLabel;
-		
 		packetQueue = new LinkedList<>(); // I need pollFirst, so I can't use collections synchronization.
 		
-		reader = new PacketPipeReader();
+		reader = new PacketPipeReader(readerThreadLabel);
 		writer = new PacketPipeWriter();
 	}
 	
 	public PacketPipeReader getPipeReader() { return reader; }
 	public PacketPipeWriter getPipeWriter() { return writer; }
 	
-	
-	private void closePipe(boolean finishPackets) {
-		canExit = true;
-		running = running && finishPackets;
-	}
-	
-	
 	/// below are classes to restrict access to the pipe, so one end may be passed to part of the code without letting that code use the other end too.
 	
 	// simple way to define methods common to both ends in one place.
 	private class PacketPipeInterface {
-		public void close(boolean finishPackets) {
-			closePipe(finishPackets);
+		public void close() {
+			running = false;
+			synchronized (lock) {
+				// wake up the reader thread so that it can realize it should shut down
+				lock.notify();
+			}
 		}
 		
-		public boolean isOpen() { return running; }
+		public boolean isOpen() {
+			return running;
+		}
 		
 		@Override
 		public String toString() {
@@ -70,11 +63,9 @@ public class PacketPipe {
 	public class PacketPipeWriter extends PacketPipeInterface {
 		public void send(Object packet) {
 			// GameCore.debug("sending packet from pipe: "+readerThreadLabel+"; packet type: "+packet.getClass().getSimpleName());
-			synchronized (packetQueue) {
-				packetQueue.add(packet);
-			}
-			// Start the thread again to read a new packet
 			synchronized (lock) {
+				packetQueue.add(packet);
+				// Start the thread again to read a new packet
 				lock.notify();
 			}
 		}
@@ -83,7 +74,15 @@ public class PacketPipe {
 	// can only read/listen through this end
 	public class PacketPipeReader extends PacketPipeInterface implements Runnable {
 		
-		@NotNull private PacketHandler listener = obj -> {};
+		@Nullable
+		private final String readerThreadLabel;
+		
+		@NotNull
+		private PacketHandler listener = obj -> {};
+		
+		PacketPipeReader(@Nullable String readerThreadLabel) {
+			this.readerThreadLabel = readerThreadLabel;
+		}
 		
 		public void setListener(@NotNull PacketHandler handler) {
 			this.listener = handler;
@@ -99,30 +98,21 @@ public class PacketPipe {
 		@Override
 		public void run() {
 			running = true;
-			canExit = false;
 			GameCore.debug("Starting pipe flow: "+readerThreadLabel);
-
+			
 			while(running) {
 				Object packet;
-				synchronized (packetQueue) {
+				synchronized (lock) {
 					packet = packetQueue.pollFirst();
-				}
-				
-				if(packet == null) {
-					if (canExit) {
-						running = false;
-					} else {
+					if(packet == null) {
 						// Wait until a new packet
 						// to avoid executing the thread yet
-						synchronized (lock) {
-							try {
-								lock.wait();
-							} catch (InterruptedException e) {
-								e.printStackTrace();
-							}
+						try {
+							lock.wait();
+						} catch (InterruptedException ignored) {
 						}
+						continue;
 					}
-					continue;
 				}
 				
 				// GameCore.debug("PacketPipeReader \""+readerThreadLabel+"\" got packet: "+packet.getClass().getSimpleName());
