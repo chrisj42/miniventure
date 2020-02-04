@@ -8,6 +8,7 @@ import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.Version;
 import miniventure.game.util.VersionInfo;
 import miniventure.game.world.file.WorldFileInterface;
+import miniventure.game.world.management.WorldManager;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl.LwjglFiles;
@@ -32,6 +33,9 @@ public class GameCore {
 	
 	public static boolean debug = false;
 	
+	public static void debug(WorldManager world, String msg) {
+		debug(world.getClass().getSimpleName()+": "+msg);
+	}
 	public static void debug(String msg) {
 		if(debug)
 			System.out.println(msg);
