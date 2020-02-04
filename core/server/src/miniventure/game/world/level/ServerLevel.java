@@ -275,33 +275,20 @@ public class ServerLevel extends Level {
 		mob.moveTo(spawnTile);
 	}*/
 	
-	private final ArrayList<Integer> locations = new ArrayList<>();
-	{
-		for(int i = 0; i < getWidth() * getHeight(); i++) {
-			locations.add(i);
-		}
-	}
-	
 	public ServerTile getSpawnTile(ServerMob mob) {
 		if(!mob.maySpawn()) return null;
 		
-		ArrayList<Integer> locations = new ArrayList<>(this.locations);
-		
-		while(locations.size() > 0) {
-			final int idx = MathUtils.random(locations.size()-1);
-			final int loc = locations.get(idx);
-			final int x = loc % getWidth();
-			final int y = loc / getWidth();
+		for(int i = 0; i < 100; i++) {
+			final int x = MathUtils.random(getWidth());
+			final int y = MathUtils.random(getHeight());
 			Tile tile = getTile(x, y);
 			if(tile == null)
 				System.err.println("level contains null tile! "+x+','+y+"@level="+this);
 			else if(mob.maySpawn(tile.getType().getTypeEnum()))
 				return getTile(x, y);
-			else
-				locations.remove(idx);
 		}
-		// all tiles in the level were searched through; no options were found.
 		
+		// searched through enough tiles; expected to be easy to find spawnable locations, so if we can't find something then there's probably an issue. In the case that they're really unlucky, they can try again.
 		return null;
 	}
 	
