@@ -42,6 +42,10 @@ public class PacketPipe {
 	private class PacketPipeInterface {
 		public void close() {
 			running = false;
+			synchronized (lock) {
+				// wake up the reader thread so that it can realize it should shut down
+				lock.notify();
+			}
 		}
 		
 		public boolean isOpen() {
