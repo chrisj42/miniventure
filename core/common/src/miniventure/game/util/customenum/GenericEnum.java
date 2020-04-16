@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 /** @noinspection rawtypes*/
 @SuppressWarnings("unchecked")
-public abstract class GenericEnum<T, ET extends GenericEnum<T, ET>> implements Comparable<ET> {
+public abstract class GenericEnum<T, ET extends GenericEnum> implements Comparable<ET> {
 	
 	private static final HashMap<Class<? extends GenericEnum>, EnumData<? extends GenericEnum>> enumClassData = new HashMap<>();
 	
@@ -21,7 +21,7 @@ public abstract class GenericEnum<T, ET extends GenericEnum<T, ET>> implements C
 	// initializes all generic enum implementations
 	/*public static void init() {
 		TileDataTag.init();
-		TileCacheTag.init();
+		TileDataTag.init();
 	}*/
 	
 	private static final class EnumData<ET extends GenericEnum> {
@@ -135,6 +135,10 @@ public abstract class GenericEnum<T, ET extends GenericEnum<T, ET>> implements C
 		} catch(ClassCastException e) {
 			throw new EnumGenericTypeMismatchException(this, e);
 		}
+	}
+	
+	public final Class<ET> getEnumClass() {
+		return enumData.enumClass;
 	}
 	
 	public final int ordinal() { return ordinal; }

@@ -33,15 +33,28 @@ public class GameCore {
 	
 	public static boolean debug = false;
 	
+	public static String prefix(WorldManager world) {
+		return world.getClass().getSimpleName()+": ";
+	}
+	
 	public static void debug(WorldManager world, String msg) {
-		debug(world.getClass().getSimpleName()+": "+msg);
+		debug(prefix(world)+msg);
 	}
 	public static void debug(String msg) {
 		if(debug)
 			System.out.println(msg);
 	}
 	
-	public static void errorFull(String error) { error(error, false, true); }
+	// public static void errorFull(String error) { error(error, false, true); }
+	public static void error(WorldManager world, String error) {
+		error(prefix(world)+error);
+	}
+	public static void error(WorldManager world, String error, boolean debugModeOnly) {
+		error(prefix(world)+error, debugModeOnly);
+	}
+	public static void error(WorldManager world, String error, boolean debugModeOnly, boolean dumpStack) {
+		error(prefix(world)+error, debugModeOnly, dumpStack);
+	}
 	public static void error(String error) { error(error, true); }
 	public static void error(String error, boolean debugModeOnly) { error(error, debugModeOnly, false); }
 	public static void error(String error, boolean debugModeOnly, boolean dumpStack) {

@@ -10,15 +10,16 @@ public class Version implements Comparable<Version> {
 	public static final Version CURRENT = makeVersion("2.2.2.1");
 	
 	// the last time there was a change in the save format
-	private static final Version latestFormatChange = makeVersion("2.2.1");
+	private static final Version latestFormatChange = makeVersion("2.2.2.1");
 	
 	// use this to determine the latest version a world is compatible with
 	private static final TreeMap<Version, Version> endOfSupportVersions = new TreeMap<>();
 	static {
 		// this is the oldest version that the current version supports
-		endOfSupportVersions.put(makeVersion("2.2.1"), CURRENT);
+		endOfSupportVersions.put(makeVersion("2.2.2.1"), CURRENT);
 		// below is for older versions; add an entry whenever a version loses support
 		// no need to add an entry if it was only supported for one version
+		// addEoSVersion("2.2.1", "2.2.1");
 		// addEoSVersion("2.1.2", "2.1.2");
 		// addEoSVersion("2.2.1.4", "2.2.1.4");
 	}

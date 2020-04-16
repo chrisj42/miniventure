@@ -5,9 +5,8 @@ import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.level.ServerLevel;
 import miniventure.game.world.tile.ServerTile;
-import miniventure.game.world.tile.ServerTileType;
-import miniventure.game.world.tile.TileTypeEnum;
-import miniventure.game.world.tile.TileTypeEnum.TypeGroup;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.TileType.TileTypeEnum.TypeGroup;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -29,7 +28,7 @@ public interface PlacementAttempt {
 		void doPlace(ServerTile tile, ServerPlayer player);
 		
 		static PlacementAction tile(@NotNull TileTypeEnum tileType) {
-			return (tile, player) -> tile.addTile(ServerTileType.get(tileType));
+			return (tile, player) -> tile.addTile(tileType);
 		}
 		
 		static PlacementAction entity(@NotNull FetchFunction<ServerEntity> entityTemplate) {

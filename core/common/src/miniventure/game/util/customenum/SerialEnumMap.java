@@ -10,11 +10,13 @@ import miniventure.game.util.MyUtils;
 @SuppressWarnings("unchecked")
 public class SerialEnumMap<SET extends SerialEnum> extends GEnumMap<SET> {
 	
-	public SerialEnumMap() {}
-	public SerialEnumMap(DataEntry<?, ? extends SET>... entries) { super(entries); }
-	public SerialEnumMap(SerialEnumMap<SET> model) { super(model); }
+	public SerialEnumMap(Class<SET> enumClass) { super(enumClass); }
+	public SerialEnumMap(Class<SET> enumClass, DataEntry<?, ? extends SET>... entries) { super(enumClass, entries); }
+	public SerialEnumMap(DataEntry<?, ? extends SET> firstEntry, DataEntry<?, ? extends SET>... entries) { super(firstEntry, entries); }
+	// public SerialEnumMap(SerialEnumMap<SET> model) { super(model); }
 	
-	public <CT extends SET> SerialEnumMap(String alldata, Class<SET> tagClass) {
+	public SerialEnumMap(String alldata, Class<SET> tagClass) {
+		super(tagClass);
 		String[] data = MyUtils.parseLayeredString(alldata);
 		
 		for(String item: data)
@@ -22,9 +24,10 @@ public class SerialEnumMap<SET extends SerialEnum> extends GEnumMap<SET> {
 	}
 	
 	public String serialize(boolean save) {
-		ArrayList<String> entries = new ArrayList<>(map.size());
+		ArrayList<String> entries = new ArrayList<>(data.length);
 		
-		for(SET key: map.keySet()) {
+		for(SET key: GenericEnum.values(dataClass)) {
+			if(get(key) == null) continue;
 			if(key.save && save || key.send && !save)
 				entries.add(key.serializeEntry(this));
 		}

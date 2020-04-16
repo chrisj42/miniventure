@@ -1,5 +1,5 @@
 // this specifies the folder names in which to find the subprojects. by default, these are also the subproject names.
-include 'desktop'
+include 'launcher'
 include 'common'
 include 'client'
 include 'server'

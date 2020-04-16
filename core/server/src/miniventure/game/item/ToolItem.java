@@ -1,5 +1,6 @@
 package miniventure.game.item;
 
+import miniventure.game.item.ItemDataTag.ItemDataMap;
 import miniventure.game.util.customenum.SerialEnumMap;
 import miniventure.game.world.entity.mob.player.Player;
 import miniventure.game.world.entity.mob.player.Player.CursorHighlight;
@@ -69,9 +70,9 @@ public class ToolItem extends ServerItem {
 	}
 	
 	@Override
-	protected void addSerialData(SerialEnumMap<ItemDataTag<?>> map) {
+	protected void addSerialData(ItemDataMap map) {
 		super.addSerialData(map);
-		map.put(ItemDataTag.Usability, getDurability());
+		map.add(ItemDataTag.Usability, getDurability());
 	}
 	
 	@Override

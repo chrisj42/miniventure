@@ -9,7 +9,7 @@ import miniventure.game.core.GameCore;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.level.Level;
 import miniventure.game.world.tile.TileType;
-import miniventure.game.world.tile.TileTypeEnum;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 import com.badlogic.gdx.math.MathUtils;
 
@@ -18,7 +18,7 @@ import com.badlogic.gdx.math.MathUtils;
  */
 public abstract class WorldManager {
 	
-	protected float gameTime, daylightOffset;
+	private float gameTime, daylightOffset;
 	
 	// registered entities
 	private final Map<Integer, Entity> entityIDMap = new HashMap<>(128);
@@ -39,9 +39,14 @@ public abstract class WorldManager {
 	/*  --- WORLD MANAGEMENT --- */
 	
 	
+	protected void initWorldTime(float gameTime, float daylightOffset) {
+		this.gameTime = gameTime;
+		this.daylightOffset = daylightOffset;
+	}
+	
 	protected abstract boolean doDaylightCycle();
 	
-	/** if there is a world loaded (should be true after calling createWorld) */
+	/** if there is a world loaded */
 	public abstract boolean worldLoaded();
 	
 	/** unload and close the world */

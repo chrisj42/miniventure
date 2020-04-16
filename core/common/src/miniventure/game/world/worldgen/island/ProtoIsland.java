@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.util.Random;
 
 import miniventure.game.world.Point;
-import miniventure.game.world.tile.TileTypeEnum;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
 import miniventure.game.world.worldgen.noise.GenInfo;
 import miniventure.game.world.worldgen.noise.NoiseGenerator;
 

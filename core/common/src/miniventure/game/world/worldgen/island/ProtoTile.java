@@ -3,7 +3,7 @@ package miniventure.game.world.worldgen.island;
 import java.util.LinkedList;
 
 import miniventure.game.world.Point;
-import miniventure.game.world.tile.TileTypeEnum;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -23,17 +23,24 @@ public class ProtoTile {
 		addLayer(TileTypeEnum.HOLE);
 	}
 	
-	public void addLayer(TileTypeEnum type) { stack.add(type); }
+	public void addLayer(TileTypeEnum type) {
+		if(type.underType != null)
+			stack.clear(); // this is the new bottom
+		stack.add(type);
+	}
 	
-	public void replaceLayer(TileTypeEnum type) {
+	/*public void replaceLayer(TileTypeEnum type) {
 		if(stack.size() == 0)
 			addLayer(type);
 		else
 			stack.set(stack.size()-1, type);
-	}
+	}*/
 	
 	@NotNull
-	public TileTypeEnum getTopLayer() { return stack.peekLast(); }
+	public TileTypeEnum getTopLayer() {
+		TileTypeEnum type = stack.peekLast();
+		return type == null ? TileTypeEnum.HOLE : type;
+	}
 	
 	@NotNull
 	public TileTypeEnum[] getStack() { return stack.toArray(EMPTY); }

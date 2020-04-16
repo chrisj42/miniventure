@@ -5,6 +5,7 @@ import java.util.EnumMap;
 import miniventure.game.core.GameCore;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.world.management.WorldManager;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -17,12 +18,10 @@ public class SwimAnimation {
 	private static final EnumMap<TileTypeEnum, Animation<TextureHolder>> swimAnimations = new EnumMap<>(TileTypeEnum.class);
 	
 	private final Animation<TextureHolder> swim;
-	public final TileTypeEnum tileType;
 	public final float drawableHeight;
 	
 	public SwimAnimation(@NotNull TileTypeEnum enumType) { this(enumType, 0.5f); }
 	public SwimAnimation(@NotNull TileTypeEnum enumType, float drawableHeight) {
-		this.tileType = enumType;
 		this.drawableHeight = drawableHeight;
 		
 		swim = swimAnimations.computeIfAbsent(enumType, k ->

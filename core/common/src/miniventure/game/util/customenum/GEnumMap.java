@@ -1,51 +1,69 @@
 package miniventure.game.util.customenum;
 
-import java.util.HashMap;
+import java.util.Arrays;
 
 /** @noinspection rawtypes*/
 @SuppressWarnings("unchecked")
 public class GEnumMap<ET extends GenericEnum> {
 	
-	final HashMap<ET, Object> map = new HashMap<>();
+	// final HashMap<ET, Object> map = new HashMap<>();
+	final Class<ET> dataClass;
+	final Object[] data;
 	
-	public GEnumMap() {}
-	public GEnumMap(DataEntry<?, ? extends ET>... entries) { addAll(entries); }
-	// public GEnumMap(DataEntry<?, ? extends ET>[] entries) { addAll(entries); }
-	public GEnumMap(GEnumMap<ET> model) {
-		map.putAll(model.map);
+	public GEnumMap(Class<ET> dataClass) {
+		data = new Object[GenericEnum.values(dataClass).length];
+		this.dataClass = dataClass;
 	}
+	public GEnumMap(Class<ET> dataClass, DataEntry<?, ? extends ET>... entries) {
+		this(dataClass);
+		addAll(entries);
+	}
+	public GEnumMap(DataEntry<?, ? extends ET> firstEntry, DataEntry<?, ? extends ET>... entries) {
+		this(firstEntry.key.getEnumClass());
+		add(firstEntry).addAll(entries);
+	}
+	// public GEnumMap(DataEntry<?, ? extends ET>[] entries) { addAll(entries); }
+	/*public GEnumMap(GEnumMap<ET> model) {
+		this(model.dataClass);
+		// map.putAll(model.map);
+	}*/
 	
 	public GEnumMap<ET> add(DataEntry<?, ? extends ET> entry) {
-		put(entry);
+		add(entry.key, entry.value);
 		return this;
 	}
 	public GEnumMap<ET> addAll(DataEntry<?, ? extends ET>... entries) {
 		for(DataEntry<?, ? extends ET> e: entries)
-			put(e);
+			add(e.key, e.value);
 		return this;
 	}
 	
-	public <T> T put(DataEntry<T, ? extends ET> entry) {
-		return (T) map.put(entry.key, entry.value);
-	}
-	public <T, CET extends GenericEnum<T, ? extends ET>> T put(CET key, T value) {
-		return (T) map.put((ET) key, value);
+	/*public <T> T set(DataEntry<T, ? extends ET> entry) {
+		return set(entry.key, entry.value);
+	}*/
+	public <T, CET extends GenericEnum<T, ? extends ET>> void add(CET key, T value) {
+		data[key.ordinal()] = value;
 	}
 	
 	public <T, CET extends GenericEnum<T, ? extends ET>> T remove(CET tag) {
-		return (T) map.remove(tag);
+		T prev = get(tag);
+		add(tag, null);
+		return prev;
 	}
 	
-	public void clear() { map.clear(); }
+	public void clear() {
+		Arrays.fill(data, null);
+	}
 	
 	// public boolean contains(ET tag) { return map.containsKey(tag); }
 	
 	public <T, CET extends GenericEnum<T, ? extends ET>> T get(CET tag) {
-		return (T) map.get(tag);
+		return (T) data[tag.ordinal()];
 	}
 	
 	public <T, CET extends GenericEnum<T, ? extends ET>> T getOrDefault(CET tag, T defaultValue) {
-		return (T) map.getOrDefault(tag, defaultValue);
+		T value = get(tag);
+		return value == null ? defaultValue : value;
 	}
 	
 	// fetches the value for the given key. If there is no key, the default value is added for it and returned.
@@ -56,7 +74,7 @@ public class GEnumMap<ET extends GenericEnum> {
 		// return (T) map.computeIfAbsent(tag, t -> defaultValue);
 		T val = get(tag);
 		if(val == null) {
-			put(tag, defaultValue);
+			add(tag, defaultValue);
 			return defaultValue;
 		}
 		else

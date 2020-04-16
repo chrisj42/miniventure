@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 
 import miniventure.game.core.ClientCore;
-import miniventure.game.network.PacketPipe.PacketHandler;
+import miniventure.game.network.PacketPipe.PacketListener;
 import miniventure.game.network.PacketPipe.PacketPipeReader;
 import miniventure.game.screen.ErrorScreen;
 import miniventure.game.screen.InputScreen;
@@ -33,7 +33,7 @@ public class NetworkClient extends GameClient {
 	public NetworkClient() {
 		PacketPipe sendPipe = new PacketPipe();
 		packetSendQueue = sendPipe.getPipeReader();
-		packetSendQueue.setListener(new PacketHandler() {
+		packetSendQueue.setListener(new PacketListener() {
 			@Override
 			public void act(Object obj) {
 				send(obj);
@@ -52,7 +52,7 @@ public class NetworkClient extends GameClient {
 				if(object instanceof KeepAlive)
 					return; // we don't care about these.
 				
-				handlePacket(object, sendPipe.getPipeWriter());
+				handlePacket(sendPipe.getPipeWriter(), object);
 			}
 			
 			@Override

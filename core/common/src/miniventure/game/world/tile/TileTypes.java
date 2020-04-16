@@ -1,7 +1,7 @@
 package miniventure.game.world.tile;
 
-public class SpreadAction {
+public enum TileTypes {
 	
-	
+	;
 	
 }

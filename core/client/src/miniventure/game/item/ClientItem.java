@@ -1,5 +1,6 @@
 package miniventure.game.item;
 
+import miniventure.game.item.ItemDataTag.ItemDataMap;
 import miniventure.game.network.GameProtocol.SerialItem;
 import miniventure.game.network.GameProtocol.SerialItemStack;
 import miniventure.game.texture.FetchableTextureHolder;
@@ -20,8 +21,7 @@ public class ClientItem extends Item implements EquipmentItem {
 	public ClientItem(SerialItem item) {
 		super(item.name, item.texture.getTexture());
 		
-		//noinspection rawtypes
-		SerialEnumMap<ItemDataTag> map = new SerialEnumMap<>(item.data, ItemDataTag.class);
+		ItemDataMap map = new ItemDataMap(item.data);
 		
 		this.highlightMode = item.highlightMode;
 		this.usability = map.getOrDefault(ItemDataTag.Usability, 0f);

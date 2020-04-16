@@ -6,7 +6,7 @@ import miniventure.game.texture.ItemTextureSource;
 import miniventure.game.world.entity.mob.player.Player;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.tile.ServerTile;
-import miniventure.game.world.tile.TileTypeEnum;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 import org.jetbrains.annotations.NotNull;
 

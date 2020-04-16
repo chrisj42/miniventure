@@ -1,6 +1,7 @@
 package miniventure.game.world.tile;
 
 import miniventure.game.texture.TextureHolder;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 import com.badlogic.gdx.utils.Array;

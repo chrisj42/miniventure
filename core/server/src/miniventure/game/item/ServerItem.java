@@ -2,6 +2,7 @@ package miniventure.game.item;
 
 import java.util.Arrays;
 
+import miniventure.game.item.ItemDataTag.ItemDataMap;
 import miniventure.game.network.GameProtocol.SerialItem;
 import miniventure.game.network.GameProtocol.SerialItemTexture;
 import miniventure.game.texture.FetchableTextureHolder;
@@ -59,11 +60,11 @@ public abstract class ServerItem extends Item {
 	public Result interact(ServerPlayer player) { return Result.NONE; } // interact reflexively.
 	
 	// most items don't have any extra data
-	protected void addSerialData(SerialEnumMap<ItemDataTag<?>> map) {}
+	protected void addSerialData(ItemDataMap map) {}
 	
 	public SerialItem serialize() {
 		if(serialData == null) {
-			SerialEnumMap<ItemDataTag<?>> map = new SerialEnumMap<>();
+			ItemDataMap map = new ItemDataMap();
 			addSerialData(map);
 			serialData = new SerialItem(getName(), new SerialItemTexture(getFetchableTexture()), getHighlightMode(), map.serialize(false));
 		}

@@ -2,14 +2,14 @@ package miniventure.game.world.worldgen.island;
 
 import java.util.Random;
 
-import miniventure.game.world.tile.TileTypeEnum;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
 import miniventure.game.world.worldgen.noise.Coherent2DNoiseFunction;
 import miniventure.game.world.worldgen.noise.Noise;
 import miniventure.game.world.worldgen.noise.NoiseGenerator;
 import miniventure.game.world.worldgen.noise.NoiseModifier;
 import miniventure.game.world.worldgen.noise.Testing;
 
-import static miniventure.game.world.tile.TileTypeEnum.*;
+import static miniventure.game.world.tile.TileType.TileTypeEnum.*;
 import static miniventure.game.world.worldgen.noise.NoiseModifier.FILL_VALUE_RANGE;
 import static miniventure.game.world.worldgen.noise.NoiseModifier.NoiseValueMerger.MULTIPLY;
 import static miniventure.game.world.worldgen.noise.NoiseModifier.combine;

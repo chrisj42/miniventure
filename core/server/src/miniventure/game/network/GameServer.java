@@ -30,8 +30,8 @@ import miniventure.game.world.level.Level;
 import miniventure.game.world.level.ServerLevel;
 import miniventure.game.world.management.ServerWorld;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.TileStack.TileData;
-import miniventure.game.world.tile.TileTypeEnum;
+import miniventure.game.world.tile.Tile.TileData;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
@@ -196,7 +196,7 @@ public abstract class GameServer implements GameProtocol {
 		connection.send(world.getWorldUpdate());
 		// world.postRunnable(() -> {
 			if(info != null)
-				world.loadLevel(info.levelId, player);
+				world.loadLevel(info.levelId, player, level -> {});
 			else
 				world.respawnPlayer(player);
 			
@@ -557,7 +557,7 @@ public abstract class GameServer implements GameProtocol {
 		else
 			playGenericSound(fullSoundName, source.getCenter());
 	}
-	public void playTileSound(String soundName, Tile tile, TileTypeEnum type) {
+	public void playTileSound(String soundName, Tile tile) {
 		//playGenericSound("tile/"+type+"/"+soundName, tile.getCenter());
 		playGenericSound("tile/"+soundName, tile.getCenter());
 	}

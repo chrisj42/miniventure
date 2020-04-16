@@ -4,7 +4,7 @@ import miniventure.game.world.entity.Entity;
 import miniventure.game.world.level.Level;
 import miniventure.game.world.level.RenderLevel;
 import miniventure.game.world.tile.RenderTile;
-import miniventure.game.world.tile.TileTypeEnum;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
 import miniventure.game.world.worldgen.island.IslandType;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -28,7 +28,7 @@ public class DisplayWorld extends LevelManager {
 	
 	@Override
 	public boolean worldLoaded() {
-		return true;
+		return levelLoaded();
 	}
 	
 	@Override

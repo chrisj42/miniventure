@@ -388,6 +388,16 @@ public class ClientCore extends ApplicationAdapter {
 	@Nullable
 	public static MenuScreen getScreen() { synchronized (screenLock) { return menuScreen; } }
 	
+	public static LoadingScreen ensureLoadingScreen(String message) {
+		LoadingScreen loader;
+		synchronized (screenLock) {
+			loader = menuScreen instanceof LoadingScreen ? (LoadingScreen) menuScreen : new LoadingScreen();
+			loader.pushMessage(message, true);
+			setScreen(loader);
+		}
+		return loader;
+	}
+	
 	public static ClientWorld getWorld() { return clientWorld; }
 	public static GameClient getClient() { return clientWorld.getClient(); }
 	

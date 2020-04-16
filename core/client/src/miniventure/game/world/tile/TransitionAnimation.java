@@ -1,5 +1,6 @@
 package miniventure.game.world.tile;
 
+import miniventure.game.world.tile.TileType.TileTypeEnum;
 import miniventure.game.world.tile.TileTypeToAnimationMap.StringTileTypeToAnimationMap;
 
 import org.jetbrains.annotations.NotNull;

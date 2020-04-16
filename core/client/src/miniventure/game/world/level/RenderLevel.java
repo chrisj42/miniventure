@@ -7,8 +7,7 @@ import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.particle.ActionParticle;
 import miniventure.game.world.management.LevelManager;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.TileStack.TileData;
-import miniventure.game.world.tile.TileTypeEnum;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;

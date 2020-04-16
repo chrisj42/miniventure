@@ -6,14 +6,12 @@ import java.util.EnumMap;
 import miniventure.game.core.GameCore;
 import miniventure.game.item.*;
 import miniventure.game.item.ToolItem.ToolType;
-import miniventure.game.network.GameProtocol;
 import miniventure.game.network.GameProtocol.*;
 import miniventure.game.network.PacketPipe.PacketPipeWriter;
 import miniventure.game.network.GameServer;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.SerialHashMap;
 import miniventure.game.util.Version;
-import miniventure.game.util.function.Action;
 import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.Boundable;
 import miniventure.game.world.Point;
@@ -29,7 +27,7 @@ import miniventure.game.world.level.ServerLevel;
 import miniventure.game.world.management.ServerWorld;
 import miniventure.game.world.tile.ServerTile;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.TileTypeEnum;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;
@@ -564,7 +562,7 @@ public class ServerPlayer extends ServerMob implements Player {
 					moveTo(spawnTile);
 					return;
 				}
-				for(Tile tile: level.getAreaTiles(spawnLoc, 1, false)) {
+				for(Tile tile: spawnTile.getAdjacentTiles(true)) {
 					if(maySpawn(tile.getType().getTypeEnum())) {
 						moveTo(tile);
 						return;

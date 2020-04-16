@@ -2,6 +2,7 @@ package miniventure.game.network;
 
 import java.util.HashMap;
 
+import miniventure.game.chat.InfoMessage;
 import miniventure.game.core.GameCore;
 import miniventure.game.core.AudioException;
 import miniventure.game.core.ClientCore;
@@ -13,7 +14,8 @@ import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MapScreen;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.util.MyUtils;
-import miniventure.game.util.ValueWrapper;
+import miniventure.game.util.function.Action;
+import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClientEntity;
 import miniventure.game.world.entity.ClientEntityRenderer;
@@ -32,122 +34,78 @@ import com.badlogic.gdx.math.MathUtils;
 import static miniventure.game.network.GameProtocol.forPacket;
 
 /// this is a superclass for clients; the concrete class will determine if actual networking is used or not.
-public abstract class GameClient implements GameProtocol {
+public abstract class GameClient implements GameProtocol, PacketHandler<Object> {
 	
-	private boolean suspendPackets = false;
+	// private boolean suspendPackets = false;
 	
-	GameClient() {}
+	private PacketDispatcher dispatcher = new PacketDispatcher();
 	
-	public abstract void send(Object obj);
-	
-	void handlePacket(Object object, PacketPipeWriter connection) {
-		// GameCore.debug("Client got packet: "+object.getClass().getSimpleName());
+	GameClient() {
+		PacketHandler<Object> playerPackets = (connection, packet) -> {
+			ClientPlayer player = ClientCore.getWorld().getMainPlayer();
+			if(player != null)
+				player.handlePlayerPackets(packet, connection);
+		};
 		
-		while(suspendPackets)
-			MyUtils.sleep(10);
+		dispatcher.registerHandler(InventoryUpdate.class, playerPackets);
+		dispatcher.registerHandler(SerialItem.class, playerPackets);
+		dispatcher.registerHandler(PositionUpdate.class, playerPackets);
+		dispatcher.registerHandler(StatUpdate.class, playerPackets);
 		
-		ClientWorld world = ClientCore.getWorld();
-		ClientPlayer player = world.getMainPlayer();
+		final ClientWorld world = ClientCore.getWorld();
 		
-		if(object instanceof Ping)
-			send(object);
-		
-		if(object instanceof WorldData)
-			world.init((WorldData)object);
-		
-		forPacket(object, LevelInfo.class, info -> {
-			Gdx.app.postRunnable(() -> {
-				LoadingScreen loader = new LoadingScreen();
-				loader.pushMessage("reading level data", true);
-				ClientCore.setScreen(loader);
-				world.setLevel(info, loader);
-			});
-		});
-		
-		forPacket(object, LevelChunk.class, chunk -> {
+		addHandler(Ping.class, this::send);
+		addHandler(WorldData.class, world::init);
+		addHandler(LevelInfo.class, world::setupLevel);
+		addHandler(LevelChunk.class, chunk -> {
 			ClientLevel level = world.getLevel();
 			if(level == null) return;
 			level.setTiles(chunk);
 		});
 		
-		/*if(object instanceof LevelData) {
-			GameCore.debug("client received level");
-			LoadingScreen loader;
-			MenuScreen screen = ClientCore.getScreen();
-			if(screen instanceof LoadingScreen)
-				loader = (LoadingScreen) screen;
-			else {
-				ValueWrapper<LoadingScreen> loadWrapper = new ValueWrapper<>(null);
-				MyUtils.waitUntilFinished(Gdx.app::postRunnable, () -> {
-					loadWrapper.value = new LoadingScreen();
-					ClientCore.setScreen(loadWrapper.value);
-				});
-				loader = loadWrapper.value;
-			}
-			world.setLevel((LevelData)object, loader);
-		}*/
+		addHandler(DatalessRequest.Level_Loading, () -> world.setupLevel(null));
 		
-		if(object == DatalessRequest.Level_Loading) {
-			MenuScreen screen = ClientCore.getScreen();
-			if(screen instanceof LoadingScreen) {
-				LoadingScreen loader = (LoadingScreen) screen;
-				loader.pushMessage("Waiting for level data", true);
-			}
-		}
+		addHandler(DatalessRequest.Death, () -> ClientCore.setScreen(world.getRespawnScreen()));
 		
-		if(object == DatalessRequest.Death) {
-			Gdx.app.postRunnable(() -> ClientCore.setScreen(world.getRespawnScreen()));
-			return;
-		}
-		
-		forPacket(object, MapRequest.class, req -> {
+		addHandler(MapRequest.class, req -> {
 			MenuScreen screen = ClientCore.getScreen();
 			if(screen instanceof MapScreen)
 				((MapScreen)screen).mapUpdate(req);
-			else if(screen == null)
-				Gdx.app.postRunnable(() -> ClientCore.setScreen(new MapScreen()));
+			// else
+			// 	ClientCore.setScreen(new MapScreen(req));
 		});
 		
-		if(object instanceof SpawnData) {
+		addHandler(SpawnData.class, data -> {
 			GameCore.debug("client received player");
-			MenuScreen screen = ClientCore.getScreen();
-			if(screen instanceof LoadingScreen) {
-				LoadingScreen loader = (LoadingScreen) screen;
-				loader.pushMessage("spawning player", true);
-			}
-			SpawnData data = (SpawnData) object;
-			world.spawnPlayer(data, () -> { // hopefully nothing bad can come of reading packets before this is finished.
-				ClientCore.setScreen(null);
-				if(ClientCore.PLAY_MUSIC) {
-					try {
-						Music song = ClientCore.setMusicTrack(Gdx.files.internal("audio/music/game.mp3"));
-						song.setOnCompletionListener(music -> {
-							music.stop();
-							MyUtils.delay(MathUtils.random(30_000, 90_000), () -> MyUtils.tryPlayMusic(music));
-						});
-						MyUtils.delay(10_000, () -> MyUtils.tryPlayMusic(song));
-					} catch(AudioException e) {
-						System.err.println("failed to fetch game music.");
-						// e.printStackTrace();
-					}
+			// ClientCore.ensureLoadingScreen("spawning player"); // I don't think this will ever last long enough to be seen
+			world.spawnPlayer(data);
+			ClientCore.setScreen(null);
+			if(ClientCore.PLAY_MUSIC) {
+				try {
+					Music song = ClientCore.setMusicTrack(Gdx.files.internal("audio/music/game.mp3"));
+					song.setOnCompletionListener(music -> {
+						music.stop();
+						MyUtils.delay(MathUtils.random(30_000, 90_000), () -> MyUtils.tryPlayMusic(music));
+					});
+					MyUtils.delay(10_000, () -> MyUtils.tryPlayMusic(song));
+				} catch(AudioException e) {
+					System.err.println("failed to fetch game music.");
+					// e.printStackTrace();
 				}
-			});
-		}
+			}
+		});
 		
-		if(object instanceof TileUpdate) {
-			// individual tile update
-			TileUpdate update = (TileUpdate) object;
+		addHandler(TileUpdate.class, update -> {
 			ClientLevel level = world.getLevel(update.levelId);
 			if(level == null) return;
 			ClientTile tile = level.getTile(update.x, update.y);
 			if(tile != null)
-				level.serverUpdate(tile, update.tileData, update.updatedType);
-		}
+				tile.apply(update.tileData, update.updatedType);
+			else
+				GameCore.error(world, "Tile found null during update; level "+level+", tile "+update.x+','+update.y);
+		});
 		
-		if(object instanceof Hurt) {
-			//System.out.println("client received object hurt");
-			Hurt hurt = (Hurt) object;
-			
+		addHandler(Hurt.class, hurt -> {
 			WorldObject target = hurt.target.getObject(world);
 			WorldObject source = hurt.source.getObject(world);
 			
@@ -155,38 +113,25 @@ public abstract class GameClient implements GameProtocol {
 			
 			if(target instanceof ClientEntity)
 				((ClientEntity)target).hurt(source, hurt.power);
-		}
-		
-		forPacket(object, ParticleAddition.class, addition -> {
-			// ClientLevel level = world.getLevel(addition.positionUpdate.levelId);
-			// if(level == null || (player != null && !level.equals(player.getLevel()))) return;
-			
-			ClientParticle e = ClientParticle.get(addition);
-			world.registerEntity(e);
 		});
 		
-		if(object instanceof EntityAddition) {
-			//System.out.println("client received entity addition");
-			EntityAddition addition = (EntityAddition) object;
-			
+		addHandler(ParticleAddition.class, addition -> world.registerEntity(ClientParticle.get(addition)));
+		
+		addHandler(EntityAddition.class, addition -> {
 			if(world.getEntity(addition.eid) != null) return; // entity is already loaded.
 			
+			ClientPlayer player = world.getMainPlayer();
 			if(player != null && addition.eid == player.getId()) return; // shouldn't pay attention to trying to set the client player like this.
 			// ClientLevel level = world.getLevel(addition.positionUpdate.levelId);
 			// if(level == null || (player != null && !level.equals(player.getLevel()))) return;
 			
 			ClientEntity e = new ClientEntity(addition);
 			world.registerEntity(e);
-		}
+		});
 		
-		if(object instanceof EntityRemoval) {
-			//System.out.println("client received entity removal");
-			int eid = ((EntityRemoval)object).eid;
-			world.deregisterEntity(eid);
-		}
+		addHandler(EntityRemoval.class, removal -> world.deregisterEntity(removal.eid));
 		
-		if(object instanceof EntityUpdate) {
-			EntityUpdate update = (EntityUpdate) object;
+		addHandler(EntityUpdate.class, update -> {
 			PositionUpdate newPos = update.positionUpdate;
 			SpriteUpdate newSprite = update.spriteUpdate;
 			
@@ -210,19 +155,20 @@ public abstract class GameClient implements GameProtocol {
 			if(newSprite != null) {
 				e.setRenderer(ClientEntityRenderer.deserialize(newSprite.rendererData));
 			}
-		}
+		});
 		
-		forPacket(object, MobUpdate.class, update -> {
+		addHandler(MobUpdate.class, update -> {
 			Entity e = update.tag.getObject(world);
 			if(e == null) return;
 			DirectionalAnimationRenderer renderer = (DirectionalAnimationRenderer) e.getMainRenderer();
 			renderer.setDirection(update.newDir);
 		});
 		
-		forPacket(object, EntityValidation.class, list -> {
+		addHandler(EntityValidation.class, list -> {
 			// System.out.println("Client received entity validation ("+list.ids.length+" entities)");
 			// first, make a list of all the entities that the client has loaded. Then, go through those given here, removing them from the list just made as you go. For each one, check the position; if it is not in a loaded chunk, then unload it. Else, if a local version doesn't exist, request it from the server. Don't use this data to actually change the positions of the entities, as there is already a system that will take care of that.
 			
+			ClientPlayer player = world.getMainPlayer();
 			if(player == null) {
 				System.err.println("Client received entity validation without loaded player; ignoring packet.");
 				return;
@@ -264,43 +210,48 @@ public abstract class GameClient implements GameProtocol {
 			for(Entity e: loaded.values())
 				e.remove();
 		});
-				
-		/*forPacket(object, HotbarUpdate.class, update -> {
-			if(player == null || ClientCore.getScreen() instanceof InventoryScreen)
-				return;
-			
-			player.getInventory().updateItems(update.itemStacks, update.fillPercent);
-		});*/
 		
-		if(player != null)
-			player.handlePlayerPackets(object, connection);
-		
-		forPacket(object, RecipeUpdate.class, req -> {
+		addHandler(RecipeUpdate.class, req -> {
 			MenuScreen screen = ClientCore.getScreen();
-			if(!(screen instanceof CraftingScreen))
-				Gdx.app.postRunnable(() -> ClientCore.setScreen(new CraftingScreen(req)));
-			else
+			if(screen instanceof CraftingScreen)
 				((CraftingScreen)screen).recipeUpdate(req);
+			else // this part is needed so the hammer works
+				ClientCore.setScreen(new CraftingScreen(req));
 		});
 		
-		forPacket(object, RecipeStockUpdate.class, stockUpdate -> {
+		addHandler(RecipeStockUpdate.class, stockUpdate -> {
 			MenuScreen screen = ClientCore.getScreen();
 			if(screen instanceof CraftingScreen)
 				((CraftingScreen)screen).refreshCraftability(stockUpdate);
 		});
 		
-		ClientCore.manageChatPackets(object);
-		
-		forPacket(object, TabResponse.class, response -> {
+		addHandler(TabResponse.class, response -> {
 			MenuScreen screen = ClientCore.getScreen();
 			if(!(screen instanceof ChatScreen)) return; // ignore
 			ChatScreen chat = (ChatScreen) screen;
 			chat.autocomplete(response);
 		});
 		
-		forPacket(object, LoginFailure.class, failure -> Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen(failure.message))));
+		addHandler(LoginFailure.class, failure -> ClientCore.setScreen(new ErrorScreen(failure.message)));
+		addHandler(SoundRequest.class, sound -> ClientCore.playSound(sound.sound));
 		
-		forPacket(object, SoundRequest.class, sound -> ClientCore.playSound(sound.sound));
+		addHandler(Message.class, ClientCore::manageChatPackets);
+		addHandler(InfoMessage.class, ClientCore::manageChatPackets);
+		addHandler(DatalessRequest.Clear_Console, () -> ClientCore.manageChatPackets(DatalessRequest.Clear_Console));
+	}
+	
+	private <T> void addHandler(Class<T> packetClass, ValueAction<T> action) {
+		dispatcher.registerHandler(packetClass, (connection, data) -> action.act(data));
+	}
+	private void addHandler(DatalessRequest requestType, Action action) {
+		dispatcher.registerHandler(requestType, connection -> action.act());
+	}
+	
+	public abstract void send(Object obj);
+	
+	@Override
+	public void handlePacket(PacketPipeWriter connection, Object packet) {
+		Gdx.app.postRunnable(() -> dispatcher.handle(ClientCore.getWorld(), connection, packet));
 	}
 	
 	public abstract void disconnect();

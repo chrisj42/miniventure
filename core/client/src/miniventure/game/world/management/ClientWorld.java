@@ -10,7 +10,6 @@ import miniventure.game.network.ServerManager;
 import miniventure.game.item.InventoryOverlay;
 import miniventure.game.network.GameProtocol;
 import miniventure.game.network.GameProtocol.DatalessRequest;
-import miniventure.game.network.GameProtocol.LevelData;
 import miniventure.game.network.GameProtocol.Login;
 import miniventure.game.network.GameProtocol.SpawnData;
 import miniventure.game.network.GameProtocol.WorldData;
@@ -31,6 +30,8 @@ import miniventure.game.world.level.ClientLevel;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+
+import org.jetbrains.annotations.Nullable;
 
 public class ClientWorld extends LevelManager {
 	
@@ -59,6 +60,8 @@ public class ClientWorld extends LevelManager {
 	private String ipAddress;
 	private int lastPort;
 	
+	private boolean worldLoaded = false;
+	
 	private GameScreen gameScreen;
 	
 	private GameClient client;
@@ -70,20 +73,18 @@ public class ClientWorld extends LevelManager {
 	// a ClientWorld is created 
 	public ClientWorld(ServerManager serverManager) {
 		this.serverManager = serverManager;
-		
 	}
 	
 	// Update method
 	
 	@Override
 	public void update(float delta) {
-		if(!worldLoaded() || mainPlayer == null) {
+		ClientLevel level = mainPlayer == null ? null : mainPlayer.getLevel();
+		
+		if(!levelLoaded() || level == null) {
 			super.update(delta);
 			return;
 		}
-		
-		ClientLevel level = mainPlayer.getLevel();
-		if(level == null) return;
 		
 		MenuScreen menu = ClientCore.getScreen();
 		if(menu == null)
@@ -102,9 +103,9 @@ public class ClientWorld extends LevelManager {
 	
 	
 	public void init(WorldData data) {
-		gameTime = data.gameTime;
-		daylightOffset = data.daylightOffset;
+		initWorldTime(data.gameTime, data.daylightOffset);
 		this.doDaylightCycle = data.doDaylightCycle;
+		worldLoaded = true;
 	}
 	
 	@Override protected boolean doDaylightCycle() { return doDaylightCycle; }
@@ -206,6 +207,7 @@ public class ClientWorld extends LevelManager {
 			setLevel(null);
 			mainPlayer = null;
 			client = null;
+			worldLoaded = false;
 			ClientCore.setScreen(new MainMenu());
 		});
 	}
@@ -213,18 +215,17 @@ public class ClientWorld extends LevelManager {
 	// TODO add lighting overlays, based on level and/or time of day, depending on the level and perhaps other things.
 	private Color getLightingOverlay() {
 		//Array<Color> colors = new Array<>(TimeOfDay.getSkyColors(daylightOffset));
-		return TimeOfDay.getSkyColor(daylightOffset);
+		return TimeOfDay.getSkyColor(getDaylightOffset());
 	}
 	
 	
 	/*  --- LEVEL MANAGEMENT --- */
 	
-	
-	public void setLevel(LevelInfo data, LoadingScreen loader) {
+	// GDX thread only
+	public void setupLevel(@Nullable LevelInfo data) {
 		mainPlayer = null;
-		// loader.pushMessage("Parsing new level data");
-		setLevel(new ClientLevel(this, data.levelId, data.width, data.height));
-		// loader.editMessage("awaiting spawn data", true);
+		setLevel(data == null ? null : new ClientLevel(this, data.levelId, data.width, data.height));
+		ClientCore.ensureLoadingScreen(data == null ? "Waiting for level data" : "loading level");
 	}
 	
 	/*public void loadChunk(ChunkData data) {
@@ -260,19 +261,17 @@ public class ClientWorld extends LevelManager {
 	/*  --- PLAYER MANAGEMENT --- */
 	
 	
-	public void spawnPlayer(SpawnData data, Action callback) {
+	// GDX thread only.
+	public void spawnPlayer(SpawnData data) {
 		// this has to come before making the new client player, because it has the same eid and so will overwrite some things.
 		if(this.mainPlayer != null) {
 			super.deregisterEntity(this.mainPlayer.getId());
 		}
 		
-		Gdx.app.postRunnable(() -> {
-			InventoryOverlay invScreen = new InventoryOverlay(new OrthographicCamera());
-			this.mainPlayer = new ClientPlayer(data, invScreen);
-			registerEntity(mainPlayer);
-			gameScreen = ClientCore.newGameScreen(new GameScreen(mainPlayer, gameScreen, invScreen));
-			callback.act();
-		});
+		InventoryOverlay invScreen = new InventoryOverlay(new OrthographicCamera());
+		this.mainPlayer = new ClientPlayer(data, invScreen);
+		registerEntity(mainPlayer);
+		gameScreen = ClientCore.newGameScreen(new GameScreen(mainPlayer, gameScreen, invScreen));
 	}
 	
 	// libGDX thread only
@@ -289,6 +288,8 @@ public class ClientWorld extends LevelManager {
 	
 	/*  --- GET METHODS --- */
 	
+	@Override
+	public boolean worldLoaded() { return worldLoaded; }
 	
 	public GameClient getClient() { return client; }
 	

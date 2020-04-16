@@ -1,11 +1,10 @@
 package miniventure.game.world.tile;
 
 import java.util.EnumSet;
-import java.util.HashSet;
 
 import miniventure.game.util.MyUtils;
-import miniventure.game.util.function.FetchFunction;
-import miniventure.game.util.function.ValueAction;
+import miniventure.game.world.tile.Tile.TileContext;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
 import miniventure.game.world.tile.UpdateManager.UpdateAction;
 
 import com.badlogic.gdx.math.MathUtils;
@@ -32,20 +31,18 @@ class SpreadUpdateAction implements UpdateAction {
 		}
 	}
 	
-	private final TileTypeEnum tileType;
 	private final FloatFetcher spreadDelayFetcher;
 	private final float spreadChance;
 	private final TileReplaceBehavior replaceBehavior;
 	private final EnumSet<TileTypeEnum> replaces;
 	
-	SpreadUpdateAction(@NotNull TileTypeEnum tileType, float spreadDelay, TileReplaceBehavior replaceBehavior, TileTypeEnum... replaces) {
-		this(tileType, FloatFetcher.value(spreadDelay), replaceBehavior, replaces);
+	SpreadUpdateAction(float spreadDelay, TileReplaceBehavior replaceBehavior, TileTypeEnum... replaces) {
+		this(FloatFetcher.value(spreadDelay), replaceBehavior, replaces);
 	}
-	SpreadUpdateAction(@NotNull TileTypeEnum tileType, FloatFetcher spreadDelayFetcher, TileReplaceBehavior replaceBehavior, TileTypeEnum... replaces) {
-		this(tileType, spreadDelayFetcher, 1, replaceBehavior, replaces);
+	SpreadUpdateAction(FloatFetcher spreadDelayFetcher, TileReplaceBehavior replaceBehavior, TileTypeEnum... replaces) {
+		this(spreadDelayFetcher, 1, replaceBehavior, replaces);
 	}
-	SpreadUpdateAction(@NotNull TileTypeEnum tileType, FloatFetcher spreadDelayFetcher, float spreadChance, TileReplaceBehavior replaceBehavior, TileTypeEnum... replaces) {
-		this.tileType = tileType;
+	SpreadUpdateAction(FloatFetcher spreadDelayFetcher, float spreadChance, TileReplaceBehavior replaceBehavior, TileTypeEnum... replaces) {
 		this.spreadDelayFetcher = spreadDelayFetcher;
 		this.spreadChance = spreadChance;
 		this.replaceBehavior = replaceBehavior;
@@ -53,32 +50,27 @@ class SpreadUpdateAction implements UpdateAction {
 	}
 	
 	@Override
-	public void update(@NotNull ServerTile tile, FetchFunction<String> dataCacheFetcher, ValueAction<String> dataCacheSetter) {
-		if(MathUtils.random() >= spreadChance) return; // must be less to execute; a chance of 1 will always execute.
+	public float update(TileContext context) {
+		if(!canSpread(context.getTile()))
+			return 0; // no need to check for spreadability anymore until adjacent tiles are updated
 		
-		HashSet<Tile> around = tile.getAdjacentTiles(false);
-		//around.shuffle();
-		for(Tile t: around) {
-			if(replaces.contains(t.getType().getTypeEnum())) {
-				replaceBehavior.spreadType(ServerTileType.get(tileType), (ServerTile)t);
-				//break;
+		if(MathUtils.random() < spreadChance) { // must be less to execute; a chance of 1 will always execute.
+			for (Tile t: context.getTile().getAdjacentTiles(false)) {
+				if (replaces.contains(t.getType().getTypeEnum())) {
+					replaceBehavior.spreadType(context.getType(), (ServerTile) t);
+					//break;
+				}
 			}
 		}
+		
+		return spreadDelayFetcher.getFloat();
 	}
 	
-	@Override
-	public boolean canUpdate(@NotNull ServerTile tile) {
+	private boolean canSpread(@NotNull ServerTile tile) {
 		for(Tile t: tile.getAdjacentTiles(false))
 			if(replaces.contains(t.getType().getTypeEnum()))
 				return true;
 		
 		return false;
 	}
-	
-	// not called repeatedly, unless updatable state changes repeatedly.
-	@Override
-	public float getDelta(@NotNull ServerTile tile) {
-		return spreadDelayFetcher.getFloat();
-	}
-	
 }
