@@ -1,0 +1,38 @@
+package miniventure.game.world.tile;
+
+import miniventure.game.texture.TextureHolder;
+import miniventure.game.world.tile.TileType.TileTypeEnum;
+
+import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
+import com.badlogic.gdx.utils.Array;
+
+import org.jetbrains.annotations.NotNull;
+
+public class RenderStyle {
+	
+	static final RenderStyle SINGLE_FRAME = new RenderStyle(PlayMode.NORMAL, 0);
+	
+	private final PlayMode playMode;
+	private final float fps;
+	
+	private final boolean sync;
+	
+	RenderStyle(float fps) { this(false, fps); }
+	RenderStyle(boolean sync, float fps) { this(PlayMode.LOOP, sync, fps); }
+	RenderStyle(PlayMode playMode, float fps) { this(playMode, false, fps); }
+	RenderStyle(PlayMode playMode, boolean sync, float fps) {
+		this.playMode = playMode;
+		this.sync = sync;
+		this.fps = fps;
+	}
+	
+	<T> TileAnimation getAnimation(@NotNull TileTypeEnum tileType, T name, TileTypeToAnimationMap<T> map, String mapNameForErrorLog) {
+		return getAnimation(tileType, map.getAnimationFrames(tileType, name, mapNameForErrorLog));
+	}
+	private TileAnimation getAnimation(@NotNull TileTypeEnum tileType, Array<TextureHolder> frames) {
+		if(fps == 0)
+			return new TileAnimation(tileType, sync, 1, frames.get(0));
+		else
+			return new TileAnimation(tileType, sync, fps, frames, playMode);
+	}
+}

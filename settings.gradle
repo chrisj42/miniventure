@@ -3,6 +3,7 @@ include 'launcher'
 include 'common'
 include 'client'
 include 'server'
+include 'sponly'
 
 rootProject.children.each {project ->
 	project.projectDir = new File(settingsDir, "core/${project.name}")
