@@ -6,12 +6,17 @@ import java.util.Objects;
 import miniventure.game.core.ClientCore;
 import miniventure.game.core.FontStyle;
 import miniventure.game.screen.MenuScreen;
+import miniventure.game.screen.util.ColorBackground;
 import miniventure.game.screen.util.DiscreteViewport;
+import miniventure.game.util.ArrayUtils;
+import miniventure.game.util.MyUtils;
 import miniventure.game.util.RelPos;
 
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
@@ -123,8 +128,13 @@ public class InventoryOverlay extends MenuScreen {
 				slot.addListener(new InputListener() {
 					@Override
 					public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-						invManager.setSelection(index);
-						return true;
+						// note, DragListener handles events for those slots that have DragAndDrop enabled; so all such slots automatically count the event as handled. So returning false has no effect. However for the first slot that doesn't have that listener, returning true is needed to handle the event.
+						// System.out.println("clicked index "+index+" when slots taken is "+invManager.getInv().getSlotsTaken()+" (event handled: "+event.isHandled()+")");
+						if(index < invManager.getInv().getSlotsTaken()) {
+							invManager.setSelection(index);
+							return true;
+						}
+						return false;
 					}
 				});
 				if(index >= 0) {
@@ -221,6 +231,9 @@ public class InventoryOverlay extends MenuScreen {
 				return true;
 			}
 		});
+		
+		// debug
+		// mainGroup.setBackground(new ColorBackground(mainGroup, Color.NAVY));
 		
 		// will this set the stage as the input handler, or prevent any inputs from being read?
 		setKeyboardFocus(null);
@@ -327,6 +340,7 @@ public class InventoryOverlay extends MenuScreen {
 			if(item == null)
 				return null;
 			
+			System.out.println("payload accepted");
 			return new SlotPayload(new ItemIcon(item, info.slot.getCount()), item);
 		}
 	}
@@ -343,6 +357,7 @@ public class InventoryOverlay extends MenuScreen {
 		@Override
 		public boolean drag(Source source, Payload payload, float x, float y, int pointer) {
 			// SlotInfo other = ((SlotSource)source).info;
+			System.out.println("target drag");
 			
 			if(source.getActor() == getActor())
 				return false;

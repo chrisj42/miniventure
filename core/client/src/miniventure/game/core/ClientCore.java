@@ -255,8 +255,8 @@ public class ClientCore extends ApplicationAdapter {
 			
 			input.resetDelay();
 			menuScreen = screen;
-			if(menuScreen != null) menuScreen.focus();
 			resetInputProcessor();
+			if(menuScreen != null) menuScreen.focus();
 		}
 	}
 	public static void backToParentScreen() {

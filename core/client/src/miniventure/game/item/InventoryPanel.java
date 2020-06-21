@@ -3,6 +3,7 @@ package miniventure.game.item;
 import miniventure.game.util.function.FetchFunction;
 
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Event;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -93,6 +94,13 @@ public class InventoryPanel extends Table {
 					over = false;
 				}
 			});
+		}
+		
+		@Override
+		public boolean fire(Event event) {
+			if(event instanceof InputEvent && idx >= inventory.getSlotsTaken())
+				return false;
+			return super.fire(event);
 		}
 		
 		@Override @Nullable
