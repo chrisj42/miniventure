@@ -1,4 +1,4 @@
-package miniventure.game.core;
+package miniventure.game.desktop;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,6 +10,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
+import miniventure.game.core.GameCore;
+import miniventure.game.core.Preferences;
+import miniventure.game.core.ClientCore;
 import miniventure.game.network.NetworkClient;
 import miniventure.game.network.ServerManager;
 import miniventure.game.network.GameProtocol;
@@ -19,6 +22,7 @@ import miniventure.game.screen.ErrorScreen;
 import miniventure.game.screen.LoadingScreen;
 import miniventure.game.network.LocalServer;
 import miniventure.game.network.NetworkServer;
+import miniventure.game.core.ServerCore;
 import miniventure.game.network.ServerFetcher;
 import miniventure.game.util.ProgressLogger;
 import miniventure.game.util.Version;

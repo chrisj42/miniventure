@@ -1,14 +1,14 @@
 package miniventure.game.world.tile;
 
+import java.util.HashMap;
+
 import miniventure.game.item.FoodType;
 import miniventure.game.item.PlaceableItemType;
 import miniventure.game.item.ResourceType;
 import miniventure.game.item.Result;
 import miniventure.game.item.ServerItem;
 import miniventure.game.item.ToolItem.ToolType;
-import miniventure.game.util.customenum.GEnumMap;
-import miniventure.game.util.customenum.GenericEnum;
-import miniventure.game.util.customenum.PropertyEnum;
+import miniventure.game.world.tile.TileCacheTag.TileDataCache;
 import miniventure.game.util.function.MapFunction;
 import miniventure.game.util.param.ParamMap;
 import miniventure.game.util.param.Value;
@@ -20,7 +20,6 @@ import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.tile.DestructionManager.PreferredTool;
 import miniventure.game.world.tile.DestructionManager.RequiredTool;
 import miniventure.game.world.tile.SpreadUpdateAction.FloatFetcher;
-import miniventure.game.world.tile.Tile.TileContext;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -33,63 +32,43 @@ public class ServerTileType extends TileType {
 			type.getType();
 	}
 	
-	private static class TypeFetchPropertyEnum<T, E extends TypeFetchPropertyEnum<T, E>> extends PropertyEnum<MapFunction<TileTypeEnum, T>, E> {
-		protected TypeFetchPropertyEnum(MapFunction<TileTypeEnum, T> defaultValue) {
-			super(defaultValue);
-		}
-	}
-	public static class P<T extends TileProperty> extends TypeFetchPropertyEnum<T, P<T>> {
-		public static final P<DestructionManager> DESTRUCT = new P<>(DestructionManager.INDESTRUCTIBLE);
-		public static final P<UpdateManager> UPDATE = new P<>(UpdateManager::new);
-		public static final P<TransitionManager> TRANS = new P<>(TransitionManager::new);
-		
-		public static final P<?>[] values = GenericEnum.values(P.class);
-		
-		private P(MapFunction<TileTypeEnum, T> mapFunction) {
-			super(mapFunction);
-		}
+	
+	public interface P {
+		TParam<DestructionManager> DESTRUCT = new TParam<>(DestructionManager::INDESTRUCTIBLE);
+		TParam<UpdateManager> UPDATE = new TParam<>(UpdateManager::new);
+		TParam<TransitionManager> TRANS = new TParam<>(TransitionManager::new);
+		// TParam<TileItem> ITEM = new TParam<>(type -> null);
 	}
 	
-	@FunctionalInterface
-	private interface TypeFetcher {
-		ServerTileType get(@NotNull TileTypeEnum tileType, Value<?>[] params);
-	}
-	
-	// private final HashMap<TParam<?>, Object> propertyMap;
-	private final GEnumMap<P> propertyMap;
+	private final HashMap<TParam<?>, Object> propertyMap;
 	// private boolean initializing = false;
 	// private boolean initialized = false;
 	
-	private ServerTileType(@NotNull TileTypeEnum type, Value<?>[] params) {
+	private ServerTileType(@NotNull TileTypeEnum type) {
 		super(type);
-		propertyMap = new GEnumMap<>(P.class);
+		propertyMap = new HashMap<>(4);
 	}
 	
-	@SuppressWarnings("unchecked")
-	private void initProperties(Value<?>... params) {
+	private void initProperties(Value... params) {
 		// if(initialized || initializing) {
 		// 	System.err.println("ServerTileType initProperties was called more than once for type "+getTypeEnum());
 		// 	return;
 		// }
 		ParamMap map = new ParamMap(params);
-		// TileTypeEnum type = getTypeEnum();
+		TileTypeEnum type = getTypeEnum();
 		// initializing = true;
-		for(P prop: P.values) {
-			prop.addToMap(propertyMap, map, this);
-		}
 		// propertyMap.put(P.ITEM, map.get(P.ITEM).get(type)); // important to create and set the item first
-		// propertyMap.put(P.DESTRUCT, map.get(P.DESTRUCT).get(type));
-		// propertyMap.put(P.UPDATE, map.get(P.UPDATE).get(type));
-		// propertyMap.put(P.TRANS, map.get(P.TRANS).get(type));
+		propertyMap.put(P.DESTRUCT, map.get(P.DESTRUCT).get(type));
+		propertyMap.put(P.UPDATE, map.get(P.UPDATE).get(type));
+		propertyMap.put(P.TRANS, map.get(P.TRANS).get(type));
 		// initialized = true;
 		// initializing = false;
-		
-		// get(P.DESTRUCT)
 	}
 	
+	@SuppressWarnings("unchecked")
 	// this fetches the given property from this type's property map.
-	public <T extends TileProperty> T get(P<T> property) {
-		/*T prop =*/return propertyMap.get(property);
+	public <T> T get(TParam<T> property) {
+		/*T prop =*/return (T) propertyMap.get(property);
 		// String propClass = prop.getClass().getSimpleName();
 		// if(initializing)
 		// 	GameCore.debug(propClass+" property fetch during initialization of ServerTileType "+getTypeEnum());
@@ -104,11 +83,8 @@ public class ServerTileType extends TileType {
 	}
 	
 	// combines the above two methods into a single neat call.
-	public static <T extends TileProperty> T get(TileTypeEnum type, P<T> property) {
+	public static <T> T get(TileTypeEnum type, TParam<T> property) {
 		return get(type).get(property);
-	}
-	public static <T extends TileProperty> T get(TileContext context, P<T> property) {
-		return get(context.getType().getTypeEnum(), property);
 	}
 	
 	// used initially by destruction manager to get tile type item while the ServerTileType object is still being constructed; also used normally throughout the code to get TileItems.
@@ -123,31 +99,28 @@ public class ServerTileType extends TileType {
 	// after all, initial data is data that should be a given, and therefore shouldn't need to be stored.
 	// public SerialMap getInitialData() { return new SerialMap(); }
 	
-	/*
+	/**
 	 * Called to update the tile's state in some way, whenever an adjacent tile is updated. It is also called once on tile load to get the first value and determine future calls.
 	 * If this returns a value greater than 0, then it is called after at least the specified amount of time has passed. Otherwise, it won't be updated until an adjacent tile is updated.
 	 *
-	 * @param context the tile context
+	 * @param tile the tile
 	 * @return how long to wait before next call, or 0 for never (until adjacent tile update)
 	 */
-	/*public float update(@NotNull Tile.TileContext context, float delta) {
-		// TileDataMap dataMap = tile.getDataMap(getTypeEnum());
+	public float update(@NotNull ServerTile tile) {
+		TileDataCache dataMap = tile.getCacheMap(getTypeEnum());
 		
-		float now = context.getWorld().getGameTime();
-		float delayOriginal = context.getData(TileDataTag.UpdateTimer);
-		float delayLeft = now - delayOriginal;
+		float now = tile.getWorld().getGameTime();
+		float lastUpdate = dataMap.getOrDefault(TileCacheTag.LastUpdate, now);
+		float delta = now - lastUpdate;
+		dataMap.put(TileCacheTag.LastUpdate, now);
 		
-		if(delayLeft <= 0)
-			delayLeft = get(P.UPDATE).update(context, delta);
-		
-		context.setData(TileDataTag.UpdateTimer, delayLeft);
-		return delayLeft;
-	}*/
+		return get(P.UPDATE).update(tile, delta);
+	}
 	
 	
 	public Result interact(@NotNull ServerTile tile, Player player, @Nullable ServerItem item) { return Result.NONE; }
 	
-	public Result attacked(@NotNull TileContext tile, WorldObject source, @Nullable ServerItem item, int damage) {
+	public Result attacked(@NotNull ServerTile tile, WorldObject source, @Nullable ServerItem item, int damage) {
 		return get(P.DESTRUCT).tileAttacked(tile, source, item, damage);
 	}
 	
@@ -159,62 +132,65 @@ public class ServerTileType extends TileType {
 		HOLE(),
 		
 		DIRT(
-			new DestructionManager(
+			P.DESTRUCT.as(type -> new DestructionManager(type,
 				new ItemDrop(PlaceableItemType.Dirt.get()),
 				new RequiredTool(ToolType.Shovel)
-			)
+			))
 		),
 		
 		SAND(
-			new DestructionManager(
+			P.DESTRUCT.as(type -> new DestructionManager(type,
 				new ItemDrop(PlaceableItemType.Sand.get()),
 				new RequiredTool(ToolType.Shovel)
-			)
+			))
 		),
 		
 		GRASS(
-			new DestructionManager(
+			P.DESTRUCT.as(type -> new DestructionManager(type,
 				new ItemDrop(PlaceableItemType.Dirt.get()),
 				new RequiredTool(ToolType.Shovel)
-			),
+			)),
 			
-			new UpdateManager(
-				new SpreadUpdateAction(FloatFetcher.random(5, 30, 60), .95f,
-					(newType, tile) -> tile.addTile(newType.getTypeEnum()),
-					TileTypeEnum.DIRT
+			P.UPDATE.as(type ->
+				new UpdateManager(type,
+					new SpreadUpdateAction(type, FloatFetcher.random(5, 30, 60), .95f,
+						(newType, tile) -> tile.addTile(newType),
+						TileTypeEnum.DIRT
+					)
 				)
 			)
 		),
 		
 		STONE_PATH(
-			new DestructionManager(
+			P.DESTRUCT.as(type -> new DestructionManager(type,
 				new ItemDrop(ResourceType.Stone.get(), 2),
 				new RequiredTool(ToolType.Pickaxe)
-			)
+			))
 		),
 		
 		SNOW(
-			new DestructionManager.DestructibleBuilder()
+			P.DESTRUCT.as(type -> new DestructionManager.DestructibleBuilder(type)
 				.drops(
 					new ItemDrop(PlaceableItemType.Snow.get()),
 					new ItemDrop(FoodType.Snow_Berries.get(), 0, 1, .1f)
 				)
 				.require(new RequiredTool(ToolType.Shovel))
 				.make()
-		),
-		
-		SMALL_STONE(
-			new DestructionManager(new ItemDrop(ResourceType.Stone.get()))
-		),
-		
-		WATER(
-			new UpdateManager(
-				new SpreadUpdateAction(0.33f,
-					(newType, tile) -> tile.addTile(newType.getTypeEnum()), TileTypeEnum.HOLE)
 			)
 		),
 		
-		DOCK((type, params) -> new ServerTileType(type, params)
+		SMALL_STONE(
+			P.DESTRUCT.as(type -> new DestructionManager(type, new ItemDrop(ResourceType.Stone.get())))
+		),
+		
+		WATER(
+			P.UPDATE.as(type -> new UpdateManager(type,
+				new SpreadUpdateAction(type, 0.33f,
+					(newType, tile) -> tile.addTile(newType), TileTypeEnum.HOLE)
+			))
+		),
+		
+		DOCK(type -> new ServerTileType(type)
 		{
 			@Override
 			public Result interact(@NotNull ServerTile tile, Player player, @Nullable ServerItem item) {
@@ -229,14 +205,14 @@ public class ServerTileType extends TileType {
 		RUBY_ORE(ServerTileFactory.ore(ResourceType.Ruby, 60)),
 		
 		STONE(
-			P.DESTRUCT.as(type -> new DestructionManager(40,
+			P.DESTRUCT.as(type -> new DestructionManager(type, 40,
 				new PreferredTool(ToolType.Pickaxe, 5),
 				new ItemDrop(ResourceType.Stone.get(), 2, 3)
 			))
 		),
 		
 		STONE_FLOOR(
-			P.DESTRUCT.as(type -> new DestructionManager(
+			P.DESTRUCT.as(type -> new DestructionManager(type,
 				new ItemDrop(ResourceType.Stone.get(), 3),
 				new RequiredTool(ToolType.Pickaxe)
 			))
@@ -244,7 +220,7 @@ public class ServerTileType extends TileType {
 		
 		WOOD_WALL(
 			P.DESTRUCT.as(type -> 
-				new DestructionManager(20,
+				new DestructionManager(type, 20,
 					new PreferredTool(ToolType.Axe, 3),
 					new ItemDrop(ResourceType.Log.get(), 3)
 				)
@@ -253,22 +229,22 @@ public class ServerTileType extends TileType {
 		
 		STONE_WALL(
 			P.DESTRUCT.as(type -> 
-				new DestructionManager(40,
+				new DestructionManager(type, 40,
 					new PreferredTool(ToolType.Pickaxe, 5),
 					new ItemDrop(ResourceType.Stone.get(), 3)
 				)
 			)
 		),
 		
-		OPEN_DOOR((type, params) -> new ServerTileType(type, params)
+		OPEN_DOOR(type -> new ServerTileType(type)
 		{
 			@Override
 			public Result interact(@NotNull ServerTile tile, Player player, @Nullable ServerItem item) {
-				tile.replaceTile(TileTypeEnum.CLOSED_DOOR);
+				tile.replaceTile(CLOSED_DOOR.getType());
 				return Result.INTERACT;
 			}
 		},
-			P.DESTRUCT.as(type -> new DestructionManager(
+			P.DESTRUCT.as(type -> new DestructionManager(type,
 				new ItemDrop(ResourceType.Log.get(), 3),
 				new RequiredTool(ToolType.Axe)
 			)),
@@ -279,15 +255,15 @@ public class ServerTileType extends TileType {
 			)
 		),
 		
-		CLOSED_DOOR((type, params) -> new ServerTileType(type, params)
+		CLOSED_DOOR(type -> new ServerTileType(type)
 		{
 			@Override
 			public Result interact(@NotNull ServerTile tile, Player player, @Nullable ServerItem item) {
-				tile.replaceTile(TileTypeEnum.OPEN_DOOR);
+				tile.replaceTile(OPEN_DOOR.getType());
 				return Result.INTERACT;
 			}
 		},
-			P.DESTRUCT.as(type -> new DestructionManager(
+			P.DESTRUCT.as(type -> new DestructionManager(type,
 				new ItemDrop(ResourceType.Log.get(), 3),
 				new RequiredTool(ToolType.Axe)
 			))
@@ -295,20 +271,20 @@ public class ServerTileType extends TileType {
 		
 		// note / to-do: I could pretty easily make torches melt adjacent snow...
 		TORCH(
-			P.DESTRUCT.as(type -> new DestructionManager(new ItemDrop(PlaceableItemType.Torch.get()))),
+			P.DESTRUCT.as(type -> new DestructionManager(type, new ItemDrop(PlaceableItemType.Torch.get()))),
 			P.TRANS.as(type -> new TransitionManager(type)
 				.addEntrance("enter", 12)
 			)
 		),
 		
-		CACTUS((type, params) -> new ServerTileType(type, params)
+		CACTUS(type -> new ServerTileType(type)
 		{
 			@Override
 			public boolean touched(@NotNull ServerTile tile, Entity entity, boolean initial) {
 				return entity.attackedBy(tile, null, 1).success;
 			}
 		},
-			P.DESTRUCT.as(type -> new DestructionManager(12, null,
+			P.DESTRUCT.as(type -> new DestructionManager(type, 12, null,
 				new ItemDrop(FoodType.Cactus_Fruit.get(), 1, 2, .15f)
 			))
 		),
@@ -322,14 +298,12 @@ public class ServerTileType extends TileType {
 		
 		/** @noinspection NonFinalFieldInEnum*/
 		private ServerTileType type = null;
-		private final TypeFetcher fetcher;
-		private final Value<?>[] params;
+		private final MapFunction<TileTypeEnum, ServerTileType> fetcher;
+		private final Value[] params;
 		private final TileTypeEnum mainEnum;
 		
-		// ServerTileTypeEnum(DataEntry<?, P<?>>... params) {
-		ServerTileTypeEnum(DestructionManager destructionManager)
-		ServerTileTypeEnum(Value<?>... params) { this(ServerTileType::new, params); }
-		ServerTileTypeEnum(TypeFetcher fetcher, Value<?>... params) {
+		ServerTileTypeEnum(Value... params) { this(ServerTileType::new, params); }
+		ServerTileTypeEnum(MapFunction<TileTypeEnum, ServerTileType> fetcher, Value... params) {
 			this.fetcher = fetcher;
 			this.params = params;
 			mainEnum = TileTypeEnum.value(ordinal());
@@ -337,7 +311,7 @@ public class ServerTileType extends TileType {
 		
 		public ServerTileType getType() {
 			if(type == null) {
-				type = fetcher.get(mainEnum, params);
+				type = fetcher.get(mainEnum);
 				type.initProperties(params);
 			}
 			return type;
@@ -348,17 +322,17 @@ public class ServerTileType extends TileType {
 	}
 	
 	private interface ServerTileFactory {
-		static Value<?>[] ore(ResourceType oreType, int health) {
+		static Value[] ore(ResourceType oreType, int health) {
 			return new Value[] {
-				P.DESTRUCT.as(type -> new DestructionManager(health,
+				P.DESTRUCT.as(type -> new DestructionManager(type, health,
 					new PreferredTool(ToolType.Pickaxe, 5),
 					new ItemDrop(oreType.get(), 3, 4)
 				))
 			};
 		}
 		
-		Value<?>[] tree = {
-			P.DESTRUCT.as(type -> new DestructionManager(24,
+		Value[] tree = {
+			P.DESTRUCT.as(type -> new DestructionManager(type, 24,
 				new PreferredTool(ToolType.Axe, 2),
 				new ItemDrop(ResourceType.Log.get(), 2),
 				new ItemDrop(FoodType.Apple.get(), 0, 2, 0.32f)

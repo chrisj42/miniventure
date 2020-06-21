@@ -1,12 +1,13 @@
 package miniventure.game.world.tile;
 
-import miniventure.game.world.tile.Tile.TileContext;
+import miniventure.game.world.tile.TileCacheTag.TileDataCache;
+import miniventure.game.util.function.FetchFunction;
+import miniventure.game.util.function.ValueAction;
+import miniventure.game.world.tile.ServerTileType.P;
 
 import org.jetbrains.annotations.NotNull;
 
-public class UpdateManager implements TileProperty {
-	
-	public static final UpdateManager NONE = new UpdateManager(null);
+public class UpdateManager {
 	
 	/*
 		Update Actions have:
@@ -16,57 +17,42 @@ public class UpdateManager implements TileProperty {
 	 */
 	
 	interface UpdateAction {
-		float update(TileContext context);
+		void update(@NotNull ServerTile tile, FetchFunction<String> dataCacheFetcher, ValueAction<String> dataCacheSetter);
 		
-		// boolean canUpdate(@NotNull ServerTile tile);
+		boolean canUpdate(@NotNull ServerTile tile);
 		
-		// float getDelta(@NotNull ServerTile tile);
+		float getDelta(@NotNull ServerTile tile);
 	}
 	
-	// private final UpdateAction[] actions;
-	private final UpdateAction action;
+	private final TileTypeEnum tileType;
+	private final UpdateAction[] actions;
 	
-	public UpdateManager(UpdateAction action) {
-		this.action = action;
+	public UpdateManager(@NotNull TileTypeEnum tileType, UpdateAction... actions) {
+		this.tileType = tileType;
+		this.actions = actions;
 	}
 	
-	@Override
-	public void registerDataTags(TileType tileType) {
-		if(action != null) {
-			// tileType.addDataTag(TileDataTag.LastUpdate);
-			tileType.addDataTag(TileDataTag.UpdateTimer);
-		}
-	}
-	
-	public float update(@NotNull Tile.TileContext context, float delta) {
+	public float update(@NotNull ServerTile tile, float delta) {
+		// if playing an exit animation, then don't update the tile.
+		TransitionManager man = ServerTileType.get(tileType, P.TRANS);
+		if(man.playingAnimation(tile))
+			return man.tryFinishAnimation(tile);
 		
-		if(action == null)
-			return 0;
-		
-		float delayOriginal = context.getData(TileDataTag.UpdateTimer);
-		float delayLeft = delayOriginal - delta;
-		
-		if(delayLeft <= 0)
-			delayLeft = action.update(context);
-		
-		context.setData(TileDataTag.UpdateTimer, delayLeft);
-		return delayLeft;
-		
-		// float minWait = 0;
-		// TileTypeDataMap dataMap = context.getDataMap(tileType);
-		// float[] deltas = dataMap.getOrDefaultAndPut(TileDataTag.UpdateTimers, new float[actions.length]);
-		// String[] datas = dataMap.getOrDefaultAndPut(TileDataTag.UpdateActionCaches, new String[actions.length]);
-		/*for(int i = 0; i < actions.length; i++) {
-			if(!actions[i].canUpdate(context))
+		float minWait = 0;
+		TileDataCache dataMap = tile.getCacheMap(tileType);
+		float[] deltas = dataMap.getOrDefaultAndPut(TileCacheTag.UpdateTimers, new float[actions.length]);
+		String[] datas = dataMap.getOrDefaultAndPut(TileCacheTag.UpdateActionCaches, new String[actions.length]);
+		for(int i = 0; i < actions.length; i++) {
+			if(!actions[i].canUpdate(tile))
 				deltas[i] = 0;
 			else if(deltas[i] == 0)
-				deltas[i] = actions[i].getDelta(context);
+				deltas[i] = actions[i].getDelta(tile);
 			else {
 				deltas[i] -= delta;
 				if(deltas[i] <= 0) {
 					UpdateAction action = actions[i];
 					final int idx = i;
-					action.update(context, () -> datas[idx], value -> datas[idx] = value);
+					action.update(tile, () -> datas[idx], value -> datas[idx] = value);
 					deltas[i] = 0;
 				}
 			}
@@ -77,6 +63,6 @@ public class UpdateManager implements TileProperty {
 				minWait = Math.min(minWait, deltas[i]);
 		}
 		
-		return minWait;*/
+		return minWait;
 	}
 }

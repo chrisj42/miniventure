@@ -1,7 +1,6 @@
 package miniventure.game.item;
 
 import miniventure.game.core.GameCore;
-import miniventure.game.item.ItemDataTag.ItemDataMap;
 import miniventure.game.item.ItemType.EnumItem;
 import miniventure.game.texture.FetchableTextureHolder;
 import miniventure.game.texture.ItemTextureSource;
@@ -10,7 +9,7 @@ import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.player.Player.CursorHighlight;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.tile.ServerTile;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.TileTypeEnum;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -73,9 +72,9 @@ public enum PlaceableItemType {
 		}
 		
 		@Override
-		protected void addSerialData(ItemDataMap map) {
+		protected void addSerialData(SerialEnumMap<ItemDataTag<?>> map) {
 			super.addSerialData(map);
-			map.add(ItemDataTag.CursorSprite, resultTexture);
+			map.put(ItemDataTag.CursorSprite, resultTexture);
 		}
 		
 		@Override

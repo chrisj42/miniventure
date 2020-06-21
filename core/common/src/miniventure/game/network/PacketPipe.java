@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 public class PacketPipe {
 	
 	@FunctionalInterface
-	public interface PacketListener extends ValueAction<Object> {
+	public interface PacketHandler extends ValueAction<Object> {
 		default void onDisconnect() {}
 	}
 	
@@ -78,13 +78,13 @@ public class PacketPipe {
 		private final String readerThreadLabel;
 		
 		@NotNull
-		private PacketPipe.PacketListener listener = obj -> {};
+		private PacketHandler listener = obj -> {};
 		
 		PacketPipeReader(@Nullable String readerThreadLabel) {
 			this.readerThreadLabel = readerThreadLabel;
 		}
 		
-		public void setListener(@NotNull PacketPipe.PacketListener handler) {
+		public void setListener(@NotNull PacketHandler handler) {
 			this.listener = handler;
 		}
 		

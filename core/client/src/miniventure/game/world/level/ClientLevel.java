@@ -13,8 +13,8 @@ import miniventure.game.world.entity.Entity;
 import miniventure.game.world.management.ClientWorld;
 import miniventure.game.world.tile.ClientTile;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.Tile.TileData;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.TileStack.TileData;
+import miniventure.game.world.tile.TileTypeEnum;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
@@ -22,11 +22,12 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class ClientLevel extends RenderLevel {
 	
 	@NotNull private ClientWorld world;
-	// private final boolean[][] loaded;
+	private final boolean[][] loaded;
 	
 	private final Map<ClientTile, CachedTileUpdate> tileUpdates = Collections.synchronizedMap(new HashMap<>());
 	
@@ -34,7 +35,7 @@ public class ClientLevel extends RenderLevel {
 		super(world, levelId, width, height, ClientTile::new);
 		this.world = world;
 		
-		// loaded = new boolean[width][height];
+		loaded = new boolean[width][height];
 	}
 	
 	@Override @NotNull
@@ -88,13 +89,12 @@ public class ClientLevel extends RenderLevel {
 			((ClientTile)t).updateSprites();
 	}
 	
-	// called in gdx thread, from the runnable that parses network packets.
-	/*public void serverUpdate(ClientTile tile, TileData data, @Nullable TileTypeEnum updatedType) {
-		tile.apply(data, updatedType);
-		// synchronized (tileUpdates) {
-		// 	tileUpdates.put(tile, new CachedTileUpdate(data, updatedType));
-		// }
-	}*/
+	// called in GameClient thread.
+	public void serverUpdate(ClientTile tile, TileData data, @Nullable TileTypeEnum updatedType) {
+		synchronized (tileUpdates) {
+			tileUpdates.put(tile, new CachedTileUpdate(data, updatedType));
+		}
+	}
 	
 	private static class CachedTileUpdate {
 		TileData newData;

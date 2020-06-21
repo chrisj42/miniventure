@@ -3,9 +3,7 @@ package miniventure.game.item;
 import miniventure.game.texture.FetchableTextureHolder;
 import miniventure.game.texture.ItemTextureSource;
 import miniventure.game.util.MyUtils;
-import miniventure.game.util.customenum.DataEntry;
 import miniventure.game.util.customenum.SerialEnum;
-import miniventure.game.util.customenum.SerialEnumMap;
 import miniventure.game.util.function.MapFunction;
 
 public class ItemDataTag<T> extends SerialEnum<T, ItemDataTag<T>> {
@@ -31,23 +29,4 @@ public class ItemDataTag<T> extends SerialEnum<T, ItemDataTag<T>> {
 		super(false, true, valueWriter, valueParser);
 	}
 	
-	/** @noinspection rawtypes*/
-	@SuppressWarnings("unchecked")
-	public static class ItemDataMap extends SerialEnumMap<ItemDataTag> {
-		public ItemDataMap() {
-			super(ItemDataTag.class);
-		}
-		
-		public ItemDataMap(DataEntry<?, ? extends ItemDataTag>... entries) {
-			super(ItemDataTag.class, entries);
-		}
-		
-		public ItemDataMap(DataEntry<?, ? extends ItemDataTag> firstEntry, DataEntry<?, ? extends ItemDataTag>... entries) {
-			super(firstEntry, entries);
-		}
-		
-		public ItemDataMap(String alldata) {
-			super(alldata, ItemDataTag.class);
-		}
-	}
 }

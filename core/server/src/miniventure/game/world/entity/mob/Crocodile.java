@@ -5,7 +5,7 @@ import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.entity.EntityDataSet;
 import miniventure.game.world.management.ServerWorld;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.TileTypeEnum;
 
 import org.jetbrains.annotations.NotNull;
 

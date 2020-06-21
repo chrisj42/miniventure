@@ -37,8 +37,8 @@ import miniventure.game.world.level.Level;
 import miniventure.game.world.level.LevelFetcher;
 import miniventure.game.world.level.ServerLevel;
 import miniventure.game.world.tile.ServerTileType;
-import miniventure.game.world.tile.Tile.TileData;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.TileStack.TileData;
+import miniventure.game.world.tile.TileTypeEnum;
 import miniventure.game.world.worldgen.island.IslandType;
 
 import org.jetbrains.annotations.NotNull;
@@ -115,7 +115,8 @@ public class ServerWorld extends WorldManager {
 		
 		this.server = serverFetcher.get(this, pinfo);
 		
-		initWorldTime(worldInfo.gameTime, worldInfo.timeOfDay);
+		gameTime = worldInfo.gameTime;
+		daylightOffset = worldInfo.timeOfDay;
 		worldSeed = worldInfo.seed;
 		
 		islandStores = worldInfo.islandCaches;
@@ -184,15 +185,15 @@ public class ServerWorld extends WorldManager {
 	/*  --- WORLD MANAGEMENT --- */
 	
 	
-	public WorldData getWorldUpdate() { return new WorldData(getGameTime(), getDaylightOffset(), Config.DaylightCycle.get()); }
+	public WorldData getWorldUpdate() { return new WorldData(gameTime, this.daylightOffset, Config.DaylightCycle.get()); }
 	public void broadcastWorldUpdate() { server.broadcastGlobal(getWorldUpdate()); }
 	
 	public void setTimeOfDay(float daylightOffset) {
-		initWorldTime(getGameTime(), daylightOffset % TimeOfDay.SECONDS_IN_DAY);
+		this.daylightOffset = daylightOffset % TimeOfDay.SECONDS_IN_DAY;
 		broadcastWorldUpdate();
 	}
 	public float changeTimeOfDay(float deltaOffset) {
-		float newOff = getDaylightOffset();
+		float newOff = this.daylightOffset;
 		if(deltaOffset < 0)
 			newOff += TimeOfDay.SECONDS_IN_DAY;
 		newOff = (newOff + deltaOffset) % TimeOfDay.SECONDS_IN_DAY;
@@ -221,7 +222,7 @@ public class ServerWorld extends WorldManager {
 			// 	savePlayer(player);
 			// }
 			
-			WorldFileInterface.saveWorld(new WorldDataSet(worldPath, lockRef, worldSeed, getGameTime(), getDaylightOffset(), Version.CURRENT, pdata, islandStores));
+			WorldFileInterface.saveWorld(new WorldDataSet(worldPath, lockRef, worldSeed, gameTime, daylightOffset, Version.CURRENT, pdata, islandStores));
 		// });
 	}
 	
@@ -277,12 +278,12 @@ public class ServerWorld extends WorldManager {
 	@Override
 	public ServerLevel getLevel(int levelId) { return loadedLevels.get(map -> map.get(levelId)); }
 	
+	@NotNull
 	// player activator is required to ensure the level is not immediately pruned due to chance circumstances.
 	// it is assumed that the player is not currently on a level.
-	/*@NotNull
 	public ServerLevel loadLevel(int levelId, @NotNull ServerPlayer activator) {
 		return loadLevel(levelId, activator, level -> {});
-	}*/
+	}
 	@NotNull
 	// the ordering of "get/make level", "position player", "send level data", and finally "register world/add player" is important. Doing so is the most efficient, and prevents split-second frame changes like showing the player in the previous level position, as well as minimizing the time that the player may be in-game on the server, but still loading on the client.
 	public ServerLevel loadLevel(int levelId, @NotNull ServerPlayer activator, ValueAction<ServerLevel> playerPositioner) {
@@ -333,8 +334,6 @@ public class ServerWorld extends WorldManager {
 		
 		return level;
 	}
-	
-	
 	
 	protected void unloadLevel(int levelId) {
 		ServerLevel level = getLevel(levelId);

@@ -12,7 +12,7 @@ import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.EntityDataSet;
 import miniventure.game.world.level.ServerLevel;
 import miniventure.game.world.management.ServerWorld;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.TileTypeEnum;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

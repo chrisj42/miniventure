@@ -2,7 +2,6 @@ package miniventure.game.world.tile;
 
 import java.util.HashMap;
 
-import miniventure.game.world.tile.TileType.TileTypeEnum;
 import miniventure.game.world.tile.TileTypeRenderer.RendererBuilder;
 
 import org.jetbrains.annotations.NotNull;

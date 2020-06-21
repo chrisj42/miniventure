@@ -21,8 +21,8 @@ import miniventure.game.world.file.LevelCache;
 import miniventure.game.world.management.ServerWorld;
 import miniventure.game.world.tile.ServerTile;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.Tile.TileData;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.TileStack.TileData;
+import miniventure.game.world.tile.TileTypeEnum;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;

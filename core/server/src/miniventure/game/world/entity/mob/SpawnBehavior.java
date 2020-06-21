@@ -5,7 +5,7 @@ import java.util.EnumSet;
 
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.management.TimeOfDay;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.TileTypeEnum;
 
 import org.jetbrains.annotations.Nullable;
 

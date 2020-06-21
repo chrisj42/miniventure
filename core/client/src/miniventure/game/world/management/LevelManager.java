@@ -4,8 +4,9 @@ import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.particle.ClientParticle;
 import miniventure.game.world.level.RenderLevel;
 import miniventure.game.world.tile.ClientTileType;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.TileTypeEnum;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 // A world manager that specifically loads only one level at a time.
@@ -19,7 +20,8 @@ public abstract class LevelManager extends WorldManager {
 	/*  --- WORLD MANAGEMENT --- */
 	
 	
-	public boolean levelLoaded() { return level != null; }
+	@Override
+	public boolean worldLoaded() { return level != null; }
 	
 	
 	/*  --- LEVEL MANAGEMENT --- */

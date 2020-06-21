@@ -2,7 +2,6 @@ package miniventure.game.item;
 
 import java.util.Objects;
 
-import miniventure.game.item.ItemDataTag.ItemDataMap;
 import miniventure.game.util.customenum.SerialEnumMap;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.player.Player;
@@ -60,10 +59,10 @@ public class HammerItem extends ServerItem {
 	}
 	
 	@Override
-	protected void addSerialData(ItemDataMap map) {
+	protected void addSerialData(SerialEnumMap<ItemDataTag<?>> map) {
 		super.addSerialData(map);
 		if(selection != null)
-			map.add(ItemDataTag.CursorSprite, recipeSet.getRecipe(selection).getResult().item.getFetchableTexture());
+			map.put(ItemDataTag.CursorSprite, recipeSet.getRecipe(selection).getResult().item.getFetchableTexture());
 	}
 	
 	@Override

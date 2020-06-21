@@ -36,8 +36,8 @@ public class ClientTileType extends TileType {
 	private final SwimAnimation swimAnimation;
 	
 	// all default; goes to connection+overlap
-	private ClientTileType(@NotNull TileTypeEnum tileType, Value<?>... params) {
-		this(tileType, TileTypeRenderer.buildRenderer(tileType).build(), params);
+	private ClientTileType(@NotNull TileTypeEnum tileType, boolean isOpaque, Value<?>... params) {
+		this(tileType, TileTypeRenderer.buildRenderer(tileType, isOpaque).build(), params);
 	}
 	/*// connection only; goes to connection+overlap
 	private ClientTileType(@NotNull TileTypeEnum tileType, boolean isOpaque, ConnectionManager connectionManager, Value<?>... params) {
@@ -83,66 +83,69 @@ public class ClientTileType extends TileType {
 	
 	private enum ClientTileTypeEnum {
 		
-		HOLE(type -> new ClientTileType(type, buildRenderer(type)
+		HOLE(type -> new ClientTileType(type, buildRenderer(type, true)
 				.connect(list(type, TileTypeEnum.WATER))
 				.build(),
 			P.swimAnimation.as(new SwimAnimation(type, 0.75f))
 		)),
 		
-		DIRT(),
+		DIRT(type -> new ClientTileType(type, true)),
 		
-		SAND(),
+		SAND(type -> new ClientTileType(type, true)),
 		
-		GRASS(),
+		GRASS(type -> new ClientTileType(type, true)),
 		
-		STONE_PATH(),
+		STONE_PATH(type -> new ClientTileType(type, true)),
 		
-		SNOW(),
+		SNOW(type -> new ClientTileType(type, true)),
 		
-		SMALL_STONE(),
+		SMALL_STONE(type -> new ClientTileType(type, false)),
 		
-		WATER(type -> new ClientTileType(type, buildRenderer(type,
-			new RenderStyle(PlayMode.LOOP_RANDOM, 5),
+		WATER(type -> new ClientTileType(type, buildRenderer(type, true,
+				new RenderStyle(PlayMode.LOOP_RANDOM, 5),
 				new RenderStyle(true, 24)
 			).build(),
 			P.swimAnimation.as(new SwimAnimation(type))
 		)),
 		
-		DOCK(),
+		DOCK(type -> new ClientTileType(type, false)),
 		
 		COAL_ORE(ClientTileFactory::ore),
 		IRON_ORE(ClientTileFactory::ore),
 		TUNGSTEN_ORE(ClientTileFactory::ore),
 		RUBY_ORE(ClientTileFactory::ore),
 		
-		STONE(ClientTileFactory::ore),
+		STONE(type -> new ClientTileType(type, buildRenderer(type, true)
+			.connect(list(type, COAL_ORE.mainEnum, IRON_ORE.mainEnum, TUNGSTEN_ORE.mainEnum, RUBY_ORE.mainEnum))
+			.build()
+		)),
 		
-		STONE_FLOOR(),
+		STONE_FLOOR(type -> new ClientTileType(type, true)),
 		
-		WOOD_WALL(),
-		STONE_WALL(),
+		WOOD_WALL(ClientTileFactory::wall),
+		STONE_WALL(ClientTileFactory::wall),
 		
-		OPEN_DOOR(type -> new ClientTileType(type, buildRenderer(type)
+		OPEN_DOOR(type -> new ClientTileType(type, buildRenderer(type, false)
 			.addTransition("open", new RenderStyle(PlayMode.NORMAL, 24))
 			.addTransition("close", new RenderStyle(PlayMode.NORMAL, 24))
 			.build()
 		)),
-		CLOSED_DOOR(),
+		CLOSED_DOOR(type -> new ClientTileType(type, false)),
 		
-		TORCH(type -> new ClientTileType(type, buildRenderer(type, new RenderStyle(12))
+		TORCH(type -> new ClientTileType(type, buildRenderer(type, false, new RenderStyle(12))
 				.addTransition("enter", new RenderStyle(12))
 				.build(),
 			P.lightRadius.as(2f)
 		)),
 		
-		CACTUS(),
+		CACTUS(type -> new ClientTileType(type, false)),
 		
-		CARTOON_TREE(),
-		DARK_TREE(),
-		PINE_TREE(),
-		POOF_TREE(),
+		CARTOON_TREE(ClientTileFactory::tree),
+		DARK_TREE(ClientTileFactory::tree),
+		PINE_TREE(ClientTileFactory::tree),
+		POOF_TREE(ClientTileFactory::tree),
 		
-		AIR();
+		AIR(type -> new ClientTileType(type, false));
 		
 		
 		/** @noinspection NonFinalFieldInEnum*/
@@ -150,7 +153,6 @@ public class ClientTileType extends TileType {
 		private final P fetcher;
 		private final TileTypeEnum mainEnum;
 		
-		ClientTileTypeEnum() { this(ClientTileType::new); }
 		ClientTileTypeEnum(P fetcher) {
 			this.fetcher = fetcher;
 			mainEnum = TileTypeEnum.value(ordinal());
@@ -168,10 +170,31 @@ public class ClientTileType extends TileType {
 	
 	private interface ClientTileFactory {
 		static ClientTileType ore(TileTypeEnum type) {
-			return new ClientTileType(type, buildRenderer(type)
-				.connect(list(TileTypeEnum.STONE, TileTypeEnum.COAL_ORE, TileTypeEnum.IRON_ORE, TileTypeEnum.TUNGSTEN_ORE, TileTypeEnum.RUBY_ORE))
+			return new ClientTileType(type, buildRenderer(type, false)
+				.connect(list(TileTypeEnum.STONE))
 				.build()
 			);
+		}
+		
+		static ClientTileType wall(TileTypeEnum type) {
+			return new ClientTileType(type, false);
+		}
+		
+		/*static ClientTileType door(TileTypeEnum type, boolean open) {
+			return new ClientTileType(type, buildRenderer(type, false)
+				.addTransition("open", new RenderStyle(PlayMode.NORMAL, 24))
+				.addTransition("close", new RenderStyle(PlayMode.NORMAL, 24))
+				.build(),
+				P.transitions.as(open?Arrays.asList(
+					new TransitionAnimation(type, ),
+					new TransitionAnimation(type, )
+					):new ArrayList<>(0)
+				)
+			);
+		}*/
+		
+		static ClientTileType tree(TileTypeEnum type) {
+			return new ClientTileType(type, false);
 		}
 	}
 }

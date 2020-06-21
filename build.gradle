@@ -5,7 +5,7 @@ allprojects {
 	sourceCompatibility = 1.8
 	[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 	
-	version = '2.2.2'
+	version = '2.2.1'
 	ext {
 		appName = "miniventure"
 		gdxVersion = '1.9.8'
@@ -41,10 +41,10 @@ subprojects {
 sourceSets.main.java.srcDirs = []
 
 dependencies {
-	compile project(":launcher")
+	compile project(":desktop")
 }
 
-project(":launcher") {
+project(":desktop") {
 	dependencies {
 		compile project(":client")
 		compile project(":server")
@@ -82,7 +82,7 @@ project(":server") {
 }
 
 ext {
-	mainClassName = "miniventure.game.core.DesktopLauncher"
+	mainClassName = "miniventure.game.desktop.DesktopLauncher"
 	assetsDir = new File("core/common/assets")
 }
 

@@ -2,7 +2,7 @@ package miniventure.game.network;
 
 import java.net.InetSocketAddress;
 
-import miniventure.game.network.PacketPipe.PacketListener;
+import miniventure.game.network.PacketPipe.PacketHandler;
 import miniventure.game.network.PacketPipe.PacketPipeReader;
 import miniventure.game.network.PacketPipe.PacketPipeWriter;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
@@ -25,7 +25,7 @@ public class LocalServer extends GameServer {
 		this.in = serverIn;
 		this.out = serverOut;
 		
-		in.setListener(new PacketListener() {
+		in.setListener(new PacketHandler() {
 			@Override
 			public void act(Object obj) {
 				world.postRunnable(() -> {
