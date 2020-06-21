@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import miniventure.game.util.ArrayUtils;
+import miniventure.game.util.MyUtils;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
@@ -19,39 +20,8 @@ public class InputHandler implements InputProcessor {
 	private static final float INITIAL_DELAY = 0.5f; // delay between initial press and first simulated press.
 	private static final float REPEAT_DELAY = 0.2f; // delay between each simulated press.
 	
-	public enum Modifier {
-		SHIFT(Keys.SHIFT_LEFT, Keys.SHIFT_RIGHT),
-		ALT(Keys.ALT_LEFT, Keys.ALT_RIGHT),
-		CONTROL(Keys.CONTROL_LEFT, Keys.CONTROL_RIGHT);
-		
-		private final int leftKey, rightKey;
-		
-		Modifier(int left, int right) {
-			leftKey = left;
-			rightKey = right;
-		}
-		
-		public boolean isPressed() {
-			return Gdx.input.isKeyPressed(leftKey)
-				|| Gdx.input.isKeyPressed(rightKey);
-		}
-	}
-	
-	public static class Mapping {
-		public final int code;
-		public final boolean mouse;
-		
-		private static Mapping mouse(int code) { return new Mapping(code, true); }
-		private static Mapping key(int code) { return new Mapping(code, false); }
-		
-		private Mapping(int code, boolean mouse) {
-			this.code = code;
-			this.mouse = mouse;
-		}
-		
-		public boolean isPressed(InputHandler input, boolean held) {
-			return mouse ? held ? input.buttonPresses.containsKey(code) : input.pressingButton(code) : held ? input.keyPresses.containsKey(code) : input.pressingKey(code);
-		}
+	private enum PressType {
+		Down, Pressed, JustPressed
 	}
 	
 	public enum Control {
@@ -99,9 +69,9 @@ public class InputHandler implements InputProcessor {
 			resetMappings();
 		}
 		
-		public boolean isPressed(InputHandler input, boolean held) {
+		public boolean isPressed(InputHandler input, PressType pressType) {
 			for(Mapping mapping: mappings)
-				if(mapping.isPressed(input, held))
+				if(mapping.isPressed(input, pressType))
 					return true;
 			
 			return false;
@@ -127,40 +97,43 @@ public class InputHandler implements InputProcessor {
 		}
 	}
 	
-	private final HashMap<Integer, Float> keyPresses = new HashMap<>(); // keys in here are currently being held down. The value stored is the initial time of press.
+	private final HashMap<Integer, Long> keyPresses = new HashMap<>(); // keys in here are currently being held down. The value stored is the initial time of press.
 	private final HashSet<Integer> pressedKeys = new HashSet<>(); // keys here are treated as being just pressed down.
 	// mouse
-	private final HashMap<Integer, Float> buttonPresses = new HashMap<>(); // keys in here are currently being held down. The value stored is the initial time of press.
+	private final HashMap<Integer, Long> buttonPresses = new HashMap<>(); // keys in here are currently being held down. The value stored is the initial time of press.
 	private final HashSet<Integer> pressedButtons = new HashSet<>(); // keys here are treated as being just pressed down.
+	private final HashSet<Integer> justPressedButtons = new HashSet<>(); // just pressed buttons
 	private float repressDelay = REPEAT_DELAY;
-	private float prevUpdate;
+	private long prevUpdate;
 	
 	InputHandler() {}
 	
-	void update(/*boolean late*/) {
-		// if(late)
-			
-		// else {
-			final float elapTime = GameCore.getElapsedProgramTime();
-			
-			updateSet(elapTime, keyPresses, pressedKeys);
-			updateSet(elapTime, buttonPresses, pressedButtons);
-			
-			prevUpdate = elapTime;
-		// }
+	void onFrameStart() {
+		final long curTime = System.nanoTime();
+		
+		updateSet(curTime, keyPresses, pressedKeys);
+		updateSet(curTime, buttonPresses, pressedButtons);
+		
+		prevUpdate = curTime;
 	}
 	
-	private void updateSet(final float elapTime, HashMap<Integer, Float> keyPresses, HashSet<Integer> pressedKeys) {
+	void onFrameEnd() {
 		pressedKeys.clear();
-		
-		for(Entry<Integer, Float> pressTime : keyPresses.entrySet()) {
-			final float curTime = elapTime - pressTime.getValue();
-			final float prevUpdate = this.prevUpdate - pressTime.getValue();
-			if(prevUpdate < INITIAL_DELAY && curTime >= INITIAL_DELAY)
+		pressedButtons.clear();
+		justPressedButtons.clear();
+	}
+	
+	private void updateSet(final long curTime, HashMap<Integer, Long> keyPresses, HashSet<Integer> pressedKeys) {
+		for(Entry<Integer, Long> pressTime : keyPresses.entrySet()) {
+			final float elapTime = MyUtils.getDelta(pressTime.getValue(), curTime);
+			final float prevElapTime = MyUtils.getDelta(pressTime.getValue(), this.prevUpdate);
+			// press when first crossing the initial delay threshold
+			if(prevElapTime < INITIAL_DELAY && elapTime >= INITIAL_DELAY)
 				pressedKeys.add(pressTime.getKey());
-			else if(prevUpdate >= INITIAL_DELAY) {
-				float prevTime = (prevUpdate - INITIAL_DELAY) % repressDelay;
-				float delta = curTime - prevUpdate;
+				// press again if past at least first reg delay (only triggers when prev elap time is past initial delay)
+			else if(elapTime >= INITIAL_DELAY + repressDelay) {
+				float prevTime = (prevElapTime - INITIAL_DELAY) % repressDelay;
+				float delta = elapTime - prevElapTime;
 				if(prevTime + delta >= repressDelay)
 					pressedKeys.add(pressTime.getKey());
 			}
@@ -179,21 +152,22 @@ public class InputHandler implements InputProcessor {
 		return this;
 	}
 	
-	public boolean pressingControl(Control control) {
-		return control.isPressed(this, false);
+	public boolean pressingControl(Control control) { return pressingControl(control, false); }
+	public boolean pressingControl(Control control, boolean just) {
+		return control.isPressed(this, just ? PressType.JustPressed : PressType.Pressed);
 	}
 	public boolean holdingControl(Control control) {
-		return control.isPressed(this, true);
+		return control.isPressed(this, PressType.Down);
 	}
 	
 	/**
 	 * Used to check if a given key is currently being pressed. This method differs from Gdx.input.isKeyJustPressed in that it will repeat the press event at regular intervals, after an initial larger delay.
-	 * 
+	 *
 	 * @param keycode the keycode of the key to check
 	 * @return Whether the given key has just been pressed, either physically, or programmatically for repetition.
 	 */
 	public boolean pressingKey(int keycode) {
-		return Gdx.input.isKeyJustPressed(keycode) || repressingKey(keycode);
+		return pressedKeys.contains(keycode);//Gdx.input.isKeyJustPressed(keycode) || repressingKey(keycode);
 	}
 	public boolean pressingButton(int button) {
 		return pressedButtons.contains(button);
@@ -201,18 +175,19 @@ public class InputHandler implements InputProcessor {
 	
 	/**
 	 * Used to detect when a key is being programmatically re-pressed. Good if you want to avoid collisions with libGDX input listeners.
-	 * 
+	 *
 	 * @param keycode the keycode of the key to check
 	 * @return Whether the given key is currently being re-pressed programmatically for repetition.
 	 */
-	public boolean repressingKey(int keycode) { return pressedKeys.contains(keycode); }
+	// public boolean repressingKey(int keycode) { return pressedKeys.contains(keycode); }
 	
 	@Override
 	public boolean keyDown(int keycode) {
-		keyPresses.put(keycode, GameCore.getElapsedProgramTime());
+		keyPresses.put(keycode, System.nanoTime());
+		pressedKeys.add(keycode);
 		if(Modifier.SHIFT.isPressed())
 			if(Gdx.input.isKeyJustPressed(Keys.D) && Gdx.input.isKeyPressed(Keys.TAB) ||
-				Gdx.input.isKeyJustPressed(Keys.TAB) && Gdx.input.isKeyPressed(Keys.D))
+					Gdx.input.isKeyJustPressed(Keys.TAB) && Gdx.input.isKeyPressed(Keys.D))
 				GameCore.debug = !GameCore.debug; // toggle debug mode
 		return false;
 	}
@@ -227,8 +202,9 @@ public class InputHandler implements InputProcessor {
 	
 	@Override public boolean touchDown(int screenX, int screenY, int pointer, int button) {
 		// if(GameCore.debug) System.out.println("button press: "+button);
-		buttonPresses.put(button, GameCore.getElapsedProgramTime());
+		buttonPresses.put(button, System.nanoTime());
 		pressedButtons.add(button);
+		justPressedButtons.add(button);
 		return false;
 	}
 	@Override public boolean touchUp(int screenX, int screenY, int pointer, int button) {
@@ -247,5 +223,50 @@ public class InputHandler implements InputProcessor {
 			if(just ? Gdx.input.isKeyJustPressed(code) : Gdx.input.isKeyPressed(code))
 				return true;
 		return false;
+	}
+	
+	public static class Mapping {
+		public final int code;
+		public final boolean mouse;
+		
+		private static Mapping mouse(int code) { return new Mapping(code, true); }
+		private static Mapping key(int code) { return new Mapping(code, false); }
+		
+		private Mapping(int code, boolean mouse) {
+			this.code = code;
+			this.mouse = mouse;
+		}
+		
+		public boolean isPressed(InputHandler input, PressType pressType) {
+			if(pressType == PressType.JustPressed) {
+				return mouse ? input.justPressedButtons.contains(code) : Gdx.input.isKeyJustPressed(code);
+			}
+			HashMap<Integer, Long> presses = mouse ? input.buttonPresses : input.keyPresses;
+			HashSet<Integer> pressed = mouse ? input.pressedButtons : input.pressedKeys;
+			
+			if(pressType == PressType.Down)
+				return presses.containsKey(code);
+			else
+				return pressed.contains(code);
+			// return mouse ? held ? input.buttonPresses.containsKey(code) : input.pressingButton(code) : held ? input.keyPresses.containsKey(code) : input.pressingKey(code);
+		}
+	}
+	
+	public enum Modifier {
+		SHIFT(Keys.SHIFT_LEFT, Keys.SHIFT_RIGHT),
+		ALT(Keys.ALT_LEFT, Keys.ALT_RIGHT),
+		CONTROL(Keys.CONTROL_LEFT, Keys.CONTROL_RIGHT);
+		
+		private final int leftKey, rightKey;
+		
+		Modifier(int left, int right) {
+			leftKey = left;
+			rightKey = right;
+		}
+		
+		public boolean isPressed() {
+			return Gdx.input.isKeyPressed(leftKey)
+					|| Gdx.input.isKeyPressed(rightKey);
+		}
 	}
 }

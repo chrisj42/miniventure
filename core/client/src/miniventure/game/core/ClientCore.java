@@ -184,10 +184,10 @@ public class ClientCore extends ApplicationAdapter {
 	public void render() {
 		getBatch().setColor(Color.WHITE);
 		
+		input.onFrameStart();
+		
 		if (clientWorld != null && clientWorld.worldLoaded())
 			clientWorld.update(GameCore.getDeltaTime()); // renders as well
-		
-		input.update();
 		
 		synchronized (screenLock) {
 			hasMenu = menuScreen != null;
@@ -197,6 +197,8 @@ public class ClientCore extends ApplicationAdapter {
 			if(menuScreen != null)
 				menuScreen.draw();
 		}
+		
+		input.onFrameEnd();
 	}
 	
 	private static void resetInputProcessor() {
