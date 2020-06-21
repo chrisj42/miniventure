@@ -7,21 +7,26 @@ import org.jetbrains.annotations.NotNull;
 public class Version implements Comparable<Version> {
 	
 	// the last digit increments without release or tag
-	public static final Version CURRENT = makeVersion("2.2.2.1");
+	public static final Version CURRENT = makeVersion("2.3.0.1");
 	
 	// the last time there was a change in the save format
-	private static final Version latestFormatChange = makeVersion("2.2.2.1");
+	private static final Version latestFormatChange = makeVersion("2.3.0.1");
 	
 	// use this to determine the latest version a world is compatible with
 	private static final TreeMap<Version, Version> endOfSupportVersions = new TreeMap<>();
 	static {
 		// this is the oldest version that the current version supports
-		endOfSupportVersions.put(makeVersion("2.2.2.1"), CURRENT);
+		endOfSupportVersions.put(makeVersion("2.3.0.1"), CURRENT);
 		// below is for older versions; add an entry whenever a version loses support
 		// no need to add an entry if it was only supported for one version
-		// addEoSVersion("2.2.1", "2.2.1");
-		// addEoSVersion("2.1.2", "2.1.2");
-		// addEoSVersion("2.2.1.4", "2.2.1.4");
+		
+		// addEoSVersion("", "");
+		
+		// version history: (f = format change, bf = breaking format change (breaks compatibility with some version down the line), cbf = complete bf (not compatible with prev version). reason listed after
+		// 2.1.2 - cbf (unknown)
+		// 2.2.1 - cbf (optimizing data formats)
+		// 2.3.0 - cbf (removal of multiplayer)
+		
 	}
 	
 	private static void addEoSVersion(String version, String lastSupportingVersion) {
@@ -147,10 +152,6 @@ public class Version implements Comparable<Version> {
 	
 	@Override
 	public String toString() {
-		// note: when major is 0, minor is ignored. There should only be one "1.0 release". Make is expected to be 3.
-		if(major == 0)
-			return "Full Release"+(build>0?" (Dev Build "+build+')':"");
-		
-		return (make==1?"Pre-Alpha ":make==2?"Alpha ":make==3?"Beta ":"Update ")+major+(minor<0?" (Final)":"."+minor)+(build>0?" (Dev Build "+build+')':"");
+		return (make==1?"Pre-Alpha ":make==2?"Alpha ":make==3?"Beta ":"Update ")+major+'.'+minor+(build>0?" (Dev Build "+build+')':"");
 	}
 }

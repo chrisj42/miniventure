@@ -25,12 +25,12 @@ public interface ParticleData {
 	}
 	
 	class ActionParticleData implements ParticleData {
-		public final ActionType action;
+		public final ActionParticle.ActionType action;
 		public final Direction dir;
 		
 		private ActionParticleData() { this(null, null); }
-		public ActionParticleData(ActionType type) { this(type, null); }
-		public ActionParticleData(ActionType type, Direction dir) {
+		public ActionParticleData(ActionParticle.ActionType type) { this(type, null); }
+		public ActionParticleData(ActionParticle.ActionType type, Direction dir) {
 			this.action = type;
 			this.dir = dir;
 		}

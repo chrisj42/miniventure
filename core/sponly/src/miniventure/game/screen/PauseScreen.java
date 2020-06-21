@@ -1,33 +1,36 @@
 package miniventure.game.screen;
 
-import miniventure.game.core.ClientCore;
+import miniventure.game.core.GameCore;
+import miniventure.game.core.GdxCore;
 import miniventure.game.screen.InfoScreen.InstructionsScreen;
-import miniventure.game.screen.util.BackgroundInheritor;
+import miniventure.game.world.management.WorldManager;
 
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 
-public class PauseScreen extends BackgroundInheritor {
+import org.jetbrains.annotations.NotNull;
+
+public class PauseScreen extends MenuScreen {
 	
-	public PauseScreen() {
+	public PauseScreen(@NotNull WorldManager world) {
 		Table table = useTable();
 		
 		table.defaults().pad(10);
 		
-		VisTextButton resume = makeButton("Resume", () -> ClientCore.setScreen(null));
+		VisTextButton resume = makeButton("Resume", () -> GdxCore.setScreen(null));
 		table.add(resume).row();
 		
 		VisTextButton save = makeButton("Save World", () -> {
-			ClientCore.getWorld().saveWorld();
-			ClientCore.setScreen(null);
+			world.saveWorld();
+			GdxCore.setScreen(null);
 		});
-		if(ClientCore.getWorld().isLocalWorld())
-			table.add(save).row();
+		// if(GameCore.getWorld().isLocalWorld())
+		table.add(save).row();
 		
-		VisTextButton instruct = makeButton("Instructions/Controls", () -> ClientCore.setScreen(new InstructionsScreen()));
+		VisTextButton instruct = makeButton("Instructions/Controls", () -> GdxCore.addScreen(new InstructionsScreen()));
 		table.add(instruct).row();
 		
-		VisTextButton exit = makeButton("Main Menu", () -> ClientCore.setScreen(new ConfirmScreen(ClientCore.getWorld().isLocalWorld() ? "Exit World? Your progress will be saved." : "Leave Server?", () -> ClientCore.getWorld().exitWorld())));
+		VisTextButton exit = makeButton("Main Menu", () -> GdxCore.addScreen(new ConfirmScreen("Exit World? Your progress will be saved.", GameCore::exitWorld)));
 		table.add(exit).row();
 		
 		mapButtons(table, resume, resume);
@@ -35,8 +38,8 @@ public class PauseScreen extends BackgroundInheritor {
 		setKeyboardFocus(table);
 	}
 	
-	@Override
+	/*@Override
 	public boolean allowChildren() {
 		return true;
-	}
+	}*/
 }

@@ -4,10 +4,9 @@ import java.util.List;
 
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
-import miniventure.game.world.entity.mob.player.ClientPlayer;
+import miniventure.game.world.entity.mob.player.CursorHighlight;
 import miniventure.game.world.entity.mob.player.Player;
-import miniventure.game.world.entity.mob.player.Player.CursorHighlight;
-import miniventure.game.world.level.RenderLevel;
+import miniventure.game.world.management.Level;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.Gdx;
@@ -40,7 +39,7 @@ public class LevelViewport {
 	private float maxWorldViewWidth = 0;
 	private float maxWorldViewHeight = 0;
 	
-	private final SpriteBatch batch = ClientCore.getBatch();
+	private final SpriteBatch batch = GdxCore.getBatch();
 	
 	private final OrthographicCamera camera, lightingCamera;
 	
@@ -53,10 +52,9 @@ public class LevelViewport {
 	@Nullable
 	Vector2 getCursorPos() { return cursorValid ? cursorPos : null; }
 	
-	public LevelViewport() { this(new OrthographicCamera()); }
-	public LevelViewport(OrthographicCamera lightingCamera) {
+	public LevelViewport() {
 		camera = new OrthographicCamera();
-		this.lightingCamera = lightingCamera;
+		lightingCamera = new OrthographicCamera();
 		resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 	}
 	
@@ -96,7 +94,7 @@ public class LevelViewport {
 		}
 	}
 	
-	public void render(@NotNull Vector2 cameraCenter, Color ambientLighting, @NotNull RenderLevel level) {
+	public void render(@NotNull Level level, @NotNull Vector2 cameraCenter, Color ambientLighting) {
 		// get the size of the area of the game on screen by projecting the application window dimensions into world space.
 		Vector3 screenSize = new Vector3(Gdx.graphics.getWidth(), 0, 0); // because unproject has origin at the top, so the upper right corner is at (width, 0).
 		camera.unproject(screenSize); // screen to render coords
@@ -129,8 +127,8 @@ public class LevelViewport {
 		
 		batch.setBlendFunction(GL20.GL_ZERO, GL20.GL_ONE_MINUS_SRC_ALPHA);
 		
-		Array<Vector3> lights = RenderLevel.renderLighting(level.getOverlappingObjects(lightRenderSpace));
-		final TextureRegion lightTexture = GameCore.icons.get("light").texture;
+		Array<Vector3> lights = Level.renderLighting(level.getOverlappingObjects(lightRenderSpace));
+		final TextureRegion lightTexture = GdxCore.icons.get("light").texture;
 		
 		for(Vector3 light: lights) {
 			light.sub(offset.x, offset.y, 0).scl(Tile.SIZE); // world to render coords
@@ -143,18 +141,18 @@ public class LevelViewport {
 		lightingBuffer.end();
 		
 		// clears the screen with a green color.
-		Gdx.gl.glClearColor(0.1f, 0.5f, 0.1f, 1); // these are floats from 0 to 1.
+		GdxCore.useDefaultBackgroundColor();
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		
 		batch.setProjectionMatrix(camera.combined); // tells the batch to use the camera's coordinate system.
 		batch.begin();
 		batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA); // default
 		//System.out.println("rendering level in bounds "+renderSpace+" to camera at "+camera.position+" with offset "+offset);
-		level.render(renderSpace, batch, GameCore.getDeltaTime(), offset); // renderSpace in world coords, but offset can give render coords
+		level.render(renderSpace, batch, GdxCore.getDeltaTime(), offset); // renderSpace in world coords, but offset can give render coords
 		
-		final ClientPlayer player = ClientCore.getWorld().getMainPlayer();
+		final Player player = level.getPlayer();
 		
-		if(player != null && ClientCore.getScreen() == null) {
+		if(player != null && GdxCore.getScreen() == null) {
 			// cursor management
 			Vector3 cursor = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
 			camera.unproject(cursor); // screen to render coords
@@ -163,12 +161,12 @@ public class LevelViewport {
 			cursorPos.set(cursor.x, cursor.y);
 			// limit range
 			CursorHighlight highlightMode = player.getCurrentHighlightMode();
-			List<Tile> path = Player.computeCursorPos(cameraCenter, cursorPos, level, highlightMode);
+			List<Tile> path = highlightMode.computeCursorPos(cameraCenter, cursorPos, level);
 			Tile cursorTile = level.getTile(cursorPos);
 			if(highlightMode != CursorHighlight.INVISIBLE) {
 				Tile last = path.get(path.size() - 1);
 				Color invalidColor = new Color(1, 0, 0, .5f);
-				if (ClientCore.debugInteract) {
+				if (GameCore.debugInteract) {
 					boolean invalid = false;
 					invalidColor.mul(1, 1, 1, .5f);
 					Color norm = Color.BLACK.cpy().mul(1, 1, 1, 0.5f);

@@ -7,7 +7,7 @@ import java.util.Objects;
 
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.chat.InfoMessageLine;
-import miniventure.game.item.EquipmentType;
+import miniventure.game.item.EquipmentItem.EquipmentType;
 import miniventure.game.item.ItemStack;
 import miniventure.game.texture.FetchableTextureHolder;
 import miniventure.game.texture.ItemTextureSource;
@@ -16,23 +16,20 @@ import miniventure.game.util.Version;
 import miniventure.game.util.function.Action;
 import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.Point;
-import miniventure.game.world.Taggable.Tag;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.Entity.EntityTag;
-import miniventure.game.world.entity.EntityRenderer;
-import miniventure.game.world.entity.mob.Mob;
-import miniventure.game.world.entity.mob.player.Player.CursorHighlight;
-import miniventure.game.world.entity.mob.player.Player.Stat;
-import miniventure.game.world.entity.particle.ActionType;
+import miniventure.game.world.entity.mob.player.CursorHighlight;
+import miniventure.game.world.entity.mob.player.Stat;
+import miniventure.game.world.entity.particle.ActionParticle.ActionType;
 import miniventure.game.world.entity.particle.ParticleData;
-import miniventure.game.world.level.Level;
+import miniventure.game.world.management.Level;
 import miniventure.game.world.management.WorldManager;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.Tile.TileTag;
 import miniventure.game.world.tile.Tile.TileData;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.Tile.TileTag;
+import miniventure.game.world.tile.TileType;
 import miniventure.game.world.worldgen.island.IslandType;
 
 import com.badlogic.gdx.graphics.Color;
@@ -99,7 +96,7 @@ public interface GameProtocol {
 		kryo.register(InfoMessageLine.class);
 		kryo.register(InfoMessageLine[].class);
 		kryo.register(InfoMessage.class);
-		kryo.register(TileTypeEnum.class);
+		kryo.register(TileType.class);
 		kryo.register(ItemTextureSource.class);
 		kryo.register(SerialItem[].class);
 		kryo.register(SerialItemStack[].class);
@@ -298,12 +295,12 @@ public interface GameProtocol {
 		public final int levelId;
 		public final int x;
 		public final int y;
-		public final TileTypeEnum updatedType;
+		public final TileType updatedType;
 		
 		private TileUpdate() { this(null, 0, 0, 0, null); }
-		public TileUpdate(Tile tile, TileTypeEnum updatedType) { this(tile, tile.getLocation(), updatedType); }
-		private TileUpdate(Tile tile, Point pos, TileTypeEnum updatedType) { this(new TileData(tile, false), tile.getLevel().getLevelId(), pos.x, pos.y, updatedType); }
-		public TileUpdate(TileData data, int levelId, int x, int y, TileTypeEnum updatedType) {
+		public TileUpdate(Tile tile, TileType updatedType) { this(tile, tile.getLocation(), updatedType); }
+		private TileUpdate(Tile tile, Point pos, TileType updatedType) { this(new TileData(tile, false), tile.getLevel().getLevelId(), pos.x, pos.y, updatedType); }
+		public TileUpdate(TileData data, int levelId, int x, int y, TileType updatedType) {
 			tileData = data;
 			this.levelId = levelId;
 			this.x = x;
@@ -456,8 +453,8 @@ public interface GameProtocol {
 		public final String[] rendererData;
 		
 		private SpriteUpdate() { this((String[])null); }
-		public SpriteUpdate(Entity e) { this(e.getRenderer()); }
-		public SpriteUpdate(EntityRenderer renderer) { this(EntityRenderer.serialize(renderer)); }
+		// public SpriteUpdate(Entity e) { this(e.getRenderer()); }
+		// public SpriteUpdate(OldEntityRenderer renderer) { this(OldEntityRenderer.serialize(renderer)); }
 		public SpriteUpdate(String[] rendererData) {
 			this.rendererData = rendererData;
 		}

@@ -1,25 +1,29 @@
 package miniventure.game.core;
 
-import java.nio.file.Path;
-import java.util.HashMap;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
-import miniventure.game.texture.TextureAtlasHolder;
-import miniventure.game.texture.TextureHolder;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.lang.Thread.UncaughtExceptionHandler;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Locale;
+
+import miniventure.game.screen.LoadingScreen;
+import miniventure.game.screen.MainMenu;
+import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
 import miniventure.game.util.VersionInfo;
 import miniventure.game.world.file.WorldFileInterface;
+import miniventure.game.world.management.WorldDataSet;
 import miniventure.game.world.management.WorldManager;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.backends.lwjgl.LwjglFiles;
-import com.badlogic.gdx.backends.lwjgl.LwjglNativesLoader;
-import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas.TextureAtlasData;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas.TextureAtlasData.Region;
-import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
+import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
@@ -27,44 +31,25 @@ import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /** @noinspection StaticNonFinalField*/
 public class GameCore {
 	
+	// DEBUG
+	
 	public static boolean debug = false;
 	
-	public static String prefix(WorldManager world) {
-		return world.getClass().getSimpleName()+": ";
-	}
+	public static boolean debugBounds = false;
+	// debug flags
+	static boolean debugInfo = false;
+	// static boolean debugChunk = false;
+	// static boolean debugTile = false;
+	static boolean debugInteract = false;
 	
-	public static void debug(WorldManager world, String msg) {
-		debug(prefix(world)+msg);
-	}
-	public static void debug(String msg) {
-		if(debug)
-			System.out.println(msg);
-	}
+	public static final long PROGRAM_START = System.nanoTime();
 	
-	// public static void errorFull(String error) { error(error, false, true); }
-	public static void error(WorldManager world, String error) {
-		error(prefix(world)+error);
-	}
-	public static void error(WorldManager world, String error, boolean debugModeOnly) {
-		error(prefix(world)+error, debugModeOnly);
-	}
-	public static void error(WorldManager world, String error, boolean debugModeOnly, boolean dumpStack) {
-		error(prefix(world)+error, debugModeOnly, dumpStack);
-	}
-	public static void error(String error) { error(error, true); }
-	public static void error(String error, boolean debugModeOnly) { error(error, debugModeOnly, false); }
-	public static void error(String error, boolean debugModeOnly, boolean dumpStack) {
-		if(debugModeOnly && !debug) return;
-		if(dumpStack) {
-			System.err.println(error + " Printing stack trace:");
-			Thread.dumpStack();
-		} else
-			System.err.println(error);
-	}
+	// GAME DATA DIRECTORY
 	
 	@NotNull public static final String DEFAULT_GAME_DIR;
 	public static Path GAME_DIR = null;
@@ -72,83 +57,68 @@ public class GameCore {
 		String home = System.getProperty("user.home");
 		if(System.getProperty("os.name").contains("Windows")) {
 			DEFAULT_GAME_DIR = home + "/Documents/My Games/Miniventure/";
-			WorldFileInterface.migrate(home + "/AppData/Roaming/Miniventure/");
+			// WorldFileInterface.migrate(home + "/AppData/Roaming/Miniventure/");
 		}
 		else
 			DEFAULT_GAME_DIR = home + "/.miniventure/";
 	}
 	
-	public static final float MAX_DELTA = 0.25f; // the maximum time that the game will clamp getDeltaTime to, to prevent huge jumps after a lag spike.
+	/// --- APPLICATION ENTRY POINT ---
 	
-	private static final long START_TIME = System.nanoTime();
-	
-	public static final float SOUND_RADIUS = 10; // 10 tiles
-	
-	public static final Color DEFAULT_CHAT_COLOR = Color.WHITE;
-	
-	// public static final int DEFAULT_WORLD_SIZE = 200;
-	
-	public static TextureAtlasHolder entityAtlas, tileAtlas;
-	public static TextureAtlasHolder descaledTileAtlas, scaledIconAtlas; // these two are exclusively used for item entities
-	public static TextureAtlas tileConnectionAtlas = new TextureAtlas(); // tile overlap atlas not needed b/c the overlap sprite layout is simple enough to code; it goes in binary. However, the tile connection sprite layout is more complicated, so a map is needed to compare against.
-	
-	private static TextureAtlas iconAtlas;
-	public static final HashMap<String, TextureHolder> icons = new HashMap<>();
-	
-	private static boolean initialized = false;
-	
-	public static void initGdxTextures() {
-		if(initialized) return;
-		initialized = true;
-		entityAtlas = new TextureAtlasHolder(new TextureAtlas("sprites/entities.txt"));
-		tileAtlas = new TextureAtlasHolder(new TextureAtlas("sprites/tiles4x.txt"));
-		tileConnectionAtlas = new TextureAtlas("sprites/tileconnectmap.txt");
-		iconAtlas = new TextureAtlas("sprites/icons.txt");
-		scaledIconAtlas = new TextureAtlasHolder(new TextureAtlas("sprites/icons4x.txt"));
+	public static void main(String[] args) throws IOException {
+		Locale.setDefault(Locale.ENGLISH);
+		Thread.setDefaultUncaughtExceptionHandler(exceptionHandler);
 		
-		for(AtlasRegion region: iconAtlas.getRegions())
-			icons.put(region.name, new TextureHolder(region));
+		if(args.length > 0 && args[0].equals("--debug"))
+			debug = true;
 		
-		descaledTileAtlas = new TextureAtlasHolder(new TextureAtlas("sprites/tiles.txt"));
-	}
-	
-	public static void initNonGdxTextures() {
-		if(initialized) return;
-		initialized = true;
-		// initialize entity atlas and icon atlas, b/c that's what the server needs to determine entity sizes (icons b/c of item entities)
-		LwjglNativesLoader.load();
-		Gdx.files = new LwjglFiles();
-		
-		// maybe if I manually created a TextureAtlasData?
-		FileHandle spriteFolder = Gdx.files.internal("sprites");
-		TextureAtlasData entityData = new TextureAtlasData(spriteFolder.child("entities.txt"), spriteFolder, false);
-		TextureAtlasData iconData = new TextureAtlasData(spriteFolder.child("icons.txt"), spriteFolder, false);
-		TextureAtlasData iconScaledData = new TextureAtlasData(spriteFolder.child("icons4x.txt"), spriteFolder, false);
-		TextureAtlasData tileData = new TextureAtlasData(spriteFolder.child("tiles4x.txt"), spriteFolder, false);
-		
-		entityAtlas = new TextureAtlasHolder(entityData);
-		tileAtlas = new TextureAtlasHolder(tileData);
-		descaledTileAtlas = new TextureAtlasHolder(new TextureAtlasData(spriteFolder.child("tiles.txt"), spriteFolder, false));
-		scaledIconAtlas = new TextureAtlasHolder(iconScaledData);
-		for(Region region: iconData.getRegions()) {
-			TextureHolder tex = new TextureHolder(region);
-			icons.put(tex.name, tex);
+		// follow the redirect if it exists and there wasn't a command line override
+		if(GAME_DIR == null) {
+			File redirect = new File(DEFAULT_GAME_DIR, Preferences.PREF_REDIRECT);
+			if(redirect.exists())
+				GAME_DIR = new File(String.join("", Files.readAllLines(redirect.toPath()))).toPath();
+			else
+				GAME_DIR = new File(DEFAULT_GAME_DIR).toPath();
 		}
+		
+		WorldFileInterface.initGameDir();
+		
+		MyUtils.debug("Starting GUI client...");
+		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
+		config.title = "Miniventure - " + Version.CURRENT;
+		config.width = GdxCore.DEFAULT_SCREEN_WIDTH;
+		config.height = GdxCore.DEFAULT_SCREEN_HEIGHT;
+		new LwjglApplication(new GdxCore(), config);
 	}
 	
-	public static void dispose () {
-		entityAtlas.dispose();
-		tileAtlas.dispose();
-		descaledTileAtlas.dispose();
-		tileConnectionAtlas.dispose();
-		iconAtlas.dispose();
-		scaledIconAtlas.dispose();
+	
+	// WORLD MANAGEMENT
+	
+	private static WorldManager world;
+	
+	@Nullable
+	public static WorldManager getWorld() { return world; }
+	
+	public static void startWorld(WorldDataSet worldInfo) {
+		// perhaps notify if a world is already running
+		// create a world manager with this world data and set it as the active world
+		// remove all open menus
+		// note: the world gen screen will follow this with setting the menu to instructions
+		world = new WorldManager(worldInfo/*, new LoadingScreen()*/);
 	}
 	
-	public static float getDeltaTime() { return MathUtils.clamp(Gdx.graphics.getDeltaTime(), 0, MAX_DELTA); }
+	public static void exitWorld() {
+		if(world == null) return;
+		
+		// save and then set to null, and open main menu
+		world.saveWorld();
+		world.dispose();
+		world = null;
+		GdxCore.setScreen(new MainMenu());
+	}
 	
-	public static float getElapsedProgramTime() { return (System.nanoTime() - START_TIME)/1E9f; }
 	
+	// VERSION CHECKING
 	
 	private static VersionInfo latestVersion = null;
 	
@@ -174,4 +144,21 @@ public class GameCore {
 			return latestVersion = new VersionInfo(Version.CURRENT, "", "");
 		}
 	}
+	
+	public static final UncaughtExceptionHandler exceptionHandler = (thread, throwable) -> {
+		throwable.printStackTrace();
+		
+		StringWriter string = new StringWriter();
+		PrintWriter printer = new PrintWriter(string);
+		throwable.printStackTrace(printer);
+		
+		JTextArea errorDisplay = new JTextArea(string.toString());
+		errorDisplay.setEditable(false);
+		JScrollPane errorPane = new JScrollPane(errorDisplay);
+		JOptionPane.showMessageDialog(null, errorPane, "An error has occurred", JOptionPane.ERROR_MESSAGE);
+		
+		System.exit(1);
+	};
+	
+	// public static GameClient getClient() { return clientWorld.getClient(); }
 }

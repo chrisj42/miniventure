@@ -7,16 +7,15 @@ import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.MapFunction;
 
+import org.jetbrains.annotations.NotNull;
+
 @SuppressWarnings("unchecked")
 public abstract class SerialEnum<T, ET extends SerialEnum<T, ET>> extends GenericEnum<T, ET> {
 	
 	/* Some notes:
-		
-		- it is expected that all given value types can be converted to a String with toString, and have a constructor that takes a single String.
-		
-		- This class is used for both Tile-specific data, and TileType Property data.
-		
-		- None of these values will ever be saved to file. TileType properties will be regenerated, and tile data-caches don't hold important data.
+		- this is for generic enums who represent at least some types that can be serialized
+			- if all enum types of a subclass should be serializable, then the subclass can simply not include a constructor without serialization methods.
+		- it is designed so that the types can be serialized to or from a map of the data
 	 */
 	
 	@FunctionalInterface
@@ -24,41 +23,48 @@ public abstract class SerialEnum<T, ET extends SerialEnum<T, ET>> extends Generi
 		T get(String data, Class<T> clazz);
 	}
 	
-	public final boolean save;
-	public final boolean send;
+	private class SerialInterface {
+		@NotNull final MapFunction<T, String> valueWriter;
+		@NotNull final MapFunction<String, T> valueParser;
+		
+		SerialInterface(@NotNull MapFunction<T, String> valueWriter, @NotNull MapFunction<String, T> valueParser) {
+			this.valueWriter = valueWriter;
+			this.valueParser = valueParser;
+		}
+	}
+	
+	// public final boolean save; // save to map?
+	// public final boolean send;
+	
+	// @Nullable
+	// private final SerialInterface serialInterface;
+	
 	private final MapFunction<T, String> valueWriter;
 	private final MapFunction<String, T> valueParser;
 	
-	// neither saves nor sends
-	protected SerialEnum() {
-		this(false, false, null, null);
-	}
+	// no serialization
+	protected SerialEnum() { this(null, null); }
 	
-	protected SerialEnum(boolean save, boolean send, MapFunction<T, String> valueWriter, MapFunction<String, T> valueParser) {
-		this.save = save;
-		this.send = send;
+	protected SerialEnum(MapFunction<T, String> valueWriter, MapFunction<String, T> valueParser) {
 		this.valueWriter = valueWriter;
 		this.valueParser = valueParser;
 	}
 	
-	protected SerialEnum(boolean save, boolean send, final Class<T> valueClass) {
-		this.save = save;
-		this.send = send;
-		this.valueWriter = defaultValueWriter(valueClass);
-		this.valueParser = defaultValueParser(valueClass);
+	protected SerialEnum(final Class<T> valueClass) {
+		this(defaultValueWriter(valueClass), defaultValueParser(valueClass));
 	}
 	
 	// these two constructors below are essentially the same as the two above, except that they convert the value type to a substitute type which gets serialized instead.
 	
-	protected <U> SerialEnum(boolean save, boolean send, MapFunction<T, U> substituter, MapFunction<U, T> unsubstituter, MapFunction<U, String> substituteWriter, MapFunction<String, U> substituteParser) {
-		this.save = save;
-		this.send = send;
-		this.valueWriter = val -> substituteWriter.get(substituter.get(val));
-		this.valueParser = string -> unsubstituter.get(substituteParser.get(string));
+	protected <U> SerialEnum(MapFunction<T, U> substituter, MapFunction<U, T> unsubstituter, MapFunction<U, String> substituteWriter, MapFunction<String, U> substituteParser) {
+		this(
+				val -> substituteWriter.get(substituter.get(val)),
+				string -> unsubstituter.get(substituteParser.get(string))
+		);
 	}
 	
-	protected <U> SerialEnum(boolean save, boolean send, final Class<U> substituteClass, MapFunction<T, U> substituter, MapFunction<U, T> unsubstituter) {
-		this(save, send, substituter, unsubstituter, defaultValueWriter(substituteClass), defaultValueParser(substituteClass));
+	protected <U> SerialEnum(final Class<U> substituteClass, MapFunction<T, U> substituter, MapFunction<U, T> unsubstituter) {
+		this(substituter, unsubstituter, defaultValueWriter(substituteClass), defaultValueParser(substituteClass));
 	}
 	
 	private static <T> MapFunction<T, String> defaultValueWriter(final Class<T> valueClass) {
@@ -118,8 +124,18 @@ public abstract class SerialEnum<T, ET extends SerialEnum<T, ET>> extends Generi
 		return ar;
 	}
 	
-	public String serialize(T value) { return valueWriter.get(value); }
-	public T deserialize(String data) { return valueParser.get(data); }
+	public String serialize(T value) {
+		// return valueWriter == null ? null : valueWriter.get(value);
+		if(valueWriter == null)
+			throw new SerializableException(this, true);
+		return valueWriter.get(value);
+	}
+	public T deserialize(String data) {
+		// return valueParser == null ? null : valueParser.get(data);
+		if(valueParser == null)
+			throw new SerializableException(this, false);
+		return valueParser.get(data);
+	}
 	
 	String serializeEntry(SerialEnumMap<? super ET> map) {
 		return name()+'='+serialize(map.get(this));
@@ -129,5 +145,11 @@ public abstract class SerialEnum<T, ET extends SerialEnum<T, ET>> extends Generi
 		String[] parts = data.split("=", 2);
 		ET tag = GenericEnum.valueOf(tagClass, parts[0]);
 		map.add(tag, tag.deserialize(parts[1]));
+	}
+	
+	private static class SerializableException extends RuntimeException {
+		public SerializableException(SerialEnum<?, ?> enumValue, boolean missingSerial) {
+			super(enumValue.getEnumClass().getSimpleName()+' '+enumValue+" has no value"+(missingSerial?"writer":"parser")+" and cannot be "+(missingSerial?"":"de")+"serialized.");
+		}
 	}
 }

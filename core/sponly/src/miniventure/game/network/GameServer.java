@@ -14,27 +14,21 @@ import miniventure.game.chat.MessageBuilder;
 import miniventure.game.chat.command.Command;
 import miniventure.game.chat.command.CommandInputParser;
 import miniventure.game.core.GameCore;
+import miniventure.game.core.GdxCore;
 import miniventure.game.network.PacketPipe.PacketPipeWriter;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
 import miniventure.game.world.Point;
-import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
-import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.player.Player;
-import miniventure.game.world.entity.mob.player.ServerPlayer;
-import miniventure.game.world.entity.particle.ParticleData;
-import miniventure.game.world.file.PlayerData;
-import miniventure.game.world.level.Level;
-import miniventure.game.world.level.ServerLevel;
-import miniventure.game.world.management.ServerWorld;
+import miniventure.game.world.management.Level;
+import miniventure.game.world.management.WorldManager;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.Tile.TileData;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.TileType;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
@@ -52,7 +46,7 @@ public abstract class GameServer implements GameProtocol {
 	
 	private class PlayerLink {
 		final PacketPipeWriter connection;
-		@NotNull final ServerPlayer player;
+		@NotNull final Player player;
 		final InfoMessageBuilder toClientOut, toClientErr;
 		final Timer validationTimer;
 		
@@ -61,12 +55,12 @@ public abstract class GameServer implements GameProtocol {
 		// /** @see GameProtocol.InventoryRequest */
 		// private boolean inventoryMode = false; // send hotbar updates at first
 		
-		PlayerLink(PacketPipeWriter connection, @NotNull ServerPlayer player, boolean op) {
+		PlayerLink(PacketPipeWriter connection, @NotNull Player player, boolean op) {
 			this.connection = connection;
 			this.player = player;
 			this.op = op;
 			
-			toClientOut = new InfoMessageBuilder(text -> new InfoMessageLine(GameCore.DEFAULT_CHAT_COLOR, text));
+			toClientOut = new InfoMessageBuilder(text -> new InfoMessageLine(GdxCore.DEFAULT_CHAT_COLOR, text));
 			toClientErr = new InfoMessageBuilder(toClientOut, text -> new InfoMessageLine(ERROR_CHAT_COLOR, text));
 			
 			validationTimer = new Timer(5000, e -> player.getWorld().postRunnable(() -> sendEntityValidation(this)));
@@ -77,14 +71,14 @@ public abstract class GameServer implements GameProtocol {
 	private final Map<String, PlayerData> knownPlayers = Collections.synchronizedMap(new HashMap<>());
 	
 	private final Map<PacketPipeWriter, PlayerLink> connectionToPlayerInfoMap = new HashMap<>();
-	private final Map<ServerPlayer, PacketPipeWriter> playerToConnectionMap = new HashMap<>();
-	private final Map<String, ServerPlayer> playersByName = new HashMap<>();
+	private final Map<Player, PacketPipeWriter> playerToConnectionMap = new HashMap<>();
+	private final Map<String, Player> playersByName = new HashMap<>();
 	private final Object playerLock = new Object();
 	
-	@NotNull private final ServerWorld world;
+	@NotNull private final WorldManager world;
 	private boolean multiplayer;
 	
-	public GameServer(@NotNull ServerWorld world, boolean multiplayer, PlayerData[] playerData) {
+	public GameServer(@NotNull WorldManager world, boolean multiplayer, PlayerData[] playerData) {
 		this.world = world;
 		this.multiplayer = multiplayer;
 		
@@ -98,24 +92,24 @@ public abstract class GameServer implements GameProtocol {
 	
 	protected abstract boolean isHost(@NotNull InetSocketAddress address);
 	
-	public boolean isHost(@NotNull ServerPlayer player) {
+	public boolean isHost(@NotNull Player player) {
 		InetSocketAddress addr = getPlayerAddress(player);
 		return addr != null && isHost(addr);
 	}
 	
 	public PlayerData[] updatePlayerData() {
-		ServerPlayer[] players;
+		Player[] players;
 		synchronized (playerLock) {
-			players = playerToConnectionMap.keySet().toArray(new ServerPlayer[0]);
+			players = playerToConnectionMap.keySet().toArray(new Player[0]);
 		}
-		for(ServerPlayer p: players)
+		for(Player p: players)
 			updatePlayerData(p);
 		
 		synchronized (knownPlayers) {
 			return knownPlayers.values().toArray(new PlayerData[0]);
 		}
 	}
-	public void updatePlayerData(ServerPlayer player) {
+	public void updatePlayerData(Player player) {
 		PlayerLink info = getPlayerInfo(player);
 		if(info == null) {
 			System.err.println("Player "+player+" does not have PlayerLink, cannot update data.");
@@ -141,7 +135,7 @@ public abstract class GameServer implements GameProtocol {
 		}
 	}
 	
-	private PlayerLink getPlayerInfo(@Nullable ServerPlayer player) {
+	private PlayerLink getPlayerInfo(@Nullable Player player) {
 		if(player == null)
 			return null;
 		synchronized (playerLock) {
@@ -155,29 +149,29 @@ public abstract class GameServer implements GameProtocol {
 		// }
 	}
 	
-	PacketPipeWriter getPipeWriter(@Nullable ServerPlayer player) {
+	PacketPipeWriter getPipeWriter(@Nullable Player player) {
 		// synchronized (playerLock) {
 			return playerToConnectionMap.get(player);
 		// }
 	}
 	
 	
-	void login(String name, boolean isHost, PacketPipeWriter connection) {
-		ServerPlayer player;
+	/*void login(String name, boolean isHost, PacketPipeWriter connection) {
+		Player player;
 		PlayerLink pinfo;
 		
 		PlayerData info = knownPlayers.get(name);
 		boolean op;
 		if(info != null) {
-			GameCore.debug("Player '"+name+"' is known, loading stored data.");
+			MyUtils.debug("Player '"+name+"' is known, loading stored data.");
 			// TODO passwords
 			// if(!info.passhash.equals(passhash))
 			// 	return null; // incorrect password
-			player = (ServerPlayer) ServerEntity.deserialize(world, info.data, Version.CURRENT);
+			player = (Player) Entity.deserialize(world, info.data, Version.CURRENT);
 			op = info.op;
 		} else {
-			GameCore.debug("Player '"+name+"' is not known, creating new player.");
-			player = new ServerPlayer(world, name);
+			MyUtils.debug("Player '"+name+"' is not known, creating new player.");
+			player = new Player(world, name);
 			// if(GameCore.debug)
 			// 	op = connection.getRemoteAddressTCP().getAddress().isLoopbackAddress();
 			// else
@@ -216,7 +210,7 @@ public abstract class GameServer implements GameProtocol {
 		PlayerLink info = getPlayerInfo(connection);
 		if(info == null) return;
 		info.validationTimer.stop();
-		ServerPlayer player = info.player;
+		Player player = info.player;
 		// world.postRunnable(() -> {
 			updatePlayerData(player);
 			player.remove();
@@ -232,7 +226,7 @@ public abstract class GameServer implements GameProtocol {
 			if(player.getName().equals(HOST)) // quit server when host exits
 				world.exitWorld();
 		// });
-	}
+	}*/
 	
 	/*private <T> void forPacket(Object packet, DatalessRequest type, boolean sync, Action response) {
 		GameProtocol.forPacket(packet, type, response, sync ? world::postRunnable : null);
@@ -243,7 +237,7 @@ public abstract class GameServer implements GameProtocol {
 	}*/
 	
 	protected void handlePacket(PacketPipeWriter connection, Object object) {
-		// final ServerWorld world = GameServer.this.world;
+		// final WorldManager world = GameServer.this.world;
 		
 		PlayerLink clientData = getPlayerInfo(connection);
 		if(clientData == null) {
@@ -251,7 +245,7 @@ public abstract class GameServer implements GameProtocol {
 			return;
 		}
 		
-		ServerPlayer client = clientData.player;
+		Player client = clientData.player;
 		
 		GameProtocol.forPacket(object, Ping.class, ping -> {
 			long nano = System.nanoTime() - ping.start;
@@ -300,11 +294,11 @@ public abstract class GameServer implements GameProtocol {
 			// todo check if move is valid in terms of stats (prob using class/method in common module)
 			// for now we will assume it is.
 			
-			world.despawnPlayer(client);
+			/*world.despawnPlayer(client);
 			world.loadLevel(change.levelid, client, level -> {
-				Tile spawnTile = level.getMatchingTiles(TileTypeEnum.DOCK).get(0);
+				Tile spawnTile = level.getMatchingTiles(TileType.DOCK).get(0);
 				client.moveTo(spawnTile);
-			});
+			});*/
 			
 			// broadcast(new EntityUpdate(client.getTag(), new PositionUpdate(client), null));
 		});
@@ -312,7 +306,7 @@ public abstract class GameServer implements GameProtocol {
 		/*if(object instanceof ChunkRequest) {
 			//System.out.println("server received chunk request");
 			ChunkRequest request = (ChunkRequest) object;
-			ServerLevel level = client.getLevel(); // assumes player wants for current level
+			Level level = client.getLevel(); // assumes player wants for current level
 			if(level != null) {
 				Chunk chunk = level.getChunk(request.x, request.y);
 				//System.out.println("server sending back chunk "+chunk);
@@ -369,7 +363,7 @@ public abstract class GameServer implements GameProtocol {
 				matches.sort(String::compareToIgnoreCase);
 				
 				if(request.tabIndex < 0)
-					connection.send(new Message(ArrayUtils.arrayToString(matches.shrink(), ", "), GameCore.DEFAULT_CHAT_COLOR));
+					connection.send(new Message(ArrayUtils.arrayToString(matches.shrink(), ", "), GdxCore.DEFAULT_CHAT_COLOR));
 				else {
 					// actually autocomplete
 					connection.send(new TabResponse(request.manualText, matches.get(request.tabIndex % matches.size)));
@@ -378,19 +372,19 @@ public abstract class GameServer implements GameProtocol {
 		});
 	};
 	
-	public Set<ServerPlayer> getPlayers() {
+	public Set<Player> getPlayers() {
 		// synchronized (playerToConnectionMap) {
 			return new HashSet<>(playerToConnectionMap.keySet());
 		// }
 	}
 	
-	public void sendToPlayer(@NotNull ServerPlayer player, Object obj) {
+	public void sendToPlayer(@NotNull Player player, Object obj) {
 		PacketPipeWriter toClient = getPipeWriter(player);
 		if(toClient != null) {
 			toClient.send(obj);
 		}
 		else
-			GameCore.error("Server could not find send pipe for client "+player+" to send packet: "+obj.getClass().getSimpleName());
+			MyUtils.error("Server could not find send pipe for client "+player+" to send packet: "+obj.getClass().getSimpleName());
 	}
 	
 	public void broadcastGlobal(Object obj) {
@@ -399,63 +393,63 @@ public abstract class GameServer implements GameProtocol {
 				out.send(obj);
 		// }
 	}
-	private void broadcastFilter(Object obj, Predicate<ServerPlayer> filter) {
+	private void broadcastFilter(Object obj, Predicate<Player> filter) {
 		// synchronized (playerLock) {
-			for(Entry<ServerPlayer, PacketPipeWriter> entry: playerToConnectionMap.entrySet())
+			for(Entry<Player, PacketPipeWriter> entry: playerToConnectionMap.entrySet())
 				if(filter.test(entry.getKey()))
 					entry.getValue().send(obj);
 		// }
 	}
-	public void broadcastGlobal(@NotNull ServerPlayer exclude, Object obj) {
+	public void broadcastGlobal(@NotNull Player exclude, Object obj) {
 		broadcastFilter(obj, player -> player != exclude);
 	}
-	public void broadcastLocal(ServerLevel levelMask, Object obj) {
+	public void broadcastLocal(Level levelMask, Object obj) {
 		if(levelMask == null)
 			return;
 		broadcastFilter(obj, player -> player.getLevel() == levelMask);
 	}
-	public void broadcastLocal(ServerLevel levelMask, @NotNull ServerEntity excludeIfPlayer, Object obj) {
+	public void broadcastLocal(Level levelMask, @NotNull Entity excludeIfPlayer, Object obj) {
 		if(levelMask == null)
 			return;
-		/*if(!(excludeIfPlayer instanceof ServerPlayer))
+		/*if(!(excludeIfPlayer instanceof Player))
 			broadcastLocal(levelMask, obj);
 		else
 			*/broadcastFilter(obj, player -> player != excludeIfPlayer && player.getLevel() == levelMask);
 	}
 	// levelMask is the level a player must be on to receive this data.
-	/*public void broadcast(Level levelMask, Object obj, @NotNull ServerEntity... exclude) {
+	/*public void broadcast(Level levelMask, Object obj, @NotNull Entity... exclude) {
 		if(levelMask == null) return; // no level, no packet.
 		
-		Set<ServerPlayer> players = getPlayers();
-		HashSet<ServerEntity> excluded = new HashSet<>(Arrays.asList(exclude));
+		Set<Player> players = getPlayers();
+		HashSet<Entity> excluded = new HashSet<>(Arrays.asList(exclude));
 		//noinspection SuspiciousMethodCalls
 		players.removeAll(excluded);
 		players.removeIf(player -> !levelMask.equals(player.getLevel()));
 		
 		broadcast(obj, true, players);
 	}
-	private void broadcast(Object obj, boolean includeGiven, @NotNull Set<ServerPlayer> players) {
+	private void broadcast(Object obj, boolean includeGiven, @NotNull Set<Player> players) {
 		if(!includeGiven) {
-			Set<ServerPlayer> playerSet = getPlayers();
+			Set<Player> playerSet = getPlayers();
 			playerSet.removeAll(players);
 			players = playerSet;
 		}
 		
-		for(ServerPlayer p: players)
+		for(Player p: players)
 			sendToPlayer(p, obj);
 	}*/
 	
 	@Nullable
-	public ServerPlayer getPlayerByName(String name) {
+	public Player getPlayerByName(String name) {
 		// synchronized (playerLock) {
 			return playersByName.get(name);
 		// }
 	}
 	
 	@Nullable
-	public abstract InetSocketAddress getPlayerAddress(@NotNull ServerPlayer player);
+	public abstract InetSocketAddress getPlayerAddress(@NotNull Player player);
 	
-	public void sendLevel(@NotNull ServerPlayer player, @NotNull ServerLevel level) {
+	public void sendLevel(@NotNull Player player, @NotNull Level level) {
 		PacketPipeWriter connection = getPipeWriter(player);
 		if(connection == null) {
 			System.err.println("Could not send level to player "+player+", Connection obj could not be found.");
@@ -466,11 +460,11 @@ public abstract class GameServer implements GameProtocol {
 		connection.send(new LevelInfo(level.getLevelId(), level.getWidth(), level.getHeight()));
 		
 		TileData[][] tileData = level.getTileData(false);
-		for (int i = 0; i < tileData.length; i += ServerLevel.CHUNK_SIZE) {
-			for (int j = 0; j < tileData[i].length; j += ServerLevel.CHUNK_SIZE) {
+		for (int i = 0; i < tileData.length; i += Level.CHUNK_SIZE) {
+			for (int j = 0; j < tileData[i].length; j += Level.CHUNK_SIZE) {
 				Point offset = new Point(i, j);
-				int width = Math.min(ServerLevel.CHUNK_SIZE, tileData.length - i);
-				int height = Math.min(ServerLevel.CHUNK_SIZE, tileData[i].length - j);
+				int width = Math.min(Level.CHUNK_SIZE, tileData.length - i);
+				int height = Math.min(Level.CHUNK_SIZE, tileData[i].length - j);
 				connection.send(new LevelChunk(offset, width, height, tileData));
 				MyUtils.sleep(2);
 			}
@@ -482,19 +476,19 @@ public abstract class GameServer implements GameProtocol {
 		// });
 	}
 	
-	/*public boolean isInventoryMode(@NotNull ServerPlayer player) {
+	/*public boolean isInventoryMode(@NotNull Player player) {
 		PlayerLink info = getPlayerInfo(player);
 		return info != null && info.inventoryMode;
 	}*/
 	
-	public boolean isAdmin(@Nullable ServerPlayer player) {
+	public boolean isAdmin(@Nullable Player player) {
 		if(player == null) return true; // from server command prompt
 		PlayerLink info = getPlayerInfo(player);
 		if(info == null) return false; // unrecognized player (should never happen)
 		return info.op;
 	}
 	
-	public boolean setAdmin(@NotNull ServerPlayer player, boolean op) {
+	public boolean setAdmin(@NotNull Player player, boolean op) {
 		PlayerLink info = getPlayerInfo(player);
 		if(info == null) return false; // unrecognized player (should never happen)
 		info.op = op;
@@ -503,38 +497,34 @@ public abstract class GameServer implements GameProtocol {
 		return true;
 	}
 	
-	public void sendMessage(@Nullable ServerPlayer sender, ServerPlayer reciever, String msg) {
+	public void sendMessage(@Nullable Player sender, Player reciever, String msg) {
 		sendToPlayer(reciever, getMessage(sender, msg));
 	}
-	public void broadcastMessage(@Nullable ServerPlayer sender, String msg) {
+	public void broadcastMessage(@Nullable Player sender, String msg) {
 		broadcastGlobal(getMessage(sender, msg));
 	}
 	
-	public Message getMessage(@Nullable ServerPlayer sender, String msg) {
+	public Message getMessage(@Nullable Player sender, String msg) {
 		if(sender == null) return new Message("Server: "+msg, SERVER_CHAT_COLOR);
-		return new Message((multiplayer?sender.getName()+": ":"")+msg, GameCore.DEFAULT_CHAT_COLOR);
+		return new Message((multiplayer?sender.getName()+": ":"")+msg, GdxCore.DEFAULT_CHAT_COLOR);
 	}
 	
-	public void broadcastParticle(ParticleData data, WorldObject posMarker) {
+	/*public void broadcastParticle(ParticleData data, WorldObject posMarker) {
 		broadcastParticle(data, posMarker.getLevel(), posMarker.getCenter());
 	}
 	public void broadcastParticle(ParticleData data, Level level, Vector2 pos) {
 		broadcastGlobal(new ParticleAddition(data, new PositionUpdate(level, pos)));
-	}
+	}*/
 	
 	private void sendEntityValidation(@NotNull PlayerLink pData) {
-		ServerPlayer player = pData.player;
+		Player player = pData.player;
 		/*if(!pData.connection.isConnected()) {
 			System.err.println("Server not sending entity validation to player "+player.getName()+" because player has disconnected; stopping validation timer.");
 			pData.validationTimer.stop();
 			return;
 		}*/
 		
-		ServerLevel level = player.getLevel();
-		if(level == null) {
-			GameCore.debug("Server: Level of player "+player.getName()+" is null during entity validation attempt, skipping validation.");
-			return;
-		}
+		Level level = player.getLevel();
 		
 		// world.postRunnable(() -> {
 			EntityValidation validation = new EntityValidation(level, player);
@@ -542,7 +532,7 @@ public abstract class GameServer implements GameProtocol {
 		// });
 	}
 	
-	public void playEntitySound(String soundName, Entity source) { playEntitySound(soundName, source, true); }
+	/*public void playEntitySound(String soundName, Entity source) { playEntitySound(soundName, source, true); }
 	public void playEntitySound(String soundName, Entity source, boolean broadcast) {
 		String fullSoundName;
 		if(source instanceof Player)
@@ -552,8 +542,8 @@ public abstract class GameServer implements GameProtocol {
 		else
 			fullSoundName = "entity/"+soundName;
 		
-		if(source instanceof ServerPlayer && !broadcast)
-			playGenericSound(fullSoundName, source.getCenter(), (ServerPlayer)source);
+		if(source instanceof Player && !broadcast)
+			playGenericSound(fullSoundName, source.getCenter(), (Player)source);
 		else
 			playGenericSound(fullSoundName, source.getCenter());
 	}
@@ -562,15 +552,15 @@ public abstract class GameServer implements GameProtocol {
 		playGenericSound("tile/"+soundName, tile.getCenter());
 	}
 	public void playGenericSound(String soundName, Vector2 source) {
-		for(ServerPlayer player: playerToConnectionMap.keySet()) {
+		for(Player player: playerToConnectionMap.keySet()) {
 			playGenericSound(soundName, source, player);
 		}
 	}
-	public void playGenericSound(String soundName, Vector2 source, @NotNull ServerPlayer forPlayer) {
-		if(forPlayer.getPosition().dst(source) <= GameCore.SOUND_RADIUS) {
+	public void playGenericSound(String soundName, Vector2 source, @NotNull Player forPlayer) {
+		if(forPlayer.getPosition().dst(source) <= AudioCore.SOUND_RADIUS) {
 			sendToPlayer(forPlayer, new SoundRequest(soundName));
 		}
-	}
+	}*/
 	
 	public void printStatus(MessageBuilder out) {
 		out.println("Miniventure Version: "+ Version.CURRENT);

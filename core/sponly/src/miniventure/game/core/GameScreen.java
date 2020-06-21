@@ -1,15 +1,17 @@
 package miniventure.game.core;
 
 import miniventure.game.core.InputHandler.Control;
-import miniventure.game.item.InventoryOverlay;
+import miniventure.game.item.inventory.InventoryOverlay;
 import miniventure.game.screen.ChatScreen;
 import miniventure.game.screen.InputScreen;
 import miniventure.game.screen.MapScreen;
 import miniventure.game.screen.PauseScreen;
+import miniventure.game.screen.util.DiscreteViewport;
+import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
-import miniventure.game.world.entity.mob.player.ClientPlayer;
-import miniventure.game.world.level.ClientLevel;
-import miniventure.game.world.level.Level;
+import miniventure.game.world.entity.mob.player.Player;
+import miniventure.game.world.entity.mob.player.PlayerInventory;
+import miniventure.game.world.management.Level;
 import miniventure.game.world.management.TimeOfDay;
 import miniventure.game.world.tile.Tile;
 
@@ -22,64 +24,64 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.viewport.Viewport;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class GameScreen {
 	
-	@NotNull private final LevelViewport levelView;
+	private SpriteBatch batch = GdxCore.getBatch();
 	
-	private SpriteBatch batch = ClientCore.getBatch();
-	private InventoryOverlay guiStage;
+	private final OrthographicCamera noScaleCamera = new OrthographicCamera();
 	
-	private final OrthographicCamera uiCamera;
-	private final OrthographicCamera noScaleCamera;
+	private final LevelViewport levelView;
+	private final ChatScreen chatScreen, chatOverlay;
 	
-	final ChatScreen chatOverlay, chatScreen;
-	// private boolean showDebug = false;
+	private final Viewport uiViewport;
+	private InventoryOverlay inventoryGui;
 	
-	@NotNull
-	private final ClientPlayer player;
-	
-	public GameScreen(@NotNull ClientPlayer player, @Nullable GameScreen prev, InventoryOverlay invScreen) {
-		this.player = player;
+	public GameScreen() {
+		levelView = new LevelViewport();
 		
-		uiCamera = new OrthographicCamera();
-		noScaleCamera = new OrthographicCamera();
-		guiStage = invScreen;
-		invScreen.getViewport().setCamera(uiCamera);
-		levelView = new LevelViewport(noScaleCamera); // uses uiCamera for rendering lighting to the screen.
-		
+		chatScreen = new ChatScreen(false);
 		chatOverlay = new ChatScreen(true);
-		chatScreen = prev == null ? new ChatScreen(false) : prev.chatScreen;
-		if(prev != null)
-			prev.dispose(true);
+		chatScreen.connect(chatOverlay);
+		chatOverlay.connect(chatScreen);
+		
+		uiViewport = new DiscreteViewport();
+		inventoryGui = null;
 		
 		resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 	}
 	
-	void dispose() { dispose(false); }
-	private void dispose(boolean recycle) {
+	public void dispose() {
 		levelView.dispose();
-		guiStage.dispose();
+		chatScreen.dispose();
 		chatOverlay.dispose();
-		if(!recycle)
-			chatScreen.dispose();
-		// super.dispose();
+		
+		if(inventoryGui != null)
+			inventoryGui.dispose();
 	}
 	
-	public void handleInput() {
-		player.handleInput(getMouseInput(), levelView.getCursorPos());
+	public void setInventoryGui(@NotNull PlayerInventory inv) {
+		if(inventoryGui != null)
+			inventoryGui.dispose();
+		
+		inventoryGui = new InventoryOverlay(inv, uiViewport);
+		inventoryGui.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+	}
+	
+	public void handleInput(@NotNull Player player) {
+		player.handleInput(levelView.getCursorPos());
 		
 		boolean shift = Gdx.input.isKeyPressed(Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Keys.SHIFT_RIGHT);
 		if(shift && GameCore.debug && Gdx.input.isKeyJustPressed(Keys.S)) {
-			ClientCore.setScreen(new InputScreen("Enter new Player Speed:", newSpeed -> {
+			GdxCore.setScreen(new InputScreen("Enter new Player Speed:", newSpeed -> {
 				try {
 					float value = Float.parseFloat(newSpeed);
 					player.setSpeed(value);
 				} catch(NumberFormatException ignored) {}
-				ClientCore.setScreen(null);
+				GdxCore.setScreen(null);
 			}));
 		}
 		
@@ -87,87 +89,74 @@ public class GameScreen {
 		
 		if(shift) {
 			if(Gdx.input.isKeyJustPressed(Keys.D) && !Gdx.input.isKeyPressed(Keys.TAB))
-				ClientCore.debugInfo = !ClientCore.debugInfo;
+				GameCore.debugInfo = !GameCore.debugInfo;
 			
 			// if(Gdx.input.isKeyJustPressed(Keys.T))
 			// 	ClientCore.debugTile = !ClientCore.debugTile;
 			
 			if(Gdx.input.isKeyJustPressed(Keys.B))
-				ClientCore.debugBounds = !ClientCore.debugBounds;
+				GameCore.debugBounds = !GameCore.debugBounds;
 			
 			if(Gdx.input.isKeyJustPressed(Keys.I))
-				ClientCore.debugInteract = !ClientCore.debugInteract;
+				GameCore.debugInteract = !GameCore.debugInteract;
 		}
 		// else if(Gdx.input.isKeyJustPressed(Keys.B))
 		// 	ClientCore.debugChunk = !ClientCore.debugChunk;
 		
-		if(!ClientCore.hasMenu()) {
-			if(ClientCore.input.pressingControl(Control.CHAT))
+		if(!GdxCore.hasMenu()) {
+			if(GdxCore.input.pressingControl(Control.CHAT, true))
 				chatScreen.focus("");
 			
-			else if(ClientCore.input.pressingKey(Keys.SLASH))
+			else if(Gdx.input.isKeyJustPressed(Keys.SLASH))
 				chatScreen.focus("/");
 			
-			else if(ClientCore.input.pressingControl(Control.PAUSE))
-				ClientCore.setScreen(new PauseScreen());
+			else if(GdxCore.input.pressingControl(Control.PAUSE, true))
+				GdxCore.setScreen(new PauseScreen(player.getWorld()));
 			
-			else if(GameCore.debug && ClientCore.input.pressingKey(Keys.M))
-				ClientCore.setScreen(new MapScreen());
+			else if(GameCore.debug && Gdx.input.isKeyJustPressed(Keys.M))
+				GdxCore.setScreen(new MapScreen(player.getLevel()));
 		}
 	}
 	
-	public void render(Color lightOverlay, @NotNull ClientLevel level) {
-		render(lightOverlay, level, true);
+	public void render(@NotNull Level level, Color lightOverlay) {
+		render(level, lightOverlay, true);
 	}
-	public void render(Color lightOverlay, @NotNull ClientLevel level, boolean drawGui) {
+	public void render(@NotNull Level level, Color lightOverlay, boolean drawGui) {
 		
-		levelView.render(player.getCenter(), lightOverlay, level);
+		Vector2 v = MyUtils.getV2();
+		levelView.render(level, level.getPlayer().getCenter(v), lightOverlay);
+		MyUtils.freeV2(v);
 		
 		// batch.setProjectionMatrix(uiCamera.combined);
 		if(drawGui) {
 			renderGui(level);
-			// guiStage.focus();
-			guiStage.act();
-			guiStage.draw();
+			
+			if(inventoryGui != null) {
+				inventoryGui.act();
+				inventoryGui.draw();
+			}
 		}
 		
 		chatOverlay.act();
-		if(!(ClientCore.getScreen() instanceof ChatScreen)) {
+		if(!(GdxCore.getScreen() instanceof ChatScreen)) {
 			chatOverlay.draw();
 		}
 	}
 	
-	private static Vector2 getMouseInput() {
-		if(Gdx.input.isTouched()) {
-			Vector2 mousePos = new Vector2(Gdx.input.getX(), Gdx.input.getY());
-			mousePos.y = Gdx.graphics.getHeight() - mousePos.y; // origin is top left corner, so reverse Y dir
-			
-			// player is always in the center of the screen.
-			Vector2 screenCenter = new Vector2(Gdx.graphics.getWidth()/2f, Gdx.graphics.getHeight()/2f);
-			
-			Vector2 mouseMove = mousePos.cpy().sub(screenCenter);
-			mouseMove.nor();
-			
-			return mouseMove;
-		}
-		
-		return new Vector2();
-	}
-	
 	private void renderGui(@NotNull Level level) {
-		batch.setProjectionMatrix(uiCamera.combined);
+		batch.setProjectionMatrix(uiViewport.getCamera().combined);
 		batch.begin();
 		// draw UI for stats
 		// System.out.println("ui viewport: "+uiCamera.viewportWidth+"x"+uiCamera.viewportHeight);
-		player.drawGui(new Rectangle(0, 0, uiCamera.viewportWidth, uiCamera.viewportHeight), batch);
+		level.getPlayer().drawStatGui(new Rectangle(0, 0, uiViewport.getWorldWidth(), uiViewport.getWorldHeight()), batch);
 		batch.end();
 		
 		batch.setProjectionMatrix(noScaleCamera.combined);
 		batch.begin();
 		
-		if(!ClientCore.debugInfo) {
+		if(!GameCore.debugInfo) {
 			if(GameCore.debug) {
-				BitmapFont f = ClientCore.getFont();
+				BitmapFont f = GdxCore.getFont();
 				f.setColor(Color.ORANGE);
 				f.draw(batch, "Debug Mode ENABLED", 0, noScaleCamera.viewportHeight - 5);
 				f.setColor(Color.WHITE);
@@ -185,21 +174,21 @@ public class GameScreen {
 		debugInfo.add("Version: " + Version.CURRENT);
 		
 		// player coordinates, for debug
-		Rectangle playerBounds = player.getBounds();
+		Rectangle playerBounds = level.getPlayer().getBounds();
 		debugInfo.add("X = "+playerBounds.x);
 		debugInfo.add("Y = "+playerBounds.y);
 		
 		Tile playerTile = level.getTile(playerBounds);
 		debugInfo.add("Tile = " + (playerTile == null ? "Null" : playerTile.getType()));
-		Tile interactTile = level.getTile(player.getInteractionRect(levelView.getCursorPos()));
+		Tile interactTile = level.getTile(level.getPlayer().getInteractionRect(levelView.getCursorPos()));
 		debugInfo.add("Looking at: " + (interactTile == null ? "Null" : interactTile.toLocString().replace("Client", "")));
 		
 		debugInfo.add("Mobs in level: " + level.getMobCount()+"/"+level.getMobCap());
 		debugInfo.add("Total Entities: " + level.getEntityCount());
 		
-		debugInfo.add("Time: " + TimeOfDay.getTimeString(ClientCore.getWorld().getDaylightOffset()));
+		debugInfo.add("Time: " + TimeOfDay.getTimeString(level.getWorld().getDaylightOffset()));
 		
-		BitmapFont font = ClientCore.getFont();
+		BitmapFont font = GdxCore.getFont();
 		if(GameCore.debug) font.setColor(Color.ORANGE);
 		else font.setColor(Color.WHITE);
 		for(int i = 0; i < debugInfo.size; i++) {
@@ -211,12 +200,15 @@ public class GameScreen {
 		batch.end();
 	}
 	
-	void resize(int width, int height) {
+	public void resize(int width, int height) {
 		levelView.resize(width, height);
-		guiStage.getViewport().update(width, height, true);
-		chatOverlay.resize(width, height);
-		// noScaleCamera.setToOrtho(false, width, height);
+		noScaleCamera.setToOrtho(false, width, height);
+		
+		if(inventoryGui == null)
+			uiViewport.update(width, height, true);
+		else
+			inventoryGui.resize(width, height);
 	}
 	
-	public InventoryOverlay getGuiStage() { return guiStage; }
+	public InventoryOverlay getGuiStage() { return inventoryGui; }
 }

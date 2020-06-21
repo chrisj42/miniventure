@@ -3,7 +3,8 @@ package miniventure.game.network;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
-import miniventure.game.core.ClientCore;
+import miniventure.game.core.GdxCore;
+import miniventure.game.core.GameCore;
 import miniventure.game.network.PacketPipe.PacketListener;
 import miniventure.game.network.PacketPipe.PacketPipeReader;
 import miniventure.game.screen.ErrorScreen;
@@ -58,7 +59,7 @@ public class NetworkClient extends GameClient {
 			@Override
 			public void disconnected(Connection connection) {
 				System.err.println("client disconnected from server.");
-				Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen("Lost connection with server.")));
+				Gdx.app.postRunnable(() -> GdxCore.setScreen(new ErrorScreen("Lost connection with server.")));
 				packetSendQueue.close();
 			}
 		});
@@ -70,7 +71,7 @@ public class NetworkClient extends GameClient {
 			@Override
 			public void run() {
 				Thread.currentThread().setUncaughtExceptionHandler((t, e) -> {
-					ClientCore.exceptionHandler.uncaughtException(t, e);
+					GameCore.exceptionHandler.uncaughtException(t, e);
 					t.getThreadGroup().uncaughtException(t, e);
 					client.close();
 				});
@@ -95,7 +96,7 @@ public class NetworkClient extends GameClient {
 			// e.printStackTrace();
 			Gdx.app.postRunnable(() -> {
 				// error screen
-				ClientCore.setScreen(new ErrorScreen("Failed to connect: "+e.getMessage()));
+				GdxCore.setScreen(new ErrorScreen("Failed to connect: "+e.getMessage()));
 				callback.act(false);
 			});
 			return;
@@ -108,18 +109,18 @@ public class NetworkClient extends GameClient {
 			callback.act(true);
 		}
 		else {
-			Gdx.app.postRunnable(() -> ClientCore.setScreen(new InputScreen("Player name:", username -> {
+			/*Gdx.app.postRunnable(() -> GdxCore.setScreen(new InputScreen("Player name:", username -> {
 				this.username = username;
 				send(new Login(username, Version.CURRENT));
 				
 				logger.editMessage("Logging in as '"+username+'\'');
-				ClientCore.setScreen(logger);
+				GdxCore.setScreen(logger);
 				callback.act(true);
 			}, () -> {
 				disconnect();
-				ClientCore.backToParentScreen();
+				GdxCore.backToParentScreen();
 				callback.act(false);
-			})));
+			})));*/
 		}
 	}
 	

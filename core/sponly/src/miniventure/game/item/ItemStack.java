@@ -1,15 +1,13 @@
 package miniventure.game.item;
 
-import java.util.Arrays;
-
-import miniventure.game.network.GameProtocol.SerialItem;
-import miniventure.game.network.GameProtocol.SerialItemStack;
+import miniventure.game.util.Version;
 
 import org.jetbrains.annotations.NotNull;
 
 public class ItemStack {
 	
-	@NotNull public final Item item;
+	@NotNull
+	public final Item item;
 	public final int count;
 	
 	public ItemStack(@NotNull Item item, int count) {
@@ -17,16 +15,22 @@ public class ItemStack {
 		this.count = count;
 	}
 	
+	public ItemStack(String data, Version version) {
+		String countData = data.substring(0, data.indexOf(','));
+		count = Integer.parseInt(countData);
+		String itemData = data.substring(countData.length()+1);
+		item = Item.load(itemData, version);
+	}
+	
+	public static String save(@NotNull Item item, int count) {
+		return count+","+item.save();
+	}
+	
+	public String save() { return save(item, count); }
+	
 	@NotNull
 	public Item getItem() { return item; }
-	
-	public static int fetchCount(String[] data) {
-		return Integer.parseInt(data[0]);
-	}
-	
-	public static String[] fetchItemData(String[] data) {
-		return Arrays.copyOfRange(data, 1, data.length);
-	}
+	public int getCount() { return count; }
 	
 	@Override
 	public boolean equals(Object o) {

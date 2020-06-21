@@ -1,8 +1,8 @@
 // this specifies the folder names in which to find the subprojects. by default, these are also the subproject names.
-include 'launcher'
-include 'common'
-include 'client'
-include 'server'
+//include 'launcher'
+//include 'common'
+//include 'client'
+//include 'server'
 include 'sponly'
 
 rootProject.children.each {project ->

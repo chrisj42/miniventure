@@ -1,6 +1,6 @@
 package miniventure.game.network;
 
-import miniventure.game.core.ClientCore;
+import miniventure.game.core.GdxCore;
 import miniventure.game.network.PacketPipe.PacketListener;
 import miniventure.game.network.PacketPipe.PacketPipeReader;
 import miniventure.game.network.PacketPipe.PacketPipeWriter;
@@ -29,7 +29,7 @@ public class LocalClient extends GameClient {
 			@Override
 			public void onDisconnect() {
 				if(!selfDisconnect)
-					Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen("Internal Error (server thread closed packet pipe)")));
+					Gdx.app.postRunnable(() -> GdxCore.setScreen(new ErrorScreen("Internal Error (server thread closed packet pipe)")));
 			}
 		});
 	}

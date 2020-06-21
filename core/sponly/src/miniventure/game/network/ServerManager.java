@@ -5,7 +5,7 @@ import miniventure.game.network.PacketPipe.PacketPipeWriter;
 import miniventure.game.screen.LoadingScreen;
 import miniventure.game.util.ProgressLogger;
 import miniventure.game.util.function.ValueAction;
-import miniventure.game.world.file.WorldDataSet;
+import miniventure.game.world.management.WorldDataSet;
 
 public interface ServerManager {
 	

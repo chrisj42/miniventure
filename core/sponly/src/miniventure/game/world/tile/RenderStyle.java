@@ -1,12 +1,9 @@
 package miniventure.game.world.tile;
 
 import miniventure.game.texture.TextureHolder;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 import com.badlogic.gdx.utils.Array;
-
-import org.jetbrains.annotations.NotNull;
 
 public class RenderStyle {
 	
@@ -26,13 +23,15 @@ public class RenderStyle {
 		this.fps = fps;
 	}
 	
-	<T> TileAnimation getAnimation(@NotNull TileTypeEnum tileType, T name, TileTypeToAnimationMap<T> map, String mapNameForErrorLog) {
-		return getAnimation(tileType, map.getAnimationFrames(tileType, name, mapNameForErrorLog));
+	// public float getFPS() { return fps; }
+	
+	<T> TileAnimation getAnimation(T name, TileAnimationSetFrames<T> map) {
+		return getAnimation(map.getFrames(name));
 	}
-	private TileAnimation getAnimation(@NotNull TileTypeEnum tileType, Array<TextureHolder> frames) {
+	TileAnimation getAnimation(Array<TextureHolder> frames) {
 		if(fps == 0)
-			return new TileAnimation(tileType, sync, 1, frames.get(0));
+			return new TileAnimation(true, 1, frames.get(0));
 		else
-			return new TileAnimation(tileType, sync, fps, frames, playMode);
+			return new TileAnimation(sync, fps, frames, playMode);
 	}
 }

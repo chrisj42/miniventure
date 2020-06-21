@@ -1,20 +1,18 @@
 package miniventure.game.world.tile;
 
+import miniventure.game.core.AudioCore.SoundEffect;
+import miniventure.game.item.Item;
 import miniventure.game.item.MaterialQuality;
 import miniventure.game.item.Result;
-import miniventure.game.item.ServerItem;
 import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolItem.ToolType;
-import miniventure.game.network.GameServer;
 import miniventure.game.util.ArrayUtils;
-import miniventure.game.world.level.ServerLevel;
-import miniventure.game.world.management.ServerWorld;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.WorldObject;
-import miniventure.game.world.entity.particle.ActionType;
-import miniventure.game.world.entity.particle.ParticleData.ActionParticleData;
-import miniventure.game.world.entity.particle.ParticleData.TextParticleData;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.entity.EntitySpawn;
+import miniventure.game.world.entity.particle.ActionParticle.ActionType;
+import miniventure.game.world.entity.particle.TextParticle;
+import miniventure.game.world.management.Level;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -117,36 +115,34 @@ public class DestructionManager implements TileProperty {
 	
 	void tileDestroyed(@NotNull Tile.TileContext context) {
 		for(ItemDrop drop: drops)
-			context.<ServerLevel>getLevel().dropItems(drop, context.getTile(), null);
+			context.<Level>getLevel().dropItems(drop, context.getTile(), null);
 	}
 	
-	Result tileAttacked(@NotNull Tile.TileContext context, @NotNull WorldObject attacker, @Nullable ServerItem item, int damage) {
+	Result tileAttacked(@NotNull Tile.TileContext context, @NotNull WorldObject attacker, @Nullable Item item, int damage) {
 		damage = getDamage(item, damage);
 		
 		if(damage > 0) {
-			//if(tile.getServerLevel() != null)
-			//	tile.getLevel().getWorld().getSender().sendData(new Hurt(attacker.getTag(), tile.getTag(), damage, ServerItem.save(item)));
+			//if(tile.getLevel() != null)
+			//	tile.getLevel().getWorld().getSender().sendData(new Hurt(attacker.getTag(), tile.getTag(), damage, Item.save(item)));
 			
-			GameServer server = context.<ServerWorld>getWorld().getServer();
-			ServerTile tile = context.getTile();
+			// GameServer server = context.<WorldManager>getWorld().getServer();
+			Tile tile = context.getTile();
+			Level level = context.getLevel();
 			
 			// add damage particle
-			server.broadcastParticle(new ActionParticleData(ActionType.IMPACT), tile);
+			// server.broadcastParticle(new ActionParticleData(ActionType.IMPACT), tile);
+			ActionType.IMPACT.makeParticle(EntitySpawn.get(level, tile.getCenter()), null);
 			
 			int health = totalHealth > 1 ? context.getData(TileDataTag.Health, totalHealth) : 1;
 			health -= damage;
 			if(totalHealth > 1)
-				server.broadcastParticle(new TextParticleData(String.valueOf(damage)), tile);
+				new TextParticle(level.getSpawn(tile.getCenter()), String.valueOf(damage));
 			if(health <= 0) {
-				server.playTileSound("break", tile);
-				/*tile.getDataMap(tileType).put(TileDataTag.DestroyAction, () -> {
-					for(ItemDrop drop: drops)
-						tile.getLevel().dropItems(drop, tile, attacker);
-				});*/
+				SoundEffect.TILE_BREAK.play(tile);
 				tile.breakTile();
 			} else {
 				context.setData(TileDataTag.Health, health);
-				server.playTileSound("hit", tile);
+				SoundEffect.TILE_HIT.play(tile);
 			}
 			
 			return damage > 1 || damageConditions.length > 0 ? Result.USED : Result.INTERACT;
@@ -155,7 +151,7 @@ public class DestructionManager implements TileProperty {
 		return Result.NONE;
 	}
 	
-	private int getDamage(@Nullable ServerItem attackItem, int damage) {
+	private int getDamage(@Nullable Item attackItem, int damage) {
 		if(damageConditions.length > 0) {
 			// must satisfy at least one condition
 			boolean doDamage = true;
@@ -194,7 +190,7 @@ public class DestructionManager implements TileProperty {
 	
 	@FunctionalInterface
 	interface DamageConditionCheck {
-		boolean isDamagedBy(@Nullable ServerItem attackItem);
+		boolean isDamagedBy(@Nullable Item attackItem);
 	}
 	
 	static class RequiredTool implements DamageConditionCheck {
@@ -211,7 +207,7 @@ public class DestructionManager implements TileProperty {
 		}
 		
 		@Override
-		public boolean isDamagedBy(@Nullable ServerItem attackItem) {
+		public boolean isDamagedBy(@Nullable Item attackItem) {
 			if(!(attackItem instanceof ToolItem))
 				return false;
 			

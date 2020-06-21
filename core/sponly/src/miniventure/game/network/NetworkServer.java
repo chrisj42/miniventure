@@ -4,14 +4,13 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 
-import miniventure.game.core.GameCore;
 import miniventure.game.network.PacketPipe.PacketPipeReader;
 import miniventure.game.network.PacketPipe.PacketPipeWriter;
+import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.MapFunction;
-import miniventure.game.world.entity.mob.player.ServerPlayer;
-import miniventure.game.world.file.PlayerData;
-import miniventure.game.world.management.ServerWorld;
+import miniventure.game.world.entity.mob.player.Player;
+import miniventure.game.world.management.WorldManager;
 
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.FrameworkMessage.KeepAlive;
@@ -32,7 +31,7 @@ public class NetworkServer extends GameServer {
 	
 	private final MapFunction<InetSocketAddress, Boolean> hostChecker;
 	
-	public NetworkServer(@NotNull ServerWorld world, int port, MapFunction<InetSocketAddress, Boolean> hostChecker, PlayerData[] playerData) throws IOException {
+	public NetworkServer(@NotNull WorldManager world, int port, MapFunction<InetSocketAddress, Boolean> hostChecker, PlayerData[] playerData) throws IOException {
 		super(world, true, playerData);
 		
 		this.port = port;
@@ -84,7 +83,7 @@ public class NetworkServer extends GameServer {
 	}
 	
 	private void handleLogin(Connection connection, Login login) {
-		GameCore.debug("server received login");
+		MyUtils.debug("server received login");
 		
 		if(login.version.compareTo(Version.CURRENT) != 0) {
 			connection.sendTCP(new LoginFailure("Required version: "+ Version.CURRENT));
@@ -108,7 +107,7 @@ public class NetworkServer extends GameServer {
 		
 		// here, split off into an update thread operation
 		
-		// for(ServerPlayer p: getPlayers()) {
+		// for(Player p: getPlayers()) {
 			if(getPlayerByName(name) != null) {
 				connection.sendTCP(new LoginFailure("A player named '"+name+"' is already logged in."));
 				return;
@@ -161,7 +160,7 @@ public class NetworkServer extends GameServer {
 	}
 	
 	@Override @Nullable
-	public InetSocketAddress getPlayerAddress(@NotNull ServerPlayer player) {
+	public InetSocketAddress getPlayerAddress(@NotNull Player player) {
 		PacketPipeWriter writer = getPipeWriter(player);
 		Connection c;
 		// synchronized (connectionMapLock) {

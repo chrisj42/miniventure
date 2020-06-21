@@ -13,7 +13,7 @@ public class FrameBlinker implements Blinker {
 		this.framesOff = framesOff;
 		this.startOn = startOn;
 	}
-	FrameBlinker(String[] data) {
+	/*FrameBlinker(String[] data) {
 		this(Integer.parseInt(data[0]), Integer.parseInt(data[1]), Boolean.parseBoolean(data[2]));
 	}
 	
@@ -25,10 +25,10 @@ public class FrameBlinker implements Blinker {
 			framesOff+"",
 			startOn+""
 		};
-	}
+	}*/
 	
 	@Override
-	public void update(float delta) {
+	public void update() {
 		frames++;
 	}
 	

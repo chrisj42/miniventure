@@ -1,8 +1,5 @@
 package miniventure.game.texture;
 
-import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas.TextureAtlasData.Region;
-
 import org.jetbrains.annotations.NotNull;
 
 public class FetchableTextureHolder {

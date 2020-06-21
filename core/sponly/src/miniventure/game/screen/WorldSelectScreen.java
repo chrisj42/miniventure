@@ -3,8 +3,8 @@ package miniventure.game.screen;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-import miniventure.game.core.ClientCore;
-import miniventure.game.screen.util.BackgroundInheritor;
+import miniventure.game.core.GameCore;
+import miniventure.game.core.GdxCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
 import miniventure.game.world.file.WorldFileInterface;
@@ -27,7 +27,7 @@ import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 
-public class WorldSelectScreen extends BackgroundInheritor {
+public class WorldSelectScreen extends MenuScreen {
 	
 	private static final Color invalidColor = new Color(1, .5f, .5f, 1);
 	
@@ -37,6 +37,8 @@ public class WorldSelectScreen extends BackgroundInheritor {
 	// TODO use the info strings in WorldReference to highlight the world a certain color,
 	//  and display info about it.
 	// TODO add a checkbox to have invalid worlds displayed (missing files will be shown).
+	
+	// TODO NOW - add a "create new world" button to this menu
 	public WorldSelectScreen() {
 		
 		Table table = useTable();
@@ -68,10 +70,10 @@ public class WorldSelectScreen extends BackgroundInheritor {
 			.row();
 		
 		VisLabel worldInfo = makeLabel("Select a World");
-		table.add(worldInfo).height(ClientCore.getFont().getLineHeight() * 3).row();
+		table.add(worldInfo).height(GdxCore.getFont().getLineHeight() * 3).row();
 		
 		VisLabel error = makeLabel("");
-		table.add(error).height(ClientCore.getFont().getLineHeight() * 3).row();
+		table.add(error).height(GdxCore.getFont().getLineHeight() * 3).row();
 		
 		VisTextButton load = makeButton("Load World", () -> {
 			WorldReference ref = worldList.getSelected();
@@ -85,14 +87,14 @@ public class WorldSelectScreen extends BackgroundInheritor {
 				else {
 					LoadingScreen loader = new LoadingScreen();
 					loader.pushMessage("Loading world '"+ref.worldName+'\'', true);
-					ClientCore.setScreen(loader);
+					GdxCore.setScreen(loader);
 					new Thread(() -> {
 						try {
-							ClientCore.getWorld().startLocalWorld(WorldFileInterface.loadWorld(ref, lockRef), loader);
+							GameCore.startWorld(WorldFileInterface.loadWorld(ref, lockRef));
 						} catch(WorldFormatException e) {
 							Gdx.app.postRunnable(() -> {
 								error.setText(MyUtils.combineThrowableCauses(e, "Failed to load world"));
-								ClientCore.setScreen(this);
+								GdxCore.setScreen(this);
 							});
 						}
 					}).start();
@@ -103,7 +105,7 @@ public class WorldSelectScreen extends BackgroundInheritor {
 			}
 			// code reaches here if an error occurred
 			error.invalidateHierarchy();
-			ClientCore.setScreen(this);
+			GdxCore.setScreen(this);
 		});
 		table.add(load).row();
 		
@@ -144,26 +146,26 @@ public class WorldSelectScreen extends BackgroundInheritor {
 		ev.setTarget(worldList);
 		worldList.fire(ev);
 		
-		VisTextButton back = makeButton("Back to Main Menu", ClientCore::backToParentScreen);
+		VisTextButton back = makeButton("Back to Main Menu", GdxCore::backToParentScreen);
 		table.add(back);
 		mapButtons(getRoot(), load, back);
 		setKeyboardFocus(null);
 		setScrollFocus(scrollPane);
 	}
 	
-	@Override
+	/*@Override
 	public boolean allowChildren() {
 		return true;
-	}
+	}*/
 	
 	@Override
 	public void act(float delta) {
 		super.act(delta);
 		
 		int scroll = 0;
-		if(ClientCore.input.pressingKey(Keys.UP))
+		if(GdxCore.input.pressingKey(Keys.UP))
 			scroll--;
-		if(ClientCore.input.pressingKey(Keys.DOWN))
+		if(GdxCore.input.pressingKey(Keys.DOWN))
 			scroll++;
 		
 		if(scroll != 0) {

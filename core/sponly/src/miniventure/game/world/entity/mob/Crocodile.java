@@ -3,18 +3,19 @@ package miniventure.game.world.entity.mob;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.entity.EntityDataSet;
-import miniventure.game.world.management.ServerWorld;
+import miniventure.game.world.entity.EntitySpawn;
+import miniventure.game.world.management.Level;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.TileType;
 
 import org.jetbrains.annotations.NotNull;
 
 public class Crocodile extends MobAi {
 	
-	public Crocodile(@NotNull ServerWorld world) { super(world, AiType.Crocodile); }
+	protected Crocodile(@NotNull EntitySpawn info) { super(info, AiType.Crocodile); }
 	
-	protected Crocodile(@NotNull ServerWorld world, EntityDataSet allData, Version version, ValueAction<EntityDataSet> modifier) {
-		super(world, allData, version, data -> {
+	protected Crocodile(@NotNull Level level, EntityDataSet allData, Version version, ValueAction<EntityDataSet> modifier) {
+		super(level, allData, version, data -> {
 			modifier.act(data);
 			data.get("ai").add("type", AiType.Crocodile);
 		});
@@ -29,6 +30,6 @@ public class Crocodile extends MobAi {
 	
 	@Override
 	public boolean canPermeate(Tile tile) {
-		return tile.getType().getTypeEnum() == TileTypeEnum.WATER;
+		return tile.getType() == TileType.WATER;
 	}
 }

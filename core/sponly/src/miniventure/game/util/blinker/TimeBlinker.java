@@ -1,40 +1,56 @@
 package miniventure.game.util.blinker;
 
+import miniventure.game.core.GameCore;
+import miniventure.game.util.MyUtils;
+import miniventure.game.world.management.WorldManager;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 public class TimeBlinker implements Blinker {
 	
 	private final float timeOn;
 	private final float timeOff;
 	private final boolean startOn;
+	@Nullable
+	private final WorldManager timeSource;
 	
-	private float time;
+	private float startTime = -1;
+	private float elapTime;
 	
-	public TimeBlinker(float timeOn, float timeOff, boolean startOn) {
+	private TimeBlinker(float timeOn, float timeOff, boolean startOn, @Nullable WorldManager world) {
 		this.timeOn = timeOn;
 		this.timeOff = timeOff;
 		this.startOn = startOn;
+		this.timeSource = world;
 	}
-	TimeBlinker(String[] data) {
-		this(Float.parseFloat(data[0]), Float.parseFloat(data[1]), Boolean.parseBoolean(data[2]));
+	
+	public static TimeBlinker fromProgramTime(float timeOn, float timeOff, boolean startOn) {
+		return new TimeBlinker(timeOn, timeOff, startOn, null);
+	}
+	
+	public static TimeBlinker fromWorldTime(@NotNull WorldManager world, float timeOn, float timeOff, boolean startOn) {
+		return new TimeBlinker(timeOn, timeOff, startOn, world);
 	}
 	
 	@Override
-	public String[] serialize() {
-		return new String[] {
-			"time",
-			String.valueOf(timeOn),
-			String.valueOf(timeOff),
-			String.valueOf(startOn)
-		};
-	}
-	
-	@Override
-	public void update(float delta) {
-		time += delta;
+	public void update() {
+		float curTime;
+		
+		if(timeSource != null)
+			curTime = timeSource.getGameTime();
+		else
+			curTime = MyUtils.getDelta(GameCore.PROGRAM_START, System.nanoTime());
+		
+		if(startTime < 0)
+			startTime = curTime;
+		
+		elapTime = curTime - startTime;
 	}
 	
 	@Override
 	public boolean shouldRender() {
-		float curTime = time % (timeOn + timeOff);
+		float curTime = elapTime % (timeOn + timeOff);
 		
 		if(startOn)
 			return curTime < timeOn;
@@ -44,6 +60,7 @@ public class TimeBlinker implements Blinker {
 	
 	@Override
 	public void reset() {
-		time = 0;
+		elapTime = 0;
+		startTime = -1;
 	}
 }

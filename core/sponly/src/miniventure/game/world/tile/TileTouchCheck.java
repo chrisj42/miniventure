@@ -2,7 +2,7 @@ package miniventure.game.world.tile;
 
 import java.util.EnumMap;
 
-import miniventure.game.core.GameCore;
+import miniventure.game.core.GdxCore;
 import miniventure.game.util.RelPos;
 
 import com.badlogic.gdx.graphics.Color;
@@ -17,7 +17,7 @@ public class TileTouchCheck {
 	
 	private static final int MATCH = 1, NOMATCH = -1, SKIP = 0;
 	
-	public static final TileTouchCheck[] connectionChecks = getTileChecks(GameCore.tileConnectionAtlas);
+	public static final TileTouchCheck[] connectionChecks = getTileChecks(GdxCore.tileConnectionAtlas);
 	
 	private static TileTouchCheck[] getTileChecks(TextureAtlas atlas) {
 		if(atlas == null) return new TileTouchCheck[0];

@@ -1,6 +1,6 @@
 package miniventure.game.screen.util;
 
-import miniventure.game.core.ClientCore;
+import miniventure.game.core.GdxCore;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
@@ -18,9 +18,9 @@ public class DiscreteViewport extends ScreenViewport {
 	
 	public DiscreteViewport(Camera camera) {
 		super(camera);
-		 
-		this.minWidth = ClientCore.DEFAULT_SCREEN_WIDTH*4/5;
-		this.minHeight = ClientCore.DEFAULT_SCREEN_HEIGHT*4/5;
+		
+		this.minWidth = GdxCore.DEFAULT_SCREEN_WIDTH*4/5;
+		this.minHeight = GdxCore.DEFAULT_SCREEN_HEIGHT*4/5;
 	}
 	
 	@Override

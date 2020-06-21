@@ -1,29 +1,28 @@
 package miniventure.game.item;
 
 import miniventure.game.item.ItemType.EnumItem;
-import miniventure.game.world.entity.mob.player.Player;
-import miniventure.game.world.entity.mob.player.Player.CursorHighlight;
+import miniventure.game.world.entity.mob.player.CursorHighlight;
 
 import org.jetbrains.annotations.NotNull;
 
-public enum ResourceType {
+public enum ResourceType implements ItemEnum {
 	
 	Log, Flint, Coal, Cotton, Fabric, Stone, Iron, Tungsten, Ruby;
 	
 	@NotNull
-	private final ServerItem item;
+	private final Item item;
 	
 	ResourceType() {
 		item = new EnumItem(ItemType.Resource, this) {
 			@Override @NotNull
-			public Player.CursorHighlight getHighlightMode() {
+			public CursorHighlight getHighlightMode() {
 				return CursorHighlight.INVISIBLE;
 			}
 		};
 	}
 	
-	@NotNull
-	public ServerItem get() {
+	@Override @NotNull
+	public Item get() {
 		return item;
 	}
 	

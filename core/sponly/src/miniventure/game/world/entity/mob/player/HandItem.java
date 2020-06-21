@@ -1,11 +1,10 @@
 package miniventure.game.world.entity.mob.player;
 
+import miniventure.game.item.Item;
 import miniventure.game.item.ItemType.EphemeralItem;
 import miniventure.game.item.Result;
-import miniventure.game.item.ServerItem;
 import miniventure.game.texture.ItemTextureSource;
 import miniventure.game.world.WorldObject;
-import miniventure.game.world.entity.mob.player.Player.CursorHighlight;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -20,16 +19,16 @@ public final class HandItem extends EphemeralItem {
 	}
 	
 	@Override @NotNull
-	public Player.CursorHighlight getHighlightMode() {
+	public CursorHighlight getHighlightMode() {
 		return CursorHighlight.TILE_ADJACENT;
 	}
 	
-	@Override public ServerItem getUsedItem() { return this; }
+	@Override public Item getUsedItem() { return this; }
 	
-	@Override public Result interact(WorldObject obj, ServerPlayer player) {
+	@Override public Result interact(WorldObject obj, Player player) {
 		return obj.interactWith(player, null);
 	}
-	@Override public Result attack(WorldObject obj, ServerPlayer player) {
+	@Override public Result attack(WorldObject obj, Player player) {
 		return obj.attackedBy(player, null, 1);
 	}
 }

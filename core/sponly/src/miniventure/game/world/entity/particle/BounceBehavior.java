@@ -1,7 +1,7 @@
 package miniventure.game.world.entity.particle;
 
 import miniventure.game.world.entity.Entity;
-import miniventure.game.world.level.Level;
+import miniventure.game.world.management.Level;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -13,20 +13,23 @@ public class BounceBehavior {
 	
 	private static final float GRAVITY = -50;
 	private static final float REBOUND_SPEED_FACTOR = 0.5f;
+	private final Entity e;
 	
 	private Vector3 velocity; // in tiles / second.
-	private float time; // the current time relative to the creation of this item entity. used as the current position along the "x-axis".
+	private float time; // the current time relative to the start of the first bounce. used as the current position along the "x-axis".
 	
 	private float lastBounceTime; // used to halt the entity once it starts bouncing a lot really quickly.
 	
-	public BounceBehavior(@Nullable Vector2 goalDir) {
+	public BounceBehavior(Entity e, @Nullable Vector2 goalDir) {
+		this.e = e;
 		if(goalDir == null)
 			goalDir = new Vector2().setToRandomDirection();
 		
 		velocity = new Vector3(goalDir, MathUtils.random(8f, 12f));
 	}
 	
-	BounceBehavior(String[] data) {
+	BounceBehavior(Entity e, String[] data) {
+		this.e = e;
 		float x = Float.parseFloat(data[0]);
 		float y = Float.parseFloat(data[1]);
 		float z = Float.parseFloat(data[2]);
@@ -50,7 +53,7 @@ public class BounceBehavior {
 	float getTime() { return time; }
 	
 	private boolean moving = true;
-	public void update(Entity e, float delta) {
+	public void update(float delta) {
 		/*
 			Movement will work like this:
 				- the itemEntity will move along a base axis, as time progresses, and the actual position will vary according to time.
@@ -58,7 +61,7 @@ public class BounceBehavior {
 		 */
 		
 		Level level = e.getLevel();
-		if(level == null) return;
+		// if(level == null) return;
 		
 		Vector2 pos = e.getPosition();
 		Vector3 vel = velocity.cpy().scl(delta);

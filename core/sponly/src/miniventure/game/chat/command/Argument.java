@@ -2,24 +2,24 @@ package miniventure.game.chat.command;
 
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.customenum.GenericEnum;
 import miniventure.game.util.function.FetchFunction;
 import miniventure.game.util.function.MapFunction;
-import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.management.Config;
-import miniventure.game.world.management.ServerWorld;
 import miniventure.game.world.management.TimeOfDay;
+import miniventure.game.world.management.WorldManager;
 
 import org.jetbrains.annotations.NotNull;
 
 public interface Argument {
 	
-	boolean satisfiedBy(@NotNull ServerWorld world, String[] args, int offset);
+	boolean satisfiedBy(@NotNull WorldManager world, String[] args, int offset);
 	int length();
 	
 	/*static Argument get(@NotNull ArgValidator... validators) {
 		return new Argument() {
 			@Override
-			public boolean satisfiedBy(@NotNull ServerWorld world, String[] args, int offset) {
+			public boolean satisfiedBy(@NotNull WorldManager world, String[] args, int offset) {
 				for(int i = 0; i < validators.length; i++)
 					if(!validators[i].isValid(world, args[i]))
 						return false;
@@ -32,10 +32,10 @@ public interface Argument {
 		};
 	}*/
 	
-	static Argument varArg(ArgValidator validator) {
+	static Argument varArg(ArgValidator<?> validator) {
 		return new Argument() {
 			@Override
-			public boolean satisfiedBy(@NotNull ServerWorld world, String[] args, int offset) {
+			public boolean satisfiedBy(@NotNull WorldManager world, String[] args, int offset) {
 				if(args.length - offset <= 0) return false; // must have at least one arg
 				for(int i = offset; i < args.length; i++)
 					if(!validator.isValid(world, args[i]))
@@ -51,7 +51,7 @@ public interface Argument {
 	interface ArgValidator<T> extends Argument {
 		
 		@Override
-		default boolean satisfiedBy(@NotNull ServerWorld world, String[] args, int offset) {
+		default boolean satisfiedBy(@NotNull WorldManager world, String[] args, int offset) {
 			return isValid(world, args[offset]);
 		}
 		
@@ -88,11 +88,11 @@ public interface Argument {
 				throw new IllegalArgumentException("arg '"+arg+"' is not a boolean");
 			return Boolean.parseBoolean(arg);
 		};
-		ArgValidator<ServerPlayer> PLAYER = (world, arg) -> notNull(() -> world.getServer().getPlayerByName(arg),
-			"player '"+arg+"' does not exist");
+		/*ArgValidator<Player> PLAYER = (world, arg) -> notNull(() -> world.getServer().getPlayerByName(arg),
+			"player '"+arg+"' does not exist");*/
 		SimpleArgValidator<Command> COMMAND = arg -> noException(() -> Enum.valueOf(Command.class, arg.toUpperCase()), 
 			"command '"+arg+"' does not exist");
-		SimpleArgValidator<Config> CONFIG_VALUE = arg -> notNull(() -> Config.valueOf(arg),
+		SimpleArgValidator<Config<?>> CONFIG_VALUE = arg -> notNull(() -> GenericEnum.valueOf(Config.class, arg),
 			"arg '"+arg+"' is not a valid config value");
 		
 		SimpleArgValidator<Float> CLOCK_DURATION = arg -> noException(() -> {
@@ -147,9 +147,9 @@ public interface Argument {
 			};
 		}
 		
-		T get(@NotNull ServerWorld world, String arg) throws IllegalArgumentException;
+		T get(@NotNull WorldManager world, String arg) throws IllegalArgumentException;
 		
-		default boolean isValid(@NotNull ServerWorld world, String arg) {
+		default boolean isValid(@NotNull WorldManager world, String arg) {
 			try {
 				get(world, arg);
 			} catch(IllegalArgumentException ex) {
@@ -165,7 +165,7 @@ public interface Argument {
 		T get(String arg) throws IllegalArgumentException;
 		
 		@Override
-		default T get(@NotNull ServerWorld world, String arg) throws IllegalArgumentException {
+		default T get(@NotNull WorldManager world, String arg) throws IllegalArgumentException {
 			return get(arg);
 		}
 		

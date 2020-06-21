@@ -1,53 +1,44 @@
 package miniventure.game.chat.command;
 
-import java.util.Arrays;
-
-import miniventure.game.core.GameCore;
 import miniventure.game.chat.MessageBuilder;
 import miniventure.game.chat.command.Argument.ArgValidator;
-import miniventure.game.network.GameProtocol.DatalessRequest;
-import miniventure.game.network.GameProtocol.Message;
-import miniventure.game.network.GameProtocol.Ping;
-import miniventure.game.network.GameProtocol.PositionUpdate;
-import miniventure.game.network.GameServer;
+import miniventure.game.core.GameCore;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
-import miniventure.game.world.entity.mob.player.ServerPlayer;
-import miniventure.game.world.level.ServerLevel;
+import miniventure.game.util.customenum.GenericEnum;
+import miniventure.game.world.entity.mob.player.Player;
 import miniventure.game.world.management.Config;
-import miniventure.game.world.management.ServerWorld;
+import miniventure.game.world.management.Level;
 import miniventure.game.world.management.TimeOfDay;
+import miniventure.game.world.management.WorldManager;
 
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static miniventure.game.chat.command.CommandInputParser.SERVER_ONLY;
-
 public enum Command {
 	
-	CLEAR("Clear the chat console.",
+	/*CLEAR("Clear the chat console.",
 		new CommandUsageForm(false, "", "Clears all messages from the chat screen scroll area.", MyUtils::notNull, (world, executor, args, out, err) -> world.getServer().sendToPlayer(executor, DatalessRequest.Clear_Console))
 	),
 	
-	CONFIG("Edit configuration values for how the world works.",
+	*/CONFIG("Edit configuration values for how the world works.",
 		new CommandUsageForm(true, "list", "Display the current value of all config entries.", (world, executor, args, out, err) -> {
 			out.println("Config values:");
-			for(Config value: Config.values)
+			for(Config<?> value: GenericEnum.values(Config.class))
 				out.println("    "+value+" = "+value.get());
 		}, ArgValidator.exactString(false, "list")),
 		
 		new CommandUsageForm(true, "get <configvalue>", "Display the current value of a config entry.", (world, executor, args, out, err) -> {
-			Config value = ArgValidator.CONFIG_VALUE.get(args[1]);
+			Config<?> value = ArgValidator.CONFIG_VALUE.get(args[1]);
 			out.println(value+": "+value.get());
 		}, ArgValidator.exactString(false, "get"), ArgValidator.CONFIG_VALUE),
 		
 		new CommandUsageForm(true, "set <configname> <value>", "Set the value of a config entry.", (world, executor, args, out, err) -> {
-			Config value = ArgValidator.CONFIG_VALUE.get(args[1]);
+			Config<?> value = ArgValidator.CONFIG_VALUE.get(args[1]);
 			if(value.set(world, args[2], err)) {
 				out.println("Successfully set " + value + " to " + value.get());
-				world.broadcastWorldUpdate();
 			} else
 				err.println("Could not set config value.");
 	}, ArgValidator.exactString(false, "set"), ArgValidator.CONFIG_VALUE, ArgValidator.ANY)
@@ -82,7 +73,7 @@ public enum Command {
 		}, ArgValidator.exactString(false, "--all"))
 	),
 	
-	MSG("Broadcast a message for all players to see.",
+	/*MSG("Broadcast a message for all players to see.",
 		new CommandUsageForm(false, "<message...>", "Everyone on the server will see the message.", (world, executor, args, out, err) -> {
 			String msg = String.join(" ", args);
 			world.getServer().broadcastMessage(executor, msg);
@@ -92,7 +83,7 @@ public enum Command {
 	OP("Give another player access to all commands, or take it away.",
 		new CommandUsageForm(true, "<player> <isAdmin>", "Give or take admin permissions for the specified player. (isAdmin = true OR false)", SERVER_ONLY,
 			((world, executor, args, out, err) -> {
-				ServerPlayer player = ArgValidator.PLAYER.get(world, args[0]);
+				Player player = ArgValidator.PLAYER.get(world, args[0]);
 				boolean give = ArgValidator.BOOLEAN.get(args[1]);
 					
 				if(world.getServer().isAdmin(player) == give) {
@@ -146,7 +137,7 @@ public enum Command {
 	PMSG("Send a private message to another player.",
 		new CommandUsageForm(false, "<player> <message...>", "Send a message to the specified player, that only they can see.", SERVER_ONLY,
 			((world, executor, args, out, err) -> {
-			ServerPlayer player = ArgValidator.PLAYER.get(world, args[0]);
+			Player player = ArgValidator.PLAYER.get(world, args[0]);
 			String msg = String.join("", Arrays.copyOfRange(args, 1, args.length));
 			
 			world.getServer().sendMessage(executor, player, msg);
@@ -168,7 +159,7 @@ public enum Command {
 	
 	STOP("Stops the server.",
 		new CommandUsageForm(true, "", "Stops the server.", (world, executor, args, out, err) -> world.exitWorld())
-	),
+	),*/
 	
 	TIME("Get or set the time of day.", "Note, the \"clocktime\" parameter used below refers to the time format \"HH:MM\", with the hour(HH) in the range 0-23, and the minute(MM) in the range 0-59, as one expects from a normal 24-hour clock.",
 		new CommandUsageForm(false, "get", "Print the time of day, in 24 hour clock format, along with the current time \"range\" (day, night, etc).", (world, executor, args, out, err) -> {
@@ -201,11 +192,11 @@ public enum Command {
 	// all TP forms in one: [player] <player | <x> <y> [level]>
 	// args are fairly variable; maybe usage forms split at '|'?
 	TP("Teleport a player to a location in the world.",
-		new CommandUsageForm(true, "<player> <player>", "Teleport the first player to the second player.", (world, executor, args, out, err) -> {
-			ServerPlayer toMove = ArgValidator.PLAYER.get(world, args[0]);
-			ServerPlayer dest = ArgValidator.PLAYER.get(world, args[1]);
+		/*new CommandUsageForm(true, "<player> <player>", "Teleport the first player to the second player.", (world, executor, args, out, err) -> {
+			Player toMove = ArgValidator.PLAYER.get(world, args[0]);
+			Player dest = ArgValidator.PLAYER.get(world, args[1]);
 			
-			ServerLevel level = dest.getLevel();
+			Level level = dest.getLevel();
 			if(level != null) {
 				toMove.moveTo(dest.getPosition());
 				world.getServer().sendToPlayer(toMove, new PositionUpdate(toMove));
@@ -220,21 +211,29 @@ public enum Command {
 		}), ArgValidator.PLAYER),
 		
 		new CommandUsageForm(true, "<player> <x> <y>", "Teleports the specified player to the specified location.", ((world, executor, args, out, err) -> {
-			ServerPlayer player = ArgValidator.PLAYER.get(world, args[0]);
+			Player player = ArgValidator.PLAYER.get(world, args[0]);
 			float x = ArgValidator.DECIMAL.get(args[1]);
 			float y = ArgValidator.DECIMAL.get(args[2]);
-			ServerLevel level = player.getLevel();
+			Level level = player.getLevel();
 			if(level != null) {
 				player.moveTo(x, y);
 				world.getServer().sendToPlayer(player, new PositionUpdate(player));
 				out.println("teleported "+player.getName()+" to "+player.getPosition()+'.');
 			} else
 				err.println("player "+player.getName()+" is not on a valid level; cannot be teleported.");
-		}), ArgValidator.PLAYER, ArgValidator.DECIMAL, ArgValidator.DECIMAL),
+		}), ArgValidator.PLAYER, ArgValidator.DECIMAL, ArgValidator.DECIMAL),*/
 		
 		new CommandUsageForm(true, "<x> <y>", "Teleports user to the specified location.", MyUtils::notNull, (world, executor, args, out, err) -> {
-			String source = executor.getName();
-			Command.valueOf("TP").execute(world, executor, new String[] {source, args[0], args[1]}, out, err);
+			/*String source = executor.getName();
+			Command.valueOf("TP").execute(world, executor, new String[] {source, args[0], args[1]}, out, err);*/
+			Level level = world.getLevel();
+			if(level != null) {
+				Player toMove = level.getPlayer();
+				float x = ArgValidator.DECIMAL.get(args[0]);
+				float y = ArgValidator.DECIMAL.get(args[1]);
+				toMove.moveTo(x, y);
+				out.println("teleported player to " + toMove.getPosition() + '.');
+			}
 		}, ArgValidator.DECIMAL, ArgValidator.DECIMAL)
 	);
 	
@@ -270,13 +269,14 @@ public enum Command {
 		this.details = details;
 	}
 	
-	public void execute(@NotNull ServerWorld world, @Nullable ServerPlayer executor, String[] args, MessageBuilder out, MessageBuilder err) {
+	public void execute(@NotNull WorldManager world, @Nullable Player executor, String[] args, MessageBuilder out, MessageBuilder err) {
 		// this method is called after previous canExecute checks, at least by proxy; so this technically should never print unless it's a race condition or something.
 		if(!canExecute(executor)) {
-			if(executor == null || world.getServer().isHost(executor))
+			/*if(executor == null || world.getServer().isHost(executor))
 				err.println("This command is only available on multiplayer servers.");
 			else
-				err.println("You do not have access to this command.");
+				err.println("You do not have access to this command.");*/
+			err.println("You cannot currently use this command.");
 			return;
 		}
 		
@@ -290,7 +290,7 @@ public enum Command {
 	
 	private static final String tab = "    ";
 	
-	private void printHelp(ServerPlayer executor, MessageBuilder out, boolean printDescription, boolean printUsage, boolean printDetails) {
+	private void printHelp(Player executor, MessageBuilder out, boolean printDescription, boolean printUsage, boolean printDetails) {
 		if(printDescription) out.println(name + " - " + description);
 		
 		if(printDetails && details != null) out.println(tab+details);
@@ -305,15 +305,15 @@ public enum Command {
 		}
 	}
 	
-	public void printHelpAdvanced(ServerPlayer executor, MessageBuilder out) { printHelp(executor, out, true, true, true); }
-	public void printHelpBasic(ServerPlayer executor, MessageBuilder out) {
+	public void printHelpAdvanced(Player executor, MessageBuilder out) { printHelp(executor, out, true, true, true); }
+	public void printHelpBasic(Player executor, MessageBuilder out) {
 		out.print(name+' ');
 		printHelp(executor, out, false, true, false);
 		out.println("type \"/help " + name + "\" for more info.");
 	}
 	
-	private boolean canExecute(@Nullable ServerPlayer executor) {
-		if(restricted && executor != null && !executor.getWorld().getServer().isAdmin(executor))
+	private boolean canExecute(@Nullable Player executor) {
+		if(restricted && executor != null/* && !executor.getWorld().getServer().isAdmin(executor)*/)
 			return false;
 		
 		// run through each form's checks and see if any of them are viable options
@@ -324,7 +324,7 @@ public enum Command {
 		return false;
 	}
 	
-	public static Command[] valuesFor(@Nullable ServerPlayer player) {
+	public static Command[] valuesFor(@Nullable Player player) {
 		Array<Command> commands = new Array<>(true, Command.values().length, Command.class);
 		for(Command c: Command.values())
 			if(c.canExecute(player) && (c != DEBUG || player == null)) // only list debug command on server console; but all admins are still capable of *using* the debug command.

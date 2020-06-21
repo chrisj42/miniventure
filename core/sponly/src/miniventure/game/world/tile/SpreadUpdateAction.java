@@ -4,7 +4,6 @@ import java.util.EnumSet;
 
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.tile.Tile.TileContext;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
 import miniventure.game.world.tile.UpdateManager.UpdateAction;
 
 import com.badlogic.gdx.math.MathUtils;
@@ -15,7 +14,7 @@ class SpreadUpdateAction implements UpdateAction {
 	
 	@FunctionalInterface
 	interface TileReplaceBehavior {
-		void spreadType(ServerTileType newType, ServerTile tile);
+		void spreadType(TileType newType, Tile tile);
 	}
 	
 	@FunctionalInterface
@@ -34,15 +33,15 @@ class SpreadUpdateAction implements UpdateAction {
 	private final FloatFetcher spreadDelayFetcher;
 	private final float spreadChance;
 	private final TileReplaceBehavior replaceBehavior;
-	private final EnumSet<TileTypeEnum> replaces;
+	private final EnumSet<TileType> replaces;
 	
-	SpreadUpdateAction(float spreadDelay, TileReplaceBehavior replaceBehavior, TileTypeEnum... replaces) {
+	SpreadUpdateAction(float spreadDelay, TileReplaceBehavior replaceBehavior, TileType... replaces) {
 		this(FloatFetcher.value(spreadDelay), replaceBehavior, replaces);
 	}
-	SpreadUpdateAction(FloatFetcher spreadDelayFetcher, TileReplaceBehavior replaceBehavior, TileTypeEnum... replaces) {
+	SpreadUpdateAction(FloatFetcher spreadDelayFetcher, TileReplaceBehavior replaceBehavior, TileType... replaces) {
 		this(spreadDelayFetcher, 1, replaceBehavior, replaces);
 	}
-	SpreadUpdateAction(FloatFetcher spreadDelayFetcher, float spreadChance, TileReplaceBehavior replaceBehavior, TileTypeEnum... replaces) {
+	SpreadUpdateAction(FloatFetcher spreadDelayFetcher, float spreadChance, TileReplaceBehavior replaceBehavior, TileType... replaces) {
 		this.spreadDelayFetcher = spreadDelayFetcher;
 		this.spreadChance = spreadChance;
 		this.replaceBehavior = replaceBehavior;
@@ -56,8 +55,8 @@ class SpreadUpdateAction implements UpdateAction {
 		
 		if(MathUtils.random() < spreadChance) { // must be less to execute; a chance of 1 will always execute.
 			for (Tile t: context.getTile().getAdjacentTiles(false)) {
-				if (replaces.contains(t.getType().getTypeEnum())) {
-					replaceBehavior.spreadType(context.getType(), (ServerTile) t);
+				if (replaces.contains(t.getType())) {
+					replaceBehavior.spreadType(context.getType(),  t);
 					//break;
 				}
 			}
@@ -66,9 +65,9 @@ class SpreadUpdateAction implements UpdateAction {
 		return spreadDelayFetcher.getFloat();
 	}
 	
-	private boolean canSpread(@NotNull ServerTile tile) {
+	private boolean canSpread(@NotNull Tile tile) {
 		for(Tile t: tile.getAdjacentTiles(false))
-			if(replaces.contains(t.getType().getTypeEnum()))
+			if(replaces.contains(t.getType()))
 				return true;
 		
 		return false;

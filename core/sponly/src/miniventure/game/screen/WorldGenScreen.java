@@ -4,11 +4,13 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.file.Path;
 
-import miniventure.game.core.ClientCore;
-import miniventure.game.screen.util.BackgroundInheritor;
-import miniventure.game.world.file.WorldDataSet;
+import miniventure.game.core.GameCore;
+import miniventure.game.core.GdxCore;
+import miniventure.game.screen.InfoScreen.InstructionsScreen;
 import miniventure.game.world.file.WorldFileInterface;
+import miniventure.game.world.management.WorldDataSet;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.utils.Align;
@@ -16,7 +18,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 
-public class WorldGenScreen extends BackgroundInheritor {
+public class WorldGenScreen extends MenuScreen {
 	
 	/*
 		world creation; currently only needs name, and seed.
@@ -52,11 +54,11 @@ public class WorldGenScreen extends BackgroundInheritor {
 				lockRef = WorldFileInterface.tryLockWorld(path);
 			} catch(IOException e) {
 				// e.printStackTrace();
-				ClientCore.setScreen(new ErrorScreen(e.getMessage()));
+				GdxCore.setScreen(new ErrorScreen(e.getMessage()));
 				return;
 			}
 			if(lockRef == null) {
-				ClientCore.setScreen(new ErrorScreen("World exists and is currently being managed by another process. Please ensure no other programs (or miniventure processes) are modifying the world files, then try again."));
+				GdxCore.setScreen(new ErrorScreen("World exists and is currently being managed by another process. Please ensure no other programs (or miniventure processes) are modifying the world files, then try again."));
 				return;
 			}
 			
@@ -64,16 +66,21 @@ public class WorldGenScreen extends BackgroundInheritor {
 			
 			LoadingScreen loader = new LoadingScreen();
 			loader.pushMessage("creating world files", true);
-			ClientCore.setScreen(loader);
+			GdxCore.setScreen(loader);
 			
 			new Thread(() -> {
 				WorldDataSet worldInfo = WorldFileInterface.createWorld(path, lockRef, seed);
-				ClientCore.getWorld().startLocalWorld(worldInfo, loader);
+				loader.pushMessage("loading world", true);
+				// RenderCore.getWorld().startLocalWorld(worldInfo, loader);
+				Gdx.app.postRunnable(() -> {
+					GameCore.startWorld(worldInfo);
+					GdxCore.setScreen(new InstructionsScreen());
+				});
 			}).start();
 		});
 		table.add(genButton);
 		
-		VisTextButton cancelBtn = makeButton("Cancel", ClientCore::backToParentScreen);
+		VisTextButton cancelBtn = makeButton("Cancel", GdxCore::backToParentScreen);
 		table.add(cancelBtn);
 		
 		mapFieldButtons(nameField, genButton, cancelBtn);

@@ -1,7 +1,11 @@
 package miniventure.game.item;
 
-import miniventure.game.texture.FetchableTextureHolder;
+import miniventure.game.item.recipe.ObjectRecipeSet;
+import miniventure.game.texture.TextureHolder;
+import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
+import miniventure.game.util.function.MapFunction;
+import miniventure.game.world.entity.mob.player.HammerItem;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -11,79 +15,69 @@ public enum ItemType {
 	
 	// Tools are used to interact with the world, usually through destruction.
 	// Tools have durability, and multiple levels of quality.
-	Tool(data -> new ToolItem(ToolItem.ToolType.valueOf(data[0]), MaterialQuality.valueOf(data[1]), Integer.parseInt(data[2]))),
+	Tool(data -> {
+		String[] dataAr = MyUtils.parseLayeredString(data);
+		return new ToolItem(ToolItem.ToolType.valueOf(dataAr[0]), MaterialQuality.valueOf(dataAr[1]), Integer.parseInt(dataAr[2]));
+	}),
 	
-	Hammer(data -> new HammerItem(
-		ObjectRecipeSet.valueOf(data[0]),
-		data[1].equals("null") ? null : Integer.parseInt(data[1])
-	)),
+	Hammer(data -> new HammerItem(ObjectRecipeSet.valueOf(data))),
 	
-	Food(data -> FoodType.valueOf(data[0]).get()),
+	Food(FoodType.class),
 	
-	Placeable(data -> PlaceableItemType.valueOf(data[0]).get()),
+	Placeable(PlaceableItemType.class),
 	
-	Resource(data -> ResourceType.valueOf(data[0]).get()),
+	Resource(ResourceType.class),
 	
 	Ephemeral(data -> {throw new UnsupportedOperationException("Ephemeral items cannot be loaded.");});
 	
 	
-	// private final ItemSerialType serialType;
-	private final ItemFetcher fetcher;
-	
-	// ItemDataType(ItemFetcher fetcher) { this(ItemSerialType.Normal, fetcher); }
-	ItemType(/*ItemSerialType serialType, */ItemFetcher fetcher) {
-		// this.serialType = serialType;
-		this.fetcher = fetcher;
-	}
-	
-	public ServerItem load(String[] data, @NotNull Version version) {
-		return fetcher.load(data);
-	}
-	
-	// public ItemSerialType getSerialType() { return serialType; }
-	
 	@FunctionalInterface
-	interface ItemFetcher {
-		ServerItem load(String[] data);
+	interface ItemParser {
+		Item load(String data, Version dataVersion);
 	}
 	
-	public static abstract class EphemeralItem extends ServerItem {
+	public final ItemParser loader;
+	
+	ItemType(ItemParser parser) {
+		this.loader = parser;
+	}
+	ItemType(MapFunction<String, Item> parser) {
+		this.loader = (data, dataVersion) -> parser.get(data);
+	}
+	<T extends Enum<T> & ItemEnum> ItemType(Class<T> enumClass) {
+		loader = (data, dataVersion) -> Enum.valueOf(enumClass, data).get();
+	}
+	
+	public static abstract class EphemeralItem extends Item {
 		
 		/*protected EphemeralItem(@NotNull String name) {
 			super(Ephemeral, name);
 		}*/
-		protected EphemeralItem(@NotNull String name, @NotNull FetchableTextureHolder texture) {
+		protected EphemeralItem(@NotNull String name, @NotNull TextureHolder texture) {
 			super(Ephemeral, name, texture);
 		}
 		
 		@Override
-		public final String[] save() {
+		public final String compileSaveData() {
 			throw new UnsupportedOperationException("Ephemeral items cannot be saved.");
 		}
 	}
 	
 	// utility class for Item types that are no more than an enum value.
-	static abstract class EnumItem extends ServerItem {
-		// private final EnumItemType enumItemType;
-		// private final Enum<?> enumValue;
+	public static abstract class EnumItem extends Item {
 		
-		private final String[] saveData;
+		private final Enum<?> enumValue;
 		
 		EnumItem(@NotNull ItemType type, @NotNull Enum<?> enumValue) {
 			super(type, enumValue.name(), type.name().toLowerCase());
-			saveData = new String[] {type.name(), enumValue.name()};
+			this.enumValue = enumValue;
 		}
-		EnumItem(@NotNull ItemType type, @NotNull Enum<?> enumValue, @NotNull FetchableTextureHolder texture) {
+		EnumItem(@NotNull ItemType type, @NotNull Enum<?> enumValue, @NotNull TextureHolder texture) {
 			super(type, enumValue.name(), texture);
-			// this.enumItemType = type;
-			// this.enumValue = enumValue;
-			saveData = new String[] {type.name(), enumValue.name()};
+			this.enumValue = enumValue;
 		}
 		
 		@Override
-		public String[] save() {
-			return saveData;
-		}
-		
+		public String compileSaveData() { return enumValue.name(); }
 	}
 }

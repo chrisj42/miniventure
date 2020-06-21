@@ -3,9 +3,9 @@ package miniventure.game.network;
 import java.util.EnumMap;
 import java.util.HashMap;
 
-import miniventure.game.core.GameCore;
 import miniventure.game.network.GameProtocol.DatalessRequest;
 import miniventure.game.network.PacketPipe.PacketPipeWriter;
+import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.management.WorldManager;
 
@@ -31,7 +31,7 @@ public class PacketDispatcher {
 	
 	public void handle(WorldManager world, PacketPipeWriter connection, Object packet) {
 		if(!tryHandlePacket(connection, packet))
-			GameCore.error(world, "packet not handled: ("+packet.getClass().getSimpleName()+") "+packet);
+			MyUtils.error(world, "packet not handled: ("+packet.getClass().getSimpleName()+") "+packet);
 	}
 	
 	private <T> boolean tryHandlePacket(PacketPipeWriter connection, T packet) {

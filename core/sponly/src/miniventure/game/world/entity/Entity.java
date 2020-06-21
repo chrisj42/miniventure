@@ -1,13 +1,23 @@
 package miniventure.game.world.entity;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Map.Entry;
+
+import miniventure.game.core.GameCore;
 import miniventure.game.item.Item;
 import miniventure.game.item.Result;
-import miniventure.game.network.GameProtocol.PositionUpdate;
+import miniventure.game.texture.TextureHolder;
+import miniventure.game.util.MyUtils;
+import miniventure.game.util.SerialHashMap;
+import miniventure.game.util.Version;
 import miniventure.game.util.blinker.Blinker;
+import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.WorldObject;
-import miniventure.game.world.entity.EntityRenderer.BlinkRenderer;
 import miniventure.game.world.entity.mob.player.Player;
-import miniventure.game.world.level.Level;
+import miniventure.game.world.entity.particle.Particle;
+import miniventure.game.world.entity.property.RenderProperty;
+import miniventure.game.world.management.Level;
 import miniventure.game.world.management.WorldManager;
 import miniventure.game.world.tile.Tile;
 
@@ -21,77 +31,145 @@ import com.badlogic.gdx.utils.Array;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class Entity implements WorldObject {
+public abstract class Entity implements WorldObject, RenderProperty {
 	
-	@NotNull private final WorldManager world;
+	// @NotNull private final WorldManager world;
+	@NotNull public final Level level;
 	
-	private final EntityTag tag;
+	// private final EntityTag tag;
 	private final int eid;
 	float x, y, z = 0;
 	
-	@NotNull private EntityRenderer renderer = EntityRenderer.BLANK;
-	private BlinkRenderer blinker = null;
+	// private RenderProperty baseRenderer; // separate so that this can be changed without invalidating all modifiers
+	@NotNull
+	private RenderProperty entityRenderer;
 	
 	// for entities updated locally (called by both server and client for different entities)
 	// "local" refers to if the entity exists only locally, as opposed to being synced across clients.
-	protected Entity(@NotNull WorldManager world, boolean negative) {
-		this.world = world;
-		eid = world.reserveNewEntityId(negative);
-		this.tag = new EntityTag(eid);
+	protected Entity(@NotNull EntitySpawn info) {
+		this.entityRenderer = this;
+		this.level = info.getLevel();
+		this.x = info.getX();
+		this.y = info.getY();
+		EntitySpawn.free(info);
+		eid = level.addEntity(this);
+		// this.tag = new EntityTag(eid);
 	}
 	
-	// for client, on entities updated by the server
-	protected Entity(@NotNull WorldManager world, int eid, PositionUpdate position) {
-		this.world = world;
-		this.eid = eid;
-		x = position.x;
-		z = position.z;
-		y = position.y;
-		this.tag = new EntityTag(eid);
-		// world.registerEntity(this); // considered to be part of the level as well
+	protected Entity(@NotNull Level level, EntityDataSet allData, final Version version, ValueAction<EntityDataSet> modifier) {
+		this.entityRenderer = this;
+		this.level = level;
+		
+		modifier.act(allData);
+		
+		SerialHashMap data = allData.get("e");
+		x = data.get("x", Float::parseFloat);
+		y = data.get("y", Float::parseFloat);
+		// z = data.get("z", Float::parseFloat);
+		
+		eid = level.addEntity(this);
+	}
+	
+	public EntityDataSet save() {
+		EntityDataSet allData = new EntityDataSet();
+		SerialHashMap data = new SerialHashMap();
+		data.add("x", x);
+		data.add("y", y);
+		// data.add("z", z);
+		
+		allData.put("e", data);
+		return allData;
 	}
 	
 	public int getId() { return eid; }
 	
 	@NotNull @Override
-	public WorldManager getWorld() { return world; }
+	public WorldManager getWorld() { return level.getWorld(); }
 	
-	@Override @Nullable
-	public Level getLevel() { return world.getEntityLevel(this); }
+	@Override @NotNull
+	public Level getLevel() { return level; }
 	
-	public abstract boolean isMob();
+	// public abstract boolean isMob();
 	public boolean isFloating() { return false; }
 	
 	/// this is called only to remove an entity completely from the game, not to change levels.
 	public void remove() {
-		world.deregisterEntity(eid);
+		level.removeEntity(this);
 	}
 	
-	public void update(float delta) {}
+	public void update(float delta) {
+		if(isFloating()) return; // floating entities don't interact
+		
+		Array<WorldObject> objects = new Array<>();
+		objects.addAll(level.getOverlappingEntities(getBounds(), this));
+		// we don't want to trigger things like getting hurt by lava until the entity is actually *in* the tile, so we'll only consider the closest one to be "touching".
+		Tile tile = level.getTile(getBounds());
+		if(tile != null) objects.add(tile);
+		
+		for(WorldObject obj: objects)
+			obj.touching(this);
+		
+		// get the entity back on the map if they somehow end up on a null tile
+		if(tile == null)
+			moveTo(level.getClosestTile(getBounds()).getCenter());
+	}
 	
-	public void setRenderer(@NotNull EntityRenderer renderer) {
+	/*public void setRenderer(@NotNull EntityRenderer renderer) {
 		this.renderer = renderer;
 		if(blinker != null)
 			blinker.setRenderer(renderer);
-	}
+	}*/
+	
+	// TODO FIXME entity rendering modifiers were never finished
 	public void setBlinker(@Nullable Color blinkColor, float initialDuration, boolean blinkFirst, Blinker blinker) {
-		this.blinker = new BlinkRenderer(renderer, blinkColor, initialDuration, blinkFirst, blinker);
+		// this.blinker = new BlinkRenderer(renderer, blinkColor, initialDuration, blinkFirst, blinker);
 	}
-	@NotNull public EntityRenderer getRenderer() {
-		if(blinker != null) return blinker;
-		return renderer;
+	
+	/*protected void setRenderer(RenderProperty renderer) {
+		this.baseRenderer = renderer;
+		if(entityRenderer == null)
+			entityRenderer = renderer;
 	}
-	@NotNull public EntityRenderer getMainRenderer() { return renderer; }
+	
+	protected void modifyRenderer(RenderModifier renderer) { modifyRenderer(renderer, -1); }
+	protected void modifyRenderer(RenderModifier renderer, float duration) {
+		entityRenderer = 
+	}*/
 	
 	@Override
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
-		renderer.update(delta);
-		if(blinker != null) blinker.update(delta);
+		if(entityRenderer.shouldRender())
+			entityRenderer.render(getSprite(), (x-posOffset.x) * Tile.SIZE, (y+z - posOffset.y) * Tile.SIZE, batch, 1f);
+		
+		if(GameCore.debugBounds && !(this instanceof Particle)) {
+			Rectangle rect = getBounds();
+			rect.x = (rect.x - posOffset.x) * Tile.SIZE;
+			rect.y = (rect.y - posOffset.y) * Tile.SIZE;
+			rect.width *= Tile.SIZE;
+			rect.height *= Tile.SIZE;
+			MyUtils.drawRect(rect, 1, Color.BLACK, batch);
+		}
+	}
+	
+	protected abstract TextureHolder getSprite();
+	
+	@Override
+	public boolean shouldRender() { return true; }
+	
+	@Override
+	public final RenderProperty getRenderPipe() { return null; }
+	
+	@Override
+	public void render(TextureHolder sprite, float x, float y, SpriteBatch batch, float drawableHeight) {
+		if(drawableHeight == 1)
+			batch.draw(sprite.texture, x, y);
+		else
+			batch.draw(sprite.texture.split(sprite.width, (int) (sprite.height * drawableHeight))[0][0], x, y);
 	}
 	
 	protected Rectangle getUnscaledBounds() {
-		Vector2 size = renderer.getSize();
-		return new Rectangle(x, y, size.x, size.y);
+		TextureHolder sprite = getSprite();
+		return new Rectangle(x, y, sprite == null ? 0 : sprite.width, sprite == null ? 0 : sprite.height);
 	}
 	
 	public Vector3 getLocation() { return new Vector3(x, y, z); }
@@ -114,8 +192,8 @@ public abstract class Entity implements WorldObject {
 	public boolean move(Vector3 v) { return move(v.x, v.y, v.z); }
 	public boolean move(float xd, float yd) { return move(xd, yd, 0); }
 	public boolean move(float xd, float yd, float zd) {
-		Level level = getLevel();
-		if(level == null) return false; // can't move if you're not in a level...
+		// Level level = getLevel();
+		// if(level == null) return false; // can't move if you're not in a level...
 		Vector2 movement = new Vector2();
 		movement.x = moveAxis(level, true, xd, 0);
 		movement.y = moveAxis(level, false, yd, movement.x);
@@ -209,8 +287,14 @@ public abstract class Entity implements WorldObject {
 		return true;
 	}
 	
-	abstract void touchTile(Tile tile);
-	abstract void touchEntity(Entity entity);
+	void touchTile(Tile tile) {
+		tile.touchedBy(this); // NOTE: I can see this causing an issue if you move too fast; it will "touch" tiles that could be far away, if the player will move there next frame.
+	}
+	
+	void touchEntity(Entity entity) {
+		if(!entity.touchedBy(this))
+			this.touchedBy(entity); // to make sure something has a chance to happen, but it doesn't happen twice.
+	}
 	
 	public void moveTo(@NotNull Vector2 pos) { moveTo(pos.x, pos.y); }
 	public void moveTo(@NotNull Vector3 pos) { moveTo(pos.x, pos.y, pos.z); }
@@ -219,14 +303,11 @@ public abstract class Entity implements WorldObject {
 		// this method doesn't care where you end up; ie doesn't check for collisions.
 		// it also doesn't bother with clamping if there is no level.
 		
-		Level level = getLevel();
-		if(level != null) {
-			x = Math.max(x, 0);
-			y = Math.max(y, 0);
-			Vector2 size = getSize();
-			x = Math.min(x, level.getWidth() - size.x);
-			y = Math.min(y, level.getHeight() - size.y);
-		}
+		x = Math.max(x, 0);
+		y = Math.max(y, 0);
+		Vector2 size = getSize();
+		x = Math.min(x, level.getWidth() - size.x);
+		y = Math.min(y, level.getHeight() - size.y);
 		
 		this.x = x;
 		this.y = y;
@@ -236,12 +317,6 @@ public abstract class Entity implements WorldObject {
 		Vector2 pos = tile.getCenter();
 		pos.sub(getSize().scl(0.5f));
 		moveTo(pos);
-	}
-	
-	protected void moveIfLevel(float x, float y) {
-		Level level = getLevel();
-		if(level != null)
-			moveTo(x, y);
 	}
 	
 	// returns whether anything meaningful happened; if false, then other.touchedBy(this) will be called.
@@ -266,7 +341,7 @@ public abstract class Entity implements WorldObject {
 	public int hashCode() { return eid; }
 	
 	
-	public static class EntityTag implements Tag<Entity> {
+	/*public static class EntityTag implements Tag<Entity> {
 		public final int eid;
 		
 		private EntityTag() { this(0); }
@@ -276,13 +351,65 @@ public abstract class Entity implements WorldObject {
 		
 		@Override
 		public Entity getObject(WorldManager world) { return world.getEntity(eid); }
-	}
+	}*/
 	
-	@Override
-	public EntityTag getTag() { return tag; }
+	// @Override
+	// public EntityTag getTag() { return tag; }
 	
 	@Override
 	public String toString() { return Integer.toHexString(super.hashCode())+'_'+getClass().getSimpleName()+'-'+eid; }
 	
 	public int superHash() { return super.hashCode(); }
+	
+	public String serialize() { return serialize(this); }
+	
+	public static String serialize(Entity e) {
+		EntityDataSet data = e.save();
+		
+		SerialHashMap allData = new SerialHashMap();
+		for(Entry<String, SerialHashMap> entry: data.entrySet())
+			allData.put(entry.getKey(), entry.getValue().serialize());
+		
+		allData.add("class", e.getClass().getCanonicalName().replace(Entity.class.getPackage().getName()+".", ""));
+		
+		return allData.serialize();
+	}
+	
+	public static Entity deserialize(@NotNull Level level, String data, @NotNull Version version) {
+		SerialHashMap allData = new SerialHashMap(data);
+		
+		String entityType = allData.remove("class");
+		
+		EntityDataSet map = new EntityDataSet();
+		for(Entry<String, String> entry: allData.entrySet()) {
+			map.put(entry.getKey(), new SerialHashMap(entry.getValue()));
+		}
+		
+		Entity entity = null;
+		
+		try {
+			Class<?> clazz = Class.forName(Entity.class.getPackage().getName()+'.'+entityType);
+			
+			Class<? extends Entity> entityClass = clazz.asSubclass(Entity.class);
+			
+			entity = deserialize(level, entityClass, map, version);
+			
+		} catch(ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		
+		return entity;
+	}
+	public static <T extends Entity> T deserialize(@NotNull Level level, Class<T> clazz, EntityDataSet data, @NotNull Version version) {
+		T newEntity = null;
+		try {
+			Constructor<T> constructor = clazz.getDeclaredConstructor(Level.class, EntityDataSet.class, Version.class, ValueAction.class);
+			constructor.setAccessible(true);
+			newEntity = constructor.newInstance(level, data, version, (ValueAction<EntityDataSet>)(allData -> {}));
+		} catch(NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+			e.printStackTrace();
+		}
+		
+		return newEntity;
+	}
 }

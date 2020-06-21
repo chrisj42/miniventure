@@ -2,8 +2,7 @@ package miniventure.game.network;
 
 import java.io.IOException;
 
-import miniventure.game.world.file.PlayerData;
-import miniventure.game.world.management.ServerWorld;
+import miniventure.game.world.management.WorldManager;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -11,6 +10,6 @@ import org.jetbrains.annotations.NotNull;
 public interface ServerFetcher {
 	
 	@NotNull
-	GameServer get(@NotNull ServerWorld world, PlayerData[] playerData) throws IOException;
+	GameServer get(@NotNull WorldManager world, PlayerData[] playerData) throws IOException;
 	
 }

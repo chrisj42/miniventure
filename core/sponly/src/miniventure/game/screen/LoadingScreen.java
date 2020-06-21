@@ -3,7 +3,6 @@ package miniventure.game.screen;
 import java.util.EmptyStackException;
 import java.util.Stack;
 
-import miniventure.game.screen.util.BackgroundInheritor;
 import miniventure.game.util.ProgressLogger;
 
 import com.badlogic.gdx.Gdx;
@@ -11,7 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.widget.VisLabel;
 
-public class LoadingScreen extends BackgroundInheritor implements ProgressLogger {
+public class LoadingScreen extends MenuScreen implements ProgressLogger {
 	
 	/*
 		I want to have a system where it displays a message, and the message shows a #/total progress format.
@@ -24,19 +23,34 @@ public class LoadingScreen extends BackgroundInheritor implements ProgressLogger
 		Like that.  
 	 */
 	
-	private final VerticalGroup vGroup;
 	private final boolean initLoader;
+	private final boolean popup;
+	
+	private final VerticalGroup vGroup;
 	private Stack<VisLabel> messageLabels = new Stack<>();
 	
 	private boolean topEphemeral = false; // should the top message be overwritten on push?
 	
-	public LoadingScreen() { this(false); }
-	public LoadingScreen(boolean initLoader) {
+	public static LoadingScreen initLoader() { return new LoadingScreen(true, false); }
+	
+	public LoadingScreen() { this(false, false); }
+	public LoadingScreen(String popupMsg) {
+		this(false, true);
+		pushMessage(popupMsg);
+	}
+	private LoadingScreen(boolean initLoader, boolean popup) {
 		super(new ScreenViewport());
 		this.initLoader = initLoader;
+		this.popup = popup;
 		vGroup = new VerticalGroup();
 		setCenterGroup(vGroup);
 		vGroup.space(15);
+	}
+	
+	@Override
+	public void focus() {
+		super.focus();
+		// if(popup) setBackground(null); // popup version doesn't obstruct screen
 	}
 	
 	@Override

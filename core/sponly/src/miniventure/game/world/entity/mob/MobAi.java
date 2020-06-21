@@ -2,7 +2,7 @@ package miniventure.game.world.entity.mob;
 
 import miniventure.game.item.Item;
 import miniventure.game.item.Result;
-import miniventure.game.item.ServerItem;
+import miniventure.game.util.MyUtils;
 import miniventure.game.util.SerialHashMap;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueAction;
@@ -10,14 +10,13 @@ import miniventure.game.world.ItemDrop;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.EntityDataSet;
-import miniventure.game.world.level.ServerLevel;
-import miniventure.game.world.management.ServerWorld;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.entity.EntitySpawn;
+import miniventure.game.world.management.Level;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class MobAi extends ServerMob {
+public class MobAi extends Mob {
 	
 	/*
 		The key component of MobAis is just that they will move by themselves.
@@ -41,23 +40,23 @@ public class MobAi extends ServerMob {
 	@Nullable private MovementPattern tempMovePattern = null;
 	private float tempTimeLeft = 0;
 	
-	protected MobAi(@NotNull ServerWorld world, @NotNull AiType aiType) {
-		super(world, aiType.name().toLowerCase(), aiType.health);
+	private int health;
+	
+	protected MobAi(@NotNull EntitySpawn info, @NotNull AiType aiType) {
+		super(info, aiType.name().toLowerCase());
 		this.aiType = aiType;
+		this.health = aiType.health;
 		this.itemDrops = aiType.deathDrops;
 		this.movePattern = aiType.defaultPattern.copy();
 	}
 	
 	// if a subclass was made of this, then it may not save the ai type.
-	protected MobAi(@NotNull ServerWorld world, EntityDataSet allData, final Version version, ValueAction<EntityDataSet> modifier) {
-		super(world, allData, version, data -> {
-			modifier.act(data);
-			AiType type = data.get("ai").get("type", AiType::valueOf);
-			data.get("mob").add("sprite", type.name().toLowerCase());
-			data.get("mob").add("mhp", type.health);
-		});
+	protected MobAi(@NotNull Level level, EntityDataSet allData, final Version version, ValueAction<EntityDataSet> modifier) {
+		super(level, allData, version, modifier);
+		
 		SerialHashMap data = allData.get("ai");
 		aiType = data.get("type", AiType::valueOf);
+		
 		this.itemDrops = aiType.deathDrops;
 		this.movePattern = aiType.defaultPattern.copy();
 	}
@@ -65,8 +64,6 @@ public class MobAi extends ServerMob {
 	@Override
 	public EntityDataSet save() {
 		EntityDataSet allData = super.save();
-		allData.get("mob").remove("sprite");
-		allData.get("mob").remove("mhp");
 		
 		SerialHashMap data = new SerialHashMap();
 		data.add("type", aiType);
@@ -75,7 +72,27 @@ public class MobAi extends ServerMob {
 		return allData;
 	}
 	
+	@Override
+	public void reset() {
+		super.reset();
+		health = aiType.health;
+		tempMovePattern = null;
+		tempTimeLeft = 0;
+		movePattern = aiType.defaultPattern.copy();
+	}
+	
 	public AiType getType() { return aiType; }
+	
+	@Override
+	protected int getMaxHealth() { return aiType.health; }
+	@Override
+	protected int getHealth() { return health; }
+	@Override
+	protected int changeHealth(int amount) {
+		final int prev = health;
+		health = MyUtils.clamp(health + amount, 0, getMaxHealth());
+		return health - prev;
+	}
 	
 	//protected void setMovePattern(@NotNull MovementPattern pattern) { movePattern = pattern; }
 	protected void setMovePattern(@NotNull MovementPattern pattern, float duration) {
@@ -98,7 +115,7 @@ public class MobAi extends ServerMob {
 	
 	@Override
 	public Result attackedBy(WorldObject obj, @Nullable Item attackItem, int damage) {
-		if(aiType.onHit != null) aiType.onHit.onHit(this, obj, (ServerItem)attackItem);
+		if(aiType.onHit != null) aiType.onHit.onHit(this, obj, (Item)attackItem);
 		return super.attackedBy(obj, attackItem, damage);
 	}
 	
@@ -110,24 +127,10 @@ public class MobAi extends ServerMob {
 	
 	@Override
 	public void die() {
-		ServerLevel level = getLevel();
-		if(level != null)
-			for (ItemDrop drop: itemDrops)
-				level.dropItems(drop, this, null);
+		for (ItemDrop drop: itemDrops)
+			getLevel().dropItems(drop, this, null);	
 		
 		super.die();
-	}
-	
-	@Override
-	public boolean maySpawn() {
-		return super.maySpawn() && aiType.spawnBehavior.maySpawn(this);
-	}
-	
-	@Override
-	public boolean maySpawn(TileTypeEnum type) {
-		if(!aiType.spawnBehavior.hasTiles())
-			return super.maySpawn(type);
-		return aiType.spawnBehavior.maySpawn(type);
 	}
 	
 	@Override

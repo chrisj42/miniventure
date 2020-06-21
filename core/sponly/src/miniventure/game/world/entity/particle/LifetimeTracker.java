@@ -15,11 +15,11 @@ public class LifetimeTracker {
 	private float time; // the current time relative to the creation of this item entity. used as the current position along the "x-axis".
 	
 	public LifetimeTracker(@NotNull Entity e, float lifetime) { this(e, lifetime, true); }
-	public LifetimeTracker(@NotNull Entity e, float lifetime, boolean blinker) {
+	public LifetimeTracker(@NotNull Entity e, float lifetime, boolean blinkNearEnd) {
 		this.entity = e;
 		this.lifetime = lifetime;
 		
-		if(blinker)
+		if(blinkNearEnd)
 			e.setBlinker(null, lifetime * BLINK_THRESHOLD, false, new FrameBlinker(1, 1, false));
 	}
 	

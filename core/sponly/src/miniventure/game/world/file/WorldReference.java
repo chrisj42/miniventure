@@ -20,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class WorldReference {
 	
+	// null version means it's too old for even version-checking to work right (unless the files are just broken)
 	@Nullable public final Version version; // todo when reading this in world select screen, check if it is a dev build, and display a compatibility warning if so.
 	public final Path folder;
 	public final String worldName;

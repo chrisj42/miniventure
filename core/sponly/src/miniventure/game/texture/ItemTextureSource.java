@@ -1,12 +1,12 @@
 package miniventure.game.texture;
 
-import miniventure.game.core.GameCore;
+import miniventure.game.core.GdxCore;
 import miniventure.game.util.function.MapFunction;
 
 public enum ItemTextureSource {
-	Icon_Map(GameCore.icons::get),
-	Entity_Atlas(GameCore.entityAtlas::getRegion),
-	Tile_Atlas(GameCore.tileAtlas::getRegion);
+	Icon_Map(GdxCore.icons::get),
+	Entity_Atlas(GdxCore.entityAtlas::getRegion),
+	Tile_Atlas(GdxCore.tileAtlas::getRegion);
 	
 	private final MapFunction<String, TextureHolder> textureFetcher;
 	
@@ -14,13 +14,13 @@ public enum ItemTextureSource {
 		this.textureFetcher = textureFetcher;
 	}
 	
-	public TextureHolder getTexture(String textureName) {
+	public TextureHolder get(String textureName) {
 		return textureFetcher.get(textureName);
 	}
 	
-	public FetchableTextureHolder get(String textureName) {
+	/*public FetchableTextureHolder get(String textureName) {
 		return new FetchableTextureHolder(this, textureFetcher.get(textureName));
-	}
+	}*/
 	
 	public static final ItemTextureSource[] values = ItemTextureSource.values();
 }

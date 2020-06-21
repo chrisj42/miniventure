@@ -5,9 +5,8 @@ import java.net.InetSocketAddress;
 import miniventure.game.network.PacketPipe.PacketListener;
 import miniventure.game.network.PacketPipe.PacketPipeReader;
 import miniventure.game.network.PacketPipe.PacketPipeWriter;
-import miniventure.game.world.entity.mob.player.ServerPlayer;
-import miniventure.game.world.file.PlayerData;
-import miniventure.game.world.management.ServerWorld;
+import miniventure.game.world.entity.mob.player.Player;
+import miniventure.game.world.management.WorldManager;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -20,7 +19,7 @@ public class LocalServer extends GameServer {
 	private final PacketPipeReader in;
 	private final PacketPipeWriter out;
 	
-	public LocalServer(@NotNull ServerWorld world, PlayerData[] playerData, @NotNull PacketPipeReader serverIn, @NotNull PacketPipeWriter serverOut) {
+	public LocalServer(@NotNull WorldManager world, PlayerData[] playerData, @NotNull PacketPipeReader serverIn, @NotNull PacketPipeWriter serverOut) {
 		super(world, false, playerData);
 		this.in = serverIn;
 		this.out = serverOut;
@@ -52,7 +51,7 @@ public class LocalServer extends GameServer {
 	public boolean isHost(@NotNull InetSocketAddress address) { return address == PLAYER_ADDR; }
 	
 	@Override
-	public InetSocketAddress getPlayerAddress(@NotNull ServerPlayer player) {
+	public InetSocketAddress getPlayerAddress(@NotNull Player player) {
 		return PLAYER_ADDR;
 	}
 	

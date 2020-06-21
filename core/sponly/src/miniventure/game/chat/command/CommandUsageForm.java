@@ -3,8 +3,8 @@ package miniventure.game.chat.command;
 import miniventure.game.chat.MessageBuilder;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.MapFunction;
-import miniventure.game.world.entity.mob.player.ServerPlayer;
-import miniventure.game.world.management.ServerWorld;
+import miniventure.game.world.entity.mob.player.Player;
+import miniventure.game.world.management.WorldManager;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -12,13 +12,13 @@ public class CommandUsageForm {
 	
 	@FunctionalInterface
 	interface ExecutionBehavior {
-		void execute(@NotNull ServerWorld world, ServerPlayer executor, String[] args, MessageBuilder out, MessageBuilder err);
+		void execute(@NotNull WorldManager world, Player executor, String[] args, MessageBuilder out, MessageBuilder err);
 	}
 	
 	final boolean restricted;
 	final String usage;
 	final String details;
-	final MapFunction<ServerPlayer, Boolean> executorCheck;
+	final MapFunction<Player, Boolean> executorCheck;
 	private final Argument[] args;
 	private final ExecutionBehavior executionBehavior;
 	
@@ -26,7 +26,7 @@ public class CommandUsageForm {
 	CommandUsageForm(boolean restricted, String usage, String details, ExecutionBehavior executionBehavior, Argument... args) {
 		this(restricted, usage, details, executor -> true, executionBehavior, args);
 	}
-	CommandUsageForm(boolean restricted, String usage, String details, MapFunction<ServerPlayer, Boolean> executorCheck, ExecutionBehavior executionBehavior, Argument... args) {
+	CommandUsageForm(boolean restricted, String usage, String details, MapFunction<Player, Boolean> executorCheck, ExecutionBehavior executionBehavior, Argument... args) {
 		this.restricted = restricted;
 		this.usage = usage;
 		this.details = details;
@@ -35,8 +35,8 @@ public class CommandUsageForm {
 		this.executorCheck = executorCheck;
 	}
 	
-	public boolean execute(@NotNull ServerWorld world, ServerPlayer executor, String[] args, MessageBuilder out, MessageBuilder err) {
-		if(restricted && !world.getServer().isAdmin(executor))
+	public boolean execute(@NotNull WorldManager world, Player executor, String[] args, MessageBuilder out, MessageBuilder err) {
+		if(restricted/* && !world.getServer().isAdmin(executor)*/)
 			return false;
 		if(!executorCheck.get(executor))
 			return false;

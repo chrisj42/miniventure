@@ -4,8 +4,6 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Iterator;
 
-import miniventure.game.util.ProgressLogger;
-
 public class ProgressPrinter implements ProgressLogger {
 	
 	private Deque<String> messages = new ArrayDeque<>();

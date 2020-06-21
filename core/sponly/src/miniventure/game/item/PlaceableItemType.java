@@ -1,16 +1,14 @@
 package miniventure.game.item;
 
-import miniventure.game.core.GameCore;
-import miniventure.game.item.ItemDataTag.ItemDataMap;
+import miniventure.game.core.GdxCore;
 import miniventure.game.item.ItemType.EnumItem;
-import miniventure.game.texture.FetchableTextureHolder;
 import miniventure.game.texture.ItemTextureSource;
-import miniventure.game.util.customenum.SerialEnumMap;
+import miniventure.game.texture.TextureHolder;
 import miniventure.game.world.WorldObject;
-import miniventure.game.world.entity.mob.player.Player.CursorHighlight;
-import miniventure.game.world.entity.mob.player.ServerPlayer;
-import miniventure.game.world.tile.ServerTile;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.entity.mob.player.CursorHighlight;
+import miniventure.game.world.entity.mob.player.Player;
+import miniventure.game.world.tile.Tile;
+import miniventure.game.world.tile.TileType;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,15 +17,15 @@ import static miniventure.game.item.PlacementAttempt.PlacementAction.tile;
 import static miniventure.game.item.PlacementAttempt.PlacementCheck;
 import static miniventure.game.item.PlacementAttempt.getAttempt;
 
-public enum PlaceableItemType {
+public enum PlaceableItemType implements ItemEnum {
 	
-	Dirt(TileTypeEnum.DIRT, PlacementCheck.onTile(TileTypeEnum.HOLE)),
+	Dirt(TileType.DIRT, PlacementCheck.onTile(TileType.HOLE)),
 	
-	Sand(TileTypeEnum.SAND, PlacementCheck.onTile(TileTypeEnum.DIRT)),
+	Sand(TileType.SAND, PlacementCheck.onTile(TileType.DIRT)),
 	
-	Snow(TileTypeEnum.SNOW, PlacementCheck.groundExcluding(TileTypeEnum.SNOW)),
+	Snow(TileType.SNOW, PlacementCheck.groundExcluding(TileType.SNOW)),
 	
-	Torch(TileTypeEnum.TORCH, PlacementCheck.GROUND,
+	Torch(TileType.TORCH, PlacementCheck.GROUND,
 		ItemTextureSource.Tile_Atlas.get("torch/main")
 	);
 	
@@ -37,24 +35,24 @@ public enum PlaceableItemType {
 	@NotNull private final PlacementAttempt placementAttempt;
 	// @Nullable private final TextureHolder customTexture;
 	private final PlaceableItem item;
-	private final FetchableTextureHolder resultTexture;
+	private final TextureHolder resultTexture;
 	
 	// I'll turn the tile types back into placement actions later.
-	PlaceableItemType(@NotNull TileTypeEnum tileType, @NotNull PlacementCheck placementCheck) {
+	PlaceableItemType(@NotNull TileType tileType, @NotNull PlacementCheck placementCheck) {
 		this(tileType, placementCheck, null);
 	}
-	PlaceableItemType(@NotNull TileTypeEnum tileType, @NotNull PlacementCheck placementCheck, @Nullable FetchableTextureHolder customTexture) {
+	PlaceableItemType(@NotNull TileType tileType, @NotNull PlacementCheck placementCheck, @Nullable TextureHolder customTexture) {
 		this.placementAttempt = getAttempt(placementCheck, tile(tileType));
 		String spritePrefix = tileType.name().toLowerCase()+'/';
 		String spriteName = spritePrefix + "main";
-		if(GameCore.tileAtlas.getRegion(spriteName) == null)
+		if(GdxCore.tileAtlas.getRegion(spriteName) == null)
 			spriteName = spritePrefix + "c00";
 		resultTexture = ItemTextureSource.Tile_Atlas.get(spriteName);
 		this.item = customTexture == null ? new PlaceableItem() : new PlaceableItem(customTexture);
 	}
 	
-	@NotNull
-	public ServerItem get() {
+	@Override @NotNull
+	public Item get() {
 		return item;
 	}
 	
@@ -63,7 +61,7 @@ public enum PlaceableItemType {
 		private PlaceableItem() {
 			super(ItemType.Placeable, PlaceableItemType.this);
 		}
-		private PlaceableItem(@NotNull FetchableTextureHolder customTexture) {
+		private PlaceableItem(@NotNull TextureHolder customTexture) {
 			super(ItemType.Placeable, PlaceableItemType.this, customTexture);
 		}
 		
@@ -72,16 +70,21 @@ public enum PlaceableItemType {
 			return CursorHighlight.TILE_IN_RADIUS;
 		}
 		
-		@Override
+		/*@Override
 		protected void addSerialData(ItemDataMap map) {
 			super.addSerialData(map);
 			map.add(ItemDataTag.CursorSprite, resultTexture);
+		}*/
+		
+		@Override @Nullable
+		public TextureHolder getCursorTexture() {
+			return resultTexture;
 		}
 		
 		@Override
-		public Result interact(WorldObject obj, ServerPlayer player) {
-			if(obj instanceof ServerTile) {
-				ServerTile tile = (ServerTile) obj;
+		public Result interact(WorldObject obj, Player player) {
+			if(obj instanceof Tile) {
+				Tile tile =  (Tile) obj;
 				if(placementAttempt.tryPlace(tile, player))
 					return Result.USED;
 			}

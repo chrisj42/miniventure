@@ -1,6 +1,6 @@
 package miniventure.game.world.entity;
 
-import miniventure.game.world.Boundable;
+import miniventure.game.world.WorldObject;
 
 import com.badlogic.gdx.math.Vector2;
 
@@ -18,7 +18,7 @@ public class KnockbackController {
 		entity = target;
 	}
 	
-	public void knock(Boundable knocker, float speed, float duration) {
+	public void knock(WorldObject knocker, float speed, float duration) {
 		Vector2 knockDir = entity.getCenter().sub(knocker.getCenter()).nor();
 		knock(knockDir, speed, duration);
 	}

@@ -1,7 +1,7 @@
 package miniventure.game.world.entity.mob;
 
 import miniventure.game.world.WorldObject;
-import miniventure.game.world.level.Level;
+import miniventure.game.world.management.Level;
 
 import com.badlogic.gdx.math.Vector2;
 
@@ -14,11 +14,11 @@ public class PursuePattern implements MovementPattern {
 	interface FollowBehavior {
 		@Nullable WorldObject getObjectToFollow(MobAi self);
 		
-		FollowBehavior NEAREST_PLAYER = (self) -> {
+		FollowBehavior PLAYER = (self) -> {
 			Level level = self.getLevel();
-			if(level == null) return null;
-			
-			return level.getClosestPlayer(self.getCenter());
+			if(level.getPlayer().getPosition().dst(self.getPosition()) < 7)
+				return level.getPlayer();
+			return null;
 		};
 	}
 	
@@ -29,7 +29,7 @@ public class PursuePattern implements MovementPattern {
 	private WanderingPattern idlePattern;
 	private boolean wasFollowing = false;
 	
-	public PursuePattern() { this(FollowBehavior.NEAREST_PLAYER); }
+	public PursuePattern() { this(FollowBehavior.PLAYER); }
 	public PursuePattern(FollowBehavior followBehavior) { this(followBehavior, 2.5f); }
 	public PursuePattern(FollowBehavior followBehavior, float followSpeed) { this(followBehavior, 8, followSpeed); }
 	public PursuePattern(@NotNull FollowBehavior behavior, float maxDist, float followSpeed) {

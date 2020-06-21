@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.util.Random;
 
 import miniventure.game.world.Point;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.TileType;
 import miniventure.game.world.worldgen.noise.GenInfo;
 import miniventure.game.world.worldgen.noise.NoiseGenerator;
 
@@ -47,8 +47,8 @@ public class ProtoIsland extends GenInfo {
 				processor.processTile(getTile(x, y));
 	}
 	
-	public TileTypeEnum[][][] getMap() {
-		TileTypeEnum[][][] types = new TileTypeEnum[width][height][];
+	public TileType[][][] getMap() {
+		TileType[][][] types = new TileType[width][height][];
 		
 		for(int x = 0; x < width; x++)
 			for(int y = 0; y < height; y++)
@@ -62,12 +62,12 @@ public class ProtoIsland extends GenInfo {
 		
 		for(int x = 0; x < width; x++)
 			for(int y = 0; y < height; y++)
-				colors[x][y] = getTile(x, y).getTopLayer().color;
+				colors[x][y] = getTile(x, y).getTopLayer().getColor();
 		
 		return colors;
 	}
 	
-	public float[][] getFromGen(NoiseGenerator gen) {
+	public float[][] generateNoise(NoiseGenerator gen) {
 		return gen.get2DNoise(new GenInfo(requestSeed(), width, height));
 	}
 }

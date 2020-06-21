@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 /** @noinspection rawtypes*/
 @SuppressWarnings("unchecked")
-public abstract class GenericEnum<T, ET extends GenericEnum> implements Comparable<ET> {
+public abstract class GenericEnum<T, ET extends GenericEnum<T, ET>> implements Comparable<ET> {
 	
 	private static final HashMap<Class<? extends GenericEnum>, EnumData<? extends GenericEnum>> enumClassData = new HashMap<>();
 	
@@ -169,7 +169,7 @@ public abstract class GenericEnum<T, ET extends GenericEnum> implements Comparab
 	
 	// the below methods provide support for GEnumMap
 	
-	public DataEntry<T, ET> as(T value) {
+	public DataEntry<T, ET> entry(T value) {
 		enumData.checkInit();
 		return new DataEntry<>(enumData.values[ordinal], value);
 	}

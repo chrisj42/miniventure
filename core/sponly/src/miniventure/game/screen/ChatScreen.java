@@ -4,14 +4,10 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.LinkedList;
 
-import miniventure.game.core.GameCore;
 import miniventure.game.chat.InfoMessage;
 import miniventure.game.chat.InfoMessageLine;
-import miniventure.game.core.ClientCore;
 import miniventure.game.core.FontStyle;
-import miniventure.game.network.GameProtocol.Message;
-import miniventure.game.network.GameProtocol.TabRequest;
-import miniventure.game.network.GameProtocol.TabResponse;
+import miniventure.game.core.GdxCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.RelPos;
 
@@ -59,8 +55,48 @@ public class ChatScreen extends MenuScreen {
 	private int tabIndex = -1;
 	private String manualInput = ""; // this is the part of the command that the user entered manually, and so should not be changed when tabbing.
 	
+	private ChatScreen altScreen;
+	
+	static class Message {
+		public final String msg;
+		public final String color;
+		
+		private Message() { this(null, (String)null); }
+		// public Message(String msg) { this(msg, 0); }
+		public Message(String msg, Color color) { this(msg, color.toString()); }
+		private Message(String msg, String color) {
+			this.msg = msg;
+			this.color = color;
+		}
+	}
+	
+	// client asking for autocomplete
+	static class TabRequest {
+		public final String manualText;
+		public final int tabIndex;
+		
+		private TabRequest() { this(null, 0); }
+		public TabRequest(String manualText, int tabIndex) {
+			this.manualText = manualText;
+			this.tabIndex = tabIndex;
+		}
+	}
+	
+	// server response to autocomplete request
+	static class TabResponse {
+		public final String manualText; // used to check against the client text again; if it's different, then it means that the client has abandoned the tab request, and so this response will be ignored.
+		public final String completion;
+		// there will also be output, but that ought to be taken care of separately.
+		
+		private TabResponse() { this(null, null); }
+		public TabResponse(String manualText, String completion) {
+			this.manualText = manualText;
+			this.completion = completion;
+		}
+	}
+	
 	public ChatScreen(boolean timeOutMessages) {
-		super(false, new ScreenViewport());
+		super(new ScreenViewport());
 		useTimer = timeOutMessages;
 		
 		VerticalGroup vGroup = useVGroup(0, Align.topRight, false);
@@ -83,7 +119,7 @@ public class ChatScreen extends MenuScreen {
 		input = new TextField("", VisUI.getSkin()) {
 			@Override
 			public void draw(Batch batch, float parentAlpha) {
-				if(ClientCore.getScreen() == ChatScreen.this)
+				if(GdxCore.getScreen() == ChatScreen.this)
 					super.draw(batch, parentAlpha);
 			}
 			@Override
@@ -138,12 +174,14 @@ public class ChatScreen extends MenuScreen {
 					else
 						text = text.substring(1);
 					
-					ClientCore.getClient().send(new Message(text, GameCore.DEFAULT_CHAT_COLOR));
-					ClientCore.setScreen(null);
+					// GameCore.getClient().send();
+					addMessage(new Message(text, GdxCore.DEFAULT_CHAT_COLOR));
+					if(altScreen != null) altScreen.addMessage(new Message(text, GdxCore.DEFAULT_CHAT_COLOR));
+					GdxCore.setScreen(null);
 					return true;
 				}
 				else if(keycode == Keys.ESCAPE) {
-					ClientCore.setScreen(null);
+					GdxCore.setScreen(null);
 					return true;
 				}
 				else if(keycode == Keys.UP) {
@@ -176,7 +214,8 @@ public class ChatScreen extends MenuScreen {
 						tabbing = true;
 						tabIndex = -1;
 					}
-					ClientCore.getClient().send(new TabRequest(manualInput, tabIndex));
+					// FIXME TODO tabbing
+					// GameCore.getClient().send(new TabRequest(manualInput, tabIndex));
 					tabIndex++;
 					
 					return true;
@@ -196,6 +235,10 @@ public class ChatScreen extends MenuScreen {
 		});
 	}
 	
+	public void connect(ChatScreen other) {
+		altScreen = other;
+	}
+	
 	public void reset() {
 		previousCommands.clear();
 		deregisterLabels(labelQueue.toArray(new Label[0]));
@@ -208,13 +251,16 @@ public class ChatScreen extends MenuScreen {
 		input.setCursorPosition(initText.length());
 		if(scrollPane != null)
 			scrollPane.setScrollPercentY(0);
-		ClientCore.setScreen(this);
+		GdxCore.setScreen(this);
 	}
 	@Override
 	public void focus() {
 		super.focus();
 		setKeyboardFocus(input);
 	}
+	
+	@Override
+	public boolean isPersistent() { return true; }
 	
 	public void addMessage(InfoMessage msg) {
 		synchronized (labelQueue) {
@@ -260,7 +306,7 @@ public class ChatScreen extends MenuScreen {
 		private final boolean connect;
 		
 		TimerLabel(String text, Color color, boolean connect) {
-			super(text, new LabelStyle(ClientCore.getFont(), color));
+			super(text, new LabelStyle(GdxCore.getFont(), color));
 			this.connect = connect;
 			timeLeft = MESSAGE_LIFE_TIME;
 			setAlignment(Align.left);

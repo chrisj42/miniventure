@@ -3,9 +3,10 @@ package miniventure.game.world.entity.mob;
 import miniventure.game.item.FoodType;
 import miniventure.game.item.ResourceType;
 import miniventure.game.world.ItemDrop;
+import miniventure.game.world.entity.EntitySpawn;
 import miniventure.game.world.entity.mob.PursuePattern.FollowBehavior;
-import miniventure.game.world.management.ServerWorld;
-import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.entity.mob.SpawnBehavior.SimpleSpawnBehavior;
+import miniventure.game.world.tile.TileType;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -20,14 +21,14 @@ public enum AiType {
 		new ItemDrop(FoodType.Raw_Meat.get(), 2)
 	),
 	
-	Crocodile(14, SpawnBehavior.custom(null, TileTypeEnum.WATER), new WanderingPattern(), HitReaction.CHASE, TouchReaction.attackPlayer(2),
+	Crocodile(14, new SimpleSpawnBehavior(null, TileType.WATER), new WanderingPattern(), HitReaction.CHASE, TouchReaction.attackPlayer(2),
 		new ItemDrop(FoodType.Raw_Meat.get(), 1, 2)
 	) {
 		@Override
-		public MobAi makeMob(@NotNull ServerWorld world) { return new Crocodile(world); }
+		public MobAi makeMob(@NotNull EntitySpawn info) { return new Crocodile(info); }
 	},
 	
-	Zombie(15, SpawnBehavior.DEFAULT_NIGHT, new PursuePattern(FollowBehavior.NEAREST_PLAYER), null, TouchReaction.attackPlayer(1),
+	Zombie(15, SpawnBehavior.DEFAULT_NIGHT, new PursuePattern(FollowBehavior.PLAYER), null, TouchReaction.attackPlayer(1),
 		new ItemDrop(FoodType.Gooseberry.get(), 0, 1, 0.2f),
 		new ItemDrop(ResourceType.Fabric.get(), 1, 3, 0.35f),
 		new ItemDrop(ResourceType.Cotton.get(), 0, 1, 0.275f)
@@ -49,7 +50,12 @@ public enum AiType {
 		this.deathDrops = deathDrops;
 	}
 	
-	public MobAi makeMob(@NotNull ServerWorld world) { return new MobAi(world, this); }
+	public MobAi makeMob(@NotNull EntitySpawn info) {
+		return new MobAi(info, this);
+	}
+	
+	@NotNull
+	public SpawnBehavior getSpawnBehavior() { return spawnBehavior; }
 	
 	public static final AiType[] values = AiType.values();
 }

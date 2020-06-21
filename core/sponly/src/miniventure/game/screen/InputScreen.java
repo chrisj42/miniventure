@@ -1,7 +1,6 @@
 package miniventure.game.screen;
 
-import miniventure.game.core.ClientCore;
-import miniventure.game.screen.util.BackgroundInheritor;
+import miniventure.game.core.GdxCore;
 import miniventure.game.util.function.Action;
 import miniventure.game.util.function.ValueAction;
 
@@ -18,10 +17,10 @@ import com.kotcrab.vis.ui.widget.VisTextButton;
 		- also allow for a title/header
 		- menu should also be contained in a ui frame, i.e. have some solid background
  */
-public class InputScreen extends BackgroundInheritor {
+public class InputScreen extends MenuScreen {
 	
-	public InputScreen(String prompt, ValueAction<String> onConfirm) { this(prompt, onConfirm, ClientCore::backToParentScreen); }
-	public InputScreen(String[] prompt, ValueAction<String> onConfirm) { this(prompt, onConfirm, ClientCore::backToParentScreen); }
+	public InputScreen(String prompt, ValueAction<String> onConfirm) { this(prompt, onConfirm, GdxCore::backToParentScreen); }
+	public InputScreen(String[] prompt, ValueAction<String> onConfirm) { this(prompt, onConfirm, GdxCore::backToParentScreen); }
 	public InputScreen(String prompt, ValueAction<String> onConfirm, Action onCancel) {
 		this(new String[] {prompt}, onConfirm, onCancel);
 	}
@@ -49,7 +48,7 @@ public class InputScreen extends BackgroundInheritor {
 		setKeyboardFocus(field);
 	}
 	
-	public static class CircularFunction<T> implements ValueAction<T> {
+	/*public static class CircularFunction<T> implements ValueAction<T> {
 		
 		@FunctionalInterface
 		public interface CircularAction<T> {
@@ -68,5 +67,5 @@ public class InputScreen extends BackgroundInheritor {
 		}
 		
 		
-	}
+	}*/
 }

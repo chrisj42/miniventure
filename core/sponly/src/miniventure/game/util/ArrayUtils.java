@@ -28,6 +28,11 @@ public final class ArrayUtils {
 		return (T) Array.get(array, random.nextInt(Array.getLength(array)));
 	}
 	
+	// a way to do arrays via var arg
+	public static <T> T[] array(T... values) {
+		return values;
+	}
+	
 	public static void revArray(Object array) {
 		final int len = Array.getLength(array);
 		if(len < 2) return;

@@ -12,6 +12,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Random;
@@ -23,9 +24,10 @@ import miniventure.game.util.SerialHashMap;
 import miniventure.game.util.Version;
 import miniventure.game.util.Version.VersionFormatException;
 import miniventure.game.util.function.ValueAction;
-import miniventure.game.world.file.IslandCache.LevelCacheFetcher;
+import miniventure.game.world.Point;
+import miniventure.game.world.management.LevelDataSet;
 import miniventure.game.world.management.TimeOfDay;
-import miniventure.game.world.worldgen.island.IslandType;
+import miniventure.game.world.management.WorldDataSet;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -52,10 +54,13 @@ public class WorldFileInterface {
 	
 	private static final String VERSION_FILE = "version.txt";
 	
-	private static final String PLAYER_FILE = "players.txt";
+	// private static final String PLAYER_FILE = "players.txt";
 	private static final String GAME_FILE = "game.txt";
 	
 	private static final String ISLAND_FILE_REGEX = "island-\\d+-(surface|caves)\\.txt";
+	private static String getIslandFileName(int id) {
+		return getIslandFileName(Math.abs(id), id >= 0);
+	}
 	private static String getIslandFileName(int id, boolean surface) {
 		return "island-"+(id<10?"0":"")+id+'-'+(surface?"surface":"caves")+".txt";
 	}
@@ -194,17 +199,17 @@ public class WorldFileInterface {
 	}
 	
 	@NotNull
-	public static WorldDataSet createWorld(Path file, RandomAccessFile lockRef, String seedString) {
+	public static WorldDataSet createWorld(Path folder, RandomAccessFile lockRef, String seedString) {
 		if(seedString == null || seedString.length() == 0)
-			return createWorld(file, lockRef, new Random().nextLong());
+			return createWorld(folder, lockRef, new Random().nextLong());
 		
 		try {
 			long seed = Long.parseLong(seedString, 16);
-			return createWorld(file, lockRef, seed);
+			return createWorld(folder, lockRef, seed);
 		} catch(NumberFormatException ignored) {}
 		
 		if(seedString.length() < 2)
-			return createWorld(file, lockRef, seedString.hashCode());
+			return createWorld(folder, lockRef, seedString.hashCode());
 		
 		String s1 = seedString.substring(0, seedString.length()/2);
 		String s2 = seedString.substring(seedString.length()/2);
@@ -219,51 +224,50 @@ public class WorldFileInterface {
 			b2 = b+b2;
 		}
 		long seed = Long.parseLong(b1+b2, 2);
-		return createWorld(file, lockRef, seed);
+		return createWorld(folder, lockRef, seed);
 	}
 	
-	// this method doesn't actually generate levels; the ServerWorld does that when it's created. So very little work is actually done here.
+	// this method doesn't actually generate levels; the WorldManager does that when it's created. So very little work is actually done here.
 	@NotNull
 	private static WorldDataSet createWorld(Path folder, RandomAccessFile lockRef, long seed) {
-		IslandCache[] levelCaches = new IslandCache[] {
+		/*IslandCache[] levelCaches = new IslandCache[] {
 			new IslandCache(1, seed, IslandType.WOODLAND),
 			new IslandCache(2, seed, IslandType.DESERT),
 			new IslandCache(3, seed, IslandType.ARCTIC)
 			// new LevelCache(3, seed, IslandType.SWAMP),
 			// new LevelCache(4, seed, IslandType.JUNGLE),
-		};
+		};*/
 		
-		WorldDataSet worldData = new WorldDataSet(folder, lockRef, seed, 0, TimeOfDay.Morning.getStartOffsetSeconds(), Version.CURRENT, new PlayerData[0], levelCaches, true);
+		WorldDataSet worldData = new WorldDataSet(folder, lockRef, seed, 0, TimeOfDay.Morning.getStartOffsetSeconds(), Version.CURRENT, 1, null);
 		saveWorld(worldData);
 		return worldData;
 	}
 	
 	public static boolean saveWorld(WorldDataSet worldData) {
-		Path main = worldData.worldFile;
+		Path main = worldData.worldPath;
 		boolean good;
 		
-		good = writeFile(main.resolve(VERSION_FILE), list -> list.add(Version.CURRENT.serialize()));
+		LinkedList<String> data = new LinkedList<>();
+		good = writeFile(main.resolve(VERSION_FILE), data, list -> list.add(Version.CURRENT.serialize()));
 		
-		good = writeFile(main.resolve(GAME_FILE), list -> {
+		good = writeFile(main.resolve(GAME_FILE), data, list -> {
 			SerialHashMap map = new SerialHashMap();
 			map.add("seed", worldData.seed);
 			map.add("gt", (int)worldData.gameTime); // accuracy isn't worth the extra space
 			map.add("time", (int)worldData.timeOfDay); // same here
-			map.add("islands", worldData.islandCaches.length);
+			// map.add("islands", worldData.islandCaches.length);
+			map.add("level", worldData.playerLevel);
 			list.add(map.serialize());
+			list.add(String.valueOf(worldData.playerData));
 		}) && good;
 		
-		int i = 0;
-		for(IslandCache island: worldData.islandCaches) {
+		// int i = 0;
+		/*for(IslandCache island: worldData.islandCaches) {
 			good = writeFile(main.resolve(getIslandFileName(i, true)), island.surface::save) && good;
 			good = writeFile(main.resolve(getIslandFileName(i++, false)), island.caverns::save) && good;
-		}
+		}*/
 		
-		good = writeFile(main.resolve(PLAYER_FILE), list -> {
-			for(PlayerData p: worldData.playerInfo) {
-				p.serialize(list);
-			}
-		}) && good;
+		// good = writeFile(main.resolve(PLAYER_FILE), data, list -> list.add(worldData.playerData)) && good;
 		
 		return good;
 	}
@@ -286,36 +290,39 @@ public class WorldFileInterface {
 			final long seed = map.get("seed", Long::parseLong);
 			final float gameTime = map.get("gt", Float::parseFloat);
 			final float daytime = map.get("time", Float::parseFloat);
-			final int islandCount = map.get("islands", Integer::parseInt);
+			// final int islandCount = map.get("islands", Integer::parseInt);
+			final int playerLevel = map.get("level", Integer::parseInt);
+			
+			final String playerData = lines.pop();
 			
 			// read terrain / entity / level data
 			/*Set<Path> islandFiles = Files.list(folder)
 				.filter(path -> path.getFileName().toString().matches(ISLAND_FILE_REGEX))
 				.collect(Collectors.toCollection(TreeSet::new));*/
 			
-			IslandCache[] islands = new IslandCache[islandCount];
+			/*IslandCache[] islands = new IslandCache[islandCount];
 			for(int i = 0; i < islands.length; i++) {
 				readFile(folder.resolve(getIslandFileName(i, true)), lines);
 				LevelCacheFetcher surfaceCache = (island, isSurface) -> new LevelCache(island, isSurface, version, lines);
 				readFile(folder.resolve(getIslandFileName(i, false)), lines, false);
 				LevelCacheFetcher cavernCache = (island, isSurface) -> new LevelCache(island, isSurface, version, lines);
 				islands[i] = new IslandCache(i+1, surfaceCache, cavernCache);
-			}
+			}*/
 			
 			// read player data
-			readFile(folder.resolve(PLAYER_FILE), lines);
-			PlayerData[] players = new PlayerData[lines.size() / 5];
+			// readFile(folder.resolve(PLAYER_FILE), lines);
+			// PlayerData[] players = new PlayerData[lines.size() / 5];
 			
-			for(int i = 0; i < players.length; i++) {
+			/*for(int i = 0; i < players.length; i++) {
 				String name = lines.pop();
 				String passhash = lines.pop();
 				int level = Integer.parseInt(lines.pop());
 				String data = lines.pop();
 				boolean op = Boolean.parseBoolean(lines.pop());
 				players[i] = new PlayerData(name, passhash, data, level, op);
-			}
+			}*/
 			
-			return new WorldDataSet(folder, lockRef, seed, gameTime, daytime, version, players, islands);
+			return new WorldDataSet(folder, lockRef, seed, gameTime, daytime, version, playerLevel, playerData);
 		} catch(FileNotFoundException e) {
 			throw new WorldFormatException("Missing file", e);
 		} catch(IOException e) {
@@ -335,13 +342,79 @@ public class WorldFileInterface {
 		}
 	}
 	
+	public static void saveLevel(Path worldFolder, LevelDataSet data) {
+		writeFile(worldFolder.resolve(getIslandFileName(data.id)), new LinkedList<>(), list -> {
+			list.add(data.dataVersion.serialize());
+			
+			SerialHashMap map = new SerialHashMap();
+			map.add("ec", data.entityData.length);
+			map.add("w", data.width);
+			map.add("h", data.height);
+			map.add("spawn", data.travelPos.serialize());
+			
+			list.add(map.serialize());
+			
+			list.addAll(Arrays.asList(data.entityData));
+			
+			for(int xp = 0; xp < data.width; xp++) {
+				for(int yp = 0; yp < data.height; yp++)
+					list.add(data.tileData[xp][yp]);
+			}
+		});
+	}
+	
+	@Nullable
+	public static LevelDataSet loadLevel(Path worldFolder, final int levelId) throws WorldFormatException {
+		final Path islandFile = worldFolder.resolve(getIslandFileName(levelId));
+		if(!islandFile.toFile().exists())
+			return null;
+		
+		LinkedList<String> lines = new LinkedList<>();
+		try {
+			readFile(islandFile, lines);
+		} catch(IOException e) {
+			throw new WorldFormatException("Bad file", e);
+		}
+		
+		final Version dataVersion;
+		try {
+			dataVersion = new Version(lines.pop());
+		} catch (VersionFormatException e) {
+			throw new WorldFormatException("could not determine level data version", e);
+		}
+		// final IslandType islandType = WorldManager.getIslandType(levelId);
+		
+		//noinspection MismatchedQueryAndUpdateOfCollection
+		SerialHashMap map = new SerialHashMap(lines.pop());
+		// IslandType islandType = map.get("island", IslandType::valueOf);
+		// this.ref = new IslandReference(id, IslandType.valueOf(islandType));
+		// long seed = map.get("seed", Long::parseLong);
+		int ec = map.get("ec", Integer::parseInt);
+		int width = map.get("w", Integer::parseInt);
+		int height = map.get("h", Integer::parseInt);
+		Point travelPos = map.get("spawn", Point::new);
+		
+		String[] entityData = new String[ec];
+		String[][] tileData = new String[width][height];
+		
+		for(int i = 0; i < ec; i++)
+			entityData[i] = lines.pop();
+		
+		// TODO here is where I can check for compressed tiles
+		for(int xp = 0; xp < width; xp++)
+			for(int yp = 0; yp < height; yp++)
+				tileData[xp][yp] = lines.pop();
+			
+		return new LevelDataSet(levelId, width, height, dataVersion, tileData, entityData, travelPos);
+	}
+	
 	// removes all possibly useful files from the worldFiles set, so that remaining files are considered "extra".
 	// returns a collection of the names of the missing files.
 	static Collection<String> validateWorldFiles(Set<Path> worldFiles) {
 		LinkedList<String> missing = new LinkedList<>();
 		
 		// todo add the surface and cavern files for every island in IslandType (except menu)
-		for(String file: new String[] {VERSION_FILE, GAME_FILE, PLAYER_FILE, getIslandFileName(0, true)})
+		for(String file: new String[] {VERSION_FILE, GAME_FILE, getIslandFileName(1, true)})
 			if(!worldFiles.removeIf(path -> path.getFileName().toString().equals(file)))
 				// this executes if the above command doesn't remove the file, i.e. the file wasn't found
 				missing.add(file);
@@ -370,10 +443,9 @@ public class WorldFileInterface {
 		return true;*/
 	}
 	
-	private static boolean writeFile(Path path, @NotNull ValueAction<LinkedList<String>> populator) {
+	private static boolean writeFile(Path path, LinkedList<String> data, @NotNull ValueAction<LinkedList<String>> populator) {
 		try (BufferedWriter writer = Files.newBufferedWriter(path)) {
-			
-			LinkedList<String> data = new LinkedList<>();
+			data.clear();
 			populator.act(data);
 			for(String s: data) {
 				writer.write(s);

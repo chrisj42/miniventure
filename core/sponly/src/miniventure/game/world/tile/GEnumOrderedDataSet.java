@@ -6,6 +6,8 @@ import miniventure.game.util.customenum.GenericEnum;
 
 class GEnumOrderedDataSet<T extends GenericEnum> {
 	
+	private static final Object[] EMPTY = new Object[0];
+	
 	private final int[] dataPositions;
 	private final int[] typeByPos;
 	private int nextDataPos;
@@ -29,7 +31,7 @@ class GEnumOrderedDataSet<T extends GenericEnum> {
 	public int getDataSize() { return nextDataPos; }
 	
 	public Object[] createDataArray() {
-		return getDataSize() == 0 ? null : new Object[getDataSize()];
+		return getDataSize() == 0 ? EMPTY : new Object[getDataSize()];
 	}
 	
 	public int getDataIndex(T key) {

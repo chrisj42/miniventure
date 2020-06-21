@@ -1,13 +1,11 @@
 package miniventure.game.item;
 
-import miniventure.game.item.ItemDataTag.ItemDataMap;
-import miniventure.game.util.customenum.SerialEnumMap;
-import miniventure.game.world.entity.mob.player.Player;
-import miniventure.game.world.entity.mob.player.Player.CursorHighlight;
+import miniventure.game.util.MyUtils;
+import miniventure.game.world.entity.mob.player.CursorHighlight;
 
 import org.jetbrains.annotations.NotNull;
 
-public class ToolItem extends ServerItem {
+public class ToolItem extends Item implements BreakableItem {
 	
 	// todo determine if I want to have all tools follow the same material/upgrade path, or let them deviate
 	// - if deviate, determine how to provide levels; perhaps just a fetcher that is provided the tier?
@@ -61,18 +59,17 @@ public class ToolItem extends ServerItem {
 	@Override
 	public int getStaminaUsage() { return toolType.staminaUsage; }
 	
-	// the the Item class will have the wrong value, but it only references it through this method so this override will negate any effects.
-	public float getDurability() { return quality == null ? 0 : durability / (float) quality.maxDurability; }
+	@Override
+	public float getDurability() { return durability / (float) quality.maxDurability; }
 	
 	@Override @NotNull
-	public Player.CursorHighlight getHighlightMode() {
+	public CursorHighlight getHighlightMode() {
 		return toolType.cursorType;
 	}
 	
 	@Override
-	protected void addSerialData(ItemDataMap map) {
-		super.addSerialData(map);
-		map.add(ItemDataTag.Usability, getDurability());
+	public String compileSaveData() {
+		return MyUtils.encodeStringArray(toolType.name(), quality.name(), String.valueOf(durability));
 	}
 	
 	@Override
@@ -82,11 +79,6 @@ public class ToolItem extends ServerItem {
 	
 	@Override
 	public int hashCode() { return super.hashCode() + durability; }
-	
-	@Override
-	public String[] save() {
-		return new String[] {getType().name(), toolType.name(), quality.name(), String.valueOf(durability)};
-	}
 	
 	@Override public String toString() { return "ToolItem("+ quality +' '+toolType+",dura="+durability+')'; }
 }

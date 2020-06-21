@@ -5,13 +5,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-import miniventure.game.world.entity.ServerEntity;
-import miniventure.game.world.level.ServerLevel;
+import miniventure.game.world.entity.Entity;
 
 class EntityManager {
 	
-	private final HashMap<ServerLevel, Set<ServerEntity>> levelEntities;
-	private final HashMap<ServerEntity, ServerLevel> entityLevels;
+	private final HashMap<Level, Set<Entity>> levelEntities;
+	private final HashMap<Entity, Level> entityLevels;
 	
 	EntityManager() {
 		levelEntities = new HashMap<>();
@@ -23,31 +22,31 @@ class EntityManager {
 		entityLevels.clear();
 	}
 	
-	private Set<ServerEntity> entitySet(ServerLevel level) {
+	private Set<Entity> entitySet(Level level) {
 		return levelEntities.getOrDefault(level, Collections.emptySet());
 	}
 	
-	synchronized void addEntity(ServerEntity e, ServerLevel level) {
+	synchronized void addEntity(Entity e, Level level) {
 		entityLevels.put(e, level);
 		levelEntities.computeIfAbsent(level, k -> new HashSet<>()).add(e);
 	}
 	
-	synchronized void removeEntity(ServerEntity e) {
+	synchronized void removeEntity(Entity e) {
 		entitySet(entityLevels.remove(e)).remove(e);
 	}
 	
 	// returns the entities that were in the level
-	synchronized Set<ServerEntity> removeLevel(ServerLevel level) {
-		Set<ServerEntity> entities = levelEntities.remove(level);
+	synchronized Set<Entity> removeLevel(Level level) {
+		Set<Entity> entities = levelEntities.remove(level);
 		if(entities == null) return Collections.emptySet();
 		
-		for(ServerEntity e: entities)
+		for(Entity e: entities)
 			entityLevels.remove(e);
 		
 		return entities;
 	}
 	
-	synchronized ServerLevel getLevel(ServerEntity entity) {
+	synchronized Level getLevel(Entity entity) {
 		return entityLevels.get(entity);
 	}
 	
@@ -55,11 +54,11 @@ class EntityManager {
 		return entityLevels.size();
 	}
 	
-	synchronized int getEntityCount(ServerLevel level) {
+	synchronized int getEntityCount(Level level) {
 		return entitySet(level).size();
 	}
 	
-	synchronized HashSet<ServerEntity> getEntities(ServerLevel level) {
+	synchronized HashSet<Entity> getEntities(Level level) {
 		return new HashSet<>(entitySet(level));
 	}
 }

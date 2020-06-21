@@ -2,22 +2,22 @@ package miniventure.game.screen;
 
 import java.util.HashMap;
 
-import miniventure.game.core.ClientCore;
+import miniventure.game.core.GdxCore;
 import miniventure.game.core.InputHandler.Control;
-import miniventure.game.network.GameProtocol.LevelChange;
-import miniventure.game.network.GameProtocol.MapRequest;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Point;
-import miniventure.game.world.level.Level;
+import miniventure.game.world.management.Level;
+import miniventure.game.world.management.WorldManager;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 
+import org.jetbrains.annotations.NotNull;
+
 public class MapScreen extends MenuScreen {
 	
-	private boolean requested;
+	// private boolean requested;
 	
 	private HashMap<Point, Cell> mapCells;
 	
@@ -27,57 +27,31 @@ public class MapScreen extends MenuScreen {
 		table = useTable();
 	}
 	
-	public MapScreen() {
-		super(false);
+	public MapScreen(@NotNull Level curLevel) {
+		super();
 		
-		table.add(makeLabel("waiting..."));
-		requested = false;
-	}
-	
-	public MapScreen(MapRequest data) {
-		super(false);
-		
-		requested = true;
-		mapUpdate(data);
-	}
-	
-	@Override
-	public void focus() {
-		super.focus();
-		if(!requested) {
-			requested = true;
-			ClientCore.getClient().send(new MapRequest());
+		// Level curLevel = GameCore.getWorld().getLevel();
+		int curId = curLevel.getLevelId();
+		for(int i = 0; i < 3; i++) {
+			// Point p = null;//mapRequest.islands[i];
+			final int levelid = i;
+			if(levelid == curId) continue;
+			VisTextButton btn = makeButton("Island "+(i+1)+": "+MyUtils.toTitleFormat(WorldManager.getIslandType(i+1).name()), () -> {
+				// Level curLevel = ClientCore.getWorld().getMainPlayer().getLevel();
+				if(!(curLevel.getLevelId() == levelid))
+					curLevel.getWorld().requestLevel(levelid);
+					// GameCore.getClient().send(new LevelChange(levelid));
+				GdxCore.setScreen(null);
+			});
+			table.add(btn).row();
 		}
 	}
 	
 	@Override
 	public void act(float delta) {
-		if(ClientCore.input.pressingControl(Control.CANCEL))
-			ClientCore.setScreen(null);
+		if(GdxCore.input.pressingControl(Control.CANCEL))
+			GdxCore.setScreen(null);
 		else
 			super.act(delta);
-	}
-	
-	public void mapUpdate(MapRequest mapRequest) {
-		Gdx.app.postRunnable(() -> {
-			table.clearChildren();
-			// table.add(makeLabel("More cooler island travel coming soon!")).row();
-			Level playerLevel = ClientCore.getWorld().getLevel();
-			int curlevel = -1;
-			if(playerLevel != null)
-				curlevel = playerLevel.getLevelId();
-			for(int i = 0; i < mapRequest.islands.length; i++) {
-				// Point p = null;//mapRequest.islands[i];
-				final int levelid = i;
-				if(levelid == curlevel) continue;
-				VisTextButton btn = makeButton("Island "+(i+1)+": "+MyUtils.toTitleFormat(mapRequest.islands[i].type.name()), () -> {
-					// Level playerLevel = ClientCore.getWorld().getMainPlayer().getLevel();
-					if(!(playerLevel != null && playerLevel.getLevelId() == levelid))
-						ClientCore.getClient().send(new LevelChange(levelid));
-					ClientCore.setScreen(null);
-				});
-				table.add(btn).row();
-			}
-		});
 	}
 }

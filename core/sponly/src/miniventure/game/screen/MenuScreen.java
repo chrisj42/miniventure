@@ -5,15 +5,14 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 
-import miniventure.game.core.ClientCore;
 import miniventure.game.core.FontStyle;
+import miniventure.game.core.GdxCore;
 import miniventure.game.core.InputHandler.Control;
 import miniventure.game.screen.util.DiscreteViewport;
 import miniventure.game.util.RelPos;
 import miniventure.game.util.function.Action;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -38,9 +37,9 @@ import com.kotcrab.vis.ui.widget.VisTextButton;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class MenuScreen extends Stage {
+public abstract class MenuScreen extends Stage {
 	
-	private final boolean clearGdxBackground;
+	// private final boolean clearGdxBackground;
 	private MenuScreen parent;
 	
 	private final LinkedList<ActorAnchor> anchoredActors = new LinkedList<>();
@@ -48,10 +47,9 @@ public class MenuScreen extends Stage {
 	private HashMap<Label, FontStyle> labels = new HashMap<>();
 	private HashSet<TextField> textFields = new HashSet<>();
 	
-	public MenuScreen(final boolean clearGdxBackground) { this(clearGdxBackground, new DiscreteViewport()); }
-	public MenuScreen(final boolean clearGdxBackground, Viewport viewport) {
-		super(viewport, ClientCore.getBatch());
-		this.clearGdxBackground = clearGdxBackground;
+	public MenuScreen() { this(new DiscreteViewport()); }
+	public MenuScreen(Viewport viewport) {
+		super(viewport, GdxCore.getBatch());
 	}
 	
 	protected void setCenterGroup(Group group) { addMainGroup(group, RelPos.CENTER); }
@@ -85,24 +83,18 @@ public class MenuScreen extends Stage {
 			anchor.layout();
 	}
 	
-	public void setParent(MenuScreen parent) {
-		if(parent != null && !parent.allowChildren())
-			setParent(parent.getParent());
-		else
-			this.parent = parent;
-	}
+	public void setParent(MenuScreen parent) { this.parent = parent; }
 	public MenuScreen getParent() { return parent; }
 	
-	public boolean allowChildren() { return false; }
+	// public boolean allowChildren() { return false; }
 	
-	public boolean usesWholeScreen() { return clearGdxBackground; }
+	/** @noinspection BooleanMethodIsAlwaysInverted*/
+	// menus that return true should not be disposed when exited; these menu instances are externally managed.
+	public boolean isPersistent() { return false; }
 	
-	@Override
-	public void draw() {
-		if(clearGdxBackground)
-			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		super.draw();
-	}
+	// public abstract boolean renderGameScreen();
+	
+	// public boolean usesWholeScreen() { return clearGdxBackground; }
 	
 	@Override
 	public void dispose() { dispose(true); }
@@ -129,7 +121,7 @@ public class MenuScreen extends Stage {
 		return makeLabel(text, FontStyle.Default, wrapText);
 	}
 	protected VisLabel makeLabel(String text, FontStyle style, boolean wrap) {
-		VisLabel label = new VisLabel(text, new LabelStyle(ClientCore.getFont(style), null));
+		VisLabel label = new VisLabel(text, new LabelStyle(GdxCore.getFont(style), null));
 		label.setWrap(wrap);
 		label.setAlignment(Align.center, Align.left);
 		labels.put(label, style);
@@ -140,7 +132,7 @@ public class MenuScreen extends Stage {
 		labels.put(label, style);
 		Gdx.app.postRunnable(() -> {
 			// refresh the style font
-			label.getStyle().font = ClientCore.getFont(style);
+			label.getStyle().font = GdxCore.getFont(style);
 			label.setStyle(label.getStyle());
 		});
 	}
@@ -240,12 +232,12 @@ public class MenuScreen extends Stage {
 		
 		for(Map.Entry<Label, FontStyle> labelStyle: labels.entrySet()) {
 			LabelStyle style = labelStyle.getKey().getStyle();
-			style.font = ClientCore.getFont(labelStyle.getValue());
+			style.font = GdxCore.getFont(labelStyle.getValue());
 			labelStyle.getKey().setStyle(style);
 		}
 		
 		for(TextField field: textFields) {
-			field.getStyle().font = ClientCore.getFont(FontStyle.TextField);
+			field.getStyle().font = GdxCore.getFont(FontStyle.TextField);
 			field.setStyle(field.getStyle());
 			// this is a hack to make the text field update its cursor position, which otherwise would be displayed wrong; the data is right, but the cached screen position is wrong.
 			field.setPasswordMode(false);

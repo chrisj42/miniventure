@@ -18,9 +18,9 @@ public class UpdateManager implements TileProperty {
 	interface UpdateAction {
 		float update(TileContext context);
 		
-		// boolean canUpdate(@NotNull ServerTile tile);
+		// boolean canUpdate(@NotNull Tile tile);
 		
-		// float getDelta(@NotNull ServerTile tile);
+		// float getDelta(@NotNull Tile tile);
 	}
 	
 	// private final UpdateAction[] actions;

@@ -3,20 +3,20 @@ package miniventure.game.item;
 /**
  * This is used to give the result of interactions involving items.
  */
-public enum Result {
+public class Result {
 	// the item was used
-	USED(true),
+	public static final Result USED = new Result(true);
 	
 	// the item was not used, but an interaction did occur
-	INTERACT(true),
+	public static final Result INTERACT = new Result(true);
 	
 	// no interaction occurred
-	NONE(false);
+	public static final Result NONE = new Result(false);
 	
 	
 	public final boolean success;
 	
-	Result(boolean success) {
+	private Result(boolean success) {
 		this.success = success;
 	}
 }

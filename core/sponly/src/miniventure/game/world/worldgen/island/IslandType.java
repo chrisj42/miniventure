@@ -2,14 +2,14 @@ package miniventure.game.world.worldgen.island;
 
 import java.util.Random;
 
-import miniventure.game.world.tile.TileType.TileTypeEnum;
+import miniventure.game.world.tile.TileType;
 import miniventure.game.world.worldgen.noise.Coherent2DNoiseFunction;
 import miniventure.game.world.worldgen.noise.Noise;
 import miniventure.game.world.worldgen.noise.NoiseGenerator;
 import miniventure.game.world.worldgen.noise.NoiseModifier;
 import miniventure.game.world.worldgen.noise.Testing;
 
-import static miniventure.game.world.tile.TileType.TileTypeEnum.*;
+import static miniventure.game.world.tile.TileType.*;
 import static miniventure.game.world.worldgen.noise.NoiseModifier.FILL_VALUE_RANGE;
 import static miniventure.game.world.worldgen.noise.NoiseModifier.NoiseValueMerger.MULTIPLY;
 import static miniventure.game.world.worldgen.noise.NoiseModifier.combine;
@@ -52,7 +52,7 @@ public enum IslandType {
 	MENU(100, 100) {
 		@Override
 		void generateIsland(ProtoIsland island) {
-			float[][] terrain = island.getFromGen(
+			float[][] terrain = island.generateNoise(
 				new Coherent2DNoiseFunction(36, 3).modify(
 					combine(new Noise(new int[] {1,32,8,2,4,16}, new int[] {4,2,1})),
 					FILL_VALUE_RANGE,
@@ -60,7 +60,7 @@ public enum IslandType {
 				)
 			);
 			
-			float[][] features = island.getFromGen(
+			float[][] features = island.generateNoise(
 				new Coherent2DNoiseFunction(12, 2)
 				.modify(FILL_VALUE_RANGE)
 			);
@@ -89,13 +89,13 @@ public enum IslandType {
 	WOODLAND() {
 		@Override
 		void generateIsland(ProtoIsland island) {
-			float[][] shape = island.getFromGen(NoiseGenerator.islandShape);
+			float[][] shape = island.generateNoise(NoiseGenerator.islandShape);
 			
-			float[][] trees = island.getFromGen(
+			float[][] trees = island.generateNoise(
 				new Coherent2DNoiseFunction(8, 3)
 				// .modify(NoiseModifier.combine(NoiseGenerator.islandShapeOld, .35f))
 			);
-			float[][] trees2 = island.getFromGen(
+			float[][] trees2 = island.generateNoise(
 				NoiseGenerator.tunnelPattern(
 					new Coherent2DNoiseFunction(16, 5),
 					new Coherent2DNoiseFunction(8, 3)
@@ -103,11 +103,11 @@ public enum IslandType {
 				.modify(NoiseModifier.combine(NoiseGenerator.circleMask(1.4f), MULTIPLY))
 			);
 			
-			float[][] sparse = island.getFromGen(
+			float[][] sparse = island.generateNoise(
 				new Coherent2DNoiseFunction(8, 2)
 			);
 			
-			float[][] flint = island.getFromGen(
+			float[][] flint = island.generateNoise(
 				new Coherent2DNoiseFunction(16, 2)
 				.modify(NoiseModifier.combine(new Coherent2DNoiseFunction(16, 2), MULTIPLY))
 			);
@@ -160,11 +160,11 @@ public enum IslandType {
 		void generateIsland(ProtoIsland island) {
 			// describe process
 			
-			float[][] shape = island.getFromGen(NoiseGenerator.islandShape);
+			float[][] shape = island.generateNoise(NoiseGenerator.islandShape);
 			
-			float[][] stone = island.getFromGen(new Coherent2DNoiseFunction(18).modify(combine(NoiseGenerator.circleMask(1), MULTIPLY, NoiseGenerator.circleMask(1)), FILL_VALUE_RANGE));
+			float[][] stone = island.generateNoise(new Coherent2DNoiseFunction(18).modify(combine(NoiseGenerator.circleMask(1), MULTIPLY, NoiseGenerator.circleMask(1)), FILL_VALUE_RANGE));
 			
-			float[][] trees = island.getFromGen(new Noise(new int[] {1,32,8,2,4,16}, new int[] {4,2,1,2,1,2}).modify(FILL_VALUE_RANGE));//.modify(combine(NoiseGenerator.islandMask(1), AVERAGE)));
+			float[][] trees = island.generateNoise(new Noise(new int[] {1,32,8,2,4,16}, new int[] {4,2,1,2,1,2}).modify(FILL_VALUE_RANGE));//.modify(combine(NoiseGenerator.islandMask(1), AVERAGE)));
 			
 			
 			TileConditionChain features = TileConditionChain.builder()
@@ -201,8 +201,8 @@ public enum IslandType {
 		}
 	};
 	
-	private final int width;
-	private final int height;
+	public final int width;
+	public final int height;
 	
 	IslandType() { this(500, 500); }
 	IslandType(int width, int height) {
@@ -218,7 +218,7 @@ public enum IslandType {
 	abstract void generateIsland(ProtoIsland island);
 	abstract void generateCaverns(ProtoIsland island);
 	
-	public TileTypeEnum[][][] generateIsland(long seed, boolean surface) {
+	public TileType[][][] generateIsland(long seed, boolean surface) {
 		ProtoIsland island = new ProtoIsland(seed, width, height);
 		if(surface)
 			generateIsland(island);

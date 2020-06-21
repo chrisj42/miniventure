@@ -5,6 +5,8 @@ import miniventure.game.world.tile.Tile.TileContext;
 
 public class TileStackData {
 	
+	// TODO first is stack-wide tile data, then is each layer's data
+	
 	private String[][] stackData;
 	
 	TileStackData(String[] data) {

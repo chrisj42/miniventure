@@ -2,7 +2,7 @@ package miniventure.game.network;
 
 import java.util.LinkedList;
 
-import miniventure.game.core.GameCore;
+import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.ValueAction;
 
 import org.jetbrains.annotations.NotNull;
@@ -98,7 +98,7 @@ public class PacketPipe {
 		@Override
 		public void run() {
 			running = true;
-			GameCore.debug("Starting pipe flow: "+readerThreadLabel);
+			MyUtils.debug("Starting pipe flow: "+readerThreadLabel);
 			
 			while(running) {
 				Object packet;
@@ -121,7 +121,7 @@ public class PacketPipe {
 			
 			listener.onDisconnect();
 			
-			GameCore.debug("Pipe ending: "+readerThreadLabel);
+			MyUtils.debug("Pipe ending: "+readerThreadLabel);
 		}
 	}
 }
