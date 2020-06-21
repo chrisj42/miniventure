@@ -340,7 +340,6 @@ public class InventoryOverlay extends MenuScreen {
 			if(item == null)
 				return null;
 			
-			System.out.println("payload accepted");
 			return new SlotPayload(new ItemIcon(item, info.slot.getCount()), item);
 		}
 	}
@@ -357,8 +356,6 @@ public class InventoryOverlay extends MenuScreen {
 		@Override
 		public boolean drag(Source source, Payload payload, float x, float y, int pointer) {
 			// SlotInfo other = ((SlotSource)source).info;
-			System.out.println("target drag");
-			
 			if(source.getActor() == getActor())
 				return false;
 			
