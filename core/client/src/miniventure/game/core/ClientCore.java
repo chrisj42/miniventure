@@ -8,6 +8,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashMap;
 
@@ -32,6 +33,7 @@ import miniventure.game.world.tile.ClientTileType;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
@@ -232,6 +234,11 @@ public class ClientCore extends ApplicationAdapter {
 		} else {
 			Gdx.input.setInputProcessor(menuScreen == null ? new InputMultiplexer(gameScreen.getGuiStage(), input) : new InputMultiplexer(input.repressDelay(.1f), menuScreen, gameScreen.getGuiStage()));
 		}
+		
+		if(GameCore.debug) {
+			InputProcessor processor = Gdx.input.getInputProcessor();
+			MyUtils.debug("input processors: " + (processor instanceof InputMultiplexer ? Arrays.toString(((InputMultiplexer) processor).getProcessors().items) : processor.toString()));
+		}
 	}
 	
 	public static void addScreen(@NotNull MenuScreen screen) { setScreen(screen, true); }
@@ -302,8 +309,10 @@ public class ClientCore extends ApplicationAdapter {
 			if(menuScreen == null && !clientWorld.worldLoaded())
 				setScreen(new MainMenu());
 			
-			if(menuScreen == null)
+			if(menuScreen == null) {
 				MyUtils.debug("setting screen to null");
+				resetInputProcessor();
+			}
 		}
 	}
 	
