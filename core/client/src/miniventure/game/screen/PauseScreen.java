@@ -8,9 +8,6 @@ import com.kotcrab.vis.ui.widget.VisTextButton;
 
 public class PauseScreen extends MenuScreen {
 	
-	// TODO remove the background inheritor thing from the screens, like in sponly
-	// menus don't render backgrounds; the background is either the game screen, or the main menu background which is rendered in absence of a game screen
-	
 	public PauseScreen() {
 		Table table = useTable();
 		
