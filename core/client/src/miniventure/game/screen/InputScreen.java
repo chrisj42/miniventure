@@ -1,7 +1,6 @@
 package miniventure.game.screen;
 
 import miniventure.game.core.ClientCore;
-import miniventure.game.screen.util.BackgroundInheritor;
 import miniventure.game.util.function.Action;
 import miniventure.game.util.function.ValueAction;
 
@@ -18,10 +17,10 @@ import com.kotcrab.vis.ui.widget.VisTextButton;
 		- also allow for a title/header
 		- menu should also be contained in a ui frame, i.e. have some solid background
  */
-public class InputScreen extends BackgroundInheritor {
+public class InputScreen extends MenuScreen {
 	
-	public InputScreen(String prompt, ValueAction<String> onConfirm) { this(prompt, onConfirm, ClientCore::backToParentScreen); }
-	public InputScreen(String[] prompt, ValueAction<String> onConfirm) { this(prompt, onConfirm, ClientCore::backToParentScreen); }
+	public InputScreen(String prompt, ValueAction<String> onConfirm) { this(prompt, onConfirm, ClientCore::removeScreen); }
+	public InputScreen(String[] prompt, ValueAction<String> onConfirm) { this(prompt, onConfirm, ClientCore::removeScreen); }
 	public InputScreen(String prompt, ValueAction<String> onConfirm, Action onCancel) {
 		this(new String[] {prompt}, onConfirm, onCancel);
 	}

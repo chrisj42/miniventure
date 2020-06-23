@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import miniventure.game.core.GameCore;
+import miniventure.game.util.MyUtils;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.level.Level;
 import miniventure.game.world.tile.TileType;
@@ -78,12 +78,12 @@ public abstract class WorldManager {
 	void registerEntity(Entity e, boolean shouldBeReserved) {
 		synchronized (idLock) {
 			if(!reservedIDs.remove(e.getId()) && shouldBeReserved)
-				GameCore.error(this+" has not reserved entity ID "+e.getId()+"; continuing registration of given entity "+e);
+				MyUtils.error(this+" has not reserved entity ID "+e.getId()+"; continuing registration of given entity "+e);
 			
 			// check for existing registration
 			Entity cur;
 			if((cur = entityIDMap.put(e.getId(), e)) != null)
-				GameCore.error(this+" recieved redundant registration request for entity "+e+"; existing mapping (should match): "+cur);
+				MyUtils.error(this+" recieved redundant registration request for entity "+e+"; existing mapping (should match): "+cur);
 		}
 	}
 	
@@ -109,14 +109,14 @@ public abstract class WorldManager {
 	public void cancelIdReservation(Entity e) {
 		synchronized (idLock) {
 			if(!reservedIDs.remove(e.getId()))
-				GameCore.error("(in WorldManager.cancelIdReservation): id for entity " + e + " not reserved.");
+				MyUtils.error("(in WorldManager.cancelIdReservation): id for entity " + e + " not reserved.");
 		}
 	}
 	
 	public void deregisterEntity(int eid) {
 		synchronized (idLock) {
 			if(entityIDMap.remove(eid) == null)
-				GameCore.error("(in WorldManager.deregisterEntity): id "+eid+" not registered.");
+				MyUtils.error("(in WorldManager.deregisterEntity): id "+eid+" not registered.");
 		}
 	}
 	

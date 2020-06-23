@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 
-import miniventure.game.core.GameCore;
 import miniventure.game.network.PacketPipe.PacketPipeReader;
 import miniventure.game.network.PacketPipe.PacketPipeWriter;
+import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.MapFunction;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
@@ -84,7 +84,7 @@ public class NetworkServer extends GameServer {
 	}
 	
 	private void handleLogin(Connection connection, Login login) {
-		GameCore.debug("server received login");
+		MyUtils.debug("server received login");
 		
 		if(login.version.compareTo(Version.CURRENT) != 0) {
 			connection.sendTCP(new LoginFailure("Required version: "+ Version.CURRENT));

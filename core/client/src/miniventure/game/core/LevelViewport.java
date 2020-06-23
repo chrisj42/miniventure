@@ -150,7 +150,7 @@ public class LevelViewport {
 		batch.begin();
 		batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA); // default
 		//System.out.println("rendering level in bounds "+renderSpace+" to camera at "+camera.position+" with offset "+offset);
-		level.render(renderSpace, batch, GameCore.getDeltaTime(), offset); // renderSpace in world coords, but offset can give render coords
+		level.render(renderSpace, batch, MyUtils.getDeltaTime(), offset); // renderSpace in world coords, but offset can give render coords
 		
 		final ClientPlayer player = ClientCore.getWorld().getMainPlayer();
 		

@@ -8,7 +8,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import miniventure.game.core.GameCore;
 import miniventure.game.chat.ConsoleMessageBuilder;
 import miniventure.game.chat.MessageBuilder;
 import miniventure.game.util.MyUtils;
@@ -45,7 +44,7 @@ public class CommandInputParser implements Runnable {
 	@Override
 	public void run() {
 		shouldRun = true;
-		GameCore.debug("Starting server command parser");
+		MyUtils.debug("Starting server command parser");
 		
 		this.in = new BufferedReader(new InputStreamReader(System.in));
 		while(shouldRun) {
@@ -73,7 +72,7 @@ public class CommandInputParser implements Runnable {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		GameCore.debug("Ending server command parser");
+		MyUtils.debug("Ending server command parser");
 	}
 	
 	// a null player indicates that it is from the server console.

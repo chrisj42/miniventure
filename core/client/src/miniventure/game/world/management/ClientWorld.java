@@ -10,7 +10,6 @@ import miniventure.game.network.ServerManager;
 import miniventure.game.item.InventoryOverlay;
 import miniventure.game.network.GameProtocol;
 import miniventure.game.network.GameProtocol.DatalessRequest;
-import miniventure.game.network.GameProtocol.LevelData;
 import miniventure.game.network.GameProtocol.Login;
 import miniventure.game.network.GameProtocol.SpawnData;
 import miniventure.game.network.GameProtocol.WorldData;
@@ -64,6 +63,7 @@ public class ClientWorld extends LevelManager {
 	private GameClient client;
 	
 	private ClientPlayer mainPlayer;
+	private boolean renderWithoutPlayer = false; // this is needed to differentiate between death and loading a new level; on death, the previous level should still be rendered, but on load we should wait until the player is added.
 	
 	private boolean doDaylightCycle = true;
 	
@@ -77,13 +77,14 @@ public class ClientWorld extends LevelManager {
 	
 	@Override
 	public void update(float delta) {
-		if(!worldLoaded() || mainPlayer == null) {
+		ClientLevel level = !worldLoaded() ? null :
+				renderWithoutPlayer ? getLevel() :
+						mainPlayer == null ? null :
+								mainPlayer.getLevel();
+		if(level == null) {
 			super.update(delta);
 			return;
 		}
-		
-		ClientLevel level = mainPlayer.getLevel();
-		if(level == null) return;
 		
 		MenuScreen menu = ClientCore.getScreen();
 		if(menu == null)
@@ -91,6 +92,7 @@ public class ClientWorld extends LevelManager {
 		
 		level.update(delta);
 		
+		// gonna say for now that none of the menus use the whole screen
 		if(menu == null || !menu.usesWholeScreen())
 			gameScreen.render(getLightingOverlay(), level);
 		
@@ -101,6 +103,7 @@ public class ClientWorld extends LevelManager {
 	/*  --- WORLD MANAGEMENT --- */
 	
 	
+	// TODO send a WorldData packet to the client whenever a new level is loaded
 	public void init(WorldData data) {
 		gameTime = data.gameTime;
 		daylightOffset = data.daylightOffset;
@@ -114,7 +117,7 @@ public class ClientWorld extends LevelManager {
 	public void joinWorld(String ipAddress, int port) {
 		ClientCore.stopMusic();
 		LoadingScreen loadingScreen = new LoadingScreen();
-		ClientCore.setScreen(loadingScreen);
+		ClientCore.addScreen(loadingScreen);
 		
 		clearEntityIdMap();
 		
@@ -143,7 +146,7 @@ public class ClientWorld extends LevelManager {
 		// ClientCore.stopMusic();
 		LoadingScreen loadingScreen = new LoadingScreen();
 		// loadingScreen.pushMessage("Initializing local server");
-		ClientCore.setScreen(loadingScreen);
+		ClientCore.addScreen(loadingScreen);
 		
 		NetworkClient netClient = new NetworkClient();
 		this.client = netClient;
@@ -206,7 +209,7 @@ public class ClientWorld extends LevelManager {
 			setLevel(null);
 			mainPlayer = null;
 			client = null;
-			ClientCore.setScreen(new MainMenu());
+			ClientCore.removeScreen(true); // adds main menu automatically
 		});
 	}
 	
@@ -271,20 +274,19 @@ public class ClientWorld extends LevelManager {
 			this.mainPlayer = new ClientPlayer(data, invScreen);
 			registerEntity(mainPlayer);
 			gameScreen = ClientCore.newGameScreen(new GameScreen(mainPlayer, gameScreen, invScreen));
+			renderWithoutPlayer = true; // death will result in still showing the player
 			callback.act();
 		});
 	}
 	
 	// libGDX thread only
-	public void respawnPlayer() {
+	public void requestRespawn() {
+		renderWithoutPlayer = false; // hide the screen while the level reloads
 		LoadingScreen loader = new LoadingScreen();
-		ClientCore.setScreen(loader);
 		loader.pushMessage("Respawning");
+		ClientCore.addScreen(loader);
 		client.send(DatalessRequest.Respawn);
 	}
-	
-	public RespawnScreen getRespawnScreen() { return new RespawnScreen(mainPlayer, getLightingOverlay(), gameScreen); }
-	
 	
 	
 	/*  --- GET METHODS --- */
@@ -303,7 +305,10 @@ public class ClientWorld extends LevelManager {
 	
 	public ClientPlayer getMainPlayer() { return mainPlayer; }
 	
-	public boolean hasRenderableLevel() { return worldLoaded() && mainPlayer != null && mainPlayer.getLevel() != null; }
+	@Override
+	public boolean worldLoaded() { return client != null; }
+	
+	// public boolean hasRenderableLevel() { return worldLoaded() && mainPlayer != null && mainPlayer.getLevel() != null; }
 	
 	public boolean isLocalWorld() { return serverManager.isHosting(); }
 	

@@ -2,7 +2,7 @@ package miniventure.game.world.tile;
 
 import java.util.HashSet;
 
-import miniventure.game.core.GameCore;
+import miniventure.game.util.MyUtils;
 import miniventure.game.world.tile.TileCacheTag.TileDataCache;
 import miniventure.game.world.tile.TileDataTag.TileDataMap;
 import miniventure.game.world.Point;
@@ -77,7 +77,7 @@ public abstract class Tile implements WorldObject {
 		TileDataMap map = tileStack.getDataMap(tileType);
 		// should never happen, especially with the new synchronization. But this will stay, just in case.
 		if(map == null) {
-			GameCore.error("ERROR: tile " + toLocString() + " came back with a null data map for tiletype " + tileType + "; stack: " + tileStack.getDebugString(), true, true);
+			MyUtils.error("ERROR: tile " + toLocString() + " came back with a null data map for tiletype " + tileType + "; stack: " + tileStack.getDebugString(), true, true);
 			map = new TileDataMap();
 		}
 		return map;
@@ -88,7 +88,7 @@ public abstract class Tile implements WorldObject {
 		TileDataCache map = tileStack.getCacheMap(tileType);
 		// should never happen, especially with the new synchronization. But this will stay, just in case.
 		if(map == null) {
-			GameCore.error("ERROR: tile " + toLocString() + " came back with a null cache map for tiletype " + tileType + "; stack: " + tileStack.getDebugString(), true, true);
+			MyUtils.error("ERROR: tile " + toLocString() + " came back with a null cache map for tiletype " + tileType + "; stack: " + tileStack.getDebugString(), true, true);
 			map = new TileDataCache();
 		}
 		return map;

@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-import miniventure.game.core.GameCore;
 import miniventure.game.util.MyUtils;
-import miniventure.game.util.function.FetchFunction;
 import miniventure.game.world.tile.TileDataTag.TileDataMap;
 import miniventure.game.world.Point;
 import miniventure.game.world.Taggable;
@@ -72,36 +70,36 @@ public abstract class Level implements Taggable<Level> {
 	protected Level(@NotNull WorldManager world, int levelId, @NotNull TileTypeEnum[][][] tileTypes, @NotNull TileMaker tileFetcher) {
 		this(world, levelId, tileTypes.length, tileTypes.length == 0 ? 0 : tileTypes[0].length);
 		
-		GameCore.debug(world.getClass().getSimpleName()+": fetching level "+levelId+" initial tile data...");
+		MyUtils.debug(world.getClass().getSimpleName()+": fetching level "+levelId+" initial tile data...");
 		for(int x = 0; x < tiles.length; x++)
 			for(int y = 0; y < tiles[x].length; y++)
 				tiles[x][y] = tileFetcher.get(this, x, y, tileTypes[x][y]);
 		
-		GameCore.debug(world.getClass().getSimpleName()+": tile data initialized.");
+		MyUtils.debug(world.getClass().getSimpleName()+": tile data initialized.");
 	}
 	
 	protected Level(@NotNull WorldManager world, int levelId, TileData[][] tileData, TileLoader tileFetcher) {
 		this(world, levelId, tileData.length, tileData.length == 0 ? 0 : tileData[0].length);
 		
-		GameCore.debug(world.getClass().getSimpleName()+": loading level "+levelId+" tile data...");
+		MyUtils.debug(world.getClass().getSimpleName()+": loading level "+levelId+" tile data...");
 		for(int x = 0; x < tileData.length; x++) {
 			for(int y = 0; y < tileData[x].length; y++) {
 				TileData data = tileData[x][y];
 				tiles[x][y] = tileFetcher.get(this, x, y, data.getTypes(), data.getDataMaps());
 			}
 		}
-		GameCore.debug(world.getClass().getSimpleName()+": tile data loaded.");
+		MyUtils.debug(world.getClass().getSimpleName()+": tile data loaded.");
 	}
 	
 	protected Level(@NotNull WorldManager world, int levelId, int width, int height, TileFetcher tileFetcher) {
 		this(world, levelId, width, height);
-		GameCore.debug(world.getClass().getSimpleName()+": loading level "+levelId+" tile placeholders...");
+		MyUtils.debug(world.getClass().getSimpleName()+": loading level "+levelId+" tile placeholders...");
 		for(int x = 0; x < width; x++) {
 			for(int y = 0; y < height; y++) {
 				tiles[x][y] = tileFetcher.get(this, x, y);
 			}
 		}
-		GameCore.debug(world.getClass().getSimpleName()+": tile placeholders loaded.");
+		MyUtils.debug(world.getClass().getSimpleName()+": tile placeholders loaded.");
 	}
 	
 	public int getWidth() { return width; }

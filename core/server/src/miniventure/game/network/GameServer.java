@@ -169,14 +169,14 @@ public abstract class GameServer implements GameProtocol {
 		PlayerData info = knownPlayers.get(name);
 		boolean op;
 		if(info != null) {
-			GameCore.debug("Player '"+name+"' is known, loading stored data.");
+			MyUtils.debug("Player '"+name+"' is known, loading stored data.");
 			// TODO passwords
 			// if(!info.passhash.equals(passhash))
 			// 	return null; // incorrect password
 			player = (ServerPlayer) ServerEntity.deserialize(world, info.data, Version.CURRENT);
 			op = info.op;
 		} else {
-			GameCore.debug("Player '"+name+"' is not known, creating new player.");
+			MyUtils.debug("Player '"+name+"' is not known, creating new player.");
 			player = new ServerPlayer(world, name);
 			// if(GameCore.debug)
 			// 	op = connection.getRemoteAddressTCP().getAddress().isLoopbackAddress();
@@ -390,7 +390,7 @@ public abstract class GameServer implements GameProtocol {
 			toClient.send(obj);
 		}
 		else
-			GameCore.error("Server could not find send pipe for client "+player+" to send packet: "+obj.getClass().getSimpleName());
+			MyUtils.error("Server could not find send pipe for client "+player+" to send packet: "+obj.getClass().getSimpleName());
 	}
 	
 	public void broadcastGlobal(Object obj) {
@@ -532,7 +532,7 @@ public abstract class GameServer implements GameProtocol {
 		
 		ServerLevel level = player.getLevel();
 		if(level == null) {
-			GameCore.debug("Server: Level of player "+player.getName()+" is null during entity validation attempt, skipping validation.");
+			MyUtils.debug("Server: Level of player "+player.getName()+" is null during entity validation attempt, skipping validation.");
 			return;
 		}
 		

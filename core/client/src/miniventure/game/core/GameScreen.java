@@ -74,12 +74,12 @@ public class GameScreen {
 		
 		boolean shift = Gdx.input.isKeyPressed(Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Keys.SHIFT_RIGHT);
 		if(shift && GameCore.debug && Gdx.input.isKeyJustPressed(Keys.S)) {
-			ClientCore.setScreen(new InputScreen("Enter new Player Speed:", newSpeed -> {
+			ClientCore.addScreen(new InputScreen("Enter new Player Speed:", newSpeed -> {
 				try {
 					float value = Float.parseFloat(newSpeed);
 					player.setSpeed(value);
 				} catch(NumberFormatException ignored) {}
-				ClientCore.setScreen(null);
+				ClientCore.removeScreen();
 			}));
 		}
 		
@@ -109,10 +109,10 @@ public class GameScreen {
 				chatScreen.focus("/");
 			
 			else if(ClientCore.input.pressingControl(Control.PAUSE))
-				ClientCore.setScreen(new PauseScreen());
+				ClientCore.addScreen(new PauseScreen());
 			
 			else if(GameCore.debug && ClientCore.input.pressingKey(Keys.M))
-				ClientCore.setScreen(new MapScreen());
+				ClientCore.addScreen(new MapScreen());
 		}
 	}
 	

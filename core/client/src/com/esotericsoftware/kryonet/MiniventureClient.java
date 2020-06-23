@@ -2,7 +2,7 @@ package com.esotericsoftware.kryonet;
 
 import java.net.InetSocketAddress;
 
-import miniventure.game.core.GameCore;
+import miniventure.game.util.MyUtils;
 
 public class MiniventureClient extends Client {
 	
@@ -24,9 +24,9 @@ public class MiniventureClient extends Client {
 	
 	@Override
 	public void run() {
-		GameCore.debug("Starting Network client update thread");
+		MyUtils.debug("Starting Network client update thread");
 		super.run();
-		GameCore.debug("Ending Network client update thread");
+		MyUtils.debug("Ending Network client update thread");
 	}
 	
 	private int maxSize = 0;
@@ -36,7 +36,7 @@ public class MiniventureClient extends Client {
 		int sent = super.sendTCP(object);
 		
 		if(sent > maxSize) {
-			GameCore.debug("new largest packet of "+sent+" bytes is of type "+object.getClass().getSimpleName());
+			MyUtils.debug("new largest packet of "+sent+" bytes is of type "+object.getClass().getSimpleName());
 			maxSize = sent;
 		}
 		return sent;

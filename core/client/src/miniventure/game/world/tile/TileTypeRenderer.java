@@ -20,12 +20,12 @@ public class TileTypeRenderer {
 	static final TileTypeToAnimationMap<Integer> overlapAnimations = new IndexedTileTypeToAnimationMap();
 	
 	static {
-		GameCore.debug("init TileTypeRenderer class");
+		MyUtils.debug("init TileTypeRenderer class");
 	}
 	
 	// moved into a static init method instead of static init block in an attempt to fix some strange errors someone was having.
 	static void init() {
-		GameCore.debug("reading tile sprites...");
+		MyUtils.debug("reading tile sprites...");
 		
 		GameCore.tileAtlas.iterRegions(region -> {
 			final int split = region.name.indexOf('/');
@@ -52,7 +52,7 @@ public class TileTypeRenderer {
 			animationMap.addFrame(tileType, spriteName.substring(1), region);
 		});
 		
-		GameCore.debug("tile sprites read successfully.");
+		MyUtils.debug("tile sprites read successfully.");
 	}
 	
 	@FunctionalInterface

@@ -1,12 +1,11 @@
 package com.esotericsoftware.kryonet;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.channels.SocketChannel;
 import java.util.LinkedList;
 
-import miniventure.game.core.GameCore;
+import miniventure.game.util.MyUtils;
 
 public class MiniventureConnection extends Connection {
 	
@@ -62,11 +61,11 @@ public class MiniventureConnection extends Connection {
 		
 		int sent = super.sendTCP(object);
 		if(sent > maxSize) {
-			GameCore.debug("new largest packet of "+sent+" bytes is of type "+object.getClass().getSimpleName());
+			MyUtils.debug("new largest packet of "+sent+" bytes is of type "+object.getClass().getSimpleName());
 			maxSize = sent;
 		}
 		if(tcp.writeBuffer.position() > 0)
-			GameCore.debug("write buffer usage: "+(tcp.writeBuffer.position()/* / (float) tcp.writeBuffer.capacity()*/));
+			MyUtils.debug("write buffer usage: "+(tcp.writeBuffer.position()/* / (float) tcp.writeBuffer.capacity()*/));
 		/*if(tcp.writeBuffer.position() > 7_000) {
 			tcp.socketChannel.
 			try {

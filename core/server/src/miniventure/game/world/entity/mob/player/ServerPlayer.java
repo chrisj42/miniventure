@@ -6,14 +6,12 @@ import java.util.EnumMap;
 import miniventure.game.core.GameCore;
 import miniventure.game.item.*;
 import miniventure.game.item.ToolItem.ToolType;
-import miniventure.game.network.GameProtocol;
 import miniventure.game.network.GameProtocol.*;
 import miniventure.game.network.PacketPipe.PacketPipeWriter;
 import miniventure.game.network.GameServer;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.SerialHashMap;
 import miniventure.game.util.Version;
-import miniventure.game.util.function.Action;
 import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.Boundable;
 import miniventure.game.world.Point;
@@ -221,7 +219,7 @@ public class ServerPlayer extends ServerMob implements Player {
 			if(req.isItem) {
 				ItemRecipeSet set = ItemRecipeSet.values[req.setOrdinal];
 				ItemRecipe recipe = set.getRecipe(req.recipeIndex);
-				GameCore.debug("server got craft request for " + recipe.getResult().item);
+				MyUtils.debug("server got craft request for " + recipe.getResult().item);
 				Integer left = recipe.tryCraft(inventory);
 				if (left != null) {
 					ServerLevel level = getLevel();

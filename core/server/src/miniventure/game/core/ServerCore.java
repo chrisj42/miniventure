@@ -51,7 +51,7 @@ public class ServerCore extends Thread {
 	
 	@Override
 	public void run() {
-		GameCore.debug("ServerCore starting up");
+		MyUtils.debug("ServerCore starting up");
 		updateThread = Thread.currentThread();
 		
 		// start command parser thread
@@ -82,7 +82,7 @@ public class ServerCore extends Thread {
 				MyUtils.sleep(10 - (int)(delta*1000));
 			
 			try {
-				serverWorld.update(MathUtils.clamp(delta, 0, GameCore.MAX_DELTA));
+				serverWorld.update(MathUtils.clamp(delta, 0, MyUtils.MAX_DELTA));
 			} catch(Throwable t) {
 				try {
 					getServer().stop(false);
@@ -98,7 +98,7 @@ public class ServerCore extends Thread {
 		}
 		
 		commandParser.end();
-		GameCore.debug("ServerCore ending");
+		MyUtils.debug("ServerCore ending");
 	}
 	
 	@NotNull

@@ -33,26 +33,6 @@ public class GameCore {
 	
 	public static boolean debug = false;
 	
-	public static void debug(WorldManager world, String msg) {
-		debug(world.getClass().getSimpleName()+": "+msg);
-	}
-	public static void debug(String msg) {
-		if(debug)
-			System.out.println(msg);
-	}
-	
-	public static void errorFull(String error) { error(error, false, true); }
-	public static void error(String error) { error(error, true); }
-	public static void error(String error, boolean debugModeOnly) { error(error, debugModeOnly, false); }
-	public static void error(String error, boolean debugModeOnly, boolean dumpStack) {
-		if(debugModeOnly && !debug) return;
-		if(dumpStack) {
-			System.err.println(error + " Printing stack trace:");
-			Thread.dumpStack();
-		} else
-			System.err.println(error);
-	}
-	
 	@NotNull public static final String DEFAULT_GAME_DIR;
 	public static Path GAME_DIR = null;
 	static {
@@ -64,10 +44,6 @@ public class GameCore {
 		else
 			DEFAULT_GAME_DIR = home + "/.miniventure/";
 	}
-	
-	public static final float MAX_DELTA = 0.25f; // the maximum time that the game will clamp getDeltaTime to, to prevent huge jumps after a lag spike.
-	
-	private static final long START_TIME = System.nanoTime();
 	
 	public static final float SOUND_RADIUS = 10; // 10 tiles
 	
@@ -131,11 +107,6 @@ public class GameCore {
 		iconAtlas.dispose();
 		scaledIconAtlas.dispose();
 	}
-	
-	public static float getDeltaTime() { return MathUtils.clamp(Gdx.graphics.getDeltaTime(), 0, MAX_DELTA); }
-	
-	public static float getElapsedProgramTime() { return (System.nanoTime() - START_TIME)/1E9f; }
-	
 	
 	private static VersionInfo latestVersion = null;
 	

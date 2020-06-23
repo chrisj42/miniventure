@@ -10,9 +10,11 @@ import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.management.WorldManager;
 import miniventure.game.world.tile.TileTypeEnum;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
@@ -222,6 +224,13 @@ public final class MyUtils {
 	
 	// TIME UTILS
 	
+	
+	public static final float MAX_DELTA = 0.25f; // the maximum time that the game will clamp getDeltaTime to, to prevent huge jumps after a lag spike.
+	// private static final long START_TIME = System.nanoTime();
+	
+	public static float getDeltaTime() { return MathUtils.clamp(Gdx.graphics.getDeltaTime(), 0, MAX_DELTA); }
+	
+	// public static float getElapsedProgramTime() { return (System.nanoTime() - START_TIME)/1E9f; }
 	
 	public static void delay(int milliDelay, Action action) { new DelayedAction(milliDelay, action).start(); }
 	

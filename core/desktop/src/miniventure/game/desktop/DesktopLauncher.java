@@ -24,6 +24,7 @@ import miniventure.game.network.LocalServer;
 import miniventure.game.network.NetworkServer;
 import miniventure.game.core.ServerCore;
 import miniventure.game.network.ServerFetcher;
+import miniventure.game.util.MyUtils;
 import miniventure.game.util.ProgressLogger;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.MapFunction;
@@ -103,7 +104,7 @@ public class DesktopLauncher {
 			});
 			ServerCore.initHeadless(leftover.toArray(new String[0]));
 		} else {
-			GameCore.debug("Starting GUI client...");
+			MyUtils.debug("Starting GUI client...");
 			Thread.setDefaultUncaughtExceptionHandler(ClientCore.exceptionHandler);
 			LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 			config.title = "Miniventure - " + Version.CURRENT;
@@ -186,7 +187,7 @@ public class DesktopLauncher {
 				core.start();
 				return true;
 			} catch(IOException e) {
-				Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen("Error starting world: "+e.getMessage())));
+				Gdx.app.postRunnable(() -> ClientCore.addScreen(new ErrorScreen("Error starting world: "+e.getMessage())));
 				return false;
 			}
 		}

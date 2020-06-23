@@ -1,7 +1,6 @@
 package miniventure.game.screen;
 
 import miniventure.game.core.ClientCore;
-import miniventure.game.screen.util.BackgroundInheritor;
 import miniventure.game.util.function.Action;
 
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -10,9 +9,9 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 
-public class ConfirmScreen extends BackgroundInheritor {
+public class ConfirmScreen extends MenuScreen {
 	
-	public ConfirmScreen(String prompt, Action onConfirm) { this(prompt, onConfirm, ClientCore::backToParentScreen); }
+	public ConfirmScreen(String prompt, Action onConfirm) { this(prompt, onConfirm, ClientCore::removeScreen); }
 	public ConfirmScreen(String prompt, Action onConfirm, Action onCancel) {
 		super(new ScreenViewport());
 		

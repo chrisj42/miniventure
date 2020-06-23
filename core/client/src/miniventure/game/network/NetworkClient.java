@@ -58,7 +58,7 @@ public class NetworkClient extends GameClient {
 			@Override
 			public void disconnected(Connection connection) {
 				System.err.println("client disconnected from server.");
-				Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen("Lost connection with server.")));
+				Gdx.app.postRunnable(() -> ClientCore.addScreen(new ErrorScreen("Lost connection with server.")));
 				packetSendQueue.close();
 			}
 		});
@@ -95,7 +95,7 @@ public class NetworkClient extends GameClient {
 			// e.printStackTrace();
 			Gdx.app.postRunnable(() -> {
 				// error screen
-				ClientCore.setScreen(new ErrorScreen("Failed to connect: "+e.getMessage()));
+				ClientCore.addScreen(new ErrorScreen("Failed to connect: "+e.getMessage()));
 				callback.act(false);
 			});
 			return;
@@ -108,16 +108,16 @@ public class NetworkClient extends GameClient {
 			callback.act(true);
 		}
 		else {
-			Gdx.app.postRunnable(() -> ClientCore.setScreen(new InputScreen("Player name:", username -> {
+			Gdx.app.postRunnable(() -> ClientCore.addScreen(new InputScreen("Player name:", username -> {
 				this.username = username;
 				send(new Login(username, Version.CURRENT));
 				
 				logger.editMessage("Logging in as '"+username+'\'');
-				ClientCore.setScreen(logger);
+				ClientCore.addScreen(logger);
 				callback.act(true);
 			}, () -> {
 				disconnect();
-				ClientCore.backToParentScreen();
+				ClientCore.removeScreen();
 				callback.act(false);
 			})));
 		}

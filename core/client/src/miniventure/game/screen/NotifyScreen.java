@@ -8,8 +8,8 @@ import com.kotcrab.vis.ui.widget.VisTextButton;
 
 public class NotifyScreen extends MenuScreen {
 	
-	public NotifyScreen(boolean clearGdxBackground, Action onConfirm, String buttonText, String... message) {
-		super(clearGdxBackground, new ScreenViewport());
+	public NotifyScreen(Action onConfirm, String buttonText, String... message) {
+		super(new ScreenViewport());
 		
 		Table table = useTable();
 		table.defaults().pad(5);

@@ -13,7 +13,6 @@ import miniventure.game.util.RelPos;
 import miniventure.game.util.function.Action;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -40,18 +39,18 @@ import org.jetbrains.annotations.Nullable;
 
 public class MenuScreen extends Stage {
 	
-	private final boolean clearGdxBackground;
 	private MenuScreen parent;
+	private boolean ephemeral = false;
+	private boolean usesWholeScreen = false;
 	
 	private final LinkedList<ActorAnchor> anchoredActors = new LinkedList<>();
 	
 	private HashMap<Label, FontStyle> labels = new HashMap<>();
 	private HashSet<TextField> textFields = new HashSet<>();
 	
-	public MenuScreen(final boolean clearGdxBackground) { this(clearGdxBackground, new DiscreteViewport()); }
-	public MenuScreen(final boolean clearGdxBackground, Viewport viewport) {
+	public MenuScreen() { this(new DiscreteViewport()); }
+	public MenuScreen(Viewport viewport) {
 		super(viewport, ClientCore.getBatch());
-		this.clearGdxBackground = clearGdxBackground;
 	}
 	
 	protected void setCenterGroup(Group group) { addMainGroup(group, RelPos.CENTER); }
@@ -86,23 +85,27 @@ public class MenuScreen extends Stage {
 	}
 	
 	public void setParent(MenuScreen parent) {
-		if(parent != null && !parent.allowChildren())
+		if(parent != null && parent.ephemeral)
 			setParent(parent.getParent());
 		else
 			this.parent = parent;
 	}
 	public MenuScreen getParent() { return parent; }
 	
-	public boolean allowChildren() { return false; }
+	// use this method if you desire that child menus skip this one in the menu hierarchy
+	public MenuScreen markEphemeral() { ephemeral = true; return this; }
+	// public boolean allowChildren() { return false; }
 	
-	public boolean usesWholeScreen() { return clearGdxBackground; }
+	public MenuScreen useWholeScreen() { usesWholeScreen = true; return this; }
 	
-	@Override
+	public boolean usesWholeScreen() { return usesWholeScreen; }
+	
+	/*@Override
 	public void draw() {
 		if(clearGdxBackground)
 			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		super.draw();
-	}
+	}*/
 	
 	@Override
 	public void dispose() { dispose(true); }

@@ -2,7 +2,6 @@ package miniventure.game.world.level;
 
 import java.util.*;
 
-import miniventure.game.core.GameCore;
 import miniventure.game.item.ServerItem;
 import miniventure.game.network.GameProtocol.TileUpdate;
 import miniventure.game.network.GameServer;
@@ -299,7 +298,7 @@ public class ServerLevel extends Level {
 			mob.moveTo(tile);
 			addEntity(mob);
 		}
-		else GameCore.error("Failed to spawn mob "+mob+", no suitable spawn location.");
+		else MyUtils.error("Failed to spawn mob "+mob+", no suitable spawn location.");
 	}
 	
 	// only spawns within the given area

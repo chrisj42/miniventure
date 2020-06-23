@@ -71,7 +71,7 @@ public class CraftingScreen extends MenuScreen {
 	
 	public CraftingScreen() { this(null); }
 	public CraftingScreen(@Nullable RecipeUpdate update) {
-		super(false);
+		super();
 		
 		mainGroup = useTable(Align.topLeft, false);
 		addMainGroup(mainGroup, RelPos.TOP_LEFT);
@@ -113,7 +113,7 @@ public class CraftingScreen extends MenuScreen {
 			@Override
 			public boolean keyDown(InputEvent event, int keycode) {
 				if(Control.CANCEL.matches(keycode) || Control.CRAFTING_TOGGLE.matches(keycode)) {
-					ClientCore.setScreen(null);
+					ClientCore.removeScreen();
 					return true;
 				}
 				
@@ -355,7 +355,7 @@ public class CraftingScreen extends MenuScreen {
 		void onSelect() {
 			ClientCore.getClient().send(new RecipeSelectionRequest(isItemRecipe(), setOrdinal, id));
 			if(!isItemRecipe())
-				ClientCore.setScreen(null);
+				ClientCore.removeScreen();
 		}
 		
 		/*boolean needsItem(Item item) {

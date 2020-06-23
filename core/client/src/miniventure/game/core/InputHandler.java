@@ -117,6 +117,7 @@ public class InputHandler implements InputProcessor {
 		prevUpdate = curTime;
 	}
 	
+	// TODO not entirely sure if I need this to be separate; I mean, doing so should technically mean that nothing will be considered just pressed if executed during a Gdx.app runnable, since those are executed right before the render method. But until I figure out what my reasoning for doing this in the single-player version was, I'll leave it be.
 	void onFrameEnd() {
 		pressedKeys.clear();
 		pressedButtons.clear();

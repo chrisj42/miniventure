@@ -10,7 +10,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import miniventure.game.core.GameCore;
 import miniventure.game.network.GameProtocol.DatalessRequest;
 import miniventure.game.network.GameProtocol.EntityAddition;
 import miniventure.game.network.GameProtocol.EntityRemoval;
@@ -21,6 +20,7 @@ import miniventure.game.network.GameServer;
 import miniventure.game.core.ServerCore;
 import miniventure.game.network.ServerFetcher;
 import miniventure.game.util.ArrayUtils;
+import miniventure.game.util.MyUtils;
 import miniventure.game.util.ProgressLogger;
 import miniventure.game.util.SyncObj;
 import miniventure.game.util.Version;
@@ -58,7 +58,7 @@ public class ServerWorld extends WorldManager {
 			int levelId = cache.getId();
 			IslandType islandType = cache.islandType;
 			String mapType = levelId < 0 ? "underground" : "surface";
-			GameCore.debug("Server generating "+islandType+' '+mapType+" map for level "+levelId);
+			MyUtils.debug("Server generating "+islandType+' '+mapType+" map for level "+levelId);
 			long seed = ServerWorld.this.worldSeed * (2 + levelId);
 			return new ServerLevel(ServerWorld.this, cache,
 				islandType.generateIsland(seed, levelId > 0)
@@ -67,12 +67,12 @@ public class ServerWorld extends WorldManager {
 		
 		@Override
 		public ServerLevel loadLevel(LevelCache cache, final Version version, TileData[][] tileData, String[] entityData) {
-			GameCore.debug("Server loading level "+cache.getId()+" from data");
+			MyUtils.debug("Server loading level "+cache.getId()+" from data");
 			ServerLevel level = new ServerLevel(ServerWorld.this, cache, tileData);
 			
 			for(String e: entityData)
 				level.addEntity(ServerEntity.deserialize(ServerWorld.this, e, version));
-			GameCore.debug("Server finished loading level "+cache.getId()+" (including entities)");
+			MyUtils.debug("Server finished loading level "+cache.getId()+" (including entities)");
 			return level;
 		}
 	};
@@ -292,7 +292,7 @@ public class ServerWorld extends WorldManager {
 		
 		boolean put = level == null;
 		if(put) {
-			GameCore.debug("Fetching level "+levelId);
+			MyUtils.debug("Fetching level "+levelId);
 			server.sendToPlayer(activator, DatalessRequest.Level_Loading);
 			IslandCache island = islandStores[Math.abs(levelId)-1];
 			level = (ServerLevel) (levelId > 0 ? island.surface : island.caverns).getLevel(levelFetcher);
@@ -326,11 +326,11 @@ public class ServerWorld extends WorldManager {
 				map.put(levelId, sl);
 				setEntityLevel(activator, sl);
 			});
-			GameCore.debug("level "+level.getLevelId()+" is now loaded.");
+			MyUtils.debug("level "+level.getLevelId()+" is now loaded.");
 		}
 		else setEntityLevel(activator, level);
 		
-		GameCore.debug("Player "+activator+" has been loaded to level "+level.getLevelId());
+		MyUtils.debug("Player "+activator+" has been loaded to level "+level.getLevelId());
 		
 		return level;
 	}
@@ -346,7 +346,7 @@ public class ServerWorld extends WorldManager {
 			super.deregisterEntity(e.getId());
 		
 		loadedLevels.act(map -> map.remove(levelId));
-		GameCore.debug("unloaded level "+levelId);
+		MyUtils.debug("unloaded level "+levelId);
 	}
 	
 	protected void pruneLoadedLevels() {
@@ -382,7 +382,7 @@ public class ServerWorld extends WorldManager {
 	public void deregisterEntity(int eid) {
 		ServerEntity e = getEntity(eid);
 		if(e == null) {
-			GameCore.debug("Server could not find entity "+eid+", ignoring deregister request.");
+			MyUtils.debug("Server could not find entity "+eid+", ignoring deregister request.");
 			return;
 		}
 		
@@ -408,21 +408,21 @@ public class ServerWorld extends WorldManager {
 		
 		if(hasLevel) {
 			if(!registered) {
-				GameCore.error("Unregistered server entity found on level " + current + " during request to set level to " + level + ". Removing from current level.");
+				MyUtils.error("Unregistered server entity found on level " + current + " during request to set level to " + level + ". Removing from current level.");
 				entityManager.removeEntity(e);
 				hasLevel = false;
 				act = false;
 			}
 			else if(current.getLevelId() != level.getLevelId())
 				// levels are different
-				GameCore.error("Server entity "+e+" is already on level "+current+", will not set level to "+level);
+				MyUtils.error("Server entity "+e+" is already on level "+current+", will not set level to "+level);
 			else
 				return; // requests to add an entity to a level they are already on will be quietly ignored.
 		}
 		
 		if(!level.isPreload() && !isLevelLoaded(level.getLevelId())) {
 			act = false;
-			GameCore.error("Server level "+level+" exists but is not loaded; will not add entity "+e);
+			MyUtils.error("Server level "+level+" exists but is not loaded; will not add entity "+e);
 		}
 		
 		if(!act) return; // level set is not valid.

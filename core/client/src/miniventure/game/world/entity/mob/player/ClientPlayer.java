@@ -179,7 +179,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 				dir = newDir;
 		}
 		
-		Vector2 moveDist = inputDir.cpy().scl(moveSpeed * GameCore.getDeltaTime());
+		Vector2 moveDist = inputDir.cpy().scl(moveSpeed * MyUtils.getDeltaTime());
 		// FIXME speed needs to be set in server 
 		ClientTile closest = (ClientTile) getClosestTile();
 		if(closest != null)
@@ -191,7 +191,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 			
 			animator.requestState(AnimationState.WALK);
 			
-			getStatEvo(HungerSystem.class).addHunger(GameCore.getDeltaTime() * 0.35f);
+			getStatEvo(HungerSystem.class).addHunger(MyUtils.getDeltaTime() * 0.35f);
 			
 			/*if(elapTime - lastWalkTime > 0.25f) {
 				ClientCore.playSound("player/walk");
@@ -222,7 +222,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 			/*if(ClientCore.input.pressingControl(Control.INVENTORY_TOGGLE)) {
 				ClientCore.setScreen(new InventoryScreen(inventory));
 			} else */if(ClientCore.input.pressingControl(Control.CRAFTING_TOGGLE))
-				ClientCore.setScreen(new CraftingScreen());
+				ClientCore.addScreen(new CraftingScreen());
 			else if(ClientCore.input.pressingControl(Control.DROP_ITEM)) {
 				inventory.dropInvItems(Modifier.SHIFT.isPressed());
 			}

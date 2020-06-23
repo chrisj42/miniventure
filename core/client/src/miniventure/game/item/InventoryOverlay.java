@@ -6,17 +6,12 @@ import java.util.Objects;
 import miniventure.game.core.ClientCore;
 import miniventure.game.core.FontStyle;
 import miniventure.game.screen.MenuScreen;
-import miniventure.game.screen.util.ColorBackground;
 import miniventure.game.screen.util.DiscreteViewport;
-import miniventure.game.util.ArrayUtils;
-import miniventure.game.util.MyUtils;
 import miniventure.game.util.RelPos;
 
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
@@ -69,7 +64,7 @@ public class InventoryOverlay extends MenuScreen {
 	private String lastItem; // cache for held item label
 	
 	public InventoryOverlay(Camera camera) {
-		super(false, new DiscreteViewport(camera));
+		super(new DiscreteViewport(camera));
 		mainGroup = useTable(Align.left, false);
 		mainGroup.defaults().padBottom(2f);
 		addMainGroup(mainGroup, RelPos.BOTTOM_LEFT);
@@ -86,11 +81,11 @@ public class InventoryOverlay extends MenuScreen {
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
 				if(ClientCore.getScreen() instanceof CraftingScreen) {
-					ClientCore.setScreen(null);
+					ClientCore.removeScreen();
 					craftBtn.focusLost();
 				}
 				else
-					ClientCore.setScreen(new CraftingScreen());
+					ClientCore.addScreen(new CraftingScreen());
 			}
 		});
 		/*craftBtn.setBackground(new BaseDrawable(craftBtn.getBackground()) {

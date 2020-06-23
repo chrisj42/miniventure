@@ -1,15 +1,12 @@
 package miniventure.game.screen;
 
 import miniventure.game.core.ClientCore;
-import miniventure.game.screen.util.BackgroundInheritor;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 
-public class InfoScreen extends BackgroundInheritor {
+public class InfoScreen extends MenuScreen {
 	
 	private InfoScreen(String... text) { this(false, text); }
 	private InfoScreen(boolean addButton, String... text) {
@@ -24,11 +21,11 @@ public class InfoScreen extends BackgroundInheritor {
 		
 		VisTextButton cont = null;
 		if(addButton) {
-			cont = makeButton("Continue to World Config", () -> ClientCore.setScreen(new WorldGenScreen()));
+			cont = makeButton("Continue to World Config", () -> ClientCore.addScreen(new WorldGenScreen()));
 			table.add(cont);
 		}
 		
-		VisTextButton back = makeButton("Back", ClientCore::backToParentScreen); 
+		VisTextButton back = makeButton("Back", ClientCore::removeScreen); 
 		table.add(back).row();
 		
 		// table.pack();
@@ -37,10 +34,10 @@ public class InfoScreen extends BackgroundInheritor {
 		setKeyboardFocus(table);
 	}
 	
-	@Override
+	/*@Override
 	public void renderBackground() {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-	}
+	}*/
 	
 	public static class InstructionsScreen extends InfoScreen {
 		public InstructionsScreen() { this(false); }

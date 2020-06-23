@@ -2,7 +2,6 @@ package miniventure.game.network;
 
 import java.util.HashMap;
 
-import miniventure.game.core.GameCore;
 import miniventure.game.core.AudioException;
 import miniventure.game.core.ClientCore;
 import miniventure.game.item.CraftingScreen;
@@ -12,8 +11,8 @@ import miniventure.game.screen.ErrorScreen;
 import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MapScreen;
 import miniventure.game.screen.MenuScreen;
+import miniventure.game.screen.RespawnScreen;
 import miniventure.game.util.MyUtils;
-import miniventure.game.util.ValueWrapper;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClientEntity;
 import miniventure.game.world.entity.ClientEntityRenderer;
@@ -59,7 +58,7 @@ public abstract class GameClient implements GameProtocol {
 			Gdx.app.postRunnable(() -> {
 				LoadingScreen loader = new LoadingScreen();
 				loader.pushMessage("reading level data", true);
-				ClientCore.setScreen(loader);
+				ClientCore.addScreen(loader);
 				world.setLevel(info, loader);
 			});
 		});
@@ -96,7 +95,7 @@ public abstract class GameClient implements GameProtocol {
 		}
 		
 		if(object == DatalessRequest.Death) {
-			Gdx.app.postRunnable(() -> ClientCore.setScreen(world.getRespawnScreen()));
+			Gdx.app.postRunnable(() -> ClientCore.addScreen(new RespawnScreen()));
 			return;
 		}
 		
@@ -105,11 +104,11 @@ public abstract class GameClient implements GameProtocol {
 			if(screen instanceof MapScreen)
 				((MapScreen)screen).mapUpdate(req);
 			else if(screen == null)
-				Gdx.app.postRunnable(() -> ClientCore.setScreen(new MapScreen()));
+				Gdx.app.postRunnable(() -> ClientCore.addScreen(new MapScreen()));
 		});
 		
 		if(object instanceof SpawnData) {
-			GameCore.debug("client received player");
+			MyUtils.debug("client received player");
 			MenuScreen screen = ClientCore.getScreen();
 			if(screen instanceof LoadingScreen) {
 				LoadingScreen loader = (LoadingScreen) screen;
@@ -117,7 +116,7 @@ public abstract class GameClient implements GameProtocol {
 			}
 			SpawnData data = (SpawnData) object;
 			world.spawnPlayer(data, () -> { // hopefully nothing bad can come of reading packets before this is finished.
-				ClientCore.setScreen(null);
+				ClientCore.removeScreen(true);
 				if(ClientCore.PLAY_MUSIC) {
 					try {
 						Music song = ClientCore.setMusicTrack(Gdx.files.internal("audio/music/game.mp3"));
@@ -278,7 +277,7 @@ public abstract class GameClient implements GameProtocol {
 		forPacket(object, RecipeUpdate.class, req -> {
 			MenuScreen screen = ClientCore.getScreen();
 			if(!(screen instanceof CraftingScreen))
-				Gdx.app.postRunnable(() -> ClientCore.setScreen(new CraftingScreen(req)));
+				Gdx.app.postRunnable(() -> ClientCore.addScreen(new CraftingScreen(req)));
 			else
 				((CraftingScreen)screen).recipeUpdate(req);
 		});
@@ -298,7 +297,7 @@ public abstract class GameClient implements GameProtocol {
 			chat.autocomplete(response);
 		});
 		
-		forPacket(object, LoginFailure.class, failure -> Gdx.app.postRunnable(() -> ClientCore.setScreen(new ErrorScreen(failure.message))));
+		forPacket(object, LoginFailure.class, failure -> Gdx.app.postRunnable(() -> ClientCore.addScreen(new ErrorScreen(failure.message))));
 		
 		forPacket(object, SoundRequest.class, sound -> ClientCore.playSound(sound.sound));
 	}

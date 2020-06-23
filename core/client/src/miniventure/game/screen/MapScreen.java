@@ -28,14 +28,14 @@ public class MapScreen extends MenuScreen {
 	}
 	
 	public MapScreen() {
-		super(false);
+		super();
 		
 		table.add(makeLabel("waiting..."));
 		requested = false;
 	}
 	
 	public MapScreen(MapRequest data) {
-		super(false);
+		super();
 		
 		requested = true;
 		mapUpdate(data);
@@ -53,7 +53,7 @@ public class MapScreen extends MenuScreen {
 	@Override
 	public void act(float delta) {
 		if(ClientCore.input.pressingControl(Control.CANCEL))
-			ClientCore.setScreen(null);
+			ClientCore.removeScreen();
 		else
 			super.act(delta);
 	}
@@ -74,7 +74,7 @@ public class MapScreen extends MenuScreen {
 					// Level playerLevel = ClientCore.getWorld().getMainPlayer().getLevel();
 					if(!(playerLevel != null && playerLevel.getLevelId() == levelid))
 						ClientCore.getClient().send(new LevelChange(levelid));
-					ClientCore.setScreen(null);
+					ClientCore.removeScreen();
 				});
 				table.add(btn).row();
 			}

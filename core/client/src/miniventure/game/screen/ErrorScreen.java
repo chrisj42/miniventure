@@ -1,13 +1,12 @@
 package miniventure.game.screen;
 
 import miniventure.game.core.ClientCore;
-import miniventure.game.screen.util.BackgroundInheritor;
 
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 
-public class ErrorScreen extends BackgroundInheritor {
+public class ErrorScreen extends MenuScreen {
 	
 	private final String error;
 	
@@ -24,7 +23,7 @@ public class ErrorScreen extends BackgroundInheritor {
 		if(allowRejoin)
 			table.add(rejoin).spaceTop(50).row();
 		
-		VisTextButton back = makeButton("Back to main menu", () -> ClientCore.setScreen(getParent() != null ? getParent() : new MainMenu()));
+		VisTextButton back = makeButton("Back to main menu", () -> ClientCore.addScreen(getParent() != null ? getParent() : new MainMenu()));
 		table.add(back).spaceTop(10).row();
 		
 		mapButtons(table, rejoin, back);

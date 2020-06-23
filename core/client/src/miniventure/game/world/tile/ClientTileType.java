@@ -1,6 +1,6 @@
 package miniventure.game.world.tile;
 
-import miniventure.game.core.GameCore;
+import miniventure.game.util.MyUtils;
 import miniventure.game.util.param.Param;
 import miniventure.game.util.param.ParamMap;
 import miniventure.game.util.param.Value;
@@ -15,7 +15,7 @@ import static miniventure.game.world.tile.TileTypeRenderer.buildRenderer;
 public class ClientTileType extends TileType {
 	
 	public static void init() {
-		GameCore.debug("about to init TileTypeRenderer");
+		MyUtils.debug("about to init TileTypeRenderer");
 		TileTypeRenderer.init();
 		for(ClientTileTypeEnum type: ClientTileTypeEnum.values)
 			type.getType();

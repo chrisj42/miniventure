@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 import miniventure.game.core.ClientCore;
-import miniventure.game.screen.util.BackgroundInheritor;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
 import miniventure.game.world.file.WorldFileInterface;
@@ -27,7 +26,7 @@ import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 
-public class WorldSelectScreen extends BackgroundInheritor {
+public class WorldSelectScreen extends MenuScreen {
 	
 	private static final Color invalidColor = new Color(1, .5f, .5f, 1);
 	
@@ -85,14 +84,14 @@ public class WorldSelectScreen extends BackgroundInheritor {
 				else {
 					LoadingScreen loader = new LoadingScreen();
 					loader.pushMessage("Loading world '"+ref.worldName+'\'', true);
-					ClientCore.setScreen(loader);
+					ClientCore.addScreen(loader);
 					new Thread(() -> {
 						try {
 							ClientCore.getWorld().startLocalWorld(WorldFileInterface.loadWorld(ref, lockRef), loader);
 						} catch(WorldFormatException e) {
 							Gdx.app.postRunnable(() -> {
 								error.setText(MyUtils.combineThrowableCauses(e, "Failed to load world"));
-								ClientCore.setScreen(this);
+								ClientCore.addScreen(this);
 							});
 						}
 					}).start();
@@ -103,7 +102,7 @@ public class WorldSelectScreen extends BackgroundInheritor {
 			}
 			// code reaches here if an error occurred
 			error.invalidateHierarchy();
-			ClientCore.setScreen(this);
+			ClientCore.addScreen(this);
 		});
 		table.add(load).row();
 		
@@ -144,16 +143,11 @@ public class WorldSelectScreen extends BackgroundInheritor {
 		ev.setTarget(worldList);
 		worldList.fire(ev);
 		
-		VisTextButton back = makeButton("Back to Main Menu", ClientCore::backToParentScreen);
+		VisTextButton back = makeButton("Back to Main Menu", ClientCore::removeScreen);
 		table.add(back);
 		mapButtons(getRoot(), load, back);
 		setKeyboardFocus(null);
 		setScrollFocus(scrollPane);
-	}
-	
-	@Override
-	public boolean allowChildren() {
-		return true;
 	}
 	
 	@Override

@@ -74,7 +74,7 @@ public class TransitionManager {
 		HashMap<String, ServerTileTransition> animations = isEntering ? entranceAnimations : exitAnimations;
 		for(ServerTileTransition animation: animations.values()) {
 			if(animation.isTriggerType(nextType.tileType)) {
-				GameCore.debug("Server starting tile transition for tile "+tile+", triggered by tiletype "+nextType.tileType+", with enter="+isEntering);
+				MyUtils.debug("Server starting tile transition for tile "+tile+", triggered by tiletype "+nextType.tileType+", with enter="+isEntering);
 				TileDataMap dataMap = tile.getDataMap(tileType);
 				TileDataCache cacheMap = tile.getCacheMap(tileType);
 				dataMap.put(TileDataTag.TransitionName, animation.name);
@@ -123,7 +123,7 @@ public class TransitionManager {
 		if(timeElapsed < anim.getDuration())
 			return anim.getDuration() - timeElapsed;
 		
-		GameCore.debug("Server ending tile transition for "+tile);
+		MyUtils.debug("Server ending tile transition for "+tile);
 		
 		TransitionMode mode = cacheMap.remove(TileCacheTag.TransitionMode);
 		cacheMap.remove(TileCacheTag.AnimationStart);

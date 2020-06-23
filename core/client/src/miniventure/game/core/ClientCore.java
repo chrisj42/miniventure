@@ -23,8 +23,6 @@ import miniventure.game.screen.LoadingScreen;
 import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
 import miniventure.game.screen.NotifyScreen;
-import miniventure.game.screen.util.BackgroundInheritor;
-import miniventure.game.screen.util.BackgroundProvider;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.entity.ClientEntityRenderer;
 import miniventure.game.world.file.WorldFileInterface;
@@ -38,6 +36,7 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -55,9 +54,14 @@ public class ClientCore extends ApplicationAdapter {
 	
 	public static final int DEFAULT_SCREEN_WIDTH = 1400;
 	public static final int DEFAULT_SCREEN_HEIGHT = 800;
+	
+	/// This variable is sort of a cache of the variable stored in the ClientWorld instance, so that ClientCore can perform operations with it. It's null more often than the ClientWorld's value because it gets reset when coming back to the main menu, but the ClientWorld's value doesn't. The reason we can't just do everything with the screen in ClientWorld is because that would require making more GameScreen methods/fields public; having some things in ClientCore means we can take advantage of package-private access.
 	private static GameScreen gameScreen;
+	
+	/// This ClientWorld instance handles the world-related actions of a client-side game, and its persistent across multiple game instances; i.e. it's created once during initialization and then handles each new world in turn as they're loaded.
 	private static ClientWorld clientWorld;
 	
+	// determines whether the instructions are shown before starting a new world
 	public static boolean viewedInstructions = false;
 	
 	// debug flags
@@ -70,18 +74,29 @@ public class ClientCore extends ApplicationAdapter {
 	private static Music song;
 	private static final HashMap<String, Sound> soundEffects = new HashMap<>();
 	
+	/// The InputHandler class handles most game-related inputs and controls, i.e. stuff shown by the GameScreen instead of things in menus. But some menus do still check the InputHandler, such as for list scrolling with keys, so it's important to always multiplex this InputHandler after the respective MenuScreen Stage.
 	public static final InputHandler input = new InputHandler();
 	
+	// This boolean is separate from the MenuScreen instance so that removal of the screen during MenuScreen act() is not reflected until the following frame.
 	private static boolean hasMenu = false;
+	// The current screen being shown. May have parent screens, which will not be rendered.
 	private static MenuScreen menuScreen;
-	
+	// a lock object to prevent multithreading mixups while changing the screen.
 	private static final Object screenLock = new Object();
+	
+	private static DisplayLevelBackground displayLevelBackground;
+	
+	// the batch used in most of the code
 	private static SpriteBatch batch;
+	// the ui skin used for most of the Scene2D elements
 	private static Skin skin;
+	// a font generator to allow for free font size scaling so the UI can still look half-decent regardless of window dimensions.
 	private static FreeTypeFontGenerator fontGenerator;
+	// lays out characters.
 	private static GlyphLayout layout = new GlyphLayout();
 	// private static HashMap<Integer, BitmapFont> fonts = new HashMap<>();
 	
+	/// manages all inter-operations with the server module of the code, used when starting single-player worlds. This allows the client and server module to be compiled independently while still allowing the various screens in this module to manage the state of a single-player server.
 	private final ServerManager serverStarter;
 	
 	public static boolean PLAY_MUSIC = false;
@@ -116,6 +131,7 @@ public class ClientCore extends ApplicationAdapter {
 		loader.pushMessage("Initializing");
 		setScreen(loader);
 		//System.out.println("start delay");
+		// this delay is to allow the GDX backend to start up the render loop and render the loading screen we just set, before we start actually initializing all the things.
 		MyUtils.delay(0, () -> Gdx.app.postRunnable(() -> {
 			//System.out.println("end delay");
 			GameCore.initGdxTextures();
@@ -130,7 +146,9 @@ public class ClientCore extends ApplicationAdapter {
 			// gameScreen = new GameScreen();
 			clientWorld = new ClientWorld(serverStarter);
 			
-			MenuScreen devNotice = new NotifyScreen(true, () -> setScreen(new MainMenu()),
+			displayLevelBackground = new DisplayLevelBackground();
+			
+			MenuScreen devNotice = new NotifyScreen(() -> setScreen(new MainMenu()),
 				"Continue",
 				"Welcome to Miniventure Alpha!",
 				"",
@@ -147,16 +165,16 @@ public class ClientCore extends ApplicationAdapter {
 				"as the world is still being fleshed out.",
 				"",
 				"Enjoy the game!"
-			);
+			).useWholeScreen();
+			
+			setScreen(devNotice);
 			
 			Path oldDataPath = WorldFileInterface.getDataImportSource();
 			if(oldDataPath != null)
-				setScreen(new ConfirmScreen("The default save location for miniventure files has changed since the previous version,\nso your files have been copied to the new location.\nDo you wish to delete the old save location? Older versions will lose their data.", () -> {
+				addScreen(new ConfirmScreen("The default save location for miniventure files has changed since the previous version,\nso your files have been copied to the new location.\nDo you wish to delete the old save location? Older versions will lose their data.", () -> {
 					WorldFileInterface.deleteRecursively(oldDataPath);
-					setScreen(devNotice);
-				}, () -> setScreen(devNotice)));
-			else
-				setScreen(devNotice);
+					removeScreen();
+				}, ClientCore::removeScreen).useWholeScreen());
 		}));
 	}
 	
@@ -183,11 +201,18 @@ public class ClientCore extends ApplicationAdapter {
 	@Override
 	public void render() {
 		getBatch().setColor(Color.WHITE);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		
 		input.onFrameStart();
 		
-		if (clientWorld != null && clientWorld.worldLoaded())
-			clientWorld.update(GameCore.getDeltaTime()); // renders as well
+		MenuScreen curScreen = getScreen();
+		final float delta = MyUtils.getDeltaTime();
+		if(clientWorld != null) {
+			if (clientWorld.worldLoaded())
+				clientWorld.update(delta); // renders as well
+			else if(curScreen == null || !curScreen.usesWholeScreen())
+				displayLevelBackground.render(delta);
+		}
 		
 		synchronized (screenLock) {
 			hasMenu = menuScreen != null;
@@ -209,19 +234,21 @@ public class ClientCore extends ApplicationAdapter {
 		}
 	}
 	
-	public static void setScreen(@Nullable MenuScreen screen) {
+	public static void addScreen(@NotNull MenuScreen screen) { setScreen(screen, true); }
+	private static void setScreen(@NotNull MenuScreen screen) { setScreen(screen, false); }
+	private static void setScreen(@NotNull MenuScreen screen, boolean addToParent) {
 		synchronized (screenLock) {
 			if(screen == menuScreen) return;
 			
-			if(menuScreen != null && screen != null && screen == menuScreen.getParent()) {
-				backToParentScreen();
+			/*if(menuScreen != null && screen != null && screen == menuScreen.getParent()) {
+				removeScreen();
 				return;
-			}
+			}*/
 			
 			if((menuScreen instanceof MainMenu || menuScreen instanceof ErrorScreen) && screen instanceof ErrorScreen)
 				return; // ignore it.
 			
-			if(screen != null) {
+			/*if(screen != null) {
 				// determine if the given screen instance is already somewhere on the "screen" hierarchy, and if so go back to that one.
 				MenuScreen check = menuScreen;
 				while(check != null && check != screen)
@@ -230,55 +257,53 @@ public class ClientCore extends ApplicationAdapter {
 				if(check != null) {
 					// screen found
 					while(menuScreen != null && menuScreen != screen)
-						backToParentScreen();
+						removeScreen();
 					
 					return;
 				}
-			}
+			}*/
 			
-			if(menuScreen instanceof BackgroundProvider && screen instanceof BackgroundInheritor)
-				((BackgroundInheritor) screen).setBackground((BackgroundProvider) menuScreen);
+			// if(menuScreen instanceof BackgroundProvider && screen instanceof BackgroundInheritor)
+			// 	((BackgroundInheritor) screen).setBackground((BackgroundProvider) menuScreen);
 			
-			if(screen != null) {
-				// error and loading (and chat) screens can have parents, but cannot be parents.
+			if(addToParent)
 				screen.setParent(menuScreen);
-				screen.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-			} else if(menuScreen != null && (gameScreen == null || menuScreen != gameScreen.chatScreen))
-				menuScreen.dispose(); // "menuScreen != null" is always true because the start of the method cut off if screen == menuScreen, and since in this branch screen == null, menuScreen cannot also be null otherwise it would be equal. A bit roundabout, I know.
+			else if(menuScreen != null && (gameScreen == null || menuScreen != gameScreen.chatScreen))
+				menuScreen.dispose();
 			
-			GameCore.debug("setting screen to " + screen);
+			MyUtils.debug("setting screen to " + screen);
 			
-			if(gameScreen != null) {
-				if(screen instanceof MainMenu) {
-					gameScreen.chatScreen.reset();
-					gameScreen.chatOverlay.reset();
-				}
+			if(gameScreen != null && screen instanceof MainMenu) {
+				gameScreen.chatScreen.reset();
+				gameScreen.chatOverlay.reset();
+				gameScreen = null; // the ClientWorld still saves the gameScreen in its instance; it will still be used for creating the new screen. This just means the chat screens don't get reset over and over again.
 			}
 			
 			input.resetDelay();
 			menuScreen = screen;
 			resetInputProcessor();
+			screen.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 			if(menuScreen != null) menuScreen.focus();
 		}
 	}
-	public static void backToParentScreen() {
+	public static void removeScreen() { removeScreen(false); }
+	public static void removeScreen(boolean all) {
 		synchronized (screenLock) {
-			if(menuScreen != null && menuScreen.getParent() != null) {
-				MenuScreen screen = menuScreen.getParent();
-				GameCore.debug("setting screen back to " + screen);
-				if(gameScreen == null || menuScreen != gameScreen.chatScreen)
-					menuScreen.dispose(false);
-				screen.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-				menuScreen = screen;
-				Gdx.input.setInputProcessor(menuScreen);
-				input.reset();
+			if(menuScreen != null) {
+				// screens are getting removed
+				MenuScreen parent = menuScreen.getParent();
+				menuScreen.dispose(all);
+				menuScreen = null;
+				if(!all && parent != null)
+					setScreen(parent);
 			}
-			else {
-				if(clientWorld.worldLoaded())
-					setScreen(null);
-				else if(!(menuScreen instanceof MainMenu))
-					setScreen(new MainMenu());
-			}
+			
+			// add back the main menu if we don't have any other screens and no world
+			if(menuScreen == null && !clientWorld.worldLoaded())
+				setScreen(new MainMenu());
+			
+			if(menuScreen == null)
+				MyUtils.debug("setting screen to null");
 		}
 	}
 	
@@ -346,6 +371,9 @@ public class ClientCore extends ApplicationAdapter {
 		MenuScreen menu = getScreen();
 		if(menu != null)
 			menu.resize(width, height);
+		
+		if(displayLevelBackground != null)
+			displayLevelBackground.resize(width, height);
 	}
 	
 	

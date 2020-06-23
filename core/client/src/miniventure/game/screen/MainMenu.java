@@ -4,25 +4,17 @@ import miniventure.game.core.GameCore;
 import miniventure.game.core.AudioException;
 import miniventure.game.core.ClientCore;
 import miniventure.game.core.FontStyle;
-import miniventure.game.core.LevelViewport;
 import miniventure.game.network.GameProtocol;
 import miniventure.game.screen.InfoScreen.CreditsScreen;
 import miniventure.game.screen.InfoScreen.InstructionsScreen;
-import miniventure.game.screen.util.BackgroundProvider;
 import miniventure.game.screen.util.MyLinkLabel;
 import miniventure.game.util.Version;
 import miniventure.game.util.VersionInfo;
 import miniventure.game.world.file.WorldReference;
-import miniventure.game.world.level.RenderLevel;
 import miniventure.game.world.management.ClientWorld;
-import miniventure.game.world.management.DisplayWorld;
-import miniventure.game.world.management.TimeOfDay;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.widget.VisLabel;
@@ -30,19 +22,12 @@ import com.kotcrab.vis.ui.widget.VisTextButton;
 
 import org.jetbrains.annotations.NotNull;
 
-public class MainMenu extends BackgroundProvider {
+public class MainMenu extends MenuScreen {
 	
 	private final Table table;
 	
-	private final RenderLevel backgroundLevel;
-	private final LevelViewport levelView;
-	private final Color lightOverlay;
-	private final Vector2 cameraPos, cameraDir;
-	
-	private static final float PAN_SPEED = 4.5f; // in tiles/second.
-	
 	public MainMenu() {
-		super(false, true, new ScreenViewport()); // level renderer clears it
+		super(new ScreenViewport()); // level renderer clears it
 		
 		ClientWorld world = ClientCore.getWorld();
 		
@@ -56,20 +41,20 @@ public class MainMenu extends BackgroundProvider {
 		
 		VisTextButton playButton = makeButton("New World", () -> {
 			if(!ClientCore.viewedInstructions)
-				ClientCore.setScreen(new InstructionsScreen(true));
+				ClientCore.addScreen(new InstructionsScreen(true));
 			else
-				ClientCore.setScreen(new WorldGenScreen());
+				ClientCore.addScreen(new WorldGenScreen());
 		});
 		
 		table.add(playButton).spaceBottom(20);
 		table.row();
 		
 		if(WorldReference.getLocalWorlds(false).size() > 0) {
-			VisTextButton loadBtn = makeButton("Load World", () -> ClientCore.setScreen(new WorldSelectScreen()));
+			VisTextButton loadBtn = makeButton("Load World", () -> ClientCore.addScreen(new WorldSelectScreen()));
 			table.add(loadBtn).spaceBottom(20).row();
 		}
 		
-		VisTextButton joinBtn = makeButton("Join Local Game", () -> ClientCore.setScreen(new InputScreen("Enter the IP Address you want to connect to (optionally including port):", input -> {
+		VisTextButton joinBtn = makeButton("Join Local Game", () -> ClientCore.addScreen(new InputScreen("Enter the IP Address you want to connect to (optionally including port):", input -> {
 			/*
 				TODO condense player name input into server ip input
 				- if the username is taken, display the same page again, with the same data in them but also an error message saying the username is taken.
@@ -91,7 +76,7 @@ public class MainMenu extends BackgroundProvider {
 				try {
 					port = Integer.parseInt(portstr);
 				} catch(NumberFormatException e) {
-					ClientCore.setScreen(new ErrorScreen("Given ip address is invalid; appeared to have port number '"+portstr+"', but port was not a valid integer."));
+					ClientCore.addScreen(new ErrorScreen("Given ip address is invalid; appeared to have port number '"+portstr+"', but port was not a valid integer."));
 					return;
 				}
 				world.joinWorld(ip, port);
@@ -101,28 +86,14 @@ public class MainMenu extends BackgroundProvider {
 		
 		table.add(joinBtn).spaceBottom(20).row();
 		
-		VisTextButton helpBtn = makeButton("Instructions", () -> ClientCore.setScreen(new InstructionsScreen()));
+		VisTextButton helpBtn = makeButton("Instructions", () -> ClientCore.addScreen(new InstructionsScreen()));
 		table.add(helpBtn).spaceBottom(20).row();
 		
-		VisTextButton creditsBtn = makeButton("Credits", () -> ClientCore.setScreen(new CreditsScreen()));
+		VisTextButton creditsBtn = makeButton("Credits", () -> ClientCore.addScreen(new CreditsScreen()));
 		table.add(creditsBtn).spaceBottom(20).row();
 		
 		VisTextButton exitBtn = makeButton("Quit", () -> Gdx.app.exit());
 		table.add(exitBtn).row();
-		
-		// setup level scrolling in background
-		
-		levelView = new LevelViewport();
-		levelView.zoom(-1);
-		TimeOfDay time = TimeOfDay.values[MathUtils.random(TimeOfDay.values.length-1)];
-		lightOverlay = TimeOfDay.getSkyColor(time.getStartOffsetSeconds());
-		
-		backgroundLevel = new DisplayWorld().getLevel();
-		
-		Vector2 size = new Vector2(levelView.getViewWidth(), levelView.getViewHeight());//.scl(0.5f);
-		cameraPos = new Vector2(MathUtils.random(size.x, backgroundLevel.getWidth()-size.x), MathUtils.random(size.y, backgroundLevel.getHeight()-size.y));
-		
-		cameraDir = new Vector2().setLength(PAN_SPEED).setToRandomDirection().setLength(PAN_SPEED);
 		
 		if(ClientCore.PLAY_MUSIC) {
 			// setup background music
@@ -135,34 +106,6 @@ public class MainMenu extends BackgroundProvider {
 				// e.printStackTrace();
 			}
 		}
-	}
-	
-	@Override
-	public boolean allowChildren() {
-		return true;
-	}
-	
-	@Override
-	public void renderBackground() {
-		levelView.render(cameraPos, lightOverlay, backgroundLevel);
-		
-		cameraPos.add(cameraDir.cpy().scl(GameCore.getDeltaTime()));
-		cameraDir.x = velDir(cameraPos.x, cameraDir.x, levelView.getViewWidth()/2, backgroundLevel.getWidth() - levelView.getViewWidth()/2);
-		cameraDir.y = velDir(cameraPos.y, cameraDir.y, levelView.getViewHeight()/2, backgroundLevel.getHeight() - levelView.getViewHeight()/2);
-	}
-	
-	@Override
-	public void resizeBackground(int width, int height) {
-		levelView.resize(width, height);
-	}
-	
-	private float velDir(float pos, float vel, float min, float max) {
-		if((pos >= max && vel >= 0) || (pos <= min && vel <= 0)) {
-			vel += MathUtils.random(-PAN_SPEED/4, PAN_SPEED/4);
-			vel = -vel;
-		}
-		
-		return vel;
 	}
 	
 	@NotNull

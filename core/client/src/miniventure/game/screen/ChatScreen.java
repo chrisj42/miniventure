@@ -60,7 +60,7 @@ public class ChatScreen extends MenuScreen {
 	private String manualInput = ""; // this is the part of the command that the user entered manually, and so should not be changed when tabbing.
 	
 	public ChatScreen(boolean timeOutMessages) {
-		super(false, new ScreenViewport());
+		super(new ScreenViewport());
 		useTimer = timeOutMessages;
 		
 		VerticalGroup vGroup = useVGroup(0, Align.topRight, false);
@@ -139,11 +139,11 @@ public class ChatScreen extends MenuScreen {
 						text = text.substring(1);
 					
 					ClientCore.getClient().send(new Message(text, GameCore.DEFAULT_CHAT_COLOR));
-					ClientCore.setScreen(null);
+					ClientCore.removeScreen();
 					return true;
 				}
 				else if(keycode == Keys.ESCAPE) {
-					ClientCore.setScreen(null);
+					ClientCore.removeScreen();
 					return true;
 				}
 				else if(keycode == Keys.UP) {
@@ -208,7 +208,7 @@ public class ChatScreen extends MenuScreen {
 		input.setCursorPosition(initText.length());
 		if(scrollPane != null)
 			scrollPane.setScrollPercentY(0);
-		ClientCore.setScreen(this);
+		ClientCore.addScreen(this);
 	}
 	@Override
 	public void focus() {

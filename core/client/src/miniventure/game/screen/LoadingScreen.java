@@ -3,7 +3,6 @@ package miniventure.game.screen;
 import java.util.EmptyStackException;
 import java.util.Stack;
 
-import miniventure.game.screen.util.BackgroundInheritor;
 import miniventure.game.util.ProgressLogger;
 
 import com.badlogic.gdx.Gdx;
@@ -11,7 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.widget.VisLabel;
 
-public class LoadingScreen extends BackgroundInheritor implements ProgressLogger {
+public class LoadingScreen extends MenuScreen implements ProgressLogger {
 	
 	/*
 		I want to have a system where it displays a message, and the message shows a #/total progress format.
@@ -25,8 +24,10 @@ public class LoadingScreen extends BackgroundInheritor implements ProgressLogger
 	 */
 	
 	private final VerticalGroup vGroup;
-	private final boolean initLoader;
 	private Stack<VisLabel> messageLabels = new Stack<>();
+	
+	// this is necessary so that a LoadingScreen can be created during initialization before most assets are fully ready; that way the user gets more than a blank screen while everything is loading up.
+	private final boolean initLoader;
 	
 	private boolean topEphemeral = false; // should the top message be overwritten on push?
 	
