@@ -10,6 +10,7 @@ import java.awt.image.BufferedImage;
 import java.util.Random;
 
 import miniventure.game.util.function.MapFunction;
+import miniventure.game.world.worldgen.noise.NoiseModifier.NoiseValueMapper;
 import miniventure.game.world.worldgen.posmap.DistanceMap;
 import miniventure.game.world.worldgen.posmap.PositionGroupMap;
 import miniventure.game.world.worldgen.posmap.PositionGroupMap.PositionGroup;
@@ -22,12 +23,12 @@ import static miniventure.game.world.worldgen.noise.NoiseModifier.combine;
 /** @noinspection SameParameterValue*/
 public class Testing {
 	
-	public static NoiseGenerator removeHoles(NoiseGenerator original, float landThresh) {
+	public static NoiseGenerator removeSmallerHoles(NoiseGenerator original, float threshold) {
 		return info -> {
 			float[][] noise = original.get2DNoise(info);
 			
 			PositionGroupMap groupMap = PositionGroupMap.process(info.width, info.height,
-				(x, y) -> noise[x][y] >= landThresh
+				(x, y) -> noise[x][y] >= threshold
 			);
 			
 			// System.out.println("match groups: "+groupMap.matches.size()+", fail groups: "+groupMap.fails.size());
@@ -55,8 +56,44 @@ public class Testing {
 			// System.out.println("after switching:\nmatch groups: "+groupMap.matches.size()+", fail groups: "+groupMap.fails.size());
 			
 			NoiseModifier.forEach(noise, (val, x, y) ->
-				groupMap.checkMatched(x, y) ? Math.max(landThresh+.01f, val) : Math.min(landThresh-.01f, val)
+				groupMap.checkMatched(x, y) ? Math.max(threshold+.01f, val) : Math.min(threshold-.01f, val)
 			);
+			
+			return noise;
+		};
+	}
+	
+	public static NoiseGenerator removeSmallHoles(NoiseGenerator original, float threshold, boolean less, int minGroupSize, boolean switchFails) {
+		return info -> {
+			float[][] noise = original.get2DNoise(info);
+			
+			MapFunction<Float, Boolean> mapper = less ? val -> val < threshold : val -> val > threshold;
+			
+			PositionGroupMap groupMap = PositionGroupMap.process(info.width, info.height,
+					(x, y) -> mapper.get(noise[x][y])
+			);
+			
+			// System.out.println("match groups: "+groupMap.matches.size()+", fail groups: "+groupMap.fails.size());
+			
+			for(PositionGroup match: groupMap.matches.toArray(new PositionGroup[0])) {
+				if(match.size() < minGroupSize)
+					match.switchSet(); // switches group to a fail group, modifying related maps and the match/fail sets; group is combined with any adjacent groups.
+			}
+			
+			if(switchFails) {
+				for (PositionGroup fail : groupMap.fails.toArray(new PositionGroup[0])) {
+					if (fail.size() < minGroupSize)
+						fail.switchSet();
+				}
+			}
+			
+			// System.out.println("after switching:\nmatch groups: "+groupMap.matches.size()+", fail groups: "+groupMap.fails.size());
+			
+			NoiseModifier.forEach(noise, (val, x, y) -> {
+				float max = Math.max(threshold + .01f, val);
+				float min = Math.min(threshold - .01f, val);
+				return groupMap.checkMatched(x, y) ? less ? min : max : less ? max : min;
+			});
 			
 			return noise;
 		};
@@ -160,13 +197,15 @@ public class Testing {
 	private static NoiseGenerator getTerrain() {
 		// return new Coherent2DNoiseFunction(16, 4)
 		// 	.modify(NoiseModifier.combine(NoiseGenerator.islandShape, .35f));
-		// return islandShape(info -> NoiseGenerator.MIN_RADIUS.get(info)*.8f, .15f, 2, false, new Coherent2DNoiseFunction(36, 3));
+		// return new Coherent2DNoiseFunction(128, 4);
+		
+		return new Coherent2DNoiseFunction(90, 3);
 		
 		// return NoiseGenerator.islandShape;
-		return NoiseGenerator.tunnelPattern(
+		/*return NoiseGenerator.tunnelPattern(
 			new Coherent2DNoiseFunction(16),
 			new Coherent2DNoiseFunction(32)
-		);
+		);*/
 		// return NoiseGenerator.getFromFetcher(info -> (x, y) -> 1 - Math.abs(info.width/2f - (x+.5f))/(info.width/2f) * Math.abs(info.height/2f - (y+.5f))/(info.height/2f));
 		
 		/*return NoiseGenerator.rectMask(3, .8f).modify(
@@ -186,13 +225,13 @@ public class Testing {
 		// final int width = new Integer(args[0]);
 		// final int height = new Integer(args[1]);
 		// final int scale = new Integer(args[2]);
-		final int width = 1200;
-		final int height = 900;
-		final int scale = 1;
+		final int width = 600;
+		final int height = 400;
+		final int scale = 2;
 		
 		// float[] thresholds = {.08f};
-		float[] thresholds = getThresholds(255);
-		// float[] thresholds = {.1f};
+		float[] thresholds = getThresholds(10);
+		// float[] thresholds = {.05f, .6f};
 		// float[] thresholds = getThresholds(10, v -> (float) Math.pow(v, 3));
 		// float[] thresholds = {.1f};
 		// System.out.println(Arrays.toString(thresholds));

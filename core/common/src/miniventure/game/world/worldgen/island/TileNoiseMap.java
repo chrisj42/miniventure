@@ -20,7 +20,7 @@ public class TileNoiseMap implements TileProcessor {
 		private final LinkedList<WeightedSource> regions;
 		private TileProcessor superProcessor;
 		
-		public TileNoiseMapBuilder() {
+		private TileNoiseMapBuilder() {
 			regions = new LinkedList<>();
 		}
 		
@@ -31,6 +31,7 @@ public class TileNoiseMap implements TileProcessor {
 			return this;
 		}
 		
+		// the overlap processor will be applied to all tiles, and then the sub region processors will be applied on top of that. It's a way pf layering tiles.
 		public TileNoiseMapBuilder addOverlapRegion(@NotNull TileProcessor region, float preExcess, float postExcess, ValueAction<TileNoiseMapBuilder> subRegionAdder) {
 			if(preExcess > 0)
 				addRegion(preExcess, region);

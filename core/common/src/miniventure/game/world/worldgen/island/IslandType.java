@@ -2,11 +2,13 @@ package miniventure.game.world.worldgen.island;
 
 import java.util.Random;
 
+import miniventure.game.util.MyUtils;
 import miniventure.game.world.tile.TileTypeEnum;
 import miniventure.game.world.worldgen.noise.Coherent2DNoiseFunction;
 import miniventure.game.world.worldgen.noise.Noise;
 import miniventure.game.world.worldgen.noise.NoiseGenerator;
 import miniventure.game.world.worldgen.noise.NoiseModifier;
+import miniventure.game.world.worldgen.noise.NoiseModifier.NoiseValueMapper;
 import miniventure.game.world.worldgen.noise.Testing;
 
 import static miniventure.game.world.tile.TileTypeEnum.*;
@@ -151,7 +153,17 @@ public enum IslandType {
 		
 		@Override
 		void generateCaverns(ProtoIsland island) {
+			float[][] noise = island.getFromGen(NoiseGenerator.tunnelPattern(
+					new Coherent2DNoiseFunction(16),
+					new Coherent2DNoiseFunction(32)
+			));
 			
+			TileNoiseMap map = TileNoiseMap.builder()
+					.addRegion(1, DIRT)
+					.addRegion(5, STONE)
+					.get(noise);
+			
+			island.forEach(map);
 		}
 	},
 	
@@ -162,25 +174,60 @@ public enum IslandType {
 			
 			float[][] shape = island.getFromGen(NoiseGenerator.islandShape);
 			
+			float[][] terrain = island.getFromGen(Testing.removeSmallHoles(
+					Testing.removeSmallHoles(
+						new Noise(new int[] {12, 10, 5}, new int[] {20, 10, 5, 4, 3, 2, 1})
+							.modify(FILL_VALUE_RANGE),
+						.4f, true, 20, false),
+					.7f, false, 20, false)
+			);
+			
+			float[][] elevation = island.getFromGen(new Coherent2DNoiseFunction(32, 3)
+					.modify(NoiseModifier.forEach((noise, x, y) -> noise * noise * noise))
+					.modify(
+							combine(new Coherent2DNoiseFunction(16, 3).modify(
+									combine(new Coherent2DNoiseFunction(16, 3), .5f)
+							), .25f)
+					));
+			
+			float[][] moisture = island.getFromGen(new Coherent2DNoiseFunction(30, 3)
+			.modify(NoiseModifier.forEach((noise, x, y) -> (float) Math.pow(noise, 3))));
+			
 			float[][] stone = island.getFromGen(new Coherent2DNoiseFunction(18).modify(combine(NoiseGenerator.circleMask(1), MULTIPLY, NoiseGenerator.circleMask(1)), FILL_VALUE_RANGE));
 			
 			float[][] trees = island.getFromGen(new Noise(new int[] {1,32,8,2,4,16}, new int[] {4,2,1,2,1,2}).modify(FILL_VALUE_RANGE));//.modify(combine(NoiseGenerator.islandMask(1), AVERAGE)));
 			
 			
-			TileConditionChain features = TileConditionChain.builder()
-				.add(new NoiseTileCondition(stone, val -> val > .65), STONE)
+			TileConditionChain desert = TileConditionChain.builder()
+				// .add(new NoiseTileCondition(stone, val -> val > .65), STONE)
 				// .add(new NoiseTileCondition(stone, val -> val > .6), FLINT)
-				.add(new NoiseTileCondition(trees, val -> val > .76), CACTUS)
-				.getChain();
+				// .add(new NoiseTileCondition(trees, val -> val > .76), CACTUS)
+				.add(tile -> MyUtils.getRandom().nextInt(40) == 0, CACTUS)
+				.getChain(SAND);
+			
+			TileConditionChain biomes = TileConditionChain.builder()
+					.add(new NoiseTileCondition(elevation, val -> val > .6f), STONE)
+					.add(tile -> tile.getVal(elevation) < .2f && tile.getVal(moisture) > .9f, WATER)
+					.getChain();
 			
 			TileNoiseMap map = TileNoiseMap.builder()
 				.addRegion(15, WATER)
-				.addOverlapRegion(SAND, 5, 0, m -> m
-					.addRegion(82, features)
+				.addOverlapRegion(SAND, 0, 0, m -> m
+					.addRegion(82, biomes)
 				)
 				.get(shape);
 			
 			island.forEach(map);
+			
+			/*TileDistanceMap.builder()
+					.atRange(1, 2, TORCH)
+					.get(tile -> tile.getTopLayer() == STONE)
+					.apply(island);*/
+			
+			TileDistanceMap.builder()
+					.atRange(1, 4, GRASS)
+					.get(tile -> tile.getTopLayer() == WATER)
+			.apply(island);
 		}
 		
 		@Override
@@ -204,7 +251,7 @@ public enum IslandType {
 	private final int width;
 	private final int height;
 	
-	IslandType() { this(500, 500); }
+	IslandType() { this(400, 400); }
 	IslandType(int width, int height) {
 		this.width = width;
 		this.height = height;
@@ -249,20 +296,22 @@ public enum IslandType {
 		return island.getMap();
 	}
 	
-	public boolean displayColorMap(long seed, int scale) {
+	public boolean displayColorMap(boolean surface, long seed, int scale) {
 		ProtoIsland island = new ProtoIsland(seed, width, height);
-		generateIsland(island);
+		
+		if(surface) generateIsland(island);
+		else generateCaverns(island);
 		
 		return Testing.displayMap(width, height, scale, island.getColors());
 	}
-	public void displayColorMap(boolean repeat, int scale) {
+	public void displayColorMap(boolean surface, boolean repeat, int scale) {
 		Random rand = new Random();
 		if(!repeat)
-			displayColorMap(rand.nextLong(), scale);
+			displayColorMap(surface, rand.nextLong(), scale);
 		else {
 			boolean again = true;
 			while(again)
-				again = displayColorMap(rand.nextLong(), scale);
+				again = displayColorMap(surface, rand.nextLong(), scale);
 		}
 	}
 }
