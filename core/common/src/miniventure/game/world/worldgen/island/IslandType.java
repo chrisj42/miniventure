@@ -272,7 +272,7 @@ public enum IslandType {
 		else
 			generateCaverns(island);
 		
-		/*if(island.getTile(0, 0).getTopLayer() != WATER) {
+		if(island.getTile(0, 0).getTopLayer() != WATER) {
 			island.getTile(0, 0).addLayer(DOCK);
 		}
 		else {
@@ -291,7 +291,7 @@ public enum IslandType {
 			}
 			if(!dock)
 				island.getTile(width/2, height/2).addLayer(DOCK);
-		}*/
+		}
 		
 		return island.getMap();
 	}
