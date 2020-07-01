@@ -12,6 +12,7 @@ hs_err_pid*
 notes/ignored/
 sprites/cache/
 scripts/
+core/sponly/
 /*.jar
 
 ## Windows Explorer configuration
