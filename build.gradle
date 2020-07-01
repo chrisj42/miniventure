@@ -41,10 +41,10 @@ subprojects {
 sourceSets.main.java.srcDirs = []
 
 dependencies {
-	compile project(":desktop")
+	compile project(":launcher")
 }
 
-project(":desktop") {
+project(":launcher") {
 	dependencies {
 		compile project(":client")
 		compile project(":server")
@@ -82,7 +82,7 @@ project(":server") {
 }
 
 ext {
-	mainClassName = "miniventure.game.desktop.DesktopLauncher"
+	mainClassName = "miniventure.game.core.Launcher"
 	assetsDir = new File("core/common/assets")
 }
 
