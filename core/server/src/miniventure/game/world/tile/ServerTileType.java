@@ -49,7 +49,7 @@ public class ServerTileType extends TileType {
 		propertyMap = new HashMap<>(4);
 	}
 	
-	private void initProperties(Value... params) {
+	private void initProperties(Value<?>... params) {
 		// if(initialized || initializing) {
 		// 	System.err.println("ServerTileType initProperties was called more than once for type "+getTypeEnum());
 		// 	return;
@@ -107,12 +107,12 @@ public class ServerTileType extends TileType {
 	 * @return how long to wait before next call, or 0 for never (until adjacent tile update)
 	 */
 	public float update(@NotNull ServerTile tile) {
-		TileDataCache dataMap = tile.getCacheMap(getTypeEnum());
+		// TileDataCache dataMap = tile.getCacheMap(getTypeEnum());
 		
 		float now = tile.getWorld().getGameTime();
-		float lastUpdate = dataMap.getOrDefault(TileCacheTag.LastUpdate, now);
+		float lastUpdate = tile.getLevel().lastUpdate.getOrDefault(tile, now);
 		float delta = now - lastUpdate;
-		dataMap.put(TileCacheTag.LastUpdate, now);
+		tile.getLevel().lastUpdate.put(tile, now);
 		
 		return get(P.UPDATE).update(tile, delta);
 	}
@@ -183,6 +183,13 @@ public class ServerTileType extends TileType {
 			P.DESTRUCT.as(type -> new DestructionManager(type, new ItemDrop(ResourceType.Stone.get())))
 		),
 		
+		STONE_FLOOR(
+				P.DESTRUCT.as(type -> new DestructionManager(type,
+						new ItemDrop(ResourceType.Stone.get(), 3),
+						new RequiredTool(ToolType.Pickaxe)
+				))
+		),
+		
 		WATER(
 			P.UPDATE.as(type -> new UpdateManager(type,
 				new SpreadUpdateAction(type, 0.33f,
@@ -211,13 +218,6 @@ public class ServerTileType extends TileType {
 			))
 		),
 		
-		STONE_FLOOR(
-			P.DESTRUCT.as(type -> new DestructionManager(type,
-				new ItemDrop(ResourceType.Stone.get(), 3),
-				new RequiredTool(ToolType.Pickaxe)
-			))
-		),
-		
 		WOOD_WALL(
 			P.DESTRUCT.as(type -> 
 				new DestructionManager(type, 20,
@@ -240,7 +240,7 @@ public class ServerTileType extends TileType {
 		{
 			@Override
 			public Result interact(@NotNull ServerTile tile, Player player, @Nullable ServerItem item) {
-				tile.replaceTile(CLOSED_DOOR.getType());
+				tile.setTile(CLOSED_DOOR.getType());
 				return Result.INTERACT;
 			}
 		},
@@ -259,7 +259,7 @@ public class ServerTileType extends TileType {
 		{
 			@Override
 			public Result interact(@NotNull ServerTile tile, Player player, @Nullable ServerItem item) {
-				tile.replaceTile(OPEN_DOOR.getType());
+				tile.setTile(OPEN_DOOR.getType());
 				return Result.INTERACT;
 			}
 		},

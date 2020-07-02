@@ -1,16 +1,16 @@
-package miniventure.game.world.worldgen.island;
+package miniventure.game.world.worldgen.level;
 
 import java.awt.Color;
 import java.util.Random;
 
 import miniventure.game.world.Point;
-import miniventure.game.world.tile.TileTypeEnum;
+import miniventure.game.world.worldgen.level.processing.TileProcessor;
 import miniventure.game.world.worldgen.noise.GenInfo;
 import miniventure.game.world.worldgen.noise.NoiseGenerator;
 
 // passed around to layer makers during island generation
 // island starts out like this, and this is passed to level constructor
-public class ProtoIsland extends GenInfo {
+public class ProtoLevel extends GenInfo {
 	
 	private final Random random;
 	
@@ -20,7 +20,7 @@ public class ProtoIsland extends GenInfo {
 	private final ProtoTile[][] tiles;
 	
 	// public ProtoIsland(GenInfo info) { this(info.seed, info.width, info.height); }
-	public ProtoIsland(long seed, int width, int height) {
+	public ProtoLevel(long seed, int width, int height) {
 		super(seed, width, height);
 		random = new Random(seed);
 		tiles = new ProtoTile[width][height];
@@ -29,16 +29,13 @@ public class ProtoIsland extends GenInfo {
 				tiles[x][y] = new ProtoTile(x, y, x * height + y);
 	}
 	
+	// mutation methods
+	
 	long requestSeed() {
 		// curSeed = random.nextLong();
 		// random.setSeed(random.nextLong());
 		// return curSeed;
 		return random.nextLong();
-	}
-	
-	public ProtoTile getTile(Point p) { return getTile(p.x, p.y); }
-	public ProtoTile getTile(int x, int y) {
-		return tiles[x][y];
 	}
 	
 	void forEach(TileProcessor processor) {
@@ -47,7 +44,18 @@ public class ProtoIsland extends GenInfo {
 				processor.processTile(getTile(x, y));
 	}
 	
-	public TileTypeEnum[][][] getMap() {
+	float[][] getFromGen(NoiseGenerator gen) {
+		return gen.get2DNoise(new GenInfo(requestSeed(), width, height));
+	}
+	
+	// fetch methods
+	
+	public ProtoTile getTile(Point p) { return getTile(p.x, p.y); }
+	public ProtoTile getTile(int x, int y) {
+		return tiles[x][y];
+	}
+	
+	/*public TileTypeEnum[][][] getMap() {
 		TileTypeEnum[][][] types = new TileTypeEnum[width][height][];
 		
 		for(int x = 0; x < width; x++)
@@ -55,7 +63,7 @@ public class ProtoIsland extends GenInfo {
 				types[x][y] = getTile(x, y).getStack();
 		
 		return types;
-	}
+	}*/
 	
 	public Color[][] getColors() {
 		Color[][] colors = new Color[width][height];
@@ -65,9 +73,5 @@ public class ProtoIsland extends GenInfo {
 				colors[x][y] = getTile(x, y).getTopLayer().color;
 		
 		return colors;
-	}
-	
-	public float[][] getFromGen(NoiseGenerator gen) {
-		return gen.get2DNoise(new GenInfo(requestSeed(), width, height));
 	}
 }

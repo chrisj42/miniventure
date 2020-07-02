@@ -4,8 +4,9 @@ import miniventure.game.world.entity.Entity;
 import miniventure.game.world.level.Level;
 import miniventure.game.world.level.RenderLevel;
 import miniventure.game.world.tile.RenderTile;
-import miniventure.game.world.tile.TileTypeEnum;
-import miniventure.game.world.worldgen.island.IslandType;
+import miniventure.game.world.tile.Tile;
+import miniventure.game.world.worldgen.level.LevelGenerator;
+import miniventure.game.world.worldgen.level.ProtoTile;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
@@ -39,7 +40,7 @@ public class DisplayWorld extends LevelManager {
 		
 		DisplayLevel(DisplayWorld world) {
 			super(world, 0,
-				IslandType.MENU.generateIsland(MathUtils.random.nextLong(), true),
+				LevelGenerator.MENU.generateLevel(MathUtils.random.nextLong()),
 				DisplayTile::new
 			);
 		}
@@ -48,15 +49,18 @@ public class DisplayWorld extends LevelManager {
 		public void render(Rectangle renderSpace, SpriteBatch batch, float delta, Vector2 posOffset) {
 			RenderLevel.render(getOverlappingTiles(renderSpace), new Array<>(Entity.class), batch, delta, posOffset);
 		}
+		
+		@Override
+		public void resetTileData(Tile tile) {}
 	}
 	
 	private static class DisplayTile extends RenderTile {
 		
-		DisplayTile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types) {
-			this((DisplayLevel)level, x, y, types);
+		DisplayTile(@NotNull Level level, @NotNull ProtoTile tile) {
+			this((DisplayLevel)level, tile);
 		}
-		DisplayTile(@NotNull DisplayLevel level, int x, int y, @NotNull TileTypeEnum[] types) {
-			super(level, x, y, types, null);
+		DisplayTile(@NotNull DisplayLevel level, @NotNull ProtoTile tile) {
+			super(level, tile);
 		}
 		
 	}

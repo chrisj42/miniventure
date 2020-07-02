@@ -36,10 +36,10 @@ import miniventure.game.world.file.WorldFileInterface;
 import miniventure.game.world.level.Level;
 import miniventure.game.world.level.LevelFetcher;
 import miniventure.game.world.level.ServerLevel;
+import miniventure.game.world.level.TileMapData;
 import miniventure.game.world.tile.ServerTileType;
-import miniventure.game.world.tile.TileStack.TileData;
 import miniventure.game.world.tile.TileTypeEnum;
-import miniventure.game.world.worldgen.island.IslandType;
+import miniventure.game.world.worldgen.level.IslandType;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -54,19 +54,19 @@ public class ServerWorld extends WorldManager {
 	
 	private final LevelFetcher<ServerLevel> levelFetcher = new LevelFetcher<ServerLevel>() {
 		@Override
-		public ServerLevel makeLevel(LevelCache cache) {
+		public ServerLevel makeLevel(LevelCache cache, long seed) {
 			int levelId = cache.getId();
-			IslandType islandType = cache.islandType;
-			String mapType = levelId < 0 ? "underground" : "surface";
+			IslandType islandType = cache.getIslandType();
+			String mapType = levelId % 2 == 1 ? "underground" : "surface";
 			MyUtils.debug("Server generating "+islandType+' '+mapType+" map for level "+levelId);
-			long seed = ServerWorld.this.worldSeed * (2 + levelId);
+			// long seed = ServerWorld.this.worldSeed * (2 + levelId);
 			return new ServerLevel(ServerWorld.this, cache,
-				islandType.generateIsland(seed, levelId > 0)
+				islandType.generateLevel(seed, levelId % 2)
 			);
 		}
 		
 		@Override
-		public ServerLevel loadLevel(LevelCache cache, final Version version, TileData[][] tileData, String[] entityData) {
+		public ServerLevel loadLevel(LevelCache cache, final Version version, TileMapData tileData, String[] entityData) {
 			MyUtils.debug("Server loading level "+cache.getId()+" from data");
 			ServerLevel level = new ServerLevel(ServerWorld.this, cache, tileData);
 			
@@ -126,7 +126,7 @@ public class ServerWorld extends WorldManager {
 		
 		if(worldInfo.create) {
 			logger.pushMessage("Generating starter island");
-			levelFetcher.makeLevel(islandStores[0].surface).save(); // not actually loaded, so manual save is necessary here
+			// levelFetcher.makeLevel(islandStores[0].surface).save(); // not actually loaded, so manual save is necessary here
 			logger.editMessage("Saving generated terrain to file");
 			saveWorld();
 			logger.editMessage("World Loaded.", true);
@@ -278,24 +278,25 @@ public class ServerWorld extends WorldManager {
 	@Override
 	public ServerLevel getLevel(int levelId) { return loadedLevels.get(map -> map.get(levelId)); }
 	
-	@NotNull
 	// player activator is required to ensure the level is not immediately pruned due to chance circumstances.
 	// it is assumed that the player is not currently on a level.
+	@NotNull
 	public ServerLevel loadLevel(int levelId, @NotNull ServerPlayer activator) {
 		return loadLevel(levelId, activator, level -> {});
 	}
-	@NotNull
+	
 	// the ordering of "get/make level", "position player", "send level data", and finally "register world/add player" is important. Doing so is the most efficient, and prevents split-second frame changes like showing the player in the previous level position, as well as minimizing the time that the player may be in-game on the server, but still loading on the client.
+	@NotNull
 	public ServerLevel loadLevel(int levelId, @NotNull ServerPlayer activator, ValueAction<ServerLevel> playerPositioner) {
 		
 		ServerLevel level = getLevel(levelId);
 		
-		boolean put = level == null;
+		final boolean put = level == null;
 		if(put) {
 			MyUtils.debug("Fetching level "+levelId);
 			server.sendToPlayer(activator, DatalessRequest.Level_Loading);
-			IslandCache island = islandStores[Math.abs(levelId)-1];
-			level = (ServerLevel) (levelId > 0 ? island.surface : island.caverns).getLevel(levelFetcher);
+			IslandCache island = islandStores[levelId/2];
+			level = (ServerLevel) island.getCache(levelId % 2).getLevel(levelFetcher);
 		}
 		
 		// synchronize on the level
@@ -486,7 +487,7 @@ public class ServerWorld extends WorldManager {
 	
 	/*  --- GET METHODS --- */
 	
-	public int getDefaultLevel() { return islandStores[0].surface.getId(); }
+	public int getDefaultLevel() { return islandStores[0].getCache(0).getId(); }
 	
 	@Override
 	public ServerEntity getEntity(int eid) { return (ServerEntity) super.getEntity(eid); }
@@ -500,7 +501,7 @@ public class ServerWorld extends WorldManager {
 	public MapRequest getMapData() {
 		LinkedList<IslandReference> refs = new LinkedList<>();
 		for(IslandCache cache: islandStores) { // todo only add islands that have been unlocked
-			refs.add(cache.ref);
+			refs.add(cache.getRef());
 		}
 		return new MapRequest(refs.toArray(new IslandReference[0]));
 	}

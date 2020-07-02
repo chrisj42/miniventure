@@ -1,10 +1,12 @@
-package miniventure.game.world.worldgen.island;
+package miniventure.game.world.worldgen.level.processing;
+
+import miniventure.game.world.worldgen.level.ProtoLevel;
 
 // processes a proto-island using some method
 // noise maps are not necessarily involved; an island layer may end up using a noise map, but it will create the noise itself, using the seed fetched from the proto-island.
-public interface IslandProcessor {
+public interface LevelProcessor {
 	
-	void apply(ProtoIsland island);
+	void apply(ProtoLevel island);
 	
 	/*
 		process types that I may need:

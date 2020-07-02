@@ -1,6 +1,7 @@
-package miniventure.game.world.worldgen.island;
+package miniventure.game.world.worldgen.level.processing;
 
 import miniventure.game.util.function.MapFunction;
+import miniventure.game.world.worldgen.level.ProtoTile;
 
 // used to compare tiles against a noise map.
 // to 

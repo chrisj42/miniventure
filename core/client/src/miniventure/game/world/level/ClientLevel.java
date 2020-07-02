@@ -13,8 +13,7 @@ import miniventure.game.world.entity.Entity;
 import miniventure.game.world.management.ClientWorld;
 import miniventure.game.world.tile.ClientTile;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.TileStack.TileData;
-import miniventure.game.world.tile.TileTypeEnum;
+import miniventure.game.world.tile.TileData;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
@@ -22,29 +21,35 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class ClientLevel extends RenderLevel {
 	
-	@NotNull private ClientWorld world;
-	private final boolean[][] loaded;
+	// private final boolean[][] loaded;
+	
+	public final TileDataMap<String> transitions = new TileDataMap<>();
 	
 	private final Map<ClientTile, CachedTileUpdate> tileUpdates = Collections.synchronizedMap(new HashMap<>());
 	
 	public ClientLevel(@NotNull ClientWorld world, int levelId, int width, int height) {
 		super(world, levelId, width, height, ClientTile::new);
-		this.world = world;
+		// this.world = world;
 		
-		loaded = new boolean[width][height];
+		// loaded = new boolean[width][height];
 	}
 	
 	@Override @NotNull
-	public ClientWorld getWorld() { return world; }
+	public ClientWorld getWorld() { return (ClientWorld) super.getWorld(); }
 	
 	@Override
 	public ClientTile getTile(float x, float y) { return (ClientTile) super.getTile(x, y); }
 	@Override
 	public ClientTile getTile(int x, int y) { return (ClientTile) super.getTile(x, y); }
+	
+	@Override
+	public void resetTileData(Tile tile) {
+		transitions.clear(tile);
+		animStartTimes.clear(tile);
+	}
 	
 	@Override
 	public void render(Rectangle renderSpace, SpriteBatch batch, float delta, Vector2 posOffset) {
@@ -65,7 +70,7 @@ public class ClientLevel extends RenderLevel {
 	public void setTiles(LevelChunk data) {
 		for (int i = 0; i < data.tileData.length; i++) {
 			for (int j = 0; j < data.tileData[i].length; j++) {
-				getTile(data.offset.x + i, data.offset.y + j).apply(data.tileData[i][j], null);
+				getTile(data.offset.x + i, data.offset.y + j).apply(data.tileData[i][j]);
 			}
 		}
 	}
@@ -80,7 +85,7 @@ public class ClientLevel extends RenderLevel {
 		}
 		for(Entry<ClientTile, CachedTileUpdate> entry: tilesToUpdate) {
 			CachedTileUpdate update = entry.getValue();
-			entry.getKey().apply(update.newData, update.updatedType);
+			entry.getKey().apply(update.newData);
 			spriteUpdates.add(entry.getKey());
 			spriteUpdates.addAll(entry.getKey().getAdjacentTiles(true));
 		}
@@ -90,19 +95,17 @@ public class ClientLevel extends RenderLevel {
 	}
 	
 	// called in GameClient thread.
-	public void serverUpdate(ClientTile tile, TileData data, @Nullable TileTypeEnum updatedType) {
+	public void serverUpdate(ClientTile tile, TileData data) {
 		synchronized (tileUpdates) {
-			tileUpdates.put(tile, new CachedTileUpdate(data, updatedType));
+			tileUpdates.put(tile, new CachedTileUpdate(data));
 		}
 	}
 	
-	private static class CachedTileUpdate {
+	public static class CachedTileUpdate {
 		TileData newData;
-		TileTypeEnum updatedType;
 		
-		private CachedTileUpdate(TileData newData, TileTypeEnum updatedType) {
+		public CachedTileUpdate(TileData newData) {
 			this.newData = newData;
-			this.updatedType = updatedType;
 		}
 	}
 }

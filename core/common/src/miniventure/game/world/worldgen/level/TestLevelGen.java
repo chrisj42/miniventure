@@ -1,6 +1,6 @@
-package miniventure.game.world.worldgen.island;
+package miniventure.game.world.worldgen.level;
 
-public class TestIslandGen {
+public class TestLevelGen {
 	
 	public static void main(String[] args) {
 		

@@ -6,8 +6,8 @@ import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.level.ServerLevel;
 import miniventure.game.world.tile.ServerTile;
 import miniventure.game.world.tile.ServerTileType;
+import miniventure.game.world.tile.TileLayer;
 import miniventure.game.world.tile.TileTypeEnum;
-import miniventure.game.world.tile.TileTypeEnum.TypeGroup;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -64,7 +64,7 @@ public interface PlacementAttempt {
 			};
 		}
 		
-		PlacementCheck GROUND = (tile, player) -> TypeGroup.GROUND.contains(tile.getType().getTypeEnum());
+		PlacementCheck GROUND = (tile, player) -> tile.getType().getTypeEnum().layer != TileLayer.ObjectLayer && tile.getType().getTypeEnum() != TileTypeEnum.WATER;
 		
 		static PlacementCheck groundExcluding(TileTypeEnum exclude) {
 			return (tile, player) -> tile.getType().getTypeEnum() != exclude && GROUND.canPlace(tile, player);

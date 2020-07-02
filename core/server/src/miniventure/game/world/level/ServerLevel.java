@@ -3,6 +3,7 @@ package miniventure.game.world.level;
 import java.util.*;
 
 import miniventure.game.item.ServerItem;
+import miniventure.game.network.GameProtocol.TileTransition;
 import miniventure.game.network.GameProtocol.TileUpdate;
 import miniventure.game.network.GameServer;
 import miniventure.game.util.MyUtils;
@@ -20,8 +21,10 @@ import miniventure.game.world.file.LevelCache;
 import miniventure.game.world.management.ServerWorld;
 import miniventure.game.world.tile.ServerTile;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.TileStack.TileData;
-import miniventure.game.world.tile.TileTypeEnum;
+import miniventure.game.world.tile.TileData;
+import miniventure.game.world.tile.TransitionData;
+import miniventure.game.world.tile.UpdateManager.UpdateData;
+import miniventure.game.world.worldgen.level.ProtoLevel;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -43,16 +46,30 @@ public class ServerLevel extends Level {
 	private final Set<Tile> newTileUpdates = Collections.synchronizedSet(new HashSet<>());
 	private final HashMap<Tile, Float> tileUpdateQueue = new HashMap<>();
 	
+	// damage to tiles
+	public final TileDataMap<Integer> tileDamage = new TileDataMap<>();
+	// active transitions
+	public final TileDataMap<TransitionData> tileTransitions = new TileDataMap<TransitionData>() {
+		@Override
+		public void put(Tile tile, TransitionData value) {
+			super.put(tile, value);
+			getWorld().getServer().broadcastLocal(ServerLevel.this, new TileTransition(value.name, getLevelId(), tile.x, tile.y));
+		}
+	};
+	
+	public final TileDataMap<Float> lastUpdate = new TileDataMap<>();
+	public final TileDataMap<UpdateData> tileUpdates = new TileDataMap<>();
+	
 	// prevents level from being pruned before any keep-alives are added to it.
 	private boolean preload = true;
 	//private float timeCache = 0; // this is used when you should technically be updating < 1 tile in a frame.
 	
-	public ServerLevel(@NotNull ServerWorld world, LevelCache cache, TileTypeEnum[][][] tiles) {
-		super(world, cache.getId(), tiles, ServerTile::new);
+	public ServerLevel(@NotNull ServerWorld world, LevelCache cache, ProtoLevel island) {
+		super(world, cache.getId(), island, ServerTile::new);
 		this.dataCache = cache;
 	}
 	
-	public ServerLevel(@NotNull ServerWorld world, LevelCache cache, TileData[][] tileData) {
+	public ServerLevel(@NotNull ServerWorld world, LevelCache cache, TileMapData tileData) {
 		super(world, cache.getId(), tileData, ServerTile::new);
 		this.dataCache = cache;
 	}
@@ -85,7 +102,13 @@ public class ServerLevel extends Level {
 				continue;
 			entityData.add(ServerEntity.serialize((ServerEntity)e));
 		}
-		dataCache.updateData(entityData.toArray(new String[0]), tileData);
+		dataCache.updateData(entityData.toArray(new String[0]), new TileMapData(getWidth(), getHeight(), tileData));
+	}
+	
+	@Override
+	public void resetTileData(Tile tile) {
+		tileTransitions.clear(tile);
+		tileDamage.clear(tile);
 	}
 	
 	/*@Override
@@ -103,8 +126,8 @@ public class ServerLevel extends Level {
 		}
 	}*/
 	
-	public void onTileUpdate(ServerTile tile, @Nullable TileTypeEnum updatedType) {
-		getServer().broadcastLocal(this, new TileUpdate(tile, updatedType));
+	public void onTileUpdate(ServerTile tile) {
+		getServer().broadcastLocal(this, new TileUpdate(tile));
 		
 		HashSet<Tile> tiles = getAreaTiles(tile.getLocation(), 1, true);
 		

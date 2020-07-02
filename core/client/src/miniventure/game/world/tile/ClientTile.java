@@ -1,10 +1,8 @@
 package miniventure.game.world.tile;
 
 import miniventure.game.world.tile.TileCacheTag.TileDataCache;
-import miniventure.game.world.tile.TileDataTag.TileDataMap;
 import miniventure.game.world.level.ClientLevel;
 import miniventure.game.world.level.Level;
-import miniventure.game.world.tile.TileStack.TileData;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -20,15 +18,14 @@ public class ClientTile extends RenderTile {
 		this((ClientLevel)level, x, y);
 	}
 	public ClientTile(@NotNull ClientLevel level, int x, int y) {
-		super(level, x, y, new TileTypeEnum[] {TileTypeEnum.HOLE}, null);
+		super(level, x, y, TileData.EMPTY);
 	}
 	
 	@NotNull @Override
 	public ClientLevel getLevel() { return (ClientLevel) super.getLevel(); }
 	
-	public void apply(TileData tileData, TileTypeEnum updatedType) {
-		ClientTileStack newStack = makeStack(tileData.getTypes(), tileData.getDataMaps());
-		for(TileTypeEnum type: getTypeStack().getEnumTypes(true)) {
+	public void apply(TileData tileData) {
+		/*for(TileTypeEnum type: getTypeStack().getEnumTypes(true)) {
 			if(type == updatedType)
 				continue; // forget the animation start time, because this is a new animation.
 			Float curValue = getCacheMap(type).get(TileCacheTag.AnimationStart);
@@ -37,7 +34,7 @@ public class ClientTile extends RenderTile {
 			TileDataCache dest = newStack.getCacheMap(type);
 			if(dest != null) // can be null if the new stack is missing a type that the current stack has.
 				dest.put(TileCacheTag.AnimationStart, curValue);
-		}
-		setTileStack(newStack);
+		}*/
+		setTypeStack(tileData.types);
 	}
 }

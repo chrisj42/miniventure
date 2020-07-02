@@ -1,8 +1,9 @@
-package miniventure.game.world.worldgen.island;
+package miniventure.game.world.worldgen.level.processing;
 
 import java.util.Random;
 
 import miniventure.game.util.function.MapFunction;
+import miniventure.game.world.worldgen.level.ProtoTile;
 
 public class RandomTileCondition implements TileCondition {
 	

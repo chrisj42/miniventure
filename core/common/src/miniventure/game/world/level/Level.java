@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import miniventure.game.util.MyUtils;
-import miniventure.game.world.tile.TileDataTag.TileDataMap;
 import miniventure.game.world.Point;
 import miniventure.game.world.Taggable;
 import miniventure.game.world.WorldObject;
@@ -13,8 +12,10 @@ import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.player.Player;
 import miniventure.game.world.management.WorldManager;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.TileStack.TileData;
+import miniventure.game.world.tile.TileData;
 import miniventure.game.world.tile.TileTypeEnum;
+import miniventure.game.world.worldgen.level.ProtoLevel;
+import miniventure.game.world.worldgen.level.ProtoTile;
 
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -32,7 +33,7 @@ public abstract class Level implements Taggable<Level> {
 	private final int height;
 	
 	@NotNull private final WorldManager world;
-	@NotNull private Tile[][] tiles;
+	@NotNull private final Tile[][] tiles;
 	// final SynchronizedAccessor<Map<Point, Chunk>> loadedChunks = new SynchronizedAccessor<>(Collections.synchronizedMap(new HashMap<>(X_LOAD_RADIUS*2*Y_LOAD_RADIUS*2)));
 	//private int tileCount;
 	private int mobCount;
@@ -43,16 +44,19 @@ public abstract class Level implements Taggable<Level> {
 	/** @noinspection FieldCanBeLocal*/
 	private int mobCap = 80;
 	
+	// for freshly generated levels
 	@FunctionalInterface
 	public interface TileMaker {
-		Tile get(Level level, int x, int y, TileTypeEnum[] types);
+		Tile get(Level level, ProtoTile tile);
 	}
 	
+	// for server
 	@FunctionalInterface
 	public interface TileLoader {
-		Tile get(Level level, int x, int y, TileTypeEnum[] types, TileDataMap[] dataMaps);
+		Tile get(Level level, int x, int y, @NotNull TileData tileData);
 	}
 	
+	// for client, which doesn't load tile information immediately 
 	@FunctionalInterface
 	public interface TileFetcher {
 		Tile get(Level level, int x, int y);
@@ -67,30 +71,32 @@ public abstract class Level implements Taggable<Level> {
 		tiles = new Tile[width][height];
 	}
 	
-	protected Level(@NotNull WorldManager world, int levelId, @NotNull TileTypeEnum[][][] tileTypes, @NotNull TileMaker tileFetcher) {
-		this(world, levelId, tileTypes.length, tileTypes.length == 0 ? 0 : tileTypes[0].length);
+	// generation / server (or display level)
+	protected Level(@NotNull WorldManager world, int levelId, @NotNull ProtoLevel island, @NotNull TileMaker tileMaker) {
+		this(world, levelId, island.width, island.height);
 		
 		MyUtils.debug(world.getClass().getSimpleName()+": fetching level "+levelId+" initial tile data...");
-		for(int x = 0; x < tiles.length; x++)
-			for(int y = 0; y < tiles[x].length; y++)
-				tiles[x][y] = tileFetcher.get(this, x, y, tileTypes[x][y]);
+		for(int x = 0; x < island.width; x++)
+			for(int y = 0; y < island.height; y++)
+				tiles[x][y] = tileMaker.get(this, island.getTile(x, y));
 		
 		MyUtils.debug(world.getClass().getSimpleName()+": tile data initialized.");
 	}
 	
-	protected Level(@NotNull WorldManager world, int levelId, TileData[][] tileData, TileLoader tileFetcher) {
-		this(world, levelId, tileData.length, tileData.length == 0 ? 0 : tileData[0].length);
+	// loading (server)
+	protected Level(@NotNull WorldManager world, int levelId, TileMapData tileData, TileLoader tileFetcher) {
+		this(world, levelId, tileData.width, tileData.height);
 		
 		MyUtils.debug(world.getClass().getSimpleName()+": loading level "+levelId+" tile data...");
-		for(int x = 0; x < tileData.length; x++) {
-			for(int y = 0; y < tileData[x].length; y++) {
-				TileData data = tileData[x][y];
-				tiles[x][y] = tileFetcher.get(this, x, y, data.getTypes(), data.getDataMaps());
+		for(int x = 0; x < tileData.width; x++) {
+			for(int y = 0; y < tileData.height; y++) {
+				tiles[x][y] = tileFetcher.get(this, x, y, tileData.getTileData(x, y));
 			}
 		}
 		MyUtils.debug(world.getClass().getSimpleName()+": tile data loaded.");
 	}
 	
+	// fetching / fake load (client)
 	protected Level(@NotNull WorldManager world, int levelId, int width, int height, TileFetcher tileFetcher) {
 		this(world, levelId, width, height);
 		MyUtils.debug(world.getClass().getSimpleName()+": loading level "+levelId+" tile placeholders...");
@@ -115,12 +121,16 @@ public abstract class Level implements Taggable<Level> {
 	public TileData[][] getTileData(boolean save) {
 		TileData[][] data = new TileData[width][height];
 		
-		for(int x = 0; x < tiles.length; x++)
-			for(int y = 0; y < tiles[x].length; y++)
+		for(int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
 				data[x][y] = new TileData(tiles[x][y], save);
+			}
+		}
 		
 		return data;
 	}
+	
+	public abstract void resetTileData(Tile tile);
 	
 	// protected int getLoadedChunkCount() { return loadedChunks.get(Map::size); }
 	// protected Chunk getLoadedChunk(Point p) { return loadedChunks.get(chunks -> chunks.get(p)); }

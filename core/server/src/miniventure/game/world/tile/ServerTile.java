@@ -1,5 +1,6 @@
 package miniventure.game.world.tile;
 
+import java.util.EnumMap;
 import java.util.HashSet;
 
 import miniventure.game.item.Item;
@@ -8,7 +9,6 @@ import miniventure.game.item.ServerItem;
 import miniventure.game.network.GameServer;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.tile.TileDataTag.TileDataMap;
-import miniventure.game.util.function.Action;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.player.Player;
@@ -16,6 +16,7 @@ import miniventure.game.world.level.Level;
 import miniventure.game.world.level.ServerLevel;
 import miniventure.game.world.management.ServerWorld;
 import miniventure.game.world.tile.ServerTileType.P;
+import miniventure.game.world.worldgen.level.ProtoTile;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
@@ -28,19 +29,15 @@ import org.jetbrains.annotations.Nullable;
 /** @noinspection EqualsAndHashcode*/
 public class ServerTile extends Tile {
 	
-	public ServerTile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types) {
-		this(level, x, y, types, null);
-	}
-	public ServerTile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, TileDataMap[] dataMaps) {
-		this((ServerLevel) level, x, y, types, dataMaps);
-	}
-	public ServerTile(@NotNull ServerLevel level, int x, int y, @NotNull TileTypeEnum[] types, TileDataMap[] dataMaps) {
-		super(level, x, y, types, dataMaps);
+	public ServerTile(@NotNull Level level, ProtoTile tile) {
+		super(level, tile);
 	}
 	
-	@Override
-	ServerTileStack makeStack(@NotNull TileTypeEnum[] types, @Nullable TileDataMap[] dataMaps) {
-		return new ServerTileStack(getWorld(), types, dataMaps);
+	public ServerTile(@NotNull Level level, int x, int y, @NotNull TileData tileData) {
+		this((ServerLevel) level, x, y, tileData);
+	}
+	public ServerTile(@NotNull ServerLevel level, int x, int y, @NotNull TileData tileData) {
+		super(level, x, y, tileData);
 	}
 	
 	@Override @NotNull
@@ -54,55 +51,62 @@ public class ServerTile extends Tile {
 	
 	@Override
 	public ServerTileType getType() { return (ServerTileType) super.getType(); }
-	
 	@Override
-	public ServerTileStack getTypeStack() {
-		return (ServerTileStack) super.getTypeStack();
+	public ServerTileType getType(TileLayer layer) {
+		return (ServerTileType) super.getType(layer);
+	}
+	@Override
+	@SuppressWarnings("unchecked")
+	public EnumMap<TileLayer, ServerTileType> getTypeStack() {
+		return (EnumMap<TileLayer, ServerTileType>) super.getTypeStack();
 	}
 	
-	public void addTile(@NotNull ServerTileType newType) { addTile(new TileTypeInfo(newType)); }
-	public synchronized void addTile(@NotNull TileTypeInfo newType) { addTile(newType, getType()); }
+	public synchronized void addTile(@NotNull ServerTileType newType) { addTile(newType, getType()); }
 	// not synchronizing this only because it's always called in a synchronized context.
-	private void addTile(@NotNull TileTypeInfo newTypeInfo, @NotNull ServerTileType prevType) {
-		ServerTileType newType = ServerTileType.get(newTypeInfo.tileType);
+	private void addTile(@NotNull ServerTileType newType, @NotNull ServerTileType prevType) {
+		// ServerTileType newType = ServerTileType.get(newTypeInfo.tileType);
 		
 		moveEntities(newType);
 		
-		getTypeStack().addLayer(newType, newTypeInfo.initialData);
+		setType(newType);
 		
 		// check for an entrance animation
 		if(!newType.get(P.TRANS).tryStartAnimation(this, prevType))
-			getLevel().onTileUpdate(this, newTypeInfo.tileType); // trigger update manually since tile still changed, just without an animation; tryStartAnimation only triggers updates for transition state changes.
+			getLevel().onTileUpdate(this); // trigger update manually since tile still changed, just without an animation; tryStartAnimation only triggers updates for transition state changes.
 	}
 	
 	// starting point to break a tile
 	boolean breakTile() {
-		return removeTile(true, null);
+		return replaceTile(true, null);
 	}
 	// starting point to replace a tile
-	boolean replaceTile(@NotNull ServerTileType newType) { return replaceTile(new TileTypeInfo(newType)); }
-	boolean replaceTile(@NotNull TileTypeInfo newType) {
-		return removeTile(true, newType);
+	/*boolean replaceTile(@NotNull ServerTileType newType) { return replaceTile(new TileTypeInfo(newType)); }*/
+	boolean setTile(@NotNull ServerTileType newType) {
+		return replaceTile(true, newType);
 	}
 	// can be called down the line after either method above, after the exit animation plays
-	boolean breakTile(@Nullable TileTypeInfo replacementType) {
-		return removeTile(false, replacementType);
+	boolean breakTile(@Nullable ServerTileType replacementType) {
+		return replaceTile(false, replacementType);
 	}
-	private synchronized boolean removeTile(boolean checkForExitAnim, @Nullable TileTypeInfo replacementType) {
+	private synchronized boolean replaceTile(boolean checkForExitAnim, @Nullable ServerTileType replacementType) {
 		ServerTileType type = getType();
 		if(checkForExitAnim) {
 			boolean addNext = replacementType != null;
-			TileTypeInfo nextType = replacementType == null ? new TileTypeInfo(getTypeStack().getLayerFromTop(1, true)) : replacementType;
+			TileType nextType = replacementType == null ? getUnderType() : replacementType;
 			if(type.get(P.TRANS).tryStartAnimation(this, nextType, addNext)) {
 				// transitioning successful, tile will be broken after exit animation
 				return true; // don't actually break the tile yet (but line above, still signal for update)
 			}
 		}
 		
-		Action destroyAction = getCacheMap(type.getTypeEnum()).get(TileCacheTag.DestroyAction);
-		ServerTileType prevType = getTypeStack().removeLayer();
-		if(destroyAction != null)
-			destroyAction.act();
+		// Action destroyAction = getCacheMap(type.getTypeEnum()).get(TileCacheTag.DestroyAction);
+		// ServerTileType prevType = getTypeStack().removeLayer();
+		ServerTileType prevType = getType();
+		getTypeStack().remove(prevType.getTypeEnum().layer);
+		// if(destroyAction != null)
+		// 	destroyAction.act();
+		
+		getLevel().resetTileData(this);
 		
 		if(replacementType != null) {
 			// don't worry if a tile type was removed or not, add the next one anyway.
@@ -112,11 +116,22 @@ public class ServerTile extends Tile {
 		else if(prevType != null) {
 			// a tile type was removed
 			moveEntities(getType());
-			getLevel().onTileUpdate(this, null);
+			getLevel().onTileUpdate(this);
 			return true;
 		}
 		
 		return false; // cannot break this tile any further.
+	}
+	
+	public synchronized boolean removeLayer(TileLayer layer) {
+		TileType type = getTypeStack().remove(layer);
+		if(type == null)
+			return false;
+		
+		TileTypeEnum under = type.getTypeEnum().getUnderType();
+		if(under != null)
+			addTile(getWorld().getTileType(under));
+		return true;
 	}
 	
 	private void moveEntities(ServerTileType newType) {
@@ -161,7 +176,7 @@ public class ServerTile extends Tile {
 	
 	public float update() {
 		float min = 0;
-		for(ServerTileType type: getTypeStack().getTypes()) {
+		for(ServerTileType type: getTypeStack().values()) {
 			float wait = type.update(this);
 			if(min == 0)
 				min = wait;
