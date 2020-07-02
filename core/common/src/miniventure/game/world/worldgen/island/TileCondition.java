@@ -1,6 +1,4 @@
-package miniventure.game.world.worldgen.level.processing;
-
-import miniventure.game.world.worldgen.level.ProtoTile;
+package miniventure.game.world.worldgen.island;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

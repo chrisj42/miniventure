@@ -140,7 +140,7 @@ public abstract class GameClient implements GameProtocol {
 			if(level == null) return;
 			ClientTile tile = level.getTile(update.x, update.y);
 			if(tile != null)
-				level.serverUpdate(tile, update.tileData);
+				level.serverUpdate(tile, update.tileData, update.updatedType);
 		}
 		
 		if(object instanceof Hurt) {

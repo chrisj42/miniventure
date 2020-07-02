@@ -30,7 +30,7 @@ import miniventure.game.world.level.Level;
 import miniventure.game.world.level.ServerLevel;
 import miniventure.game.world.management.ServerWorld;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.TileData;
+import miniventure.game.world.tile.TileStack.TileData;
 import miniventure.game.world.tile.TileTypeEnum;
 
 import com.badlogic.gdx.graphics.Color;

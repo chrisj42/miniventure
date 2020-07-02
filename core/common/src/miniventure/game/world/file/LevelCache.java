@@ -8,8 +8,8 @@ import miniventure.game.util.SerialHashMap;
 import miniventure.game.util.Version;
 import miniventure.game.world.level.Level;
 import miniventure.game.world.level.LevelFetcher;
-import miniventure.game.world.level.TileMapData;
-import miniventure.game.world.worldgen.level.IslandType;
+import miniventure.game.world.tile.TileStack.TileData;
+import miniventure.game.world.worldgen.island.IslandType;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -26,31 +26,35 @@ public class LevelCache {
 	
 	// public final IslandReference ref;
 	public final IslandCache island;
-	private final int id;
+	public final IslandType islandType;
+	private final boolean isSurface;
 	
+	// gen parameter
 	private final long seed;
 	
 	// load parameters
 	@NotNull
 	private Version dataVersion;
 	private String[] entityData;
-	private TileMapData tileData;
+	private TileData[][] tileData;
 	
-	LevelCache(IslandCache parent, int id, long seed) {
+	LevelCache(IslandCache parent, boolean isSurface, long seed, IslandType islandType) {
+		// this.ref = new IslandReference(levelId, islandType);
 		this.island = parent;
-		this.id = id;
+		this.isSurface = isSurface;
+		this.islandType = islandType;
 		this.seed = seed;
 		dataVersion = Version.CURRENT;
 	}
 	
-	LevelCache(IslandCache parent, int id, @NotNull Version dataVersion, LinkedList<String> fileData) {
+	LevelCache(IslandCache parent, boolean isSurface, @NotNull Version dataVersion, LinkedList<String> fileData) {
 		this.island = parent;
-		this.id = id;
+		this.isSurface = isSurface;
 		this.dataVersion = dataVersion;
 		
 		//noinspection MismatchedQueryAndUpdateOfCollection
 		SerialHashMap map = new SerialHashMap(fileData.pop());
-		// this.islandType = map.get("island", IslandType::valueOf);
+		this.islandType = map.get("island", IslandType::valueOf);
 		// this.ref = new IslandReference(id, IslandType.valueOf(islandType));
 		seed = map.get("seed", Long::parseLong);
 		int ec = map.get("ec", Integer::parseInt);
@@ -64,36 +68,39 @@ public class LevelCache {
 		}
 		
 		this.entityData = new String[ec];
+		this.tileData = new TileData[width][height];
+		
 		for(int i = 0; i < ec; i++)
 			entityData[i] = fileData.pop();
 		
-		this.tileData = new TileMapData(width, height, dataVersion, fileData);
 		// TODO here is where I can check for compressed tiles
-		// for(int xp = 0; xp < width; xp++)
-		// 	for(int yp = 0; yp < height; yp++)
-		// 		tileData[xp][yp] = new TileData(dataVersion, fileData.pop());
+		for(int xp = 0; xp < width; xp++)
+			for(int yp = 0; yp < height; yp++)
+				tileData[xp][yp] = new TileData(dataVersion, fileData.pop());
 	}
 	
 	List<String> save() { return save(new LinkedList<>()); }
 	List<String> save(List<String> data) {
 		SerialHashMap map = new SerialHashMap();
-		// map.add("island", island.getId());
+		map.add("island", this.islandType);
 		map.add("seed", seed);
 		map.add("ec", entityData == null ? -1 : entityData.length);
-		map.add("w", tileData == null ? 0 : tileData.width);
-		map.add("h", tileData == null ? 0 : tileData.height);
+		map.add("w", tileData == null ? 0 : tileData.length);
+		map.add("h", tileData == null ? 0 : tileData[0].length);
 		data.add(map.serialize());
 		
 		if(entityData != null)
 			data.addAll(Arrays.asList(entityData));
 		
 		if(tileData != null)
-			tileData.serialize(data);
+			for(TileData[] col: tileData)
+				for(TileData td: col)
+					data.add(td.serialize());
 		
 		return data;
 	}
 	
-	public void updateData(String[] entityData, TileMapData tileData) {
+	public void updateData(String[] entityData, TileData[][] tileData) {
 		this.entityData = entityData;
 		this.tileData = tileData;
 		dataVersion = Version.CURRENT;
@@ -101,15 +108,13 @@ public class LevelCache {
 	
 	public boolean generated() { return tileData != null; }
 	
-	public IslandType getIslandType() { return island.getIslandType(); }
-	
-	public int getId() { return id; }
+	public int getId() { return island.getId(isSurface); }
 	
 	// the server is the only one that calls this, since it's the only one that uses this system.
 	public Level getLevel(LevelFetcher<?> fetcher) {
 		if(generated()) // should basically always be true
 			return fetcher.loadLevel(this, dataVersion, tileData, entityData);
 		
-		return fetcher.makeLevel(this, seed);
+		return fetcher.makeLevel(this);
 	}
 }

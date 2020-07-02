@@ -5,8 +5,6 @@ import java.util.*;
 import miniventure.game.core.GameCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.RelPos;
-import miniventure.game.world.level.ClientLevel;
-import miniventure.game.world.level.Level;
 import miniventure.game.world.tile.SpriteManager.SpriteCompiler;
 import miniventure.game.world.tile.TileTypeToAnimationMap.IndexedTileTypeToAnimationMap;
 
@@ -164,10 +162,7 @@ public class TileTypeRenderer {
 	// fetches sprites that represent this TileType on the given tile, including a main sprite and/or a connection sprite; or a transition sprite, if there is a current transition.
 	public LinkedList<TileAnimation> getCoreSprites(@NotNull Tile tile, EnumMap<RelPos, EnumSet<TileTypeEnum>> aroundTypes) {
 		LinkedList<TileAnimation> sprites = new LinkedList<>();
-		String tName = null;
-		Level level = tile.getLevel();
-		if(level instanceof ClientLevel)
-			tName = ((ClientLevel)level).transitions.get(tile);
+		String tName = tile.getDataMap(tileType).get(TileDataTag.TransitionName);
 		if(tName != null)
 			sprites.add(transitions.get(tName).getAnimation());
 		else {

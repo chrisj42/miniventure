@@ -31,9 +31,9 @@ import miniventure.game.world.level.Level;
 import miniventure.game.world.management.WorldManager;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.Tile.TileTag;
-import miniventure.game.world.tile.TileData;
+import miniventure.game.world.tile.TileStack.TileData;
 import miniventure.game.world.tile.TileTypeEnum;
-import miniventure.game.world.worldgen.level.IslandType;
+import miniventure.game.world.worldgen.island.IslandType;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
@@ -246,28 +246,28 @@ public interface GameProtocol {
 	}
 	
 	// for server to send level data to the client. Sets the client to a loading screen, which stays open until a SpawnData is sent. A SpawnData packet will always clear a loading screen.
-	/*class LevelData {
+	class LevelData {
 		public final int levelId;
-		public final TileDataOld[][] tiles;
+		public final TileData[][] tiles;
 		
 		// for client
 		public LevelData() { this(0, null); }
 		// for server
 		public LevelData(Level level) { this(level.getLevelId(), level.getTileData(false)); }
-		public LevelData(int levelId, TileDataOld[][] tiles) {
+		public LevelData(int levelId, TileData[][] tiles) {
 			this.levelId = levelId;
 			this.tiles = tiles;
 		}
-	}*/
+	}
 	
 	// used in MapRequest below; holds general data about a single island.
 	class IslandReference {
-		public final int islandId;
+		public final int levelId;
 		public final IslandType type; // gen parameter
 		
 		private IslandReference() { this(0, null); }
-		public IslandReference(int islandId, IslandType type) {
-			this.islandId = islandId;
+		public IslandReference(int levelId, IslandType type) {
+			this.levelId = levelId;
 			this.type = type;
 		}
 	}
@@ -298,29 +298,17 @@ public interface GameProtocol {
 		public final int levelId;
 		public final int x;
 		public final int y;
+		public final TileTypeEnum updatedType;
 		
-		private TileUpdate() { this(null, 0, 0, 0); }
-		public TileUpdate(Tile tile) { this(tile, tile.getLocation()); }
-		private TileUpdate(Tile tile, Point pos) { this(new TileData(tile, false), tile.getLevel().getLevelId(), pos.x, pos.y); }
-		public TileUpdate(TileData data, int levelId, int x, int y) {
+		private TileUpdate() { this(null, 0, 0, 0, null); }
+		public TileUpdate(Tile tile, TileTypeEnum updatedType) { this(tile, tile.getLocation(), updatedType); }
+		private TileUpdate(Tile tile, Point pos, TileTypeEnum updatedType) { this(new TileData(tile, false), tile.getLevel().getLevelId(), pos.x, pos.y, updatedType); }
+		public TileUpdate(TileData data, int levelId, int x, int y, TileTypeEnum updatedType) {
 			tileData = data;
 			this.levelId = levelId;
 			this.x = x;
 			this.y = y;
-		}
-	}
-	
-	class TileTransition {
-		public final String transition;
-		public final int levelId;
-		public final int x;
-		public final int y;
-		
-		public TileTransition(String transition, int levelId, int x, int y) {
-			this.transition = transition;
-			this.levelId = levelId;
-			this.x = x;
-			this.y = y;
+			this.updatedType = updatedType;
 		}
 	}
 	

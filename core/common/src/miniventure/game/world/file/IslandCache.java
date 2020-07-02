@@ -1,60 +1,36 @@
 package miniventure.game.world.file;
 
-import java.io.IOException;
-
 import miniventure.game.network.GameProtocol.IslandReference;
-import miniventure.game.util.function.MapFunction;
-import miniventure.game.util.function.ValueAction;
-import miniventure.game.world.worldgen.level.IslandType;
+import miniventure.game.world.worldgen.island.IslandType;
 
 public class IslandCache {
 	
 	// holds the LevelCache for the surface and cavern levels
 	
 	public interface LevelCacheFetcher {
-		LevelCache getCache(IslandCache island, int id) throws IOException;
+		LevelCache getCache(IslandCache island, boolean isSurface);
 	}
 	
-	private final IslandReference ref;
-	private final long seed;
-	private final LevelCache[] levels;
+	public final IslandReference ref;
+	
+	public final LevelCache surface, caverns;
 	
 	// world gen
 	IslandCache(int id, long seed, IslandType islandType) {
-		this.seed = seed;
-		ref = new IslandReference(id, islandType);
-		levels = new LevelCache[islandType.getLevelCount()];
-		for(int i = 0; i < levels.length; i++)
-			levels[i] = new LevelCache(this, i, seed + i);
+		this(id,
+			(island, isSurface) -> new LevelCache(island, isSurface, seed, islandType),
+			(island, isSurface) -> new LevelCache(island, isSurface, seed, islandType)
+		);
 	}
 	
-	// load
-	IslandCache(int id, long seed, IslandType islandType, LevelCacheFetcher cacheFetcher) throws IOException {
-		ref = new IslandReference(id, islandType);
-		this.seed = seed;
-		levels = new LevelCache[islandType.getLevelCount()];
-		for (int i = 0; i < levels.length; i++)
-			levels[i] = cacheFetcher.getCache(this, i);
+	IslandCache(int id, LevelCacheFetcher surface, LevelCacheFetcher caverns) {
+		this.surface = surface.getCache(this, true);
+		this.caverns = caverns.getCache(this, false);
+		
+		ref = new IslandReference(id, this.surface.islandType);
 	}
 	
-	// game will do a hasDepth() check to determine if digging through the ground should allow you to go a level below.
-	public int getLevelCount() {
-		return levels.length;
-	}
-	
-	public LevelCache getCache(int depth) {
-		return /*depth >= levels.length ? null : */levels[depth];
-	}
-	
-	public int getId() {
-		return ref.islandId;
-	}
-	
-	public IslandType getIslandType() {
-		return ref.type;
-	}
-	
-	public IslandReference getRef() {
-		return ref;
+	int getId(boolean isSurface) {
+		return isSurface ? ref.levelId : -ref.levelId;
 	}
 }

@@ -1,6 +1,5 @@
 package miniventure.game.world.tile;
 
-import miniventure.game.world.level.ServerLevel;
 import miniventure.game.world.tile.TileCacheTag.TileDataCache;
 import miniventure.game.util.function.FetchFunction;
 import miniventure.game.util.function.ValueAction;
@@ -16,17 +15,6 @@ public class UpdateManager {
 			- a period to wait before that update happens
 			- a way to signal what that wait period is, that is only requested once per update cycle
 	 */
-	
-	public static class UpdateData {
-		// public float lastUpdate;
-		public final float[] updateDeltas;
-		public final String[] actionCaches;
-		
-		public UpdateData(float[] updateDeltas, String[] actionCaches) {
-			this.updateDeltas = updateDeltas;
-			this.actionCaches = actionCaches;
-		}
-	}
 	
 	interface UpdateAction {
 		void update(@NotNull ServerTile tile, FetchFunction<String> dataCacheFetcher, ValueAction<String> dataCacheSetter);
@@ -51,11 +39,9 @@ public class UpdateManager {
 			return man.tryFinishAnimation(tile);
 		
 		float minWait = 0;
-		// TileDataCache dataMap = tile.getCacheMap(tileType);
-		ServerLevel level = tile.getLevel();
-		UpdateData updateData = level.tileUpdates.getOrDefaultAndPut(tile, new UpdateData(new float[actions.length], new String[actions.length]));
-		float[] deltas = updateData.updateDeltas;
-		String[] datas = updateData.actionCaches;
+		TileDataCache dataMap = tile.getCacheMap(tileType);
+		float[] deltas = dataMap.getOrDefaultAndPut(TileCacheTag.UpdateTimers, new float[actions.length]);
+		String[] datas = dataMap.getOrDefaultAndPut(TileCacheTag.UpdateActionCaches, new String[actions.length]);
 		for(int i = 0; i < actions.length; i++) {
 			if(!actions[i].canUpdate(tile))
 				deltas[i] = 0;

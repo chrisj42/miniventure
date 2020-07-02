@@ -2,11 +2,12 @@ package miniventure.game.world.level;
 
 import miniventure.game.util.Version;
 import miniventure.game.world.file.LevelCache;
+import miniventure.game.world.tile.TileStack.TileData;
 
 public interface LevelFetcher<L extends Level> {
 	
-	L makeLevel(LevelCache cache, long seed);
+	L makeLevel(LevelCache cache);
 	
-	L loadLevel(LevelCache cache, final Version version, TileMapData tileData, String[] entityData);
+	L loadLevel(LevelCache cache, final Version version, TileData[][] tileData, String[] entityData);
 	
 }

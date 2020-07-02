@@ -7,8 +7,8 @@ import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.particle.ActionParticle;
 import miniventure.game.world.management.LevelManager;
 import miniventure.game.world.tile.Tile;
+import miniventure.game.world.tile.TileStack.TileData;
 import miniventure.game.world.tile.TileTypeEnum;
-import miniventure.game.world.worldgen.level.ProtoLevel;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
@@ -20,16 +20,12 @@ import org.jetbrains.annotations.NotNull;
 
 public abstract class RenderLevel extends Level {
 	
-	// store animation start times for visible tiles
-	public final TileDataMap<Float> animStartTimes = new TileDataMap<>();
+	protected RenderLevel(@NotNull LevelManager world, int levelId, @NotNull TileTypeEnum[][][] tileTypes, @NotNull TileMaker tileFetcher) {
+		super(world, levelId, tileTypes, tileFetcher);
+	}
 	
 	protected RenderLevel(@NotNull LevelManager world, int levelId, int width, int height, TileFetcher tileFetcher) {
 		super(world, levelId, width, height, tileFetcher);
-	}
-	
-	// only used for DisplayLevel
-	protected RenderLevel(@NotNull LevelManager world, int levelId, @NotNull ProtoLevel island, @NotNull TileMaker tileFetcher) {
-		super(world, levelId, island, tileFetcher);
 	}
 	
 	@Override @NotNull

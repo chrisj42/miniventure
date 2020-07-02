@@ -1,6 +1,5 @@
 package miniventure.game.world.tile;
 
-import java.util.EnumMap;
 import java.util.HashSet;
 
 import miniventure.game.util.MyUtils;
@@ -10,12 +9,12 @@ import miniventure.game.world.Point;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.level.Level;
 import miniventure.game.world.management.WorldManager;
-import miniventure.game.world.worldgen.level.ProtoTile;
 
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class Tile implements WorldObject {
 	
@@ -39,47 +38,23 @@ public abstract class Tile implements WorldObject {
 	public static final int SCALE = 4;
 	public static final int SIZE = RESOLUTION * SCALE;
 	
-	private final EnumMap<TileLayer, TileType> typeStack;
-	private TileType topCache;
+	private TileStack tileStack;
 	
 	@NotNull private final Level level;
-	public final int x, y;
+	final int x, y;
 	// final EnumMap<TileTypeEnum, SerialMap> dataMaps = new EnumMap<>(TileTypeEnum.class);
 	
-	// create
-	Tile(@NotNull Level level, @NotNull ProtoTile tile) {
-		this.level = level;
-		this.x = tile.pos.x;
-		this.y = tile.pos.y;
-		typeStack = new EnumMap<>(TileLayer.class);
-		setTypeStack(tile.getTypes(), false);
-	}
 	// the TileType array is ALWAYS expected in order of bottom to top.
-	Tile(@NotNull Level level, int x, int y, @NotNull TileData data) {
+	Tile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, @Nullable TileDataMap[] dataMaps) {
 		this.level = level;
 		this.x = x;
 		this.y = y;
-		typeStack = new EnumMap<>(TileLayer.class);
-		setTypeStack(data.types, false);
+		setTileStack(makeStack(types, dataMaps));
 	}
 	
-	void setTypeStack(TileTypeEnum[] types) { setTypeStack(types, true); }
-	void setTypeStack(TileTypeEnum[] types, boolean resetData) {
-		for(TileTypeEnum type: types) {
-			if(type != null)
-				typeStack.put(type.layer, level.getWorld().getTileType(type));
-		}
-		refreshTopCache();
-		if(resetData)
-			level.resetTileData(this);
-	}
+	abstract TileStack makeStack(@NotNull TileTypeEnum[] types, @Nullable TileDataMap[] dataMaps);
 	
-	private void refreshTopCache() {
-		for(int i = TileLayer.values.length-1; i >= 0; i--) {
-			if(getType(TileLayer.values[i]) != null)
-				topCache = getType(TileLayer.values[i]);
-		}
-	}
+	void setTileStack(TileStack stack) { this.tileStack = stack; }
 	
 	@NotNull @Override
 	public WorldManager getWorld() { return level.getWorld(); }
@@ -92,51 +67,32 @@ public abstract class Tile implements WorldObject {
 	
 	public Point getLocation() { return new Point(x, y); }
 	
-	void setType(TileTypeEnum type) { setType(level.getWorld().getTileType(type)); }
-	void setType(TileType type) {
-		typeStack.put(type.getTypeEnum().layer, type);
-		refreshTopCache();
-	}
 	
-	public TileType getType() {
-		if(topCache == null) refreshTopCache();
-		return topCache;
-	}
-	public TileType getType(TileLayer layer) { return typeStack.get(layer); }
-	public EnumMap<TileLayer, ? extends TileType> getTypeStack() { return typeStack; }
-	public TileType getUnderType() {
-		for(int i = topCache.getTypeEnum().layer.ordinal(); i >= 0; i--) {
-			TileType curType = getType(TileLayer.values[i]);
-			if(curType == null) continue;
-			TileTypeEnum under = curType.getTypeEnum().getUnderType();
-			if(under != null)
-				return getWorld().getTileType(under);
-		}
-		return getWorld().getTileType(TileTypeEnum.HOLE);
-	}
+	public TileType getType() { return tileStack.getTopLayer(); }
+	public TileStack getTypeStack() { return tileStack; }
 	
 	// public SerialMap getDataMap(TileType tileType) { return getDataMap(tileType.getTypeEnum()); }
-	/*@NotNull
+	@NotNull
 	public TileDataMap getDataMap(TileTypeEnum tileType) {
-		TileDataMap map = typeStack.getDataMap(tileType);
+		TileDataMap map = tileStack.getDataMap(tileType);
 		// should never happen, especially with the new synchronization. But this will stay, just in case.
 		if(map == null) {
-			MyUtils.error("ERROR: tile " + toLocString() + " came back with a null data map for tiletype " + tileType + "; stack: " + typeStack.getDebugString(), true, true);
+			MyUtils.error("ERROR: tile " + toLocString() + " came back with a null data map for tiletype " + tileType + "; stack: " + tileStack.getDebugString(), true, true);
 			map = new TileDataMap();
 		}
 		return map;
-	}*/
+	}
 	
-	/*@NotNull
+	@NotNull
 	public TileCacheTag.TileDataCache getCacheMap(TileTypeEnum tileType) {
-		TileDataCache map = typeStack.getCacheMap(tileType);
+		TileDataCache map = tileStack.getCacheMap(tileType);
 		// should never happen, especially with the new synchronization. But this will stay, just in case.
 		if(map == null) {
-			MyUtils.error("ERROR: tile " + toLocString() + " came back with a null cache map for tiletype " + tileType + "; stack: " + typeStack.getDebugString(), true, true);
+			MyUtils.error("ERROR: tile " + toLocString() + " came back with a null cache map for tiletype " + tileType + "; stack: " + tileStack.getDebugString(), true, true);
 			map = new TileDataCache();
 		}
 		return map;
-	}*/
+	}
 	
 	
 	public HashSet<Tile> getAdjacentTiles(boolean includeCorners) {
@@ -168,7 +124,7 @@ public abstract class Tile implements WorldObject {
 	}
 	
 	@Override
-	public int hashCode() { return x * level.getHeight() + y; }
+	public int hashCode() { return Point.javaPointHashCode(x, y) + level.getLevelId() * 17; }
 	
 	public static class TileTag implements Tag<Tile> {
 		public final int x;

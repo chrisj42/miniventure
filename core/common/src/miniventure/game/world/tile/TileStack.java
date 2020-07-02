@@ -109,16 +109,16 @@ public class TileStack<T extends TileType> {
 		}
 	}
 	
-	/*public static class TileDataOld {
+	public static class TileData {
 		public final int[] typeOrdinals;
 		public final String[] data;
 		
-		private TileDataOld() { this((int[])null, null); }
-		private TileDataOld(int[] typeOrdinals, String[] data) {
+		private TileData() { this((int[])null, null); }
+		private TileData(int[] typeOrdinals, String[] data) {
 			this.typeOrdinals = typeOrdinals;
 			this.data = data;
 		}
-		public TileDataOld(Tile tile, boolean save) {
+		public TileData(Tile tile, boolean save) {
 			TileStack<?> stack = tile.getTypeStack();
 			synchronized (stack.dataLock) {
 				TileTypeEnum[] tileTypes = stack.getEnumTypes();
@@ -134,7 +134,7 @@ public class TileStack<T extends TileType> {
 			}
 		}
 		
-		public TileDataOld(Version dataVersion, String tileData) {
+		public TileData(Version dataVersion, String tileData) {
 			String[] all = MyUtils.parseLayeredString(tileData);
 			data = Arrays.copyOfRange(all, 1, all.length);
 			
@@ -167,7 +167,7 @@ public class TileStack<T extends TileType> {
 			return maps;
 		}
 		
-	}*/
+	}
 	
 	public String getDebugString() {
 		StringBuilder str = new StringBuilder(getClass().getSimpleName()).append('[');

@@ -5,18 +5,14 @@ import java.util.*;
 import miniventure.game.item.Item;
 import miniventure.game.item.Result;
 import miniventure.game.util.RelPos;
-import miniventure.game.world.level.RenderLevel;
 import miniventure.game.world.tile.TileDataTag.TileDataMap;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.player.Player;
 import miniventure.game.world.level.Level;
-import miniventure.game.world.worldgen.level.ProtoTile;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
-
-import com.esotericsoftware.kryonet.Client;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,29 +25,20 @@ public class RenderTile extends Tile {
 	// spriteLock is unnecessary because all access occurs in the same thread: the libGDX render thread.
 	// private final Object spriteLock = new Object();
 	
-	public RenderTile(@NotNull Level level, @NotNull ProtoTile tile) {
-		super(level, tile);
+	public RenderTile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, @Nullable TileDataMap[] data) {
+		super(level, x, y, types, data);
 	}
-	public RenderTile(@NotNull Level level, int x, int y, @NotNull TileData data) {
-		super(level, x, y, data);
+	
+	@Override
+	ClientTileStack makeStack(@NotNull TileTypeEnum[] types, @Nullable TileDataMap[] dataMaps) {
+		return new ClientTileStack(types, dataMaps);
 	}
+	
+	@Override
+	public ClientTileStack getTypeStack() { return (ClientTileStack) super.getTypeStack(); }
 	
 	@Override
 	public ClientTileType getType() { return (ClientTileType) super.getType(); }
-	@Override
-	public ClientTileType getType(TileLayer layer) { return (ClientTileType) super.getType(layer); }
-	
-	@Override
-	@NotNull
-	public RenderLevel getLevel() {
-		return (RenderLevel) super.getLevel();
-	}
-	
-	@Override
-	@SuppressWarnings("unchecked")
-	public EnumMap<TileLayer, ClientTileType> getTypeStack() {
-		return (EnumMap<TileLayer, ClientTileType>) super.getTypeStack();
-	}
 	
 	@Override
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {
@@ -72,7 +59,7 @@ public class RenderTile extends Tile {
 	@Override
 	public float getLightRadius() {
 		float maxRadius = 0;
-		for(ClientTileType type: getTypeStack().values())
+		for(ClientTileType type: getTypeStack().getTypes())
 			maxRadius = Math.max(maxRadius, type.getLightRadius());
 		
 		return maxRadius;
@@ -101,7 +88,7 @@ public class RenderTile extends Tile {
 			int x = rp.getX();
 			int y = rp.getY();
 			RenderTile oTile = (RenderTile) getLevel().getTile(this.x + x, this.y + y);
-			List<ClientTileType> aroundTypes = oTile != null ? new ArrayList<>(oTile.getTypeStack().values()) : Collections.emptyList();
+			List<ClientTileType> aroundTypes = oTile != null ? oTile.getTypeStack().getTypes() : Collections.emptyList();
 			if(aroundTypes.size() > 0 && aroundTypes.get(aroundTypes.size()-1).getTypeEnum() == TileTypeEnum.STONE && getType().getTypeEnum() != TileTypeEnum.STONE)
 				aroundTypes.add(ClientTileType.get(TileTypeEnum.AIR));
 			
@@ -118,7 +105,7 @@ public class RenderTile extends Tile {
 		ArrayList<TileAnimation> spriteStack = new ArrayList<>(16);
 		
 		// iterate through main stack from bottom to top, adding connection and overlap sprites each level.
-		List<ClientTileType> types = new ArrayList<>(getTypeStack().values());
+		List<ClientTileType> types = getTypeStack().getTypes();
 		for(int i = 1; i <= types.size(); i++) {
 			ClientTileType cur = i < types.size() ? types.get(i) : null;
 			ClientTileType prev = types.get(i-1);

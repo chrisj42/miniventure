@@ -1,72 +1,56 @@
 package miniventure.game.world.tile;
 
 import java.awt.Color;
+import java.util.Arrays;
+import java.util.EnumSet;
 
 import miniventure.game.util.MyUtils;
-import miniventure.game.util.param.Param;
-import miniventure.game.util.param.ParamMap;
-import miniventure.game.util.param.Value;
 import miniventure.game.world.management.WorldManager;
-import miniventure.game.world.worldgen.level.ProtoTile;
-import miniventure.game.world.worldgen.level.processing.TileProcessor;
+import miniventure.game.world.worldgen.island.ProtoTile;
+import miniventure.game.world.worldgen.island.TileProcessor;
 
 import org.jetbrains.annotations.NotNull;
 
-import static miniventure.game.world.tile.TileLayer.DecLayer;
-import static miniventure.game.world.tile.TileLayer.GroundLayer;
-import static miniventure.game.world.tile.TileLayer.ObjectLayer;
-
 public enum TileTypeEnum implements TileProcessor {
 	
-	HOLE(GroundLayer, true),
-	DIRT(GroundLayer, true, new Color(200, 100, 0)),
-	SAND(GroundLayer, true, Color.YELLOW),
-	GRASS(GroundLayer, true, Color.GREEN, P.UNDER.as(DIRT)),
-	STONE_PATH(DecLayer, true),
-	SNOW(DecLayer, true, Color.WHITE),
-	SMALL_STONE(DecLayer, true, Color.LIGHT_GRAY),
-	STONE_FLOOR(GroundLayer, true),
-	WATER(GroundLayer, true, Color.BLUE.darker(), P.SPEED.as(0.6f)),
-	DOCK(DecLayer, true),
-	COAL_ORE(ObjectLayer, false),
-	IRON_ORE(ObjectLayer, false),
-	TUNGSTEN_ORE(ObjectLayer, false),
-	RUBY_ORE(ObjectLayer, false),
-	STONE(ObjectLayer, false, Color.GRAY),
-	WOOD_WALL(ObjectLayer, false),
-	STONE_WALL(ObjectLayer, false),
-	OPEN_DOOR(ObjectLayer, true),
-	CLOSED_DOOR(ObjectLayer, false),
-	TORCH(ObjectLayer, true),
-	CACTUS(ObjectLayer, false, Color.GREEN.darker().darker()),
-	CARTOON_TREE(ObjectLayer, false, Color.GREEN.darker().darker()),
-	DARK_TREE(ObjectLayer, false, Color.GREEN.darker().darker()),
-	PINE_TREE(ObjectLayer, false, Color.GREEN.darker().darker()),
-	POOF_TREE(ObjectLayer, false, Color.GREEN.darker().darker()),
-	AIR(ObjectLayer, true);
+	HOLE(true),
+	DIRT(true, new Color(200, 100, 0)),
+	SAND(true, Color.YELLOW),
+	GRASS(true, Color.GREEN),
+	STONE_PATH(true),
+	SNOW(true, Color.WHITE),
+	SMALL_STONE(true, Color.LIGHT_GRAY),
+	WATER(true, 0.6f, Color.BLUE.darker()),
+	DOCK(true),
+	COAL_ORE(false),
+	IRON_ORE(false),
+	TUNGSTEN_ORE(false),
+	RUBY_ORE(false),
+	STONE(false, Color.GRAY),
+	STONE_FLOOR(true),
+	WOOD_WALL(false),
+	STONE_WALL(false),
+	OPEN_DOOR(true),
+	CLOSED_DOOR(false),
+	TORCH(true),
+	CACTUS(false, Color.GREEN.darker().darker()),
+	CARTOON_TREE(false, Color.GREEN.darker().darker()),
+	DARK_TREE(false, Color.GREEN.darker().darker()),
+	PINE_TREE(false, Color.GREEN.darker().darker()),
+	POOF_TREE(false, Color.GREEN.darker().darker()),
+	AIR(true);
 	
-	private interface P {
-		Param<Float> SPEED = new Param<>(1f);
-		// Param<Color> COLOR = new Param<>(Color.BLACK);
-		Param<TileTypeEnum> UNDER = new Param<>(null);
-	}
-	
-	public final TileLayer layer;
 	public final boolean walkable;
 	public final float speedRatio;
 	public final Color color;
-	private final TileTypeEnum underType;
 	
-	TileTypeEnum(TileLayer layer, boolean walkable, Value<?>... params) {
-		this(layer, walkable, Color.BLACK, params);
-	}
-	TileTypeEnum(TileLayer layer, boolean walkable, Color color, Value<?>... params) {
-		this.layer = layer;
+	TileTypeEnum(boolean walkable) { this(walkable, 1); }
+	TileTypeEnum(boolean walkable, Color color) { this(walkable, 1, color); }
+	TileTypeEnum(boolean walkable, float speedRatio) { this(walkable, speedRatio, Color.BLACK); }
+	TileTypeEnum(boolean walkable, float speedRatio, Color color) {
 		this.walkable = walkable;
-		ParamMap map = new ParamMap(params);
-		this.speedRatio = map.get(P.SPEED);
+		this.speedRatio = speedRatio;
 		this.color = color;
-		this.underType = map.get(P.UNDER);
 		MyUtils.debug("Initialized TileType "+this);
 	}
 	
@@ -77,17 +61,13 @@ public enum TileTypeEnum implements TileProcessor {
 		return world.getTileType(this);
 	}
 	
-	public TileTypeEnum getUnderType() {
-		return underType == null ? layer == GroundLayer ? HOLE : null : underType;
-	}
-	
 	@Override
 	// adds this tile type to the tile stack.
 	public void processTile(ProtoTile tile) {
 		tile.addLayer(this);
 	}
 	
-	/*public enum TypeGroup {
+	public enum TypeGroup {
 		GROUND(DIRT, GRASS, SAND, STONE_PATH, STONE_FLOOR, SNOW, DOCK);
 		
 		private final EnumSet<TileTypeEnum> types;
@@ -99,12 +79,5 @@ public enum TileTypeEnum implements TileProcessor {
 		public boolean contains(TileTypeEnum type) {
 			return types.contains(type);
 		}
-	}*/
-	
-	/*
-		- tile types fit into layers
-			- ground
-			- decoration
-			- object
-	 */
+	}
 }

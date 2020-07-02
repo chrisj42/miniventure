@@ -101,8 +101,6 @@ public class ClientTileType extends TileType {
 		
 		SMALL_STONE(type -> new ClientTileType(type, false)),
 		
-		STONE_FLOOR(type -> new ClientTileType(type, true)),
-		
 		WATER(type -> new ClientTileType(type, buildRenderer(type, true,
 				new RenderStyle(PlayMode.LOOP_RANDOM, 5),
 				new RenderStyle(true, 24)
@@ -121,6 +119,8 @@ public class ClientTileType extends TileType {
 			.connect(list(type, COAL_ORE.mainEnum, IRON_ORE.mainEnum, TUNGSTEN_ORE.mainEnum, RUBY_ORE.mainEnum))
 			.build()
 		)),
+		
+		STONE_FLOOR(type -> new ClientTileType(type, true)),
 		
 		WOOD_WALL(ClientTileFactory::wall),
 		STONE_WALL(ClientTileFactory::wall),

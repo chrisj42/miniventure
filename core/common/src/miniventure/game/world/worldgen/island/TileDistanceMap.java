@@ -1,15 +1,14 @@
-package miniventure.game.world.worldgen.level.processing;
+package miniventure.game.world.worldgen.island;
 
 import java.util.Map;
 import java.util.TreeMap;
 
-import miniventure.game.world.worldgen.level.ProtoLevel;
 import miniventure.game.world.worldgen.posmap.DistanceMap;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class TileDistanceMap implements LevelProcessor {
+public class TileDistanceMap implements IslandProcessor {
 	
 	public static TileDistanceMapBuilder builder() {
 		return new TileDistanceMapBuilder();
@@ -74,7 +73,7 @@ public class TileDistanceMap implements LevelProcessor {
 	}
 	
 	@Override
-	public void apply(ProtoLevel island) {
+	public void apply(ProtoIsland island) {
 		if(distances.length == 0) return;
 		
 		DistanceMap distMap = new DistanceMap(island.width, island.height,

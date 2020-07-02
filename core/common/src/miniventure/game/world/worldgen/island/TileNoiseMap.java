@@ -1,10 +1,9 @@
-package miniventure.game.world.worldgen.level.processing;
+package miniventure.game.world.worldgen.island;
 
 import java.util.LinkedList;
 
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.ValueAction;
-import miniventure.game.world.worldgen.level.ProtoTile;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

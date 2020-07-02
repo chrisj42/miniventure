@@ -5,8 +5,8 @@ import java.util.HashMap;
 
 import miniventure.game.core.GameCore;
 import miniventure.game.util.MyUtils;
-import miniventure.game.world.level.ServerLevel;
 import miniventure.game.world.tile.TileCacheTag.TileDataCache;
+import miniventure.game.world.tile.TileDataTag.TileDataMap;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -63,31 +63,29 @@ public class TransitionManager {
 	
 	// enter animation
 	public boolean tryStartAnimation(@NotNull ServerTile tile, @NotNull TileType previous) {
-		return tryStartAnimation(tile, true, previous, false);
+		return tryStartAnimation(tile, true, new TileTypeInfo(previous), false);
 	}
 	// exit animation
-	public boolean tryStartAnimation(@NotNull ServerTile tile, @NotNull TileType next, boolean addNext) {
+	public boolean tryStartAnimation(@NotNull ServerTile tile, @NotNull TileTypeInfo next, boolean addNext) {
 		return tryStartAnimation(tile, false, next, addNext);
 	}
 	// check for transition animation; tiletype is being entered or removed, and given what tile type will be the main one next.
-	private boolean tryStartAnimation(@NotNull ServerTile tile, boolean isEntering, @NotNull TileType nextType, boolean addNext) { // addNext is ignored if isEntering is true
+	private boolean tryStartAnimation(@NotNull ServerTile tile, boolean isEntering, @NotNull TileTypeInfo nextType, boolean addNext) { // addNext is ignored if isEntering is true
 		HashMap<String, ServerTileTransition> animations = isEntering ? entranceAnimations : exitAnimations;
 		for(ServerTileTransition animation: animations.values()) {
-			if(animation.isTriggerType(nextType)) {
-				MyUtils.debug("Server starting tile transition for tile "+tile+", triggered by tiletype "+nextType+", with enter="+isEntering);
-				// TileDataMap dataMap = tile.getDataMap(tileType);
-				// TileDataCache cacheMap = tile.getCacheMap(tileType);
-				TransitionData transitionData = new TransitionData(animation.name, tile.getWorld().getGameTime(), isEntering ? TransitionMode.ENTERING : TransitionMode.EXITING, addNext ? nextType.getTypeEnum() : null);
-				// dataMap.put(TileDataTag.TransitionName, animation.name);
-				// float start = tile.getWorld().getGameTime();
-				// cacheMap.put(TileCacheTag.AnimationStart, start);
-				// cacheMap.put(TileCacheTag.TransitionMode, isEntering ? TransitionMode.ENTERING : TransitionMode.EXITING);
-				// if(addNext)
-				// 	cacheMap.put(TileCacheTag.TransitionTile, nextType);
-				// else
-				// 	cacheMap.remove(TileCacheTag.TransitionTile);
-				tile.getLevel().tileTransitions.put(tile, transitionData);
-				// tile.getLevel().onTileUpdate(tile, tileType);
+			if(animation.isTriggerType(nextType.tileType)) {
+				MyUtils.debug("Server starting tile transition for tile "+tile+", triggered by tiletype "+nextType.tileType+", with enter="+isEntering);
+				TileDataMap dataMap = tile.getDataMap(tileType);
+				TileDataCache cacheMap = tile.getCacheMap(tileType);
+				dataMap.put(TileDataTag.TransitionName, animation.name);
+				float start = tile.getWorld().getGameTime();
+				cacheMap.put(TileCacheTag.AnimationStart, start);
+				cacheMap.put(TileCacheTag.TransitionMode, isEntering ? TransitionMode.ENTERING : TransitionMode.EXITING);
+				if(addNext)
+					cacheMap.put(TileCacheTag.TransitionTile, nextType);
+				else
+					cacheMap.remove(TileCacheTag.TransitionTile);
+				tile.getLevel().onTileUpdate(tile, tileType);
 				return true;
 			}
 		}
@@ -100,32 +98,26 @@ public class TransitionManager {
 		map.put(TileCacheTag.TransitionStart, tile.getWorld().getGameTime());
 	}*/
 	
-	private boolean isTransitionMode(@NotNull ServerTile tile, TransitionMode mode) {
-		// TileDataCache map = tile.getCacheMap(tileType);
-		TransitionData data = tile.getLevel().tileTransitions.get(tile);
-		return (data == null ? TransitionMode.NONE : data.mode) == mode;
+	private boolean isTransitionMode(@NotNull Tile tile, TransitionMode mode) {
+		TileDataCache map = tile.getCacheMap(tileType);
+		return map.getOrDefault(TileCacheTag.TransitionMode, TransitionMode.NONE) == mode;
 	}
 	
-	public boolean playingAnimation(@NotNull ServerTile tile) { return !isTransitionMode(tile, TransitionMode.NONE); }
-	public boolean playingEntranceAnimation(@NotNull ServerTile tile) { return isTransitionMode(tile, TransitionMode.ENTERING); }
-	public boolean playingExitAnimation(@NotNull ServerTile tile) { return isTransitionMode(tile, TransitionMode.EXITING); }
+	public boolean playingAnimation(@NotNull Tile tile) { return !isTransitionMode(tile, TransitionMode.NONE); }
+	public boolean playingEntranceAnimation(@NotNull Tile tile) { return isTransitionMode(tile, TransitionMode.ENTERING); }
+	public boolean playingExitAnimation(@NotNull Tile tile) { return isTransitionMode(tile, TransitionMode.EXITING); }
 	
 	public float tryFinishAnimation(@NotNull ServerTile tile) {
-		// TileDataMap dataMap = tile.getDataMap(tileType);
-		// TileDataCache cacheMap = tile.getCacheMap(tileType);
-		ServerLevel level = tile.getLevel();
+		TileDataMap dataMap = tile.getDataMap(tileType);
+		TileDataCache cacheMap = tile.getCacheMap(tileType);
 		
-		TransitionData data = level.tileTransitions.get(tile);
-		if(data == null)
-			return 0;
-		
-		ServerTileTransition anim = getAnimationStyle(data.mode, data.name);
+		ServerTileTransition anim = getAnimationStyle(cacheMap.get(TileCacheTag.TransitionMode), dataMap.get(TileDataTag.TransitionName));
 		
 		if(anim == null)
 			return 0;
 		
 		float now = tile.getWorld().getGameTime();
-		float prev = data.startTime;
+		float prev = cacheMap.get(TileCacheTag.AnimationStart);
 		float timeElapsed = now - prev;
 		
 		if(timeElapsed < anim.getDuration())
@@ -133,21 +125,20 @@ public class TransitionManager {
 		
 		MyUtils.debug("Server ending tile transition for "+tile);
 		
-		level.tileTransitions.clear(tile);
-		// TransitionMode mode = cacheMap.remove(TileCacheTag.TransitionMode);
-		// cacheMap.remove(TileCacheTag.AnimationStart);
-		// dataMap.remove(TileDataTag.TransitionName);
-		// TileTypeInfo nextType = cacheMap.remove(TileCacheTag.TransitionTile);
+		TransitionMode mode = cacheMap.remove(TileCacheTag.TransitionMode);
+		cacheMap.remove(TileCacheTag.AnimationStart);
+		dataMap.remove(TileDataTag.TransitionName);
+		TileTypeInfo nextType = cacheMap.remove(TileCacheTag.TransitionTile);
 		
 		// if entering, no action required. if removing, remove the current tile from the stack, specifying not to check for an exit animation. If removing, and there is data for a tile type, then add that tile type.
 		
 		boolean update = true;
-		if(data.mode == TransitionMode.EXITING) {
-			update = !tile.breakTile(level.getWorld().getTileType(data.nextType)); // successful breakage will handle the update
+		if(mode == TransitionMode.EXITING) {
+			update = !tile.breakTile(nextType); // successful breakage will handle the update
 		}
 		
 		if(update) // entering, or exit where tile could not be removed
-			level.onTileUpdate(tile);
+			tile.getLevel().onTileUpdate(tile, tileType);
 		
 		return 0;
 	}
