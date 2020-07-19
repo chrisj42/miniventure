@@ -255,20 +255,18 @@ public class ClientCore extends ApplicationAdapter {
 			if((menuScreen instanceof MainMenu || menuScreen instanceof ErrorScreen) && screen instanceof ErrorScreen)
 				return; // ignore it.
 			
-			/*if(screen != null) {
-				// determine if the given screen instance is already somewhere on the "screen" hierarchy, and if so go back to that one.
-				MenuScreen check = menuScreen;
-				while(check != null && check != screen)
-					check = check.getParent();
+			// determine if the given screen instance is already somewhere on the "screen" hierarchy, and if so go back to that one.
+			MenuScreen check = menuScreen;
+			while(check != null && check != screen)
+				check = check.getParent();
+			if(check != null) {
+				// screen found
+				while(menuScreen != null && menuScreen != screen)
+					removeScreen();
 				
-				if(check != null) {
-					// screen found
-					while(menuScreen != null && menuScreen != screen)
-						removeScreen();
-					
-					return;
-				}
-			}*/
+				return;
+			}
+			
 			
 			// if(menuScreen instanceof BackgroundProvider && screen instanceof BackgroundInheritor)
 			// 	((BackgroundInheritor) screen).setBackground((BackgroundProvider) menuScreen);
