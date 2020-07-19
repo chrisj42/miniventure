@@ -49,7 +49,7 @@ public abstract class LevelWorldManager extends WorldManager {
 	public RenderLevel getLevel() { return level; }
 	
 	@Override
-	public RenderLevel getLevel(LevelId levelId) { return level != null && level.getLevelId() == levelId ? level : null; }
+	public RenderLevel getLevel(LevelId levelId) { return level != null && level.getLevelId().equals(levelId) ? level : null; }
 	
 	@Override
 	public RenderLevel getEntityLevel(Entity e) { return isEntityRegistered(e) ? level : null; }

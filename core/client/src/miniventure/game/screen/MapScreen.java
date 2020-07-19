@@ -70,10 +70,10 @@ public class MapScreen extends MenuScreen {
 				curLevel = playerLevel.getLevelId();
 			for(int i = 0; i < mapRequest.islands.length; i++) {
 				final LevelId levelId = mapRequest.islands[i].surfaceLevelId;
-				if(levelId == curLevel) continue;
+				if(levelId.equals(curLevel)) continue;
 				VisTextButton btn = makeButton("Island "+(i+1)+": "+MyUtils.toTitleFormat(mapRequest.islands[i].type.name()), () -> {
 					// Level playerLevel = ClientCore.getWorld().getMainPlayer().getLevel();
-					if(!(playerLevel != null && playerLevel.getLevelId() == levelId))
+					if(!(playerLevel != null && levelId.equals(playerLevel.getLevelId())))
 						ClientCore.getClient().send(new LevelChange(levelId));
 					ClientCore.removeScreen();
 				});
