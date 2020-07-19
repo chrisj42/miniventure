@@ -43,6 +43,7 @@ public class LoadingScreen extends MenuScreen implements ProgressLogger {
 	@Override
 	public void pushMessage(String message, boolean ephemeral) {
 		if(topEphemeral) {
+			topEphemeral = false; // tell editMessage we don't want to pop the top message
 			editMessage(message, ephemeral);
 			return;
 		}
@@ -56,9 +57,14 @@ public class LoadingScreen extends MenuScreen implements ProgressLogger {
 	
 	@Override
 	public void editMessage(String message, boolean ephemeral) {
+		if(topEphemeral) {
+			topEphemeral = false; // make popMessage() only pop 1 message
+			popMessage();
+		}
+		
 		VisLabel label = messageLabels.empty() ? null : messageLabels.peek();
 		if(label == null) {
-			topEphemeral = false; // without this we could go into infinite recursion
+			// topEphemeral = false; // ensures this method is not called again during pushMessage
 			pushMessage(message, ephemeral);
 		}
 		else {
@@ -69,13 +75,14 @@ public class LoadingScreen extends MenuScreen implements ProgressLogger {
 	
 	@Override
 	public void popMessage() {
-		try {
+		if(topEphemeral) {
+			topEphemeral = false;
+			popMessage();
+		}
+		if(!messageLabels.empty()) {
 			VisLabel removed = messageLabels.pop();
 			Gdx.app.postRunnable(() -> vGroup.removeActor(removed));
-		} catch(EmptyStackException e) {
-			System.err.println("Cannot pop from LoadingScreen message stack; stack is empty.");
 		}
-		topEphemeral = false;
 	}
 	
 }

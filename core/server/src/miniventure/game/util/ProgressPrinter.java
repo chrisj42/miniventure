@@ -23,7 +23,7 @@ public class ProgressPrinter implements ProgressLogger {
 	
 	@Override
 	public void editMessage(String newMessage, boolean ephemeral) {
-		popMessage();
+		popMessage(); // automatically pops 1 or 2 according to topEphemeral
 		messages.push(newMessage);
 		topEphemeral = ephemeral;
 		printProgress();
@@ -32,6 +32,11 @@ public class ProgressPrinter implements ProgressLogger {
 	@Override
 	public void popMessage() {
 		messages.poll();
+		if(topEphemeral) {
+			// first one doesn't count, pop another one
+			messages.poll();
+			topEphemeral = false;
+		}
 	}
 	
 	public void printProgress() {

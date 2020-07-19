@@ -36,7 +36,8 @@ public interface ProgressLogger {
 	default void editMessage(String newMessage) { editMessage(newMessage, false); }
 	
 	/**
-	 * edits the top message in the stack, optionally making it ephemeral.
+	 * Edits the top message in the stack, optionally making it ephemeral.
+	 * If the top message is ephemeral, it is ignored and the underlying message is edited.
 	 * Ephemeral messages are overwritten when anther message is pushed on top of it.
 	 *
 	 * @param newMessage the new text for the top message.
@@ -45,7 +46,8 @@ public interface ProgressLogger {
 	void editMessage(String newMessage, boolean ephemeral);
 	
 	/**
-	 * removes the top message from the message stack.
+	 * Removes the top message from the message stack.
+	 * If the top message is ephemeral, both it and the next message are removed.
 	 */
 	void popMessage();
 	
