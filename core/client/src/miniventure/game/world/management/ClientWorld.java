@@ -207,6 +207,7 @@ public class ClientWorld extends LevelWorldManager {
 			setLevel(null);
 			mainPlayer = null;
 			client = null;
+			renderWithoutPlayer = false;
 			ClientCore.removeScreen(true); // adds main menu automatically
 		});
 	}
