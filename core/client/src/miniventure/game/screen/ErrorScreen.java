@@ -23,7 +23,7 @@ public class ErrorScreen extends MenuScreen {
 		if(allowRejoin)
 			table.add(rejoin).spaceTop(50).row();
 		
-		VisTextButton back = makeButton("Back to main menu", () -> ClientCore.addScreen(getParent() != null ? getParent() : new MainMenu()));
+		VisTextButton back = makeButton("Back to main menu", () -> ClientCore.removeScreen(true));
 		table.add(back).spaceTop(10).row();
 		
 		mapButtons(table, rejoin, back);
