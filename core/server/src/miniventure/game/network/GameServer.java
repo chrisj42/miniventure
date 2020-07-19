@@ -27,6 +27,7 @@ import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.entity.particle.ParticleData;
 import miniventure.game.world.file.PlayerData;
 import miniventure.game.world.level.Level;
+import miniventure.game.world.level.LevelId;
 import miniventure.game.world.level.ServerLevel;
 import miniventure.game.world.management.ServerWorld;
 import miniventure.game.world.tile.Tile;
@@ -131,8 +132,8 @@ public abstract class GameServer implements GameProtocol {
 		final String data = player.serialize();
 		final Level level = player.getLevel();
 		// using the pdata level id is better than using the spawn level because it doesn't lose the info if an extra update request is sent after the player is removed from their level.
-		final int levelid = level == null ? pdata.levelId : level.getLevelId();
-		knownPlayers.put(name, new PlayerData(name, pdata.passhash, data, levelid, info.op));
+		final LevelId levelId = level == null ? pdata.levelId : level.getLevelId();
+		knownPlayers.put(name, new PlayerData(name, pdata.passhash, data, levelId, info.op));
 	}
 	
 	public int getPlayerCount() {
@@ -294,14 +295,14 @@ public abstract class GameServer implements GameProtocol {
 			// if the move is invalid, then send a simple spawn packet; the client doesn't unload a level unless a new LevelData packet is recieved.
 			
 			Level clientLevel = client.getLevel();
-			if(clientLevel != null && change.levelid == clientLevel.getLevelId())
+			if(clientLevel != null && change.levelId == clientLevel.getLevelId())
 				return; // quietly ignore level requests for the same level
 			
 			// todo check if move is valid in terms of stats (prob using class/method in common module)
 			// for now we will assume it is.
 			
 			world.despawnPlayer(client);
-			world.loadLevel(change.levelid, client, level -> {
+			world.loadLevel(change.levelId, client, level -> {
 				Tile spawnTile = level.getMatchingTiles(TileTypeEnum.DOCK).get(0);
 				client.moveTo(spawnTile);
 			});

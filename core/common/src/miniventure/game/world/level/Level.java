@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import miniventure.game.util.MyUtils;
-import miniventure.game.world.tile.TileDataTag.TileDataMap;
+import miniventure.game.world.tile.TileDataTag.TileDataEnumMap;
 import miniventure.game.world.Point;
 import miniventure.game.world.Taggable;
 import miniventure.game.world.WorldObject;
@@ -27,7 +27,7 @@ public abstract class Level implements Taggable<Level> {
 	
 	// public static final int X_LOAD_RADIUS = 4, Y_LOAD_RADIUS = 2;
 	
-	private final int levelId;
+	private final LevelId levelId;
 	private final int width;
 	private final int height;
 	
@@ -50,7 +50,7 @@ public abstract class Level implements Taggable<Level> {
 	
 	@FunctionalInterface
 	public interface TileLoader {
-		Tile get(Level level, int x, int y, TileTypeEnum[] types, TileDataMap[] dataMaps);
+		Tile get(Level level, int x, int y, TileTypeEnum[] types, TileDataEnumMap[] dataMaps);
 	}
 	
 	@FunctionalInterface
@@ -58,7 +58,7 @@ public abstract class Level implements Taggable<Level> {
 		Tile get(Level level, int x, int y);
 	}
 	
-	private Level(@NotNull WorldManager world, int levelId, int width, int height) {
+	private Level(@NotNull WorldManager world, LevelId levelId, int width, int height) {
 		this.world = world;
 		this.levelId = levelId;
 		this.width = width;
@@ -67,7 +67,7 @@ public abstract class Level implements Taggable<Level> {
 		tiles = new Tile[width][height];
 	}
 	
-	protected Level(@NotNull WorldManager world, int levelId, @NotNull TileTypeEnum[][][] tileTypes, @NotNull TileMaker tileFetcher) {
+	protected Level(@NotNull WorldManager world, LevelId levelId, @NotNull TileTypeEnum[][][] tileTypes, @NotNull TileMaker tileFetcher) {
 		this(world, levelId, tileTypes.length, tileTypes.length == 0 ? 0 : tileTypes[0].length);
 		
 		MyUtils.debug(world.getClass().getSimpleName()+": fetching level "+levelId+" initial tile data...");
@@ -78,7 +78,7 @@ public abstract class Level implements Taggable<Level> {
 		MyUtils.debug(world.getClass().getSimpleName()+": tile data initialized.");
 	}
 	
-	protected Level(@NotNull WorldManager world, int levelId, TileData[][] tileData, TileLoader tileFetcher) {
+	protected Level(@NotNull WorldManager world, LevelId levelId, TileData[][] tileData, TileLoader tileFetcher) {
 		this(world, levelId, tileData.length, tileData.length == 0 ? 0 : tileData[0].length);
 		
 		MyUtils.debug(world.getClass().getSimpleName()+": loading level "+levelId+" tile data...");
@@ -91,7 +91,7 @@ public abstract class Level implements Taggable<Level> {
 		MyUtils.debug(world.getClass().getSimpleName()+": tile data loaded.");
 	}
 	
-	protected Level(@NotNull WorldManager world, int levelId, int width, int height, TileFetcher tileFetcher) {
+	protected Level(@NotNull WorldManager world, LevelId levelId, int width, int height, TileFetcher tileFetcher) {
 		this(world, levelId, width, height);
 		MyUtils.debug(world.getClass().getSimpleName()+": loading level "+levelId+" tile placeholders...");
 		for(int x = 0; x < width; x++) {
@@ -104,7 +104,7 @@ public abstract class Level implements Taggable<Level> {
 	
 	public int getWidth() { return width; }
 	public int getHeight() { return height; }
-	public int getLevelId() { return levelId; }
+	public LevelId getLevelId() { return levelId; }
 	@NotNull public WorldManager getWorld() { return world; }
 	public int getMobCap() { return mobCap; }
 	public int getMobCount() { return mobCount; }
@@ -369,7 +369,7 @@ public abstract class Level implements Taggable<Level> {
 	@Override
 	public boolean equals(Object other) { return other instanceof Level && ((Level)other).levelId == levelId; }
 	@Override
-	public int hashCode() { return levelId; }
+	public int hashCode() { return levelId.hashCode(); }
 	
 	@Override
 	public String toString() { return getClass().getSimpleName()+"(levelId="+ levelId +')'; }
@@ -379,9 +379,9 @@ public abstract class Level implements Taggable<Level> {
 	
 	public static class LevelTag implements Tag<Level> {
 		
-		private final int levelId;
+		private final LevelId levelId;
 		
-		public LevelTag(int levelId) { this.levelId = levelId; }
+		public LevelTag(LevelId levelId) { this.levelId = levelId; }
 		
 		@Override
 		public Level getObject(WorldManager world) {

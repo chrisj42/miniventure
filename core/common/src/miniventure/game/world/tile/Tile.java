@@ -3,8 +3,9 @@ package miniventure.game.world.tile;
 import java.util.HashSet;
 
 import miniventure.game.util.MyUtils;
+import miniventure.game.world.level.LevelId;
 import miniventure.game.world.tile.TileCacheTag.TileDataCache;
-import miniventure.game.world.tile.TileDataTag.TileDataMap;
+import miniventure.game.world.tile.TileDataTag.TileDataEnumMap;
 import miniventure.game.world.Point;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.level.Level;
@@ -45,14 +46,14 @@ public abstract class Tile implements WorldObject {
 	// final EnumMap<TileTypeEnum, SerialMap> dataMaps = new EnumMap<>(TileTypeEnum.class);
 	
 	// the TileType array is ALWAYS expected in order of bottom to top.
-	Tile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, @Nullable TileDataMap[] dataMaps) {
+	Tile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, @Nullable TileDataEnumMap[] dataMaps) {
 		this.level = level;
 		this.x = x;
 		this.y = y;
 		setTileStack(makeStack(types, dataMaps));
 	}
 	
-	abstract TileStack makeStack(@NotNull TileTypeEnum[] types, @Nullable TileDataMap[] dataMaps);
+	abstract TileStack makeStack(@NotNull TileTypeEnum[] types, @Nullable TileDataEnumMap[] dataMaps);
 	
 	void setTileStack(TileStack stack) { this.tileStack = stack; }
 	
@@ -73,12 +74,12 @@ public abstract class Tile implements WorldObject {
 	
 	// public SerialMap getDataMap(TileType tileType) { return getDataMap(tileType.getTypeEnum()); }
 	@NotNull
-	public TileDataMap getDataMap(TileTypeEnum tileType) {
-		TileDataMap map = tileStack.getDataMap(tileType);
+	public TileDataTag.TileDataEnumMap getDataMap(TileTypeEnum tileType) {
+		TileDataEnumMap map = tileStack.getDataMap(tileType);
 		// should never happen, especially with the new synchronization. But this will stay, just in case.
 		if(map == null) {
 			MyUtils.error("ERROR: tile " + toLocString() + " came back with a null data map for tiletype " + tileType + "; stack: " + tileStack.getDebugString(), true, true);
-			map = new TileDataMap();
+			map = new TileDataEnumMap();
 		}
 		return map;
 	}
@@ -124,16 +125,16 @@ public abstract class Tile implements WorldObject {
 	}
 	
 	@Override
-	public int hashCode() { return Point.javaPointHashCode(x, y) + level.getLevelId() * 17; }
+	public int hashCode() { return Point.javaPointHashCode(x, y) + level.getLevelId().hashCode() * 17; }
 	
 	public static class TileTag implements Tag<Tile> {
 		public final int x;
 		public final int y;
-		public final int levelId;
+		public final LevelId levelId;
 		
-		private TileTag() { this(0, 0, 0); }
+		private TileTag() { this(0, 0, null); }
 		public TileTag(Tile tile) { this(tile.x, tile.y, tile.getLevel().getLevelId()); }
-		public TileTag(int x, int y, int levelId) {
+		public TileTag(int x, int y, LevelId levelId) {
 			this.x = x;
 			this.y = y;
 			this.levelId = levelId;

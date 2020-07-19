@@ -5,9 +5,8 @@ import java.util.Set;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.particle.ActionParticle;
-import miniventure.game.world.management.LevelManager;
+import miniventure.game.world.management.LevelWorldManager;
 import miniventure.game.world.tile.Tile;
-import miniventure.game.world.tile.TileStack.TileData;
 import miniventure.game.world.tile.TileTypeEnum;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -20,16 +19,20 @@ import org.jetbrains.annotations.NotNull;
 
 public abstract class RenderLevel extends Level {
 	
-	protected RenderLevel(@NotNull LevelManager world, int levelId, @NotNull TileTypeEnum[][][] tileTypes, @NotNull TileMaker tileFetcher) {
+	public final TileDataMap<Float> animStartTimes = new TileDataMap<>();
+	
+	protected RenderLevel(@NotNull LevelWorldManager world, LevelId levelId, @NotNull TileTypeEnum[][][] tileTypes, @NotNull TileMaker tileFetcher) {
 		super(world, levelId, tileTypes, tileFetcher);
 	}
 	
-	protected RenderLevel(@NotNull LevelManager world, int levelId, int width, int height, TileFetcher tileFetcher) {
+	protected RenderLevel(@NotNull LevelWorldManager world, LevelId levelId, int width, int height, TileFetcher tileFetcher) {
 		super(world, levelId, width, height, tileFetcher);
 	}
 	
 	@Override @NotNull
-	public LevelManager getWorld() { return (LevelManager) super.getWorld(); }
+	public LevelWorldManager getWorld() { return (LevelWorldManager) super.getWorld(); }
+	
+	
 	
 	@Override
 	public int getEntityCount() { return getWorld().getEntityTotal(); }

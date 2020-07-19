@@ -8,7 +8,9 @@ import miniventure.game.network.GameProtocol.LevelChange;
 import miniventure.game.network.GameProtocol.MapRequest;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.Point;
+import miniventure.game.world.file.IslandDataManager;
 import miniventure.game.world.level.Level;
+import miniventure.game.world.level.LevelId;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
@@ -63,17 +65,16 @@ public class MapScreen extends MenuScreen {
 			table.clearChildren();
 			// table.add(makeLabel("More cooler island travel coming soon!")).row();
 			Level playerLevel = ClientCore.getWorld().getLevel();
-			int curlevel = -1;
+			LevelId curLevel = null;
 			if(playerLevel != null)
-				curlevel = playerLevel.getLevelId();
+				curLevel = playerLevel.getLevelId();
 			for(int i = 0; i < mapRequest.islands.length; i++) {
-				// Point p = null;//mapRequest.islands[i];
-				final int levelid = i+1;
-				if(levelid == curlevel) continue;
+				final LevelId levelId = mapRequest.islands[i].surfaceLevelId;
+				if(levelId == curLevel) continue;
 				VisTextButton btn = makeButton("Island "+(i+1)+": "+MyUtils.toTitleFormat(mapRequest.islands[i].type.name()), () -> {
 					// Level playerLevel = ClientCore.getWorld().getMainPlayer().getLevel();
-					if(!(playerLevel != null && playerLevel.getLevelId() == levelid))
-						ClientCore.getClient().send(new LevelChange(levelid));
+					if(!(playerLevel != null && playerLevel.getLevelId() == levelId))
+						ClientCore.getClient().send(new LevelChange(levelId));
 					ClientCore.removeScreen();
 				});
 				table.add(btn).row();

@@ -2,6 +2,7 @@ package miniventure.game.world.management;
 
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.level.Level;
+import miniventure.game.world.level.LevelId;
 import miniventure.game.world.level.RenderLevel;
 import miniventure.game.world.tile.RenderTile;
 import miniventure.game.world.tile.TileTypeEnum;
@@ -15,21 +16,17 @@ import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
 
-public class DisplayWorld extends LevelManager {
+public class DisplayWorld extends LevelWorldManager {
 	
 	public DisplayWorld() {
 		setLevel(new DisplayLevel(this));
 	}
 	
 	@Override
-	protected boolean doDaylightCycle() {
-		return false;
-	}
+	public boolean worldLoaded() { return true; }
 	
 	@Override
-	public boolean worldLoaded() {
-		return true;
-	}
+	protected boolean doDaylightCycle() { return false; }
 	
 	@Override
 	public void exitWorld() {}
@@ -38,8 +35,8 @@ public class DisplayWorld extends LevelManager {
 	private static class DisplayLevel extends RenderLevel {
 		
 		DisplayLevel(DisplayWorld world) {
-			super(world, 0,
-				IslandType.MENU.generateIsland(MathUtils.random.nextLong(), true),
+			super(world, LevelId.getId(0),
+				IslandType.MENU.generateLevel(MathUtils.random.nextLong(), true).getMap(),
 				DisplayTile::new
 			);
 		}

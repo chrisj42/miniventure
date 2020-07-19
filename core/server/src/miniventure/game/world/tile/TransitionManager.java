@@ -6,7 +6,7 @@ import java.util.HashMap;
 import miniventure.game.core.GameCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.tile.TileCacheTag.TileDataCache;
-import miniventure.game.world.tile.TileDataTag.TileDataMap;
+import miniventure.game.world.tile.TileDataTag.TileDataEnumMap;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -75,7 +75,7 @@ public class TransitionManager {
 		for(ServerTileTransition animation: animations.values()) {
 			if(animation.isTriggerType(nextType.tileType)) {
 				MyUtils.debug("Server starting tile transition for tile "+tile+", triggered by tiletype "+nextType.tileType+", with enter="+isEntering);
-				TileDataMap dataMap = tile.getDataMap(tileType);
+				TileDataEnumMap dataMap = tile.getDataMap(tileType);
 				TileDataCache cacheMap = tile.getCacheMap(tileType);
 				dataMap.put(TileDataTag.TransitionName, animation.name);
 				float start = tile.getWorld().getGameTime();
@@ -108,7 +108,7 @@ public class TransitionManager {
 	public boolean playingExitAnimation(@NotNull Tile tile) { return isTransitionMode(tile, TransitionMode.EXITING); }
 	
 	public float tryFinishAnimation(@NotNull ServerTile tile) {
-		TileDataMap dataMap = tile.getDataMap(tileType);
+		TileDataEnumMap dataMap = tile.getDataMap(tileType);
 		TileDataCache cacheMap = tile.getCacheMap(tileType);
 		
 		ServerTileTransition anim = getAnimationStyle(cacheMap.get(TileCacheTag.TransitionMode), dataMap.get(TileDataTag.TransitionName));

@@ -8,12 +8,12 @@ import java.util.Set;
 import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.level.ServerLevel;
 
-class EntityManager {
+class ServerEntityManager {
 	
 	private final HashMap<ServerLevel, Set<ServerEntity>> levelEntities;
 	private final HashMap<ServerEntity, ServerLevel> entityLevels;
 	
-	EntityManager() {
+	ServerEntityManager() {
 		levelEntities = new HashMap<>();
 		entityLevels = new HashMap<>();
 	}

@@ -2,6 +2,7 @@ package miniventure.game.util;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,6 +27,11 @@ public final class ArrayUtils {
 	public static <T> T pickRandom(Object array) { return pickRandom(array, MathUtils.random); }
 	public static <T> T pickRandom(Object array, Random random) {
 		return (T) Array.get(array, random.nextInt(Array.getLength(array)));
+	}
+	
+	private static final HashMap<Class<?>, Object> emptyArrays = new HashMap<>();
+	public static <T> T[] empty(Class<T> clazz) {
+		return (T[]) emptyArrays.computeIfAbsent(clazz, c -> Array.newInstance(c, 0));
 	}
 	
 	public static void revArray(Object array) {

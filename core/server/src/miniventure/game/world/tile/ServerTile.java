@@ -7,7 +7,7 @@ import miniventure.game.item.Result;
 import miniventure.game.item.ServerItem;
 import miniventure.game.network.GameServer;
 import miniventure.game.util.MyUtils;
-import miniventure.game.world.tile.TileDataTag.TileDataMap;
+import miniventure.game.world.tile.TileDataTag.TileDataEnumMap;
 import miniventure.game.util.function.Action;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
@@ -31,15 +31,15 @@ public class ServerTile extends Tile {
 	public ServerTile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types) {
 		this(level, x, y, types, null);
 	}
-	public ServerTile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, TileDataMap[] dataMaps) {
+	public ServerTile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, TileDataEnumMap[] dataMaps) {
 		this((ServerLevel) level, x, y, types, dataMaps);
 	}
-	public ServerTile(@NotNull ServerLevel level, int x, int y, @NotNull TileTypeEnum[] types, TileDataMap[] dataMaps) {
+	public ServerTile(@NotNull ServerLevel level, int x, int y, @NotNull TileTypeEnum[] types, TileDataEnumMap[] dataMaps) {
 		super(level, x, y, types, dataMaps);
 	}
 	
 	@Override
-	ServerTileStack makeStack(@NotNull TileTypeEnum[] types, @Nullable TileDataMap[] dataMaps) {
+	ServerTileStack makeStack(@NotNull TileTypeEnum[] types, @Nullable TileDataEnumMap[] dataMaps) {
 		return new ServerTileStack(getWorld(), types, dataMaps);
 	}
 	

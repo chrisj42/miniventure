@@ -1,10 +1,9 @@
-Alpha 2.3:
-	* Simplified tile stacks to just 2 types, ground and surface, to reduce memory
-
 Alpha 2.2:
 	# Fixed some bugs with inventory selection
 	* Backend changes to menus
 	# Cpu optimizations for packet reading
+	# Only unlocked islands now show in map screen
+	* Unloaded level data is no longer cached in memory
 
 Alpha 2.1:
 	* Moved game data directory for Windows users to Documents/My Games/Miniventure

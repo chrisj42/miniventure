@@ -36,21 +36,21 @@ public class TileDataTag<T> extends SerialEnum<T, TileDataTag<T>> {
 	
 	/** @noinspection rawtypes*/
 	@SuppressWarnings("unchecked")
-	public static class TileDataMap extends SerialEnumMap<TileDataTag> {
+	public static class TileDataEnumMap extends SerialEnumMap<TileDataTag> {
 		
-		public TileDataMap() {
+		public TileDataEnumMap() {
 			super();
 		}
 		
-		public TileDataMap(DataEntry<?, ? extends TileDataTag>... entries) {
+		public TileDataEnumMap(DataEntry<?, ? extends TileDataTag>... entries) {
 			super(entries);
 		}
 		
-		public TileDataMap(SerialEnumMap<TileDataTag> model) {
+		public TileDataEnumMap(SerialEnumMap<TileDataTag> model) {
 			super(model);
 		}
 		
-		public TileDataMap(String alldata) {
+		public TileDataEnumMap(String alldata) {
 			super(alldata, TileDataTag.class);
 		}
 	}

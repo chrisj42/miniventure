@@ -10,7 +10,7 @@ import miniventure.game.world.worldgen.noise.NoiseGenerator;
 
 // passed around to layer makers during island generation
 // island starts out like this, and this is passed to level constructor
-public class ProtoIsland extends GenInfo {
+public class ProtoLevel extends GenInfo {
 	
 	private final Random random;
 	
@@ -20,7 +20,7 @@ public class ProtoIsland extends GenInfo {
 	private final ProtoTile[][] tiles;
 	
 	// public ProtoIsland(GenInfo info) { this(info.seed, info.width, info.height); }
-	public ProtoIsland(long seed, int width, int height) {
+	public ProtoLevel(long seed, int width, int height) {
 		super(seed, width, height);
 		random = new Random(seed);
 		tiles = new ProtoTile[width][height];

@@ -8,6 +8,7 @@ import java.util.Set;
 import miniventure.game.util.MyUtils;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.level.Level;
+import miniventure.game.world.level.LevelId;
 import miniventure.game.world.tile.TileType;
 import miniventure.game.world.tile.TileTypeEnum;
 
@@ -18,7 +19,8 @@ import com.badlogic.gdx.math.MathUtils;
  */
 public abstract class WorldManager {
 	
-	protected float gameTime, daylightOffset;
+	private float gameTime;
+	private float daylightOffset;
 	
 	// registered entities
 	private final Map<Integer, Entity> entityIDMap = new HashMap<>(128);
@@ -39,10 +41,15 @@ public abstract class WorldManager {
 	/*  --- WORLD MANAGEMENT --- */
 	
 	
-	protected abstract boolean doDaylightCycle();
+	protected void updateTime(float gameTime, float daylightOffset) {
+		this.gameTime = gameTime;
+		this.daylightOffset = daylightOffset;
+	}
 	
 	/** if there is a world loaded (should be true after calling createWorld) */
 	public abstract boolean worldLoaded();
+	
+	protected abstract boolean doDaylightCycle();
 	
 	/** unload and close the world */
 	public abstract void exitWorld();
@@ -128,7 +135,7 @@ public abstract class WorldManager {
 	
 	public Entity getEntity(int eid) { synchronized (idLock) { return entityIDMap.get(eid); } }
 	
-	public abstract Level getLevel(int levelId);
+	public abstract Level getLevel(LevelId levelId);
 	
 	public abstract Level getEntityLevel(Entity e);
 	

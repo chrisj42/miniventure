@@ -3,12 +3,7 @@ package miniventure.game.world.management;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import miniventure.game.network.GameProtocol.DatalessRequest;
 import miniventure.game.network.GameProtocol.EntityAddition;
@@ -22,24 +17,16 @@ import miniventure.game.network.ServerFetcher;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.ProgressLogger;
-import miniventure.game.util.SyncObj;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
-import miniventure.game.world.file.IslandCache;
-import miniventure.game.world.file.LevelCache;
-import miniventure.game.world.file.PlayerData;
-import miniventure.game.world.file.WorldDataSet;
-import miniventure.game.world.file.WorldFileInterface;
-import miniventure.game.world.level.Level;
-import miniventure.game.world.level.LevelFetcher;
+import miniventure.game.world.file.*;
+import miniventure.game.world.level.LevelId;
 import miniventure.game.world.level.ServerLevel;
 import miniventure.game.world.tile.ServerTileType;
-import miniventure.game.world.tile.TileStack.TileData;
 import miniventure.game.world.tile.TileTypeEnum;
-import miniventure.game.world.worldgen.island.IslandType;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -52,43 +39,16 @@ public class ServerWorld extends WorldManager {
 		ServerWorld is also the only world that will ever have multiple islands loaded simultaneously.
 	 */
 	
-	private final LevelFetcher<ServerLevel> levelFetcher = new LevelFetcher<ServerLevel>() {
-		@Override
-		public ServerLevel makeLevel(LevelCache cache) {
-			int levelId = cache.getId();
-			IslandType islandType = cache.islandType;
-			String mapType = levelId < 0 ? "underground" : "surface";
-			MyUtils.debug("Server generating "+islandType+' '+mapType+" map for level "+levelId);
-			long seed = ServerWorld.this.worldSeed * (2 + levelId);
-			return new ServerLevel(ServerWorld.this, cache,
-				islandType.generateIsland(seed, levelId > 0)
-			);
-		}
-		
-		@Override
-		public ServerLevel loadLevel(LevelCache cache, final Version version, TileData[][] tileData, String[] entityData) {
-			MyUtils.debug("Server loading level "+cache.getId()+" from data");
-			ServerLevel level = new ServerLevel(ServerWorld.this, cache, tileData);
-			
-			for(String e: entityData)
-				level.addEntity(ServerEntity.deserialize(ServerWorld.this, e, version));
-			MyUtils.debug("Server finished loading level "+cache.getId()+" (including entities)");
-			return level;
-		}
-	};
-	
 	@NotNull
 	private final ServerCore core;
 	@NotNull
 	private final GameServer server;
 	
-	private final SyncObj<Map<Integer, ServerLevel>> loadedLevels = new SyncObj<>(Collections.synchronizedMap(new HashMap<>()));
-	
-	private final EntityManager entityManager = new EntityManager();
+	private final ServerLevelManager levelManager;
+	private final ServerEntityManager entityManager = new ServerEntityManager();
 	
 	private final Path worldPath;
 	private final RandomAccessFile lockRef;
-	private final IslandCache[] islandStores;
 	private final long worldSeed;
 	
 	private boolean worldLoaded;
@@ -101,36 +61,66 @@ public class ServerWorld extends WorldManager {
 	
 	public ServerWorld(@NotNull ServerCore core, @NotNull ServerFetcher serverFetcher, @NotNull WorldDataSet worldInfo, ProgressLogger logger) throws IOException {
 		this.core = core;
-		logger.pushMessage("Parsing world parameters", true);
-		final boolean old = worldInfo.dataVersion.compareTo(Version.CURRENT) < 0;
+		logger.pushMessage("Initializing world", false);
 		
-		PlayerData[] pinfo = worldInfo.playerInfo;
-		if(old) {
-			// "refresh" the data
-			pinfo = ArrayUtils.mapArray(pinfo, PlayerData.class, info -> {
-				String newData = ServerEntity.serialize(ServerEntity.deserialize(this, info.data, worldInfo.dataVersion));
-				return new PlayerData(info, newData);
-			});
-		}
+		logger.pushMessage("Parsing world parameters");
 		
-		this.server = serverFetcher.get(this, pinfo);
-		
-		gameTime = worldInfo.gameTime;
-		daylightOffset = worldInfo.timeOfDay;
+		updateTime(worldInfo.gameTime, worldInfo.timeOfDay);
 		worldSeed = worldInfo.seed;
 		
-		islandStores = worldInfo.islandCaches;
+		// islandManagers = worldInfo.islandManagers;
 		
 		worldPath = worldInfo.worldFile;
 		lockRef = worldInfo.lockRef;
 		
-		if(worldInfo.create) {
-			logger.pushMessage("Generating starter island");
-			levelFetcher.makeLevel(islandStores[0].surface).save(); // not actually loaded, so manual save is necessary here
-			logger.editMessage("Saving generated terrain to file");
-			saveWorld();
-			logger.editMessage("World Loaded.", true);
+		PlayerData[] pinfo = worldInfo.playerInfo;
+		
+		this.levelManager = new ServerLevelManager(this, worldPath, worldInfo.islandManagers);
+		
+		final boolean old = !Version.matchesCurrentFormat(worldInfo.dataVersion);
+		if(old) {
+			logger.editMessage("Updating save format to current version");
+			
+			// "refresh" the data
+			logger.pushMessage("updating player data");
+			pinfo = ArrayUtils.mapArray(pinfo, PlayerData.class, info -> {
+				String newData = ServerEntity.serialize(ServerEntity.deserialize(this, info.data, worldInfo.dataVersion));
+				return new PlayerData(info, newData);
+			});
+			
+			for(IslandDataManager island: worldInfo.islandManagers) {
+				// refresh surface
+				if(island.isGenerated(true)) {
+					LevelDataSet data = levelManager.loadLevel(
+							LevelId.getId(island.getIslandId(), true),
+							worldInfo.dataVersion
+					).save();
+					WorldFileInterface.saveLevel(worldPath, data);
+				}
+				// refresh caverns
+				if(island.isGenerated(false)) {
+					LevelDataSet data = levelManager.loadLevel(
+							LevelId.getId(island.getIslandId(), false),
+							worldInfo.dataVersion
+					).save();
+					WorldFileInterface.saveLevel(worldPath, data);
+				}
+			}
 		}
+		
+		this.server = serverFetcher.get(this, pinfo);
+		
+		if(worldInfo.create) {
+			logger.editMessage("Generating starter island");
+			LevelDataSet levelData = levelManager.generateLevel(
+					worldInfo.islandManagers[0], true
+			).save();
+			logger.editMessage("Saving generated terrain to file");
+			WorldFileInterface.saveLevel(worldPath, levelData);
+		}
+		
+		logger.popMessage();
+		logger.editMessage("World initialized.", true);
 		
 		worldLoaded = true;
 	}
@@ -160,8 +150,7 @@ public class ServerWorld extends WorldManager {
 		if(!worldLoaded) return;
 		
 		synchronized (updateLock) {
-			ServerLevel[] levels = loadedLevels.get(map -> map.values().toArray(new ServerLevel[0]));
-			for(ServerLevel level : levels)
+			for(ServerLevel level: levelManager.getLoadedLevels())
 				level.update(delta);
 		}
 		
@@ -185,15 +174,17 @@ public class ServerWorld extends WorldManager {
 	/*  --- WORLD MANAGEMENT --- */
 	
 	
-	public WorldData getWorldUpdate() { return new WorldData(gameTime, this.daylightOffset, Config.DaylightCycle.get()); }
+	public WorldData getWorldUpdate() {
+		return new WorldData(getGameTime(), getDaylightOffset(), Config.DaylightCycle.get());
+	}
 	public void broadcastWorldUpdate() { server.broadcastGlobal(getWorldUpdate()); }
 	
 	public void setTimeOfDay(float daylightOffset) {
-		this.daylightOffset = daylightOffset % TimeOfDay.SECONDS_IN_DAY;
+		updateTime(getGameTime(), daylightOffset % TimeOfDay.SECONDS_IN_DAY);
 		broadcastWorldUpdate();
 	}
 	public float changeTimeOfDay(float deltaOffset) {
-		float newOff = this.daylightOffset;
+		float newOff = getDaylightOffset();
 		if(deltaOffset < 0)
 			newOff += TimeOfDay.SECONDS_IN_DAY;
 		newOff = (newOff + deltaOffset) % TimeOfDay.SECONDS_IN_DAY;
@@ -208,22 +199,18 @@ public class ServerWorld extends WorldManager {
 	
 	/** Saves the world to file; specific to ServerWorld. */
 	public void saveWorld() {
-		// update island store caches
-		// postRunnable(() -> {
-			loadedLevels.act(map -> {
-				for(ServerLevel level: map.values())
-					if(level != null) // I don't know if I should catch this, it shouldn't happen to begin with...
-						level.save();
-			});
+		synchronized (updateLock) {
+			// save loaded levels
+			ServerLevel[] levels = levelManager.getLoadedLevels();
+			LevelDataSet[] levelData = ArrayUtils.mapArray(levels, LevelDataSet.class, ServerLevel::save);
 			
+			// save player data
 			PlayerData[] pdata = server.updatePlayerData();
-			// update player data
-			// for(ServerPlayer player: getServer().getPlayers()) {
-			// 	savePlayer(player);
-			// }
 			
-			WorldFileInterface.saveWorld(new WorldDataSet(worldPath, lockRef, worldSeed, gameTime, daylightOffset, Version.CURRENT, pdata, islandStores));
-		// });
+			WorldFileInterface.saveWorld(
+					WorldDataSet.fromLoaded(worldPath, lockRef, worldSeed, getGameTime(), getDaylightOffset(), pdata, levelManager.getIslandManagers(), levelData)
+			);
+		}
 	}
 	
 	/*public void savePlayer(@NotNull ServerPlayer player) {
@@ -250,7 +237,7 @@ public class ServerWorld extends WorldManager {
 			if(!worldLoaded) return;
 			server.stop(true);
 			worldLoaded = false;
-			// WorldFileInterface.saveWorld(new WorldDataSet(worldPath, lockRef, worldSeed, gameTime, daylightOffset, GameCore.VERSION, knownPlayers.values().toArray(new PlayerInfo[0]), islandStores));
+			// WorldFileInterface.saveWorld(WorldDataSet.fromLoaded(worldPath, lockRef, worldSeed, gameTime, daylightOffset, GameCore.VERSION, knownPlayers.values().toArray(new PlayerInfo[0]), islandStores));
 			// dispose of level/world resources
 			saveWorld();
 			clearEntityIdMap();
@@ -273,20 +260,18 @@ public class ServerWorld extends WorldManager {
 	/*  --- LEVEL MANAGEMENT --- */
 	
 	
-	private boolean isLevelLoaded(int levelId) { return loadedLevels.get(map -> map.containsKey(levelId)); }
-	
 	@Override
-	public ServerLevel getLevel(int levelId) { return loadedLevels.get(map -> map.get(levelId)); }
+	public ServerLevel getLevel(LevelId levelId) { return levelManager.getLoadedLevel(levelId); }
 	
 	@NotNull
 	// player activator is required to ensure the level is not immediately pruned due to chance circumstances.
 	// it is assumed that the player is not currently on a level.
-	public ServerLevel loadLevel(int levelId, @NotNull ServerPlayer activator) {
+	public ServerLevel loadLevel(LevelId levelId, @NotNull ServerPlayer activator) {
 		return loadLevel(levelId, activator, level -> {});
 	}
 	@NotNull
 	// the ordering of "get/make level", "position player", "send level data", and finally "register world/add player" is important. Doing so is the most efficient, and prevents split-second frame changes like showing the player in the previous level position, as well as minimizing the time that the player may be in-game on the server, but still loading on the client.
-	public ServerLevel loadLevel(int levelId, @NotNull ServerPlayer activator, ValueAction<ServerLevel> playerPositioner) {
+	public ServerLevel loadLevel(LevelId levelId, @NotNull ServerPlayer activator, ValueAction<ServerLevel> playerPositioner) {
 		
 		ServerLevel level = getLevel(levelId);
 		
@@ -294,8 +279,7 @@ public class ServerWorld extends WorldManager {
 		if(put) {
 			MyUtils.debug("Fetching level "+levelId);
 			server.sendToPlayer(activator, DatalessRequest.Level_Loading);
-			IslandCache island = islandStores[Math.abs(levelId)-1];
-			level = (ServerLevel) (levelId > 0 ? island.surface : island.caverns).getLevel(levelFetcher);
+			level = levelManager.fetchLevel(levelId);
 		}
 		
 		// synchronize on the level
@@ -321,12 +305,7 @@ public class ServerWorld extends WorldManager {
 		
 		// add player to level and register level if needed
 		if(put) {
-			final ServerLevel sl = level;
-			loadedLevels.act(map -> {
-				map.put(levelId, sl);
-				setEntityLevel(activator, sl);
-			});
-			MyUtils.debug("level "+level.getLevelId()+" is now loaded.");
+			levelManager.addLevel(level, activator);
 		}
 		else setEntityLevel(activator, level);
 		
@@ -335,7 +314,7 @@ public class ServerWorld extends WorldManager {
 		return level;
 	}
 	
-	protected void unloadLevel(int levelId) {
+	protected void unloadLevel(LevelId levelId) {
 		ServerLevel level = getLevel(levelId);
 		if(level == null) return; // already unloaded
 		
@@ -345,17 +324,17 @@ public class ServerWorld extends WorldManager {
 		for(ServerEntity e: entityManager.removeLevel(level))
 			super.deregisterEntity(e.getId());
 		
-		loadedLevels.act(map -> map.remove(levelId));
+		levelManager.removeLevel(levelId);
 		MyUtils.debug("unloaded level "+levelId);
 	}
 	
 	protected void pruneLoadedLevels() {
-		ServerLevel[] levels = loadedLevels.get(map -> map.values().toArray(new ServerLevel[0]));
-		HashSet<Integer> keepAliveIds = new HashSet<>(levels.length);
+		ServerLevel[] levels = levelManager.getLoadedLevels();
+		HashSet<LevelId> keepAliveIds = new HashSet<>(levels.length);
 		
 		// log which levels have a keep-alive
 		for(ServerPlayer player: server.getPlayers()) {
-			Level level = player.getLevel();
+			ServerLevel level = player.getLevel();
 			if(level != null)
 				keepAliveIds.add(level.getLevelId());
 		}
@@ -420,7 +399,7 @@ public class ServerWorld extends WorldManager {
 				return; // requests to add an entity to a level they are already on will be quietly ignored.
 		}
 		
-		if(!level.isPreload() && !isLevelLoaded(level.getLevelId())) {
+		if(!level.isPreload() && !levelManager.isLevelLoaded(level.getLevelId())) {
 			act = false;
 			MyUtils.error("Server level "+level+" exists but is not loaded; will not add entity "+e);
 		}
@@ -486,7 +465,10 @@ public class ServerWorld extends WorldManager {
 	
 	/*  --- GET METHODS --- */
 	
-	public int getDefaultLevel() { return islandStores[0].surface.getId(); }
+	
+	public long getWorldSeed() { return worldSeed; }
+	
+	public LevelId getDefaultLevel() { return LevelId.getId(0); }
 	
 	@Override
 	public ServerEntity getEntity(int eid) { return (ServerEntity) super.getEntity(eid); }
@@ -499,8 +481,9 @@ public class ServerWorld extends WorldManager {
 	
 	public MapRequest getMapData() {
 		LinkedList<IslandReference> refs = new LinkedList<>();
-		for(IslandCache cache: islandStores) { // todo only add islands that have been unlocked
-			refs.add(cache.ref);
+		for(IslandDataManager island: levelManager.getIslandManagers()) {
+			if(island.isUnlocked())
+				refs.add(island.getRef());
 		}
 		return new MapRequest(refs.toArray(new IslandReference[0]));
 	}

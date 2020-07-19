@@ -6,6 +6,7 @@ import miniventure.game.item.ServerItem;
 import miniventure.game.network.GameProtocol.TileUpdate;
 import miniventure.game.network.GameServer;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.Version;
 import miniventure.game.world.Boundable;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.WorldObject;
@@ -16,12 +17,13 @@ import miniventure.game.world.entity.mob.ServerMob;
 import miniventure.game.world.entity.mob.player.Player;
 import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.entity.particle.ItemEntity;
-import miniventure.game.world.file.LevelCache;
+import miniventure.game.world.file.LevelDataSet;
 import miniventure.game.world.management.ServerWorld;
 import miniventure.game.world.tile.ServerTile;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileStack.TileData;
 import miniventure.game.world.tile.TileTypeEnum;
+import miniventure.game.world.worldgen.island.ProtoLevel;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -38,7 +40,7 @@ public class ServerLevel extends Level {
 	//private static final float TILE_REFRESH_INTERVAL = 500; // every this many seconds, all tiles within the below radius of any keep-alive is updated.
 	//private static final int TILE_REFRESH_RADIUS = 4; // the radius mentioned above.
 	
-	private final LevelCache dataCache;
+	// private final LevelCache dataCache;
 	
 	private final Set<Tile> newTileUpdates = Collections.synchronizedSet(new HashSet<>());
 	private final HashMap<Tile, Float> tileUpdateQueue = new HashMap<>();
@@ -47,14 +49,14 @@ public class ServerLevel extends Level {
 	private boolean preload = true;
 	//private float timeCache = 0; // this is used when you should technically be updating < 1 tile in a frame.
 	
-	public ServerLevel(@NotNull ServerWorld world, LevelCache cache, TileTypeEnum[][][] tiles) {
-		super(world, cache.getId(), tiles, ServerTile::new);
-		this.dataCache = cache;
+	public ServerLevel(@NotNull ServerWorld world, LevelId levelId, ProtoLevel level) {
+		super(world, levelId, level.getMap(), ServerTile::new);
+		// this.dataCache = cache;
 	}
 	
-	public ServerLevel(@NotNull ServerWorld world, LevelCache cache, TileData[][] tileData) {
-		super(world, cache.getId(), tileData, ServerTile::new);
-		this.dataCache = cache;
+	public ServerLevel(@NotNull ServerWorld world, LevelId levelId, TileData[][] tileData) {
+		super(world, levelId, tileData, ServerTile::new);
+		// this.dataCache = cache;
 	}
 	
 	@Override @NotNull
@@ -77,7 +79,7 @@ public class ServerLevel extends Level {
 	/** @noinspection BooleanMethodIsAlwaysInverted*/
 	public boolean isPreload() { return preload; }
 	
-	public void save() {
+	public LevelDataSet save() {
 		TileData[][] tileData = getTileData(true);
 		LinkedList<String> entityData = new LinkedList<>();
 		for(Entity e: getEntities()) {
@@ -85,7 +87,7 @@ public class ServerLevel extends Level {
 				continue;
 			entityData.add(ServerEntity.serialize((ServerEntity)e));
 		}
-		dataCache.updateData(entityData.toArray(new String[0]), tileData);
+		return new LevelDataSet(Version.CURRENT, getLevelId(), getWidth(), getHeight(), tileData, entityData);
 	}
 	
 	/*@Override

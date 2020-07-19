@@ -17,21 +17,20 @@ import miniventure.game.network.PacketPipe;
 import miniventure.game.network.PacketPipe.PacketPipeReader;
 import miniventure.game.network.PacketPipe.PacketPipeWriter;
 import miniventure.game.screen.LoadingScreen;
-import miniventure.game.screen.MainMenu;
 import miniventure.game.screen.MenuScreen;
-import miniventure.game.screen.RespawnScreen;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.Action;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
 import miniventure.game.world.file.WorldDataSet;
 import miniventure.game.world.level.ClientLevel;
+import miniventure.game.world.level.LevelId;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 
-public class ClientWorld extends LevelManager {
+public class ClientWorld extends LevelWorldManager {
 	
 	// FIXME Implement the system below. Currently the GameView situation isn't as it says; do the thing about making the game view a Screen, and MenuScreen a screen, etc.
 	
@@ -105,8 +104,7 @@ public class ClientWorld extends LevelManager {
 	
 	// TODO send a WorldData packet to the client whenever a new level is loaded
 	public void init(WorldData data) {
-		gameTime = data.gameTime;
-		daylightOffset = data.daylightOffset;
+		updateTime(data.gameTime, data.daylightOffset);
 		this.doDaylightCycle = data.doDaylightCycle;
 	}
 	
@@ -216,7 +214,7 @@ public class ClientWorld extends LevelManager {
 	// TODO add lighting overlays, based on level and/or time of day, depending on the level and perhaps other things.
 	private Color getLightingOverlay() {
 		//Array<Color> colors = new Array<>(TimeOfDay.getSkyColors(daylightOffset));
-		return TimeOfDay.getSkyColor(daylightOffset);
+		return TimeOfDay.getSkyColor(getDaylightOffset());
 	}
 	
 	
@@ -298,7 +296,7 @@ public class ClientWorld extends LevelManager {
 	public ClientLevel getLevel() { return (ClientLevel) super.getLevel(); }
 	
 	@Override
-	public ClientLevel getLevel(int levelId) { return (ClientLevel) super.getLevel(levelId); }
+	public ClientLevel getLevel(LevelId levelId) { return (ClientLevel) super.getLevel(levelId); }
 	
 	@Override
 	public ClientLevel getEntityLevel(Entity e) { return (ClientLevel) super.getEntityLevel(e); }

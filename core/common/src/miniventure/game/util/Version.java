@@ -6,17 +6,28 @@ import org.jetbrains.annotations.NotNull;
 
 public class Version implements Comparable<Version> {
 	
+	// without a fourth digit comes after all 4th digit versions
+	// first digit is alpha, beta, etc
+		// 1 = pre-alpha, 2 = alpha, 3 = beta, 4 = release
+	// second changes with feature introductions
+		// starts at 1
+	// third changes with bug fixes and small edits
+		// starts at 0
+	// fourth changes with build
+		// starts at 1
+		// TODO how to specify release? Is it even needed?
+	
 	// the last digit increments without release or tag
 	public static final Version CURRENT = makeVersion("2.2.2.1");
 	
 	// the last time there was a change in the save format
-	private static final Version latestFormatChange = makeVersion("2.2.1");
+	private static final Version latestFormatChange = makeVersion("2.2.2.1");
 	
 	// use this to determine the latest version a world is compatible with
 	private static final TreeMap<Version, Version> endOfSupportVersions = new TreeMap<>();
 	static {
 		// this is the oldest version that the current version supports
-		endOfSupportVersions.put(makeVersion("2.2.1"), CURRENT);
+		endOfSupportVersions.put(makeVersion("2.2.2.1"), CURRENT);
 		// below is for older versions; add an entry whenever a version loses support
 		// no need to add an entry if it was only supported for one version
 		// addEoSVersion("2.1.2", "2.1.2");
@@ -119,7 +130,7 @@ public class Version implements Comparable<Version> {
 		if(make != other.make) return Integer.compare(make, other.make);
 		if(major != other.major) return Integer.compare(major, other.major);
 		if(minor != other.minor) return Integer.compare(minor, other.minor);
-		if(build != other.build) {	
+		if(build != other.build) {
 			if(build == 0) return 1; // 0 means after all other numbers, so this is after the other version.
 			if(other.build == 0) return -1; // this is before the other version.
 			return Integer.compare(build, other.build); // compare normally.

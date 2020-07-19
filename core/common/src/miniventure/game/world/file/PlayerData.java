@@ -2,14 +2,16 @@ package miniventure.game.world.file;
 
 import java.util.List;
 
+import miniventure.game.world.level.LevelId;
+
 public class PlayerData {
 	public final String name;
 	public final String passhash;
 	public final String data;
-	public final int levelId;
+	public final LevelId levelId;
 	public final boolean op;
 	
-	public PlayerData(String name, String passhash, String data, int levelId, boolean op) {
+	public PlayerData(String name, String passhash, String data, LevelId levelId, boolean op) {
 		this.name = name;
 		this.passhash = passhash;
 		this.data = data;
@@ -17,7 +19,7 @@ public class PlayerData {
 		this.op = op;
 	}
 	
-	public PlayerData(PlayerData model, String data, int levelId) {
+	public PlayerData(PlayerData model, String data, LevelId levelId) {
 		this(model.name, model.passhash, data, levelId, model.op);
 	}
 	public PlayerData(PlayerData model, String data) {

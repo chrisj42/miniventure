@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 public class WorldReference {
 	
 	@Nullable public final Version version; // todo when reading this in world select screen, check if it is a dev build, and display a compatibility warning if so.
+	@Nullable public final VersionFormatException versionError; // not-null when version is null, null when version is not null.
 	public final Path folder;
 	public final String worldName;
 	public final long timestamp;
@@ -38,13 +39,15 @@ public class WorldReference {
 		this.folder = folder;
 		worldName = folder.getFileName().toString();
 		timestamp = WorldFileInterface.getTimestamp(folder);
-		Version v;
+		Version v = null;
+		VersionFormatException error = null;
 		try {
 			v = WorldFileInterface.getWorldVersion(folder);
 		} catch (VersionFormatException e) {
-			v = null;
+			error = e;
 		}
 		version = v;
+		versionError = error;
 		if(version == null) {
 			compatible = false;
 			lastCompatible = null;

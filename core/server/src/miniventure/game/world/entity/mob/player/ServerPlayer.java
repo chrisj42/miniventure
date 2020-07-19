@@ -23,6 +23,7 @@ import miniventure.game.world.entity.mob.ServerMob;
 import miniventure.game.world.entity.particle.ActionType;
 import miniventure.game.world.entity.particle.ParticleData.ActionParticleData;
 import miniventure.game.world.entity.particle.ParticleData.TextParticleData;
+import miniventure.game.world.level.LevelId;
 import miniventure.game.world.level.ServerLevel;
 import miniventure.game.world.management.ServerWorld;
 import miniventure.game.world.tile.ServerTile;
@@ -46,7 +47,7 @@ public class ServerPlayer extends ServerMob implements Player {
 	
 	// saved spawn location; you slept in a bed, etc. This is checked when adding the player to a level. If there is no location, then the player is spawned randomly on the default level. If the location (and adjacent tiles) are not spawnable, then the player is spawned randomly on the saved level (assuming it's valid).
 	private Point spawnLoc;
-	private int spawnLevel = 0;
+	private LevelId spawnLevel = LevelId.getId(0);
 	
 	
 	@NotNull private final ServerPlayerInventory invManager;
@@ -89,7 +90,7 @@ public class ServerPlayer extends ServerMob implements Player {
 		else
 			spawnLoc = data.get("sloc", Point::new);
 		
-		spawnLevel = data.get("slvl", Integer::parseInt);
+		spawnLevel = data.get("slvl", val -> LevelId.getId(Integer.parseInt(val)));
 		
 		invManager.loadItems(MyUtils.parseLayeredString(data.get("inv")), version);
 	}
@@ -552,7 +553,7 @@ public class ServerPlayer extends ServerMob implements Player {
 		return super.maySpawn(type)/* && type != TileTypeEnum.SAND*/;
 	}
 	
-	public int getSpawnLevel() { return spawnLevel == 0 ? getWorld().getDefaultLevel() : spawnLevel; }
+	public LevelId getSpawnLevel() { return spawnLevel == null ? getWorld().getDefaultLevel() : spawnLevel; }
 	
 	public ValueAction<ServerLevel> respawnPositioning() {
 		return level -> {

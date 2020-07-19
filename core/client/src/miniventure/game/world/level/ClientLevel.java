@@ -31,7 +31,7 @@ public class ClientLevel extends RenderLevel {
 	
 	private final Map<ClientTile, CachedTileUpdate> tileUpdates = Collections.synchronizedMap(new HashMap<>());
 	
-	public ClientLevel(@NotNull ClientWorld world, int levelId, int width, int height) {
+	public ClientLevel(@NotNull ClientWorld world, LevelId levelId, int width, int height) {
 		super(world, levelId, width, height, ClientTile::new);
 		this.world = world;
 		

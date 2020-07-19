@@ -73,23 +73,23 @@ public class TileDistanceMap implements IslandProcessor {
 	}
 	
 	@Override
-	public void apply(ProtoIsland island) {
+	public void apply(ProtoLevel level) {
 		if(distances.length == 0) return;
 		
-		DistanceMap distMap = new DistanceMap(island.width, island.height,
-			(x, y) -> tileAcceptor.isMatch(island.getTile(x, y))
+		DistanceMap distMap = new DistanceMap(level.width, level.height,
+			(x, y) -> tileAcceptor.isMatch(level.getTile(x, y))
 		);
 		
 		for(int i = 0; i < distances.length; i++) {
 			final TileProcessor processor = processors[i];
 			if(processor != null)
-				distMap.forEach(distances[i], p -> processor.processTile(island.getTile(p)));
+				distMap.forEach(distances[i], p -> processor.processTile(level.getTile(p)));
 		}
 		
 		// run processor for distances past the highest given distance
 		if(trailingProcessor != null) {
 			distMap.forEachInRange(distances[distances.length-1]+1, distMap.getMaxDistance(),
-				p -> trailingProcessor.processTile(island.getTile(p))
+				p -> trailingProcessor.processTile(level.getTile(p))
 			);
 		}
 	}

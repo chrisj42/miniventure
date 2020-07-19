@@ -6,7 +6,7 @@ import miniventure.game.item.ServerItem;
 import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolItem.ToolType;
 import miniventure.game.util.ArrayUtils;
-import miniventure.game.world.tile.TileDataTag.TileDataMap;
+import miniventure.game.world.tile.TileDataTag.TileDataEnumMap;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.particle.ActionType;
@@ -127,7 +127,7 @@ public class DestructionManager {
 			// add damage particle
 			tile.getServer().broadcastParticle(new ActionParticleData(ActionType.IMPACT), tile);
 			
-			TileDataMap dataMap = tile.getDataMap(tileType);
+			TileDataEnumMap dataMap = tile.getDataMap(tileType);
 			
 			int health = totalHealth > 1 ? dataMap.getOrDefaultAndPut(TileDataTag.Health, totalHealth) : 1;
 			health -= damage;

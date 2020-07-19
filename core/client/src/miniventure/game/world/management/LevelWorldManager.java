@@ -2,6 +2,7 @@ package miniventure.game.world.management;
 
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.particle.ClientParticle;
+import miniventure.game.world.level.LevelId;
 import miniventure.game.world.level.RenderLevel;
 import miniventure.game.world.tile.ClientTileType;
 import miniventure.game.world.tile.TileTypeEnum;
@@ -12,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 // A world manager that specifically loads only one level at a time.
 // all registered entities are assumed to be on the current level.
 // this works because any change in level wipes the entity list.
-public abstract class LevelManager extends WorldManager {
+public abstract class LevelWorldManager extends WorldManager {
 	
 	private RenderLevel level;
 	
@@ -48,7 +49,7 @@ public abstract class LevelManager extends WorldManager {
 	public RenderLevel getLevel() { return level; }
 	
 	@Override
-	public RenderLevel getLevel(int levelId) { return level != null && level.getLevelId() == levelId ? level : null; }
+	public RenderLevel getLevel(LevelId levelId) { return level != null && level.getLevelId() == levelId ? level : null; }
 	
 	@Override
 	public RenderLevel getEntityLevel(Entity e) { return isEntityRegistered(e) ? level : null; }
