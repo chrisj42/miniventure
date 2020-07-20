@@ -297,7 +297,7 @@ public class ClientCore extends ApplicationAdapter {
 			if(menuScreen != null) {
 				// screens are getting removed
 				MenuScreen parent = menuScreen.getParent();
-				if(menuScreen != gameScreen.chatScreen)
+				if(gameScreen == null || menuScreen != gameScreen.chatScreen)
 					menuScreen.dispose(all);
 				menuScreen = null;
 				if(!all && parent != null)
