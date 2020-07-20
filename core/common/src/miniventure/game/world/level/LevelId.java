@@ -25,7 +25,6 @@ public class LevelId {
 	
 	private final int uniqueId;
 	
-	private LevelId() { this(0); }
 	private LevelId(int levelId) {
 		uniqueId = levelId;
 	}

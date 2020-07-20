@@ -41,6 +41,9 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
 import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.Serializer;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -80,7 +83,18 @@ public interface GameProtocol {
 	
 	static void registerClasses(Kryo kryo) {
 		kryo.register(Version.class);
-		kryo.register(LevelId.class);
+		kryo.register(LevelId.class, new Serializer<LevelId>(false, true) {
+			// note, setting "acceptsNull" to false does not mean null values are not allowed, it means that the framework will handle nulls instead of this custom impl.
+			@Override
+			public void write(Kryo kryo, Output output, LevelId object) {
+				output.writeInt(object.getLevelId());
+			}
+			@Override
+			public LevelId read(Kryo kryo, Input input, Class<LevelId> type) {
+				int id = input.readInt();
+				return LevelId.getId(id);
+			}
+		});
 		
 		registerNestedClasses(kryo, GameProtocol.class);
 		registerNestedClasses(kryo, ParticleData.class, true);
