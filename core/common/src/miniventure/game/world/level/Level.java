@@ -367,7 +367,7 @@ public abstract class Level implements Taggable<Level> {
 	}*/
 	
 	@Override
-	public boolean equals(Object other) { return other instanceof Level && ((Level) other).levelId.equals(levelId); }
+	public boolean equals(Object other) { return other instanceof Level && ((Level)other).levelId == levelId; }
 	@Override
 	public int hashCode() { return levelId.hashCode(); }
 	

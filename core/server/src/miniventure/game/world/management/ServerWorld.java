@@ -392,7 +392,7 @@ public class ServerWorld extends WorldManager {
 				hasLevel = false;
 				act = false;
 			}
-			else if(!current.getLevelId().equals(level.getLevelId()))
+			else if(current.getLevelId() != level.getLevelId())
 				// levels are different
 				MyUtils.error("Server entity "+e+" is already on level "+current+", will not set level to "+level);
 			else

@@ -101,13 +101,11 @@ public class ServerTile extends Tile {
 		
 		Action destroyAction = getCacheMap(type.getTypeEnum()).get(TileCacheTag.DestroyAction);
 		ServerTileType prevType = getTypeStack().removeLayer();
-		// MyUtils.debug("removed server type "+prevType);
 		if(destroyAction != null)
 			destroyAction.act();
 		
 		if(replacementType != null) {
 			// don't worry if a tile type was removed or not, add the next one anyway.
-			// MyUtils.debug("replacing with server type "+replacementType);
 			addTile(replacementType, type); // handles entity movement and tile update
 			return true;
 		}

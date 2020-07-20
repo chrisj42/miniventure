@@ -295,7 +295,7 @@ public abstract class GameServer implements GameProtocol {
 			// if the move is invalid, then send a simple spawn packet; the client doesn't unload a level unless a new LevelData packet is recieved.
 			
 			Level clientLevel = client.getLevel();
-			if(clientLevel != null && change.levelId.equals(clientLevel.getLevelId()))
+			if(clientLevel != null && change.levelId == clientLevel.getLevelId())
 				return; // quietly ignore level requests for the same level
 			
 			// todo check if move is valid in terms of stats (prob using class/method in common module)

@@ -232,7 +232,7 @@ public abstract class GameClient implements GameProtocol {
 				return;
 			}
 			
-			if(!level.getLevelId().equals(list.levelId)) {
+			if(level.getLevelId() != list.levelId) {
 				System.err.println("Client: level does not match entity validation level; ignoring packet.");
 				return;
 			}
