@@ -29,6 +29,7 @@ import miniventure.game.world.entity.particle.ActionType;
 import miniventure.game.world.entity.particle.ParticleData;
 import miniventure.game.world.level.Level;
 import miniventure.game.world.level.LevelId;
+import miniventure.game.world.level.LevelId.LevelIdSerializer;
 import miniventure.game.world.management.WorldManager;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.Tile.TileTag;
@@ -83,18 +84,7 @@ public interface GameProtocol {
 	
 	static void registerClasses(Kryo kryo) {
 		kryo.register(Version.class);
-		kryo.register(LevelId.class, new Serializer<LevelId>(false, true) {
-			// note, setting "acceptsNull" to false does not mean null values are not allowed, it means that the framework will handle nulls instead of this custom impl.
-			@Override
-			public void write(Kryo kryo, Output output, LevelId object) {
-				output.writeInt(object.getLevelId());
-			}
-			@Override
-			public LevelId read(Kryo kryo, Input input, Class<LevelId> type) {
-				int id = input.readInt();
-				return LevelId.getId(id);
-			}
-		});
+		kryo.register(LevelId.class, new LevelIdSerializer());
 		
 		registerNestedClasses(kryo, GameProtocol.class);
 		registerNestedClasses(kryo, ParticleData.class, true);

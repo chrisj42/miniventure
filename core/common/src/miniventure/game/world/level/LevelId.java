@@ -2,6 +2,11 @@ package miniventure.game.world.level;
 
 import java.util.ArrayList;
 
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.Serializer;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
+
 public class LevelId {
 	
 	private static final ArrayList<LevelId> idObjects = new ArrayList<>();
@@ -54,5 +59,24 @@ public class LevelId {
 	@Override
 	public String toString() {
 		return String.valueOf(uniqueId);
+	}
+	
+	public static class LevelIdSerializer extends Serializer<LevelId> {
+		
+		public LevelIdSerializer() {
+			super(false, true);
+			// note, setting "acceptsNull" to false does not mean null values are not allowed, it means that the framework will handle nulls instead of this custom impl.
+		}
+		
+		@Override
+		public void write(Kryo kryo, Output output, LevelId object) {
+			output.writeInt(object.uniqueId);
+		}
+		
+		@Override
+		public LevelId read(Kryo kryo, Input input, Class<LevelId> type) {
+			int id = input.readInt();
+			return LevelId.getId(id);
+		}
 	}
 }
