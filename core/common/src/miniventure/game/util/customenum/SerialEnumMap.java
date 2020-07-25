@@ -24,8 +24,8 @@ public class SerialEnumMap<SET extends SerialEnum> extends GEnumMap<SET> {
 	public String serialize(boolean save) {
 		ArrayList<String> entries = new ArrayList<>(map.size());
 		
-		for(SET key: map.keySet()) {
-			if(key.save && save || key.send && !save)
+		for(SerialEnum key: map.keySet()) {
+			if(key.serialSave() && save || key.serialSend() && !save)
 				entries.add(key.serializeEntry(this));
 		}
 		

@@ -4,6 +4,7 @@ import miniventure.game.texture.FetchableTextureHolder;
 import miniventure.game.texture.ItemTextureSource;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.customenum.SerialEnum;
+import miniventure.game.util.customenum.Serializer;
 import miniventure.game.util.function.MapFunction;
 
 public class ItemDataTag<T> extends SerialEnum<T, ItemDataTag<T>> {
@@ -21,12 +22,16 @@ public class ItemDataTag<T> extends SerialEnum<T, ItemDataTag<T>> {
 		return source.get(parts[1]);
 	});
 	
+	private ItemDataTag(Serializer<T> serializer) {
+		super(serializer);
+	}
+	
 	private ItemDataTag(Class<T> clazz) {
-		super(false, true, clazz);
+		this(new Serializer<T>(false, true, clazz));
 	}
 	
 	private ItemDataTag(MapFunction<T, String> valueWriter, MapFunction<String, T> valueParser) {
-		super(false, true, valueWriter, valueParser);
+		this(new Serializer<T>(false, true, valueWriter, valueParser));
 	}
 	
 }
