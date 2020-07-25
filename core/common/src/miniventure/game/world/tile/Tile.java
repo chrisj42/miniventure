@@ -39,7 +39,7 @@ public abstract class Tile implements WorldObject {
 	public static final int SCALE = 4;
 	public static final int SIZE = RESOLUTION * SCALE;
 	
-	private TileStack tileStack;
+	private TileStack<?> tileStack;
 	
 	@NotNull private final Level level;
 	final int x, y;
@@ -53,9 +53,9 @@ public abstract class Tile implements WorldObject {
 		setTileStack(makeStack(types, dataMaps));
 	}
 	
-	abstract TileStack makeStack(@NotNull TileTypeEnum[] types, @Nullable TileDataEnumMap[] dataMaps);
+	abstract TileStack<?> makeStack(@NotNull TileTypeEnum[] types, @Nullable TileDataEnumMap[] dataMaps);
 	
-	void setTileStack(TileStack stack) { this.tileStack = stack; }
+	void setTileStack(TileStack<?> stack) { this.tileStack = stack; }
 	
 	@NotNull @Override
 	public WorldManager getWorld() { return level.getWorld(); }
@@ -70,7 +70,7 @@ public abstract class Tile implements WorldObject {
 	
 	
 	public TileType getType() { return tileStack.getTopLayer(); }
-	public TileStack getTypeStack() { return tileStack; }
+	public TileStack<?> getTypeStack() { return tileStack; }
 	
 	// public SerialMap getDataMap(TileType tileType) { return getDataMap(tileType.getTypeEnum()); }
 	@NotNull
