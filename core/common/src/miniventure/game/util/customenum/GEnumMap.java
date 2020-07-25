@@ -28,11 +28,11 @@ public class GEnumMap<ET extends GenericEnum> {
 	public <T> T put(DataEntry<T, ? extends ET> entry) {
 		return (T) map.put(entry.key, entry.value);
 	}
-	public <T> T put(ET key, T value) {
-		return (T) map.put(key, value);
+	public <T, CET extends GenericEnum<T, ? extends ET>> T put(CET key, T value) {
+		return (T) map.put((ET) key, value);
 	}
 	
-	public <T> T remove(ET tag) {
+	public <T, CET extends GenericEnum<T, ? extends ET>> T remove(CET tag) {
 		return (T) map.remove(tag);
 	}
 	
@@ -40,19 +40,19 @@ public class GEnumMap<ET extends GenericEnum> {
 	
 	// public boolean contains(ET tag) { return map.containsKey(tag); }
 	
-	public <T> T get(ET tag) {
+	public <T, CET extends GenericEnum<T, ? extends ET>> T get(CET tag) {
 		return (T) map.get(tag);
 	}
 	
-	public <T> T getOrDefault(ET tag, T defaultValue) {
+	public <T, CET extends GenericEnum<T, ? extends ET>> T getOrDefault(CET tag, T defaultValue) {
 		return (T) map.getOrDefault(tag, defaultValue);
 	}
 	
 	// fetches the value for the given key. If there is no key, the default value is added for it and returned.
-	public <T> T getOrDefaultAndPut(DataEntry<T, ? extends ET> tagWithDefault) {
-		return getOrDefaultAndPut(tagWithDefault.key, tagWithDefault.value);
+	public <T, CET extends GenericEnum<T, ? extends ET>> T getOrDefaultAndPut(DataEntry<T, ? extends ET> tagWithDefault) {
+		return getOrDefaultAndPut((CET) tagWithDefault.key, tagWithDefault.value);
 	}
-	public <T> T getOrDefaultAndPut(ET tag, T defaultValue) {
+	public <T, CET extends GenericEnum<T, ? extends ET>> T getOrDefaultAndPut(CET tag, T defaultValue) {
 		// return (T) map.computeIfAbsent(tag, t -> defaultValue);
 		T val = get(tag);
 		if(val == null) {
@@ -84,7 +84,7 @@ public class GEnumMap<ET extends GenericEnum> {
 		return entries;
 	}*/
 	
-	/*<T> DataEntry<T, ? extends ET> getEntry(Object tag) {
+	/*<T, CET extends GenericEnum<T, ? extends ET>> DataEntry<T, ? extends ET> getEntry(Object tag) {
 		// return tag.as((T) map.get(tag));
 		return *//*(DataEntry<T, ? extends ET>) *//*((CET)tag).as((T) map.get(tag));
 	}*/
