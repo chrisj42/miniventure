@@ -7,6 +7,7 @@ import miniventure.game.screen.InputScreen;
 import miniventure.game.screen.MapScreen;
 import miniventure.game.screen.PauseScreen;
 import miniventure.game.util.Version;
+import miniventure.game.util.pool.RectPool;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
 import miniventure.game.world.level.ClientLevel;
 import miniventure.game.world.level.Level;
@@ -159,7 +160,9 @@ public class GameScreen {
 		batch.begin();
 		// draw UI for stats
 		// System.out.println("ui viewport: "+uiCamera.viewportWidth+"x"+uiCamera.viewportHeight);
-		player.drawGui(new Rectangle(0, 0, uiCamera.viewportWidth, uiCamera.viewportHeight), batch);
+		Rectangle guiCanvas = RectPool.POOL.obtain(0, 0, uiCamera.viewportWidth, uiCamera.viewportHeight);
+		player.drawGui(guiCanvas, batch);
+		RectPool.POOL.free(guiCanvas);
 		batch.end();
 		
 		batch.setProjectionMatrix(noScaleCamera.combined);
@@ -189,9 +192,9 @@ public class GameScreen {
 		debugInfo.add("X = "+playerBounds.x);
 		debugInfo.add("Y = "+playerBounds.y);
 		
-		Tile playerTile = level.getTile(playerBounds);
+		Tile playerTile = level.getTile(playerBounds, true);
 		debugInfo.add("Tile = " + (playerTile == null ? "Null" : playerTile.getType()));
-		Tile interactTile = level.getTile(player.getInteractionRect(levelView.getCursorPos()));
+		Tile interactTile = level.getTile(player.getInteractionRect(levelView.getCursorPos()), true);
 		debugInfo.add("Looking at: " + (interactTile == null ? "Null" : interactTile.toLocString().replace("Client", "")));
 		
 		debugInfo.add("Mobs in level: " + level.getMobCount()+"/"+level.getMobCap());

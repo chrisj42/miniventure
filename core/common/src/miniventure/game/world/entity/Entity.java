@@ -4,6 +4,7 @@ import miniventure.game.item.Item;
 import miniventure.game.item.Result;
 import miniventure.game.network.GameProtocol.PositionUpdate;
 import miniventure.game.util.blinker.Blinker;
+import miniventure.game.util.pool.RectPool;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.EntityRenderer.BlinkRenderer;
 import miniventure.game.world.entity.mob.player.Player;
@@ -91,7 +92,7 @@ public abstract class Entity implements WorldObject {
 	
 	protected Rectangle getUnscaledBounds() {
 		Vector2 size = renderer.getSize();
-		return new Rectangle(x, y, size.x, size.y);
+		return RectPool.POOL.obtain(x, y, size.x, size.y);
 	}
 	
 	public Vector3 getLocation() { return new Vector3(x, y, z); }
@@ -131,12 +132,18 @@ public abstract class Entity implements WorldObject {
 		if(amt == 0) return 0;
 		Rectangle oldRect = getBounds();
 		oldRect.setPosition(x+(xaxis?0:other), y+(xaxis?other:0));
-		Rectangle newRect = new Rectangle(oldRect.x+(xaxis?amt:0), oldRect.y+(xaxis?0:amt), oldRect.width, oldRect.height);
+		Rectangle newRect = RectPool.POOL.obtain(oldRect.x+(xaxis?amt:0), oldRect.y+(xaxis?0:amt), oldRect.width, oldRect.height);
 		
+		final float moveAmt;
 		if(checkMove(level, oldRect, newRect, true))
-			return amt;
+			moveAmt = amt;
 		else
-			return 0;
+			moveAmt = 0;
+		
+		RectPool.POOL.free(oldRect);
+		RectPool.POOL.free(newRect);
+		
+		return moveAmt;
 	}
 	/// public method to check if an entity can be moved in a given fashion. Does not call touch methods.
 	public static boolean checkMove(@NotNull Entity entity, @NotNull Level level, Rectangle oldRect, Rectangle newRect) {

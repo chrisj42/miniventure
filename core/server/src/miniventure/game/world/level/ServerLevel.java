@@ -7,6 +7,7 @@ import miniventure.game.network.GameProtocol.TileUpdate;
 import miniventure.game.network.GameServer;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
+import miniventure.game.util.pool.RectPool;
 import miniventure.game.world.Boundable;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.WorldObject;
@@ -243,7 +244,8 @@ public class ServerLevel extends Level {
 		}
 		
 		// make sure the item will be fully inside the "closest" tile when dropped.
-		MyUtils.moveRectInside(itemBounds, closest.getBounds(), 0.05f);
+		Rectangle closestBounds = closest.getBounds();
+		MyUtils.moveRectInside(itemBounds, closestBounds, 0.05f);
 		
 		dropPos.x = itemBounds.x;
 		dropPos.y = itemBounds.y;
@@ -257,6 +259,8 @@ public class ServerLevel extends Level {
 		getWorld().cancelIdReservation(ie);
 		ItemEntity nie = new ItemEntity(getWorld(), item, dropDir, delayPickup);
 		
+		RectPool.POOL.free(itemBounds);
+		RectPool.POOL.free(closestBounds);
 		nie.moveTo(dropPos);
 		addEntity(nie);
 	}

@@ -1,5 +1,6 @@
 package miniventure.game.world;
 
+import miniventure.game.util.pool.RectPool;
 import miniventure.game.world.level.Level;
 import miniventure.game.world.tile.Tile;
 
@@ -16,9 +17,24 @@ public interface Boundable {
 	
 	@NotNull Rectangle getBounds();
 	
-	default Vector2 getCenter() { return getBounds().getCenter(new Vector2()); }
-	default Vector2 getPosition() { return getBounds().getPosition(new Vector2()); }
-	default Vector2 getSize() { return getBounds().getSize(new Vector2()); }
+	default Vector2 getCenter() {
+		Rectangle rect = getBounds();
+		Vector2 v = rect.getCenter(new Vector2());
+		RectPool.POOL.free(rect);
+		return v;
+	}
+	default Vector2 getPosition() {
+		Rectangle rect = getBounds();
+		Vector2 v = rect.getPosition(new Vector2());
+		RectPool.POOL.free(rect);
+		return v;
+	}
+	default Vector2 getSize() {
+		Rectangle rect = getBounds();
+		Vector2 v = rect.getSize(new Vector2());
+		RectPool.POOL.free(rect);
+		return v;
+	}
 	
 	// returns the closest tile to the center of this object, given an array of tiles.
 	@Nullable

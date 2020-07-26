@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.pool.RectPool;
 import miniventure.game.world.tile.TileTypeDataMap;
 import miniventure.game.world.Point;
 import miniventure.game.world.Taggable;
@@ -168,7 +169,7 @@ public abstract class Level implements Taggable<Level> {
 			// decrease tile count by number of tiles in chunk
 			//tileCount -= chunk.width * chunk.height;
 			// get all entities in the chunk, and remove them from the game (later they'll be saved instead)
-			Array<Entity> entities = getOverlappingEntities(new Rectangle(chunkCoord.x * Chunk.SIZE, chunkCoord.y * Chunk.SIZE, chunk.width, chunk.height));
+			Array<Entity> entities = getOverlappingEntities(RectPool.POOL.obtain(chunkCoord.x * Chunk.SIZE, chunkCoord.y * Chunk.SIZE, chunk.width, chunk.height));
 			for(Entity e: entities)
 				e.remove();
 			
@@ -189,7 +190,12 @@ public abstract class Level implements Taggable<Level> {
 		this.mobCount = mobs;
 	}
 	
-	public Tile getTile(Rectangle rect) { return getTile(rect.getCenter(new Vector2())); }
+	public Tile getTile(Rectangle rect) { return getTile(rect, false); }
+	public Tile getTile(Rectangle rect, boolean free) {
+		Tile tile = getTile(rect.getCenter(new Vector2()));
+		if(free) RectPool.POOL.free(rect);
+		return tile;
+	}
 	public Tile getTile(Vector2 pos) { return getTile(pos.x, pos.y); }
 	public Tile getTile(float x, float y) { return getTile((int)x, (int)y); }
 	public Tile getTile(Point pos) { return getTile(pos.x, pos.y); }
@@ -215,7 +221,12 @@ public abstract class Level implements Taggable<Level> {
 		// return null;
 	}
 	
-	public Tile getClosestTile(Rectangle rect) { return getClosestTile(rect.getCenter(new Vector2())); }
+	public Tile getClosestTile(Rectangle rect) { return getClosestTile(rect, false); }
+	public Tile getClosestTile(Rectangle rect, boolean free) {
+		Tile tile = getClosestTile(rect.getCenter(new Vector2()));
+		if(free) RectPool.POOL.free(rect);
+		return tile;
+	}
 	public Tile getClosestTile(Vector2 center) { return getClosestTile(center.x, center.y); }
 	public Tile getClosestTile(float x, float y) {
 		x = MyUtils.clamp(x, 0, getWidth()-1);
@@ -280,22 +291,29 @@ public abstract class Level implements Taggable<Level> {
 		return overlappingChunks;
 	}*/
 	
-	public Array<Entity> getOverlappingEntities(Rectangle rect, Entity... exclude) {
+	public Array<Entity> getOverlappingEntities(Rectangle rect, Entity... exclude) { return getOverlappingEntities(rect, false, exclude); }
+	public Array<Entity> getOverlappingEntities(Rectangle rect, boolean free, Entity... exclude) {
 		Array<Entity> overlapping = new Array<>(Entity.class);
-		for(Entity entity: getEntities())
-			if(entity.getBounds().overlaps(rect))
+		for(Entity entity: getEntities()) {
+			Rectangle bounds = entity.getBounds();
+			if(bounds.overlaps(rect))
 				overlapping.add(entity);
+			RectPool.POOL.free(bounds);
+		}
 		
 		if(exclude.length > 0)
 			overlapping.removeAll(new Array<>(exclude), true); // use ==, not .equals()
 		
+		if(free) RectPool.POOL.free(rect);
 		return overlapping;
 	}
 	
-	public Array<WorldObject> getOverlappingObjects(Rectangle area) {
+	public Array<WorldObject> getOverlappingObjects(Rectangle area) { return getOverlappingObjects(area, false); }
+	public Array<WorldObject> getOverlappingObjects(Rectangle area, boolean free) {
 		Array<WorldObject> objects = new Array<>(WorldObject.class);
 		objects.addAll(getOverlappingTiles(area));
 		objects.addAll(getOverlappingEntities(area));
+		if(free) RectPool.POOL.free(area);
 		return objects;
 	}
 	

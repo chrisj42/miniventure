@@ -13,6 +13,7 @@ import miniventure.game.util.MyUtils;
 import miniventure.game.util.SerialHashMap;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueAction;
+import miniventure.game.util.pool.RectPool;
 import miniventure.game.world.Boundable;
 import miniventure.game.world.Point;
 import miniventure.game.world.WorldObject;
@@ -369,6 +370,8 @@ public class ServerPlayer extends ServerMob implements Player {
 		
 		objects.addAll(level.getOverlappingEntities(interactionBounds, this));
 		Boundable.sortByDistance(objects, getCenter());
+		
+		RectPool.POOL.free(interactionBounds);
 		
 		Tile tile = level.getTile(center);
 		if(tile != null)

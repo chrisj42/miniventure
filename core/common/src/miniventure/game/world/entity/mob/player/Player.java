@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import miniventure.game.network.PacketPipe;
+import miniventure.game.util.pool.RectPool;
 import miniventure.game.world.Point;
 import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.level.Level;
@@ -88,12 +89,13 @@ public interface Player extends Mob {
 	int changeStat(@NotNull Stat stat, int amt);
 	
 	default Rectangle getInteractionRect(Vector2 center) {
+		Rectangle bounds = RectPool.POOL.obtain();
 		if(center == null)
-			return new Rectangle(-1, -1, 0 ,0);
-		
-		Rectangle bounds = new Rectangle();
-		bounds.setSize(INTERACT_RECT_SIZE);
-		bounds.setCenter(center);
+			bounds.set(-1, -1, 0, 0);
+		else {
+			bounds.setSize(INTERACT_RECT_SIZE);
+			bounds.setCenter(center);
+		}
 		return bounds;
 	}
 	

@@ -11,12 +11,14 @@ import miniventure.game.network.GameServer;
 import miniventure.game.util.SerialHashMap;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueAction;
+import miniventure.game.util.pool.RectPool;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.level.ServerLevel;
 import miniventure.game.world.management.ServerWorld;
 import miniventure.game.world.tile.Tile;
 
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
@@ -77,9 +79,12 @@ public abstract class ServerEntity extends Entity {
 		ServerLevel level = getLevel();
 		if(level == null) return;
 		Array<WorldObject> objects = new Array<>();
-		objects.addAll(level.getOverlappingEntities(getBounds(), this));
+		
+		Rectangle bounds = getBounds();
+		
+		objects.addAll(level.getOverlappingEntities(bounds, this));
 		// we don't want to trigger things like getting hurt by lava until the entity is actually *in* the tile, so we'll only consider the closest one to be "touching".
-		Tile tile = level.getTile(getBounds());
+		Tile tile = level.getTile(bounds);
 		if(tile != null) objects.add(tile);
 		
 		for(WorldObject obj: objects)
@@ -87,7 +92,9 @@ public abstract class ServerEntity extends Entity {
 		
 		// get the entity back on the map if they somehow end up on a null tile
 		if(tile == null)
-			moveTo(level.getClosestTile(getBounds()).getCenter());
+			moveTo(level.getClosestTile(bounds).getCenter());
+		
+		RectPool.POOL.free(bounds);
 	}
 	
 	protected void updateSprite(SpriteUpdate newSprite) { this.newSprite = newSprite; }

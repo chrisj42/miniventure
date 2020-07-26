@@ -4,6 +4,7 @@ import java.util.List;
 
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.pool.RectPool;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
 import miniventure.game.world.entity.mob.player.Player;
 import miniventure.game.world.entity.mob.player.Player.CursorHighlight;
@@ -105,7 +106,7 @@ public class LevelViewport {
 		// subtract half the view port height and width to get the offset.
 		Vector2 offset = new Vector2(cameraCenter.x - screenSize.x/2, cameraCenter.y - screenSize.y/2); // world coords
 		
-		Rectangle renderSpace = new Rectangle(offset.x, offset.y, screenSize.x, screenSize.y); // world coords
+		Rectangle renderSpace = RectPool.POOL.obtain(offset.x, offset.y, screenSize.x, screenSize.y); // world coords
 		
 		// trim the rendering space to not exceed the max in either direction.
 		if(maxWorldViewWidth > 0)
@@ -115,7 +116,7 @@ public class LevelViewport {
 		renderSpace.setCenter(cameraCenter);
 		
 		final float extra = OFF_SCREEN_LIGHT_RADIUS; // in world coords
-		Rectangle lightRenderSpace = new Rectangle(renderSpace.x - extra, renderSpace.y - extra, renderSpace.width + extra*2, renderSpace.height + extra*2); // world coords
+		Rectangle lightRenderSpace = RectPool.POOL.obtain(renderSpace.x - extra, renderSpace.y - extra, renderSpace.width + extra*2, renderSpace.height + extra*2); // world coords
 		
 		lightingBuffer.begin();
 		Gdx.gl.glClearColor(0, 0, 0, 0);
@@ -232,6 +233,9 @@ public class LevelViewport {
 		batch.draw(lightingBuffer.getColorBufferTexture(), 0, 0);
 		
 		batch.end();
+		
+		RectPool.POOL.free(renderSpace);
+		RectPool.POOL.free(lightRenderSpace);
 	}
 	
 	/*private static void drawOutline(Vector2 offset, Rectangle rect, SpriteBatch batch) {
@@ -251,8 +255,8 @@ public class LevelViewport {
 	private void resetCamera(final int width, final int height) {
 		float zoomFactor = (float) Math.pow(2, zoom);
 		
-		Rectangle window = new Rectangle(0, 0, width, height);
-		Rectangle view = new Rectangle(0, 0, maxWorldViewWidth, maxWorldViewHeight);
+		Rectangle window = RectPool.POOL.obtain(0, 0, width, height);
+		Rectangle view = RectPool.POOL.obtain(0, 0, maxWorldViewWidth, maxWorldViewHeight);
 		
 		if(view.width <= 0)
 			view.width = Math.max(view.height, DEFAULT_VIEWPORT_SIZE);

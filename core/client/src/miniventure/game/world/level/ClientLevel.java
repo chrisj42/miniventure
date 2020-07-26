@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import miniventure.game.core.ClientCore;
 import miniventure.game.network.GameProtocol.LevelChunk;
 import miniventure.game.screen.RespawnScreen;
+import miniventure.game.util.pool.RectPool;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.management.ClientWorld;
 import miniventure.game.world.tile.ClientTile;
@@ -50,11 +51,11 @@ public class ClientLevel extends RenderLevel {
 	public void render(Rectangle renderSpace, SpriteBatch batch, float delta, Vector2 posOffset) {
 		applyTileUpdates();
 		
-		renderSpace = new Rectangle(Math.max(0, renderSpace.x), Math.max(0, renderSpace.y), Math.min(getWidth()-renderSpace.x, renderSpace.width), Math.min(getHeight()-renderSpace.y, renderSpace.height));
+		renderSpace = RectPool.POOL.obtain(Math.max(0, renderSpace.x), Math.max(0, renderSpace.y), Math.min(getWidth()-renderSpace.x, renderSpace.width), Math.min(getHeight()-renderSpace.y, renderSpace.height));
 		// pass the offset vector to all objects being rendered.
 		
 		Array<Tile> tiles = getOverlappingTiles(renderSpace);
-		Array<Entity> entities = getOverlappingEntities(renderSpace);
+		Array<Entity> entities = getOverlappingEntities(renderSpace, true);
 		
 		if(ClientCore.getScreen() instanceof RespawnScreen)
 			entities.removeValue(ClientCore.getWorld().getMainPlayer(), true);

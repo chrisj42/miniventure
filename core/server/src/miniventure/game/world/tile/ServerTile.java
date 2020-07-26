@@ -8,6 +8,7 @@ import miniventure.game.item.ServerItem;
 import miniventure.game.network.GameServer;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.function.Action;
+import miniventure.game.util.pool.RectPool;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.player.Player;
@@ -124,7 +125,7 @@ public class ServerTile extends Tile {
 		
 		HashSet<Tile> surroundingTileSet = getAdjacentTiles(true);
 		Tile[] surroundingTiles = surroundingTileSet.toArray(new Tile[0]);
-		for(Entity entity: getLevel().getOverlappingEntities(getBounds())) {
+		for(Entity entity: getLevel().getOverlappingEntities(getBounds(), true)) {
 			// for each entity, check if it can walk on the new tile type. If not, fetch the surrounding tiles, remove those the entity can't walk on, and then fetch the closest tile of the remaining ones.
 			// if(newType.isWalkable()) continue; // no worries for this entity.
 			
@@ -147,13 +148,18 @@ public class ServerTile extends Tile {
 					aroundTiles.removeValue(secClosest, false);
 					secClosest = entity.getClosestTile(aroundTiles);
 				} while(secClosest != null && secClosest.x != closest.x && secClosest.y != closest.y);
-				if(secClosest != null)
+				if(secClosest != null) {
+					Rectangle secBounds = secClosest.getBounds();
 					// expand the rect that the player can be moved to so it's not so large.
-					tileBounds.merge(secClosest.getBounds());
+					tileBounds.merge(secBounds);
+					RectPool.POOL.free(secBounds);
+				}
 				
 				Rectangle entityBounds = entity.getBounds();
 				MyUtils.moveRectInside(entityBounds, tileBounds, 0.05f);
 				entity.moveTo(entityBounds.x, entityBounds.y);
+				RectPool.POOL.free(entityBounds);
+				RectPool.POOL.free(tileBounds);
 			}
 		}
 	}

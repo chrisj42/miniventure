@@ -3,6 +3,7 @@ package miniventure.game.world.tile;
 import java.util.HashSet;
 
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.pool.RectPool;
 import miniventure.game.world.level.LevelId;
 import miniventure.game.world.Point;
 import miniventure.game.world.WorldObject;
@@ -61,7 +62,7 @@ public abstract class Tile implements WorldObject {
 	@NotNull @Override public Level getLevel() { return level; }
 	
 	@NotNull
-	@Override public Rectangle getBounds() { return new Rectangle(x, y, 1, 1); }
+	@Override public Rectangle getBounds() { return RectPool.POOL.obtain(x, y, 1, 1); }
 	@Override public Vector2 getCenter() { return new Vector2(x+0.5f, y+0.5f); }
 	
 	public Point getLocation() { return new Point(x, y); }

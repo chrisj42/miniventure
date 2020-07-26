@@ -4,6 +4,7 @@ import miniventure.game.core.ClientCore;
 import miniventure.game.network.GameProtocol.EntityAddition;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.blinker.FrameBlinker;
+import miniventure.game.util.pool.RectPool;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.entity.particle.ClientParticle;
@@ -71,6 +72,7 @@ public class ClientEntity extends Entity {
 			rect.width *= Tile.SIZE;
 			rect.height *= Tile.SIZE;
 			MyUtils.drawRect(rect, 1, Color.BLACK, batch);
+			RectPool.POOL.free(rect);
 		}
 	}
 	

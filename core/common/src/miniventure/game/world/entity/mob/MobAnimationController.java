@@ -4,6 +4,7 @@ import java.util.EnumMap;
 import java.util.concurrent.PriorityBlockingQueue;
 
 import miniventure.game.network.GameProtocol.SpriteUpdate;
+import miniventure.game.util.pool.RectPool;
 import miniventure.game.world.entity.Direction;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.EntityRenderer.DirectionalAnimationRenderer;
@@ -90,6 +91,9 @@ public class MobAnimationController<M extends Entity & Mob> {
 				return false; // different directional sprite causes new collisions.
 			}
 		}
+		
+		RectPool.POOL.free(oldRect);
+		RectPool.POOL.free(newRect);
 		
 		renderer.setDirection(dir);
 		return true;
