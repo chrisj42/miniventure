@@ -6,6 +6,8 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+import com.badlogic.gdx.graphics.glutils.ETC1;
+
 import org.jetbrains.annotations.NotNull;
 
 /** @noinspection rawtypes*/
@@ -21,7 +23,7 @@ public abstract class GenericEnum<T, ET extends GenericEnum<T, ET>> implements C
 	// initializes all generic enum implementations
 	/*public static void init() {
 		TileDataTag.init();
-		TileCacheTag.init();
+		TileDataTag.init();
 	}*/
 	
 	private static final class EnumData<ET extends GenericEnum> {
@@ -163,10 +165,18 @@ public abstract class GenericEnum<T, ET extends GenericEnum<T, ET>> implements C
 	@Override
 	public String toString() { return getClass().getSimpleName()+'-'+(enumData.initialized?name():String.valueOf(ordinal)); }
 	
+	protected ET getValue() {
+		enumData.checkInit();
+		return enumData.values[ordinal];
+	}
+	
 	// the below methods provide support for GEnumMap
 	
 	public DataEntry<T, ET> as(T value) {
-		enumData.checkInit();
-		return new DataEntry<>(enumData.values[ordinal], value);
+		return new DataEntry<>(getValue(), value);
+	}
+	@SuppressWarnings("unchecked")
+	public DataEntry<T, ET> cast(Object value) {
+		return as((T) value);
 	}
 }

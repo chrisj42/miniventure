@@ -16,14 +16,16 @@ public class RenderStyle {
 	
 	private final boolean sync;
 	
-	RenderStyle(float fps) { this(false, fps); }
+	RenderStyle(float fps) { this(fps == 0, fps); }
 	RenderStyle(boolean sync, float fps) { this(PlayMode.LOOP, sync, fps); }
-	RenderStyle(PlayMode playMode, float fps) { this(playMode, false, fps); }
+	RenderStyle(PlayMode playMode, float fps) { this(playMode, fps == 0, fps); }
 	RenderStyle(PlayMode playMode, boolean sync, float fps) {
 		this.playMode = playMode;
 		this.sync = sync;
 		this.fps = fps;
 	}
+	
+	boolean isSync() { return sync; }
 	
 	<T> TileAnimation getAnimation(@NotNull TileTypeEnum tileType, T name, TileTypeToAnimationMap<T> map, String mapNameForErrorLog) {
 		return getAnimation(tileType, map.getAnimationFrames(tileType, name, mapNameForErrorLog));

@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import miniventure.game.util.MyUtils;
-import miniventure.game.world.tile.TileDataTag.TileDataEnumMap;
+import miniventure.game.world.tile.TileTypeDataMap;
 import miniventure.game.world.Point;
 import miniventure.game.world.Taggable;
 import miniventure.game.world.WorldObject;
@@ -50,7 +50,7 @@ public abstract class Level implements Taggable<Level> {
 	
 	@FunctionalInterface
 	public interface TileLoader {
-		Tile get(Level level, int x, int y, TileTypeEnum[] types, TileDataEnumMap[] dataMaps);
+		Tile get(Level level, int x, int y, TileTypeEnum[] types, TileTypeDataMap[] dataMaps);
 	}
 	
 	@FunctionalInterface
@@ -85,7 +85,7 @@ public abstract class Level implements Taggable<Level> {
 		for(int x = 0; x < tileData.length; x++) {
 			for(int y = 0; y < tileData[x].length; y++) {
 				TileData data = tileData[x][y];
-				tiles[x][y] = tileFetcher.get(this, x, y, data.getTypes(), data.getDataMaps());
+				tiles[x][y] = tileFetcher.get(this, x, y, data.getTypes(), data.getDataMaps(world));
 			}
 		}
 		MyUtils.debug(world.getClass().getSimpleName()+": tile data loaded.");

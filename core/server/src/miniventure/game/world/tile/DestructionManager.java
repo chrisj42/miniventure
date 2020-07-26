@@ -6,7 +6,6 @@ import miniventure.game.item.ServerItem;
 import miniventure.game.item.ToolItem;
 import miniventure.game.item.ToolItem.ToolType;
 import miniventure.game.util.ArrayUtils;
-import miniventure.game.world.tile.TileDataTag.TileDataEnumMap;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.particle.ActionType;
@@ -16,7 +15,7 @@ import miniventure.game.world.entity.particle.ParticleData.TextParticleData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class DestructionManager {
+public class DestructionManager implements TileProperty {
 	
 	static final DestructionManager INDESTRUCTIBLE(@NotNull TileTypeEnum tileType) {
 		return new DestructibleBuilder(tileType, -1).require(item -> false).make();
@@ -54,6 +53,14 @@ public class DestructionManager {
 		drops = model.drops;
 		preferredTools = model.preferredTools;
 		damageConditions = model.damageConditions;
+	}
+	
+	@Override
+	public void registerDataTypes(TileType tileType) {
+		if(totalHealth > 1)
+			tileType.registerData(TileDataTag.Health);
+		if(drops.length > 0)
+			tileType.registerData(TileDataTag.DestroyAction);
 	}
 	
 	public static class DestructibleBuilder {
@@ -127,7 +134,7 @@ public class DestructionManager {
 			// add damage particle
 			tile.getServer().broadcastParticle(new ActionParticleData(ActionType.IMPACT), tile);
 			
-			TileDataEnumMap dataMap = tile.getDataMap(tileType);
+			TileTypeDataMap dataMap = tile.getDataMap(tileType);
 			
 			int health = totalHealth > 1 ? dataMap.getOrDefaultAndPut(TileDataTag.Health, totalHealth) : 1;
 			health -= damage;
@@ -135,10 +142,12 @@ public class DestructionManager {
 				tile.getServer().broadcastParticle(new TextParticleData(String.valueOf(damage)), tile);
 			if(health <= 0) {
 				tile.getServer().playTileSound("break", tile, tileType);
-				tile.getCacheMap(tileType).put(TileCacheTag.DestroyAction, () -> {
-					for(ItemDrop drop: drops)
-						tile.getLevel().dropItems(drop, tile, attacker);
-				});
+				if(drops.length > 0) {
+					tile.getDataMap(tileType).put(TileDataTag.DestroyAction, () -> {
+						for(ItemDrop drop: drops)
+							tile.getLevel().dropItems(drop, tile, attacker);
+					});
+				}
 				tile.breakTile();
 			} else {
 				dataMap.put(TileDataTag.Health, health);

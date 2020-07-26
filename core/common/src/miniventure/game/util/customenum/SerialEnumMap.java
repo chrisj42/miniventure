@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.Version;
+
+import org.jetbrains.annotations.Nullable;
 
 /** @noinspection rawtypes*/
 @SuppressWarnings("unchecked")
@@ -17,18 +20,18 @@ public class SerialEnumMap<ET extends SerialEnum> {
 		map.putAll(model.map);
 	}
 	
-	public SerialEnumMap(String alldata, Class<ET> tagClass) {
+	public SerialEnumMap(String alldata, @Nullable Version dataVersionIfFile, Class<ET> tagClass) {
 		String[] data = MyUtils.parseLayeredString(alldata);
 		
 		for(String item: data)
-			SerialEnum.deserializeEntry(item, tagClass, this);
+			SerialEnum.deserializeEntry(item, dataVersionIfFile, tagClass, this);
 	}
 	
 	public String serialize(boolean save) {
 		ArrayList<String> entries = new ArrayList<>(map.size());
 		
 		for(SerialEnum key: map.keySet()) {
-			if(key.serialSave() && save || key.serialSend() && !save)
+			if(key.savable() && save || key.sendable() && !save)
 				entries.add(key.serializeEntry(this));
 		}
 		

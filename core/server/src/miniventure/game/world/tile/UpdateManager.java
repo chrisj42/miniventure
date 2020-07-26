@@ -1,13 +1,12 @@
 package miniventure.game.world.tile;
 
-import miniventure.game.world.tile.TileCacheTag.TileDataCache;
 import miniventure.game.util.function.FetchFunction;
 import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.tile.ServerTileType.P;
 
 import org.jetbrains.annotations.NotNull;
 
-public class UpdateManager {
+public class UpdateManager implements TileProperty {
 	
 	/*
 		Update Actions have:
@@ -32,6 +31,17 @@ public class UpdateManager {
 		this.actions = actions;
 	}
 	
+	@Override
+	public void registerDataTypes(TileType tileType) {
+		if(doesUpdate()) {
+			tileType.registerData(TileDataTag.LastUpdate);
+			tileType.registerData(TileDataTag.UpdateTimers);
+			tileType.registerData(TileDataTag.UpdateActionCaches);
+		}
+	}
+	
+	public boolean doesUpdate() { return actions.length > 0; }
+	
 	public float update(@NotNull ServerTile tile, float delta) {
 		// if playing an exit animation, then don't update the tile.
 		TransitionManager man = ServerTileType.get(tileType, P.TRANS);
@@ -39,9 +49,9 @@ public class UpdateManager {
 			return man.tryFinishAnimation(tile);
 		
 		float minWait = 0;
-		TileDataCache dataMap = tile.getCacheMap(tileType);
-		float[] deltas = dataMap.getOrDefaultAndPut(TileCacheTag.UpdateTimers, new float[actions.length]);
-		String[] datas = dataMap.getOrDefaultAndPut(TileCacheTag.UpdateActionCaches, new String[actions.length]);
+		TileTypeDataMap dataMap = tile.getDataMap(tileType);
+		float[] deltas = dataMap.getOrDefaultAndPut(TileDataTag.UpdateTimers, new float[actions.length]);
+		String[] datas = dataMap.getOrDefaultAndPut(TileDataTag.UpdateActionCaches, new String[actions.length]);
 		for(int i = 0; i < actions.length; i++) {
 			if(!actions[i].canUpdate(tile))
 				deltas[i] = 0;

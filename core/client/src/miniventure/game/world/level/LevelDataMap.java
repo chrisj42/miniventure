@@ -4,11 +4,11 @@ import java.util.HashMap;
 
 import miniventure.game.world.tile.Tile;
 
-public class TileDataMap<T> {
+public class LevelDataMap<T> {
 	
 	private final HashMap<Tile, T> map = new HashMap<>();
 	
-	TileDataMap() {}
+	LevelDataMap() {}
 	
 	public T get(Tile tile) {
 		return map.get(tile);

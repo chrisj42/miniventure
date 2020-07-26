@@ -1,6 +1,5 @@
 package miniventure.game.world.tile;
 
-import miniventure.game.world.tile.TileDataTag.TileDataEnumMap;
 import miniventure.game.world.management.ServerWorld;
 
 import org.jetbrains.annotations.NotNull;
@@ -12,7 +11,7 @@ public class ServerTileStack extends TileStack<ServerTileType> {
 		super(types);
 	}*/
 	
-	public ServerTileStack(@NotNull ServerWorld world, TileTypeEnum[] enumTypes, @Nullable TileDataEnumMap[] dataMaps) {
+	public ServerTileStack(@NotNull ServerWorld world, TileTypeEnum[] enumTypes, @Nullable TileTypeDataMap[] dataMaps) {
 		super(world, enumTypes, dataMaps);
 	}
 	

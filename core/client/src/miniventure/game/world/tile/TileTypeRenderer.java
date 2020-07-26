@@ -13,7 +13,7 @@ import com.badlogic.gdx.utils.Array;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class TileTypeRenderer {
+public class TileTypeRenderer implements TileProperty {
 	
 	static final TileTypeToAnimationMap<Integer> mainAnimations = new IndexedTileTypeToAnimationMap();
 	static final TileTypeToAnimationMap<Integer> connectAnimations = new IndexedTileTypeToAnimationMap();
@@ -69,7 +69,7 @@ public class TileTypeRenderer {
 		return buildRenderer(tileType, isOpaque, RenderStyle.SINGLE_FRAME);
 	}
 	static RendererBuilder buildRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque, RenderStyle defaultStyle) {
-		return buildRenderer(tileType, isOpaque, defaultStyle, defaultStyle);
+		return buildRenderer(tileType, isOpaque, defaultStyle, RenderStyle.SINGLE_FRAME);
 	}
 	static RendererBuilder buildRenderer(@NotNull TileTypeEnum tileType, boolean isOpaque, RenderStyle defaultCoreStyle, RenderStyle defaultOverlapStyle) {
 		return buildRenderer(tileType, isOpaque, defaultCoreStyle, defaultCoreStyle, defaultOverlapStyle);
@@ -97,7 +97,14 @@ public class TileTypeRenderer {
 			
 			mainSpriteManager = new SpriteCompiler<>(this, tileType, defaultMainStyle, mainAnimations, "main");
 			connectionSpriteManager = new SpriteCompiler<>(this, tileType, defaultConnectionStyle, connectAnimations, "connection");
-			overlapSpriteManager = new SpriteCompiler<>(this, tileType, defaultOverlapStyle, overlapAnimations, "overlap");
+			overlapSpriteManager = new SpriteCompiler<Integer>(this, tileType, defaultOverlapStyle, overlapAnimations, "overlap") {
+				@Override
+				protected void validateStyle(RenderStyle style) {
+					// force overlap animations to be synchronous
+					if(!style.isSync())
+						throw new IllegalArgumentException("Overlap animations must be synchronous.");
+				}
+			};
 			
 			transitions = new HashMap<>();
 			
@@ -155,6 +162,15 @@ public class TileTypeRenderer {
 		this.transitions = transitions;
 	}
 	
+	@Override
+	public void registerDataTypes(TileType tileType) {
+		if(transitions.size() > 0) {
+			tileType.registerData(TileDataTag.TransitionName);
+			// client doesn't use this data tag
+			// tileType.registerData(TileDataTag.AnimationStart);
+		}
+	}
+	
 	public boolean isOpaque() { return isOpaque; }
 	
 	// whenever a tile changes its TileTypeEnum stack in any way, all 9 tiles around it re-fetch their overlap and main animations. Then they keep that stack of animations until the next fetch.
@@ -162,7 +178,7 @@ public class TileTypeRenderer {
 	// fetches sprites that represent this TileType on the given tile, including a main sprite and/or a connection sprite; or a transition sprite, if there is a current transition.
 	public LinkedList<TileAnimation> getCoreSprites(@NotNull Tile tile, EnumMap<RelPos, EnumSet<TileTypeEnum>> aroundTypes) {
 		LinkedList<TileAnimation> sprites = new LinkedList<>();
-		String tName = tile.getDataMap(tileType).get(TileDataTag.TransitionName);
+		String tName = transitions.size() > 0 ? tile.getDataMap(tileType).get(TileDataTag.TransitionName) : null;
 		if(tName != null)
 			sprites.add(transitions.get(tName).getAnimation());
 		else {

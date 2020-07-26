@@ -35,16 +35,21 @@ public class SpriteManager<T> {
 		SpriteCompiler(RendererBuilder builder, @NotNull TileTypeEnum tileType, RenderStyle defaultStyle, TileTypeToAnimationMap<T> animationMap, String animationMapName) {
 			this.builder = builder;
 			manager = new SpriteManager<>(tileType, defaultStyle, animationMap, animationMapName);
+			validateStyle(defaultStyle);
 		}
 		
 		SpriteManager<T> getManager() { return manager; }
 		
+		protected void validateStyle(RenderStyle style) {}
+		
 		public RendererBuilder setDefaultStyle(RenderStyle style) {
+			validateStyle(style);
 			manager.defaultStyle = style;
 			return builder;
 		}
 		
 		public SpriteCompiler<T> customStyle(T spriteName, RenderStyle customStyle) {
+			validateStyle(customStyle);
 			manager.customStyles.put(spriteName, customStyle);
 			return this;
 		}

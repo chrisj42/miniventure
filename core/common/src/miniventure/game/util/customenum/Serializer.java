@@ -5,17 +5,29 @@ import java.lang.reflect.InvocationTargetException;
 
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.Version;
 import miniventure.game.util.customenum.SerialEnum.ClassParser;
 import miniventure.game.util.function.MapFunction;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 public class Serializer<T> {
+	
+	public interface Deserializer<T> {
+		T parse(String data, @NotNull Version version);
+		
+		static <T> Deserializer<T> ignoreVersion(MapFunction<String, T> mapper) {
+			return (data, version) -> mapper.get(data);
+		}
+	}
 	
 	public final boolean save;
 	public final boolean send;
 	private final MapFunction<T, String> valueWriter;
-	private final MapFunction<String, T> valueParser;
+	private final Deserializer<T> valueParser;
 	
-	public Serializer(boolean save, boolean send, MapFunction<T, String> valueWriter, MapFunction<String, T> valueParser) {
+	public Serializer(boolean save, boolean send, MapFunction<T, String> valueWriter, Deserializer<T> valueParser) {
 		this.save = save;
 		this.send = send;
 		this.valueWriter = valueWriter;
@@ -26,7 +38,7 @@ public class Serializer<T> {
 		this.save = save;
 		this.send = send;
 		this.valueWriter = defaultValueWriter(valueClass);
-		this.valueParser = defaultValueParser(valueClass);
+		this.valueParser = Deserializer.ignoreVersion(defaultValueParser(valueClass));
 	}
 	
 	// these two constructors below are essentially the same as the two above, except that they convert the value type to a substitute type which gets serialized instead.
@@ -35,7 +47,7 @@ public class Serializer<T> {
 		this.save = save;
 		this.send = send;
 		this.valueWriter = val -> substituteWriter.get(substituter.get(val));
-		this.valueParser = string -> unsubstituter.get(substituteParser.get(string));
+		this.valueParser = (string, version) -> unsubstituter.get(substituteParser.get(string));
 	}
 	
 	public <U> Serializer(boolean save, boolean send, final Class<U> substituteClass, MapFunction<T, U> substituter, MapFunction<U, T> unsubstituter) {
@@ -101,8 +113,13 @@ public class Serializer<T> {
 		return ar;
 	}
 	
-	public String serialize(T value) { return valueWriter.get(value); }
-	public T deserialize(String data) { return valueParser.get(data); }
-	
+	public String serialize(T value) {
+		if(value == null) return "";
+		return valueWriter.get(value);
+	}
+	public T deserialize(String data, @Nullable Version dataVersionIfFile) {
+		if(data.length() == 0) return null;
+		return valueParser.parse(data, dataVersionIfFile == null ? Version.CURRENT : dataVersionIfFile);
+	}
 	
 }

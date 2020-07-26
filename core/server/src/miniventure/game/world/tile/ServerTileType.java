@@ -8,10 +8,8 @@ import miniventure.game.item.ResourceType;
 import miniventure.game.item.Result;
 import miniventure.game.item.ServerItem;
 import miniventure.game.item.ToolItem.ToolType;
-import miniventure.game.world.tile.TileCacheTag.TileDataCache;
 import miniventure.game.util.function.MapFunction;
 import miniventure.game.util.param.ParamMap;
-import miniventure.game.util.param.Value;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
@@ -40,7 +38,7 @@ public class ServerTileType extends TileType {
 		// TParam<TileItem> ITEM = new TParam<>(type -> null);
 	}
 	
-	private final HashMap<TParam<?>, Object> propertyMap;
+	private final HashMap<TParam<?>, TileProperty> propertyMap;
 	// private boolean initializing = false;
 	// private boolean initialized = false;
 	
@@ -49,25 +47,27 @@ public class ServerTileType extends TileType {
 		propertyMap = new HashMap<>(4);
 	}
 	
-	private void initProperties(Value... params) {
+	private void initProperties(TValue<?>... params) {
 		// if(initialized || initializing) {
 		// 	System.err.println("ServerTileType initProperties was called more than once for type "+getTypeEnum());
 		// 	return;
 		// }
 		ParamMap map = new ParamMap(params);
 		TileTypeEnum type = getTypeEnum();
+		
 		// initializing = true;
 		// propertyMap.put(P.ITEM, map.get(P.ITEM).get(type)); // important to create and set the item first
 		propertyMap.put(P.DESTRUCT, map.get(P.DESTRUCT).get(type));
 		propertyMap.put(P.UPDATE, map.get(P.UPDATE).get(type));
 		propertyMap.put(P.TRANS, map.get(P.TRANS).get(type));
+		propertyMap.forEach((param, prop) -> prop.registerDataTypes(this));
 		// initialized = true;
 		// initializing = false;
 	}
 	
 	@SuppressWarnings("unchecked")
 	// this fetches the given property from this type's property map.
-	public <T> T get(TParam<T> property) {
+	public <T extends TileProperty> T get(TParam<T> property) {
 		/*T prop =*/return (T) propertyMap.get(property);
 		// String propClass = prop.getClass().getSimpleName();
 		// if(initializing)
@@ -83,7 +83,7 @@ public class ServerTileType extends TileType {
 	}
 	
 	// combines the above two methods into a single neat call.
-	public static <T> T get(TileTypeEnum type, TParam<T> property) {
+	public static <T extends TileProperty> T get(TileTypeEnum type, TParam<T> property) {
 		return get(type).get(property);
 	}
 	
@@ -107,12 +107,15 @@ public class ServerTileType extends TileType {
 	 * @return how long to wait before next call, or 0 for never (until adjacent tile update)
 	 */
 	public float update(@NotNull ServerTile tile) {
-		TileDataCache dataMap = tile.getCacheMap(getTypeEnum());
+		if(!get(P.TRANS).playingAnimation(tile) && !get(P.UPDATE).doesUpdate())
+			return 0;
+		
+		TileTypeDataMap dataMap = tile.getDataMap(getTypeEnum());
 		
 		float now = tile.getWorld().getGameTime();
-		float lastUpdate = dataMap.getOrDefault(TileCacheTag.LastUpdate, now);
+		float lastUpdate = dataMap.getOrDefault(TileDataTag.LastUpdate, now);
 		float delta = now - lastUpdate;
-		dataMap.put(TileCacheTag.LastUpdate, now);
+		dataMap.put(TileDataTag.LastUpdate, now);
 		
 		return get(P.UPDATE).update(tile, delta);
 	}
@@ -299,11 +302,11 @@ public class ServerTileType extends TileType {
 		/** @noinspection NonFinalFieldInEnum*/
 		private ServerTileType type = null;
 		private final MapFunction<TileTypeEnum, ServerTileType> fetcher;
-		private final Value[] params;
+		private final TValue<?>[] params;
 		private final TileTypeEnum mainEnum;
 		
-		ServerTileTypeEnum(Value... params) { this(ServerTileType::new, params); }
-		ServerTileTypeEnum(MapFunction<TileTypeEnum, ServerTileType> fetcher, Value... params) {
+		ServerTileTypeEnum(TValue<?>... params) { this(ServerTileType::new, params); }
+		ServerTileTypeEnum(MapFunction<TileTypeEnum, ServerTileType> fetcher, TValue<?>... params) {
 			this.fetcher = fetcher;
 			this.params = params;
 			mainEnum = TileTypeEnum.value(ordinal());
@@ -322,8 +325,8 @@ public class ServerTileType extends TileType {
 	}
 	
 	private interface ServerTileFactory {
-		static Value[] ore(ResourceType oreType, int health) {
-			return new Value[] {
+		static TValue<?>[] ore(ResourceType oreType, int health) {
+			return new TValue<?>[] {
 				P.DESTRUCT.as(type -> new DestructionManager(type, health,
 					new PreferredTool(ToolType.Pickaxe, 5),
 					new ItemDrop(oreType.get(), 3, 4)
@@ -331,7 +334,7 @@ public class ServerTileType extends TileType {
 			};
 		}
 		
-		Value[] tree = {
+		TValue<?>[] tree = {
 			P.DESTRUCT.as(type -> new DestructionManager(type, 24,
 				new PreferredTool(ToolType.Axe, 2),
 				new ItemDrop(ResourceType.Log.get(), 2),

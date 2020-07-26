@@ -1,12 +1,7 @@
 package miniventure.game.world.tile;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import miniventure.game.core.ClientCore;
-import miniventure.game.world.tile.TileDataTag.TileDataEnumMap;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ClientTileStack extends TileStack<ClientTileType> {
@@ -23,7 +18,7 @@ public class ClientTileStack extends TileStack<ClientTileType> {
 		super(types);
 	}*/
 	
-	public ClientTileStack(TileTypeEnum[] enumTypes, @Nullable TileDataEnumMap[] dataMaps) {
+	public ClientTileStack(TileTypeEnum[] enumTypes, @Nullable TileTypeDataMap[] dataMaps) {
 		super(ClientCore.getWorld(), enumTypes, dataMaps);
 	}
 	

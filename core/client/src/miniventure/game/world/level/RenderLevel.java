@@ -19,7 +19,15 @@ import org.jetbrains.annotations.NotNull;
 
 public abstract class RenderLevel extends Level {
 	
-	public final TileDataMap<Float> animStartTimes = new TileDataMap<>();
+	// start times of main animations
+	public final LevelDataMap<Float> animStartTimes = new LevelDataMap<>();
+	
+	/*
+	TODO storing tile overlap animation data like this isn't going to work in the current system I think; it would probably help to simplify things first.
+		The water animation has been working only because it was synchronous... honestly overlap animations should probably be required to be synchronous.
+	 */
+	// start times of overlap animations, stored by the tile they come from
+	// public final LevelDataMap<Float> overlapAnimStartTimes = new LevelDataMap<>();
 	
 	protected RenderLevel(@NotNull LevelWorldManager world, LevelId levelId, @NotNull TileTypeEnum[][][] tileTypes, @NotNull TileMaker tileFetcher) {
 		super(world, levelId, tileTypes, tileFetcher);

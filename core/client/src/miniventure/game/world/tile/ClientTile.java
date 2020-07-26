@@ -1,6 +1,5 @@
 package miniventure.game.world.tile;
 
-import miniventure.game.world.tile.TileCacheTag.TileDataCache;
 import miniventure.game.world.level.ClientLevel;
 import miniventure.game.world.level.Level;
 import miniventure.game.world.tile.TileStack.TileData;
@@ -26,7 +25,7 @@ public class ClientTile extends RenderTile {
 	public ClientLevel getLevel() { return (ClientLevel) super.getLevel(); }
 	
 	public void apply(TileData tileData, TileTypeEnum updatedType) {
-		ClientTileStack newStack = makeStack(tileData.getTypes(), tileData.getDataMaps());
+		ClientTileStack newStack = makeStack(tileData.getTypes(), tileData.getDataMaps(getWorld()));
 		for(TileTypeEnum type: getTypeStack().getEnumTypes()) {
 			if(type == updatedType)
 				continue; // forget the animation start time, because this is a new animation.
@@ -35,6 +34,7 @@ public class ClientTile extends RenderTile {
 			// 	continue; // there's no data to transfer.
 			// TileDataCache dest = newStack.getCacheMap(type);
 			// if(dest != null) // can be null if the new stack is missing a type that the current stack has.
+			getLevel().animStartTimes.clear(this); // clear start time; this is probably good enough for now..?
 		}
 		setTileStack(newStack);
 	}

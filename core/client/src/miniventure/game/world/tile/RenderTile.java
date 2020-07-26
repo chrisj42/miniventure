@@ -5,11 +5,11 @@ import java.util.*;
 import miniventure.game.item.Item;
 import miniventure.game.item.Result;
 import miniventure.game.util.RelPos;
-import miniventure.game.world.tile.TileDataTag.TileDataEnumMap;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.player.Player;
 import miniventure.game.world.level.Level;
+import miniventure.game.world.level.RenderLevel;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
@@ -25,12 +25,12 @@ public class RenderTile extends Tile {
 	// spriteLock is unnecessary because all access occurs in the same thread: the libGDX render thread.
 	// private final Object spriteLock = new Object();
 	
-	public RenderTile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, @Nullable TileDataEnumMap[] data) {
+	public RenderTile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, @Nullable TileTypeDataMap[] data) {
 		super(level, x, y, types, data);
 	}
 	
 	@Override
-	ClientTileStack makeStack(@NotNull TileTypeEnum[] types, @Nullable TileDataEnumMap[] dataMaps) {
+	ClientTileStack makeStack(@NotNull TileTypeEnum[] types, @Nullable TileTypeDataMap[] dataMaps) {
 		return new ClientTileStack(types, dataMaps);
 	}
 	
@@ -39,6 +39,9 @@ public class RenderTile extends Tile {
 	
 	@Override
 	public ClientTileType getType() { return (ClientTileType) super.getType(); }
+	
+	@Override @NotNull
+	public RenderLevel getLevel() { return (RenderLevel) super.getLevel(); }
 	
 	@Override
 	public void render(SpriteBatch batch, float delta, Vector2 posOffset) {

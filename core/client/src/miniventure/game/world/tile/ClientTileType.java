@@ -59,6 +59,7 @@ public class ClientTileType extends TileType {
 		lightRadius = map.get(P.lightRadius);
 		swimAnimation = map.get(P.swimAnimation);
 		
+		renderer.registerDataTypes(this);
 		/*List<TransitionAnimation> transitions = map.get(P.transitions);
 		this.transitions = new HashMap<>(transitions.size());
 		for(TransitionAnimation trans: transitions)

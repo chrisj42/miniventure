@@ -1,6 +1,6 @@
 package miniventure.game.world.tile;
 
-import miniventure.game.world.tile.TileDataTag.TileDataEnumMap;
+import miniventure.game.world.management.WorldManager;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -10,16 +10,21 @@ public class TileTypeInfo {
 	
 	@NotNull
 	public final TileTypeEnum tileType;
-	@NotNull
-	public final TileDataTag.TileDataEnumMap initialData;
+	
+	private final TileTypeDataMap initialData;
 	
 	public TileTypeInfo(@NotNull TileType tileType) { this(tileType, null); }
-	public TileTypeInfo(@NotNull TileType tileType, @Nullable TileDataTag.TileDataEnumMap initialData) {
+	public TileTypeInfo(@NotNull TileType tileType, @Nullable TileTypeDataMap initialData) {
 		this(tileType.getTypeEnum(), initialData);
 	}
 	public TileTypeInfo(@NotNull TileTypeEnum tileType) { this(tileType, null); }
-	public TileTypeInfo(@NotNull TileTypeEnum tileType, @Nullable TileDataTag.TileDataEnumMap initialData) {
+	public TileTypeInfo(@NotNull TileTypeEnum tileType, @Nullable TileTypeDataMap initialData) {
 		this.tileType = tileType;
-		this.initialData = initialData == null ? new TileDataEnumMap() : initialData;
+		this.initialData = initialData;
+	}
+	
+	@NotNull
+	public TileTypeDataMap getInitialData(WorldManager world) {
+		return initialData == null ? world.getTileType(tileType).createDataMap() : initialData;
 	}
 }

@@ -21,7 +21,7 @@ public class ClientItem extends Item implements EquipmentItem {
 		super(item.name, item.texture.getTexture());
 		
 		//noinspection rawtypes
-		SerialEnumMap<ItemDataTag> map = new SerialEnumMap<>(item.data, ItemDataTag.class);
+		SerialEnumMap<ItemDataTag> map = new SerialEnumMap<>(item.data, null, ItemDataTag.class);
 		
 		this.highlightMode = item.highlightMode;
 		this.usability = map.getOrDefault(ItemDataTag.Usability, 0f);

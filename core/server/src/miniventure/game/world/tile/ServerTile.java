@@ -7,7 +7,6 @@ import miniventure.game.item.Result;
 import miniventure.game.item.ServerItem;
 import miniventure.game.network.GameServer;
 import miniventure.game.util.MyUtils;
-import miniventure.game.world.tile.TileDataTag.TileDataEnumMap;
 import miniventure.game.util.function.Action;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
@@ -31,15 +30,15 @@ public class ServerTile extends Tile {
 	public ServerTile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types) {
 		this(level, x, y, types, null);
 	}
-	public ServerTile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, TileDataEnumMap[] dataMaps) {
+	public ServerTile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, TileTypeDataMap[] dataMaps) {
 		this((ServerLevel) level, x, y, types, dataMaps);
 	}
-	public ServerTile(@NotNull ServerLevel level, int x, int y, @NotNull TileTypeEnum[] types, TileDataEnumMap[] dataMaps) {
+	public ServerTile(@NotNull ServerLevel level, int x, int y, @NotNull TileTypeEnum[] types, TileTypeDataMap[] dataMaps) {
 		super(level, x, y, types, dataMaps);
 	}
 	
 	@Override
-	ServerTileStack makeStack(@NotNull TileTypeEnum[] types, @Nullable TileDataEnumMap[] dataMaps) {
+	ServerTileStack makeStack(@NotNull TileTypeEnum[] types, @Nullable TileTypeDataMap[] dataMaps) {
 		return new ServerTileStack(getWorld(), types, dataMaps);
 	}
 	
@@ -68,7 +67,7 @@ public class ServerTile extends Tile {
 		
 		moveEntities(newType);
 		
-		getTypeStack().addLayer(newType, newTypeInfo.initialData);
+		getTypeStack().addLayer(newType, newTypeInfo.getInitialData(getWorld()));
 		
 		// check for an entrance animation
 		if(!newType.get(P.TRANS).tryStartAnimation(this, prevType))
@@ -99,7 +98,7 @@ public class ServerTile extends Tile {
 			}
 		}
 		
-		Action destroyAction = getCacheMap(type.getTypeEnum()).get(TileCacheTag.DestroyAction);
+		Action destroyAction = getDataMap(type.getTypeEnum()).get(TileDataTag.DestroyAction);
 		ServerTileType prevType = getTypeStack().removeLayer();
 		if(destroyAction != null)
 			destroyAction.act();

@@ -5,12 +5,11 @@ import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.TreeMap;
 
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
-import miniventure.game.world.tile.TileCacheTag.TileDataCache;
-import miniventure.game.world.tile.TileDataTag.TileDataEnumMap;
 import miniventure.game.util.function.Action;
 import miniventure.game.util.function.FetchFunction;
 import miniventure.game.world.management.WorldManager;
@@ -26,20 +25,24 @@ public class TileStack<T extends TileType> {
 	
 	// bottom tile is first, top tile is last.
 	final LinkedList<T> stack = new LinkedList<>();
+	final TreeMap<TileTypeEnum, TileTypeDataMap> data = new TreeMap<>();
 	
-	private final EnumMap<TileTypeEnum, TileDataEnumMap> dataMaps = new EnumMap<>(TileTypeEnum.class);
-	private final EnumMap<TileTypeEnum, TileDataCache> cacheMaps = new EnumMap<>(TileTypeEnum.class);
+	// private final EnumMap<TileTypeEnum, TileTypeDataMap> dataMaps = new EnumMap<>(TileTypeEnum.class);
+	// private final EnumMap<TileTypeEnum, TileTypeDataMap> cacheMaps = new EnumMap<>(TileTypeEnum.class);
 	private final Object dataLock = new Object();
+	// private Object[] data; // the data map
 	
 	/*TileStack(T[] types) {
 		for(T type: types)
 			addLayer(type);
 	}*/
 	@SuppressWarnings("unchecked")
-	TileStack(@NotNull WorldManager world, TileTypeEnum[] enumTypes, @Nullable TileDataEnumMap[] dataMaps) {
-		for(int i = 0; i < enumTypes.length; i++)
+	TileStack(@NotNull WorldManager world, TileTypeEnum[] enumTypes, @Nullable TileTypeDataMap[] dataMaps) {
+		for(int i = 0; i < enumTypes.length; i++) {
+			TileType type = enumTypes[i].getTypeInstance(world);
 			//noinspection ConstantConditions // IntelliJ doesn't realize that just because dataMaps can be null, doesn't mean the elements of a non-null instance can also be null.
-			addLayer((T) enumTypes[i].getTypeInstance(world), dataMaps == null ? new TileDataEnumMap() : dataMaps[i]);
+			addLayer((T) type, dataMaps == null ? type.createDataMap() : dataMaps[i]);
+		}
 	}
 	
 	private void sync(Action a) {
@@ -52,12 +55,12 @@ public class TileStack<T extends TileType> {
 	public int size() { return sync(stack::size); }
 	
 	// called by Tile.java
-	TileDataEnumMap getDataMap(TileTypeEnum tileType) {
-		return sync(() -> dataMaps.get(tileType));
+	TileTypeDataMap getDataMap(TileTypeEnum tileType) {
+		return sync(() -> data.get(tileType));
 	}
-	TileDataCache getCacheMap(TileTypeEnum tileType) {
-		return sync(() -> cacheMaps.get(tileType));
-	}
+	// TileTypeDataMap getCacheMap(TileTypeEnum tileType) {
+	// 	return sync(() -> cacheMaps.get(tileType));
+	// }
 	
 	public T getTopLayer() { return sync(stack::peekLast); }
 	
@@ -90,11 +93,10 @@ public class TileStack<T extends TileType> {
 	private int clamp(int idx) { return clamp(idx, true); }
 	private int clamp(int idx, boolean doClamp) { return doClamp ? Math.max(Math.min(idx, size()-1), 0) : idx; }
 	
-	void addLayer(@NotNull T newLayer, @NotNull TileDataTag.TileDataEnumMap dataMap) {
+	void addLayer(@NotNull T newLayer, @NotNull TileTypeDataMap dataMap) {
 		synchronized (dataLock) {
 			stack.addLast(newLayer);
-			dataMaps.put(newLayer.getTypeEnum(), dataMap);
-			cacheMaps.put(newLayer.getTypeEnum(), new TileDataCache());
+			data.put(newLayer.getTypeEnum(), dataMap);
 		}
 	}
 	
@@ -103,8 +105,8 @@ public class TileStack<T extends TileType> {
 		synchronized (dataLock) {
 			if(stack.size() == 1) return null;
 			T type = stack.removeLast();
-			dataMaps.remove(type.getTypeEnum());
-			cacheMaps.remove(type.getTypeEnum());
+			data.remove(type.getTypeEnum());
+			// cacheMaps.remove(type.getTypeEnum());
 			return type;
 		}
 	}
@@ -112,13 +114,16 @@ public class TileStack<T extends TileType> {
 	public static class TileData {
 		public final int[] typeOrdinals;
 		public final String[] data;
+		private final transient Version dataVersion; // null = serial, !null = from file
 		
 		private TileData() { this((int[])null, null); }
 		private TileData(int[] typeOrdinals, String[] data) {
 			this.typeOrdinals = typeOrdinals;
 			this.data = data;
+			dataVersion = null;
 		}
 		public TileData(Tile tile, boolean save) {
+			this.dataVersion = save ? Version.CURRENT : null; // this is kinda unnecessary because nothing ever uses this version variable for saving, but whatever, doing this maintains consistent state meaning.
 			TileStack<?> stack = tile.getTypeStack();
 			synchronized (stack.dataLock) {
 				TileTypeEnum[] tileTypes = stack.getEnumTypes();
@@ -130,11 +135,12 @@ public class TileStack<T extends TileType> {
 				
 				this.data = new String[tileTypes.length];
 				for(int i = 0; i < data.length; i++)
-					data[i] = stack.dataMaps.get(tileTypes[i]).serialize(save);
+					data[i] = stack.data.get(tileTypes[i]).serialize(save);
 			}
 		}
 		
 		public TileData(Version dataVersion, String tileData) {
+			this.dataVersion = dataVersion;
 			String[] all = MyUtils.parseLayeredString(tileData);
 			data = Arrays.copyOfRange(all, 1, all.length);
 			
@@ -150,8 +156,7 @@ public class TileStack<T extends TileType> {
 			return MyUtils.encodeStringArray(all);
 		}
 		
-		public TileTypeEnum[] getTypes() { return getTypes(typeOrdinals); }
-		public static TileTypeEnum[] getTypes(int[] typeOrdinals) {
+		public TileTypeEnum[] getTypes() {
 			TileTypeEnum[] types = new TileTypeEnum[typeOrdinals.length];
 			for(int i = 0; i < types.length; i++) {
 				types[i] = TileTypeEnum.value(typeOrdinals[i]);
@@ -159,23 +164,24 @@ public class TileStack<T extends TileType> {
 			return types;
 		}
 		
-		public TileDataEnumMap[] getDataMaps() { return getDataMaps(data); }
-		public static TileDataEnumMap[] getDataMaps(String[] data) {
-			TileDataEnumMap[] maps = new TileDataEnumMap[data.length];
+		public TileTypeDataMap[] getDataMaps(WorldManager world) {
+			TileTypeDataMap[] maps = new TileTypeDataMap[data.length];
+			TileType[] tileTypes = ArrayUtils.mapArray(int.class, typeOrdinals, TileType.class,
+					ord -> world.getTileType(TileTypeEnum.value(ord))
+			);
 			for(int i = 0; i < data.length; i++)
-				maps[i] = new TileDataEnumMap(data[i]);
+				maps[i] = tileTypes[i].parseDataMap(data[i], dataVersion);
 			return maps;
 		}
-		
 	}
 	
 	public String getDebugString() {
 		StringBuilder str = new StringBuilder(getClass().getSimpleName()).append('[');
 		TileTypeEnum[] types;
-		TileDataEnumMap[] maps;
+		TileTypeDataMap[] maps;
 		synchronized (dataLock) {
 			types = getEnumTypes();
-			maps = dataMaps.values().toArray(new TileDataEnumMap[0]);
+			maps = data.values().toArray(new TileTypeDataMap[0]);
 		}
 		for(int i = 0; i < types.length; i++) {
 			str.append(types[i]).append(':').append(maps[i]);
