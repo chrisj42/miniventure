@@ -33,7 +33,7 @@ public class GEnumMap<ET extends GenericEnum> {
 	}
 	
 	public <T, CET extends GenericEnum<T, ? extends ET>> T remove(CET tag) {
-		return (T) map.remove(tag);
+		return (T) map.remove((ET) tag);
 	}
 	
 	public void clear() { map.clear(); }
@@ -41,11 +41,11 @@ public class GEnumMap<ET extends GenericEnum> {
 	// public boolean contains(ET tag) { return map.containsKey(tag); }
 	
 	public <T, CET extends GenericEnum<T, ? extends ET>> T get(CET tag) {
-		return (T) map.get(tag);
+		return (T) map.get((ET) tag);
 	}
 	
 	public <T, CET extends GenericEnum<T, ? extends ET>> T getOrDefault(CET tag, T defaultValue) {
-		return (T) map.getOrDefault(tag, defaultValue);
+		return (T) map.getOrDefault((ET) tag, defaultValue);
 	}
 	
 	// fetches the value for the given key. If there is no key, the default value is added for it and returned.
