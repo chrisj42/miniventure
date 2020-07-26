@@ -280,11 +280,13 @@ public class ServerLevel extends Level {
 		if(!mob.maySpawn()) return null;
 		
 		for(int i = 0; i < 100; i++) {
-			final int x = MathUtils.random(getWidth());
-			final int y = MathUtils.random(getHeight());
+			final int x = MathUtils.random(getWidth()-1);
+			final int y = MathUtils.random(getHeight()-1);
 			Tile tile = getTile(x, y);
-			if(tile == null)
-				System.err.println("level contains null tile! "+x+','+y+"@level="+this);
+			if(tile == null) {
+				System.err.println("level contains null tile! " + x + ',' + y + "@level=" + this);
+				Thread.dumpStack();
+			}
 			else if(mob.maySpawn(tile.getType().getTypeEnum()))
 				return getTile(x, y);
 		}
