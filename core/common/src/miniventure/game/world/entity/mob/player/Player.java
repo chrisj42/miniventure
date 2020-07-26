@@ -164,7 +164,7 @@ public interface Player extends Mob {
 		boolean blocked = false;
 		while(path.size() > 0) {
 			Point loc = path.removeFirst();
-			Tile tile = level.getTile(loc.x, loc.y);
+			Tile tile = level.getClosestTile(loc.x, loc.y);
 			if(!tile.isPermeable()) {
 				Point altLoc = altPath.removeFirst();
 				Tile altTile = level.getTile(altLoc.x, altLoc.y);
