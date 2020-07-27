@@ -7,7 +7,7 @@ public class RectPool extends SyncPool<Rectangle> {
 	public static final RectPool POOL = new RectPool();
 	
 	private RectPool() {
-		super(12, 50);
+		super();
 	}
 	
 	@Override
