@@ -1,10 +1,6 @@
 package miniventure.game.world.tile;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.TreeMap;
 
 import miniventure.game.util.ArrayUtils;
@@ -13,6 +9,8 @@ import miniventure.game.util.Version;
 import miniventure.game.util.function.Action;
 import miniventure.game.util.function.FetchFunction;
 import miniventure.game.world.management.WorldManager;
+
+import com.badlogic.gdx.utils.Array;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -24,7 +22,7 @@ public class TileStack<T extends TileType> {
 	// For now, TileStacks cannot have multiple of the same TileType... has this been enforced?
 	
 	// bottom tile is first, top tile is last.
-	final LinkedList<T> stack = new LinkedList<>();
+	final Array<T> stack;
 	final TreeMap<TileTypeEnum, TileTypeDataMap> data = new TreeMap<>();
 	
 	// private final EnumMap<TileTypeEnum, TileTypeDataMap> dataMaps = new EnumMap<>(TileTypeEnum.class);
@@ -38,6 +36,9 @@ public class TileStack<T extends TileType> {
 	}*/
 	@SuppressWarnings("unchecked")
 	TileStack(@NotNull WorldManager world, TileTypeEnum[] enumTypes, @Nullable TileTypeDataMap[] dataMaps) {
+		Class<T> clazz = (Class<T>) world.getTileType(baseType).getClass();
+		stack = new Array<>(true, 4, clazz);
+		
 		for(int i = 0; i < enumTypes.length; i++) {
 			TileType type = enumTypes[i].getTypeInstance(world);
 			//noinspection ConstantConditions // IntelliJ doesn't realize that just because dataMaps can be null, doesn't mean the elements of a non-null instance can also be null.
@@ -52,7 +53,7 @@ public class TileStack<T extends TileType> {
 		synchronized (dataLock) { return func.get(); }
 	}
 	
-	public int size() { return sync(stack::size); }
+	public int size() { return sync(() -> stack.size); }
 	
 	// called by Tile.java
 	TileTypeDataMap getDataMap(TileTypeEnum tileType) {
@@ -62,16 +63,17 @@ public class TileStack<T extends TileType> {
 	// 	return sync(() -> cacheMaps.get(tileType));
 	// }
 	
-	public T getTopLayer() { return sync(stack::peekLast); }
+	public T getTopLayer() { return sync(() -> stack.get(stack.size-1)); }
 	
-	public List<T> getTypes() { return sync(() -> new ArrayList<>(stack)); }
+	public T[] getTypes() { return sync((FetchFunction<T[]>) stack::toArray); }
 	
 	public TileTypeEnum[] getEnumTypes() {
-		List<T> tileTypes = getTypes();
-		TileTypeEnum[] types = new TileTypeEnum[tileTypes.size()];
-		for(int i = 0; i < types.length; i++)
-			types[i] = tileTypes.get(i).getTypeEnum();
-		return types;
+		synchronized (dataLock) {
+			TileTypeEnum[] types = new TileTypeEnum[stack.size];
+			for(int i = 0; i < stack.size; i++)
+				types[i] = stack.get(i).getTypeEnum();
+			return types;
+		}
 	}
 	
 	/*public boolean hasType(@NotNull T type) {
@@ -95,7 +97,7 @@ public class TileStack<T extends TileType> {
 	
 	void addLayer(@NotNull T newLayer, @NotNull TileTypeDataMap dataMap) {
 		synchronized (dataLock) {
-			stack.addLast(newLayer);
+			stack.add(newLayer);
 			data.put(newLayer.getTypeEnum(), dataMap);
 		}
 	}
@@ -103,8 +105,8 @@ public class TileStack<T extends TileType> {
 	@Nullable
 	T removeLayer() {
 		synchronized (dataLock) {
-			if(stack.size() == 1) return null;
-			T type = stack.removeLast();
+			if(stack.size == 1) return null;
+			T type = stack.removeIndex(stack.size-1);
 			data.remove(type.getTypeEnum());
 			// cacheMaps.remove(type.getTypeEnum());
 			return type;

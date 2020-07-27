@@ -4,6 +4,7 @@ import java.util.*;
 
 import miniventure.game.item.Item;
 import miniventure.game.item.Result;
+import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.RelPos;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
@@ -91,7 +92,7 @@ public class RenderTile extends Tile {
 			int x = rp.getX();
 			int y = rp.getY();
 			RenderTile oTile = (RenderTile) getLevel().getTile(this.x + x, this.y + y);
-			List<ClientTileType> aroundTypes = oTile != null ? oTile.getTypeStack().getTypes() : Collections.emptyList();
+			List<ClientTileType> aroundTypes = oTile != null ? new ArrayList<>(Arrays.asList(oTile.getTypeStack().getTypes())) : Collections.emptyList();
 			if(aroundTypes.size() > 0 && aroundTypes.get(aroundTypes.size()-1).getTypeEnum() == TileTypeEnum.STONE && getType().getTypeEnum() != TileTypeEnum.STONE)
 				aroundTypes.add(ClientTileType.get(TileTypeEnum.AIR));
 			
@@ -108,10 +109,10 @@ public class RenderTile extends Tile {
 		ArrayList<TileAnimation> spriteStack = new ArrayList<>(16);
 		
 		// iterate through main stack from bottom to top, adding connection and overlap sprites each level.
-		List<ClientTileType> types = getTypeStack().getTypes();
-		for(int i = 1; i <= types.size(); i++) {
-			ClientTileType cur = i < types.size() ? types.get(i) : null;
-			ClientTileType prev = types.get(i-1);
+		ClientTileType[] types = getTypeStack().getTypes();
+		for(int i = 1; i <= types.length; i++) {
+			ClientTileType cur = i < types.length ? types[i] : null;
+			ClientTileType prev = types[i-1];
 			
 			// add connection sprite (or transition) for prev
 			spriteStack.addAll(prev.getRenderer().getCoreSprites(this, typesAtPositions));
