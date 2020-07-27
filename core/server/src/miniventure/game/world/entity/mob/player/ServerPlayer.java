@@ -14,6 +14,8 @@ import miniventure.game.util.SerialHashMap;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueAction;
 import miniventure.game.util.pool.RectPool;
+import miniventure.game.util.pool.Vector3Pool;
+import miniventure.game.util.pool.VectorPool;
 import miniventure.game.world.Boundable;
 import miniventure.game.world.Point;
 import miniventure.game.world.WorldObject;
@@ -173,12 +175,12 @@ public class ServerPlayer extends ServerMob implements Player {
 			Vector3 moveDist = move.getMoveDist();
 			if(!GameCore.debug) // TODO replace this static speed check with something that determines the player's speed with respect to their situation.
 				moveDist.clamp(0, Math.min(.5f, 2.5f*Player.MOVE_SPEED/Math.min(world.getFPS(), 60))); // the server will not allow the client to move fast (unless in debug mode)
-			move(moveDist);
+			move(moveDist, true);
 			// compare against given end pos
 			if(move.endPos.variesFrom(this))
 				connection.send(new PositionUpdate(this));
 			else
-				moveTo(move.endPos.getPos());
+				moveTo(move.endPos.getPos(), true);
 			// note that the server will always have the say when it comes to which level the player should be on.
 		});
 		
@@ -225,9 +227,11 @@ public class ServerPlayer extends ServerMob implements Player {
 				Integer left = recipe.tryCraft(inventory);
 				if (left != null) {
 					ServerLevel level = getLevel();
-					if (level != null)
-						for (int i = 0; i < left; i++)
-							level.dropItem(recipe.getResult().item, getPosition(), null);
+					if (level != null) {
+						for(int i = 0; i < left; i++) {
+							level.dropItem(recipe.getResult().item, getPosition(), null, true);
+						}
+					}
 				}
 				
 				connection.send(invManager.getUpdate(false));
@@ -351,9 +355,9 @@ public class ServerPlayer extends ServerMob implements Player {
 		
 		// get target pos, which is one tile in front of player.
 		Vector2 center = getCenter();
-		Vector2 targetPos = center.cpy().add(getDirection().getVector().scl(2)); // adds 2 in the direction of the player.
+		Vector2 targetPos = VectorPool.POOL.obtain(getDirection().getVector()).scl(2).add(center); // adds 2 in the direction of the player.
 		for(int i = 0; i < removed; i++)
-			level.dropItem(item, true, center, targetPos);
+			level.dropItem(item, true, center, targetPos, true);
 		
 		return true;
 	}
@@ -369,7 +373,7 @@ public class ServerPlayer extends ServerMob implements Player {
 		Rectangle interactionBounds = getInteractionRect(center);
 		
 		objects.addAll(level.getOverlappingEntities(interactionBounds, this));
-		Boundable.sortByDistance(objects, getCenter());
+		Boundable.sortByDistance(objects, getCenter(), true);
 		
 		RectPool.POOL.free(interactionBounds);
 		
@@ -430,9 +434,12 @@ public class ServerPlayer extends ServerMob implements Player {
 			// if(dir == Direction.DOWN)
 			// 	offset.y += tex.height / (float) Tile.SIZE;
 			
-			Vector2 pos = getCenter().add(dir.getVector().scl(offset));
+			Vector2 dirScl = VectorPool.POOL.obtain(dir.getVector()).scl(offset);
+			Vector2 pos = getCenter().add(dirScl);
 			
-			getServer().broadcastParticle(new ActionParticleData(actionType, dir), level, pos);
+			getServer().broadcastParticle(new ActionParticleData(actionType, dir), level, pos, true);
+			VectorPool.POOL.free(offset);
+			VectorPool.POOL.free(dirScl);
 		}
 		
 		if(result == Result.USED)
@@ -471,8 +478,11 @@ public class ServerPlayer extends ServerMob implements Player {
 			if(!inventory.addItem(index, newItem)) {
 				// inventory is full, try to drop it on the ground
 				ServerLevel level = getLevel();
-				if(level != null)
-					level.dropItem(newItem, getCenter(), getCenter().add(getDirection().getVector()));
+				if(level != null) {
+					Vector2 center = getCenter();
+					Vector2 target = VectorPool.POOL.obtain(center).add(getDirection().getVector());
+					level.dropItem(newItem, center, target, true);
+				}
 				else // this is a very bad situation, ideally it should never happen. I was considering adding a check for it, but think about it: you're using an item, but not on a level? The only way you're not on a level is if you're travelling between levels, and you're definitely not using items then, you're browsing the level select screen.
 					System.err.println("ERROR: could not drop usage-spawn item "+newItem+", ServerLevel for player "+this+" is null. (inventory is also full)");
 			}

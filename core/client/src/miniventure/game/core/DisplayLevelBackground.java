@@ -1,6 +1,7 @@
 package miniventure.game.core;
 
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.pool.VectorPool;
 import miniventure.game.world.level.RenderLevel;
 import miniventure.game.world.management.DisplayWorld;
 import miniventure.game.world.management.TimeOfDay;
@@ -26,10 +27,11 @@ public class DisplayLevelBackground {
 		
 		backgroundLevel = new DisplayWorld().getLevel();
 		
-		Vector2 size = new Vector2(levelView.getViewWidth(), levelView.getViewHeight());//.scl(0.5f);
-		cameraPos = new Vector2(MathUtils.random(size.x, backgroundLevel.getWidth()-size.x), MathUtils.random(size.y, backgroundLevel.getHeight()-size.y));
+		Vector2 size = VectorPool.POOL.obtain(levelView.getViewWidth(), levelView.getViewHeight());//.scl(0.5f);
+		cameraPos = VectorPool.POOL.obtain(MathUtils.random(size.x, backgroundLevel.getWidth()-size.x), MathUtils.random(size.y, backgroundLevel.getHeight()-size.y));
+		VectorPool.POOL.free(size);
 		
-		cameraDir = new Vector2().setLength(PAN_SPEED).setToRandomDirection().setLength(PAN_SPEED);
+		cameraDir = VectorPool.POOL.obtain().setLength(PAN_SPEED).setToRandomDirection().setLength(PAN_SPEED);
 	}
 	
 	void render(float delta) {
@@ -55,5 +57,7 @@ public class DisplayLevelBackground {
 	
 	void dispose() {
 		levelView.dispose();
+		VectorPool.POOL.free(cameraDir);
+		VectorPool.POOL.free(cameraPos);
 	}
 }

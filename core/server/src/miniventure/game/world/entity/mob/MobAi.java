@@ -6,6 +6,7 @@ import miniventure.game.item.ServerItem;
 import miniventure.game.util.SerialHashMap;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueAction;
+import miniventure.game.util.pool.VectorPool;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
@@ -13,6 +14,8 @@ import miniventure.game.world.entity.EntityDataSet;
 import miniventure.game.world.level.ServerLevel;
 import miniventure.game.world.management.ServerWorld;
 import miniventure.game.world.tile.TileTypeEnum;
+
+import com.badlogic.gdx.math.Vector2;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -33,11 +36,11 @@ public class MobAi extends ServerMob {
 			and... that's about it, really...
 	 */
 	
-	@NotNull private AiType aiType;
+	@NotNull private final AiType aiType;
 	
-	@NotNull private ItemDrop[] itemDrops;
+	@NotNull private final ItemDrop[] itemDrops;
 	
-	@NotNull private MovementPattern movePattern;
+	@NotNull private final MovementPattern movePattern;
 	@Nullable private MovementPattern tempMovePattern = null;
 	private float tempTimeLeft = 0;
 	
@@ -79,6 +82,7 @@ public class MobAi extends ServerMob {
 	
 	//protected void setMovePattern(@NotNull MovementPattern pattern) { movePattern = pattern; }
 	protected void setMovePattern(@NotNull MovementPattern pattern, float duration) {
+		if(tempMovePattern != null) tempMovePattern.free();
 		tempMovePattern = pattern;
 		tempTimeLeft = duration;
 	}
@@ -90,10 +94,12 @@ public class MobAi extends ServerMob {
 		
 		if(tempTimeLeft > 0) tempTimeLeft -= delta;
 		
-		if(tempTimeLeft <= 0 && tempMovePattern != null)
+		if(tempTimeLeft <= 0 && tempMovePattern != null) {
+			tempMovePattern.free();
 			tempMovePattern = null;
+		}
 		
-		move(curMovePattern().move(delta, this));
+		move(curMovePattern().move(delta, this, VectorPool.POOL.obtain()), true);
 	}
 	
 	@Override
@@ -116,6 +122,13 @@ public class MobAi extends ServerMob {
 				level.dropItems(drop, this, null);
 		
 		super.die();
+	}
+	
+	@Override
+	public void remove() {
+		super.remove();
+		movePattern.free();
+		if(tempMovePattern != null) tempMovePattern.free();
 	}
 	
 	@Override

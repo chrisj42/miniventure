@@ -92,7 +92,7 @@ public abstract class ServerEntity extends Entity {
 		
 		// get the entity back on the map if they somehow end up on a null tile
 		if(tile == null)
-			moveTo(level.getClosestTile(bounds).getCenter());
+			moveTo(level.getClosestTile(bounds).getCenter(), true);
 		
 		RectPool.POOL.free(bounds);
 	}

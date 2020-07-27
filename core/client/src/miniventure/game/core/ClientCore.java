@@ -196,6 +196,8 @@ public class ClientCore extends ApplicationAdapter {
 		if(menuScreen != null)
 			menuScreen.dispose();
 		
+		displayLevelBackground.dispose();
+		
 		GameCore.dispose();
 		VisUI.dispose();
 	}

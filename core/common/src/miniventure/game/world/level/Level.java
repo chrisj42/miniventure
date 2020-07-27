@@ -6,6 +6,8 @@ import java.util.Set;
 
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.pool.RectPool;
+import miniventure.game.util.pool.VectorPool;
+import miniventure.game.world.Boundable;
 import miniventure.game.world.tile.TileTypeDataMap;
 import miniventure.game.world.Point;
 import miniventure.game.world.Taggable;
@@ -192,11 +194,16 @@ public abstract class Level implements Taggable<Level> {
 	
 	public Tile getTile(Rectangle rect) { return getTile(rect, false); }
 	public Tile getTile(Rectangle rect, boolean free) {
-		Tile tile = getTile(rect.getCenter(new Vector2()));
+		Tile tile = getTile(rect.getCenter(VectorPool.POOL.obtain()), true);
 		if(free) RectPool.POOL.free(rect);
 		return tile;
 	}
-	public Tile getTile(Vector2 pos) { return getTile(pos.x, pos.y); }
+	public Tile getTile(Vector2 pos) { return getTile(pos, false); }
+	public Tile getTile(Vector2 pos, boolean free) {
+		Tile tile = getTile(pos.x, pos.y);
+		if(free) VectorPool.POOL.free(pos);
+		return tile;
+	}
 	public Tile getTile(float x, float y) { return getTile((int)x, (int)y); }
 	public Tile getTile(Point pos) { return getTile(pos.x, pos.y); }
 	public Tile getTile(int x, int y) {
@@ -223,11 +230,16 @@ public abstract class Level implements Taggable<Level> {
 	
 	public Tile getClosestTile(Rectangle rect) { return getClosestTile(rect, false); }
 	public Tile getClosestTile(Rectangle rect, boolean free) {
-		Tile tile = getClosestTile(rect.getCenter(new Vector2()));
+		Tile tile = getClosestTile(rect.getCenter(VectorPool.POOL.obtain()), true);
 		if(free) RectPool.POOL.free(rect);
 		return tile;
 	}
-	public Tile getClosestTile(Vector2 center) { return getClosestTile(center.x, center.y); }
+	public Tile getClosestTile(Vector2 center) { return getClosestTile(center, false); }
+	public Tile getClosestTile(Vector2 center, boolean free) {
+		Tile tile = getClosestTile(center.x, center.y);
+		if(free) VectorPool.POOL.free(center);
+		return tile;
+	}
 	public Tile getClosestTile(float x, float y) {
 		x = MyUtils.clamp(x, 0, getWidth()-1);
 		y = MyUtils.clamp(y, 0, getHeight()-1);
@@ -353,7 +365,8 @@ public abstract class Level implements Taggable<Level> {
 	}
 	
 	@Nullable
-	public Player getClosestPlayer(final Vector2 pos) {
+	public Player getClosestPlayer(final Vector2 pos) { return getClosestPlayer(pos, false); }
+	public Player getClosestPlayer(final Vector2 pos, boolean free) {
 		Array<Player> players = new Array<>();
 		for(Entity e: getEntities())
 			if(e instanceof Player)
@@ -361,7 +374,7 @@ public abstract class Level implements Taggable<Level> {
 		
 		if(players.size == 0) return null;
 		
-		players.sort((p1, p2) -> Float.compare(p1.getCenter().dst(pos), p2.getCenter().dst(pos)));
+		Boundable.sortByDistance(players, pos, free);
 		
 		return players.get(0);
 	}

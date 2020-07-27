@@ -191,6 +191,12 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 	
 	public void die() { remove(); }
 	
+	@Override
+	public void remove() {
+		super.remove();
+		knockbackController.free();
+	}
+	
 	public boolean maySpawn() { return true; }
 	public boolean maySpawn(TileTypeEnum type) {
 		return type == TileTypeEnum.GRASS || type == TileTypeEnum.DIRT || type == TileTypeEnum.SAND || type == TileTypeEnum.SNOW;

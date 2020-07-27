@@ -1,5 +1,6 @@
 package miniventure.game.world.entity.mob;
 
+import miniventure.game.util.pool.VectorPool;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.level.Level;
 
@@ -18,15 +19,15 @@ public class PursuePattern implements MovementPattern {
 			Level level = self.getLevel();
 			if(level == null) return null;
 			
-			return level.getClosestPlayer(self.getCenter());
+			return level.getClosestPlayer(self.getCenter(), true);
 		};
 	}
 	
-	@NotNull private FollowBehavior followBehavior;
-	private float maxDist;
-	private float followSpeed;
+	@NotNull private final FollowBehavior followBehavior;
+	private final float maxDist;
+	private final float followSpeed;
 	
-	private WanderingPattern idlePattern;
+	private final WanderingPattern idlePattern;
 	private boolean wasFollowing = false;
 	
 	public PursuePattern() { this(FollowBehavior.NEAREST_PLAYER); }
@@ -41,23 +42,32 @@ public class PursuePattern implements MovementPattern {
 	}
 	
 	@Override
-	public Vector2 move(float delta, MobAi mob) {
+	public Vector2 move(float delta, MobAi mob, Vector2 movement) {
 		WorldObject follow = followBehavior.getObjectToFollow(mob);
-		if(follow == null) return new Vector2();
+		if(follow == null) return VectorPool.POOL.obtain(0, 0);
 		
-		Vector2 dist = follow.getCenter();
-		dist.sub(mob.getCenter());
+		Vector2 followCenter = follow.getCenter();
+		Vector2 mobCenter = mob.getCenter();
+		followCenter.sub(mobCenter);
+		movement.set(followCenter);
+		VectorPool.POOL.free(followCenter);
+		VectorPool.POOL.free(mobCenter);
 		
-		if(maxDist <= 0 || dist.len() < maxDist) { // move toward the entity
-			dist.setLength(followSpeed * delta);
+		if(maxDist <= 0 || followCenter.len() < maxDist) { // move toward the entity
+			movement.setLength(followSpeed * delta);
 			wasFollowing = true;
 		} else {
 			if(wasFollowing) idlePattern.reset();
 			wasFollowing = false;
-			dist.set(idlePattern.move(delta, mob));
+			idlePattern.move(delta, mob, movement);
 		}
 		
-		return dist;
+		return movement;
+	}
+	
+	@Override
+	public void free() {
+		idlePattern.free();
 	}
 	
 	@Override
@@ -75,8 +85,8 @@ public class PursuePattern implements MovementPattern {
 		}
 		
 		@Override
-		public Vector2 move(float delta, MobAi mob) {
-			Vector2 vector = super.move(delta, mob);
+		public Vector2 move(float delta, MobAi mob, Vector2 movement) {
+			Vector2 vector = super.move(delta, mob, movement);
 			vector.rotate(180); // this will technically affect vectors from the idle wandering pattern, but it doesn't really matter, since the direction is random anyway.
 			return vector;
 		}

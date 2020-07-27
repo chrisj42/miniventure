@@ -8,6 +8,7 @@ import miniventure.game.core.FontStyle;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.blinker.Blinker;
 import miniventure.game.util.function.MapFunction;
+import miniventure.game.util.pool.VectorPool;
 import miniventure.game.world.entity.EntityRenderer.AnimationRenderer;
 import miniventure.game.world.entity.EntityRenderer.BlinkRenderer;
 import miniventure.game.world.entity.EntityRenderer.DirectionalAnimationRenderer;
@@ -114,6 +115,6 @@ public class ClientEntityRenderer {
 		}
 		
 		@Override
-		public Vector2 getSize() { return new Vector2(); }
+		public Vector2 getSize() { return VectorPool.POOL.obtain(0, 0); }
 	}
 }

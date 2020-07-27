@@ -31,4 +31,10 @@ public class TextParticle extends ClientParticle {
 		bounceBehavior.update(this, delta);
 		lifetime.update(delta);
 	}
+	
+	@Override
+	public void remove() {
+		super.remove();
+		bounceBehavior.free();
+	}
 }

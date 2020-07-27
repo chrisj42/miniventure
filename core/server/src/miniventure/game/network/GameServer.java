@@ -18,6 +18,7 @@ import miniventure.game.network.PacketPipe.PacketPipeWriter;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
+import miniventure.game.util.pool.VectorPool;
 import miniventure.game.world.Point;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
@@ -517,10 +518,11 @@ public abstract class GameServer implements GameProtocol {
 	}
 	
 	public void broadcastParticle(ParticleData data, WorldObject posMarker) {
-		broadcastParticle(data, posMarker.getLevel(), posMarker.getCenter());
+		broadcastParticle(data, posMarker.getLevel(), posMarker.getCenter(), true);
 	}
-	public void broadcastParticle(ParticleData data, Level level, Vector2 pos) {
-		broadcastGlobal(new ParticleAddition(data, new PositionUpdate(level, pos)));
+	public void broadcastParticle(ParticleData data, Level level, Vector2 pos) { broadcastParticle(data, level, pos, false); }
+	public void broadcastParticle(ParticleData data, Level level, Vector2 pos, boolean free) {
+		broadcastGlobal(new ParticleAddition(data, new PositionUpdate(level, pos, free)));
 	}
 	
 	private void sendEntityValidation(@NotNull PlayerLink pData) {
@@ -554,23 +556,28 @@ public abstract class GameServer implements GameProtocol {
 			fullSoundName = "entity/"+soundName;
 		
 		if(source instanceof ServerPlayer && !broadcast)
-			playGenericSound(fullSoundName, source.getCenter(), (ServerPlayer)source);
+			playGenericSound(fullSoundName, source.getCenter(), (ServerPlayer)source, true);
 		else
-			playGenericSound(fullSoundName, source.getCenter());
+			playGenericSound(fullSoundName, source.getCenter(), true);
 	}
 	public void playTileSound(String soundName, Tile tile, TileTypeEnum type) {
 		//playGenericSound("tile/"+type+"/"+soundName, tile.getCenter());
-		playGenericSound("tile/"+soundName, tile.getCenter());
+		playGenericSound("tile/"+soundName, tile.getCenter(), true);
 	}
-	public void playGenericSound(String soundName, Vector2 source) {
+	public void playGenericSound(String soundName, Vector2 source) { playGenericSound(soundName, source, false); }
+	public void playGenericSound(String soundName, Vector2 source, boolean free) {
 		for(ServerPlayer player: playerToConnectionMap.keySet()) {
 			playGenericSound(soundName, source, player);
 		}
+		if(free) VectorPool.POOL.free(source);
 	}
-	public void playGenericSound(String soundName, Vector2 source, @NotNull ServerPlayer forPlayer) {
-		if(forPlayer.getPosition().dst(source) <= GameCore.SOUND_RADIUS) {
+	public void playGenericSound(String soundName, Vector2 source, @NotNull ServerPlayer forPlayer) { playGenericSound(soundName, source, forPlayer, false); }
+	public void playGenericSound(String soundName, Vector2 source, @NotNull ServerPlayer forPlayer, boolean free) {
+		Vector2 pos = forPlayer.getPosition();
+		if(pos.dst(source) <= GameCore.SOUND_RADIUS)
 			sendToPlayer(forPlayer, new SoundRequest(soundName));
-		}
+		VectorPool.POOL.free(pos);
+		if(free) VectorPool.POOL.free(source);
 	}
 	
 	public void printStatus(MessageBuilder out) {

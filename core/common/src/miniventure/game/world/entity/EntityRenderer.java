@@ -9,6 +9,7 @@ import miniventure.game.texture.ItemTextureSource;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.blinker.Blinker;
+import miniventure.game.util.pool.VectorPool;
 import miniventure.game.world.tile.Tile;
 
 import com.badlogic.gdx.graphics.Color;
@@ -72,11 +73,12 @@ public abstract class EntityRenderer {
 		public void render(float x, float y, Batch batch, float drawableHeight) {
 			Vector2 size = getSize();
 			batch.draw(sprite.texture.split(sprite.width, (int) (sprite.height * drawableHeight))[0][0], x, y, size.x, size.y);
+			VectorPool.POOL.free(size);
 		}
 		
 		@Override
 		public Vector2 getSize() {
-			return new Vector2(sprite.width, sprite.height);
+			return VectorPool.POOL.obtain(sprite.width, sprite.height);
 		}
 	}
 	
@@ -114,7 +116,7 @@ public abstract class EntityRenderer {
 		@Override
 		public Vector2 getSize() {
 			int side = Item.ICON_SIZE * Tile.SCALE;
-			return new Vector2(side, side);
+			return VectorPool.POOL.obtain(side, side);
 		}
 		
 		@Override
@@ -176,7 +178,7 @@ public abstract class EntityRenderer {
 		@Override
 		public Vector2 getSize() {
 			TextureHolder frame = getSprite();
-			return new Vector2(frame.width, frame.height);
+			return VectorPool.POOL.obtain(frame.width, frame.height);
 		}
 	}
 	
@@ -320,7 +322,7 @@ public abstract class EntityRenderer {
 		
 		@Override
 		public Vector2 getSize() {
-			return new Vector2();
+			return VectorPool.POOL.obtain(0, 0);
 		}
 		
 		@Override

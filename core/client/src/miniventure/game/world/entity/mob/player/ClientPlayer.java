@@ -16,6 +16,7 @@ import miniventure.game.network.GameProtocol.*;
 import miniventure.game.network.PacketPipe.PacketPipeWriter;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.pool.VectorPool;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.ClientEntity;
 import miniventure.game.world.entity.Direction;
@@ -74,13 +75,13 @@ public class ClientPlayer extends ClientEntity implements Player {
 	
 	@NotNull private final EnumMap<Stat, Integer> stats = new EnumMap<>(Stat.class);
 	
-	private ClientPlayerInventory inventory;
+	private final ClientPlayerInventory inventory;
 	
 	private float moveSpeed = Player.MOVE_SPEED;
 	@NotNull private Direction dir;
 	
-	private MobAnimationController<ClientPlayer> animator;
-	private KnockbackController knockbackController;
+	private final MobAnimationController<ClientPlayer> animator;
+	private final KnockbackController knockbackController;
 	
 	public ClientPlayer(SpawnData data, InventoryOverlay invScreen) {
 		super(data.playerData);
@@ -159,10 +160,16 @@ public class ClientPlayer extends ClientEntity implements Player {
 		animator.progressAnimation(delta);
 	}
 	
+	@Override
+	public void remove() {
+		super.remove();
+		knockbackController.free();
+	}
+	
 	//private float lastWalkTime = 0;
 	public void handleInput(Vector2 mouseInput, @Nullable Vector2 cursorPos) {
 		
-		Vector2 inputDir = new Vector2();
+		Vector2 inputDir = VectorPool.POOL.obtain(0, 0);
 		if(ClientCore.input.holdingControl(Control.MOVE_LEFT)) inputDir.x--;
 		if(ClientCore.input.holdingControl(Control.MOVE_RIGHT)) inputDir.x++;
 		if(ClientCore.input.holdingControl(Control.MOVE_UP)) inputDir.y++;
@@ -179,7 +186,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 				dir = newDir;
 		}
 		
-		Vector2 moveDist = inputDir.cpy().scl(moveSpeed * MyUtils.getDeltaTime());
+		Vector2 moveDist = inputDir.scl(moveSpeed * MyUtils.getDeltaTime());
 		// FIXME speed needs to be set in server 
 		ClientTile closest = (ClientTile) getClosestTile();
 		if(closest != null)
@@ -187,7 +194,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 		
 		//float elapTime = GameCore.getElapsedProgramTime();
 		if(!moveDist.isZero()) {
-			move(moveDist, getLevel() != null);
+			move(getLevel() != null, moveDist);
 			
 			animator.requestState(AnimationState.WALK);
 			
@@ -233,14 +240,16 @@ public class ClientPlayer extends ClientEntity implements Player {
 		
 		if(GameCore.debug && Modifier.SHIFT.isPressed() && ClientCore.input.pressingKey(Keys.H))
 			changeStat(Stat.Health, -1);
+		
+		VectorPool.POOL.free(moveDist); // same variable as inputDir
 	}
 	
 	@Override
-	public boolean move(float xd, float yd, float zd, boolean validate) {
+	public boolean move(boolean validate, float xd, float yd, float zd) {
 		
 		PositionUpdate prevPos = new PositionUpdate(this);
 		
-		boolean moved = super.move(xd, yd, zd, validate);
+		boolean moved = super.move(validate, xd, yd, zd);
 		
 		ClientCore.getClient().send(new MovementRequest(prevPos, xd, yd, zd, new PositionUpdate(this)));
 		
@@ -279,9 +288,10 @@ public class ClientPlayer extends ClientEntity implements Player {
 		Vector2 size = renderBar(stat, x, y, batch);
 		hold.y += size.y+padding;
 		hold.x = Math.max(hold.x, size.x);
+		VectorPool.POOL.free(size);
 	}
 	public void drawGui(Rectangle canvas, SpriteBatch batch) {
-		Vector2 hold = new Vector2(0, canvas.y + padding);
+		Vector2 hold = VectorPool.POOL.obtain(0, canvas.y + padding);
 		
 		float x = canvas.x + canvas.width;
 		drawStat(Stat.Health, x, hold.y, batch, hold);
@@ -289,6 +299,8 @@ public class ClientPlayer extends ClientEntity implements Player {
 		// 	drawStat(Stat.Armor, canvas.x, hold.y, batch, hold);
 		drawStat(Stat.Stamina, x, hold.y, batch, hold);
 		drawStat(Stat.Hunger, x, hold.y, batch, hold);
+		
+		VectorPool.POOL.free(hold);
 	}
 	
 	private Vector2 renderBar(Stat stat, float x, float y, SpriteBatch batch) { return renderBar(stat, x, y, batch, 0); }
@@ -320,7 +332,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 				batch.draw(emptyIcon.getTexture(), emptyX, y, emptyIcon.getRegionX() + (rightSide?0:fullWidth), emptyIcon.getRegionY(), emptyWidth, statHeight);
 		}
 		
-		return new Vector2(iconWidth * stat.iconCount, statHeight);
+		return VectorPool.POOL.obtain(iconWidth * stat.iconCount, statHeight);
 	}
 	
 	

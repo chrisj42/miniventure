@@ -1,6 +1,7 @@
 package miniventure.game.util;
 
 import miniventure.game.util.pool.RectPool;
+import miniventure.game.util.pool.VectorPool;
 
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -115,7 +116,7 @@ public enum RelPos {
 	public Vector2 ofRectangle(Rectangle rect, boolean free) {
 		float xDist = rect.width/2;
 		float yDist = rect.height/2;
-		Vector2 center = rect.getCenter(new Vector2());
+		Vector2 center = rect.getCenter(VectorPool.POOL.obtain());
 		center.x += xDist * getX();
 		center.y += yDist * getY();
 		if(free) RectPool.POOL.free(rect);

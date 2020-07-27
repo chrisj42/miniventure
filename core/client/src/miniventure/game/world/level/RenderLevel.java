@@ -1,7 +1,10 @@
 package miniventure.game.world.level;
 
+import java.util.Comparator;
 import java.util.Set;
 
+import miniventure.game.util.pool.Vector3Pool;
+import miniventure.game.util.pool.VectorPool;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.particle.ActionParticle;
@@ -50,6 +53,15 @@ public abstract class RenderLevel extends Level {
 	
 	public abstract void render(Rectangle renderSpace, SpriteBatch batch, float delta, Vector2 posOffset);
 	
+	private static final Comparator<WorldObject> objectSorter = (e1, e2) -> {
+		Vector2 e1C = e1.getCenter();
+		Vector2 e2C = e2.getCenter();
+		final int result = Float.compare(e2C.y, e1C.y);
+		VectorPool.POOL.free(e1C);
+		VectorPool.POOL.free(e2C);
+		return result;
+	};
+	
 	public static void render(Array<Tile> tiles, Array<Entity> entities, SpriteBatch batch, float delta, Vector2 posOffset) {
 		// pass the offset vector to all objects being rendered.
 		
@@ -74,9 +86,9 @@ public abstract class RenderLevel extends Level {
 		// then particles
 		
 		// entities second
-		under.sort((e1, e2) -> Float.compare(e2.getCenter().y, e1.getCenter().y));
-		objects.sort((e1, e2) -> Float.compare(e2.getCenter().y, e1.getCenter().y));
-		over.sort((e1, e2) -> Float.compare(e2.getCenter().y, e1.getCenter().y));
+		under.sort(objectSorter);
+		objects.sort(objectSorter);
+		over.sort(objectSorter);
 		//objects.addAll(entities);
 		
 		for(WorldObject obj: under)
@@ -87,13 +99,15 @@ public abstract class RenderLevel extends Level {
 			obj.render(batch, delta, posOffset);
 	}
 	
-	public static Array<Vector3> renderLighting(Array<WorldObject> objects) {
-		Array<Vector3> lighting = new Array<>();
+	public static Array<Vector3> renderLighting(Array<WorldObject> objects, Array<Vector3> lighting) {
 		
 		for(WorldObject obj: objects) {
 			float lightR = obj.getLightRadius();
-			if(lightR > 0)
-				lighting.add(new Vector3(obj.getCenter(), lightR));
+			if(lightR > 0) {
+				Vector2 center = obj.getCenter();
+				lighting.add(Vector3Pool.POOL.obtain(center, lightR));
+				VectorPool.POOL.free(center);
+			}
 		}
 		
 		return lighting;

@@ -2,6 +2,7 @@ package miniventure.game.world.entity.particle;
 
 import miniventure.game.network.GameProtocol.ParticleAddition;
 import miniventure.game.network.GameProtocol.PositionUpdate;
+import miniventure.game.util.pool.VectorPool;
 import miniventure.game.world.entity.ClientEntity;
 
 import com.badlogic.gdx.math.Vector2;
@@ -32,6 +33,7 @@ public abstract class ClientParticle extends ClientEntity {
 		PositionUpdate newPos = addition.positionUpdate;
 		Vector2 size = particle.getSize();
 		particle.moveTo(newPos.x - size.x/2, newPos.y - size.y/2, newPos.z); // center entity
+		VectorPool.POOL.free(size);
 		
 		return particle;
 	}

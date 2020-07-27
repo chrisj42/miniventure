@@ -5,6 +5,8 @@ import java.util.List;
 import miniventure.game.texture.TextureHolder;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.pool.RectPool;
+import miniventure.game.util.pool.Vector3Pool;
+import miniventure.game.util.pool.VectorPool;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
 import miniventure.game.world.entity.mob.player.Player;
 import miniventure.game.world.entity.mob.player.Player.CursorHighlight;
@@ -26,6 +28,8 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
+import org.lwjgl.util.vector.Vector4f;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -38,8 +42,8 @@ public class LevelViewport {
 	private static final int MIN_ZOOM = -6, MAX_ZOOM = 3;
 	
 	// these two values determine how much of the level to render in either dimension, and are also used to fit the viewport to the game window. Later, they should be customizable by the user, or the mapmaker; for now, they'll remain at 0, meaning it doesn't limit the number of tiles rendered, and the default viewport size will be used for fitting.
-	private float maxWorldViewWidth = 0;
-	private float maxWorldViewHeight = 0;
+	private final float maxWorldViewWidth = 0;
+	private final float maxWorldViewHeight = 0;
 	
 	private final SpriteBatch batch = ClientCore.getBatch();
 	
@@ -48,8 +52,9 @@ public class LevelViewport {
 	private int zoom = 0;
 	private FrameBuffer lightingBuffer;
 	
-	private Vector2 cursorPos = new Vector2();
-	private boolean cursorValid = true;
+	private final Array<Vector3> lights = new Array<>();
+	private final Vector2 cursorPos = VectorPool.POOL.obtain();
+	private boolean cursorValid = false;
 	
 	@Nullable
 	Vector2 getCursorPos() { return cursorValid ? cursorPos : null; }
@@ -64,6 +69,7 @@ public class LevelViewport {
 	void dispose() {
 		if(lightingBuffer != null)
 			lightingBuffer.dispose();
+		VectorPool.POOL.free(cursorPos); // be freeeeee
 	}
 	
 	public void handleInput() {
@@ -86,27 +92,30 @@ public class LevelViewport {
 			if(texture == null)
 				MyUtils.drawRect(pos.x, pos.y, Tile.SIZE, Tile.SIZE, Tile.SIZE / 16, tint == null ? Color.BLACK : tint, batch);
 			else {
-				Vector2 sizeDiff = new Vector2(Tile.SIZE, Tile.SIZE).sub(texture.width, texture.height);
+				Vector2 sizeDiff = VectorPool.POOL.obtain(Tile.SIZE, Tile.SIZE).sub(texture.width, texture.height);
 				pos.add(sizeDiff.scl(0.5f));
+				VectorPool.POOL.free(sizeDiff);
 				Color prev = batch.getColor();
 				if(tint == null) batch.setColor(1, 1, 1, 0.5f);
 				else batch.setColor(tint);
 				batch.draw(texture.texture, pos.x, pos.y);
 				batch.setColor(prev);
 			}
+			VectorPool.POOL.free(pos);
 		}
 	}
 	
 	public void render(@NotNull Vector2 cameraCenter, Color ambientLighting, @NotNull RenderLevel level) {
 		// get the size of the area of the game on screen by projecting the application window dimensions into world space.
-		Vector3 screenSize = new Vector3(Gdx.graphics.getWidth(), 0, 0); // because unproject has origin at the top, so the upper right corner is at (width, 0).
+		Vector3 screenSize = Vector3Pool.POOL.obtain(Gdx.graphics.getWidth(), 0, 0); // because unproject has origin at the top, so the upper right corner is at (width, 0).
 		camera.unproject(screenSize); // screen to render coords
 		screenSize.scl(1f/Tile.SIZE); // now in world coords
 		
 		// subtract half the view port height and width to get the offset.
-		Vector2 offset = new Vector2(cameraCenter.x - screenSize.x/2, cameraCenter.y - screenSize.y/2); // world coords
+		Vector2 offset = VectorPool.POOL.obtain(cameraCenter.x - screenSize.x/2, cameraCenter.y - screenSize.y/2); // world coords
 		
 		Rectangle renderSpace = RectPool.POOL.obtain(offset.x, offset.y, screenSize.x, screenSize.y); // world coords
+		Vector3Pool.POOL.free(screenSize);
 		
 		// trim the rendering space to not exceed the max in either direction.
 		if(maxWorldViewWidth > 0)
@@ -130,7 +139,9 @@ public class LevelViewport {
 		
 		batch.setBlendFunction(GL20.GL_ZERO, GL20.GL_ONE_MINUS_SRC_ALPHA);
 		
-		Array<Vector3> lights = RenderLevel.renderLighting(level.getOverlappingObjects(lightRenderSpace));
+		lights.forEach(Vector3Pool.POOL::free);
+		lights.clear();
+		RenderLevel.renderLighting(level.getOverlappingObjects(lightRenderSpace), lights);
 		final TextureRegion lightTexture = GameCore.icons.get("light").texture;
 		
 		for(Vector3 light: lights) {
@@ -157,11 +168,12 @@ public class LevelViewport {
 		
 		if(player != null && ClientCore.getScreen() == null) {
 			// cursor management
-			Vector3 cursor = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+			Vector3 cursor = Vector3Pool.POOL.obtain(Gdx.input.getX(), Gdx.input.getY(), 0);
 			camera.unproject(cursor); // screen to render coords
 			cursor.scl(1f / Tile.SIZE); // render coords to renderable world
 			cursor.add(offset.x, offset.y, 0); // tile offset; renderable world to actual world coords
 			cursorPos.set(cursor.x, cursor.y);
+			Vector3Pool.POOL.free(cursor);
 			// limit range
 			CursorHighlight highlightMode = player.getCurrentHighlightMode();
 			List<Tile> path = Player.computeCursorPos(cameraCenter, cursorPos, level, highlightMode);
@@ -234,6 +246,7 @@ public class LevelViewport {
 		
 		batch.end();
 		
+		VectorPool.POOL.free(offset);
 		RectPool.POOL.free(renderSpace);
 		RectPool.POOL.free(lightRenderSpace);
 	}

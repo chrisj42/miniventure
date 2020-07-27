@@ -1,5 +1,7 @@
 package miniventure.game.world.entity.mob;
 
+import miniventure.game.util.pool.VectorPool;
+
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 
@@ -15,7 +17,7 @@ public class WanderingPattern implements MovementPattern {
 	
 	private float movementTimeLeft = 0;
 	private boolean isStopped = false;
-	private Vector2 moveDir = new Vector2();
+	private final Vector2 moveDir = VectorPool.POOL.obtain(0, 0);
 	
 	public WanderingPattern() {
 		toggleWalk();
@@ -28,11 +30,16 @@ public class WanderingPattern implements MovementPattern {
 	}
 	
 	@Override
-	public Vector2 move(float delta, MobAi mob) {
+	public void free() {
+		VectorPool.POOL.free(moveDir);
+	}
+	
+	@Override
+	public Vector2 move(float delta, MobAi mob, Vector2 movement) {
 		movementTimeLeft -= delta;
 		if(movementTimeLeft < 0) delta += movementTimeLeft;
 		
-		Vector2 movement = new Vector2();
+		movement.setZero();
 		
 		if(!isStopped) {
 			movement.set(moveDir);

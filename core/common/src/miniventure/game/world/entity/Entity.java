@@ -5,6 +5,8 @@ import miniventure.game.item.Result;
 import miniventure.game.network.GameProtocol.PositionUpdate;
 import miniventure.game.util.blinker.Blinker;
 import miniventure.game.util.pool.RectPool;
+import miniventure.game.util.pool.Vector3Pool;
+import miniventure.game.util.pool.VectorPool;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.EntityRenderer.BlinkRenderer;
 import miniventure.game.world.entity.mob.player.Player;
@@ -64,9 +66,7 @@ public abstract class Entity implements WorldObject {
 	public boolean isFloating() { return false; }
 	
 	/// this is called only to remove an entity completely from the game, not to change levels.
-	public void remove() {
-		world.deregisterEntity(eid);
-	}
+	public void remove() { world.deregisterEntity(eid); }
 	
 	public void update(float delta) {}
 	
@@ -92,10 +92,12 @@ public abstract class Entity implements WorldObject {
 	
 	protected Rectangle getUnscaledBounds() {
 		Vector2 size = renderer.getSize();
-		return RectPool.POOL.obtain(x, y, size.x, size.y);
+		Rectangle rect = RectPool.POOL.obtain(x, y, size.x, size.y);
+		VectorPool.POOL.free(size);
+		return rect;
 	}
 	
-	public Vector3 getLocation() { return new Vector3(x, y, z); }
+	public Vector3 getLocation() { return Vector3Pool.POOL.obtain(x, y, z); }
 	
 	public float getZ() { return z; }
 	public void setZ(float z) { this.z = z; }
@@ -111,19 +113,30 @@ public abstract class Entity implements WorldObject {
 	@Override
 	public Result interactWith(Player player, @Nullable Item item) { return Result.NONE; }
 	
-	public boolean move(Vector2 v) { return move(v.x, v.y); }
-	public boolean move(Vector3 v) { return move(v.x, v.y, v.z); }
+	public boolean move(Vector2 v) { return move(v, false); }
+	public boolean move(Vector2 v, boolean free) {
+		final boolean res = move(v.x, v.y);
+		if(free) VectorPool.POOL.free(v);
+		return res;
+	}
+	public boolean move(Vector3 v) { return move(v, false); }
+	public boolean move(Vector3 v, boolean free) {
+		final boolean res = move(v.x, v.y, v.z);
+		if(free) Vector3Pool.POOL.free(v);
+		return res;
+	}
 	public boolean move(float xd, float yd) { return move(xd, yd, 0); }
 	public boolean move(float xd, float yd, float zd) {
 		Level level = getLevel();
 		if(level == null) return false; // can't move if you're not in a level...
-		Vector2 movement = new Vector2();
+		Vector2 movement = VectorPool.POOL.obtain();
 		movement.x = moveAxis(level, true, xd, 0);
 		movement.y = moveAxis(level, false, yd, movement.x);
 		z += zd;
 		boolean moved = !movement.isZero();
 		if(moved)
 			moveTo(x+movement.x, y+movement.y);
+		VectorPool.POOL.free(movement);
 		return moved;
 	}
 	
@@ -219,8 +232,16 @@ public abstract class Entity implements WorldObject {
 	abstract void touchTile(Tile tile);
 	abstract void touchEntity(Entity entity);
 	
-	public void moveTo(@NotNull Vector2 pos) { moveTo(pos.x, pos.y); }
-	public void moveTo(@NotNull Vector3 pos) { moveTo(pos.x, pos.y, pos.z); }
+	public void moveTo(@NotNull Vector2 pos) { moveTo(pos, false); }
+	public void moveTo(@NotNull Vector2 pos, boolean free) {
+		moveTo(pos.x, pos.y);
+		if(free) VectorPool.POOL.free(pos);
+	}
+	public void moveTo(@NotNull Vector3 pos) { moveTo(pos, false); }
+	public void moveTo(@NotNull Vector3 pos, boolean free) {
+		moveTo(pos.x, pos.y, pos.z);
+		if(free) Vector3Pool.POOL.free(pos);
+	}
 	public void moveTo(float x, float y) { moveTo(x, y, this.z); }
 	public void moveTo(float x, float y, float z) {
 		// this method doesn't care where you end up; ie doesn't check for collisions.
@@ -233,6 +254,7 @@ public abstract class Entity implements WorldObject {
 			Vector2 size = getSize();
 			x = Math.min(x, level.getWidth() - size.x);
 			y = Math.min(y, level.getHeight() - size.y);
+			VectorPool.POOL.free(size);
 		}
 		
 		this.x = x;
@@ -241,8 +263,10 @@ public abstract class Entity implements WorldObject {
 	}
 	public void moveTo(@NotNull Tile tile) {
 		Vector2 pos = tile.getCenter();
-		pos.sub(getSize().scl(0.5f));
-		moveTo(pos);
+		Vector2 size = getSize();
+		pos.sub(size.scl(0.5f));
+		moveTo(pos, true);
+		VectorPool.POOL.free(size);
 	}
 	
 	protected void moveIfLevel(float x, float y) {

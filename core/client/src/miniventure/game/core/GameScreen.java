@@ -8,6 +8,7 @@ import miniventure.game.screen.MapScreen;
 import miniventure.game.screen.PauseScreen;
 import miniventure.game.util.Version;
 import miniventure.game.util.pool.RectPool;
+import miniventure.game.util.pool.VectorPool;
 import miniventure.game.world.entity.mob.player.ClientPlayer;
 import miniventure.game.world.level.ClientLevel;
 import miniventure.game.world.level.Level;
@@ -40,6 +41,8 @@ public class GameScreen {
 	final ChatScreen chatOverlay, chatScreen;
 	// private boolean showDebug = false;
 	
+	private final Vector2 mouseInput = VectorPool.POOL.obtain();
+	
 	@NotNull
 	private final ClientPlayer player;
 	
@@ -67,11 +70,12 @@ public class GameScreen {
 		chatOverlay.dispose();
 		if(!recycle)
 			chatScreen.dispose();
+		VectorPool.POOL.free(mouseInput);
 		// super.dispose();
 	}
 	
 	public void handleInput() {
-		player.handleInput(getMouseInput(), levelView.getCursorPos());
+		player.handleInput(getMouseInput(mouseInput), levelView.getCursorPos());
 		
 		boolean shift = Gdx.input.isKeyPressed(Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Keys.SHIFT_RIGHT);
 		if(shift && GameCore.debug && Gdx.input.isKeyJustPressed(Keys.S)) {
@@ -122,7 +126,9 @@ public class GameScreen {
 	}
 	public void render(Color lightOverlay, @NotNull ClientLevel level, boolean drawGui) {
 		
-		levelView.render(player.getCenter(), lightOverlay, level);
+		Vector2 center = player.getCenter();
+		levelView.render(center, lightOverlay, level);
+		VectorPool.POOL.free(center);
 		
 		// batch.setProjectionMatrix(uiCamera.combined);
 		if(drawGui) {
@@ -138,21 +144,21 @@ public class GameScreen {
 		}
 	}
 	
-	private static Vector2 getMouseInput() {
+	private static Vector2 getMouseInput(Vector2 mouseInput) {
 		if(Gdx.input.isTouched()) {
-			Vector2 mousePos = new Vector2(Gdx.input.getX(), Gdx.input.getY());
-			mousePos.y = Gdx.graphics.getHeight() - mousePos.y; // origin is top left corner, so reverse Y dir
+			// get position
+			mouseInput.set(Gdx.input.getX(), Gdx.input.getY());
+			mouseInput.y = Gdx.graphics.getHeight() - mouseInput.y; // origin is top left corner, so reverse Y dir
 			
+			// get delta from center
 			// player is always in the center of the screen.
-			Vector2 screenCenter = new Vector2(Gdx.graphics.getWidth()/2f, Gdx.graphics.getHeight()/2f);
+			mouseInput.sub(Gdx.graphics.getWidth()/2f, Gdx.graphics.getHeight()/2f);
+			mouseInput.nor();
 			
-			Vector2 mouseMove = mousePos.cpy().sub(screenCenter);
-			mouseMove.nor();
-			
-			return mouseMove;
+			return mouseInput;
 		}
 		
-		return new Vector2();
+		return mouseInput.setZero();
 	}
 	
 	private void renderGui(@NotNull Level level) {

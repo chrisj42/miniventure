@@ -1,11 +1,19 @@
 package miniventure.game.world.entity;
 
+import miniventure.game.util.pool.VectorPool;
+
 import com.badlogic.gdx.math.Vector2;
 
 import org.jetbrains.annotations.Nullable;
 
 public enum Direction {
-	UP, DOWN, LEFT, RIGHT;
+	UP(0, 1), DOWN(0, -1), LEFT(-1, 0), RIGHT(1, 0);
+	
+	private final Vector2 vector;
+	
+	Direction(float x, float y) {
+		vector = new Vector2(x, y);
+	}
 	
 	public static final Direction[] values = values();
 	public static final String[] names = new String[values.length];
@@ -31,14 +39,5 @@ public enum Direction {
 		}
 	}
 	
-	public Vector2 getVector() {
-		Vector2 vector = new Vector2(0, 0);
-		
-		if(this == UP) vector.y = 1;
-		if(this == DOWN) vector.y = -1;
-		if(this == LEFT) vector.x = -1;
-		if(this == RIGHT) vector.x = 1;
-		
-		return vector;
-	}
+	public Vector2 getVector() { return vector; }
 }

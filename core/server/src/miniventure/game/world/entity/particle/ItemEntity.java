@@ -62,6 +62,12 @@ public class ItemEntity extends ServerEntity {
 	}
 	
 	@Override
+	public void remove() {
+		super.remove();
+		bounceBehavior.free();
+	}
+	
+	@Override
 	public void update(float delta) {
 		super.update(delta);
 		bounceBehavior.update(this, delta);

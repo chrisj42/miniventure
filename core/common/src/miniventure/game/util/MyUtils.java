@@ -270,21 +270,6 @@ public final class MyUtils {
 	// MISC UTILS
 	
 	
-	// pool of Vector2 objects
-	private static final Array<Vector2> vectorPool = new Array<>(false, 10, Vector2.class);
-	public static Vector2 getV2(Vector2 v) { return getV2().set(v); }
-	public static Vector2 getV2(float x, float y) { return getV2().set(x, y); }
-	public static Vector2 getV2() {
-		Vector2 v;
-		if(vectorPool.size == 0)
-			v = new Vector2();
-		else
-			v = vectorPool.removeIndex(0);
-		return v;
-	}
-	public static void freeV2(Vector2 v) {
-		vectorPool.add(v);
-	}
 	// using lambdas may in many cases defeat the purpose of not creating new objects 
 	/*public static <T> T fromV2(MapFunction<Vector2, T> action) {
 		Vector2 v = getV2();

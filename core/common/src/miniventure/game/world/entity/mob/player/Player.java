@@ -8,6 +8,7 @@ import java.util.List;
 
 import miniventure.game.network.PacketPipe;
 import miniventure.game.util.pool.RectPool;
+import miniventure.game.util.pool.VectorPool;
 import miniventure.game.world.Point;
 import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.level.Level;
@@ -179,7 +180,9 @@ public interface Player extends Mob {
 				} else {
 					tiles.add(tile);
 					// restrict cursor to this tile
-					cursor.set(tile.getCenter());
+					Vector2 tileCenter = tile.getCenter();
+					cursor.set(tileCenter);
+					VectorPool.POOL.free(tileCenter);
 					blocked = true;
 				}
 			} else {

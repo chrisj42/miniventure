@@ -207,7 +207,7 @@ public enum Command {
 			
 			ServerLevel level = dest.getLevel();
 			if(level != null) {
-				toMove.moveTo(dest.getPosition());
+				toMove.moveTo(dest.getPosition(), true);
 				world.getServer().sendToPlayer(toMove, new PositionUpdate(toMove));
 				out.println("teleported "+toMove.getName()+" to "+toMove.getPosition()+'.');
 			} else

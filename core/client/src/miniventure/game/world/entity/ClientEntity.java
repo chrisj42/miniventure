@@ -5,6 +5,7 @@ import miniventure.game.network.GameProtocol.EntityAddition;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.blinker.FrameBlinker;
 import miniventure.game.util.pool.RectPool;
+import miniventure.game.util.pool.VectorPool;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.mob.Mob;
 import miniventure.game.world.entity.particle.ClientParticle;
@@ -57,9 +58,11 @@ public class ClientEntity extends Entity {
 			if(closest != null) {
 				SwimAnimation swimAnimation = closest.getType().getSwimAnimation();
 				if(swimAnimation != null) {
-					Vector2 pos = getCenter().sub(posOffset).sub(0, getSize().y / 2).scl(Tile.SIZE);
+					Rectangle bounds = getBounds();
+					Vector2 pos = bounds.getCenter(VectorPool.POOL.obtain()).sub(posOffset).sub(0, bounds.height / 2).scl(Tile.SIZE);
 					swimAnimation.drawSwimAnimation(batch, pos, getWorld());
 					drawableHeight = swimAnimation.drawableHeight;
+					RectPool.POOL.free(bounds);
 				}
 			}
 		}
@@ -102,20 +105,20 @@ public class ClientEntity extends Entity {
 		setBlinker(Color.RED, Mob.HURT_COOLDOWN, true, new FrameBlinker(5, 1, false));
 	}
 	
-	public boolean move(Vector2 moveDist, boolean validate) { return move(moveDist.x, moveDist.y, validate); }
-	public boolean move(Vector3 moveDist, boolean validate) { return move(moveDist.x, moveDist.y, moveDist.z, validate); }
-	public boolean move(float xd, float yd, boolean validate) { return move(xd, yd, 0, validate); }
+	public boolean move(boolean validate, Vector2 moveDist) { return move(validate, moveDist.x, moveDist.y); }
+	public boolean move(boolean validate, Vector3 moveDist) { return move(validate, moveDist.x, moveDist.y, moveDist.z); }
+	public boolean move(boolean validate, float xd, float yd) { return move(validate, xd, yd, 0); }
 	@Override
-	public boolean move(float xd, float yd, float zd) { return move(xd, yd, zd, false); }
+	public boolean move(float xd, float yd, float zd) { return move(false, xd, yd, zd); }
 	
 	@Override void touchTile(Tile tile) {}
 	@Override void touchEntity(Entity entity) {}
 	
-	public boolean move(float xd, float yd, float zd, boolean validate) {
+	public boolean move(boolean validate, float xd, float yd, float zd) {
 		if(validate)
 			return super.move(xd, yd, zd);
 		
-		moveTo(new Vector3(xd, yd, zd).add(getLocation()));
+		moveTo(xd + x, yd + y, zd + z);
 		return true;
 	}
 	

@@ -12,6 +12,7 @@ import miniventure.game.screen.util.DiscreteViewport;
 import miniventure.game.util.RelPos;
 import miniventure.game.util.function.Action;
 import miniventure.game.util.pool.RectPool;
+import miniventure.game.util.pool.VectorPool;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Rectangle;
@@ -286,6 +287,7 @@ public class MenuScreen extends Stage {
 			
 			Vector2 containerPos = mainContainerAnchor.ofRectangle(RectPool.POOL.obtain(offX, offY, getWidth(), getHeight()), true);
 			mainGroup.setPosition(containerPos.x, containerPos.y, mainGroupAnchor.getGdxAlign());
+			VectorPool.POOL.free(containerPos);
 		}
 	}
 }

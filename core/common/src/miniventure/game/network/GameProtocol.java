@@ -15,6 +15,8 @@ import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.Action;
 import miniventure.game.util.function.ValueAction;
+import miniventure.game.util.pool.Vector3Pool;
+import miniventure.game.util.pool.VectorPool;
 import miniventure.game.world.Point;
 import miniventure.game.world.Taggable.Tag;
 import miniventure.game.world.WorldObject;
@@ -478,11 +480,20 @@ public interface GameProtocol {
 		public final float x, y, z;
 		public final LevelId levelId; // should never be null, actually, because it is always on one level or another, and if not, then it's not in the game, aka removed. An entity removal would be sent rather than a position update. However, it's a bit complicated to change now, so I'll leave it...
 		
-		private PositionUpdate() { this(null, 0, 0, 0); }
-		public PositionUpdate(Entity e) { this(e.getLevel(), e.getLocation()); }
-		public PositionUpdate(Level level, Vector2 pos) { this(level, new Vector3(pos, 0)); }
-		public PositionUpdate(Level level, Vector3 pos) { this(level==null?null:level.getLevelId(), pos); }
-		public PositionUpdate(LevelId levelId, Vector3 pos) { this(levelId, pos.x, pos.y, pos.z); }
+		private PositionUpdate() { this((LevelId)null, 0, 0, 0); }
+		public PositionUpdate(Entity e) { this(e.getLevel(), e.getLocation(), true); }
+		public PositionUpdate(Level level, Vector2 pos) { this(level, pos, false); }
+		public PositionUpdate(Level level, Vector2 pos, boolean free) {
+			this(level, pos.x, pos.y, 0);
+			if(free) VectorPool.POOL.free(pos);
+		}
+		public PositionUpdate(Level level, Vector3 pos) { this(level, pos, false); }
+		public PositionUpdate(Level level, Vector3 pos, boolean free) {
+			this(level, pos.x, pos.y, pos.z);
+			if(free) Vector3Pool.POOL.free(pos);
+		}
+		// public PositionUpdate(LevelId levelId, Vector3 pos) { this(levelId, pos.x, pos.y, pos.z); }
+		public PositionUpdate(Level level, float x, float y, float z) { this(level==null?null:level.getLevelId(), x, y, z); }
 		public PositionUpdate(LevelId levelId, float x, float y, float z) {
 			this.levelId = levelId;
 			this.x = x;
@@ -491,17 +502,22 @@ public interface GameProtocol {
 		}
 		
 		public boolean variesFrom(Entity entity) { return variesFrom(entity, entity.getLevel()); }
-		private boolean variesFrom(Entity entity, Level level) { return variesFrom(entity.getPosition(), level==null?null:level.getLevelId()); }
-		public boolean variesFrom(Vector3 pos, LevelId levelId) { return variesFrom(new Vector2(pos.x, pos.y), levelId); }
+		private boolean variesFrom(Entity entity, Level level) {
+			Vector2 pos = entity.getPosition();
+			boolean varies = variesFrom(pos, level==null?null:level.getLevelId());
+			VectorPool.POOL.free(pos);
+			return varies;
+		}
+		// public boolean variesFrom(Vector3 pos, LevelId levelId) { return variesFrom(VectorPool.POOL.obtain(pos.x, pos.y), levelId); }
 		public boolean variesFrom(Vector2 pos, LevelId levelId) {
 			if(pos.dst(x, y) > 0.25) return true;
 			return !Objects.equals(levelId, this.levelId);
 		}
 		
-		public Vector3 getPos() { return new Vector3(x, y, z); }
+		public Vector3 getPos() { return Vector3Pool.POOL.obtain(x, y, z); }
 		
 		@Override public String toString() {
-			return "PositionUpdate("+x+","+y+","+z+",lvl"+levelId+")";
+			return "PositionUpdate("+x+','+y+','+z+",lvl"+levelId+')';
 		}
 		
 		public String toString(WorldManager world) {
@@ -527,7 +543,7 @@ public interface GameProtocol {
 			this.endPos = endPos;
 		}
 		
-		public Vector3 getMoveDist() { return new Vector3(xd, yd, zd); }
+		public Vector3 getMoveDist() { return Vector3Pool.POOL.obtain(xd, yd, zd); }
 	}
 	
 	// sent by client to interact or attack.

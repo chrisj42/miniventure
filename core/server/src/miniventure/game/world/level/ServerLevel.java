@@ -8,6 +8,7 @@ import miniventure.game.network.GameServer;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
 import miniventure.game.util.pool.RectPool;
+import miniventure.game.util.pool.VectorPool;
 import miniventure.game.world.Boundable;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.WorldObject;
@@ -203,15 +204,25 @@ public class ServerLevel extends Level {
 	}
 	
 	public void dropItems(@NotNull ItemDrop drop, @NotNull WorldObject source, @Nullable WorldObject target) {
-		dropItems(drop, source.getCenter(), target == null ? null : target.getCenter());
+		dropItems(drop, source.getCenter(), target == null ? null : target.getCenter(), true);
 	}
-	public void dropItems(@NotNull ItemDrop drop, Vector2 dropPos, @Nullable Vector2 targetPos) {
+	public void dropItems(@NotNull ItemDrop drop, @NotNull Vector2 dropPos, @Nullable Vector2 targetPos) { dropItems(drop, dropPos, targetPos, false); }
+	public void dropItems(@NotNull ItemDrop drop, @NotNull Vector2 dropPos, @Nullable Vector2 targetPos, boolean free) {
 		for(ServerItem item: drop.getDroppedItems())
 			dropItem(item, dropPos, targetPos);
+		if(free) {
+			VectorPool.POOL.free(dropPos);
+			if(targetPos != null)
+				VectorPool.POOL.free(targetPos);
+		}
 	}
 	
-	public void dropItem(@NotNull ServerItem item, @NotNull Vector2 dropPos, @Nullable Vector2 targetPos) { dropItem(item, false, dropPos, targetPos); }
+	public void dropItem(@NotNull ServerItem item, @NotNull Vector2 dropPos, @Nullable Vector2 targetPos) { dropItem(item, dropPos, targetPos, false); }
+	public void dropItem(@NotNull ServerItem item, @NotNull Vector2 dropPos, @Nullable Vector2 targetPos, boolean free) { dropItem(item, false, dropPos, targetPos, free); }
 	public void dropItem(@NotNull final ServerItem item, boolean delayPickup, @NotNull Vector2 dropPos, @Nullable Vector2 targetPos) {
+		dropItem(item, delayPickup, dropPos, targetPos, false);
+	}
+	public void dropItem(@NotNull final ServerItem item, boolean delayPickup, @NotNull Vector2 dropPos, @Nullable Vector2 targetPos, boolean free) {
 		
 		/* this drops the itemEntity at the given coordinates, with the given direction (random if null).
 		 	However, if the given coordinates reside within a solid tile, the adjacent tiles are checked.
@@ -219,9 +230,9 @@ public class ServerLevel extends Level {
 		 		But if it finds a non-solid tile, it drops it towards the non-solid tile.
 		  */
 		
-		final ItemEntity ie = new ItemEntity(getWorld(), item, Vector2.Zero.cpy()); // this is a dummy variable.
+		final ItemEntity ie = new ItemEntity(getWorld(), item, Vector2.Zero); // this is a dummy variable.
 		
-		Tile closest = getClosestTile(dropPos.x, dropPos.y);
+		Tile closest = getClosestTile(dropPos);
 		
 		Rectangle itemBounds = ie.getBounds();
 		itemBounds.setPosition(dropPos);
@@ -251,17 +262,21 @@ public class ServerLevel extends Level {
 		dropPos.y = itemBounds.y;
 		
 		Vector2 dropDir;
-		if(targetPos == null)
-			dropDir = new Vector2().setToRandomDirection();
+		boolean freeSecond = false;
+		if(targetPos == null) {
+			dropDir = VectorPool.POOL.obtain(0, 0).setToRandomDirection();
+			freeSecond = true;
+		}
 		else
-			dropDir = targetPos.cpy().sub(dropPos);
+			dropDir = targetPos.sub(dropPos);
 		
 		getWorld().cancelIdReservation(ie);
 		ItemEntity nie = new ItemEntity(getWorld(), item, dropDir, delayPickup);
 		
+		nie.moveTo(dropPos, free);
+		if(free || freeSecond) VectorPool.POOL.free(dropDir);
 		RectPool.POOL.free(itemBounds);
 		RectPool.POOL.free(closestBounds);
-		nie.moveTo(dropPos);
 		addEntity(nie);
 	}
 	
