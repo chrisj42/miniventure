@@ -35,7 +35,7 @@ public abstract class Level implements Taggable<Level> {
 	private final int height;
 	
 	@NotNull private final WorldManager world;
-	@NotNull private Tile[][] tiles;
+	@NotNull private final Tile[][] tiles;
 	// final SynchronizedAccessor<Map<Point, Chunk>> loadedChunks = new SynchronizedAccessor<>(Collections.synchronizedMap(new HashMap<>(X_LOAD_RADIUS*2*Y_LOAD_RADIUS*2)));
 	//private int tileCount;
 	private int mobCount;
@@ -44,7 +44,7 @@ public abstract class Level implements Taggable<Level> {
 	// final HashMap<Entity, Point> entityChunks = new HashMap<>(X_LOAD_RADIUS*2*Y_LOAD_RADIUS*2);
 	
 	/** @noinspection FieldCanBeLocal*/
-	private int mobCap = 80;
+	private final int mobCap = 80;
 	
 	@FunctionalInterface
 	public interface TileMaker {
