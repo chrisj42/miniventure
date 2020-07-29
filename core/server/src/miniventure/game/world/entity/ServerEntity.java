@@ -33,25 +33,25 @@ public abstract class ServerEntity extends Entity {
 		super(world, false);
 	}
 	
-	protected ServerEntity(@NotNull ServerWorld world, EntityDataSet allData, final Version version, ValueAction<EntityDataSet> modifier) {
+	protected ServerEntity(@NotNull ServerWorld world, EntityDataSet data, final Version version, ValueAction<EntityDataSet> modifier) {
 		this(world);
-		modifier.act(allData);
+		modifier.act(data);
 		
-		SerialHashMap data = allData.get("e");
+		data.setPrefix("e");
 		x = data.get("x", Float::parseFloat);
 		y = data.get("y", Float::parseFloat);
 		z = data.get("z", Float::parseFloat);
 	}
 	
 	public EntityDataSet save() {
-		EntityDataSet allData = new EntityDataSet();
-		SerialHashMap data = new SerialHashMap();
+		EntityDataSet data = new EntityDataSet();
+		
+		data.setPrefix("e");
 		data.add("x", x);
 		data.add("y", y);
 		data.add("z", z);
 		
-		allData.put("e", data);
-		return allData;
+		return data;
 	}
 	
 	@Override @NotNull
@@ -122,24 +122,25 @@ public abstract class ServerEntity extends Entity {
 	public static String serialize(ServerEntity e) {
 		EntityDataSet data = e.save();
 		
-		SerialHashMap allData = new SerialHashMap();
-		for(Entry<String, SerialHashMap> entry: data.entrySet())
-			allData.put(entry.getKey(), entry.getValue().serialize());
+		// SerialHashMap allData = new SerialHashMap();
+		// for(Entry<String, SerialHashMap> entry: data.entrySet())
+		// 	allData.put(entry.getKey(), entry.getValue().serialize());
 		
-		allData.add("class", e.getClass().getCanonicalName().replace(Entity.class.getPackage().getName()+".", ""));
+		data.setPrefix("");
+		data.add("class", e.getClass().getCanonicalName().replace(Entity.class.getPackage().getName()+'.', ""));
 		
-		return allData.serialize();
+		return data.serialize();
 	}
 	
 	public static ServerEntity deserialize(@NotNull ServerWorld world, String data, @NotNull Version version) {
-		SerialHashMap allData = new SerialHashMap(data);
+		EntityDataSet map = new EntityDataSet(data);
 		
-		String entityType = allData.remove("class");
+		String entityType = map.remove("class");
 		
-		EntityDataSet map = new EntityDataSet();
-		for(Entry<String, String> entry: allData.entrySet()) {
-			map.put(entry.getKey(), new SerialHashMap(entry.getValue()));
-		}
+		// EntityDataSet map = new EntityDataSet();
+		// for(Entry<String, String> entry: map.entrySet()) {
+		// 	map.put(entry.getKey(), new SerialHashMap(entry.getValue()));
+		// }
 		
 		ServerEntity entity = null;
 		

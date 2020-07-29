@@ -40,9 +40,9 @@ public class ItemEntity extends ServerEntity {
 		setRenderer(new ItemSpriteRenderer(item));
 	}
 	
-	protected ItemEntity(@NotNull ServerWorld world, EntityDataSet allData, final Version version, ValueAction<EntityDataSet> modifier) {
-		super(world, allData, version, modifier);
-		SerialHashMap data = allData.get("item");
+	protected ItemEntity(@NotNull ServerWorld world, EntityDataSet data, final Version version, ValueAction<EntityDataSet> modifier) {
+		super(world, data, version, modifier);
+		data.setPrefix("item");
 		delayPickup = false;
 		item = ServerItem.load(MyUtils.parseLayeredString(data.get("item")), version);
 		bounceBehavior = new BounceBehavior(MyUtils.parseLayeredString(data.get("bounce")));
@@ -51,14 +51,14 @@ public class ItemEntity extends ServerEntity {
 	
 	@Override
 	public EntityDataSet save() {
-		EntityDataSet allData = super.save();
-		SerialHashMap data = new SerialHashMap();
+		EntityDataSet data = super.save();
+		
+		data.setPrefix("item");
 		data.add("item", MyUtils.encodeStringArray(item.getSaveData()));
 		data.add("bounce", MyUtils.encodeStringArray(bounceBehavior.save()));
 		data.add("life", lifetime.getLifetime());
 		
-		allData.put("item", data);
-		return allData;
+		return data;
 	}
 	
 	@Override

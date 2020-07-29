@@ -62,9 +62,10 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 	// some stuff is given in the child constructor; this shouldn't need to be saved to file.
 	// these include the sprite name and the max health, in this case.
 	// these things
-	protected ServerMob(@NotNull ServerWorld world, EntityDataSet allData, final Version version, ValueAction<EntityDataSet> modifier) {
-		super(world, allData, version, modifier);
-		SerialHashMap data = allData.get("mob");
+	protected ServerMob(@NotNull ServerWorld world, EntityDataSet data, final Version version, ValueAction<EntityDataSet> modifier) {
+		super(world, data, version, modifier);
+		
+		data.setPrefix("mob");
 		
 		this.spriteName = data.get("sprite");
 		dir = data.get("dir", Direction::valueOf);
@@ -77,15 +78,15 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 	
 	@Override
 	public EntityDataSet save() {
-		EntityDataSet allData = super.save();
-		SerialHashMap data = new SerialHashMap();
+		EntityDataSet data = super.save();
+		
+		data.setPrefix("mob");
 		data.add("sprite", spriteName);
 		data.add("dir", dir);
 		data.add("mhp", maxHealth);
 		data.add("hp", health);
 		
-		allData.put("mob", data);
-		return allData;
+		return data;
 	}
 	
 	public void reset() {

@@ -52,14 +52,17 @@ public class MobAi extends ServerMob {
 	}
 	
 	// if a subclass was made of this, then it may not save the ai type.
-	protected MobAi(@NotNull ServerWorld world, EntityDataSet allData, final Version version, ValueAction<EntityDataSet> modifier) {
-		super(world, allData, version, data -> {
-			modifier.act(data);
-			AiType type = data.get("ai").get("type", AiType::valueOf);
-			data.get("mob").add("sprite", type.name().toLowerCase());
-			data.get("mob").add("mhp", type.health);
+	protected MobAi(@NotNull ServerWorld world, EntityDataSet data, final Version version, ValueAction<EntityDataSet> modifier) {
+		super(world, data, version, d -> {
+			modifier.act(d);
+			d.setPrefix("ai");
+			AiType type = d.get("type", AiType::valueOf);
+			d.setPrefix("mob");
+			d.add("sprite", type.name().toLowerCase());
+			d.add("mhp", type.health);
 		});
-		SerialHashMap data = allData.get("ai");
+		
+		data.setPrefix("ai");
 		aiType = data.get("type", AiType::valueOf);
 		this.itemDrops = aiType.deathDrops;
 		this.movePattern = aiType.defaultPattern.copy();
@@ -67,15 +70,16 @@ public class MobAi extends ServerMob {
 	
 	@Override
 	public EntityDataSet save() {
-		EntityDataSet allData = super.save();
-		allData.get("mob").remove("sprite");
-		allData.get("mob").remove("mhp");
+		EntityDataSet data = super.save();
 		
-		SerialHashMap data = new SerialHashMap();
+		data.setPrefix("mob");
+		data.remove("sprite");
+		data.remove("mhp");
+		
+		data.setPrefix("ai");
 		data.add("type", aiType);
 		
-		allData.put("ai", data);
-		return allData;
+		return data;
 	}
 	
 	public AiType getType() { return aiType; }

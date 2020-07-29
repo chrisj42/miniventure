@@ -72,12 +72,14 @@ public class ServerPlayer extends ServerMob implements Player {
 		reset();
 	}
 	
-	protected ServerPlayer(@NotNull ServerWorld world, EntityDataSet allData, final Version version, ValueAction<EntityDataSet> modifier) {
-		super(world, allData, version, data -> {
-			modifier.act(data);
-			data.get("mob").add("sprite", "player");
+	protected ServerPlayer(@NotNull ServerWorld world, EntityDataSet data, final Version version, ValueAction<EntityDataSet> modifier) {
+		super(world, data, version, d -> {
+			modifier.act(d);
+			d.setPrefix("mob");
+			d.add("sprite", "player");
 		});
-		SerialHashMap data = allData.get("player");
+		
+		data.setPrefix("player");
 		
 		name = data.get("name");
 		invManager = new ServerPlayerInventory();
@@ -100,10 +102,12 @@ public class ServerPlayer extends ServerMob implements Player {
 	
 	@Override
 	public EntityDataSet save() {
-		EntityDataSet allData = super.save();
-		allData.get("mob").remove("sprite");
+		EntityDataSet data = super.save();
 		
-		SerialHashMap data = new SerialHashMap();
+		data.setPrefix("mob");
+		data.remove("sprite");
+		
+		data.setPrefix("player");
 		data.add("name", name);
 		data.add("hunger", getStat(Stat.Hunger));
 		data.add("stamina", getStat(Stat.Stamina));
@@ -111,8 +115,7 @@ public class ServerPlayer extends ServerMob implements Player {
 		data.add("slvl", spawnLevel);
 		data.add("inv", MyUtils.encodeStringArray(invManager.save()));
 		
-		allData.put("player", data);
-		return allData;
+		return data;
 	}
 	
 	public String getName() { return name; }

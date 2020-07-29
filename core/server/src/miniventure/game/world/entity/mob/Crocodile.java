@@ -11,20 +11,24 @@ import org.jetbrains.annotations.NotNull;
 
 public class Crocodile extends MobAi {
 	
+	
+	
 	public Crocodile(@NotNull ServerWorld world) { super(world, AiType.Crocodile); }
 	
-	protected Crocodile(@NotNull ServerWorld world, EntityDataSet allData, Version version, ValueAction<EntityDataSet> modifier) {
-		super(world, allData, version, data -> {
-			modifier.act(data);
-			data.get("ai").add("type", AiType.Crocodile);
+	protected Crocodile(@NotNull ServerWorld world, EntityDataSet data, Version version, ValueAction<EntityDataSet> modifier) {
+		super(world, data, version, d -> {
+			modifier.act(d);
+			d.setPrefix("ai");
+			d.add("type", AiType.Crocodile);
 		});
 	}
 	
 	@Override
 	public EntityDataSet save() {
-		EntityDataSet allData = super.save();
-		allData.get("ai").remove("type"); // we don't need this data, we already know it.
-		return allData;
+		EntityDataSet data = super.save();
+		data.setPrefix("ai");
+		data.remove("type"); // we don't need this data, we already know it.
+		return data;
 	}
 	
 	@Override
