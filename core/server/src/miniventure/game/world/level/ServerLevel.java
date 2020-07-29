@@ -116,6 +116,7 @@ public class ServerLevel extends Level {
 	}
 	
 	//private float updateAllDelta = 0;
+	private final HashSet<Tile> tilesToUpdate = new HashSet<>();
 	@Override
 	public void update(float delta) {
 		// if(getLoadedChunkCount() == 0) return;
@@ -123,9 +124,9 @@ public class ServerLevel extends Level {
 		// update the tiles in the queue
 		
 		// store new and clear the cache first so we won't lose any updates added while updating.
-		Set<Tile> tilesToUpdate;
+		tilesToUpdate.clear();
 		synchronized (newTileUpdates) {
-			tilesToUpdate = new HashSet<>(newTileUpdates);
+			tilesToUpdate.addAll(newTileUpdates);
 			newTileUpdates.clear();
 		}
 		
