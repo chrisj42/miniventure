@@ -37,6 +37,18 @@ public interface Boundable {
 		return v;
 	}
 	
+	default float getDistanceTo(Boundable other) {
+		return getDistanceTo(other.getCenter(), true);
+	}
+	default float getDistanceTo(Vector2 pos) { return getDistanceTo(pos, false); }
+	default float getDistanceTo(Vector2 pos, boolean free) {
+		Vector2 center = getCenter();
+		float dist = center.dst(pos);
+		VectorPool.POOL.free(center);
+		if(free) VectorPool.POOL.free(pos);
+		return dist;
+	}
+	
 	// returns the closest tile to the center of this object, given an array of tiles.
 	@Nullable
 	default Tile getClosestTile(@NotNull Array<Tile> tiles) {
@@ -65,8 +77,8 @@ public interface Boundable {
 		objects.sort((o1, o2) -> {
 			Vector2 o1C = o1.getCenter();
 			Vector2 o2C = o2.getCenter();
-			float o1Diff = Math.abs(pos.dst(o1C));
-			float o2Diff = Math.abs(pos.dst(o2C));
+			float o1Diff = pos.dst(o1C);
+			float o2Diff = pos.dst(o2C);
 			VectorPool.POOL.free(o1C);
 			VectorPool.POOL.free(o2C);
 			return Float.compare(o1Diff, o2Diff);
