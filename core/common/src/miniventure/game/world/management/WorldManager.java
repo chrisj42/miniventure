@@ -1,11 +1,14 @@
 package miniventure.game.world.management;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.level.Level;
 import miniventure.game.world.level.LevelId;
@@ -78,7 +81,18 @@ public abstract class WorldManager {
 		}
 	}
 	
-	public Set<Entity> getRegisteredEntities() { synchronized (idLock) { return new HashSet<>(entityIDMap.values()); } }
+	private final Collection<Entity> tempEntities = new ArrayList<>(80);
+	public void forEachRegisteredEntity(ValueAction<Entity> action) {
+		synchronized (idLock) {
+			final boolean nested = tempEntities.size() > 0;
+			if(!nested)
+				tempEntities.addAll(entityIDMap.values());
+			for(Entity e: tempEntities)
+				action.act(e);
+			if(!nested)
+				tempEntities.clear();
+		}
+	}
 	
 	// only register entities in the reserved id map; give warning otherwise, or TODO possibly fail (check uses).
 	public void registerEntity(Entity e) { registerEntity(e, true); }

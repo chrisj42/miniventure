@@ -7,6 +7,7 @@ import miniventure.game.network.GameProtocol.TileUpdate;
 import miniventure.game.network.GameServer;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
+import miniventure.game.util.function.ValueAction;
 import miniventure.game.util.pool.RectPool;
 import miniventure.game.util.pool.VectorPool;
 import miniventure.game.world.Boundable;
@@ -71,7 +72,9 @@ public class ServerLevel extends Level {
 	public int getEntityCount() { return getWorld().getEntityCount(this); }
 	
 	@Override
-	public HashSet<ServerEntity> getEntities() { return getWorld().getEntities(this); }
+	public void forEachEntity(ValueAction<Entity> action) {
+		getWorld().forEachEntity(this, action::act);
+	}
 	
 	@Override
 	public ServerTile getTile(float x, float y) { return (ServerTile) super.getTile(x, y); }
@@ -84,11 +87,11 @@ public class ServerLevel extends Level {
 	public LevelDataSet save() {
 		TileData[][] tileData = getTileData(true);
 		LinkedList<String> entityData = new LinkedList<>();
-		for(Entity e: getEntities()) {
+		forEachEntity(e -> {
 			if(e instanceof ServerPlayer)
-				continue;
+				return;
 			entityData.add(ServerEntity.serialize((ServerEntity)e));
-		}
+		});
 		return new LevelDataSet(Version.CURRENT, getLevelId(), getWidth(), getHeight(), tileData, entityData);
 	}
 	

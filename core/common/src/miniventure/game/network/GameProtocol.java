@@ -3,6 +3,7 @@ package miniventure.game.network;
 import java.io.File;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
 
 import miniventure.game.chat.InfoMessage;
@@ -44,9 +45,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
 import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.Serializer;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -438,10 +436,13 @@ public interface GameProtocol {
 		private EntityValidation() { this((LevelId)null, null); }
 		public EntityValidation(Level level, Entity... excluded) {
 			this.levelId = level.getLevelId();
-			// get all entities in level
-			LinkedList<Entity> entities = new LinkedList<>(level.getEntities());
-			// remove excluded entities
-			entities.removeAll(Arrays.asList(excluded));
+			// get relevant entities
+			LinkedList<Entity> entities = new LinkedList<>();
+			List<Entity> excludedEntities = Arrays.asList(excluded);
+			level.forEachEntity(e -> {
+				if(!excludedEntities.contains(e))
+					entities.add(e);
+			});
 			// map to ids
 			ids = ArrayUtils.mapArray(entities.toArray(), int.class, int[].class, e -> ((Entity)e).getId());
 		}

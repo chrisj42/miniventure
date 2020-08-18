@@ -1,10 +1,14 @@
 package miniventure.game.world.management;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import miniventure.game.util.function.ValueAction;
+import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.ServerEntity;
 import miniventure.game.world.level.ServerLevel;
 
@@ -59,7 +63,14 @@ class ServerEntityManager {
 		return entitySet(level).size();
 	}
 	
-	synchronized HashSet<ServerEntity> getEntities(ServerLevel level) {
-		return new HashSet<>(entitySet(level));
+	private final ArrayList<ServerEntity> tempEntities = new ArrayList<>(80);
+	synchronized void forEachEntity(ServerLevel level, ValueAction<ServerEntity> action) {
+		final boolean nested = tempEntities.size() > 0;
+		if(!nested)
+			tempEntities.addAll(entitySet(level));
+		for(ServerEntity e: tempEntities)
+			action.act(e);
+		if(!nested)
+			tempEntities.clear();
 	}
 }

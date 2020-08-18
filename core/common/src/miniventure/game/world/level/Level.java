@@ -2,9 +2,10 @@ package miniventure.game.world.level;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Set;
 
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.ValueWrapper;
+import miniventure.game.util.function.ValueAction;
 import miniventure.game.util.pool.RectPool;
 import miniventure.game.util.pool.VectorPool;
 import miniventure.game.world.Boundable;
@@ -113,7 +114,7 @@ public abstract class Level implements Taggable<Level> {
 	public int getMobCount() { return mobCount; }
 	public abstract int getEntityCount();
 	
-	public abstract Set<? extends Entity> getEntities();
+	public abstract void forEachEntity(ValueAction<Entity> action);
 	
 	public TileData[][] getTileData(boolean save) {
 		TileData[][] data = new TileData[width][height];
@@ -183,13 +184,12 @@ public abstract class Level implements Taggable<Level> {
 	
 	
 	public void update(float delta) {
-		int mobs = 0;
-		for(Entity e: getEntities()) {
+		mobCount = 0;
+		forEachEntity(e -> {
 			e.update(delta);
 			if(e.isMob())
-				mobs++;
-		}
-		this.mobCount = mobs;
+				mobCount++;
+		});
 	}
 	
 	public Tile getTile(Rectangle rect) { return getTile(rect, false); }
@@ -306,15 +306,17 @@ public abstract class Level implements Taggable<Level> {
 	public Array<Entity> getOverlappingEntities(Rectangle rect, Entity... exclude) { return getOverlappingEntities(rect, false, exclude); }
 	public Array<Entity> getOverlappingEntities(Rectangle rect, boolean free, Entity... exclude) {
 		Array<Entity> overlapping = new Array<>(Entity.class);
-		for(Entity entity: getEntities()) {
+		forEachEntity(entity -> {
 			Rectangle bounds = entity.getBounds();
 			if(bounds.overlaps(rect))
 				overlapping.add(entity);
 			RectPool.POOL.free(bounds);
-		}
+		});
 		
-		if(exclude.length > 0)
-			overlapping.removeAll(new Array<>(exclude), true); // use ==, not .equals()
+		if(exclude.length > 0) {
+			for(Entity e: exclude)
+				overlapping.removeValue(e, true); // use ==, not .equals()
+		}
 		
 		if(free) RectPool.POOL.free(rect);
 		return overlapping;
@@ -367,16 +369,22 @@ public abstract class Level implements Taggable<Level> {
 	@Nullable
 	public Player getClosestPlayer(final Vector2 pos) { return getClosestPlayer(pos, false); }
 	public Player getClosestPlayer(final Vector2 pos, boolean free) {
-		Array<Player> players = new Array<>();
-		for(Entity e: getEntities())
-			if(e instanceof Player)
-				players.add((Player)e);
+		final ValueWrapper<Float> minDist = new ValueWrapper<>(-1f);
+		final ValueWrapper<Player> closest = new ValueWrapper<>(null);
+		forEachEntity(e -> {
+			if(e instanceof Player) {
+				Player p = (Player) e;
+				float dist = p.getDistanceTo(pos);
+				if(minDist.value < 0 || minDist.value > dist) {
+					minDist.value = dist;
+					closest.value = p;
+				}
+			}
+		});
 		
-		if(players.size == 0) return null;
+		if(free) VectorPool.POOL.free(pos);
 		
-		Boundable.sortByDistance(players, pos, free);
-		
-		return players.get(0);
+		return closest.value;
 	}
 	
 	// public boolean chunkExists(int cx, int cy) { return tileExists(cx * Chunk.SIZE, cy * Chunk.SIZE); }

@@ -478,8 +478,7 @@ public abstract class GameServer implements GameProtocol {
 			}
 		}
 		
-		for(Entity e: level.getEntities())
-			connection.send(new EntityAddition(e));
+		level.forEachEntity(e -> connection.send(new EntityAddition(e)));
 		connection.send(player.getSpawnData());
 		// });
 	}

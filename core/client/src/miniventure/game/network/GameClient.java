@@ -238,9 +238,10 @@ public abstract class GameClient implements GameProtocol {
 			}
 			
 			HashMap<Integer, Entity> loaded = new HashMap<>();
-			for(Entity e: level.getEntities())
+			level.forEachEntity(e -> {
 				if(e != player && !(e instanceof ClientParticle))
 					loaded.put(e.getId(), e);
+			});
 			
 			for(int i = 0; i < list.ids.length; i++) {
 				boolean entityLoaded = loaded.containsKey(list.ids[i]);

@@ -353,8 +353,8 @@ public class ServerWorld extends WorldManager {
 		return entityManager.getEntityCount(level);
 	}
 	
-	public HashSet<ServerEntity> getEntities(ServerLevel level) {
-		return entityManager.getEntities(level);
+	public void forEachEntity(ServerLevel level, ValueAction<ServerEntity> action) {
+		entityManager.forEachEntity(level, action);
 	}
 	
 	@Override

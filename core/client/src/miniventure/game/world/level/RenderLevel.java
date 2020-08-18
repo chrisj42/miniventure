@@ -1,8 +1,8 @@
 package miniventure.game.world.level;
 
 import java.util.Comparator;
-import java.util.Set;
 
+import miniventure.game.util.function.ValueAction;
 import miniventure.game.util.pool.Vector3Pool;
 import miniventure.game.util.pool.VectorPool;
 import miniventure.game.world.WorldObject;
@@ -49,7 +49,9 @@ public abstract class RenderLevel extends Level {
 	public int getEntityCount() { return getWorld().getEntityTotal(); }
 	
 	@Override
-	public Set<? extends Entity> getEntities() { return getWorld().getRegisteredEntities(); }
+	public void forEachEntity(ValueAction<Entity> action) {
+		getWorld().forEachRegisteredEntity(action);
+	}
 	
 	public abstract void render(Rectangle renderSpace, SpriteBatch batch, float delta, Vector2 posOffset);
 	
