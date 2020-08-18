@@ -265,20 +265,16 @@ public class ServerLevel extends Level {
 		dropPos.x = itemBounds.x;
 		dropPos.y = itemBounds.y;
 		
-		Vector2 dropDir;
-		boolean freeSecond = false;
-		if(targetPos == null) {
-			dropDir = VectorPool.POOL.obtain(0, 0).setToRandomDirection();
-			freeSecond = true;
-		}
-		else
-			dropDir = targetPos.sub(dropPos);
+		Vector2 dropDir = null;
+		if(targetPos != null)
+			dropDir = targetPos.sub(dropPos).nor(); // FIXME normalize to prevent crazy bouncing; need to find out why that happens
 		
 		getWorld().cancelIdReservation(ie);
 		ItemEntity nie = new ItemEntity(getWorld(), item, dropDir, delayPickup);
 		
 		nie.moveTo(dropPos, free);
-		if(free || freeSecond) VectorPool.POOL.free(dropDir);
+		if(free && targetPos != null)
+			VectorPool.POOL.free(targetPos);
 		RectPool.POOL.free(itemBounds);
 		RectPool.POOL.free(closestBounds);
 		addEntity(nie);
