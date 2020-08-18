@@ -90,7 +90,7 @@ public class ServerPlayer extends ServerMob implements Player {
 		stats.put(Stat.Stamina, data.get("stamina", Integer::parseInt));
 		// stats.put(Stat.Armor, Integer.parseInt(data.get(3)));
 		
-		if(data.get("sloc").equals("null"))
+		if(data.get("sloc").length() == 0)
 			spawnLoc = null;
 		else
 			spawnLoc = data.get("sloc", Point::new);
@@ -111,7 +111,7 @@ public class ServerPlayer extends ServerMob implements Player {
 		data.add("name", name);
 		data.add("hunger", getStat(Stat.Hunger));
 		data.add("stamina", getStat(Stat.Stamina));
-		data.add("sloc", spawnLoc == null ? null : spawnLoc.serialize());
+		data.add("sloc", spawnLoc == null ? "" : spawnLoc.serialize());
 		data.add("slvl", spawnLevel);
 		data.add("inv", MyUtils.encodeStringArray(invManager.save()));
 		
