@@ -18,7 +18,7 @@ public class Version implements Comparable<Version> {
 		// TODO how to specify release? Is it even needed?
 	
 	// the last digit increments without release or tag
-	public static final Version CURRENT = makeVersion("2.2.2");
+	public static final Version CURRENT = makeVersion("2.2.3.1");
 	
 	// the last time there was a change in the save format
 	private static final Version latestFormatChange = makeVersion("2.2.2");
