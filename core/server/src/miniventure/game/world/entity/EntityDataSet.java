@@ -18,8 +18,13 @@ public class EntityDataSet extends SerialHashMap {
 	}
 	
 	@Override
-	public <T> T get(String key, MapFunction<String, T> mapper) {
-		return super.get(prefix+key, mapper);
+	public String remove(Object key) {
+		return super.remove(prefix+key);
+	}
+	
+	@Override
+	public String get(Object key) {
+		return super.get(prefix+key);
 	}
 	
 	public void setPrefix(String prefix) {
