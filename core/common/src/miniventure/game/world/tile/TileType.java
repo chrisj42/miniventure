@@ -42,11 +42,11 @@ public abstract class TileType {
 	}
 	
 	private final TileTypeEnum enumType;
-	private final TileDataOrder dataTypes;
+	private final TileTypeDataOrder dataTypes;
 	
 	TileType(TileTypeEnum enumType) {
 		this.enumType = enumType;
-		dataTypes = new TileDataOrder(this);
+		dataTypes = new TileTypeDataOrder(this);
 	}
 	
 	public TileTypeEnum getTypeEnum() { return enumType; }

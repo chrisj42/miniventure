@@ -14,15 +14,15 @@ public class TileTypeDataMap {
 	
 	// FIXME these client-side maps have no good way of clearing data associations from tiles when the types are updated. Currently, the only used data is animation time and that sorta works for now. This should be better when stacks are reduced to 1 type per layer.
 	
-	private final TileDataOrder dataOrder;
+	private final TileTypeDataOrder dataOrder;
 	private final Object[] data;
 	
-	TileTypeDataMap(TileDataOrder dataOrder) {
+	TileTypeDataMap(TileTypeDataOrder dataOrder) {
 		this.dataOrder = dataOrder;
 		data = dataOrder.createDataArray();
 	}
 	
-	TileTypeDataMap(TileDataOrder dataOrder, String allData, @Nullable Version versionIfFile) {
+	TileTypeDataMap(TileTypeDataOrder dataOrder, String allData, @Nullable Version versionIfFile) {
 		this(dataOrder);
 		final boolean fromFile = versionIfFile != null;
 		String[] dataAr = MyUtils.parseLayeredString(allData);
