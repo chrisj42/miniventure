@@ -9,6 +9,8 @@ import org.jetbrains.annotations.NotNull;
 
 class TileAnimation extends Animation<TextureHolder> {
 	
+	// The reason this class isn't cached completely is essentially just for those tiles (namely water) that take advantage of random frame iteration.
+	
 	private final boolean sync;
 	private final TileTypeEnum tileType;
 	
