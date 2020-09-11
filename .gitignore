@@ -9,7 +9,7 @@ hs_err_pid*
 /core/*/out/
 /desktop/out/
 /gentest/out/
-notes/ignored/
+notes/
 sprites/cache/
 scripts/
 core/sponly/
