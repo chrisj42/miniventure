@@ -110,7 +110,7 @@ public class TileTypeRenderer implements TileProperty {
 			transitions = new HashMap<>();
 			
 			// by default, if connection sprites exist, the tile type will connect only to itself
-			if(connectAnimations.hasAnimations(tileType) && !tileType.multi)
+			if(connectAnimations.hasAnimations(tileType)/* && !tileType.multi*/)
 				connectionCheck = ConnectionCheck.list(tileType);
 			else
 				connectionCheck = null;
@@ -186,20 +186,6 @@ public class TileTypeRenderer implements TileProperty {
 			addMainSprite(sprites, tile);
 			addConnectionSprite(sprites, tile, aroundTypes);
 		}
-		
-		// check for multi
-		/*if(tileType.multi) {
-			// move texture regions
-			Point anchor = tile.getDataMap(tileType).get(TileDataTag.AnchorPos);
-			int xo = tile.x - anchor.x;
-			int yo = tile.y - anchor.y;
-			xo *= Tile.SIZE;
-			yo *= Tile.SIZE;
-			LinkedList<TileAnimation> relocSprites = new LinkedList<>();
-			for(TileAnimation anim: sprites) {
-				TileAnZ
-			}
-		}*/
 		
 		return sprites;
 	}

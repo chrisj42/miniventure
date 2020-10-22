@@ -114,7 +114,7 @@ public class TileStack<T extends TileType> {
 		synchronized (dataLock) {
 			stack.add(newLayer);
 			data.put(newLayer.getTypeEnum(), dataMap);
-			if(newLayer.isMulti()) {
+			/*if(newLayer.isMulti()) {
 				// spread to rest of tiles
 				TileTypeEnum type = newLayer.getTypeEnum();
 				for(int x = 0; x < type.size.x; x++) {
@@ -128,7 +128,7 @@ public class TileStack<T extends TileType> {
 						}
 					}
 				}
-			}
+			}*/
 		}
 	}
 	
@@ -139,7 +139,7 @@ public class TileStack<T extends TileType> {
 			if(stack.size == 1) return null;
 			T type = stack.removeIndex(stack.size-1);
 			data.remove(type.getTypeEnum());
-			if(type.isMulti()) {
+			/*if(type.isMulti()) {
 				// remove others
 				Point size = type.getTypeEnum().size;
 				for(int x = 0; x < size.x; x++) {
@@ -153,7 +153,7 @@ public class TileStack<T extends TileType> {
 						}
 					}
 				}
-			}
+			}*/
 			return type;
 		}
 	}

@@ -32,7 +32,7 @@ public class ProtoTile {
 		addLayer(TileTypeEnum.HOLE);
 	}
 	
-	@Nullable
+	/*@Nullable
 	private TileTypeDataMap addMulti(TileTypeEnum type) {
 		TileType typeInstance = level.getWorld().getTileType(type);
 		if(!typeInstance.isMulti())
@@ -60,12 +60,12 @@ public class ProtoTile {
 		}
 		
 		return map;
-	}
+	}*/
 	
 	// public void addLayer(TileTypeEnum type) { stack.add(type); }
 	public TileTypeDataMap addLayer(TileTypeEnum type) {
-		if(level.getWorld().getTileType(type).isMulti())
-			return addMulti(type);
+		// if(level.getWorld().getTileType(type).isMulti())
+		// 	return addMulti(type);
 		
 		TileTypeInfo info = new TileTypeInfo(level.getWorld(), type);
 		stack.add(info);

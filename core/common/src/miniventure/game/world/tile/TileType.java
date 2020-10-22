@@ -49,8 +49,8 @@ public abstract class TileType {
 		this.enumType = enumType;
 		dataTypes = new TileTypeDataOrder(this);
 		
-		if(isMulti())
-			registerData(TileDataTag.AnchorPos);
+		// if(isMulti())
+		// 	registerData(TileDataTag.AnchorPos);
 	}
 	
 	public TileTypeEnum getTypeEnum() { return enumType; }
@@ -60,9 +60,9 @@ public abstract class TileType {
 		return enumType.speedRatio;
 	}
 	
-	public boolean isMulti() {
+	/*public boolean isMulti() {
 		return enumType.size.x > 1 || enumType.size.y > 1;
-	}
+	}*/
 	
 	// public Point getSize() { return enumType.size; }
 	

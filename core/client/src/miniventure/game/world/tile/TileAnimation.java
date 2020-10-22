@@ -17,8 +17,8 @@ class TileAnimation extends Animation<TextureHolder> {
 	private final TileTypeEnum tileType;
 	private final RenderTile tile;
 	
-	private final boolean customSize;
-	private int offX, offY;
+	// private final boolean customSize;
+	// private int offX, offY;
 	
 	/*TileAnimation(@NotNull TileTypeEnum tileType, boolean sync, float fps, Array<TextureHolder> keyFrames) {
 		this(tileType, sync, fps, keyFrames, PlayMode.LOOP);
@@ -37,14 +37,14 @@ class TileAnimation extends Animation<TextureHolder> {
 		this.tileType = tileType;
 		this.tile = tile;
 		
-		if(tileType.multi) {
+		/*if(tileType.multi) {
 			customSize = true;
 			// a subsection of the tile texture needs to be drawn
 			Point anchor = tile.getDataMap(tileType).get(TileDataTag.AnchorPos);
 			offX = (tile.x - anchor.x) * Tile.SIZE;
 			offY = (tile.y - anchor.y) * Tile.SIZE;
 		} else
-			customSize = false;
+			customSize = false;*/
 	}
 	
 	/*TextureHolder getKeyFrame() {
@@ -81,9 +81,9 @@ class TileAnimation extends Animation<TextureHolder> {
 		
 		TextureHolder tex = super.getKeyFrame(time - startTime);
 		
-		if(customSize)
+		/*if(customSize)
 			batch.draw(tex.texture.getTexture(), x, y, tex.texture.getRegionX() + offX, tex.texture.getRegionY() + offY, Tile.SIZE, Tile.SIZE);
 		else
-			batch.draw(tex.texture, x, y);
+			*/batch.draw(tex.texture, x, y);
 	}
 }

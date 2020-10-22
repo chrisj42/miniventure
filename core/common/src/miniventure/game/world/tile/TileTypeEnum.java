@@ -54,7 +54,7 @@ public enum TileTypeEnum implements TileProcessor {
 	public final float speedRatio;
 	public final Color color;
 	public final Point size;
-	public final boolean multi;
+	// public final boolean multi;
 	
 	TileTypeEnum(boolean walkable, Value<?>... params) {
 		this.walkable = walkable;
@@ -62,7 +62,7 @@ public enum TileTypeEnum implements TileProcessor {
 		speedRatio = map.get(P.SPEED);
 		color = map.get(P.COLOR);
 		size = map.get(P.SIZE);
-		multi = size.x > 1 || size.y > 1;
+		// multi = size.x > 1 || size.y > 1;
 		MyUtils.debug("Initialized TileType "+this);
 	}
 	TileTypeEnum(boolean walkable, Color color) { this(walkable, P.COLOR.as(color)); }

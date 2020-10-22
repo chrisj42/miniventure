@@ -116,7 +116,7 @@ public class ServerLevel extends Level {
 	}*/
 	
 	public void onTileUpdate(ServerTile tile, @Nullable TileTypeEnum updatedType) {
-		if(updatedType != null && getWorld().getTileType(updatedType).isMulti()) {
+		/*if(updatedType != null && getWorld().getTileType(updatedType).isMulti()) {
 			// update other tiles too
 			for(int x = 0; x < updatedType.size.x; x++) {
 				for(int y = 0; y < updatedType.size.y; y++) {
@@ -124,7 +124,7 @@ public class ServerLevel extends Level {
 					onTileUpdate(getTile(tile.x+x, tile.y+y), null);
 				}
 			}
-		}
+		}*/
 		
 		getServer().broadcastLocal(this, new TileUpdate(tile, updatedType));
 		
