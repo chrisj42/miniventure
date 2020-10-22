@@ -36,7 +36,7 @@ public abstract class Tile implements WorldObject {
 		 Note, we might end up having a property type enum as well as a tile type enum...
 	 */
 	
-	public static final int RESOLUTION = 16;
+	public static final int RESOLUTION = 32;
 	public static final int SCALE = 4;
 	public static final int SIZE = RESOLUTION * SCALE;
 	
