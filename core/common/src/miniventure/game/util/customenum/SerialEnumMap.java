@@ -15,7 +15,7 @@ public class SerialEnumMap<ET extends SerialEnum> {
 	final HashMap<ET, Object> map = new HashMap<>();
 	
 	public SerialEnumMap() {}
-	public SerialEnumMap(DataEntry<?, ? extends ET>... entries) { addAll(entries); }
+	public SerialEnumMap(SerialEntry<?, ? extends ET>... entries) { addAll(entries); }
 	public SerialEnumMap(SerialEnumMap<ET> model) {
 		map.putAll(model.map);
 	}
@@ -38,17 +38,17 @@ public class SerialEnumMap<ET extends SerialEnum> {
 		return MyUtils.encodeStringArray(entries);
 	}
 	
-	public SerialEnumMap<ET> add(DataEntry<?, ? extends ET> entry) {
+	public SerialEnumMap<ET> add(SerialEntry<?, ? extends ET> entry) {
 		put(entry);
 		return this;
 	}
-	public SerialEnumMap<ET> addAll(DataEntry<?, ? extends ET>... entries) {
-		for(DataEntry<?, ? extends ET> e: entries)
+	public SerialEnumMap<ET> addAll(SerialEntry<?, ? extends ET>... entries) {
+		for(SerialEntry<?, ? extends ET> e: entries)
 			put(e);
 		return this;
 	}
 	
-	public <T> T put(DataEntry<T, ? extends ET> entry) {
+	public <T> T put(SerialEntry<T, ? extends ET> entry) {
 		return (T) map.put(entry.key, entry.value);
 	}
 	public <T, CET extends SerialEnum<T, ? extends ET>> T put(CET key, T value) {
@@ -72,7 +72,7 @@ public class SerialEnumMap<ET extends SerialEnum> {
 	}
 	
 	// fetches the value for the given key. If there is no key, the default value is added for it and returned.
-	public <T, CET extends SerialEnum<T, ? extends ET>> T getOrDefaultAndPut(DataEntry<T, ? extends ET> tagWithDefault) {
+	public <T, CET extends SerialEnum<T, ? extends ET>> T getOrDefaultAndPut(SerialEntry<T, ? extends ET> tagWithDefault) {
 		return getOrDefaultAndPut((CET) tagWithDefault.key, tagWithDefault.value);
 	}
 	public <T, CET extends SerialEnum<T, ? extends ET>> T getOrDefaultAndPut(CET tag, T defaultValue) {
