@@ -231,12 +231,15 @@ public interface GameProtocol {
 		}
 	}
 	
-	class LevelChunk {
+	// used for loading initial level data, and updating multi-tiles, but could also just be used to update an area of tiles at once.
+	class TileAreaUpdate {
 		public final Point offset;
 		public final TileData[][] tileData;
+		public final boolean updateAdjacent;
 		
-		private LevelChunk() { this(null, null); }
-		public LevelChunk(Point offset, int width, int height, TileData[][] allData) {
+		private TileAreaUpdate() { this(null, null, false); }
+		public TileAreaUpdate(Point offset, int width, int height, TileData[][] allData) {
+			this.updateAdjacent = false; // this constructor assumes we are loading a level, and in that case we don't update adjacent tiles
 			this.offset = offset;
 			this.tileData = new TileData[width][height];
 			for (int i = 0; i < width; i++) {
@@ -245,14 +248,15 @@ public interface GameProtocol {
 				}
 			}
 		}
-		public LevelChunk(Point offset, TileData[][] tileData) {
+		public TileAreaUpdate(Point offset, TileData[][] tileData, boolean updateAdjacent) {
 			this.offset = offset;
 			this.tileData = tileData;
+			this.updateAdjacent = updateAdjacent;
 		}
 	}
 	
 	// for server to send level data to the client. Sets the client to a loading screen, which stays open until a SpawnData is sent. A SpawnData packet will always clear a loading screen.
-	class LevelData {
+	/*class LevelData {
 		public final LevelId levelId;
 		public final TileData[][] tiles;
 		
@@ -264,7 +268,7 @@ public interface GameProtocol {
 			this.levelId = levelId;
 			this.tiles = tiles;
 		}
-	}
+	}*/
 	
 	// used in MapRequest below; holds general data about a single island.
 	class IslandReference {
@@ -306,7 +310,7 @@ public interface GameProtocol {
 		public final LevelId levelId;
 		public final int x;
 		public final int y;
-		public final TileTypeEnum updatedType;
+		// public final TileTypeEnum updatedType;
 		
 		private TileUpdate() { this(null, null, 0, 0, null); }
 		public TileUpdate(Tile tile, TileTypeEnum updatedType) { this(tile, tile.getLocation(), updatedType); }
@@ -316,7 +320,7 @@ public interface GameProtocol {
 			this.levelId = levelId;
 			this.x = x;
 			this.y = y;
-			this.updatedType = updatedType;
+			// this.updatedType = updatedType;
 		}
 	}
 	

@@ -11,6 +11,7 @@ import miniventure.game.world.entity.particle.ActionParticle;
 import miniventure.game.world.management.LevelWorldManager;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileTypeEnum;
+import miniventure.game.world.worldgen.island.ProtoLevel;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
@@ -32,13 +33,16 @@ public abstract class RenderLevel extends Level {
 	// start times of overlap animations, stored by the tile they come from
 	// public final LevelDataMap<Float> overlapAnimStartTimes = new LevelDataMap<>();
 	
-	protected RenderLevel(@NotNull LevelWorldManager world, LevelId levelId, @NotNull TileTypeEnum[][][] tileTypes, @NotNull TileMaker tileFetcher) {
-		super(world, levelId, tileTypes, tileFetcher);
+	protected RenderLevel(@NotNull LevelWorldManager world, LevelId levelId, int width, int height) {
+		super(world, levelId, width, height);
+	}
+	/*protected RenderLevel(@NotNull LevelWorldManager world, LevelId levelId, @NotNull ProtoLevel protoLevel, @NotNull TileMaker tileFetcher) {
+		super(world, levelId, protoLevel, tileFetcher);
 	}
 	
 	protected RenderLevel(@NotNull LevelWorldManager world, LevelId levelId, int width, int height, TileFetcher tileFetcher) {
 		super(world, levelId, width, height, tileFetcher);
-	}
+	}*/
 	
 	@Override @NotNull
 	public LevelWorldManager getWorld() { return (LevelWorldManager) super.getWorld(); }
@@ -101,7 +105,7 @@ public abstract class RenderLevel extends Level {
 			obj.render(batch, delta, posOffset);
 	}
 	
-	public static Array<Vector3> renderLighting(Array<WorldObject> objects, Array<Vector3> lighting) {
+	/*public static Array<Vector3> renderLighting(Array<WorldObject> objects, Array<Vector3> lighting) {
 		
 		for(WorldObject obj: objects) {
 			float lightR = obj.getLightRadius();
@@ -113,5 +117,5 @@ public abstract class RenderLevel extends Level {
 		}
 		
 		return lighting;
-	}
+	}*/
 }

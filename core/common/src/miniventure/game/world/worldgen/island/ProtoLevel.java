@@ -4,9 +4,13 @@ import java.awt.Color;
 import java.util.Random;
 
 import miniventure.game.world.Point;
+import miniventure.game.world.management.WorldManager;
 import miniventure.game.world.tile.TileTypeEnum;
+import miniventure.game.world.tile.TileTypeInfo;
 import miniventure.game.world.worldgen.noise.GenInfo;
 import miniventure.game.world.worldgen.noise.NoiseGenerator;
+
+import org.jetbrains.annotations.NotNull;
 
 // passed around to layer makers during island generation
 // island starts out like this, and this is passed to level constructor
@@ -19,14 +23,18 @@ public class ProtoLevel extends GenInfo {
 	
 	private final ProtoTile[][] tiles;
 	
+	@NotNull
+	private final WorldManager world;
+	
 	// public ProtoIsland(GenInfo info) { this(info.seed, info.width, info.height); }
-	public ProtoLevel(long seed, int width, int height) {
+	public ProtoLevel(@NotNull WorldManager world, long seed, int width, int height) {
 		super(seed, width, height);
+		this.world = world;
 		random = new Random(seed);
 		tiles = new ProtoTile[width][height];
 		for(int x = 0; x < width; x++)
 			for(int y = 0; y < height; y++)
-				tiles[x][y] = new ProtoTile(x, y, x * height + y);
+				tiles[x][y] = new ProtoTile(this, x, y/*, x * height + y*/);
 	}
 	
 	long requestSeed() {
@@ -35,6 +43,9 @@ public class ProtoLevel extends GenInfo {
 		// return curSeed;
 		return random.nextLong();
 	}
+	
+	@NotNull
+	WorldManager getWorld() { return world; }
 	
 	public ProtoTile getTile(Point p) { return getTile(p.x, p.y); }
 	public ProtoTile getTile(int x, int y) {
@@ -47,8 +58,8 @@ public class ProtoLevel extends GenInfo {
 				processor.processTile(getTile(x, y));
 	}
 	
-	public TileTypeEnum[][][] getMap() {
-		TileTypeEnum[][][] types = new TileTypeEnum[width][height][];
+	public TileTypeInfo[][][] getMap() {
+		TileTypeInfo[][][] types = new TileTypeInfo[width][height][];
 		
 		for(int x = 0; x < width; x++)
 			for(int y = 0; y < height; y++)

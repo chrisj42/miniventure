@@ -5,8 +5,10 @@ import miniventure.game.util.customenum.GenericEnum;
 import miniventure.game.util.customenum.SerialEnum;
 import miniventure.game.util.customenum.SerialEnumMap;
 import miniventure.game.util.customenum.Serializer;
+import miniventure.game.util.customenum.Serializer.Deserializer;
 import miniventure.game.util.function.Action;
 import miniventure.game.util.function.MapFunction;
+import miniventure.game.world.Point;
 
 public class TileDataTag<T> extends SerialEnum<T, TileDataTag<T>> {
 	
@@ -20,6 +22,10 @@ public class TileDataTag<T> extends SerialEnum<T, TileDataTag<T>> {
 	// Transition
 	public static final TileDataTag<String> TransitionName =
 		new TileDataTag<>(new Serializer<>(false, true, String.class));
+	
+	// Multi-tiles
+	public static final TileDataTag<Point> AnchorPos =
+		new TileDataTag<>(new Serializer<>(true, true, Point::serialize, Deserializer.ignoreVersion(Point::new)));
 	
 	// Non-Serializing
 	

@@ -5,6 +5,10 @@ import java.util.Arrays;
 import java.util.EnumSet;
 
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.param.Param;
+import miniventure.game.util.param.ParamMap;
+import miniventure.game.util.param.Value;
+import miniventure.game.world.Point;
 import miniventure.game.world.management.WorldManager;
 import miniventure.game.world.worldgen.island.ProtoTile;
 import miniventure.game.world.worldgen.island.TileProcessor;
@@ -21,7 +25,7 @@ public enum TileTypeEnum implements TileProcessor {
 	SNOW(true, Color.WHITE),
 	SMALL_STONE(true, Color.LIGHT_GRAY),
 	WATER(true, 0.6f, Color.BLUE.darker()),
-	DOCK(true),
+	DOCK(true, P.SIZE.as(Point.TWO)),
 	COAL_ORE(false),
 	IRON_ORE(false),
 	TUNGSTEN_ORE(false),
@@ -30,28 +34,44 @@ public enum TileTypeEnum implements TileProcessor {
 	STONE_FLOOR(true),
 	WOOD_WALL(false),
 	STONE_WALL(false),
-	OPEN_DOOR(true),
-	CLOSED_DOOR(false),
+	OPEN_DOOR(true, P.SIZE.as(Point.TWO)),
+	CLOSED_DOOR(false, P.SIZE.as(Point.TWO)),
 	TORCH(true),
 	CACTUS(false, Color.GREEN.darker().darker()),
-	CARTOON_TREE(false, Color.GREEN.darker().darker()),
-	DARK_TREE(false, Color.GREEN.darker().darker()),
-	PINE_TREE(false, Color.GREEN.darker().darker()),
-	POOF_TREE(false, Color.GREEN.darker().darker()),
+	CARTOON_TREE(false, 1, Color.GREEN.darker().darker(), Point.TWO),
+	DARK_TREE(false, 1, Color.GREEN.darker().darker(), Point.TWO),
+	PINE_TREE(false, 1, Color.GREEN.darker().darker(), Point.TWO),
+	POOF_TREE(false, 1, Color.GREEN.darker().darker(), Point.TWO),
 	AIR(true);
+	
+	private interface P {
+		Param<Float> SPEED = new Param<>(1f);
+		Param<Color> COLOR = new Param<>(Color.BLACK);
+		Param<Point> SIZE = new Param<>(new Point(0, 0));
+	}
 	
 	public final boolean walkable;
 	public final float speedRatio;
 	public final Color color;
+	public final Point size;
+	public final boolean multi;
 	
-	TileTypeEnum(boolean walkable) { this(walkable, 1); }
-	TileTypeEnum(boolean walkable, Color color) { this(walkable, 1, color); }
-	TileTypeEnum(boolean walkable, float speedRatio) { this(walkable, speedRatio, Color.BLACK); }
-	TileTypeEnum(boolean walkable, float speedRatio, Color color) {
+	TileTypeEnum(boolean walkable, Value<?>... params) {
 		this.walkable = walkable;
-		this.speedRatio = speedRatio;
-		this.color = color;
+		ParamMap map = new ParamMap(params);
+		speedRatio = map.get(P.SPEED);
+		color = map.get(P.COLOR);
+		size = map.get(P.SIZE);
+		multi = size.x > 1 || size.y > 1;
 		MyUtils.debug("Initialized TileType "+this);
+	}
+	TileTypeEnum(boolean walkable, Color color) { this(walkable, P.COLOR.as(color)); }
+	TileTypeEnum(boolean walkable, float speedRatio) { this(walkable, P.SPEED.as(speedRatio)); }
+	TileTypeEnum(boolean walkable, float speedRatio, Color color) {
+		this(walkable, P.COLOR.as(color), P.SPEED.as(speedRatio));
+	}
+	TileTypeEnum(boolean walkable, float speedRatio, Color color, Point size) {
+		this(walkable, P.COLOR.as(color), P.SPEED.as(speedRatio), P.SIZE.as(size));
 	}
 	
 	private static final TileTypeEnum[] values = TileTypeEnum.values();

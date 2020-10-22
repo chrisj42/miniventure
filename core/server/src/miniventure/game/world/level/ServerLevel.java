@@ -53,13 +53,18 @@ public class ServerLevel extends Level {
 	//private float timeCache = 0; // this is used when you should technically be updating < 1 tile in a frame.
 	
 	public ServerLevel(@NotNull ServerWorld world, LevelId levelId, ProtoLevel level) {
-		super(world, levelId, level.getMap(), ServerTile::new);
-		// this.dataCache = cache;
+		super(world, levelId, level.width, level.height);
+		setTiles(level);
 	}
 	
 	public ServerLevel(@NotNull ServerWorld world, LevelId levelId, TileData[][] tileData) {
-		super(world, levelId, tileData, ServerTile::new);
-		// this.dataCache = cache;
+		super(world, levelId, tileData.length, tileData[0].length);
+		setTiles(tileData);
+	}
+	
+	@Override
+	protected Tile makeTile(int x, int y) {
+		return new ServerTile(this, x, y);
 	}
 	
 	@Override @NotNull
@@ -111,11 +116,19 @@ public class ServerLevel extends Level {
 	}*/
 	
 	public void onTileUpdate(ServerTile tile, @Nullable TileTypeEnum updatedType) {
+		if(updatedType != null && getWorld().getTileType(updatedType).isMulti()) {
+			// update other tiles too
+			for(int x = 0; x < updatedType.size.x; x++) {
+				for(int y = 0; y < updatedType.size.y; y++) {
+					if(x == 0 && y == 0) continue;
+					onTileUpdate(getTile(tile.x+x, tile.y+y), null);
+				}
+			}
+		}
+		
 		getServer().broadcastLocal(this, new TileUpdate(tile, updatedType));
 		
-		HashSet<Tile> tiles = getAreaTiles(tile.getLocation(), 1, true);
-		
-		newTileUpdates.addAll(tiles);
+		forAreaTiles(tile.getLocation(), 1, true, newTileUpdates::add);
 	}
 	
 	//private float updateAllDelta = 0;

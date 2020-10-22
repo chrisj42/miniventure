@@ -3,13 +3,15 @@ package miniventure.game.world.worldgen.island;
 import java.util.Random;
 
 import miniventure.game.util.MyUtils;
-import miniventure.game.world.tile.TileTypeEnum;
+import miniventure.game.world.management.WorldManager;
 import miniventure.game.world.worldgen.LevelGenerator;
 import miniventure.game.world.worldgen.noise.Coherent2DNoiseFunction;
 import miniventure.game.world.worldgen.noise.Noise;
 import miniventure.game.world.worldgen.noise.NoiseGenerator;
 import miniventure.game.world.worldgen.noise.NoiseModifier;
 import miniventure.game.world.worldgen.noise.Testing;
+
+import org.jetbrains.annotations.NotNull;
 
 import static miniventure.game.world.tile.TileTypeEnum.*;
 import static miniventure.game.world.worldgen.noise.NoiseModifier.FILL_VALUE_RANGE;
@@ -259,8 +261,8 @@ public enum IslandType {
 		
 	});
 	
-	private final int width;
-	private final int height;
+	public final int width;
+	public final int height;
 	private final LevelGenerator surfaceGenerator;
 	private final LevelGenerator cavernGenerator;
 	
@@ -276,8 +278,8 @@ public enum IslandType {
 		return surface ? surfaceGenerator : cavernGenerator;
 	}
 	
-	public ProtoLevel generateLevel(long seed, boolean surface) {
-		ProtoLevel level = getGenerator(surface).generateLevel(width, height, seed);
+	public ProtoLevel generateLevel(@NotNull WorldManager world, long seed, boolean surface) {
+		ProtoLevel level = getGenerator(surface).generateLevel(world, width, height, seed);
 		
 		if(level.getTile(0, 0).getTopLayer() != WATER) {
 			level.getTile(0, 0).addLayer(DOCK);
@@ -303,19 +305,19 @@ public enum IslandType {
 		return level;
 	}
 	
-	public boolean displayColorMap(boolean surface, long seed, int scale) {
-		ProtoLevel level = getGenerator(surface).generateLevel(width, height, seed);
+	public boolean displayColorMap(@NotNull WorldManager world, boolean surface, long seed, int scale) {
+		ProtoLevel level = getGenerator(surface).generateLevel(world, width, height, seed);
 		
 		return Testing.displayMap(width, height, scale, level.getColors());
 	}
-	public void displayColorMap(boolean surface, boolean repeat, int scale) {
+	public void displayColorMap(@NotNull WorldManager world, boolean surface, boolean repeat, int scale) {
 		Random rand = new Random();
 		if(!repeat)
-			displayColorMap(surface, rand.nextLong(), scale);
+			displayColorMap(world, surface, rand.nextLong(), scale);
 		else {
 			boolean again = true;
 			while(again)
-				again = displayColorMap(surface, rand.nextLong(), scale);
+				again = displayColorMap(world, surface, rand.nextLong(), scale);
 		}
 	}
 }

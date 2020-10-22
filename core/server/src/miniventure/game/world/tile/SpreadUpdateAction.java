@@ -56,14 +56,13 @@ class SpreadUpdateAction implements UpdateAction {
 	public void update(@NotNull ServerTile tile, FetchFunction<String> dataCacheFetcher, ValueAction<String> dataCacheSetter) {
 		if(MathUtils.random() >= spreadChance) return; // must be less to execute; a chance of 1 will always execute.
 		
-		HashSet<Tile> around = tile.getAdjacentTiles(false);
 		//around.shuffle();
-		for(Tile t: around) {
+		tile.forAdjacentTiles(false, t -> {
 			if(replaces.contains(t.getType().getTypeEnum())) {
 				replaceBehavior.spreadType(ServerTileType.get(tileType), (ServerTile)t);
 				//break;
 			}
-		}
+		});
 	}
 	
 	@Override

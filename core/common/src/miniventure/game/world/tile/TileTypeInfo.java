@@ -3,28 +3,31 @@ package miniventure.game.world.tile;
 import miniventure.game.world.management.WorldManager;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 // used to package a tiletype with some initial data.
 public class TileTypeInfo {
 	
 	@NotNull
-	public final TileTypeEnum tileType;
+	public final TileTypeEnum typeEnum;
+	private final TileTypeDataMap data;
 	
-	private final TileTypeDataMap initialData;
-	
-	public TileTypeInfo(@NotNull TileType tileType) { this(tileType, null); }
-	public TileTypeInfo(@NotNull TileType tileType, @Nullable TileTypeDataMap initialData) {
-		this(tileType.getTypeEnum(), initialData);
+	public TileTypeInfo(@NotNull WorldManager world, @NotNull TileTypeEnum tileType) {
+		this(world.getTileType(tileType));
 	}
-	public TileTypeInfo(@NotNull TileTypeEnum tileType) { this(tileType, null); }
-	public TileTypeInfo(@NotNull TileTypeEnum tileType, @Nullable TileTypeDataMap initialData) {
-		this.tileType = tileType;
-		this.initialData = initialData;
+	public TileTypeInfo(@NotNull TileType tileType) {
+		this.typeEnum = tileType.getTypeEnum();
+		data = tileType.createDataMap();
+	}
+	public TileTypeInfo(@NotNull TileType tileType, @NotNull TileTypeDataMap dataMap) {
+		this(tileType.getTypeEnum(), dataMap);
+	}
+	public TileTypeInfo(@NotNull TileTypeEnum tileType, @NotNull TileTypeDataMap dataMap) {
+		this.typeEnum = tileType;
+		this.data = dataMap;
 	}
 	
 	@NotNull
-	public TileTypeDataMap getInitialData(WorldManager world) {
-		return initialData == null ? world.getTileType(tileType).createDataMap() : initialData;
+	public TileTypeDataMap getData() {
+		return data;
 	}
 }

@@ -473,7 +473,7 @@ public abstract class GameServer implements GameProtocol {
 				Point offset = new Point(i, j);
 				int width = Math.min(ServerLevel.CHUNK_SIZE, tileData.length - i);
 				int height = Math.min(ServerLevel.CHUNK_SIZE, tileData[i].length - j);
-				connection.send(new LevelChunk(offset, width, height, tileData));
+				connection.send(new TileAreaUpdate(offset, width, height, tileData));
 				MyUtils.sleep(2);
 			}
 		}

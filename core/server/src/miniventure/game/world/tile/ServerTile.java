@@ -1,7 +1,5 @@
 package miniventure.game.world.tile;
 
-import java.util.HashSet;
-
 import miniventure.game.item.Item;
 import miniventure.game.item.Result;
 import miniventure.game.item.ServerItem;
@@ -28,19 +26,13 @@ import org.jetbrains.annotations.Nullable;
 /** @noinspection EqualsAndHashcode*/
 public class ServerTile extends Tile {
 	
-	public ServerTile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types) {
-		this(level, x, y, types, null);
-	}
-	public ServerTile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, TileTypeDataMap[] dataMaps) {
-		this((ServerLevel) level, x, y, types, dataMaps);
-	}
-	public ServerTile(@NotNull ServerLevel level, int x, int y, @NotNull TileTypeEnum[] types, TileTypeDataMap[] dataMaps) {
-		super(level, x, y, types, dataMaps);
+	public ServerTile(@NotNull ServerLevel level, int x, int y) {
+		super(level, x, y);
 	}
 	
 	@Override
-	ServerTileStack makeStack(@NotNull TileTypeEnum[] types, @Nullable TileTypeDataMap[] dataMaps) {
-		return new ServerTileStack(getWorld(), types, dataMaps);
+	ServerTileStack makeStack() {
+		return new ServerTileStack(this);
 	}
 	
 	@Override @NotNull
@@ -64,15 +56,15 @@ public class ServerTile extends Tile {
 	public synchronized void addTile(@NotNull TileTypeInfo newType) { addTile(newType, getType()); }
 	// not synchronizing this only because it's always called in a synchronized context.
 	private void addTile(@NotNull TileTypeInfo newTypeInfo, @NotNull ServerTileType prevType) {
-		ServerTileType newType = ServerTileType.get(newTypeInfo.tileType);
+		ServerTileType newType = ServerTileType.get(newTypeInfo.typeEnum);
 		
 		moveEntities(newType);
 		
-		getTypeStack().addLayer(newType, newTypeInfo.getInitialData(getWorld()));
+		getTypeStack().addLayer(newType, newTypeInfo.getData());
 		
 		// check for an entrance animation
 		if(!newType.get(P.TRANS).tryStartAnimation(this, prevType))
-			getLevel().onTileUpdate(this, newTypeInfo.tileType); // trigger update manually since tile still changed, just without an animation; tryStartAnimation only triggers updates for transition state changes.
+			getLevel().onTileUpdate(this, newTypeInfo.typeEnum); // trigger update manually since tile still changed, just without an animation; tryStartAnimation only triggers updates for transition state changes.
 	}
 	
 	// starting point to break a tile
@@ -123,9 +115,10 @@ public class ServerTile extends Tile {
 		// check for entities that will not be allowed on the new tile, and move them to the closest adjacent tile they are allowed on.
 		if(newType.isWalkable()) return; // no worries for this type.
 		
-		HashSet<Tile> surroundingTileSet = getAdjacentTiles(true);
-		Tile[] surroundingTiles = surroundingTileSet.toArray(new Tile[0]);
-		for(Entity entity: getLevel().getOverlappingEntities(getBounds(), true)) {
+		Array<Tile> surroundingTiles = new Array<>(Tile.class);
+		forAdjacentTiles(true, surroundingTiles::add);
+		// Tile[] surroundingTiles = surroundingTileSet.toArray(new Tile[0]);
+		getLevel().forOverlappingEntities(getBounds(), true, entity -> {
 			// for each entity, check if it can walk on the new tile type. If not, fetch the surrounding tiles, remove those the entity can't walk on, and then fetch the closest tile of the remaining ones.
 			// if(newType.isWalkable()) continue; // no worries for this entity.
 			
@@ -161,7 +154,7 @@ public class ServerTile extends Tile {
 				RectPool.POOL.free(entityBounds);
 				RectPool.POOL.free(tileBounds);
 			}
-		}
+		});
 	}
 	
 	public float update() {

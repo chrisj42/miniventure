@@ -5,6 +5,10 @@ import com.badlogic.gdx.math.Vector2;
 
 public class Point {
 	
+	public static final Point ZERO = new Point(0, 0);
+	public static final Point ONE = new Point(1, 1);
+	public static final Point TWO = new Point(2, 2);
+	
 	public final int x, y;
 	
 	private Point() { this(0, 0); }

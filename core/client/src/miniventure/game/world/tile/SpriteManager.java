@@ -23,8 +23,8 @@ public class SpriteManager<T> {
 		this.animationMapName = animationMapName;
 	}
 	
-	public TileAnimation getAnimation(T name) {
-		return customStyles.getOrDefault(name, defaultStyle).getAnimation(tileType, name, animationMap, animationMapName);
+	public TileAnimation getAnimation(RenderTile tile, T name) {
+		return customStyles.getOrDefault(name, defaultStyle).getAnimation(tile, tileType, name, animationMap, animationMapName);
 	}
 	
 	public static class SpriteCompiler<T> {

@@ -20,8 +20,7 @@ class TransitionAnimation {
 	
 	String getName() { return name; }
 	
-	// we specifically don't want to cache this because otherwise the animation wouldn't reset; it needs to be fresh every call.
-	TileAnimation getAnimation() {
-		return renderStyle.getAnimation(tileType, name, tileAnimations, "transition");
+	TileAnimation getAnimation(RenderTile tile) {
+		return renderStyle.getAnimation(tile, tileType, name, tileAnimations, "transition");
 	}
 }

@@ -89,8 +89,8 @@ public class TransitionManager implements TileProperty {
 		
 		HashMap<String, ServerTileTransition> animations = isEntering ? entranceAnimations : exitAnimations;
 		for(ServerTileTransition animation: animations.values()) {
-			if(animation.isTriggerType(nextType.tileType)) {
-				MyUtils.debug("Server starting tile transition for tile "+tile+", triggered by tiletype "+nextType.tileType+", with enter="+isEntering);
+			if(animation.isTriggerType(nextType.typeEnum)) {
+				MyUtils.debug("Server starting tile transition for tile "+tile+", triggered by tiletype "+nextType.typeEnum +", with enter="+isEntering);
 				TileTypeDataMap dataMap = tile.getDataMap(tileType);
 				// TileTypeDataMap cacheMap = tile.getDataMap(tileType);
 				dataMap.put(TileDataTag.TransitionName, animation.name);

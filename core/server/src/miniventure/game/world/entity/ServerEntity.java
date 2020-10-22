@@ -82,7 +82,7 @@ public abstract class ServerEntity extends Entity {
 		
 		Rectangle bounds = getBounds();
 		
-		objects.addAll(level.getOverlappingEntities(bounds, this));
+		level.forOverlappingEntities(bounds, this, objects::add);
 		// we don't want to trigger things like getting hurt by lava until the entity is actually *in* the tile, so we'll only consider the closest one to be "touching".
 		Tile tile = level.getTile(bounds);
 		if(tile != null) objects.add(tile);

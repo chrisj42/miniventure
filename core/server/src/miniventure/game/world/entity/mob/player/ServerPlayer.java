@@ -2,6 +2,7 @@ package miniventure.game.world.entity.mob.player;
 
 import java.net.InetSocketAddress;
 import java.util.EnumMap;
+import java.util.HashSet;
 
 import miniventure.game.core.GameCore;
 import miniventure.game.item.*;
@@ -375,7 +376,7 @@ public class ServerPlayer extends ServerMob implements Player {
 		
 		Rectangle interactionBounds = getInteractionRect(center);
 		
-		objects.addAll(level.getOverlappingEntities(interactionBounds, this));
+		level.forOverlappingEntities(interactionBounds, this, objects::add);
 		Boundable.sortByDistance(objects, getCenter(), true);
 		
 		RectPool.POOL.free(interactionBounds);

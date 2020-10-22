@@ -27,13 +27,13 @@ public class RenderStyle {
 	
 	boolean isSync() { return sync; }
 	
-	<T> TileAnimation getAnimation(@NotNull TileTypeEnum tileType, T name, TileTypeToAnimationMap<T> map, String mapNameForErrorLog) {
-		return getAnimation(tileType, map.getAnimationFrames(tileType, name, mapNameForErrorLog));
+	<T> TileAnimation getAnimation(@NotNull RenderTile tile, @NotNull TileTypeEnum tileType, T name, TileTypeToAnimationMap<T> map, String mapNameForErrorLog) {
+		return getAnimation(tile, tileType, map.getAnimationFrames(tileType, name, mapNameForErrorLog));
 	}
-	private TileAnimation getAnimation(@NotNull TileTypeEnum tileType, Array<TextureHolder> frames) {
+	private TileAnimation getAnimation(@NotNull RenderTile tile, @NotNull TileTypeEnum tileType, Array<TextureHolder> frames) {
 		if(fps == 0)
-			return new TileAnimation(tileType, sync, 1, frames.get(0));
+			return new TileAnimation(tile, tileType, sync, 1, playMode, frames.get(0));
 		else
-			return new TileAnimation(tileType, sync, fps, frames, playMode);
+			return new TileAnimation(tile, tileType, sync, fps, playMode, frames.items);
 	}
 }

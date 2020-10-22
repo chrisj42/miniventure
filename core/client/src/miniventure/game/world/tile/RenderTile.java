@@ -6,6 +6,7 @@ import miniventure.game.item.Item;
 import miniventure.game.item.Result;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.RelPos;
+import miniventure.game.world.Point;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.player.Player;
@@ -26,13 +27,13 @@ public class RenderTile extends Tile {
 	// spriteLock is unnecessary because all access occurs in the same thread: the libGDX render thread.
 	// private final Object spriteLock = new Object();
 	
-	public RenderTile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, @Nullable TileTypeDataMap[] data) {
-		super(level, x, y, types, data);
+	public RenderTile(@NotNull Level level, int x, int y) {
+		super(level, x, y);
 	}
 	
 	@Override
-	ClientTileStack makeStack(@NotNull TileTypeEnum[] types, @Nullable TileTypeDataMap[] dataMaps) {
-		return new ClientTileStack(types, dataMaps);
+	ClientTileStack makeStack() {
+		return new ClientTileStack(this);
 	}
 	
 	@Override
@@ -57,7 +58,7 @@ public class RenderTile extends Tile {
 	
 	public void renderSprites(SpriteBatch batch, List<TileAnimation> animations, Vector2 posOffset) {
 		for(TileAnimation animation: animations)
-			batch.draw(animation.getKeyFrame(this).texture, (x - posOffset.x) * SIZE, (y - posOffset.y) * SIZE);
+			animation.drawSprite(batch, (x - posOffset.x) * SIZE, (y - posOffset.y) * SIZE);
 	}
 	
 	@Override
@@ -75,7 +76,7 @@ public class RenderTile extends Tile {
 	@Override public boolean touchedBy(Entity entity) { return false; }
 	@Override public void touching(Entity entity) {}
 	
-	public void updateSprites() {
+	public void queueSpriteUpdate() {
 		updateSprites = true;
 	}
 	
@@ -127,7 +128,7 @@ public class RenderTile extends Tile {
 			if(overlapSet.size() > 0) { // add found overlaps
 				overlapSet.forEach(enumType -> {
 					ClientTileType tileType = ClientTileType.get(enumType);
-					ArrayList<TileAnimation> sprites = tileType.getRenderer().getOverlapSprites(typePositions.get(enumType));
+					ArrayList<TileAnimation> sprites = tileType.getRenderer().getOverlapSprites(typePositions.get(enumType), this);
 					spriteStack.addAll(sprites);
 				});
 			}

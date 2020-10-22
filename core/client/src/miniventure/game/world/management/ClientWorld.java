@@ -291,6 +291,10 @@ public class ClientWorld extends LevelWorldManager {
 	/*  --- GET METHODS --- */
 	
 	
+	// a loading level is a level that exists but is not being actively updated in the render loop
+	// if it's loading, then it's safe to edit entities/tiles from the client thread
+	public boolean isLevelLoading() { return getLevel() != null && mainPlayer == null && !renderWithoutPlayer; }
+	
 	public GameClient getClient() { return client; }
 	
 	@Override

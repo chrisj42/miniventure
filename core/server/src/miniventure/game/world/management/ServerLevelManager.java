@@ -87,7 +87,7 @@ public class ServerLevelManager implements LevelFetcher<ServerLevel> {
 		MyUtils.debug("Server generating "+islandType+' '+mapType+" map for level "+levelId);
 		
 		ServerLevel level = new ServerLevel(world, levelId,
-				islandType.generateLevel(island.getSeed(), levelId.isSurface())
+				islandType.generateLevel(world, island.getSeed(), levelId.isSurface())
 		);
 		island.onGenerate(surface);
 		return level;

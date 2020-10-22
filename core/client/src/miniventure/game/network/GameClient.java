@@ -63,10 +63,13 @@ public abstract class GameClient implements GameProtocol {
 			});
 		});
 		
-		forPacket(object, LevelChunk.class, chunk -> {
+		forPacket(object, TileAreaUpdate.class, chunk -> {
 			ClientLevel level = world.getLevel();
 			if(level == null) return;
-			level.setTiles(chunk);
+			if(world.isLevelLoading())
+				level.setTiles(chunk);
+			else
+				Gdx.app.postRunnable(() -> level.setTiles(chunk));
 		});
 		
 		/*if(object instanceof LevelData) {
@@ -140,7 +143,7 @@ public abstract class GameClient implements GameProtocol {
 			if(level == null) return;
 			ClientTile tile = level.getTile(update.x, update.y);
 			if(tile != null)
-				level.serverUpdate(tile, update.tileData, update.updatedType);
+				level.serverUpdate(tile, update.tileData/*, update.updatedType*/);
 		}
 		
 		if(object instanceof Hurt) {

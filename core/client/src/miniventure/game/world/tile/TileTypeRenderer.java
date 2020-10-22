@@ -5,6 +5,7 @@ import java.util.*;
 import miniventure.game.core.GameCore;
 import miniventure.game.util.MyUtils;
 import miniventure.game.util.RelPos;
+import miniventure.game.world.Point;
 import miniventure.game.world.tile.SpriteManager.SpriteCompiler;
 import miniventure.game.world.tile.TileTypeToAnimationMap.IndexedTileTypeToAnimationMap;
 
@@ -109,7 +110,7 @@ public class TileTypeRenderer implements TileProperty {
 			transitions = new HashMap<>();
 			
 			// by default, if connection sprites exist, the tile type will connect only to itself
-			if(connectAnimations.hasAnimations(tileType))
+			if(connectAnimations.hasAnimations(tileType) && !tileType.multi)
 				connectionCheck = ConnectionCheck.list(tileType);
 			else
 				connectionCheck = null;
@@ -176,21 +177,35 @@ public class TileTypeRenderer implements TileProperty {
 	// whenever a tile changes its TileTypeEnum stack in any way, all 9 tiles around it re-fetch their overlap and main animations. Then they keep that stack of animations until the next fetch.
 	
 	// fetches sprites that represent this TileType on the given tile, including a main sprite and/or a connection sprite; or a transition sprite, if there is a current transition.
-	public LinkedList<TileAnimation> getCoreSprites(@NotNull Tile tile, EnumMap<RelPos, EnumSet<TileTypeEnum>> aroundTypes) {
+	public LinkedList<TileAnimation> getCoreSprites(@NotNull RenderTile tile, EnumMap<RelPos, EnumSet<TileTypeEnum>> aroundTypes) {
 		LinkedList<TileAnimation> sprites = new LinkedList<>();
 		String tName = transitions.size() > 0 ? tile.getDataMap(tileType).get(TileDataTag.TransitionName) : null;
 		if(tName != null)
-			sprites.add(transitions.get(tName).getAnimation());
+			sprites.add(transitions.get(tName).getAnimation(tile));
 		else {
 			addMainSprite(sprites, tile);
-			addConnectionSprite(sprites, (RenderTile) tile, aroundTypes);
+			addConnectionSprite(sprites, tile, aroundTypes);
 		}
+		
+		// check for multi
+		/*if(tileType.multi) {
+			// move texture regions
+			Point anchor = tile.getDataMap(tileType).get(TileDataTag.AnchorPos);
+			int xo = tile.x - anchor.x;
+			int yo = tile.y - anchor.y;
+			xo *= Tile.SIZE;
+			yo *= Tile.SIZE;
+			LinkedList<TileAnimation> relocSprites = new LinkedList<>();
+			for(TileAnimation anim: sprites) {
+				TileAnZ
+			}
+		}*/
 		
 		return sprites;
 	}
 	
 	// todo later on, if I decide to have multiple named main sprites, I'll need to provide a way to specify which one to use; but until then, this method will expect them to be indexed if there is more than one.
-	private void addMainSprite(List<TileAnimation> sprites, Tile tile) {
+	private void addMainSprite(List<TileAnimation> sprites, RenderTile tile) {
 		final int mainAnimCount = mainAnimations.getAnimationCount(tileType);
 		if(mainAnimCount <= 0)
 			return;
@@ -202,7 +217,7 @@ public class TileTypeRenderer implements TileProperty {
 			idx = rand.nextInt(mainAnimCount);
 		}
 		
-		sprites.add(mainSpriteManager.getAnimation(idx));
+		sprites.add(mainSpriteManager.getAnimation(tile, idx));
 	}
 	
 	/// Checks the given aroundTypes for all types
@@ -211,7 +226,7 @@ public class TileTypeRenderer implements TileProperty {
 			return;
 		
 		if(connectionCheck == null) {
-			sprites.add(connectionSpriteManager.getAnimation(0));
+			sprites.add(connectionSpriteManager.getAnimation(tile, 0));
 			return;
 		}
 		
@@ -237,12 +252,12 @@ public class TileTypeRenderer implements TileProperty {
 			}
 		}
 		
-		sprites.add(connectionSpriteManager.getAnimation(spriteIdx));
+		sprites.add(connectionSpriteManager.getAnimation(tile, spriteIdx));
 	}
 	
 	// gets the overlap sprite (sides + any isolated corners) for this tiletype overlapping a tile at the given positions.
 	/// returns sprites for the stored type assuming it is overlapping at the given positions.
-	public ArrayList<TileAnimation> getOverlapSprites(EnumSet<RelPos> ovLayout) {
+	public ArrayList<TileAnimation> getOverlapSprites(EnumSet<RelPos> ovLayout, RenderTile tile) {
 		ArrayList<TileAnimation> animations = new ArrayList<>();
 		
 		if(!overlapAnimations.hasAnimations(tileType))
@@ -267,7 +282,7 @@ public class TileTypeRenderer implements TileProperty {
 		if(ovLayout.contains(RelPos.BOTTOM_RIGHT) && bits[2] == 0 && bits[3] == 0) indexes.add(2); // 6
 		if(ovLayout.contains(RelPos.BOTTOM_LEFT)  && bits[3] == 0 && bits[0] == 0) indexes.add(3); // 0
 		for(Integer idx: indexes) {
-			animations.add(overlapSpriteManager.getAnimation(idx));
+			animations.add(overlapSpriteManager.getAnimation(tile, idx));
 		}
 		
 		return animations;

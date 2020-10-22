@@ -14,12 +14,8 @@ public class ClientTileStack extends TileStack<ClientTileType> {
 		// 	opaqueStack = new LinkedList<>();
 	// }
 	
-	/*public ClientTileStack(ClientTileType[] types) {
-		super(types);
-	}*/
-	
-	public ClientTileStack(TileTypeEnum[] enumTypes, @Nullable TileTypeDataMap[] dataMaps) {
-		super(ClientCore.getWorld(), enumTypes, dataMaps);
+	public ClientTileStack(Tile tile) {
+		super(tile);
 	}
 	
 	// was never used.

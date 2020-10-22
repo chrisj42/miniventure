@@ -18,7 +18,7 @@ public class RandomTileCondition implements TileCondition {
 	
 	@Override
 	public boolean isMatch(ProtoTile tile) {
-		rand.setSeed(seed * (1+tile.id));
+		rand.setSeed(seed * (1+tile.pos.hashCode()));
 		return valueChecker.get(rand.nextFloat());
 	}
 }

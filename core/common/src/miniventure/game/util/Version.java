@@ -18,16 +18,16 @@ public class Version implements Comparable<Version> {
 		// TODO how to specify release? Is it even needed?
 	
 	// the last digit increments without release or tag
-	public static final Version CURRENT = makeVersion("2.2.3.1");
+	public static final Version CURRENT = makeVersion("2.2.3.2");
 	
 	// the last time there was a change in the save format
-	private static final Version latestFormatChange = makeVersion("2.2.2");
+	private static final Version latestFormatChange = makeVersion("2.2.3.2");
 	
 	// use this to determine the latest version a world is compatible with
 	private static final TreeMap<Version, Version> endOfSupportVersions = new TreeMap<>();
 	static {
 		// this is the oldest version that the current version supports
-		endOfSupportVersions.put(makeVersion("2.2.2"), CURRENT);
+		endOfSupportVersions.put(makeVersion("2.2.3.2"), CURRENT);
 		// below is for older versions; add an entry whenever a version loses support
 		// no need to add an entry if it was only supported for one version
 		// addEoSVersion("2.1.2", "2.1.2");

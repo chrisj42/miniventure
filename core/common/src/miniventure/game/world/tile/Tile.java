@@ -3,6 +3,7 @@ package miniventure.game.world.tile;
 import java.util.HashSet;
 
 import miniventure.game.util.MyUtils;
+import miniventure.game.util.function.ValueAction;
 import miniventure.game.util.pool.RectPool;
 import miniventure.game.util.pool.VectorPool;
 import miniventure.game.world.level.LevelId;
@@ -42,20 +43,22 @@ public abstract class Tile implements WorldObject {
 	private TileStack<?> tileStack;
 	
 	@NotNull private final Level level;
-	final int x, y;
+	public final int x, y;
 	// final EnumMap<TileTypeEnum, SerialMap> dataMaps = new EnumMap<>(TileTypeEnum.class);
 	
 	// the TileType array is ALWAYS expected in order of bottom to top.
-	Tile(@NotNull Level level, int x, int y, @NotNull TileTypeEnum[] types, @Nullable TileTypeDataMap[] dataMaps) {
+	Tile(@NotNull Level level, int x, int y) {
 		this.level = level;
 		this.x = x;
 		this.y = y;
-		setTileStack(makeStack(types, dataMaps));
+		tileStack = makeStack();
 	}
 	
-	abstract TileStack<?> makeStack(@NotNull TileTypeEnum[] types, @Nullable TileTypeDataMap[] dataMaps);
+	abstract TileStack<?> makeStack();
 	
-	void setTileStack(TileStack<?> stack) { this.tileStack = stack; }
+	public void setStack(TileTypeInfo[] stackInfo) {
+		tileStack.setStack(getWorld(), stackInfo);
+	}
 	
 	@NotNull @Override
 	public WorldManager getWorld() { return level.getWorld(); }
@@ -95,19 +98,24 @@ public abstract class Tile implements WorldObject {
 		return map;
 	}*/
 	
+	public void forAdjacentTiles(boolean includeCorners, ValueAction<Tile> action) {
+		if(includeCorners)
+			level.forAreaTiles(x, y, 1, false, action);
+		else {
+			// HashSet<Tile> tiles = new HashSet<>();
+			if(x > 0) action.act(level.getTile(x-1, y));
+			if(y < level.getHeight()-1) action.act(level.getTile(x, y+1));
+			if(x < level.getWidth()-1) action.act(level.getTile(x+1, y));
+			if(y > 0) action.act(level.getTile(x, y-1));
+			// tiles.remove(null);
+			// return tiles;
+		}
+	}
 	
 	public HashSet<Tile> getAdjacentTiles(boolean includeCorners) {
-		if(includeCorners)
-			return level.getAreaTiles(x, y, 1, false);
-		else {
-			HashSet<Tile> tiles = new HashSet<>();
-			if(x > 0) tiles.add(level.getTile(x-1, y));
-			if(y < level.getHeight()-1) tiles.add(level.getTile(x, y+1));
-			if(x < level.getWidth()-1) tiles.add(level.getTile(x+1, y));
-			if(y > 0) tiles.add(level.getTile(x, y-1));
-			tiles.remove(null);
-			return tiles;
-		}
+		HashSet<Tile> tiles = new HashSet<>();
+		forAdjacentTiles(includeCorners, tiles::add);
+		return tiles;
 	}
 	
 	

@@ -139,17 +139,34 @@ public class LevelViewport {
 		
 		batch.setBlendFunction(GL20.GL_ZERO, GL20.GL_ONE_MINUS_SRC_ALPHA);
 		
-		lights.forEach(Vector3Pool.POOL::free);
-		lights.clear();
-		RenderLevel.renderLighting(level.getOverlappingObjects(lightRenderSpace), lights);
+		// lights.forEach(Vector3Pool.POOL::free);
+		// lights.clear();
 		final TextureRegion lightTexture = GameCore.icons.get("light").texture;
 		
-		for(Vector3 light: lights) {
+		level.forOverlappingObjects(lightRenderSpace, obj -> {
+			float lightR = obj.getLightRadius();
+			if(lightR > 0) {
+				Vector2 center = obj.getCenter();
+				Vector3 light = Vector3Pool.POOL.obtain(center, lightR);
+				
+				light.sub(offset.x, offset.y, 0).scl(Tile.SIZE); // world to render coords
+				float radius = light.z;
+				light.y = camera.viewportHeight - light.y;
+				batch.draw(lightTexture, light.x - radius, light.y - radius, radius*2, radius*2);
+				
+				VectorPool.POOL.free(center);
+				Vector3Pool.POOL.free(light);
+			}
+		});
+		// RenderLevel.renderLighting(, lights);
+		
+		
+		/*for(Vector3 light: lights) {
 			light.sub(offset.x, offset.y, 0).scl(Tile.SIZE); // world to render coords
 			float radius = light.z;
 			light.y = camera.viewportHeight - light.y;
 			batch.draw(lightTexture, light.x - radius, light.y - radius, radius*2, radius*2);
-		}
+		}*/
 		
 		batch.end();
 		lightingBuffer.end();

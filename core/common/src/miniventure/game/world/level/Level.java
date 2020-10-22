@@ -8,8 +8,6 @@ import miniventure.game.util.ValueWrapper;
 import miniventure.game.util.function.ValueAction;
 import miniventure.game.util.pool.RectPool;
 import miniventure.game.util.pool.VectorPool;
-import miniventure.game.world.Boundable;
-import miniventure.game.world.tile.TileTypeDataMap;
 import miniventure.game.world.Point;
 import miniventure.game.world.Taggable;
 import miniventure.game.world.WorldObject;
@@ -19,6 +17,7 @@ import miniventure.game.world.management.WorldManager;
 import miniventure.game.world.tile.Tile;
 import miniventure.game.world.tile.TileStack.TileData;
 import miniventure.game.world.tile.TileTypeEnum;
+import miniventure.game.world.worldgen.island.ProtoLevel;
 
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -47,9 +46,9 @@ public abstract class Level implements Taggable<Level> {
 	/** @noinspection FieldCanBeLocal*/
 	private final int mobCap = 80;
 	
-	@FunctionalInterface
+	/*@FunctionalInterface
 	public interface TileMaker {
-		Tile get(Level level, int x, int y, TileTypeEnum[] types);
+		Tile get(Level level, int x, int y, TileTypeInfo[] types);
 	}
 	
 	@FunctionalInterface
@@ -60,24 +59,29 @@ public abstract class Level implements Taggable<Level> {
 	@FunctionalInterface
 	public interface TileFetcher {
 		Tile get(Level level, int x, int y);
-	}
+	}*/
 	
-	private Level(@NotNull WorldManager world, LevelId levelId, int width, int height) {
+	protected Level(@NotNull WorldManager world, LevelId levelId, int width, int height) {
 		this.world = world;
 		this.levelId = levelId;
 		this.width = width;
 		this.height = height;
 		
 		tiles = new Tile[width][height];
+		for(int x = 0; x < width; x++) {
+			for(int y = 0; y < height; y++) {
+				tiles[x][y] = makeTile(x, y);
+			}
+		}
 	}
 	
-	protected Level(@NotNull WorldManager world, LevelId levelId, @NotNull TileTypeEnum[][][] tileTypes, @NotNull TileMaker tileFetcher) {
-		this(world, levelId, tileTypes.length, tileTypes.length == 0 ? 0 : tileTypes[0].length);
+	/*protected Level(@NotNull WorldManager world, LevelId levelId, @NotNull ProtoLevel protoLevel, @NotNull TileMaker tileFetcher) {
+		this(world, levelId, protoLevel.width, protoLevel.height);
 		
 		MyUtils.debug(world.getClass().getSimpleName()+": fetching level "+levelId+" initial tile data...");
 		for(int x = 0; x < tiles.length; x++)
 			for(int y = 0; y < tiles[x].length; y++)
-				tiles[x][y] = tileFetcher.get(this, x, y, tileTypes[x][y]);
+				tiles[x][y] = tileFetcher.get(this, x, y, protoLevel., );
 		
 		MyUtils.debug(world.getClass().getSimpleName()+": tile data initialized.");
 	}
@@ -104,6 +108,25 @@ public abstract class Level implements Taggable<Level> {
 			}
 		}
 		MyUtils.debug(world.getClass().getSimpleName()+": tile placeholders loaded.");
+	}*/
+	
+	protected abstract Tile makeTile(int x, int y);
+	
+	protected void setTiles(ProtoLevel protoLevel) {
+		for(int x = 0; x < width; x++) {
+			for(int y = 0; y < height; y++) {
+				Tile tile = tiles[x][y];
+				tile.setStack(protoLevel.getTile(x, y).getStack());
+			}
+		}
+	}
+	protected void setTiles(TileData[][] data) {
+		for(int x = 0; x < width; x++) {
+			for(int y = 0; y < height; y++) {
+				Tile tile = tiles[x][y];
+				tile.setStack(data[x][y].parseStack(world));
+			}
+		}
 	}
 	
 	public int getWidth() { return width; }
@@ -246,47 +269,50 @@ public abstract class Level implements Taggable<Level> {
 		return getTile(x, y);
 	}
 	
+	public void forAreaTiles(Point tilePos, int radius, boolean includeCenter, ValueAction<Tile> action) {
+		forAreaTiles(tilePos.x, tilePos.y, radius, includeCenter, action);
+	}
+	public void forAreaTiles(int x, int y, int radius, boolean includeCenter, ValueAction<Tile> action) {
+		for(int xo = Math.max(0, x-radius); xo <= Math.min(getWidth()-1, x+radius); xo++) {
+			for(int yo = Math.max(0, y-radius); yo <= Math.min(getHeight()-1, y+radius); yo++) {
+				if(xo == x && yo == y && !includeCenter)
+					continue;
+				action.act(tiles[xo][yo]);
+			}
+		}
+	}
+	
 	public HashSet<Tile> getAreaTiles(Point tilePos, int radius, boolean includeCenter) { return getAreaTiles(tilePos.x, tilePos.y, radius, includeCenter); }
 	public HashSet<Tile> getAreaTiles(int x, int y, int radius, boolean includeCenter) {
 		
 		HashSet<Tile> tiles = new HashSet<>();
-		for(int xo = Math.max(0, x-radius); xo <= Math.min(getWidth()-1, x+radius); xo++)
-			for(int yo = Math.max(0, y-radius); yo <= Math.min(getHeight()-1, y+radius); yo++)
-				tiles.add(getTile(xo, yo));
-		tiles.remove(null);
-		
-		if(!includeCenter)
-			tiles.remove(getTile(x, y));
+		forAreaTiles(x, y, radius, includeCenter, tiles::add);
 		
 		return tiles;
 	}
 	
-	private Array<Point> getOverlappingTileCoords(Rectangle rect) {
-		Array<Point> overlappingTiles = new Array<>();
+	public void forOverlappingTiles(Rectangle rect, ValueAction<Tile> action) { forOverlappingTiles(rect, false, action); }
+	public void forOverlappingTiles(Rectangle rect, boolean free, ValueAction<Tile> action) {
+		// Array<Point> overlappingTiles = new Array<>();
 		int minX = Math.max(0, (int) rect.x);
 		int minY = Math.max(0, (int) rect.y);
-		int maxX = Math.min(getWidth(), (int) (rect.x + rect.width));
-		int maxY = Math.min(getHeight(), (int) (rect.y + rect.height));
+		int maxX = Math.min(getWidth()-1, (int) (rect.x + rect.width));
+		int maxY = Math.min(getHeight()-1, (int) (rect.y + rect.height));
 		
+		// strange iteration order might be for rendering purposes..?
 		for(int x = minX; x <= maxX; x++) {
 			for (int y = maxY; y >= minY; y--) {
-				overlappingTiles.add(new Point(x, y));
+				action.act(tiles[x][y]);
 			}
 		}
 		
-		return overlappingTiles;
+		if(free) RectPool.POOL.free(rect);
 	}
 	
-	public Array<Tile> getOverlappingTiles(Rectangle rect) {
+	public Array<Tile> getOverlappingTiles(Rectangle rect) { return getOverlappingTiles(rect, false); }
+	public Array<Tile> getOverlappingTiles(Rectangle rect, boolean free) {
 		Array<Tile> overlappingTiles = new Array<>();
-		Array<Point> points = getOverlappingTileCoords(rect);
-		
-		for(Point p: points) {
-			Tile tile = getTile(p.x, p.y);
-			if (tile != null)
-				overlappingTiles.add(tile);
-		}
-		
+		forOverlappingTiles(rect, free, overlappingTiles::add);
 		return overlappingTiles;
 	}
 	
@@ -303,32 +329,35 @@ public abstract class Level implements Taggable<Level> {
 		return overlappingChunks;
 	}*/
 	
-	public Array<Entity> getOverlappingEntities(Rectangle rect, Entity... exclude) { return getOverlappingEntities(rect, false, exclude); }
-	public Array<Entity> getOverlappingEntities(Rectangle rect, boolean free, Entity... exclude) {
-		Array<Entity> overlapping = new Array<>(Entity.class);
+	public void forOverlappingEntities(Rectangle rect, ValueAction<Entity> action) {
+		forOverlappingEntities(rect, false, null, action);
+	}
+	public void forOverlappingEntities(Rectangle rect, @Nullable Entity exclude, ValueAction<Entity> action) {
+		forOverlappingEntities(rect, false, exclude, action);
+	}
+	public void forOverlappingEntities(Rectangle rect, boolean free, ValueAction<Entity> action) {
+		forOverlappingEntities(rect, free, null, action);
+	}
+	public void forOverlappingEntities(Rectangle rect, boolean free, @Nullable Entity exclude, ValueAction<Entity> action) {
+		// Array<Entity> overlapping = new Array<>(Entity.class);
 		forEachEntity(entity -> {
 			Rectangle bounds = entity.getBounds();
-			if(bounds.overlaps(rect))
-				overlapping.add(entity);
+			if(bounds.overlaps(rect) && exclude != entity)
+				action.act(entity);
+				
 			RectPool.POOL.free(bounds);
 		});
 		
-		if(exclude.length > 0) {
-			for(Entity e: exclude)
-				overlapping.removeValue(e, true); // use ==, not .equals()
-		}
-		
 		if(free) RectPool.POOL.free(rect);
-		return overlapping;
 	}
 	
-	public Array<WorldObject> getOverlappingObjects(Rectangle area) { return getOverlappingObjects(area, false); }
-	public Array<WorldObject> getOverlappingObjects(Rectangle area, boolean free) {
-		Array<WorldObject> objects = new Array<>(WorldObject.class);
-		objects.addAll(getOverlappingTiles(area));
-		objects.addAll(getOverlappingEntities(area));
+	public void forOverlappingObjects(Rectangle area, ValueAction<WorldObject> action) { forOverlappingObjects(area, false, action); }
+	public void forOverlappingObjects(Rectangle area, boolean free, ValueAction<WorldObject> action) {
+		// Array<WorldObject> objects = new Array<>(WorldObject.class);
+		forOverlappingTiles(area, action::act);
+		forOverlappingEntities(area, action::act);
 		if(free) RectPool.POOL.free(area);
-		return objects;
+		// return objects;
 	}
 	
 	// chunkRadius is in chunks.

@@ -25,7 +25,7 @@ public class DisplayLevelBackground {
 		TimeOfDay time = TimeOfDay.values[MathUtils.random(TimeOfDay.values.length-1)];
 		lightOverlay = TimeOfDay.getSkyColor(time.getStartOffsetSeconds());
 		
-		backgroundLevel = new DisplayWorld().getLevel();
+		backgroundLevel = new DisplayWorld(true).getLevel();
 		
 		Vector2 size = VectorPool.POOL.obtain(levelView.getViewWidth(), levelView.getViewHeight());//.scl(0.5f);
 		cameraPos = VectorPool.POOL.obtain(MathUtils.random(size.x, backgroundLevel.getWidth()-size.x), MathUtils.random(size.y, backgroundLevel.getHeight()-size.y));

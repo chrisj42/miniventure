@@ -8,6 +8,7 @@ import miniventure.game.util.MyUtils;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.Action;
 import miniventure.game.util.function.FetchFunction;
+import miniventure.game.world.Point;
 import miniventure.game.world.management.WorldManager;
 
 import com.badlogic.gdx.utils.Array;
@@ -20,6 +21,8 @@ public class TileStack<T extends TileType> {
 	private static final TileTypeEnum baseType = TileTypeEnum.HOLE;
 	
 	// For now, TileStacks cannot have multiple of the same TileType... has this been enforced?
+	
+	private final Tile tile;
 	
 	// bottom tile is first, top tile is last.
 	final Array<T> stack;
@@ -35,15 +38,13 @@ public class TileStack<T extends TileType> {
 			addLayer(type);
 	}*/
 	@SuppressWarnings("unchecked")
-	TileStack(@NotNull WorldManager world, TileTypeEnum[] enumTypes, @Nullable TileTypeDataMap[] dataMaps) {
+	TileStack(@NotNull Tile tile) {
+		this.tile = tile;
+		WorldManager world = tile.getWorld();
 		Class<T> clazz = (Class<T>) world.getTileType(baseType).getClass();
-		stack = new Array<>(true, 4, clazz);
-		
-		for(int i = 0; i < enumTypes.length; i++) {
-			TileType type = enumTypes[i].getTypeInstance(world);
-			//noinspection ConstantConditions // IntelliJ doesn't realize that just because dataMaps can be null, doesn't mean the elements of a non-null instance can also be null.
-			addLayer((T) type, dataMaps == null ? type.createDataMap() : dataMaps[i]);
-		}
+		stack = new Array<>(true, 1, clazz);
+		T type = (T) world.getTileType(baseType);
+		addLayer(type, type.createDataMap());
 	}
 	
 	private void sync(Action a) {
@@ -54,6 +55,19 @@ public class TileStack<T extends TileType> {
 	}
 	
 	public int size() { return sync(() -> stack.size); }
+	
+	@SuppressWarnings("unchecked")
+	void setStack(WorldManager world, TileTypeInfo[] stackInfo) {
+		synchronized (dataLock) {
+			stack.clear();
+			stack.ensureCapacity(stackInfo.length);
+			data.clear();
+			for(TileTypeInfo info: stackInfo) {
+				stack.add((T) world.getTileType(info.typeEnum));
+				data.put(info.typeEnum, info.getData());
+			}
+		}
+	}
 	
 	// called by Tile.java
 	TileTypeDataMap getDataMap(TileTypeEnum tileType) {
@@ -95,20 +109,51 @@ public class TileStack<T extends TileType> {
 	private int clamp(int idx) { return clamp(idx, true); }
 	private int clamp(int idx, boolean doClamp) { return doClamp ? Math.max(Math.min(idx, size()-1), 0) : idx; }
 	
+	@SuppressWarnings("unchecked")
 	void addLayer(@NotNull T newLayer, @NotNull TileTypeDataMap dataMap) {
 		synchronized (dataLock) {
 			stack.add(newLayer);
 			data.put(newLayer.getTypeEnum(), dataMap);
+			if(newLayer.isMulti()) {
+				// spread to rest of tiles
+				TileTypeEnum type = newLayer.getTypeEnum();
+				for(int x = 0; x < type.size.x; x++) {
+					for(int y = 0; y < type.size.y; y++) {
+						if(x == 0 && y == 0) continue;
+						TileStack<T> ostack = (TileStack<T>) tile.getLevel().getTile(tile.x+x, tile.y+y).getTypeStack();
+						//noinspection NestedSynchronizedStatement
+						synchronized (ostack.dataLock) {
+							ostack.stack.add(newLayer);
+							ostack.data.put(newLayer.getTypeEnum(), dataMap);
+						}
+					}
+				}
+			}
 		}
 	}
 	
 	@Nullable
+	@SuppressWarnings("unchecked")
 	T removeLayer() {
 		synchronized (dataLock) {
 			if(stack.size == 1) return null;
 			T type = stack.removeIndex(stack.size-1);
 			data.remove(type.getTypeEnum());
-			// cacheMaps.remove(type.getTypeEnum());
+			if(type.isMulti()) {
+				// remove others
+				Point size = type.getTypeEnum().size;
+				for(int x = 0; x < size.x; x++) {
+					for(int y = 0; y < size.y; y++) {
+						if(x == 0 && y == 0) continue;
+						TileStack<T> ostack = (TileStack<T>) tile.getLevel().getTile(tile.x+x, tile.y+y).getTypeStack();
+						//noinspection NestedSynchronizedStatement
+						synchronized (ostack.dataLock) {
+							ostack.stack.removeValue(type, false);
+							ostack.data.remove(type.getTypeEnum());
+						}
+					}
+				}
+			}
 			return type;
 		}
 	}
@@ -156,6 +201,18 @@ public class TileStack<T extends TileType> {
 			all[0] = ArrayUtils.arrayToString(typeOrdinals, ",");
 			
 			return MyUtils.encodeStringArray(all);
+		}
+		
+		public TileTypeInfo[] parseStack(WorldManager world) {
+			TileTypeInfo[] stack = new TileTypeInfo[typeOrdinals.length];
+			for(int i = 0; i < stack.length; i++) {
+				TileTypeEnum typeEnum = TileTypeEnum.value(typeOrdinals[i]);
+				TileType type = world.getTileType(typeEnum);
+				TileTypeDataMap dataMap = type.parseDataMap(data[i], dataVersion);
+				stack[i] = new TileTypeInfo(typeEnum, dataMap);
+			}
+			
+			return stack;
 		}
 		
 		public TileTypeEnum[] getTypes() {

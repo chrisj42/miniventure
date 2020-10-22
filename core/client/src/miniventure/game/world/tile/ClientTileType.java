@@ -25,7 +25,7 @@ public class ClientTileType extends TileType {
 	private interface P {
 		Param<Float> lightRadius = new Param<>(0f);
 		Param<SwimAnimation> swimAnimation = new Param<>(null);
-		// Param<List<TransitionAnimation>> transitions = new Param<>(new ArrayList<>(0));
+		
 		
 		ClientTileType get(TileTypeEnum type);
 	}

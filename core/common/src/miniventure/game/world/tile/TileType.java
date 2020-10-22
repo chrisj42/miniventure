@@ -6,6 +6,7 @@ import miniventure.game.util.function.FetchFunction;
 import miniventure.game.util.function.MapFunction;
 import miniventure.game.util.param.FetchParam;
 import miniventure.game.util.param.FetchParam.FetchValue;
+import miniventure.game.world.Point;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -47,6 +48,9 @@ public abstract class TileType {
 	TileType(TileTypeEnum enumType) {
 		this.enumType = enumType;
 		dataTypes = new TileTypeDataOrder(this);
+		
+		if(isMulti())
+			registerData(TileDataTag.AnchorPos);
 	}
 	
 	public TileTypeEnum getTypeEnum() { return enumType; }
@@ -55,6 +59,12 @@ public abstract class TileType {
 	public float getSpeedRatio() {
 		return enumType.speedRatio;
 	}
+	
+	public boolean isMulti() {
+		return enumType.size.x > 1 || enumType.size.y > 1;
+	}
+	
+	// public Point getSize() { return enumType.size; }
 	
 	public String getName() { return MyUtils.toTitleCase(enumType.name(), "_"); }
 	

@@ -214,8 +214,10 @@ public abstract class Entity implements WorldObject {
 		
 		// get and touch entities, and check for blockage
 		
-		Array<Entity> newEntities = level.getOverlappingEntities(newRect);
-		newEntities.removeAll(level.getOverlappingEntities(oldRect), true); // because the "old rect" entities are never added in the first place, we don't need to worry about this entity being included in this list, and accidentally interacting with itself.
+		Array<Entity> newEntities = new Array<>(Entity.class);
+		level.forOverlappingEntities(newRect, newEntities::add);
+		level.forOverlappingEntities(oldRect, e -> newEntities.removeValue(e, true));
+		// because the "old rect" entities are never added in the first place, we don't need to worry about this entity being included in this list, and accidentally interacting with itself.
 		for(Entity entity: newEntities) {
 			if(interact)
 				touchEntity(entity);

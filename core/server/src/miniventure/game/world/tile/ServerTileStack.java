@@ -11,8 +11,8 @@ public class ServerTileStack extends TileStack<ServerTileType> {
 		super(types);
 	}*/
 	
-	public ServerTileStack(@NotNull ServerWorld world, TileTypeEnum[] enumTypes, @Nullable TileTypeDataMap[] dataMaps) {
-		super(world, enumTypes, dataMaps);
+	public ServerTileStack(@NotNull Tile tile) {
+		super(tile);
 	}
 	
 }
