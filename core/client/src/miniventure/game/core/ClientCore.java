@@ -239,7 +239,7 @@ public class ClientCore extends ApplicationAdapter {
 		
 		if(GameCore.debug) {
 			InputProcessor processor = Gdx.input.getInputProcessor();
-			MyUtils.debug("input processors: " + (processor instanceof InputMultiplexer ? Arrays.toString(((InputMultiplexer) processor).getProcessors().items) : processor.toString()));
+			MyUtils.debug("input processors: " + (processor instanceof InputMultiplexer ? Arrays.toString(((InputMultiplexer) processor).getProcessors().shrink()) : processor.toString()));
 		}
 	}
 	

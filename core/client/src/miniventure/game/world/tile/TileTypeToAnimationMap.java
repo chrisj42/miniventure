@@ -40,7 +40,7 @@ public abstract class TileTypeToAnimationMap<T> {
 		return getAnimationCount(tileType) > 0;
 	}
 	
-	void addFrame(@NotNull TileTypeEnum tileType, String name, TextureHolder frame) {
+	void addFrame(@NotNull TileTypeEnum tileType, String name, @NotNull TextureHolder frame) {
 		T id = fromString(name);
 		map.computeIfAbsent(tileType, k -> new AnimationMap())
 			.computeIfAbsent(id, k -> new Array<>(TextureHolder.class))

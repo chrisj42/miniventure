@@ -34,6 +34,6 @@ public class RenderStyle {
 		if(fps == 0)
 			return new TileAnimation(tile, tileType, sync, 1, playMode, frames.get(0));
 		else
-			return new TileAnimation(tile, tileType, sync, fps, playMode, frames.items);
+			return new TileAnimation(tile, tileType, sync, fps, playMode, frames.shrink());
 	}
 }
