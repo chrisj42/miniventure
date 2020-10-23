@@ -3,6 +3,7 @@ package miniventure.game.world.tile;
 import java.util.HashMap;
 
 import miniventure.game.item.FoodType;
+import miniventure.game.item.Item;
 import miniventure.game.item.PlaceableItemType;
 import miniventure.game.item.ResourceType;
 import miniventure.game.item.Result;
@@ -186,11 +187,23 @@ public class ServerTileType extends TileType {
 			P.DESTRUCT.as(type -> new DestructionManager(type, new ItemDrop(ResourceType.Stone.get())))
 		),
 		
+		FLOWER(
+			P.DESTRUCT.as(type -> new DestructionManager(type, null))
+		),
+		
+		STICK(
+			P.DESTRUCT.as(type -> new DestructionManager(type, new ItemDrop(ResourceType.Stick.get())))
+		),
+		
 		WATER(
 			P.UPDATE.as(type -> new UpdateManager(type,
 				new SpreadUpdateAction(type, 0.33f,
 					(newType, tile) -> tile.addTile(newType), TileTypeEnum.HOLE)
 			))
+		),
+		
+		REEDS(
+			P.DESTRUCT.as(type -> new DestructionManager(type, new ItemDrop(ResourceType.Reed.get())))
 		),
 		
 		DOCK(type -> new ServerTileType(type)

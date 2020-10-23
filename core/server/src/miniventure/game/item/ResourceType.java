@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 public enum ResourceType {
 	
-	Log, Flint, Coal, Cotton, Fabric, Stone, Iron, Tungsten, Ruby;
+	Reed, Stick, Log, Flint, Coal, Cotton, Fabric, Stone, Iron, Tungsten, Ruby;
 	
 	@NotNull
 	private final ServerItem item;

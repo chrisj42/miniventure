@@ -115,14 +115,14 @@ public enum IslandType {
 		);
 		
 		TileProcessor coastal = TileConditionChain.builder()
-				.add(new NoiseTileCondition(sparse, val -> val <= .075f), POOF_TREE)
-				.add(new NoiseTileCondition(sparse, val -> val > .92f), STONE)
+				.add(new NoiseTileCondition(sparse, val -> val <= .075f), STICK)
+				.add(new NoiseTileCondition(sparse, val -> val > .92f), REEDS)
 				.add(new NoiseTileCondition(sparse, val -> val > .91f), SMALL_STONE)
 				.getChain();
 		
 		TileProcessor middle = TileConditionChain.builder()
-				.add(new NoiseTileCondition(trees, val -> val > .95f), POOF_TREE)
-				.add(new NoiseTileCondition(sparse, val -> val > .85f), STONE)
+				.add(new NoiseTileCondition(trees, val -> val > .95f), FLOWER)
+				.add(new NoiseTileCondition(sparse, val -> val > .85f), STICK)
 				.add(new NoiseTileCondition(sparse, val -> val > .84f), SMALL_STONE)
 				.getChain();
 		

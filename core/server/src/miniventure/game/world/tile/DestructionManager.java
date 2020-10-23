@@ -43,8 +43,8 @@ public class DestructionManager implements TileProperty {
 	}
 	
 	// for those that are one-shot, and have certain damage conditions, and drop an item
-	DestructionManager(@NotNull TileTypeEnum tileType, @NotNull ItemDrop drop, DamageConditionCheck... damageConditions) {
-		this(tileType, 1, new PreferredTool[0], damageConditions, new ItemDrop[] {drop});
+	DestructionManager(@NotNull TileTypeEnum tileType, @Nullable ItemDrop drop, DamageConditionCheck... damageConditions) {
+		this(tileType, 1, new PreferredTool[0], damageConditions, drop == null ? new ItemDrop[0] : new ItemDrop[] {drop});
 	}
 	
 	DestructionManager(DestructionManager model) {

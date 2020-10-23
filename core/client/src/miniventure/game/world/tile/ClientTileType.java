@@ -102,12 +102,18 @@ public class ClientTileType extends TileType {
 		
 		SMALL_STONE(type -> new ClientTileType(type, false)),
 		
+		FLOWER(type -> new ClientTileType(type, false)),
+		
+		STICK(type -> new ClientTileType(type, false)),
+		
 		WATER(type -> new ClientTileType(type, buildRenderer(type, true,
 				new RenderStyle(PlayMode.LOOP_RANDOM, 5),
 				new RenderStyle(true, 24)
 			).build(),
 			P.swimAnimation.as(new SwimAnimation(type))
 		)),
+		
+		REEDS(type -> new ClientTileType(type, false)),
 		
 		DOCK(type -> new ClientTileType(type, false)),
 		

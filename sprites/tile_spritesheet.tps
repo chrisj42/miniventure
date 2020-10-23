@@ -275,6 +275,7 @@
             <key type="filename">tile-sprites/floor_/stone/c44.png</key>
             <key type="filename">tile-sprites/floor_/stone/c45.png</key>
             <key type="filename">tile-sprites/floor_/stone/c46.png</key>
+            <key type="filename">tile-sprites/flower/main.png</key>
             <key type="filename">tile-sprites/grass/m00.png</key>
             <key type="filename">tile-sprites/grass/m01.png</key>
             <key type="filename">tile-sprites/grass/o00.png</key>
@@ -424,6 +425,7 @@
             <key type="filename">tile-sprites/ore_/tungsten/o16.png</key>
             <key type="filename">tile-sprites/ore_/tungsten/o17.png</key>
             <key type="filename">tile-sprites/ore_/tungsten/o18.png</key>
+            <key type="filename">tile-sprites/reeds/main.png</key>
             <key type="filename">tile-sprites/sand/main.png</key>
             <key type="filename">tile-sprites/sand/o00.png</key>
             <key type="filename">tile-sprites/sand/o01.png</key>
@@ -465,6 +467,7 @@
             <key type="filename">tile-sprites/snow/o16.png</key>
             <key type="filename">tile-sprites/snow/o17.png</key>
             <key type="filename">tile-sprites/snow/o18.png</key>
+            <key type="filename">tile-sprites/stick/main.png</key>
             <key type="filename">tile-sprites/stone/c00.png</key>
             <key type="filename">tile-sprites/stone/c01.png</key>
             <key type="filename">tile-sprites/stone/c02.png</key>

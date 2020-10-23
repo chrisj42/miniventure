@@ -288,7 +288,9 @@
             <key type="filename">icon-sprites/items/resource/flint.png</key>
             <key type="filename">icon-sprites/items/resource/iron.png</key>
             <key type="filename">icon-sprites/items/resource/log.png</key>
+            <key type="filename">icon-sprites/items/resource/reed.png</key>
             <key type="filename">icon-sprites/items/resource/ruby.png</key>
+            <key type="filename">icon-sprites/items/resource/stick.png</key>
             <key type="filename">icon-sprites/items/resource/stone.png</key>
             <key type="filename">icon-sprites/items/resource/tungsten.png</key>
             <key type="filename">icon-sprites/items/tools/flint_axe.png</key>
