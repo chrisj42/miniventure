@@ -113,7 +113,9 @@ public class ClientTileType extends TileType {
 			P.swimAnimation.as(new SwimAnimation(type))
 		)),
 		
-		REEDS(type -> new ClientTileType(type, false)),
+		REEDS(type -> new ClientTileType(type, false,
+			P.swimAnimation.as(new SwimAnimation(TileTypeEnum.WATER))
+		)),
 		
 		DOCK(type -> new ClientTileType(type, false)),
 		

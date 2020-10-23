@@ -27,7 +27,7 @@ public enum TileTypeEnum implements TileProcessor {
 	FLOWER(true, Color.WHITE),
 	STICK(true),
 	WATER(true, 0.6f, Color.BLUE.darker()),
-	REEDS(true, new Color(184, 101, 14)),
+	REEDS(true, 0.45f, new Color(184, 101, 14)),
 	DOCK(true, P.SIZE.as(Point.TWO)),
 	COAL_ORE(false),
 	IRON_ORE(false),
