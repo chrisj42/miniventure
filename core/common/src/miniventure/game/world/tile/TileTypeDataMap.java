@@ -52,6 +52,12 @@ public class TileTypeDataMap {
 		return (T) data[dataOrder.getDataIndex(tag)];
 	}
 	
+	public <T> T getIfValid(TileDataTag<T> tag) {
+		if(dataOrder.getDataIndex(tag) >= 0)
+			return get(tag);
+		return null;
+	}
+	
 	public <T> T getOrDefault(TileDataTag<T> tag, T defaultValue) {
 		T value = get(tag);
 		return value == null ? defaultValue : value;

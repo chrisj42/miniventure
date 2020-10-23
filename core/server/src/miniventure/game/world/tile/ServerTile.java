@@ -91,7 +91,7 @@ public class ServerTile extends Tile {
 			}
 		}
 		
-		Action destroyAction = getDataMap(type.getTypeEnum()).get(TileDataTag.DestroyAction);
+		Action destroyAction = getDataMap(type.getTypeEnum()).getIfValid(TileDataTag.DestroyAction);
 		ServerTileType prevType = getTypeStack().removeLayer();
 		if(destroyAction != null)
 			destroyAction.act();
