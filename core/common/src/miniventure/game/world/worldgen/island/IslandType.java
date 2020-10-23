@@ -116,7 +116,7 @@ public enum IslandType {
 		
 		TileProcessor coastal = TileConditionChain.builder()
 				.add(new NoiseTileCondition(sparse, val -> val <= .075f), STICK)
-				.add(new NoiseTileCondition(sparse, val -> val > .92f), REEDS)
+				.add(new NoiseTileCondition(sparse, val -> val > .92f), FLOWER)
 				.add(new NoiseTileCondition(sparse, val -> val > .91f), SMALL_STONE)
 				.getChain();
 		
@@ -142,8 +142,11 @@ public enum IslandType {
 		
 		TileDistanceMap map = TileDistanceMap.builder()
 				.atDistance(0, WATER)
-				.atRange(1, 5, SAND)
-				.atRange(6, 18, GRASS)
+				.atRange(1, 3, WATER.append(
+						new NoiseTileCondition(sparse, val -> val < .2f).onMatch(REEDS)
+				))
+				.atRange(4, 7, SAND)
+				.atRange(8, 18, GRASS)
 				.get(true, GRASS.append(grassland),
 						new NoiseTileCondition(shape, val -> val <= .1f)
 				);
