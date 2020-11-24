@@ -7,7 +7,7 @@ import miniventure.game.util.Version;
 
 import org.jetbrains.annotations.NotNull;
 
-public class ServerItemStack extends ItemStack {
+public class ServerItemStack extends ItemStack implements ServerItemStackSource {
 	
 	@NotNull public final ServerItem item;
 	
@@ -16,8 +16,12 @@ public class ServerItemStack extends ItemStack {
 		this.item = item;
 	}
 	
-	@NotNull
-	@Override
+	@Override @NotNull
+	public ServerItemStack getStack() {
+		return this;
+	}
+	
+	@Override @NotNull
 	public ServerItem getItem() {
 		return item;
 	}

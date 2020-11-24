@@ -3,8 +3,8 @@ package miniventure.game.world.tile;
 import miniventure.game.item.MaterialQuality;
 import miniventure.game.item.Result;
 import miniventure.game.item.ServerItem;
-import miniventure.game.item.ToolItem;
-import miniventure.game.item.ToolItem.ToolType;
+import miniventure.game.item.ToolType.ToolItem;
+import miniventure.game.item.ToolClass;
 import miniventure.game.util.ArrayUtils;
 import miniventure.game.world.ItemDrop;
 import miniventure.game.world.WorldObject;
@@ -172,7 +172,7 @@ public class DestructionManager implements TileProperty {
 		}
 		
 		if(preferredTools.length > 0 && attackItem instanceof ToolItem) {
-			ToolType type = ((ToolItem)attackItem).getToolType();
+			ToolClass type = ((ToolItem)attackItem).getToolType();
 			for(PreferredTool preference: preferredTools)
 				if(type == preference.toolType)
 					damage = (int) Math.ceil(damage * preference.damageMultiplier);
@@ -184,15 +184,15 @@ public class DestructionManager implements TileProperty {
 	
 	static class PreferredTool {
 		
-		private final ToolType toolType;
+		private final ToolClass toolType;
 		private final float damageMultiplier;
 		
-		public PreferredTool(@NotNull ToolType toolType, float damageMultiplier) {
+		public PreferredTool(@NotNull ToolClass toolType, float damageMultiplier) {
 			this.toolType = toolType;
 			this.damageMultiplier = damageMultiplier;
 		}
 		
-		public ToolType getToolType() { return toolType; }
+		public ToolClass getToolType() { return toolType; }
 		public float getDamageMultiplier() { return damageMultiplier; }
 		
 	}
@@ -204,15 +204,10 @@ public class DestructionManager implements TileProperty {
 	
 	static class RequiredTool implements DamageConditionCheck {
 		
-		@Nullable private final ToolType toolType;
-		@Nullable private final MaterialQuality material;
+		private final ToolClass toolType;
 		
-		public RequiredTool(@Nullable ToolType toolType) {
-			this(toolType, null);
-		}
-		public RequiredTool(@Nullable ToolType toolType, @Nullable MaterialQuality material) {
+		public RequiredTool(ToolClass toolType) {
 			this.toolType = toolType;
-			this.material = material;
 		}
 		
 		@Override
@@ -221,7 +216,7 @@ public class DestructionManager implements TileProperty {
 				return false;
 			
 			ToolItem tool = (ToolItem) attackItem;
-			return (toolType == null || tool.getToolType() == toolType) && (material == null || tool.getQuality() == material);
+			return tool.getToolType() == toolType;
 		}
 	}
 	

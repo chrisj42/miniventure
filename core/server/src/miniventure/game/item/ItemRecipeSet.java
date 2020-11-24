@@ -6,126 +6,70 @@ public enum ItemRecipeSet implements RecipeSet<ItemRecipe> {
 	
 	// crafter types
 	HAND(
-		new ItemRecipe(new HammerItem(ObjectRecipeSet.SIMPLE),
-			new ServerItemStack(ResourceType.Stone.get(), 2),
-			new ServerItemStack(ResourceType.Log.get(), 1)
-		),
-		/*new ItemRecipe(new ToolItem(ToolItem.ToolType.Pickaxe, MaterialQuality.Crude),
-			new ServerItemStack(ResourceType.Flint.get(), 2),
-			new ServerItemStack(ResourceType.Log.get(), 1)
-		),
+		// CRUDE
 		
-		new ItemRecipe(new ToolItem(ToolItem.ToolType.Sword, MaterialQuality.Crude),
-			new ServerItemStack(ResourceType.Flint.get(), 2),
-			new ServerItemStack(ResourceType.Log.get(), 1)
+		new ItemRecipe(ToolType.Crude_Axe,
+			ResourceType.Stick.stack(2),
+			ResourceType.Reed.stack(3),
+			ResourceType.Stone
 		),
 		
-		new ItemRecipe(new ToolItem(ToolItem.ToolType.Axe, MaterialQuality.Crude),
-			new ServerItemStack(ResourceType.Flint.get(), 2),
-			new ServerItemStack(ResourceType.Log.get(), 1)
+		new ItemRecipe(ToolType.Crude_Pickaxe,
+			ResourceType.Stick.stack(2),
+			ResourceType.Reed.stack(3),
+			ResourceType.Stone.stack(2)
 		),
 		
-		new ItemRecipe(new ToolItem(ToolItem.ToolType.Shovel, MaterialQuality.Crude),
-			new ServerItemStack(ResourceType.Flint.get(), 1),
-			new ServerItemStack(ResourceType.Log.get(), 1)
-		),*/
-		
-		new ItemRecipe(new ToolItem(ToolItem.ToolType.Pickaxe, MaterialQuality.Basic),
-			new ServerItemStack(ResourceType.Stone.get(), 2),
-			new ServerItemStack(ResourceType.Log.get(), 1)
+		new ItemRecipe(ToolType.Crude_Shovel,
+			ResourceType.Stick.stack(2),
+			ResourceType.Reed.stack(3),
+			ResourceType.Stone
 		),
 		
-		new ItemRecipe(new ToolItem(ToolItem.ToolType.Sword, MaterialQuality.Basic),
-			new ServerItemStack(ResourceType.Stone.get(), 2),
-			new ServerItemStack(ResourceType.Log.get(), 1)
+		new ItemRecipe(ToolType.Club,
+			ResourceType.Stick.stack(3),
+			ResourceType.Reed.stack(3)
 		),
 		
-		new ItemRecipe(new ToolItem(ToolItem.ToolType.Axe, MaterialQuality.Basic),
-			new ServerItemStack(ResourceType.Stone.get(), 2),
-			new ServerItemStack(ResourceType.Log.get(), 1)
-		),
+		// OTHER
 		
-		new ItemRecipe(new ToolItem(ToolItem.ToolType.Shovel, MaterialQuality.Basic),
-			new ServerItemStack(ResourceType.Stone.get(), 1),
-			new ServerItemStack(ResourceType.Log.get(), 1)
-		),
-		
-		/*new ItemRecipe(new ToolItem(ToolItem.ToolType.Pickaxe, MaterialQuality.Sturdy),
-			new ServerItemStack(ResourceType.Iron.get(), 2),
-			new ServerItemStack(ResourceType.Log.get(), 1)
-		),
-		
-		new ItemRecipe(new ToolItem(ToolItem.ToolType.Sword, MaterialQuality.Sturdy),
-			new ServerItemStack(ResourceType.Iron.get(), 2),
-			new ServerItemStack(ResourceType.Log.get(), 1)
-		),
-		
-		new ItemRecipe(new ToolItem(ToolItem.ToolType.Axe, MaterialQuality.Sturdy),
-			new ServerItemStack(ResourceType.Iron.get(), 2),
-			new ServerItemStack(ResourceType.Log.get(), 1)
-		),
-		
-		new ItemRecipe(new ToolItem(ToolItem.ToolType.Shovel, MaterialQuality.Sturdy),
-			new ServerItemStack(ResourceType.Iron.get(), 1),
-			new ServerItemStack(ResourceType.Log.get(), 1)
-		),
-		
-		new ItemRecipe(new ToolItem(ToolItem.ToolType.Pickaxe, MaterialQuality.Fine),
-			new ServerItemStack(ResourceType.Tungsten.get(), 2),
-			new ServerItemStack(ResourceType.Log.get(), 1)
-		),
-		
-		new ItemRecipe(new ToolItem(ToolItem.ToolType.Sword, MaterialQuality.Fine),
-			new ServerItemStack(ResourceType.Tungsten.get(), 2),
-			new ServerItemStack(ResourceType.Log.get(), 1)
-		),
-		
-		new ItemRecipe(new ToolItem(ToolItem.ToolType.Axe, MaterialQuality.Fine),
-			new ServerItemStack(ResourceType.Tungsten.get(), 2),
-			new ServerItemStack(ResourceType.Log.get(), 1)
-		),
-		
-		new ItemRecipe(new ToolItem(ToolItem.ToolType.Shovel, MaterialQuality.Fine),
-			new ServerItemStack(ResourceType.Tungsten.get(), 1),
-			new ServerItemStack(ResourceType.Log.get(), 1)
-		),
-		
-		new ItemRecipe(new ToolItem(ToolItem.ToolType.Pickaxe, MaterialQuality.Superior),
-			new ServerItemStack(ResourceType.Ruby.get(), 2),
-			new ServerItemStack(ResourceType.Log.get(), 1)
-		),
-		
-		new ItemRecipe(new ToolItem(ToolItem.ToolType.Sword, MaterialQuality.Superior),
-			new ServerItemStack(ResourceType.Ruby.get(), 2),
-			new ServerItemStack(ResourceType.Log.get(), 1)
-		),
-		
-		new ItemRecipe(new ToolItem(ToolItem.ToolType.Axe, MaterialQuality.Superior),
-			new ServerItemStack(ResourceType.Ruby.get(), 2),
-			new ServerItemStack(ResourceType.Log.get(), 1)
-		),
-		
-		new ItemRecipe(new ToolItem(ToolItem.ToolType.Shovel, MaterialQuality.Superior),
-			new ServerItemStack(ResourceType.Ruby.get(), 1),
-			new ServerItemStack(ResourceType.Log.get(), 1)
-		),*/
-		
-		new ItemRecipe(new ServerItemStack(PlaceableItemType.Torch.get(), 2),
-			new ServerItemStack(ResourceType.Log.get(), 1),
-			new ServerItemStack(ResourceType.Coal.get(), 1)
+		new ItemRecipe(PlaceableItemType.Torch,
+			ResourceType.Stick,
+			ResourceType.Coal
 		)
 	),
 	
-	Workbench(
-		// pre-metal tools mainly
+	WORKBENCH(
+		new ItemRecipe(new HammerItem(ObjectRecipeSet.BASIC),
+			ResourceType.Stick.stack(2),
+			ResourceType.Stone.stack(2),
+			ResourceType.Reed.stack(2)
+		)
 	),
 	
-	Anvil(
+	ANVIL(
 		// metal tools and any other metal things
-	),
-	
-	ArchitectTable(
-		// doors, walls, floors; everything relating to building construction
+		
+		new ItemRecipe(ToolType.Iron_Axe,
+			ResourceType.Iron,
+			ResourceType.Plank
+		),
+		
+		new ItemRecipe(ToolType.Iron_Pickaxe,
+			ResourceType.Iron.stack(2),
+			ResourceType.Plank
+		),
+		
+		new ItemRecipe(ToolType.Iron_Shovel,
+			ResourceType.Iron,
+			ResourceType.Plank
+		),
+		
+		new ItemRecipe(ToolType.Sword,
+			ResourceType.Iron.stack(3),
+			ResourceType.Stone,
+			ResourceType.Reed.stack(5)
+		)
 	),
 	
 	Oven(

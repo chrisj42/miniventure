@@ -8,7 +8,7 @@ import miniventure.game.world.entity.mob.player.ServerPlayer;
 
 import org.jetbrains.annotations.NotNull;
 
-public enum FoodType {
+public enum FoodType implements ServerItemSource {
 	
 	Apple(3), Pear(3), Cherry(1), Strawberry(2),
 	Snow_Berries(2), Gooseberry(2), Cactus_Fruit(4),
@@ -22,7 +22,7 @@ public enum FoodType {
 		item = new FoodItem();
 	}
 	
-	@NotNull
+	@Override @NotNull
 	public ServerItem get() { return item; }
 	
 	class FoodItem extends EnumItem {
@@ -35,7 +35,8 @@ public enum FoodType {
 			return CursorHighlight.INVISIBLE;
 		}
 		
-		@Override public Result interact(ServerPlayer player) {
+		@Override
+		public Result interact(ServerPlayer player) {
 			int gained = player.changeStat(Stat.Hunger, healthGained);
 			if(gained > 0)
 				return Result.USED;

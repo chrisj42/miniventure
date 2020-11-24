@@ -2,20 +2,16 @@ package miniventure.game.world.entity.mob.player;
 
 import java.net.InetSocketAddress;
 import java.util.EnumMap;
-import java.util.HashSet;
 
 import miniventure.game.core.GameCore;
 import miniventure.game.item.*;
-import miniventure.game.item.ToolItem.ToolType;
 import miniventure.game.network.GameProtocol.*;
 import miniventure.game.network.PacketPipe.PacketPipeWriter;
 import miniventure.game.network.GameServer;
 import miniventure.game.util.MyUtils;
-import miniventure.game.util.SerialHashMap;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueAction;
 import miniventure.game.util.pool.RectPool;
-import miniventure.game.util.pool.Vector3Pool;
 import miniventure.game.util.pool.VectorPool;
 import miniventure.game.world.Boundable;
 import miniventure.game.world.Point;
@@ -133,13 +129,15 @@ public class ServerPlayer extends ServerMob implements Player {
 		
 		if(GameCore.debug) {
 			System.out.println("adding debug items to player inventory");
-			inventory.addItem(new ToolItem(ToolType.Shovel, MaterialQuality.Superior));
-			inventory.addItem(new ToolItem(ToolType.Axe, MaterialQuality.Superior));
-			inventory.addItem(new ToolItem(ToolType.Pickaxe, MaterialQuality.Superior));
+			inventory.addItem(ToolType.Iron_Shovel.get());
+			inventory.addItem(ToolType.Iron_Axe.get());
+			inventory.addItem(ToolType.Iron_Pickaxe.get());
 			for(int i = 0; i < 7; i++)
 				inventory.addItem(PlaceableItemType.Torch.get());
 			for(int i = 0; i < 7; i++)
-				inventory.addItem(ResourceType.Log.get());
+				inventory.addItem(ResourceType.Stick.get());
+			for(int i = 0; i < 7; i++)
+				inventory.addItem(ResourceType.Plank.get());
 			for(int i = 0; i < 7; i++)
 				inventory.addItem(FoodType.Cooked_Meat.get());
 		}

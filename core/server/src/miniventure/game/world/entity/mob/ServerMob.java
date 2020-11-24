@@ -2,12 +2,11 @@ package miniventure.game.world.entity.mob;
 
 import miniventure.game.item.Item;
 import miniventure.game.item.Result;
-import miniventure.game.item.ToolItem;
-import miniventure.game.item.ToolItem.ToolType;
+import miniventure.game.item.ToolClass;
+import miniventure.game.item.ToolType.ToolItem;
 import miniventure.game.network.GameProtocol.Hurt;
 import miniventure.game.network.GameProtocol.MobUpdate;
 import miniventure.game.network.GameProtocol.SpriteUpdate;
-import miniventure.game.util.SerialHashMap;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.WorldObject;
@@ -157,9 +156,9 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 		if(item instanceof ToolItem) {
 			use = true;
 			ToolItem ti = (ToolItem) item;
-			if(ti.getToolType() == ToolType.Sword)
+			if(ti.getToolType() == ToolClass.Sword)
 				damage *= 3;
-			else if(ti.getToolType() == ToolType.Axe)
+			else if(ti.getToolType() == ToolClass.Axe)
 				damage *= 2;
 			else
 				use = false;

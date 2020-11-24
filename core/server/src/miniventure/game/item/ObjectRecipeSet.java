@@ -4,23 +4,30 @@ import miniventure.game.network.GameProtocol.SerialRecipe;
 
 public enum ObjectRecipeSet implements RecipeSet<ObjectRecipe> {
 	
-	SIMPLE(
+	// toolkit types
+	
+	HAND(
+		
+	),
+	
+	BASIC(
 		new ObjectRecipe(ConstructableObjectType.Stone_Path,
-			new ServerItemStack(ResourceType.Stone.get(), 2)
+			ResourceType.Stone.stack(2)
 		),
 		new ObjectRecipe(ConstructableObjectType.Door,
-			new ServerItemStack(ResourceType.Log.get(), 2)
+			ResourceType.Plank.stack(2)
 		),
 		new ObjectRecipe(ConstructableObjectType.Wood_Wall,
-			new ServerItemStack(ResourceType.Log.get(), 3)
+			ResourceType.Plank.stack(3)
 		),
 		new ObjectRecipe(ConstructableObjectType.Stone_Wall,
-			new ServerItemStack(ResourceType.Stone.get(), 3)
+			ResourceType.Stone.stack(3)
 		),
 		new ObjectRecipe(ConstructableObjectType.Stone_Floor,
-			new ServerItemStack(ResourceType.Stone.get(), 3)
+			ResourceType.Stone.stack(3)
 		)
-	); // hammer types
+	)
+	;
 	
 	private final ObjectRecipe[] recipes;
 	private final SerialRecipe[] serializedRecipes;

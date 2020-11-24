@@ -5,10 +5,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class ItemRecipe extends Recipe {
 	
-	public ItemRecipe(@NotNull ServerItem result, @NotNull ServerItemStack... costs) {
-		this(new ServerItemStack(result, 1), costs);
-	}
-	public ItemRecipe(@NotNull ServerItemStack result, @NotNull ServerItemStack... costs) {
+	public ItemRecipe(@NotNull ServerItemStackSource result, @NotNull ServerItemStackSource... costs) {
 		super(result, costs);
 	}
 	

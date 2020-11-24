@@ -1,5 +1,6 @@
 package miniventure.game.item;
 
+import miniventure.game.item.ToolType.ToolItem;
 import miniventure.game.texture.FetchableTextureHolder;
 import miniventure.game.util.Version;
 
@@ -11,7 +12,7 @@ public enum ItemType {
 	
 	// Tools are used to interact with the world, usually through destruction.
 	// Tools have durability, and multiple levels of quality.
-	Tool(data -> new ToolItem(ToolItem.ToolType.valueOf(data[0]), MaterialQuality.valueOf(data[1]), Integer.parseInt(data[2]))),
+	Tool(ToolItem::load),
 	
 	Hammer(data -> new HammerItem(
 		ObjectRecipeSet.valueOf(data[0]),

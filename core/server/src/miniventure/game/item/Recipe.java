@@ -1,6 +1,7 @@
 package miniventure.game.item;
 
 import miniventure.game.core.GameCore;
+import miniventure.game.util.ArrayUtils;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -9,9 +10,9 @@ public abstract class Recipe {
 	@NotNull private final ServerItemStack result;
 	@NotNull private final ServerItemStack[] costs;
 	
-	protected Recipe(@NotNull ServerItemStack result, @NotNull ServerItemStack... costs) {
-		this.result = result;
-		this.costs = costs;
+	protected Recipe(@NotNull ServerItemStackSource result, @NotNull ServerItemStackSource... costs) {
+		this.result = result.getStack();
+		this.costs = ArrayUtils.mapArray(costs, ServerItemStack.class, ServerItemStackSource::getStack);
 	}
 	
 	@NotNull

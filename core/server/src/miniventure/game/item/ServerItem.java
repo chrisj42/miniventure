@@ -15,7 +15,7 @@ import miniventure.game.world.entity.mob.player.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class ServerItem extends Item {
+public abstract class ServerItem extends Item implements ServerItemSource {
 	
 	// NOTE: all data aspects should be final, because one item instance is used to represent a whole stack. Now, with this in mind, one can set a temp var to determine what sort of item to return from the use() method. It should be reset following that, however.
 	
@@ -85,5 +85,10 @@ public abstract class ServerItem extends Item {
 	public static ServerItem load(@NotNull String[] data, @NotNull Version version) {
 		ItemType type = ItemType.valueOf(data[0]);
 		return type.load(Arrays.copyOfRange(data, 1, data.length), version);
+	}
+	
+	@Override @NotNull
+	public ServerItem get() {
+		return this;
 	}
 }

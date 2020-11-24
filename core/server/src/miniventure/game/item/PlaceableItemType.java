@@ -18,7 +18,7 @@ import static miniventure.game.item.PlacementAttempt.PlacementAction.tile;
 import static miniventure.game.item.PlacementAttempt.PlacementCheck;
 import static miniventure.game.item.PlacementAttempt.getAttempt;
 
-public enum PlaceableItemType {
+public enum PlaceableItemType implements ServerItemSource {
 	
 	Dirt(TileTypeEnum.DIRT, PlacementCheck.onTile(TileTypeEnum.HOLE)),
 	
@@ -52,7 +52,7 @@ public enum PlaceableItemType {
 		this.item = customTexture == null ? new PlaceableItem() : new PlaceableItem(customTexture);
 	}
 	
-	@NotNull
+	@Override @NotNull
 	public ServerItem get() {
 		return item;
 	}

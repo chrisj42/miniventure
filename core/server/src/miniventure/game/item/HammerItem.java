@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class HammerItem extends ServerItem {
 	
-	public static final CursorHighlight CONSTRUCTION_CURSOR = CursorHighlight.TILE_IN_RADIUS;
+	static final CursorHighlight CONSTRUCTION_CURSOR = CursorHighlight.TILE_IN_RADIUS;
 	
 	@Nullable
 	private final Integer selection;

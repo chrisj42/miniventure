@@ -2,13 +2,7 @@ package miniventure.game.world.tile;
 
 import java.util.HashMap;
 
-import miniventure.game.item.FoodType;
-import miniventure.game.item.Item;
-import miniventure.game.item.PlaceableItemType;
-import miniventure.game.item.ResourceType;
-import miniventure.game.item.Result;
-import miniventure.game.item.ServerItem;
-import miniventure.game.item.ToolItem.ToolType;
+import miniventure.game.item.*;
 import miniventure.game.util.function.MapFunction;
 import miniventure.game.util.param.ParamMap;
 import miniventure.game.world.ItemDrop;
@@ -138,21 +132,21 @@ public class ServerTileType extends TileType {
 		DIRT(
 			P.DESTRUCT.as(type -> new DestructionManager(type,
 				new ItemDrop(PlaceableItemType.Dirt.get()),
-				new RequiredTool(ToolType.Shovel)
+				new RequiredTool(ToolClass.Shovel)
 			))
 		),
 		
 		SAND(
 			P.DESTRUCT.as(type -> new DestructionManager(type,
 				new ItemDrop(PlaceableItemType.Sand.get()),
-				new RequiredTool(ToolType.Shovel)
+				new RequiredTool(ToolClass.Shovel)
 			))
 		),
 		
 		GRASS(
 			P.DESTRUCT.as(type -> new DestructionManager(type,
 				new ItemDrop(PlaceableItemType.Dirt.get()),
-				new RequiredTool(ToolType.Shovel)
+				new RequiredTool(ToolClass.Shovel)
 			)),
 			
 			P.UPDATE.as(type ->
@@ -168,7 +162,7 @@ public class ServerTileType extends TileType {
 		STONE_PATH(
 			P.DESTRUCT.as(type -> new DestructionManager(type,
 				new ItemDrop(ResourceType.Stone.get(), 2),
-				new RequiredTool(ToolType.Pickaxe)
+				new RequiredTool(ToolClass.Pickaxe)
 			))
 		),
 		
@@ -178,7 +172,7 @@ public class ServerTileType extends TileType {
 					new ItemDrop(PlaceableItemType.Snow.get()),
 					new ItemDrop(FoodType.Snow_Berries.get(), 0, 1, .1f)
 				)
-				.require(new RequiredTool(ToolType.Shovel))
+				.require(new RequiredTool(ToolClass.Shovel))
 				.make()
 			)
 		),
@@ -222,7 +216,7 @@ public class ServerTileType extends TileType {
 		
 		STONE(
 			P.DESTRUCT.as(type -> new DestructionManager(type, 40,
-				new PreferredTool(ToolType.Pickaxe, 5),
+				new PreferredTool(ToolClass.Pickaxe, 5),
 				new ItemDrop(ResourceType.Stone.get(), 2, 3)
 			))
 		),
@@ -230,15 +224,15 @@ public class ServerTileType extends TileType {
 		STONE_FLOOR(
 			P.DESTRUCT.as(type -> new DestructionManager(type,
 				new ItemDrop(ResourceType.Stone.get(), 3),
-				new RequiredTool(ToolType.Pickaxe)
+				new RequiredTool(ToolClass.Pickaxe)
 			))
 		),
 		
 		WOOD_WALL(
 			P.DESTRUCT.as(type -> 
 				new DestructionManager(type, 20,
-					new PreferredTool(ToolType.Axe, 3),
-					new ItemDrop(ResourceType.Log.get(), 3)
+					new PreferredTool(ToolClass.Axe, 3),
+					new ItemDrop(ResourceType.Plank.get(), 3)
 				)
 			)
 		),
@@ -246,7 +240,7 @@ public class ServerTileType extends TileType {
 		STONE_WALL(
 			P.DESTRUCT.as(type -> 
 				new DestructionManager(type, 40,
-					new PreferredTool(ToolType.Pickaxe, 5),
+					new PreferredTool(ToolClass.Pickaxe, 5),
 					new ItemDrop(ResourceType.Stone.get(), 3)
 				)
 			)
@@ -261,8 +255,8 @@ public class ServerTileType extends TileType {
 			}
 		},
 			P.DESTRUCT.as(type -> new DestructionManager(type,
-				new ItemDrop(ResourceType.Log.get(), 3),
-				new RequiredTool(ToolType.Axe)
+				new ItemDrop(ResourceType.Plank, 3),
+				new RequiredTool(ToolClass.Axe)
 			)),
 			
 			P.TRANS.as(type -> new TransitionManager(type)
@@ -280,8 +274,8 @@ public class ServerTileType extends TileType {
 			}
 		},
 			P.DESTRUCT.as(type -> new DestructionManager(type,
-				new ItemDrop(ResourceType.Log.get(), 3),
-				new RequiredTool(ToolType.Axe)
+				new ItemDrop(ResourceType.Plank, 3),
+				new RequiredTool(ToolClass.Axe)
 			))
 		),
 		
@@ -341,7 +335,7 @@ public class ServerTileType extends TileType {
 		static TValue<?>[] ore(ResourceType oreType, int health) {
 			return new TValue<?>[] {
 				P.DESTRUCT.as(type -> new DestructionManager(type, health,
-					new PreferredTool(ToolType.Pickaxe, 5),
+					new PreferredTool(ToolClass.Pickaxe, 5),
 					new ItemDrop(oreType.get(), 3, 4)
 				))
 			};
@@ -349,9 +343,9 @@ public class ServerTileType extends TileType {
 		
 		TValue<?>[] tree = {
 			P.DESTRUCT.as(type -> new DestructionManager(type, 24,
-				new PreferredTool(ToolType.Axe, 2),
-				new ItemDrop(ResourceType.Log.get(), 2),
-				new ItemDrop(FoodType.Apple.get(), 0, 2, 0.32f)
+				new PreferredTool(ToolClass.Axe, 2),
+				new ItemDrop(ResourceType.Plank, 2),
+				new ItemDrop(FoodType.Apple, 0, 2, 0.32f)
 			))
 		};
 	}

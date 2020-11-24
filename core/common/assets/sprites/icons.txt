@@ -178,205 +178,128 @@ items/resource/fabric
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/resource/flint
+items/resource/fiber_glue
   rotate: false
   xy: 87, 3
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/resource/iron
+items/resource/flint
   rotate: false
   xy: 87, 23
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/resource/log
+items/resource/iron
   rotate: false
   xy: 87, 43
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/resource/reed
+items/resource/plank
   rotate: false
   xy: 87, 63
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/resource/ruby
+items/resource/reed
   rotate: false
   xy: 91, 83
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/resource/stick
+items/resource/ruby
   rotate: false
   xy: 91, 103
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/resource/stone
+items/resource/stick
   rotate: false
   xy: 91, 123
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/resource/tungsten
+items/resource/stone
   rotate: false
   xy: 103, 143
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tools/flint_axe
+items/resource/tungsten
   rotate: false
   xy: 119, 163
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tools/flint_pickaxe
+items/tools/basic_hammer
   rotate: false
   xy: 135, 183
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tools/flint_shovel
+items/tools/club
   rotate: false
   xy: 135, 203
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tools/flint_sword
+items/tools/crude_axe
   rotate: false
   xy: 135, 223
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tools/iron_axe
+items/tools/crude_pickaxe
   rotate: false
   xy: 107, 3
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tools/iron_pickaxe
+items/tools/crude_shovel
   rotate: false
   xy: 107, 23
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tools/iron_shovel
+items/tools/iron_axe
   rotate: false
   xy: 107, 43
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tools/iron_sword
+items/tools/iron_pickaxe
   rotate: false
   xy: 107, 63
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tools/ruby_axe
+items/tools/iron_shovel
   rotate: false
   xy: 111, 83
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-items/tools/ruby_pickaxe
+items/tools/sword
   rotate: false
   xy: 111, 103
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-items/tools/ruby_shovel
-  rotate: false
-  xy: 111, 123
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-items/tools/ruby_sword
-  rotate: false
-  xy: 123, 143
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-items/tools/simple_hammer
-  rotate: false
-  xy: 139, 163
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-items/tools/stone_axe
-  rotate: false
-  xy: 155, 183
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-items/tools/stone_pickaxe
-  rotate: false
-  xy: 155, 203
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-items/tools/stone_shovel
-  rotate: false
-  xy: 155, 223
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-items/tools/stone_sword
-  rotate: false
-  xy: 127, 3
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-items/tools/tungsten_axe
-  rotate: false
-  xy: 127, 23
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-items/tools/tungsten_pickaxe
-  rotate: false
-  xy: 139, 163
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-items/tools/tungsten_shovel
-  rotate: false
-  xy: 127, 43
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-items/tools/tungsten_sword
-  rotate: false
-  xy: 127, 63
   size: 16, 16
   orig: 16, 16
   offset: 0, 0

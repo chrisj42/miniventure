@@ -6,9 +6,14 @@ import miniventure.game.world.entity.mob.player.Player.CursorHighlight;
 
 import org.jetbrains.annotations.NotNull;
 
-public enum ResourceType {
+public enum ResourceType implements ServerItemSource {
 	
-	Reed, Stick, Log, Flint, Coal, Cotton, Fabric, Stone, Iron, Tungsten, Ruby;
+	Stick, Plank,
+	Reed,
+	Flint, Coal, Stone,
+	Iron, Tungsten, Ruby,
+	Cotton, Fabric,
+	;
 	
 	@NotNull
 	private final ServerItem item;
@@ -22,7 +27,7 @@ public enum ResourceType {
 		};
 	}
 	
-	@NotNull
+	@Override @NotNull
 	public ServerItem get() {
 		return item;
 	}
