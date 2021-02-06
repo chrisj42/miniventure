@@ -124,7 +124,7 @@ public class DestructionManager implements TileProperty {
 		}
 	}
 	
-	Result tileAttacked(@NotNull ServerTile tile, @NotNull WorldObject attacker, @Nullable ServerItem item, int damage) {
+	public Result tileAttacked(@NotNull ServerTile tile, @NotNull WorldObject attacker, @Nullable ServerItem item, int damage) {
 		damage = getDamage(item, damage);
 		
 		if(damage > 0) {

@@ -3,7 +3,6 @@ package miniventure.game.world.entity.mob;
 import miniventure.game.item.Item;
 import miniventure.game.item.Result;
 import miniventure.game.item.ServerItem;
-import miniventure.game.util.SerialHashMap;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueAction;
 import miniventure.game.util.pool.VectorPool;
@@ -14,8 +13,6 @@ import miniventure.game.world.entity.EntityDataSet;
 import miniventure.game.world.level.ServerLevel;
 import miniventure.game.world.management.ServerWorld;
 import miniventure.game.world.tile.TileTypeEnum;
-
-import com.badlogic.gdx.math.Vector2;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -113,9 +110,9 @@ public class MobAi extends ServerMob {
 	}
 	
 	@Override
-	public boolean touchedBy(Entity other) {
-		if(aiType.onTouch != null) return aiType.onTouch.onTouch(this, other);
-		return super.touchedBy(other);
+	public void touchedBy(Entity other, boolean initial) {
+		if(aiType.onTouch != null)
+			aiType.onTouch.onTouch(this, other);
 	}
 	
 	@Override

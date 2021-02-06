@@ -2,7 +2,6 @@ package miniventure.game.world.entity.particle;
 
 import miniventure.game.item.ServerItem;
 import miniventure.game.util.MyUtils;
-import miniventure.game.util.SerialHashMap;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueAction;
 import miniventure.game.world.entity.Entity;
@@ -75,17 +74,11 @@ public class ItemEntity extends ServerEntity {
 	}
 	
 	@Override
-	public boolean touchedBy(Entity other) {
+	public void touchedBy(Entity other, boolean initial) {
 		if(other instanceof ServerPlayer && lifetime.getTime() > PICKUP_DELAY * (delayPickup ? 4 : 1) && ((ServerPlayer)other).takeItem(item)) {
 			remove();
-			return true;
 		}
-		
-		return false;
 	}
-	
-	@Override
-	public void touching(Entity entity) { touchedBy(entity); }
 	
 	@Override
 	public boolean isPermeable() { return true; }

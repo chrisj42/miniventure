@@ -4,9 +4,7 @@ import java.util.*;
 
 import miniventure.game.item.Item;
 import miniventure.game.item.Result;
-import miniventure.game.util.ArrayUtils;
 import miniventure.game.util.RelPos;
-import miniventure.game.world.Point;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.player.Player;
@@ -73,8 +71,7 @@ public class RenderTile extends Tile {
 	@Override public boolean isPermeable() { return getType().isWalkable(); }
 	@Override public Result interactWith(Player player, @Nullable Item heldItem) { return Result.NONE; }
 	@Override public Result attackedBy(WorldObject obj, @Nullable Item item, int dmg) { return Result.NONE; }
-	@Override public boolean touchedBy(Entity entity) { return false; }
-	@Override public void touching(Entity entity) {}
+	@Override public void touchedBy(Entity entity, boolean initial) {}
 	
 	public void queueSpriteUpdate() {
 		updateSprites = true;

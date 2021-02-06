@@ -2,13 +2,11 @@ package miniventure.game.world.entity;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Map.Entry;
 
 import miniventure.game.network.GameProtocol.EntityUpdate;
 import miniventure.game.network.GameProtocol.PositionUpdate;
 import miniventure.game.network.GameProtocol.SpriteUpdate;
 import miniventure.game.network.GameServer;
-import miniventure.game.util.SerialHashMap;
 import miniventure.game.util.Version;
 import miniventure.game.util.function.ValueAction;
 import miniventure.game.util.pool.RectPool;
@@ -78,17 +76,20 @@ public abstract class ServerEntity extends Entity {
 		
 		ServerLevel level = getLevel();
 		if(level == null) return;
-		Array<WorldObject> objects = new Array<>();
 		
 		Rectangle bounds = getBounds();
 		
-		level.forOverlappingEntities(bounds, this, objects::add);
+		// call touch on overlapping objects
+		level.forOverlappingEntities(bounds, this, e -> {
+			e.touchedBy(this, false);
+			this.touchedBy(e, false);
+		});
 		// we don't want to trigger things like getting hurt by lava until the entity is actually *in* the tile, so we'll only consider the closest one to be "touching".
 		Tile tile = level.getTile(bounds);
-		if(tile != null) objects.add(tile);
-		
-		for(WorldObject obj: objects)
-			obj.touching(this);
+		if(tile != null) {
+			tile.touchedBy(this, false);
+			this.touchedTile(tile, false);
+		}
 		
 		// get the entity back on the map if they somehow end up on a null tile
 		if(tile == null)
@@ -104,17 +105,6 @@ public abstract class ServerEntity extends Entity {
 		super.moveTo(x, y, z);
 		
 		newPos = new PositionUpdate(this);
-	}
-	
-	@Override
-	void touchTile(Tile tile) {
-		tile.touchedBy(this); // NOTE: I can see this causing an issue if you move too fast; it will "touch" tiles that could be far away, if the player will move there next frame.
-	}
-	
-	@Override
-	void touchEntity(Entity entity) {
-		if(!entity.touchedBy(this))
-			this.touchedBy(entity); // to make sure something has a chance to happen, but it doesn't happen twice.
 	}
 	
 	public String serialize() { return serialize(this); }

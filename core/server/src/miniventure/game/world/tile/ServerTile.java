@@ -10,7 +10,6 @@ import miniventure.game.util.pool.RectPool;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.player.Player;
-import miniventure.game.world.level.Level;
 import miniventure.game.world.level.ServerLevel;
 import miniventure.game.world.management.ServerWorld;
 import miniventure.game.world.tile.ServerTileType.P;
@@ -178,30 +177,25 @@ public class ServerTile extends Tile {
 	
 	@Override
 	public Result attackedBy(WorldObject obj, @Nullable Item item, int damage) {
-		if(getType().get(P.TRANS).playingExitAnimation(this))
+		ServerTileType type = getType();
+		if(type.get(P.TRANS).playingExitAnimation(this))
 			return Result.NONE;
-		return getType().attacked(this, obj, (ServerItem) item, damage);
+		return type.get(P.DESTRUCT).tileAttacked(this, obj, (ServerItem) item, damage);
 	}
 	
 	@Override
 	public Result interactWith(Player player, @Nullable Item heldItem) {
-		if(getType().get(P.TRANS).playingExitAnimation(this))
+		ServerTileType type = getType();
+		if(type.get(P.TRANS).playingExitAnimation(this))
 			return Result.NONE;
-		return getType().interact(this, player, (ServerItem) heldItem);
+		return type.get(P.INTERACT).onInteract(this, player, (ServerItem) heldItem);
 	}
 	
 	@Override
-	public boolean touchedBy(Entity entity) {
-		if(getType().get(P.TRANS).playingExitAnimation(this))
-			return false;
-		return getType().touched(this, entity, true);
-	}
-	
-	@Override
-	public void touching(Entity entity) {
-		if(getType().get(P.TRANS).playingExitAnimation(this))
-			return;
-		getType().touched(this, entity, false);
+	public void touchedBy(Entity entity, boolean initial) {
+		ServerTileType type = getType();
+		if(!type.get(P.TRANS).playingExitAnimation(this))
+			type.get(P.TOUCH).onTouched(this, entity, initial);
 	}
 	
 	@Override

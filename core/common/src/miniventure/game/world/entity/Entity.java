@@ -187,8 +187,10 @@ public abstract class Entity implements WorldObject {
 		
 		boolean canMove = true;
 		for(Tile tile: newTiles) {
-			if(interact)
-				touchTile(tile);
+			if(interact) {
+				tile.touchedBy(this, true);
+				this.touchedTile(tile, true);
+			}
 			canMove = canMove && (!canMoveCurrent || canPermeate(tile));
 		}
 		
@@ -219,8 +221,11 @@ public abstract class Entity implements WorldObject {
 		level.forOverlappingEntities(oldRect, e -> newEntities.removeValue(e, true));
 		// because the "old rect" entities are never added in the first place, we don't need to worry about this entity being included in this list, and accidentally interacting with itself.
 		for(Entity entity: newEntities) {
-			if(interact)
-				touchEntity(entity);
+			if(interact) {
+				// do an initial touch interaction both ways
+				entity.touchedBy(this, true);
+				this.touchedBy(entity, true);
+			}
 			canMove = canMove && entity.isPermeable();
 		}
 		
@@ -231,8 +236,7 @@ public abstract class Entity implements WorldObject {
 		return true;
 	}
 	
-	abstract void touchTile(Tile tile);
-	abstract void touchEntity(Entity entity);
+	protected void touchedTile(Tile tile, boolean initial) {}
 	
 	public void moveTo(@NotNull Vector2 pos) { moveTo(pos, false); }
 	public void moveTo(@NotNull Vector2 pos, boolean free) {
@@ -277,12 +281,8 @@ public abstract class Entity implements WorldObject {
 			moveTo(x, y);
 	}
 	
-	// returns whether anything meaningful happened; if false, then other.touchedBy(this) will be called.
 	@Override
-	public boolean touchedBy(Entity other) { return false; }
-	
-	@Override
-	public void touching(Entity entity) {}
+	public void touchedBy(Entity other, boolean initial) {}
 	
 	@Override
 	public boolean isPermeable() { return false; }

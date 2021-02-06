@@ -111,9 +111,6 @@ public class ClientEntity extends Entity {
 	@Override
 	public boolean move(float xd, float yd, float zd) { return move(false, xd, yd, zd); }
 	
-	@Override void touchTile(Tile tile) {}
-	@Override void touchEntity(Entity entity) {}
-	
 	public boolean move(boolean validate, float xd, float yd, float zd) {
 		if(validate)
 			return super.move(xd, yd, zd);

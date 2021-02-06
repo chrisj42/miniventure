@@ -31,7 +31,6 @@ public interface WorldObject extends Boundable, Taggable<WorldObject> {
 	// returns whether attack had any effect (should we look for other objects to attack?)
 	Result attackedBy(WorldObject obj, @Nullable Item item, int dmg);
 	
-	boolean touchedBy(Entity entity);
+	void touchedBy(Entity entity, boolean initial);
 	
-	void touching(Entity entity);
 }

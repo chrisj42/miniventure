@@ -25,12 +25,12 @@ public class ServerTileType extends TileType {
 			type.getType();
 	}
 	
-	
 	public interface P {
 		TParam<DestructionManager> DESTRUCT = new TParam<>(DestructionManager::INDESTRUCTIBLE);
 		TParam<UpdateManager> UPDATE = new TParam<>(UpdateManager::new);
 		TParam<TransitionManager> TRANS = new TParam<>(TransitionManager::new);
-		// TParam<TileItem> ITEM = new TParam<>(type -> null);
+		TParam<InteractionManager> INTERACT = new TParam<>(type -> InteractionManager.NONE); 
+		TParam<TouchManager> TOUCH = new TParam<>(type -> TouchManager.NONE);
 	}
 	
 	private final HashMap<TParam<?>, TileProperty> propertyMap;
@@ -39,7 +39,7 @@ public class ServerTileType extends TileType {
 	
 	private ServerTileType(@NotNull TileTypeEnum type) {
 		super(type);
-		propertyMap = new HashMap<>(4);
+		propertyMap = new HashMap<>(5);
 	}
 	
 	private void initProperties(TValue<?>... params) {
@@ -55,6 +55,8 @@ public class ServerTileType extends TileType {
 		propertyMap.put(P.DESTRUCT, map.get(P.DESTRUCT).get(type));
 		propertyMap.put(P.UPDATE, map.get(P.UPDATE).get(type));
 		propertyMap.put(P.TRANS, map.get(P.TRANS).get(type));
+		propertyMap.put(P.INTERACT, map.get(P.INTERACT).get(type));
+		propertyMap.put(P.TOUCH, map.get(P.TOUCH).get(type));
 		propertyMap.forEach((param, prop) -> prop.registerDataTypes(this));
 		// initialized = true;
 		// initializing = false;
@@ -114,15 +116,6 @@ public class ServerTileType extends TileType {
 		
 		return get(P.UPDATE).update(tile, delta);
 	}
-	
-	
-	public Result interact(@NotNull ServerTile tile, Player player, @Nullable ServerItem item) { return Result.NONE; }
-	
-	public Result attacked(@NotNull ServerTile tile, WorldObject source, @Nullable ServerItem item, int damage) {
-		return get(P.DESTRUCT).tileAttacked(tile, source, item, damage);
-	}
-	
-	public boolean touched(@NotNull ServerTile tile, Entity entity, boolean initial) { return false; }
 	
 	
 	private enum ServerTileTypeEnum {
@@ -200,14 +193,12 @@ public class ServerTileType extends TileType {
 			P.DESTRUCT.as(type -> new DestructionManager(type, new ItemDrop(ResourceType.Reed.get())))
 		),
 		
-		DOCK(type -> new ServerTileType(type)
-		{
-			@Override
-			public Result interact(@NotNull ServerTile tile, Player player, @Nullable ServerItem item) {
+		DOCK(
+			P.INTERACT.as(type -> (tile, player, item) -> {
 				tile.getServer().sendToPlayer((ServerPlayer) player, tile.getWorld().getMapData());
 				return Result.INTERACT;
-			}
-		}),
+			})
+		),
 		
 		COAL_ORE(ServerTileFactory.ore(ResourceType.Coal, 25)),
 		IRON_ORE(ServerTileFactory.ore(ResourceType.Iron, 35)),
@@ -246,14 +237,12 @@ public class ServerTileType extends TileType {
 			)
 		),
 		
-		OPEN_DOOR(type -> new ServerTileType(type)
-		{
-			@Override
-			public Result interact(@NotNull ServerTile tile, Player player, @Nullable ServerItem item) {
-				tile.replaceTile(CLOSED_DOOR.getType());
+		OPEN_DOOR(
+			P.INTERACT.as(type -> (tile, player, item) -> {
+				tile.replaceTile(get(TileTypeEnum.CLOSED_DOOR));
 				return Result.INTERACT;
-			}
-		},
+			}),
+			
 			P.DESTRUCT.as(type -> new DestructionManager(type,
 				new ItemDrop(ResourceType.Plank, 3),
 				new RequiredTool(ToolClass.Axe)
@@ -265,14 +254,12 @@ public class ServerTileType extends TileType {
 			)
 		),
 		
-		CLOSED_DOOR(type -> new ServerTileType(type)
-		{
-			@Override
-			public Result interact(@NotNull ServerTile tile, Player player, @Nullable ServerItem item) {
-				tile.replaceTile(OPEN_DOOR.getType());
+		CLOSED_DOOR(
+			P.INTERACT.as(type -> (tile, player, item) -> {
+				tile.replaceTile(get(TileTypeEnum.OPEN_DOOR));
 				return Result.INTERACT;
-			}
-		},
+			}),
+			
 			P.DESTRUCT.as(type -> new DestructionManager(type,
 				new ItemDrop(ResourceType.Plank, 3),
 				new RequiredTool(ToolClass.Axe)
@@ -287,13 +274,9 @@ public class ServerTileType extends TileType {
 			)
 		),
 		
-		CACTUS(type -> new ServerTileType(type)
-		{
-			@Override
-			public boolean touched(@NotNull ServerTile tile, Entity entity, boolean initial) {
-				return entity.attackedBy(tile, null, 1).success;
-			}
-		},
+		CACTUS(
+			P.TOUCH.as(type -> TouchManager.DAMAGE_ENTITY(1)),
+			
 			P.DESTRUCT.as(type -> new DestructionManager(type, 12, null,
 				new ItemDrop(FoodType.Cactus_Fruit.get(), 1, 2, .15f)
 			))
