@@ -15,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 public class HammerItem extends ServerItem {
 	
 	static final CursorHighlight CONSTRUCTION_CURSOR = CursorHighlight.TILE_IN_RADIUS;
+	static final CursorHighlight DESTRUCTION_CURSOR = CursorHighlight.TILE_IN_RADIUS;
 	
 	@Nullable
 	private final Integer selection;
@@ -32,7 +33,7 @@ public class HammerItem extends ServerItem {
 	
 	@NotNull @Override
 	public Player.CursorHighlight getHighlightMode() {
-		return selection == null ? CursorHighlight.INVISIBLE : CONSTRUCTION_CURSOR;
+		return selection == null ? DESTRUCTION_CURSOR : CONSTRUCTION_CURSOR;
 	}
 	
 	// this might change later if I give the hammer durability, but for now this is how it goes.
@@ -43,8 +44,11 @@ public class HammerItem extends ServerItem {
 	
 	@Override
 	public Result attack(WorldObject obj, ServerPlayer player) {
-		if(selection == null || !(obj instanceof ServerTile))
+		if(!(obj instanceof ServerTile))
 			return Result.NONE;
+		
+		if(selection == null) // "attack" the tile
+			return super.attack(obj, player);
 		
 		ObjectRecipe recipe = recipeSet.getRecipe(selection);
 		ServerTile tile = (ServerTile) obj;

@@ -6,10 +6,6 @@ public enum ObjectRecipeSet implements RecipeSet<ObjectRecipe> {
 	
 	// toolkit types
 	
-	HAND(
-		
-	),
-	
 	BASIC(
 		new ObjectRecipe(ConstructableObjectType.Stone_Path,
 			ResourceType.Stone.stack(2)
@@ -23,8 +19,14 @@ public enum ObjectRecipeSet implements RecipeSet<ObjectRecipe> {
 		new ObjectRecipe(ConstructableObjectType.Stone_Wall,
 			ResourceType.Stone.stack(3)
 		),
-		new ObjectRecipe(ConstructableObjectType.Stone_Floor,
-			ResourceType.Stone.stack(3)
+		new ObjectRecipe(ConstructableObjectType.Oven,
+			ResourceType.Stone.stack(5)
+		),
+		new ObjectRecipe(ConstructableObjectType.Anvil,
+			ResourceType.Iron.stack(8)
+		),
+		new ObjectRecipe(ConstructableObjectType.Table,
+			ResourceType.Plank.stack(4)
 		)
 	)
 	;

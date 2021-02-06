@@ -6,6 +6,21 @@ public enum ItemRecipeSet implements RecipeSet<ItemRecipe> {
 	
 	// crafter types
 	HAND(
+		// OTHER
+		
+		new ItemRecipe(new HammerItem(ObjectRecipeSet.BASIC),
+			ResourceType.Stick.stack(2),
+			ResourceType.Stone.stack(2),
+			ResourceType.Reed.stack(2)
+		),
+		
+		new ItemRecipe(PlaceableItemType.Torch,
+			ResourceType.Stick,
+			ResourceType.Coal
+		)
+	),
+	
+	WORKBENCH(
 		// CRUDE
 		
 		new ItemRecipe(ToolType.Crude_Axe,
@@ -29,21 +44,6 @@ public enum ItemRecipeSet implements RecipeSet<ItemRecipe> {
 		new ItemRecipe(ToolType.Club,
 			ResourceType.Stick.stack(3),
 			ResourceType.Reed.stack(3)
-		),
-		
-		// OTHER
-		
-		new ItemRecipe(PlaceableItemType.Torch,
-			ResourceType.Stick,
-			ResourceType.Coal
-		)
-	),
-	
-	WORKBENCH(
-		new ItemRecipe(new HammerItem(ObjectRecipeSet.BASIC),
-			ResourceType.Stick.stack(2),
-			ResourceType.Stone.stack(2),
-			ResourceType.Reed.stack(2)
 		)
 	),
 	
@@ -72,15 +72,21 @@ public enum ItemRecipeSet implements RecipeSet<ItemRecipe> {
 		)
 	),
 	
-	Oven(
+	OVEN(
 		// food types
+		new ItemRecipe(FoodType.Cooked_Meat,
+			FoodType.Raw_Meat
+		),
+		new ItemRecipe(FoodType.Cooked_Bacon,
+			FoodType.Raw_Bacon
+		)
 	),
 	
-	Furnace(
+	FURNACE(
 		// ores
 	),
 	
-	SciLab(
+	LAB(
 		// lazors
 	);
 	

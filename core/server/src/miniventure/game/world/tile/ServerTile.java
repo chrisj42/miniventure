@@ -10,6 +10,7 @@ import miniventure.game.util.pool.RectPool;
 import miniventure.game.world.WorldObject;
 import miniventure.game.world.entity.Entity;
 import miniventure.game.world.entity.mob.player.Player;
+import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.level.ServerLevel;
 import miniventure.game.world.management.ServerWorld;
 import miniventure.game.world.tile.ServerTileType.P;
@@ -188,7 +189,7 @@ public class ServerTile extends Tile {
 		ServerTileType type = getType();
 		if(type.get(P.TRANS).playingExitAnimation(this))
 			return Result.NONE;
-		return type.get(P.INTERACT).onInteract(this, player, (ServerItem) heldItem);
+		return type.get(P.INTERACT).onInteract(this, (ServerPlayer) player, (ServerItem) heldItem);
 	}
 	
 	@Override

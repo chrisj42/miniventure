@@ -217,9 +217,11 @@
             <key type="filename">tile-sprites/air/o16.png</key>
             <key type="filename">tile-sprites/air/o17.png</key>
             <key type="filename">tile-sprites/air/o18.png</key>
+            <key type="filename">tile-sprites/anvil/main.png</key>
             <key type="filename">tile-sprites/cactus/main.png</key>
             <key type="filename">tile-sprites/dirt/main.png</key>
-            <key type="filename">tile-sprites/dock/main.png</key>
+            <key type="filename">tile-sprites/dock/m00.png</key>
+            <key type="filename">tile-sprites/dock/m01.png</key>
             <key type="filename">tile-sprites/door_/closed/main.png</key>
             <key type="filename">tile-sprites/door_/open/main.png</key>
             <key type="filename">tile-sprites/door_/open/tclose_01.png</key>
@@ -425,6 +427,10 @@
             <key type="filename">tile-sprites/ore_/tungsten/o16.png</key>
             <key type="filename">tile-sprites/ore_/tungsten/o17.png</key>
             <key type="filename">tile-sprites/ore_/tungsten/o18.png</key>
+            <key type="filename">tile-sprites/oven/main_01.png</key>
+            <key type="filename">tile-sprites/oven/main_02.png</key>
+            <key type="filename">tile-sprites/oven/main_03.png</key>
+            <key type="filename">tile-sprites/oven/tstart.png</key>
             <key type="filename">tile-sprites/reeds/main.png</key>
             <key type="filename">tile-sprites/sand/main.png</key>
             <key type="filename">tile-sprites/sand/o00.png</key>
@@ -538,6 +544,7 @@
             <key type="filename">tile-sprites/stone_path/o16.png</key>
             <key type="filename">tile-sprites/stone_path/o17.png</key>
             <key type="filename">tile-sprites/stone_path/o18.png</key>
+            <key type="filename">tile-sprites/table/main.png</key>
             <key type="filename">tile-sprites/torch/main_01.png</key>
             <key type="filename">tile-sprites/torch/main_02.png</key>
             <key type="filename">tile-sprites/torch/main_03.png</key>

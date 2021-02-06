@@ -21,7 +21,7 @@ public enum ConstructableObjectType implements PlacementAttempt {
 	
 	Stone_Path(TileTypeEnum.STONE_PATH, PlacementCheck.groundExcluding(TileTypeEnum.STONE_PATH)),
 	
-	Dock(TileTypeEnum.DOCK, PlacementCheck.groundExcluding(TileTypeEnum.DOCK)),
+	Dock(TileTypeEnum.DOCK, "m00", PlacementCheck.groundExcluding(TileTypeEnum.DOCK)),
 	
 	Stone_Floor(TileTypeEnum.STONE_FLOOR, "c00", PlacementCheck.onTile(TileTypeEnum.HOLE)),
 	
@@ -29,7 +29,11 @@ public enum ConstructableObjectType implements PlacementAttempt {
 	
 	Stone_Wall(TileTypeEnum.STONE_WALL, PlacementCheck.GROUND),
 	
-	Door(TileTypeEnum.CLOSED_DOOR, PlacementCheck.GROUND);
+	Door(TileTypeEnum.CLOSED_DOOR, PlacementCheck.GROUND),
+	
+	Anvil(TileTypeEnum.ANVIL, PlacementCheck.GROUND),
+	Oven(TileTypeEnum.OVEN, PlacementCheck.GROUND),
+	Table(TileTypeEnum.TABLE, PlacementCheck.GROUND);
 	
 	@NotNull private final PlacementAttempt placementAttempt;
 	@NotNull private final ServerItem item;

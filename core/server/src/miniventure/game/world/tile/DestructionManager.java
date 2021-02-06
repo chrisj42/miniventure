@@ -1,6 +1,5 @@
 package miniventure.game.world.tile;
 
-import miniventure.game.item.MaterialQuality;
 import miniventure.game.item.Result;
 import miniventure.game.item.ServerItem;
 import miniventure.game.item.ToolType.ToolItem;
@@ -42,9 +41,13 @@ public class DestructionManager implements TileProperty {
 		this(tileType, totalHealth, preferredTool == null ? new PreferredTool[0] : new PreferredTool[] {preferredTool}, new DamageConditionCheck[0], drops);
 	}
 	
-	// for those that are one-shot, and have certain damage conditions, and drop an item
-	DestructionManager(@NotNull TileTypeEnum tileType, @Nullable ItemDrop drop, DamageConditionCheck... damageConditions) {
-		this(tileType, 1, new PreferredTool[0], damageConditions, drop == null ? new ItemDrop[0] : new ItemDrop[] {drop});
+	// for those that are one-shot, have a certain damage condition, and drop items
+	DestructionManager(@NotNull TileTypeEnum tileType, @NotNull DamageConditionCheck damageCondition, @NotNull ItemDrop... drops) {
+		this(tileType, 1, new PreferredTool[0], new DamageConditionCheck[] { damageCondition }, drops);
+	}
+	
+	DestructionManager(@NotNull TileTypeEnum tileType, @NotNull ItemDrop... drops) {
+		this(tileType, 1, new PreferredTool[0], new DamageConditionCheck[0], drops);
 	}
 	
 	DestructionManager(DestructionManager model) {

@@ -6,16 +6,11 @@ import miniventure.game.item.*;
 import miniventure.game.util.function.MapFunction;
 import miniventure.game.util.param.ParamMap;
 import miniventure.game.world.ItemDrop;
-import miniventure.game.world.WorldObject;
-import miniventure.game.world.entity.Entity;
-import miniventure.game.world.entity.mob.player.Player;
-import miniventure.game.world.entity.mob.player.ServerPlayer;
 import miniventure.game.world.tile.DestructionManager.PreferredTool;
 import miniventure.game.world.tile.DestructionManager.RequiredTool;
 import miniventure.game.world.tile.SpreadUpdateAction.FloatFetcher;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 
 public class ServerTileType extends TileType {
@@ -124,22 +119,22 @@ public class ServerTileType extends TileType {
 		
 		DIRT(
 			P.DESTRUCT.as(type -> new DestructionManager(type,
-				new ItemDrop(PlaceableItemType.Dirt.get()),
-				new RequiredTool(ToolClass.Shovel)
+				new RequiredTool(ToolClass.Shovel),
+				new ItemDrop(PlaceableItemType.Dirt)
 			))
 		),
 		
 		SAND(
 			P.DESTRUCT.as(type -> new DestructionManager(type,
-				new ItemDrop(PlaceableItemType.Sand.get()),
-				new RequiredTool(ToolClass.Shovel)
+				new RequiredTool(ToolClass.Shovel),
+				new ItemDrop(PlaceableItemType.Sand)
 			))
 		),
 		
 		GRASS(
 			P.DESTRUCT.as(type -> new DestructionManager(type,
-				new ItemDrop(PlaceableItemType.Dirt.get()),
-				new RequiredTool(ToolClass.Shovel)
+				new RequiredTool(ToolClass.Shovel),
+				new ItemDrop(PlaceableItemType.Dirt)
 			)),
 			
 			P.UPDATE.as(type ->
@@ -154,16 +149,16 @@ public class ServerTileType extends TileType {
 		
 		STONE_PATH(
 			P.DESTRUCT.as(type -> new DestructionManager(type,
-				new ItemDrop(ResourceType.Stone.get(), 2),
-				new RequiredTool(ToolClass.Pickaxe)
+				new RequiredTool(ToolClass.Pickaxe),
+				new ItemDrop(ResourceType.Stone, 2)
 			))
 		),
 		
 		SNOW(
 			P.DESTRUCT.as(type -> new DestructionManager.DestructibleBuilder(type)
 				.drops(
-					new ItemDrop(PlaceableItemType.Snow.get()),
-					new ItemDrop(FoodType.Snow_Berries.get(), 0, 1, .1f)
+					new ItemDrop(PlaceableItemType.Snow),
+					new ItemDrop(FoodType.Snow_Berries, 0, 1, .1f)
 				)
 				.require(new RequiredTool(ToolClass.Shovel))
 				.make()
@@ -171,15 +166,16 @@ public class ServerTileType extends TileType {
 		),
 		
 		SMALL_STONE(
-			P.DESTRUCT.as(type -> new DestructionManager(type, new ItemDrop(ResourceType.Stone.get())))
+			P.DESTRUCT.as(type -> new DestructionManager(type, new ItemDrop(ResourceType.Stone)))
 		),
 		
+		/** @noinspection Convert2MethodRef*/
 		FLOWER(
-			P.DESTRUCT.as(type -> new DestructionManager(type, null))
+			P.DESTRUCT.as(type -> new DestructionManager(type))
 		),
 		
 		STICK(
-			P.DESTRUCT.as(type -> new DestructionManager(type, new ItemDrop(ResourceType.Stick.get())))
+			P.DESTRUCT.as(type -> new DestructionManager(type, new ItemDrop(ResourceType.Stick)))
 		),
 		
 		WATER(
@@ -190,51 +186,79 @@ public class ServerTileType extends TileType {
 		),
 		
 		REEDS(
-			P.DESTRUCT.as(type -> new DestructionManager(type, new ItemDrop(ResourceType.Reed.get())))
+			P.DESTRUCT.as(type -> new DestructionManager(type, new ItemDrop(ResourceType.Reed)))
 		),
 		
 		DOCK(
 			P.INTERACT.as(type -> (tile, player, item) -> {
-				tile.getServer().sendToPlayer((ServerPlayer) player, tile.getWorld().getMapData());
+				tile.getServer().sendToPlayer(player, tile.getWorld().getMapData());
 				return Result.INTERACT;
-			})
+			}),
+			
+			P.DESTRUCT.as(ServerTileFactory.constructable(
+				ObjectRecipeSet.BASIC,
+				new ItemDrop(ResourceType.Plank, 4)
+			))
 		),
 		
-		COAL_ORE(ServerTileFactory.ore(ResourceType.Coal, 25)),
-		IRON_ORE(ServerTileFactory.ore(ResourceType.Iron, 35)),
-		TUNGSTEN_ORE(ServerTileFactory.ore(ResourceType.Tungsten, 45)),
-		RUBY_ORE(ServerTileFactory.ore(ResourceType.Ruby, 60)),
+		ANVIL(
+			P.INTERACT.as(ServerTileFactory.crafter(ItemRecipeSet.ANVIL)),
+			P.DESTRUCT.as(ServerTileFactory.constructable(
+				ObjectRecipeSet.BASIC,
+				new ItemDrop(ResourceType.Iron, 4)
+			))
+		),
+		
+		OVEN(
+			P.INTERACT.as(ServerTileFactory.crafter(ItemRecipeSet.OVEN)),
+			P.DESTRUCT.as(ServerTileFactory.constructable(
+				ObjectRecipeSet.BASIC,
+				new ItemDrop(ResourceType.Stone, 3)
+			)),
+			P.TRANS.as(type -> new TransitionManager(type)
+				.addEntrance("start", 1)
+			)
+		),
+		
+		TABLE(
+			P.INTERACT.as(ServerTileFactory.crafter(ItemRecipeSet.WORKBENCH)),
+			P.DESTRUCT.as(ServerTileFactory.constructable(
+				ObjectRecipeSet.BASIC,
+				new ItemDrop(ResourceType.Plank, 2)
+			))
+		),
+		
+		COAL_ORE(P.DESTRUCT.as(ServerTileFactory.ore(ResourceType.Coal, 25))),
+		IRON_ORE(P.DESTRUCT.as(ServerTileFactory.ore(ResourceType.Iron, 35))),
+		TUNGSTEN_ORE(P.DESTRUCT.as(ServerTileFactory.ore(ResourceType.Tungsten, 45))),
+		RUBY_ORE(P.DESTRUCT.as(ServerTileFactory.ore(ResourceType.Ruby, 60))),
 		
 		STONE(
 			P.DESTRUCT.as(type -> new DestructionManager(type, 40,
 				new PreferredTool(ToolClass.Pickaxe, 5),
-				new ItemDrop(ResourceType.Stone.get(), 2, 3)
+				new ItemDrop(ResourceType.Stone, 2, 3)
 			))
 		),
 		
 		STONE_FLOOR(
-			P.DESTRUCT.as(type -> new DestructionManager(type,
-				new ItemDrop(ResourceType.Stone.get(), 3),
-				new RequiredTool(ToolClass.Pickaxe)
+			P.DESTRUCT.as(ServerTileFactory.constructable(
+				ObjectRecipeSet.BASIC,
+				new ItemDrop(ResourceType.Stone, 3)
 			))
 		),
 		
 		WOOD_WALL(
-			P.DESTRUCT.as(type -> 
-				new DestructionManager(type, 20,
-					new PreferredTool(ToolClass.Axe, 3),
-					new ItemDrop(ResourceType.Plank.get(), 3)
-				)
-			)
+			P.DESTRUCT.as(ServerTileFactory.constructable(
+				ObjectRecipeSet.BASIC,
+				new ItemDrop(ResourceType.Plank, 3)
+			))
 		),
 		
 		STONE_WALL(
-			P.DESTRUCT.as(type -> 
-				new DestructionManager(type, 40,
-					new PreferredTool(ToolClass.Pickaxe, 5),
-					new ItemDrop(ResourceType.Stone.get(), 3)
-				)
-			)
+			P.DESTRUCT.as(ServerTileFactory.constructable(
+				ObjectRecipeSet.BASIC,
+				new ItemDrop(ResourceType.Stone, 3)
+			))
 		),
 		
 		OPEN_DOOR(
@@ -243,9 +267,9 @@ public class ServerTileType extends TileType {
 				return Result.INTERACT;
 			}),
 			
-			P.DESTRUCT.as(type -> new DestructionManager(type,
-				new ItemDrop(ResourceType.Plank, 3),
-				new RequiredTool(ToolClass.Axe)
+			P.DESTRUCT.as(ServerTileFactory.constructable(
+				ObjectRecipeSet.BASIC,
+				new ItemDrop(ResourceType.Plank, 3)
 			)),
 			
 			P.TRANS.as(type -> new TransitionManager(type)
@@ -260,15 +284,15 @@ public class ServerTileType extends TileType {
 				return Result.INTERACT;
 			}),
 			
-			P.DESTRUCT.as(type -> new DestructionManager(type,
-				new ItemDrop(ResourceType.Plank, 3),
-				new RequiredTool(ToolClass.Axe)
+			P.DESTRUCT.as(ServerTileFactory.constructable(
+				ObjectRecipeSet.BASIC,
+				new ItemDrop(ResourceType.Plank, 3)
 			))
 		),
 		
 		// note / to-do: I could pretty easily make torches melt adjacent snow...
 		TORCH(
-			P.DESTRUCT.as(type -> new DestructionManager(type, new ItemDrop(PlaceableItemType.Torch.get()))),
+			P.DESTRUCT.as(type -> new DestructionManager(type, new ItemDrop(PlaceableItemType.Torch))),
 			P.TRANS.as(type -> new TransitionManager(type)
 				.addEntrance("enter", 12)
 			)
@@ -278,14 +302,14 @@ public class ServerTileType extends TileType {
 			P.TOUCH.as(type -> TouchManager.DAMAGE_ENTITY(1)),
 			
 			P.DESTRUCT.as(type -> new DestructionManager(type, 12, null,
-				new ItemDrop(FoodType.Cactus_Fruit.get(), 1, 2, .15f)
+				new ItemDrop(FoodType.Cactus_Fruit, 1, 2, .15f)
 			))
 		),
 		
-		CARTOON_TREE(ServerTileFactory.tree),
-		DARK_TREE(ServerTileFactory.tree),
-		PINE_TREE(ServerTileFactory.tree),
-		POOF_TREE(ServerTileFactory.tree),
+		CARTOON_TREE(P.DESTRUCT.as(ServerTileFactory.tree)),
+		DARK_TREE(P.DESTRUCT.as(ServerTileFactory.tree)),
+		PINE_TREE(P.DESTRUCT.as(ServerTileFactory.tree)),
+		POOF_TREE(P.DESTRUCT.as(ServerTileFactory.tree)),
 		
 		AIR();
 		
@@ -315,21 +339,33 @@ public class ServerTileType extends TileType {
 	}
 	
 	private interface ServerTileFactory {
-		static TValue<?>[] ore(ResourceType oreType, int health) {
-			return new TValue<?>[] {
-				P.DESTRUCT.as(type -> new DestructionManager(type, health,
-					new PreferredTool(ToolClass.Pickaxe, 5),
-					new ItemDrop(oreType.get(), 3, 4)
-				))
+		static MapFunction<TileTypeEnum, DestructionManager> ore(ResourceType oreType, int health) {
+			return type -> new DestructionManager(type, health,
+				new PreferredTool(ToolClass.Pickaxe, 5),
+				new ItemDrop(oreType.get(), 3, 4)
+			);
+		}
+		
+		MapFunction<TileTypeEnum, DestructionManager> tree = type -> new DestructionManager(type, 24,
+			new PreferredTool(ToolClass.Axe, 2),
+			new ItemDrop(ResourceType.Plank, 2),
+			new ItemDrop(FoodType.Apple, 0, 2, 0.32f)
+		);
+		
+		static MapFunction<TileTypeEnum, InteractionManager> crafter(ItemRecipeSet recipeSet) {
+			return type -> (tile, player, item) -> {
+				player.useCrafter(recipeSet);
+				return Result.INTERACT;
 			};
 		}
 		
-		TValue<?>[] tree = {
-			P.DESTRUCT.as(type -> new DestructionManager(type, 24,
-				new PreferredTool(ToolClass.Axe, 2),
-				new ItemDrop(ResourceType.Plank, 2),
-				new ItemDrop(FoodType.Apple, 0, 2, 0.32f)
-			))
-		};
+		// creates a destructible property that requires a minimum object recipe level to be destroyed.
+		static MapFunction<TileTypeEnum, DestructionManager> constructable(ObjectRecipeSet reqSet, ItemDrop... drops) {
+			return type -> new DestructionManager(type,
+				attackItem -> attackItem instanceof HammerItem &&
+					((HammerItem)attackItem).getRecipeSet().ordinal() >= reqSet.ordinal(),
+				drops
+			);
+		}
 	}
 }

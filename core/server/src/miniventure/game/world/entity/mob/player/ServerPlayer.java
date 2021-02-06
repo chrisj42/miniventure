@@ -210,7 +210,7 @@ public class ServerPlayer extends ServerMob implements Player {
 			else
 				invManager.unequipItem(req.equipmentType, req.invIdx);
 			
-			getServer().sendToPlayer(this, invManager.getUpdate(true));
+			connection.send(invManager.getUpdate(true));
 		});
 		
 		forPacket(packet, DatalessRequest.Recipes, () -> {
@@ -256,7 +256,7 @@ public class ServerPlayer extends ServerMob implements Player {
 					if(idx >= 0) { // ...but I'll add this check anyway
 						inventory.removeItemStack(idx);
 						inventory.addItem(idx, newHammer);
-						getWorld().getServer().sendToPlayer(this, invManager.getUpdate(false));
+						connection.send(invManager.getUpdate(false));
 					}
 				}
 			}
@@ -544,6 +544,14 @@ public class ServerPlayer extends ServerMob implements Player {
 			return true;
 		}
 		return false;
+	}
+	
+	// called in crafting tile interaction handlers
+	public void useCrafter(ItemRecipeSet recipeSet) {
+		getServer().sendToPlayer(this, new RecipeUpdate(
+			recipeSet.getSerialRecipes(),
+			new RecipeStockUpdate(inventory.getItemStacks())
+		));
 	}
 	
 	@Override

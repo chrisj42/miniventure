@@ -119,6 +119,16 @@ public class ClientTileType extends TileType {
 		
 		DOCK(type -> new ClientTileType(type, false)),
 		
+		ANVIL(type -> new ClientTileType(type, false)),
+		
+		OVEN(type -> new ClientTileType(type,
+			TileTypeRenderer.buildRenderer(type, false, new RenderStyle(true, 12))
+				.addTransition("start", new RenderStyle(1))
+				.build()
+		)),
+		
+		TABLE(type -> new ClientTileType(type, false)),
+		
 		COAL_ORE(ClientTileFactory::ore),
 		IRON_ORE(ClientTileFactory::ore),
 		TUNGSTEN_ORE(ClientTileFactory::ore),
