@@ -231,7 +231,8 @@ public class ClientPlayer extends ClientEntity implements Player {
 			} else */if(ClientCore.input.pressingControl(Control.CRAFTING_TOGGLE))
 				ClientCore.addScreen(new CraftingScreen());
 			else if(ClientCore.input.pressingControl(Control.DROP_ITEM)) {
-				inventory.dropInvItems(Modifier.SHIFT.isPressed());
+				// FIXME see bugs-fix-first.txt; stack dropping is terribly broken
+				inventory.dropInvItems(false/*Modifier.SHIFT.isPressed()*/);
 			}
 			/*else if(ClientCore.input.pressingControl(Control.DROP_STACK)) {
 				inventory.dropInvItems(true);
