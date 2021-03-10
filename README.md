@@ -6,6 +6,13 @@ Put simply, *Miniventure* is a 2D, top down, survival sandbox adventure game. It
 - The terrain is 100% malleable, and is yours to destroy, reform, or build up into a cool base.
 - Designed for multiplayer, you can work with friends to take down a boss, show off your cool base, or do anything else you like.
 
+### Build Instructions
+
+If you want to build and run the code for yourself, it's super easy since this project uses gradle.
+- Open up a terminal window in the main folder, where you see the build scripts, `gradlew` and `gradlew.bat`
+- To run the code, simply type `./gradlew run` on Linux/Mac or `gradlew.bat run` on Windows.
+- To build the jar file, type `./gradlew dist` on Linux/Mac or `gradlew.bat dist` on Windows. The file will end up in `build/libs/`.
+
 ## History
 This started as a remake of [Minicraft Plus](https://github.com/chrisj42/minicraft-plus-revived), which is itself a mod of [Minicraft](https://github.com/shylor/miniventure), a Ludum Dare game jam game. As you may have noticed, that repository is where I got the name for this game.
 
