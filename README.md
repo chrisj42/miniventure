@@ -1,5 +1,13 @@
 # Miniventure
 
+#### Project Future
+This project has unfortunately been discontinued. Not because I don't want to go forward with the idea, but because I didn't have the resources to complete my vision
+for what I wanted this to be. I stopped working on it for a fairly long time.
+
+Instead, I will be working on a game of a similar vein in unity, but this time with more finantial/art/etc support. However, due to the commercial nature of it, it will be closed source. I will most likely link to its webpage here when it gets one and when the game is moderately playable.
+
+Thanks for the support, hopefully with this next iteration I can make it even better, and perhaps even finish it this time. :)
+
 ## In a nutshell
 Put simply, *Miniventure* is a 2D, top down, survival sandbox adventure game. It's built around a few core mechanics:
 - You scavenge your way through a chain of radically different islands, gathering resources, upgrading gear, and defeating bosses.
